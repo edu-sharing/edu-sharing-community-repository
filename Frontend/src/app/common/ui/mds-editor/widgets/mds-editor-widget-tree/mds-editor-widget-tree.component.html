@@ -44,7 +44,7 @@
       [values]="chipsControl.value"
       [indeterminateValues]="indeterminateValues$ | async"
       [filterString]="inputControl.value"
-      [parentImpliesChildren]="isEmbedded"
+      [parentImpliesChildren]="editorMode === 'search'"
       (valuesChange)="onValuesChange($event)"
       (indeterminateValuesChange)="indeterminateValues$.next($event)"
     ></app-mds-editor-widget-tree-core>

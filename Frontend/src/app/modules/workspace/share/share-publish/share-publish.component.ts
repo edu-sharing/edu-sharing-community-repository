@@ -74,7 +74,7 @@ export class SharePublishComponent implements OnChanges {
           total: (completion.mandatory.total || 0) + (completion.mandatoryForPublish.total || 0),
         };
       });
-      this.mdsService.initWithNodes([this.node]);
+      this.mdsService.initForNodes([this.node]);
       this.onInitCompleted.emit();
       this.onInitCompleted.complete();
     }
@@ -96,7 +96,7 @@ export class SharePublishComponent implements OnChanges {
   openMetadata() {
     this.mainNavService.getDialogs().nodeMetadata = [this.node];
     setTimeout(() => { // Wait for `mdsEditorWrapperRef`
-      this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.onMdsInflated.subscribe(() =>
+      this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.mdsInflated.subscribe(() =>
         this.mainNavService.getDialogs().mdsEditorWrapperRef.mdsEditorInstance.showMissingRequiredWidgets(false)
       );
     })

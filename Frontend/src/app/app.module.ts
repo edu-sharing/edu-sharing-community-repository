@@ -63,6 +63,7 @@ import { MdsEditorWidgetCheckboxesComponent } from './common/ui/mds-editor/widge
 import {MdsEditorWidgetDurationComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
 import {MdsEditorWidgetLicenseComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 import { MdsEditorEmbeddedComponent } from './common/ui/mds-editor/mds-editor-embedded/mds-editor-embedded.component';
+import { MdsEditorWidgetSuggestionChipsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -120,6 +121,7 @@ import { MdsEditorEmbeddedComponent } from './common/ui/mds-editor/mds-editor-em
         MdsEditorWidgetRadioButtonComponent,
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorEmbeddedComponent,
+        MdsEditorWidgetSuggestionChipsComponent,
     ],
     imports: [
         IMPORTS,

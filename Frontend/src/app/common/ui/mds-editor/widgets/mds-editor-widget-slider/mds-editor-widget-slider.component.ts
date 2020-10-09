@@ -64,7 +64,7 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
     // TODO: remove trailing underscore when `getInitialValue` is removed from
     // `MdsEditorWidgetBase`.
     private getInitialValue_(): number[] {
-        const initialValues = this.widget.initialValues.jointValues;
+        const initialValues = this.widget.getInitialValues().jointValues;
         if (this.isRange) {
             if (initialValues.length === 2) {
                 return [parseInt(initialValues[0], 10), parseInt(initialValues[1], 10)];

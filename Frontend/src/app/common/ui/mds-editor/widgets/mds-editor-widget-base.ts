@@ -2,7 +2,7 @@ import { Input } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
-import { assertUnreachable, InputStatus, RequiredMode } from '../types';
+import { assertUnreachable, InputStatus, EditorMode, RequiredMode } from '../types';
 
 export enum ValueType {
     String,
@@ -15,22 +15,22 @@ export abstract class MdsEditorWidgetBase {
 
     abstract readonly valueType: ValueType;
     readonly isBulk: boolean;
-    readonly isEmbedded: boolean;
+    readonly editorMode: EditorMode;
 
     constructor(
         private mdsEditorInstance: MdsEditorInstanceService,
         protected translate: TranslateService,
     ) {
         this.isBulk = this.mdsEditorInstance.isBulk;
-        this.isEmbedded = this.mdsEditorInstance.isEmbedded;
+        this.editorMode = this.mdsEditorInstance.editorMode;
     }
 
     /**
      * @deprecated use `widget.initialValues` directly
      */
     protected getInitialValue(): readonly string[] {
-        if (!this.widget.initialValues.individualValues) {
-            return this.widget.initialValues.jointValues;
+        if (!this.widget.getInitialValues().individualValues) {
+            return this.widget.getInitialValues().jointValues;
         } else {
             switch (this.valueType) {
                 case ValueType.String:

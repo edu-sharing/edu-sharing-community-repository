@@ -11,12 +11,13 @@ import {
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
-import { Node, View } from '../../../../core-module/core.module';
+import { Node } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import {
     Constraints,
     MdsEditorWidgetComponent,
+    MdsView,
     MdsWidgetType,
     NativeWidgetType,
     Values,
@@ -34,6 +35,7 @@ import { MdsEditorWidgetPreviewComponent } from '../widgets/mds-editor-widget-pr
 import { MdsEditorWidgetRadioButtonComponent } from '../widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
 import { MdsEditorWidgetSelectComponent } from '../widgets/mds-editor-widget-select/mds-editor-widget-select.component';
 import { MdsEditorWidgetSliderComponent } from '../widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
+import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
@@ -90,9 +92,14 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.DefaultValue]: null,
     };
+    private static readonly suggestionWidgetComponents: {
+        [type in MdsWidgetType]?: Type<object>;
+    } = {
+        [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetSuggestionChipsComponent,
+    };
 
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
-    @Input() view: View;
+    @Input() view: MdsView;
     html: SafeHtml;
 
     constructor(
@@ -177,7 +184,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     }
 
     private injectWidget(widget: Widget, element: Element): void {
-        const WidgetComponent = MdsEditorViewComponent.widgetComponents[widget.definition.type];
+        const WidgetComponent = this.getWidgetComponent(widget);
         if (WidgetComponent === undefined) {
             UIHelper.injectAngularComponent(
                 this.factoryResolver,
@@ -203,6 +210,14 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
                 widget,
             },
         );
+    }
+
+    private getWidgetComponent(widget: Widget): Type<object> {
+        if (this.view.rel === 'suggestions') {
+            return MdsEditorViewComponent.suggestionWidgetComponents[widget.definition.type];
+        } else {
+            return MdsEditorViewComponent.widgetComponents[widget.definition.type];
+        }
     }
 
     /**

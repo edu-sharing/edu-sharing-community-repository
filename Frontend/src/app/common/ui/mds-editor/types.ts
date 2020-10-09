@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { View, Sort } from '../../../core-module/core.module';
+import { Sort, View } from '../../../core-module/core.module';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
@@ -12,6 +12,10 @@ export class UserPresentableError extends Error {
         this.name = 'UserPresentableError';
     }
 }
+
+export type EditorMode = 'nodes' | 'search';
+
+export type ViewRelation = 'suggestions';
 
 export interface Constraints {
     requiresNode?: boolean;
@@ -76,9 +80,18 @@ export interface MdsDefinition {
     name: string;
     lists: MdsList[];
     groups: MdsGroup[];
-    views: View[];
+    views: MdsView[];
     widgets: MdsWidget[];
     sorts: Sort[];
+}
+
+export interface MdsView {
+    id: string;
+    caption: string;
+    html: string;
+    icon: string;
+    rel: ViewRelation;
+    hideIfEmpty: boolean;
 }
 
 export type EditorType = 'angular' | 'legacy';
@@ -141,6 +154,8 @@ export interface MdsWidgetCondition {
     value: string;
     negate: boolean;
 }
+
+export type Suggestions = { [property: string]: MdsWidgetValue[] };
 
 export enum RequiredMode {
     Mandatory = 'mandatory',

@@ -58,17 +58,19 @@ export class MdsEditorWidgetTreeComponent
         }
         this.tree = Tree.generateTree(
             this.widget.definition.values,
-            this.widget.initialValues.jointValues,
-            this.widget.initialValues.individualValues,
+            this.widget.getInitialValues().jointValues,
+            this.widget.getInitialValues().individualValues,
         );
         this.chipsControl = new FormControl(
             [
-                ...this.widget.initialValues.jointValues,
-                ...(this.widget.initialValues.individualValues ?? []),
+                ...this.widget.getInitialValues().jointValues,
+                ...(this.widget.getInitialValues().individualValues ?? []),
             ].map((value) => this.tree.idToDisplayValue(value)),
             this.getStandardValidators(),
         );
-        this.indeterminateValues$ = new BehaviorSubject(this.widget.initialValues.individualValues);
+        this.indeterminateValues$ = new BehaviorSubject(
+            this.widget.getInitialValues().individualValues,
+        );
         this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) => {
             this.setValue(values.map((value) => value.key));
         });
@@ -143,7 +145,7 @@ export class MdsEditorWidgetTreeComponent
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
-        if (this.indeterminateValues$.value.includes(toBeRemoved.key)) {
+        if (this.indeterminateValues$.value?.includes(toBeRemoved.key)) {
             this.indeterminateValues$.next(
                 this.indeterminateValues$.value.filter((value) => value !== toBeRemoved.key),
             );
