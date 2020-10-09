@@ -1,5 +1,10 @@
-<app-mds-editor-widget-container [widget]="widget" [label]="true">
-  <mat-chip-list #chipList *ngIf="filteredSuggestions$ | async">
+<app-mds-editor-widget-container #container [widget]="widget" [label]="true">
+  <mat-chip-list
+    #chipList
+    *ngIf="filteredSuggestions$ | async"
+    [attr.aria-labelledby]="container.labelId"
+    [attr.aria-describedby]="container.descriptionId"
+  >
     <mat-chip
       *ngFor="let value of filteredSuggestions$ | async"
       [selectable]="false"
