@@ -37,6 +37,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -45,9 +46,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 
 public class PersonDao {
 
@@ -551,12 +549,12 @@ public class PersonDao {
 
 	/**
 	 * set value into alfresco database 
-	 * @param  showEmail (String) exp: 'true'|'false' 
+	 * @param  profileSettings (Object)
 	 */
-	public void setShowEmail(String showEmail) throws Exception{
+	public void setProfileSettings(ProfileSettings profileSettings) throws Exception{
 		HashMap<String, String> newUserInfo = new HashMap<String, String>();
 		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, showEmail);
+		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL,Boolean.toString(profileSettings.getShowEmail()));
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 	}
 	
@@ -685,28 +683,35 @@ public class PersonDao {
 		}
 	}
 
-	public void writeToFile(String args) {
-		BufferedWriter bw = null;
-        FileWriter fw = null;
+	/**
+	 * Boolean method to :
+	 *   -  check if exist user is ADMIN or simple USER,
+	 *   -  check if exist user is similar with userName
+	 * @return TRUE if is Admin || FALSE if is simple User
+	 */
+	public boolean isCurrectUserAdminOrSameUSerAsUserName(String userName){
+		try {
+			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+			if (currentUser.equals(userName) || AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+				return true;
+			}
+		}catch(Exception e) {
+			return false;
+		}
+		return false;
+	}
 
-        try {
 
-            fw = new FileWriter("Edmondikacaj.log");
-            bw = new BufferedWriter(fw);
-            bw.write(args);
-
-        } catch (IOException e) {
-            System.err.format("IOException: %s%n", e);
-        } finally {
-            try {
-                if (bw != null)
-                    bw.close();
-
-                if (fw != null)
-                    fw.close();
-            } catch (IOException ex) {
-                System.err.format("IOException: %s%n", ex);
-            }
-        }
-	 } 
+	/**
+	 * Get email configuration for a specific User
+	 * @param person userName of person
+	 * @return true || false
+	 */
+	public boolean getShowEmailForSpecificUser(){
+		try {
+			return getShowEmail();
+		} catch (Throwable t) {
+			return false;
+		}
+	}
 }

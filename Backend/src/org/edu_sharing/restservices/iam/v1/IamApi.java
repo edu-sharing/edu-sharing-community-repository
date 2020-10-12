@@ -29,7 +29,7 @@ import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntry;
 import org.edu_sharing.restservices.iam.v1.model.Preferences;
-import org.edu_sharing.restservices.iam.v1.model.ShowEmail;
+import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.edu_sharing.restservices.iam.v1.model.UserEntries;
 import org.edu_sharing.restservices.iam.v1.model.UserEntry;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
@@ -347,14 +347,14 @@ public class IamApi  {
     }
 
 	@GET
-	@Path("/people/{repository}/{person}/profilesettings")
+	@Path("/people/{repository}/{person}/profileSettings")
 	@ApiOperation(
 			value = "Get user email configuration",
 			notes = "Will fail for guest")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ShowEmail.class),
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ProfileSettings.class),
 					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -372,10 +372,10 @@ public class IamApi  {
 				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			PersonDao personDao = PersonDao.getPerson(repoDao, person);
-			Boolean getShowEmail=personDao.getShowEmail();			
-			ShowEmail showEmail=new ShowEmail();
-			showEmail.setShowEmail(getShowEmail);
-			return Response.status(Response.Status.OK).entity(showEmail).build();
+			Boolean getShowEmail=personDao.getShowEmail();
+			ProfileSettings profileSettings=new ProfileSettings();
+			profileSettings.setShowEmail(getShowEmail);
+			return Response.status(Response.Status.OK).entity(profileSettings).build();
 		}catch(Throwable t){
 			return ErrorResponse.createResponse(t);
 		}
@@ -384,7 +384,7 @@ public class IamApi  {
 
 
 	@PUT       
-    @Path("/people/{repository}/{person}/profilesettings")    
+    @Path("/people/{repository}/{person}/profileSettings")
     @ApiOperation(
     	value = "Set Email Configuration", 
     	notes = "Will fail for guest")
@@ -402,7 +402,7 @@ public class IamApi  {
     public Response setProfileSettings(
     		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    		@ApiParam(value = "show or hide email in profile",required=true,defaultValue = "true") @QueryParam("showEmail") String showEmail,
+    		@ApiParam(value = "ProfileSetting Object",required=true) ProfileSettings profileSettings,
     		@Context HttpServletRequest req) {
 		try{
 			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
@@ -410,7 +410,7 @@ public class IamApi  {
 				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
-	    	personDao.setShowEmail(showEmail);
+	    	personDao.setProfileSettings(profileSettings);
 	    	return Response.status(Response.Status.OK).build();
 		}catch(Throwable t){
 			return ErrorResponse.createResponse(t);
