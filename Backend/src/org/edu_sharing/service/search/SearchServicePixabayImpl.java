@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -155,8 +157,14 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CCM_PROP_IO_WWWURL,json.getString("pageURL"));
 			properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, json.getString("id")));
 			properties.put(CCConstants.VIRT_PROP_PERMALINK,json.getString("pageURL"));
-			//properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("previewURL"));
-			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,json.getString("webformatURL"));//.replace("_640", "_960"));
+			Pattern p = Pattern.compile(".*\\/\\/.*\\/.*_(.*)\\..*");
+			String thumb = json.getString("previewURL");
+			Matcher m = p.matcher(thumb);
+			if (m.find()) {
+				thumb = thumb.substring(0,m.start(1)) + "640" + thumb.substring(m.end(1));
+				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,thumb);
+			}
+			//properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,json.getString("webformatURL"));//.replace("_640", "_960"));
 			// download is currently broken
 			//properties.put(CCConstants.DOWNLOADURL,json.getString("webformatURL").replace("_640", "_960"));
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
