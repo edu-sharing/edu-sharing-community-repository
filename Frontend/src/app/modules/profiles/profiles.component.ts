@@ -2,7 +2,7 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from "../../core-ui-module/translation";
 import {UIHelper} from "../../core-ui-module/ui-helper";
-import {SessionStorageService} from "../../core-module/core.module";
+import {ProfileSettings, SessionStorageService} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {DomSanitizer, Title} from "@angular/platform-browser";
 import {ActivatedRoute, Router} from '@angular/router';
@@ -20,6 +20,7 @@ import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {Helper} from "../../core-module/rest/helper";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import {MatSlideToggle} from "@angular/material/slide-toggle";
 
 @Component({
   selector: 'app-profiles',
@@ -43,7 +44,7 @@ export class ProfilesComponent {
   private static PASSWORD_MIN_LENGTH = 5;
   private editProfile: boolean;
   private editProfileUrl: string;
-  private showEmail:boolean=true;
+  private profileSettings:ProfileSettings;
   private avatarImage: any;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
@@ -63,7 +64,7 @@ export class ProfilesComponent {
           this.editProfileUrl=this.config.instant("editProfileUrl");
           this.editProfile=this.config.instant("editProfile",true);
           this.loadUser(params['authority']);
-          this.checkIfEmailMustShowOrHide(params['authority'])
+          this.getProfileSetting(params['authority'])
         });
       });
   }
@@ -91,11 +92,11 @@ export class ProfilesComponent {
         });
     });
   }
-  private checkIfEmailMustShowOrHide(authority:string){
-        this.iamService.getUserEmailConfiguration(authority).subscribe((res: boolean) => {
-            this.showEmail = res;           
+  private getProfileSetting(authority:string){
+        this.iamService.getProfileSettings(authority).subscribe((res: ProfileSettings) => {
+            this.profileSettings = res;
         }, (error: any) => {
-            this.showEmail=true;
+            this.profileSettings=null;
         });
   }
   public updateAvatar(event:any){
@@ -161,7 +162,8 @@ export class ProfilesComponent {
     }
     this.globalProgress=true;
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
-      this.saveEmailDisplay()
+      this.saveProfileSettings();
+      this.saveAvatar();
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -202,11 +204,12 @@ export class ProfilesComponent {
     }
   }
 
-  private saveEmailDisplay(){
-    this.iamService.setUserEmailConfiguration(this.showEmail,this.user.authorityName).subscribe(()=>{
-      this.saveAvatar();
-    },(error)=>{
-      this.globalProgress=false;
+
+  private saveProfileSettings() {
+    this.iamService.setProfileSettings(this.profileSettings, this.user.authorityName).subscribe(() => {
+      this.toast.toast('USER.' + (!this.profileSettings.showEmail ? 'hideEmail' : 'showEmail'));
+    }, (error) => {
+      this.globalProgress = false;
       this.toast.error(error);
     });
   }
