@@ -1238,7 +1238,9 @@ public class NodeDao {
 				.get(CCConstants.NODECREATOR_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODECREATOR_LASTNAME));
-		ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
+		if(this.checkUserPermission((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
+			ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
+
 		return ref;
 	}
 	
@@ -1249,9 +1251,27 @@ public class NodeDao {
 		Person ref = new Person();
 		ref.setFirstName(owner.getGivenName());
 		ref.setLastName(owner.getSurname());
-		ref.setMailbox(owner.getEmail());
+		if(this.checkUserPermission(owner.getUsername()))//only admin can see even if users have hide email
+			ref.setMailbox(owner.getEmail());
+
 		return ref;
 	}
+
+	/**
+	 * Check if user has permision to see email
+	 * @param person userName of person
+	 * @return true || false
+	 * @throws Throwable exception and return false everytime we have a exception
+	 */
+	private boolean checkUserPermission(String userName){
+		try {
+			return (PersonDao.getPerson(repoDao, userName).getShowEmail() ||  // User can see own email
+					PersonDao.getPerson(repoDao, userName).isCurrectUserAdminOrSameUSerAsUserName(userName)); //only admin  can see even if users have hide email
+		} catch (Throwable t) {
+			return false;
+		}
+	}
+
 
 	private Date getModifiedAt() {
 
@@ -1270,7 +1290,8 @@ public class NodeDao {
 				.get(CCConstants.NODEMODIFIER_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODEMODIFIER_LASTNAME));
-		ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
+		if(this.checkUserPermission((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
+			ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
 
 		return ref;
 	}
