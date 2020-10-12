@@ -1,8 +1,6 @@
 package org.edu_sharing.restservices;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -20,6 +18,7 @@ import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -27,6 +26,7 @@ import org.edu_sharing.service.search.model.SortDefinition;
 public class GroupDao {
 
 	static Logger logger=Logger.getLogger(GroupDao.class);
+	private final HashMap<String, Object> properties;
 
 	public static GroupDao getGroup(RepositoryDao repoDao, String groupName) throws DAOException {
 		
@@ -123,12 +123,12 @@ public class GroupDao {
 						new IllegalArgumentException("Group does not exist: "+groupName));
 				
 			}
-			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-			this.scopeType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_SCOPE_TYPE);
-
-			this.groupEmail= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
 			this.ref = authorityService.getAuthorityNodeRef(this.authorityName);
-			
+			properties = NodeServiceHelper.getProperties(ref);
+			this.groupType= (String) properties.get(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+			this.scopeType= (String) properties.get(CCConstants.CCM_PROP_SCOPE_TYPE);
+			this.groupEmail= (String) properties.get(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
+
 		} catch (Throwable t) {
 			
 			throw DAOException.mapping(t);
@@ -270,9 +270,18 @@ public class GroupDao {
     	profile.setScopeType(getScopeType());
     	profile.setGroupEmail(getGoupEmail());
     	data.setProfile(profile);
-    	
-    	return data;
+		data.setProperties(getProperties());
+
+
+		return data;
 	}
+
+	private Map<String, String[]> getProperties() {
+		return NodeServiceHelper.getPropertiesMultivalue(
+				NodeServiceHelper.transformLongToShortProperties(properties)
+		);
+	}
+
 	private String getScopeType(){
 		return this.scopeType;
 	}
