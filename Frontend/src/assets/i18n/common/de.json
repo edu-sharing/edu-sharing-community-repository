@@ -432,9 +432,9 @@
         "status": "Status",
         "primaryAffiliation": "Primäre Rolle",
         "password": "Passwort",
-        "sizeQuota": "Speicherkontingent in MB",       
-        "showEmail": "E-mail anzeigen",
-        "hideEmail": "E-mail verbergen",
+        "sizeQuota": "Speicherkontingent in MB",
+        "showEmail": "E-Mail wird angezeigt",
+        "hideEmail": "E-Mail wird versteckt",
         "PRIMARY_AFFILIATION": {
             "teacher": "Lehrender / Lehrer",
             "student": "Lernender / Schüler",
