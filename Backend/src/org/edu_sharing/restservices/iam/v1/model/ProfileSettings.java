@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
-public class ShowEmail {
+public class ProfileSettings {
 	@ApiModelProperty(required = true, value = "false")
 	@JsonProperty("showEmail")
 	private boolean showEmail; // show or hide email in profile
