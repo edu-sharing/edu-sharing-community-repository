@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -27,6 +28,7 @@ public class GroupDao {
 
 	static Logger logger=Logger.getLogger(GroupDao.class);
 	private final HashMap<String, Object> properties;
+	private final String[] aspects;
 
 	public static GroupDao getGroup(RepositoryDao repoDao, String groupName) throws DAOException {
 		
@@ -124,7 +126,8 @@ public class GroupDao {
 				
 			}
 			this.ref = authorityService.getAuthorityNodeRef(this.authorityName);
-			properties = NodeServiceHelper.getProperties(ref);
+			this.properties = NodeServiceHelper.getProperties(ref);
+			this.aspects = NodeServiceHelper.getAspects(ref);
 			this.groupType= (String) properties.get(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
 			this.scopeType= (String) properties.get(CCConstants.CCM_PROP_SCOPE_TYPE);
 			this.groupEmail= (String) properties.get(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
@@ -271,9 +274,14 @@ public class GroupDao {
     	profile.setGroupEmail(getGoupEmail());
     	data.setProfile(profile);
 		data.setProperties(getProperties());
+		data.setAspects(getAspects());
 
 
 		return data;
+	}
+
+	private List<String> getAspects() {
+		return Arrays.stream(aspects).map((a) -> CCConstants.getValidLocalName(a)).collect(Collectors.toList());
 	}
 
 	private Map<String, String[]> getProperties() {

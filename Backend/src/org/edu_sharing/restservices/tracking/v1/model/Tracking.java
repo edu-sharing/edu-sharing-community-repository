@@ -11,13 +11,13 @@ import java.util.Map;
 public class Tracking {
     private final Map<TrackingService.EventType, Integer> counts;
     private final String date;
-    private final Authority authority;
+    private final TrackingAuthority trackingAuthority;
     private final Map<String, Serializable> fields;
     private final Map<TrackingService.EventType, Map<String, Map<String, Long>>> groups;
 
-    public Tracking(String date, Authority authority, Map<TrackingService.EventType,Integer> counts, Map<String,Serializable> fields, Map<TrackingService.EventType, Map<String, Map<String, Long>>> groups){
+    public Tracking(String date, TrackingAuthority trackingAuthority, Map<TrackingService.EventType,Integer> counts, Map<String,Serializable> fields, Map<TrackingService.EventType, Map<String, Map<String, Long>>> groups){
         this.date=date;
-        this.authority=authority;
+        this.trackingAuthority = trackingAuthority;
         this.counts=counts;
         this.fields=fields;
         this.groups=groups;
@@ -40,11 +40,11 @@ public class Tracking {
         return groups;
     }
 
-    public Authority getAuthority() {
-        return authority;
+    public TrackingAuthority getAuthority() {
+        return trackingAuthority;
     }
 
-    public static class Authority {
+    public static class TrackingAuthority {
         private String hash;
         private List<Organization> organization;
         private List<Group> mediacenter;
