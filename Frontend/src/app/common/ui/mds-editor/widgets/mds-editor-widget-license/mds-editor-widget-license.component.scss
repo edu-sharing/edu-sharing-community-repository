@@ -4,3 +4,20 @@
     justify-content: center;
     margin-top: 5px;
 }
+.license-list {
+    margin-top: 10px;
+    >div:not(:last-child){
+        margin-bottom: 10px;
+    }
+    .mat-checkbox-multiline {
+        h4 {
+            display: flex;
+            align-items: center;
+
+            img {
+                height: 15px;
+                margin-right: 5px;
+            }
+        }
+    }
+}

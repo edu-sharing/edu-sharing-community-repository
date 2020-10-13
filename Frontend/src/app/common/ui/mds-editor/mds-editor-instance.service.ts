@@ -28,6 +28,7 @@ import {
 } from './types';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import {SearchService} from '../../../modules/search/search.service';
+import {MdsEditorWidgetBase} from './widgets/mds-editor-widget-base';
 
 export interface CompletionStatusEntry {
     completed: number;
@@ -132,7 +133,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         async getSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
-            console.log('search ' + searchString);
             if (this.definition.values) {
                 return this.getLocalSuggestedValues(searchString);
             } else {
@@ -248,7 +248,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (searchString?.length < 2) {
                 return new Promise((resolve) => resolve([]));
             }
-            console.log(searchString);
             let criterias: any[] = [];
             if(this.mdsEditorInstanceService.editorMode === 'search') {
                 const values = this.mdsEditorInstanceService.getValues();
@@ -260,7 +259,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                     values,
                     this.mdsEditorInstanceService.widgets
                 );
-                console.log(criterias);
             }
             return this.mdsEditorInstanceService.restMdsService
                 .getValues(
@@ -404,6 +402,12 @@ export class MdsEditorInstanceService implements OnDestroy {
         await this.initMds(groupId, mdsId, repository);
         for (const widget of this.widgets) {
             widget.initWithValues(initialValues);
+        }
+        for (const widget of this.nativeWidgets) {
+            // @TODO: This causes a circular dep even if we just use the type for checking, may we find a better way)
+            if(widget instanceof MdsEditorWidgetBase) {
+                (widget as MdsEditorWidgetBase).widget.initWithValues(initialValues);
+            }
         }
         this.updateCompletionState();
         return this.getGroup(this.mdsDefinition$.value, groupId).rendering;
@@ -589,10 +593,11 @@ export class MdsEditorInstanceService implements OnDestroy {
     ): Widget[] {
         const result: Widget[] = [];
         const availableWidgets = mdsDefinition.widgets
-            .filter(
+            // nope, we also need Native Widgets e.g. for loading the allowed values for license in search
+            /*.filter(
                 (widget) =>
                     !Object.values(NativeWidgetType).includes(widget.id as NativeWidgetType),
-            )
+            )*/
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
             .filter((widget) => this.meetsCondition(widget, nodes));
         for (const view of views) {

@@ -130,19 +130,19 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         const elements = this.container.nativeElement.getElementsByTagName('*');
         for (const element of Array.from(elements)) {
             const tagName = element.localName;
+            const widget = this.mdsEditorInstance.getWidget(tagName, this.view.id);
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
-                this.injectNativeWidget(widgetName, element);
-                continue;
-            }
-            const widget = this.mdsEditorInstance.getWidget(tagName, this.view.id);
-            if (widget) {
-                this.injectWidget(widget, element);
+                this.injectNativeWidget(widget, widgetName, element);
+            } else {
+                if (widget) {
+                    this.injectWidget(widget, element);
+                }
             }
         }
     }
 
-    private injectNativeWidget(widgetName: NativeWidgetType, element: Element): void {
+    private injectNativeWidget(widget: Widget, widgetName: NativeWidgetType, element: Element): void {
         const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
         if (!WidgetComponent) {
             UIHelper.injectAngularComponent(
@@ -178,6 +178,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             element,
             {
                 widgetName,
+                widget
             },
         );
         this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance);

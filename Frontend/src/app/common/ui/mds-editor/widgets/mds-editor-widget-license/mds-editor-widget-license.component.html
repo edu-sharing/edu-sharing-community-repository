@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container [label]="false">
+<app-mds-editor-widget-container [label]="false" *ngIf="mdsEditorValues.editorMode === 'nodes'">
   <ng-container *ngIf="!isSafe">
     <app-license-details [nodes]="nodes"></app-license-details>
     <div class="link">
@@ -15,4 +15,16 @@
     </div>
   </ng-container>
   <info-message mode="warning" *ngIf="isSafe">{{'MDS.LICENSE_NO_PERMISSIONS_SAFE' | translate}}</info-message>
+</app-mds-editor-widget-container>
+<app-mds-editor-widget-container label="{{'MDS.LICENSE' | translate}}" *ngIf="mdsEditorValues.editorMode === 'search'">
+  <div class="license-list">
+    <div *ngFor="let license of licenses">
+      <mat-checkbox class="mat-checkbox-multiline"
+                    [ngModel]="checked.indexOf(license.id) !== -1"
+                    (ngModelChange)="updateValue(license, $event)">
+        <h4><img *ngIf="license.imageUrl" [src]="license.imageUrl"> {{license.caption}}</h4>
+        <h5>{{license.description}}</h5>
+      </mat-checkbox>
+    </div>
+  </div>
 </app-mds-editor-widget-container>
