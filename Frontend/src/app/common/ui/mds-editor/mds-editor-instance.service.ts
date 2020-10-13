@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, OnDestroy } from '@angular/core';
+import {EventEmitter, Injectable, Input, OnDestroy} from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -29,7 +29,7 @@ import {
 } from './types';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import {SearchService} from '../../../modules/search/search.service';
-import {MdsEditorWidgetBase} from './widgets/mds-editor-widget-base';
+import {TranslateService} from '@ngx-translate/core';
 
 export interface CompletionStatusEntry {
     completed: number;
@@ -48,6 +48,20 @@ export interface InitialValues {
      * Can be null but will never be set to an empty array.
      */
     readonly individualValues?: string[];
+}
+export abstract class MdsEditorWidgetCore {
+    @Input() widget: Widget;
+    readonly isBulk: boolean;
+    readonly editorMode: EditorMode;
+
+    constructor(
+        private mdsEditorInstance: MdsEditorInstanceService,
+        protected translate: TranslateService,
+    ) {
+        this.isBulk = this.mdsEditorInstance.isBulk;
+        this.editorMode = this.mdsEditorInstance.editorMode;
+    }
+
 }
 
 /**
@@ -405,9 +419,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             widget.initWithValues(initialValues);
         }
         for (const widget of this.nativeWidgets) {
-            // @TODO: This causes a circular dep even if we just use the type for checking, may we find a better way)
-            if(widget instanceof MdsEditorWidgetBase) {
-                (widget as MdsEditorWidgetBase).widget.initWithValues(initialValues);
+            if(widget instanceof MdsEditorWidgetCore) {
+                (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
             }
         }
         this.updateCompletionState();

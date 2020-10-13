@@ -1,7 +1,7 @@
 import { Input } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
+import {MdsEditorInstanceService, MdsEditorWidgetCore, Widget} from '../mds-editor-instance.service';
 import { assertUnreachable, InputStatus, EditorMode, RequiredMode } from '../types';
 
 export enum ValueType {
@@ -10,20 +10,8 @@ export enum ValueType {
     Range,
 }
 
-export abstract class MdsEditorWidgetBase {
-    @Input() widget: Widget;
-
+export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     abstract readonly valueType: ValueType;
-    readonly isBulk: boolean;
-    readonly editorMode: EditorMode;
-
-    constructor(
-        private mdsEditorInstance: MdsEditorInstanceService,
-        protected translate: TranslateService,
-    ) {
-        this.isBulk = this.mdsEditorInstance.isBulk;
-        this.editorMode = this.mdsEditorInstance.editorMode;
-    }
 
     /**
      * @deprecated use `widget.initialValues` directly

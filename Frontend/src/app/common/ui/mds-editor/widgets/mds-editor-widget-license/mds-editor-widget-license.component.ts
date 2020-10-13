@@ -54,7 +54,6 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
             return license;
         });
         this.checked = this.widget.getInitialValues().jointValues ?? [];
-        console.log(this.checked);
     }
     getValues(values: Values) {
         if(this.checked.length) {
