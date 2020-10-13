@@ -161,7 +161,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			String thumb = json.getString("previewURL");
 			Matcher m = p.matcher(thumb);
 			if (m.find()) {
-				thumb = thumb.substring(0,m.start(1)) + "640" + thumb.substring(m.end(1));
+				thumb = thumb.substring(0,m.start(1)) + "1280" + thumb.substring(m.end(1));
 				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,thumb);
 			}
 			//properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,json.getString("webformatURL"));//.replace("_640", "_960"));
