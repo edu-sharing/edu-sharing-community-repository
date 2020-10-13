@@ -1062,7 +1062,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 mdsId,
             );
             const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed && this.isHomeRepository();
-            console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
+            // console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
             }
