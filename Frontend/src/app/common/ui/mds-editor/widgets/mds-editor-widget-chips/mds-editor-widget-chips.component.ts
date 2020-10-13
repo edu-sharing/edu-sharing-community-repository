@@ -108,7 +108,6 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         // selected values change.
         return combineLatest([
             this.inputControl.valueChanges.pipe(
-                // @TODO: When activated, multivalueSuggestBadges do not emit any value when typing
                 startWith(null as string),
                 filter(
                     (value: string | null | DisplayValue) =>
