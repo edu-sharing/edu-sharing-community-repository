@@ -77,7 +77,7 @@ export class RouterComponent implements DoCheck, AfterViewInit {
     }
 
     private monitorChecks(): void {
-        console.log('Change detections run in the past second:', this.numberOfChecks);
+        // console.log('Change detections run in the past second:', this.numberOfChecks);
         if (this.numberOfChecks > RouterComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD) {
             this.consecutiveTransgression++;
             if (
@@ -91,7 +91,7 @@ export class RouterComponent implements DoCheck, AfterViewInit {
                         ' seconds consecutively.' +
                         ' Not showing any more warnings.',
                 );
-                //window.clearInterval(this.checksMonitorInterval);
+                window.clearInterval(this.checksMonitorInterval);
             }
         } else {
             this.consecutiveTransgression = 0;
