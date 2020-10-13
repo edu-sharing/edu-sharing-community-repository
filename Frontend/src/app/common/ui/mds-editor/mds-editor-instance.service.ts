@@ -95,7 +95,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
         }
 
-        initWithValues(values: Values): void {
+        initWithValues(values?: Values): void {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
@@ -385,7 +385,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.isBulk = this.getIsBulk(this.nodes$.value);
         const groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
         const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
-        await this.initMdsIfChanged(groupId, mdsId);
+        await this.initMds(groupId, mdsId);
         for (const widget of this.widgets) {
             widget.initWithNodes(this.nodes$.value);
         }
@@ -401,12 +401,23 @@ export class MdsEditorInstanceService implements OnDestroy {
     ): Promise<EditorType> {
         this.editorMode = 'search';
         this.isBulk = false;
-        await this.initMdsIfChanged(groupId, mdsId, repository);
+        await this.initMds(groupId, mdsId, repository);
         for (const widget of this.widgets) {
             widget.initWithValues(initialValues);
         }
         this.updateCompletionState();
         return this.getGroup(this.mdsDefinition$.value, groupId).rendering;
+    }
+
+    async clearValues(): Promise<void> {
+        // At the moment, widget components don't support changing or resetting the value from
+        // outside the component. Therefore, we have to reload and redraw everything here.
+        //
+        // TODO: Handle values in a way that allows dynamic updates.
+        await this.initMds(this.groupId, this.mdsId, this.repository);
+        for (const widget of this.widgets) {
+            widget.initWithValues();
+        }
     }
 
     getWidget(propertyName: string, viewId: string): Widget {
@@ -524,22 +535,20 @@ export class MdsEditorInstanceService implements OnDestroy {
         return values;
     }
 
-    private async initMdsIfChanged(
+    private async initMds(
         groupId: string,
         mdsId: string,
         repository?: string,
     ): Promise<void> {
-        if (this.mdsId === mdsId && this.repository === repository && this.groupId === groupId) {
-            return;
+        if (this.mdsId !== mdsId || this.repository !== repository || this.groupId !== groupId) {
+            this.mdsId = mdsId;
+            this.repository = repository;
+            this.groupId = groupId;
+            this.mdsDefinition$.next(
+                await this.mdsEditorCommonService.fetchMdsDefinition(mdsId, repository),
+            );
         }
-        this.mdsId = mdsId;
-        this.repository = repository;
-        this.groupId = groupId;
-        const mdsDefinition = await this.mdsEditorCommonService.fetchMdsDefinition(
-            mdsId,
-            repository,
-        );
-        this.mdsDefinition$.next(mdsDefinition);
+        const mdsDefinition = this.mdsDefinition$.value;
         const group = this.getGroup(mdsDefinition, groupId);
         this.views = this.getViews(mdsDefinition, group);
         this.widgets = this.generateWidgets(mdsDefinition, this.views);
