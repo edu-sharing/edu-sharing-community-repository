@@ -1,7 +1,11 @@
-<app-mds-editor-widget-container #container [widget]="widget" [label]="true">
+<app-mds-editor-widget-container
+  #container
+  *ngIf="filteredSuggestions$ | async"
+  [widget]="widget"
+  [label]="true"
+>
   <mat-chip-list
     #chipList
-    *ngIf="filteredSuggestions$ | async"
     [attr.aria-labelledby]="container.labelId"
     [attr.aria-describedby]="container.descriptionId"
   >

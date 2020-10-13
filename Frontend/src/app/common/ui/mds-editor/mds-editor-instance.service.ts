@@ -5,7 +5,8 @@ import {
     Node,
     RestConnectorService,
     RestConstants,
-    RestMdsService, RestSearchService,
+    RestMdsService,
+    RestSearchService,
 } from '../../../core-module/core.module';
 import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
@@ -245,19 +246,19 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         private async getRemoteSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
-            if (searchString?.length < 2) {
-                return new Promise((resolve) => resolve([]));
+            if (!searchString || searchString.length < 2) {
+                return [];
             }
             let criterias: any[] = [];
-            if(this.mdsEditorInstanceService.editorMode === 'search') {
+            if (this.mdsEditorInstanceService.editorMode === 'search') {
                 const values = this.mdsEditorInstanceService.getValues();
                 delete values[this.definition.id];
                 values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
-                    this.mdsEditorInstanceService.searchService.searchTerm
+                    this.mdsEditorInstanceService.searchService.searchTerm,
                 ];
                 criterias = RestSearchService.convertCritierias(
                     values,
-                    this.mdsEditorInstanceService.widgets
+                    this.mdsEditorInstanceService.widgets,
                 );
             }
             return this.mdsEditorInstanceService.restMdsService
@@ -539,11 +540,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         return values;
     }
 
-    private async initMds(
-        groupId: string,
-        mdsId: string,
-        repository?: string,
-    ): Promise<void> {
+    private async initMds(groupId: string, mdsId: string, repository?: string): Promise<void> {
         if (this.mdsId !== mdsId || this.repository !== repository || this.groupId !== groupId) {
             this.mdsId = mdsId;
             this.repository = repository;

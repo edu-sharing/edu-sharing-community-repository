@@ -2,8 +2,8 @@ $expandToggleWidthThreshold: 400px;
 
 app-input-fill-progress {
     display: flex;
-    width: 200px;
-    height: 40px;
+    min-width: 200px;
+    height: 36px;
 }
 
 :host ::ng-deep app-mds-editor-core {
