@@ -672,6 +672,12 @@
             <ref bean="PermissionService" />
         </property>
         <property name="repositoryHelper" ref="repositoryHelper"/>
+         <property name="policyBehaviourFilter">
+             <ref bean="policyBehaviourFilter"/>
+         </property>
+         <property name="transactionService">
+             <ref bean="transactionService"/>
+         </property>
     </bean>
 
     <bean id="onRestoreCollectionPolicy" class="org.edu_sharing.alfresco.policy.OnRestoreCollectionPolicy" init-method="init">

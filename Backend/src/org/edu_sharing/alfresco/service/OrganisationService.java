@@ -9,19 +9,24 @@ import java.util.Set;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.cache.Cache;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 
 public class OrganisationService {
 
@@ -34,6 +39,10 @@ public class OrganisationService {
 	Repository repositoryHelper;
 
 	PermissionService permissionService;
+
+	BehaviourFilter policyBehaviourFilter;
+
+	TransactionService transactionService;
 
 	public static String ORGANIZATION_GROUP_FOLDER = "EDU_SHARED";
 
@@ -116,6 +125,44 @@ public class OrganisationService {
 		tmpOrgName = tmpOrgName.replace(AuthorityType.GROUP.getPrefixString(),"");
 		tmpOrgName = tmpOrgName.replace(AuthorityService.ORG_GROUP_PREFIX, "");
 		return tmpOrgName;
+	}
+
+
+	public void syncOrganisationFolderName(boolean execute){
+		for(Map.Entry<NodeRef, Map<QName, Serializable>> entry : EduGroupCache.getAllEduGroupFolderAndEduGroupProps().entrySet()){
+			NodeRef organisationNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,(String)entry.getValue().get(ContentModel.PROP_NODE_UUID));
+			String authorityName = (String)entry.getValue().get(ContentModel.PROP_AUTHORITY_NAME);
+			String displayName = (String)nodeService.getProperty(organisationNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
+			String folderName = (String)nodeService.getProperty(entry.getKey(), ContentModel.PROP_NAME);
+			if (displayName == null || displayName.trim().equals("")) {
+				logger.error("display name of authority is null or empty "+ authorityName);
+				continue;
+			}
+
+			if(!displayName.equals(folderName)){
+				logger.info("syncing organisation folder name:" + folderName + "with displayName:" + displayName);
+				if(execute) {
+					String newFolderName = EduSharingNodeHelper.cleanupCmName(displayName);
+					Cache repCache = new RepositoryCache();
+					this.transactionService.getRetryingTransactionHelper().doInTransaction(()->{
+
+						try {
+							policyBehaviourFilter.disableBehaviour(entry.getKey());
+							nodeService.setProperty(entry.getKey(), ContentModel.PROP_NAME, newFolderName);
+							nodeService.setProperty(entry.getKey(), ContentModel.PROP_TITLE, newFolderName);
+							repCache.remove(entry.getKey().getId());
+						} catch (DuplicateChildNodeNameException e) {
+								logger.error("duplicate organisation name: \"" + newFolderName + "\" for " + authorityName + ". fix by hand");
+						}catch(Throwable e){
+							logger.error(e.getMessage(),e);
+						} finally {
+							policyBehaviourFilter.enableBehaviour(entry.getKey());
+						}
+						return null;
+					});
+				}
+			}
+		}
 	}
 	
 	private void addAspect(String authority, String aspect) {
@@ -307,5 +354,13 @@ public class OrganisationService {
 	
 	public boolean isUseOrgPrefix() {
 		return useOrgPrefix;
+	}
+
+	public void setPolicyBehaviourFilter(BehaviourFilter policyBehaviourFilter) {
+		this.policyBehaviourFilter = policyBehaviourFilter;
+	}
+
+	public void setTransactionService(TransactionService transactionService) {
+		this.transactionService = transactionService;
 	}
 }
