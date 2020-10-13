@@ -5,7 +5,7 @@ import {
     Node,
     RestConnectorService,
     RestConstants,
-    RestMdsService,
+    RestMdsService, RestSearchService,
 } from '../../../core-module/core.module';
 import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
@@ -27,6 +27,7 @@ import {
     ViewRelation,
 } from './types';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {SearchService} from '../../../modules/search/search.service';
 
 export interface CompletionStatusEntry {
     completed: number;
@@ -98,7 +99,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                this.initialValues = { jointValues: values[this.definition.id] || [] };
+                this.initialValues = { jointValues: values?.[this.definition.id] || [] };
             }
         }
 
@@ -131,6 +132,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         async getSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
+            console.log('search ' + searchString);
             if (this.definition.values) {
                 return this.getLocalSuggestedValues(searchString);
             } else {
@@ -246,6 +248,20 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (searchString?.length < 2) {
                 return new Promise((resolve) => resolve([]));
             }
+            console.log(searchString);
+            let criterias: any[] = [];
+            if(this.mdsEditorInstanceService.editorMode === 'search') {
+                const values = this.mdsEditorInstanceService.getValues();
+                delete values[this.definition.id];
+                values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
+                    this.mdsEditorInstanceService.searchService.searchTerm
+                ];
+                criterias = RestSearchService.convertCritierias(
+                    values,
+                    this.mdsEditorInstanceService.widgets
+                );
+                console.log(criterias);
+            }
             return this.mdsEditorInstanceService.restMdsService
                 .getValues(
                     {
@@ -254,7 +270,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                             property: this.definition.id,
                             pattern: searchString,
                         },
-                        criterias: [],
+                        criterias,
                         /*
                         criterias: RestSearchService.convertCritierias(
                             Helper.arrayJoin(this._currentValues, this.getValues()),
@@ -343,6 +359,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private mdsEditorCommonService: MdsEditorCommonService,
         private restMdsService: RestMdsService,
         private restConnector: RestConnectorService,
+        private searchService: SearchService,
     ) {
         combineLatest([this.hasChanges$, this.isValid$])
             .pipe(map(([hasChanged, isValid]) => hasChanged && isValid))

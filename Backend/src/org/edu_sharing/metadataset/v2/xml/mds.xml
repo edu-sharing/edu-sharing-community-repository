@@ -50,7 +50,7 @@
 			</widget>
 			<widget>
 				<id>cclom:general_keyword</id>
-				<type>multivalueBadges</type>
+				<type>multivalueSuggestBadges</type>
 				<caption>lom_prop_general_keyword</caption>
 				<placeholder>lom_prop_general_keyword_placeholder</placeholder>
 				<hideIfEmpty>true</hideIfEmpty>
@@ -59,12 +59,12 @@
 			<widget>
 				<id>cclom:general_keyword</id>
 				<template>search_suggestions</template>
-				<type>multivalueBadges</type>
+				<type>multivalueSuggestBadges</type>
 				<caption>lom_prop_general_keyword_tagcloud</caption>
 			</widget>
 			<widget>
 				<id>cclom:general_keyword</id>
-				<type>multivalueBadges</type>
+				<type>multivalueSuggestBadges</type>
 				<caption>lom_prop_general_keyword</caption>
 				<template>search</template>
 			</widget>

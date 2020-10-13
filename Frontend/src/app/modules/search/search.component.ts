@@ -25,6 +25,7 @@ import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchService } from './search.service';
 import { WindowRefService } from './window-ref.service';
+import {Values} from '../../common/ui/mds-editor/types';
 
 @Component({
     selector: 'app-search',
@@ -103,7 +104,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private enabledRepositories: string[];
     // we only initalize the banner once to prevent flickering
     private bannerInitalized = false;
-    private currentValues: any;
+    currentValues: Values;
     private currentMdsSet: any;
     private mdsActions: OptionItem[];
     private mdsButtons: DialogButton[];
@@ -285,20 +286,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     handleScroll(event: Event) {
         this.searchService.offset =
             window.pageYOffset || document.documentElement.scrollTop;
-    }
-
-    getValuesForMds() {
-        // add the primary search word to the currentValuesAll so that the mds is aware of it
-        let values = Helper.deepCopy(this.currentValues);
-        if (!values) {
-            values = [];
-        }
-        if (this.searchService.searchTerm) {
-            values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
-                this.searchService.searchTerm,
-            ];
-        }
-        return values;
     }
 
     setRepository(repository: string) {
@@ -1147,7 +1134,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mdsActions = [];
         this.mdsActions.push(
             new OptionItem('SEARCH.APPLY_FILTER', 'search', () => {
-                this.applyParameters(this.getActiveMds().saveValues());
+                this.applyParameters(this.getActiveMds().getValues());
             }),
         );
         if (this.applyMode) {
