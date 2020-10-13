@@ -86,6 +86,8 @@ export class CollectionsMainComponent {
     @ViewChild('listCollections')
     listCollections: ListTableComponent;
 
+    viewTypeNodes = ListTableComponent.VIEW_TYPE_GRID;
+
     dialogTitle: string;
     dialogCancelable = false;
     dialogMessage: string;
@@ -946,6 +948,12 @@ export class CollectionsMainComponent {
                 this.isReady = true;
                 // subscribe to parameters of url
                 this.route.queryParams.subscribe(params => {
+                    const diffs = Helper.getDifferentKeys(this.params, params);
+                    if(Object.keys(diffs).length === 1 && diffs.viewType) {
+                        this.params = params;
+                        this.viewTypeNodes = diffs.viewType;
+                        return;
+                    }
                     this.params = params;
                     if (params.scope) {
                         this.tabSelected = params.scope;
