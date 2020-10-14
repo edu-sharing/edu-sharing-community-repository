@@ -433,8 +433,6 @@
         "primaryAffiliation": "Primäre Rolle",
         "password": "Passwort",
         "sizeQuota": "Speicherkontingent in MB",
-        "showEmail": "E-Mail wird angezeigt",
-        "hideEmail": "E-Mail wird versteckt",
         "PRIMARY_AFFILIATION": {
             "teacher": "Lehrender / Lehrer",
             "student": "Lernender / Schüler",
@@ -443,6 +441,11 @@
             "system": "Systemaccount",
             "function": "Funktionsaccount"
         }
+    },
+    "PROFILE_SETTINGS": {
+        "SHOW_EMAIL_LABEL": "E-Mail öffentlich",
+        "SHOW_EMAIL": "E-Mail wird angezeigt",
+        "HIDE_EMAIL": "E-Mail wird versteckt"
     },
     "CONNECTOR": {
         "ONLY_OFFICE": {

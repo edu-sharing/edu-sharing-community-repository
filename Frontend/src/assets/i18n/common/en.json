@@ -368,8 +368,6 @@
         "primaryAffiliation": "Primary role",
         "password": "password",
         "sizeQuota": "Quota size in MB",
-        "showEmail": "Email is displayed",
-        "hideEmail": "E-mail is hidden",
         "PRIMARY_AFFILIATION": {
             "teacher": "teacher",
             "student": "student",
@@ -378,6 +376,11 @@
             "system": "system account",
             "function": "function account"
         }
+    },
+    "PROFILE_SETTINGS": {
+        "SHOW_EMAIL_LABEL": "E-Mail public",
+        "SHOW_EMAIL": "Email is displayed",
+        "HIDE_EMAIL": "E-mail is hidden"
     },
     "CONNECTOR": {
         "ONLY_OFFICE": {

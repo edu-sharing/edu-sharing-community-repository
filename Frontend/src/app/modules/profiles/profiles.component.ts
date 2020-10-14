@@ -207,7 +207,7 @@ export class ProfilesComponent {
 
   private saveProfileSettings() {
     this.iamService.setProfileSettings(this.profileSettings, this.user.authorityName).subscribe(() => {
-      this.toast.toast('USER.' + (!this.profileSettings.showEmail ? 'hideEmail' : 'showEmail'));
+      this.toast.toast('PROFILE_SETTINGS.' + (!this.profileSettings.showEmail ? 'HIDE_EMAIL' : 'SHOW_EMAIL'));
     }, (error) => {
       this.globalProgress = false;
       this.toast.error(error);
