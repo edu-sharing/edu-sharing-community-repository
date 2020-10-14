@@ -1266,7 +1266,7 @@ public class NodeDao {
 	private boolean checkUserHasPermissionToSeeMail(String userName){
 		try {
 			return (PersonDao.getPerson(repoDao, userName).getShowEmail() ||  // User can see own email
-					PersonDao.getPerson(repoDao, userName).isCurrectUserAdminOrSameUserAsUserName(userName)); //only admin  can see even if users have hide email
+					PersonDao.getPerson(repoDao, userName).isCurrentUserAdminOrSameUserAsUserName(userName)); //only admin  can see even if users have hide email
 		} catch (Throwable t) {
 			return false;
 		}

@@ -317,7 +317,7 @@ public class PersonDao {
 
 	private Map<String, String[]> getProperties() {
 		Map<String, Serializable> properties = userInfo;
-		if (!getShowEmail() || !isCurrentUserOrAdmin()) // email must be showed only if is admin, or if email ragards to user login
+		if (!(getShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
 			properties.replace(CCConstants.CM_PROP_PERSON_EMAIL, null);
 
 		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
@@ -339,19 +339,21 @@ public class PersonDao {
 
 	private UserProfile getProfile() {
 		UserProfile profile = new UserProfile();
-    	profile.setFirstName(getFirstName());
+		profile.setFirstName(getFirstName());
 		profile.setLastName(getLastName());
 		// Admin user can see all email even if they are not showed
-		// hide only for non admin user and if showEmail is false 
-		if(getShowEmail() || isCurrentUserOrAdmin())profile.setEmail(getEmail());
-		else profile.setEmail("");			
+		// hide only for non admin user and if showEmail is false
+		if (getShowEmail() || isCurrentUserOrAdmin())
+			profile.setEmail(getEmail());
+		else
+			profile.setEmail("");
 
-    	profile.setPrimaryAffiliation(getPrimaryAffiliation());
-    	profile.setAvatar(getAvatar());
-    	profile.setAbout(getAbout());
-    	profile.setSkills(getSkills());
-    	profile.setType(getType());
-    	return profile;
+		profile.setPrimaryAffiliation(getPrimaryAffiliation());
+		profile.setAvatar(getAvatar());
+		profile.setAbout(getAbout());
+		profile.setSkills(getSkills());
+		profile.setType(getType());
+		return profile;
 	}
 	private UserStatus getStatus() {
 		UserStatus status = new UserStatus();
@@ -695,7 +697,7 @@ public class PersonDao {
 	 * @param userName get a userName as parameter to controll
 	 * @return TRUE if is Admin || FALSE if is simple User
 	 */
-	public boolean isCurrectUserAdminOrSameUserAsUserName(String userName){
+	public boolean isCurrentUserAdminOrSameUserAsUserName(String userName){
 		try {
 			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
 			if (currentUser.equals(userName) || AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
