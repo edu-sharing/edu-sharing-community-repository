@@ -929,7 +929,8 @@ export class AdminComponent {
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob'),
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob'),
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteNodesJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob')
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RestoreNodesBySolrQuery')
         ];
         const deleteAuthorities = new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteAuthoritiesJob')
         deleteAuthorities.originalObject = {upload: true};
