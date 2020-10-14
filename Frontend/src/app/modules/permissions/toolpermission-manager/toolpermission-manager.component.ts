@@ -49,6 +49,7 @@ export class ToolpermissionManagerComponent {
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
+        RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
             RestConstants.TOOLPERMISSION_COMMENT_WRITE,
             RestConstants.TOOLPERMISSION_RATE

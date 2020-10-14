@@ -137,7 +137,8 @@
         "TOOLPERMISSION_RATE": "The permission to rate materials",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" can be used",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
-        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed"
+        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed",
+        "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders"
     },
     "NO_WRITE_PERMISSIONS": "No permissions",
     "NODE_SEARCH": "Search elements...",
@@ -252,7 +253,7 @@
         "FILE_PICKER_TITLE": "Choose storage location",
         "CREATE": "Create",
         "CREATE_EDIT": "Create & Open",
-        "CREATED": "New variant was created and saved in a folder <b>\"{{folder}}\"</b>",
+        "CREATED": "New variant was created and saved in folder <b>\"{{folder}}\"</b>",
         "CREATED_LINK": "show",
         "WARNING": {
             "NO_LICENSE": "This material has no license attached.\nMay get in touch with the author of the material in order to prevent license infringements.",
@@ -260,6 +261,17 @@
             "ND": "This material has a non derivative license attached, which does not allow to change the material.\nMay get in touch with the author of the material in order to prevent license infringements.",
             "LINK": "Lizenzinformationen anzeigen"
         }
+    },
+    "MAP_LINK": {
+        "TITLE": "Create Link",
+        "NAME": "Link name",
+        "INFO": "A link to this folder will be created. It links to all contents of this folder. The visibility of the contents depends on the visibility of the original elements. Editing elements itself will edit the original elements.",
+        "BREADCRUMB_INFO": "Save link in:",
+        "CHOOSE": "Storage location",
+        "FILE_PICKER_TITLE": "Choose storage location",
+        "CREATE": "Create link",
+        "CREATED": "Link was created and saved in folder <b>\"{{folder}}\"</b>",
+        "CREATED_LINK": "show"
     },
     "NODE_REPORT": {
         "TITLE": "Report problem",
@@ -501,7 +513,8 @@
         "QR_CODE": "QR-Code Link",
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
-        "NEW_COLLECTION": "Add collection"
+        "NEW_COLLECTION": "Add collection",
+        "LINK_MAP": "Create link"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",

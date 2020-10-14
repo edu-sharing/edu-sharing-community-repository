@@ -134,7 +134,8 @@
         "TOOLPERMISSION_RATE": "Die Berechtigung zum Bewerten von Materialien",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
-        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden"
+        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
+        "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken"
     },
     "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
     "NODE_SEARCH": "Elemente suchen...",
@@ -316,7 +317,7 @@
         "FILE_PICKER_TITLE": "Speicherort wählen",
         "CREATE": "Anlegen",
         "CREATE_EDIT": "Anlegen & Öffnen",
-        "CREATED": "Die Variante wurde angelegt und in <b>\"{{folder}}\"</b> Ordner gespeichert",
+        "CREATED": "Die Variante wurde angelegt und im Ordner <b>\"{{folder}}\"</b> gespeichert",
         "CREATED_LINK": "anzeigen",
         "WARNING": {
             "NO_LICENSE": "Dieses Material besitzt noch keine Lizenz.\nSetzen Sie sich ggf. mit dem Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
@@ -324,6 +325,17 @@
             "ND": "Dieses Material besitzt eine Non Derivative Lizenz. Diese Lizenz legt fest, dass das Material nicht verändert werden darf.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
             "LINK": "Lizenzinformationen anzeigen"
         }
+    },
+    "MAP_LINK": {
+        "TITLE": "Link erstellen",
+        "NAME": "Name des Links",
+        "INFO": "Es wird ein Link auf diesen Ordner erstellt. Dieser zeigt auf alle Inhalte des gewählten Ordners. Die Sichtbarkeit der Inhalte hängt von dem Rechten der Originalobjekte ab. Bearbeitungsaktionen innerhalb der Daten beziehen sich auf die echten Elemente",
+        "BREADCRUMB_INFO": "Link-Objekt speichern in:",
+        "CHOOSE": "Speicherort ändern",
+        "FILE_PICKER_TITLE": "Speicherort wählen",
+        "CREATE": "Link erstellen",
+        "CREATED": "Der Link wurde angelegt und im Ordner <b>\"{{folder}}\"</b> gespeichert",
+        "CREATED_LINK": "anzeigen"
     },
     "NODE_REPORT": {
         "TITLE": "Problem melden",
@@ -534,7 +546,8 @@
         "QR_CODE": "QR-Code Link",
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
-        "NEW_COLLECTION": "Neue Sammlung"
+        "NEW_COLLECTION": "Neue Sammlung",
+        "LINK_MAP": "Verlinkung erstellen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",

@@ -32,6 +32,7 @@ export enum MdsType {
     Io = 'io',
     IoBulk = 'io_bulk',
     Map = 'map',
+    MapRef = 'map_ref',
     IoChildObject = 'io_childobject',
     ToolDefinition = 'tool_definition',
     ToolInstance = 'tool_instance',

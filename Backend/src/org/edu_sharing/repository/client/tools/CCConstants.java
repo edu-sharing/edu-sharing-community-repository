@@ -429,6 +429,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_REF_VIDEO_VTT = "{http://www.campuscontent.de/model/1.0}ref_video_vtt";
 
+	public final static String CCM_PROP_MAP_REF_TARGET = "{http://www.campuscontent.de/model/1.0}map_ref_target";
+
 	public final static String CCM_PROP_ADDRESS_POSTALCODE = "{http://www.campuscontent.de/model/1.0}postalCode";
 
 	public final static String CCM_PROP_ADDRESS_CITY = "{http://www.campuscontent.de/model/1.0}city";
@@ -438,6 +440,8 @@ public class CCConstants {
 	public final static String CCM_ASPECT_COMMON_LICENSES ="{http://www.campuscontent.de/model/1.0}commonlicenses";
 
 	public final static String CCM_ASPECT_EDUGROUP = "{http://www.campuscontent.de/model/1.0}edugroup";
+
+	public final static String CCM_ASPECT_MAP_REF = "{http://www.campuscontent.de/model/1.0}map_ref";
 
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
 
@@ -868,6 +872,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE = "TOOLPERMISSION_MEDIACENTER_MANAGE";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY = "TOOLPERMISSION_PUBLISH_COPY";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK = "TOOLPERMISSION_CREATE_MAP_LINK";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 

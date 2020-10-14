@@ -340,12 +340,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		// this method uses nodeServiceAlfresco instead of nodeService
 		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
 		List<ChildAssociationRef> assocs;
+		NodeRef nodeRef = new NodeRef(store, nodeId);
+		// we should not recurse any ref folders, they're just links and the real objects are found add different places
+		if(nodeServiceAlfresco.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MAP_REF))){
+			return new ArrayList<>();
+		}
 		if(types==null){
-			assocs = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
+			assocs = nodeServiceAlfresco.getChildAssocs(nodeRef);
 		}
 		else {
 			Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
-			assocs = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), typesConverted);
+			assocs = nodeServiceAlfresco.getChildAssocs(nodeRef, typesConverted);
 		}
 		List<NodeRef> result=new ArrayList<>();
 		for(ChildAssociationRef assoc : assocs){
@@ -353,11 +358,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		List<ChildAssociationRef> maps;
 		if(recurseMode.equals(RecurseMode.Folders)) {
-			maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId), new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+			maps = nodeServiceAlfresco.getChildAssocs(nodeRef, new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
 		}
 		else if(recurseMode.equals(RecurseMode.All)){
 			// in theory, every object may have children, so we need to access all of them
-			maps = nodeServiceAlfresco.getChildAssocs(new NodeRef(store, nodeId));
+			maps = nodeServiceAlfresco.getChildAssocs(nodeRef);
 		}
 		else{
 			throw new IllegalArgumentException("invalid RecurseMode");

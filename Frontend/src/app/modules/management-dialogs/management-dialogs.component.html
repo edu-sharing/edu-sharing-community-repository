@@ -121,6 +121,12 @@
         (onCancel)="closeVariant()"
         (onDone)="closeVariant()"
 ></node-variant>
+<app-map-link
+        *ngIf="linkMap"
+        [node]="linkMap"
+        (onCancel)="closeLinkMap()"
+        (onDone)="closeLinkMap($event)"
+></app-map-link>
 <collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"

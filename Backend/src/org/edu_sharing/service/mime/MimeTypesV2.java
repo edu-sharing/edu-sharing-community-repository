@@ -179,8 +179,12 @@ public class MimeTypesV2 {
 	public static String getNodeType(String nodeType,Map<String,Object> properties,List<String> aspects){
 		if(isCollection(aspects, properties))
 			return "collection";
-		if(isDirectory(properties))
+		if(isDirectory(properties)) {
+			if(aspects.contains(CCConstants.CCM_ASPECT_MAP_REF)){
+				return "folder-link";
+			}
 			return "folder";
+		}
 		if(isLtiDefinition(aspects))
 			return "tool_definition";
 		if(isSavedSearch(nodeType))

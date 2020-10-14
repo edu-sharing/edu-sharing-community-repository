@@ -128,7 +128,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
 			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
-			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT
+			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT,
+			CCConstants.CCM_PROP_MAP_REF_TARGET,
 	};
 	/**
 	 * These are the properties that will be copied to all io_reference nodes inside collections

@@ -608,6 +608,15 @@
 				</property>
 			</properties>
 		</aspect>
+		<aspect name="ccm:map_ref">
+			<title>aspect to mark a map that is simply referencing an other map</title>
+			<properties>
+				<!-- must be an other map -->
+				<property name="ccm:map_ref_target">
+					<type>d:noderef</type>
+				</property>
+			</properties>
+		</aspect>
 
 		<aspect name="ccm:basemetadata">
 			<title>Metadata for a CC base object</title>

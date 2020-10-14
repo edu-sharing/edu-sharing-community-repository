@@ -18,6 +18,7 @@ import {SimpleEditInviteComponent} from './simple-edit-dialog/simple-edit-invite
 import {SimpleEditLicenseComponent} from './simple-edit-dialog/simple-edit-license/simple-edit-license.component';
 import {LicenseSourceComponent} from "./license/license-source/license-source.component";
 import {LicenseDetailsComponent} from './license/license-details/license-details.component';
+import {MapLinkComponent} from './map-link/map-link.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -34,6 +35,7 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   CommentsListComponent,
   AddStreamComponent,
   NodeVariantComponent,
+  MapLinkComponent,
   NodeTemplateComponent,
   ViewCollectionFeedbackComponent,
   SimpleEditDialogComponent,

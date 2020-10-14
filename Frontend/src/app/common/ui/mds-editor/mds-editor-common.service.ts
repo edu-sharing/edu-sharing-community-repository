@@ -1,13 +1,8 @@
-import { Injectable } from '@angular/core';
-import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
-import {
-    Node,
-    RestConstants,
-    RestMdsService,
-    RestNodeService,
-} from '../../../core-module/core.module';
-import { MdsDefinition, MdsType, Values } from './types';
+import {Injectable} from '@angular/core';
+import {forkJoin} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {Node, RestConstants, RestMdsService, RestNodeService,} from '../../../core-module/core.module';
+import {MdsDefinition, MdsType, Values} from './types';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -102,6 +97,9 @@ export class MdsEditorCommonService {
     getGroupId(nodes: Node[]): MdsType {
         const node = nodes[0];
         let nodeGroup: MdsType = node.isDirectory ? MdsType.Map : MdsType.Io;
+        if(node.mediatype == 'folder-link') {
+            nodeGroup = MdsType.MapRef;
+        }
         if (node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
             nodeGroup = MdsType.IoChildObject;
         }

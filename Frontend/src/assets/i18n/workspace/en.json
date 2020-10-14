@@ -59,9 +59,12 @@
         "DELETE_TITLE_SINGLE": "Delete element?",
         "DELETE_TITLE_PUBLISHED_COPY": "Unpublish?",
         "DELETE_TITLE_COLLECTION": "Delete collection?",
+        "DELETE_TITLE_FOLDER_LINK": "Delete link to folder?",
         "DELETE_MESSAGE_SINGLE": "Are you sure you want to delete '{{name}}'?",
         "DELETE_MESSAGE_PUBLISHED_COPY": "Are you sure you want to unpublish '{{name}}'?\nThis will remove the published copy.\n\nCurrent links or handles pointing to this published element will become invalid!",
         "DELETE_MESSAGE_COLLECTION": "Are you sure you want to delete the collection '{{name}}' including all sub-collections?",
+        "DELETE_MESSAGE_FOLDER_LINK": "Are you sure you want to remove the link '{{name}}'?\n\nThe original folder and all it's contents will not be removed.",
+
         "DELETE_MESSAGE_SINGLE_USAGES": "Are you sure you want to delete '{{name}}'?\n\nThe element is currently used {{usages}} times in collections or connected systems.\n\nBy deleting the element it will not longer be usable there.",
         "DELETE_TITLE": "Delete elements?",
         "DELETE_MESSAGE": "Do you want to remove all selected elements?",

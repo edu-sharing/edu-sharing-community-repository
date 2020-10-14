@@ -353,6 +353,8 @@ export class OptionsHelperService {
                 return ElementType.SavedSearch;
             } else if(object.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
                 return ElementType.NodeChild;
+            } else if(object.mediatype === 'folder-link') {
+                return ElementType.MapRef;
             } else {
                 if(NodeHelper.isNodePublishedCopy(object)) {
                     return ElementType.NodePublishedCopy;
@@ -417,7 +419,7 @@ export class OptionsHelperService {
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
             management.nodeDebug = this.getObjects(object)[0],
         );
-        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.NodeBlockedImport, ElementType.SavedSearch, ElementType.NodeChild];
+        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.NodeBlockedImport, ElementType.SavedSearch, ElementType.NodeChild, ElementType.MapRef];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
         debugNode.group = DefaultGroups.View;
@@ -653,8 +655,8 @@ export class OptionsHelperService {
         const editNode = new OptionItem('OPTIONS.EDIT', 'edit', (object) =>
             management.nodeMetadata = this.getObjects(object)
         );
-        editNode.elementType = [ElementType.Node, ElementType.NodeChild];
-        editNode.constrains = [Constrain.FilesAndFolders, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
+        editNode.constrains = [Constrain.FilesAndDirectories, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;
         editNode.group = DefaultGroups.Edit;
@@ -684,6 +686,16 @@ export class OptionsHelperService {
         templateNode.group = DefaultGroups.Edit;
 
 
+        const linkMap = new OptionItem('OPTIONS.LINK_MAP', 'link', (node) =>
+            management.linkMap = this.getObjects(node)[0]
+        );
+        linkMap.constrains = [Constrain.NoBulk, Constrain.HomeRepository, Constrain.User, Constrain.Directory];
+        linkMap.toolpermissions = [RestConstants.TOOLPERMISSION_PUBLISH_COPY];
+        linkMap.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
+        linkMap.permissionsMode = HideMode.Hide;
+        linkMap.group = DefaultGroups.FileOperations;
+        linkMap.priority = 5;
+
         /**
          const cut = new OptionItem('OPTIONS.CUT', 'content_cut', (node: Node) => this.cutCopyNode(node, false));
          cut.isSeperate = true;
@@ -695,6 +707,7 @@ export class OptionsHelperService {
         const cutNodes = new OptionItem('OPTIONS.CUT', 'content_cut', (node) =>
             this.cutCopyNode(node, false)
         );
+        cutNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef]
         cutNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         cutNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         cutNodes.permissions = [RestConstants.ACCESS_WRITE];
@@ -707,6 +720,7 @@ export class OptionsHelperService {
         const copyNodes = new OptionItem('OPTIONS.COPY', 'content_copy', (node) =>
             this.cutCopyNode(node, true)
         );
+        copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef]
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         copyNodes.key = 'KeyC';
@@ -727,7 +741,7 @@ export class OptionsHelperService {
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete',(object) => {
             management.nodeDelete = this.getObjects(object);
         });
-        deleteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
+        deleteNode.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         deleteNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
         deleteNode.permissions = [RestConstants.PERMISSION_DELETE];
         deleteNode.permissionsMode = HideMode.Hide;
@@ -952,6 +966,7 @@ export class OptionsHelperService {
         options.push(downloadNode);
         options.push(downloadMetadataNode);
         options.push(qrCodeNode);
+        options.push(linkMap);
         options.push(cutNodes);
         options.push(copyNodes);
         options.push(pasteNodes);
@@ -1110,9 +1125,9 @@ export class OptionsHelperService {
                 return Constrain.Files;
             }
         }
-        if (constrains.indexOf(Constrain.FilesAndFolders) !== -1) {
+        if (constrains.indexOf(Constrain.FilesAndDirectories) !== -1) {
             if (objects.some((o) => o.collection || o.type !== RestConstants.CCM_TYPE_IO && o.type !== RestConstants.CCM_TYPE_MAP)) {
-                return Constrain.FilesAndFolders;
+                return Constrain.FilesAndDirectories;
             }
         }
         if (constrains.indexOf(Constrain.Admin) !== -1) {

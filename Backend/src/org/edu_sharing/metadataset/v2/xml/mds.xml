@@ -468,6 +468,14 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_map_ref</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <cm:name caption="{{cm_name_map}}" placeholder="{{cm_name_map_placeholder}}">
+				]]></html>
+			</template>
+			<template>
 				<id>tool_definition</id>
 				<caption></caption>
 				<html><![CDATA[
@@ -786,6 +794,13 @@
 				<rendering>angular</rendering>
 				<views>
 					<view>node_map</view>
+				</views>
+			</group>
+			<group>
+				<id>map_ref</id>
+				<rendering>angular</rendering>
+				<views>
+					<view>node_map_ref</view>
 				</views>
 			</group>
 			<group>

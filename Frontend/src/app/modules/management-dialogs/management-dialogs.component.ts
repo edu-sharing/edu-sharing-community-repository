@@ -48,6 +48,8 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeLicenseChange = new EventEmitter();
   @Input() addPinnedCollection: Node;
   @Output() addPinnedCollectionChange = new EventEmitter();
+  @Input() linkMap: Node;
+  @Output() linkMapChange = new EventEmitter<Node>();
   @Input() set nodeImportUnblock (nodeImportUnblock: Node[]) {
       this.toast.showConfigurableDialog({
           title: 'WORKSPACE.UNBLOCK_TITLE',
@@ -68,22 +70,26 @@ export class WorkspaceManagementDialogsComponent  {
         this.dialogNode=nodeDelete;
         this.nodeDeleteButtons=DialogButton.getCancel(()=> {this._nodeDelete = null});
         this.nodeDeleteButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_DANGER,()=>{this.deleteConfirmed(nodeDelete)}));
-
-      if(nodeDelete.length === 1 && nodeDelete[0].collection) {
-          this.nodeDeleteTitle='WORKSPACE.DELETE_TITLE_COLLECTION';
-          this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE_COLLECTION';
-      } else if(nodeDelete.length === 1 && NodeHelper.isNodePublishedCopy(nodeDelete[0])) {
-          this.nodeDeleteTitle='WORKSPACE.DELETE_TITLE_PUBLISHED_COPY';
-          this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE_PUBLISHED_COPY';
-      }else if(nodeDelete.length === 1 && !nodeDelete[0].isDirectory) {
-          // check for usages and warn user
-          this.usageService.getNodeUsages(nodeDelete[0].ref.id,nodeDelete[0].ref.repo).subscribe((usages)=>{
-                if(usages.usages.length>0) {
-                    this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
-                    this.nodeDeleteMessageParams = {name:nodeDelete[0].name,usages:usages.usages.length};
-                }
-            });
-        }
+      if(nodeDelete.length === 1) {
+          if (nodeDelete[0].collection) {
+              this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_COLLECTION';
+              this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_COLLECTION';
+          } else if (NodeHelper.isNodePublishedCopy(nodeDelete[0])) {
+              this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_PUBLISHED_COPY';
+              this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_PUBLISHED_COPY';
+          } else if (nodeDelete[0].mediatype === 'folder-link') {
+              this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_FOLDER_LINK';
+              this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_FOLDER_LINK';
+          } else if (!nodeDelete[0].isDirectory) {
+              // check for usages and warn user
+              this.usageService.getNodeUsages(nodeDelete[0].ref.id, nodeDelete[0].ref.repo).subscribe((usages) => {
+                  if (usages.usages.length > 0) {
+                      this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_SINGLE_USAGES';
+                      this.nodeDeleteMessageParams = {name: nodeDelete[0].name, usages: usages.usages.length};
+                  }
+              });
+          }
+      }
       this.nodeDeleteBlock = this.connector.getCurrentLogin()?.isAdmin &&
           nodeDelete.every((n) => n.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] != null);
       this.nodeDeleteBlockStatus = this.nodeDeleteBlock;
@@ -646,5 +652,10 @@ export class WorkspaceManagementDialogsComponent  {
             this.toast.closeModalDialog();
             this.onRefresh.emit(results);
         });
+    }
+
+    closeLinkMap(node: Node = null) {
+      this.linkMap = null;
+      this.linkMapChange.emit(null);
     }
 }
