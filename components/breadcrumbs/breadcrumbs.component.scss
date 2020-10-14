@@ -56,7 +56,7 @@
       top: 5px;
     }
     &.breadcrumbShort{
-      @include limitLineCount(1);
+      //@include limitLineCount(1);
       span{
         line-height: 1;
       }

@@ -164,6 +164,7 @@ export enum Scope {
 export enum ElementType {
   Node,
   NodeChild, // Child object
+  MapRef, // Map ref (link to another map)
   NodePublishedCopy,
   NodeBlockedImport, // node with property ccm:importblocked == true
   Person,
@@ -196,7 +197,7 @@ export enum Constrain {
   Directory, // only visible for directories (ccm:map)
   Collections, // only visible for collections
   Files, // only visible for files (ccm:io)
-  FilesAndFolders, // only visible for files and directories (ccm:io / ccm:map) - no collections!
+  FilesAndDirectories, // only visible for files and directories (ccm:io / ccm:map) - no collections!
   Admin, // only visible if user is admin or esDebug is enabled on window component
   AdminOrDebug, // only visible if user is admin or esDebug is enabled on window component
   NoBulk, // No support for bulk (multiple objects)
