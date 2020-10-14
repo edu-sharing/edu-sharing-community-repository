@@ -316,9 +316,9 @@ public class PersonDao {
 	}
 
 	private Map<String,String[]> getProperties() {
-           Map<String,Serializable> properties=userInfo;
-		if (!getShowEmail() || !isCurrentUserOrAdmin())
-			 properties.replace(CCConstants.CM_PROP_PERSON_EMAIL,null);
+        Map<String,Serializable> properties=userInfo;
+		if (!getShowEmail() || !isCurrentUserOrAdmin()) // email must be showed only if is admin, or if email ragards to user login
+			properties.replace(CCConstants.CM_PROP_PERSON_EMAIL,null);
 
 		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
 	}
