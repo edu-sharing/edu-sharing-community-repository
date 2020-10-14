@@ -161,6 +161,19 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			String thumb = json.getString("previewURL");
 			Matcher m = p.matcher(thumb);
 			if (m.find()) {
+				/*
+				Supported sizes:
+					_1024_1280.jpg
+					_1280.jpg
+					_1440_2560.jpg
+					_150.jpg
+					__180.jpg
+					__240.jpg
+					__340.jpg
+					__480.jpg
+					_640.jpg
+					_960_720.jpg
+				 */
 				thumb = thumb.substring(0,m.start(1)) + "1280" + thumb.substring(m.end(1));
 				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,thumb);
 			}
