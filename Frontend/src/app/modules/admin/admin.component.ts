@@ -930,7 +930,11 @@ export class AdminComponent {
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob'),
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteNodesJob'),
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RestoreNodesBySolrQuery')
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RestoreNodesBySolrQuery'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.SyncOrganisationFolderName'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.SetPermissionsOrgAdminGroup'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.TrashcanCleanerSolrJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.CheckLinkJob')
         ];
         const deleteAuthorities = new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteAuthoritiesJob')
         deleteAuthorities.originalObject = {upload: true};
