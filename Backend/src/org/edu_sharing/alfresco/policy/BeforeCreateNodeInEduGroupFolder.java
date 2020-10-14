@@ -38,8 +38,10 @@ public class BeforeCreateNodeInEduGroupFolder implements NodeServicePolicies.Bef
 			if(mapType != null && mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP)){
 				throw new NodeCreateDeniedException("creating nodes is not allowed in this folder");
 			}
+			if(nodeService.hasAspect(parentRef,QName.createQName(CCConstants.CCM_ASPECT_MAP_REF))){
+				throw new NodeCreateDeniedException("creating nodes is not allowed in " + CCConstants.CCM_ASPECT_MAP_REF+ " folders");
+			}
 		}
-		
 	}
 	
 	public void setNodeService(NodeService nodeService) {
