@@ -706,18 +706,4 @@ public class PersonDao {
 		}
 		return false;
 	}
-
-
-	/**
-	 * Get email configuration for a specific User
-	 * @param person userName of person
-	 * @return true || false
-	 */
-	public boolean getShowEmailForSpecificUser(){
-		try {
-			return getShowEmail();
-		} catch (Throwable t) {
-			return false;
-		}
-	}
 }
