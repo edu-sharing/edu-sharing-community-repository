@@ -20,6 +20,7 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.QNamePattern;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
@@ -312,7 +313,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	 */
 	@Override
 	public String findNodeByName(String parentId, String name){
-		List<ChildAssociationRef> children = nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId));
+		List<ChildAssociationRef> children = this.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId));
 		for(ChildAssociationRef child : children){
 			String childName=(String) nodeService.getProperty(child.getChildRef(), QName.createQName(CCConstants.CM_NAME));
 			if(childName.equals(name))
@@ -321,7 +322,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return null;
 	}
     private List<ChildAssociationRef> getChildrenAssocsByType(StoreRef store, String nodeId, String type) {
-        List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId), Collections.singleton(QName.createQName(type)));
+        List<ChildAssociationRef> childAssocList = this.getChildAssocs(new NodeRef(store, nodeId), Collections.singleton(QName.createQName(type)));
         return childAssocList;
     }
 
@@ -341,10 +342,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
 		List<ChildAssociationRef> assocs;
 		NodeRef nodeRef = new NodeRef(store, nodeId);
-		// we should not recurse any ref folders, they're just links and the real objects are found add different places
-		if(nodeServiceAlfresco.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MAP_REF))){
-			return new ArrayList<>();
-		}
 		if(types==null){
 			assocs = nodeServiceAlfresco.getChildAssocs(nodeRef);
 		}
@@ -814,16 +811,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		NodeRef parentNodeRef = getParentRef(parentID);
         List<ChildAssociationRef> result;
         if(assocName==null || assocName.isEmpty()){
-            result=nodeService.getChildAssocs(parentNodeRef);
+            result=this.getChildAssocs(parentNodeRef);
 		}
 		else{
-            result=nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
+            result=this.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
 		}
         result=sortNodeRefList(result,filter,sortDefinition);
         return result;
 	}
 
-    private NodeRef getParentRef(String parentID) {
+
+	private NodeRef getParentRef(String parentID) {
 		if (parentID == null) {
 
 			String startParentId = apiClient.getRootNodeId();
@@ -836,18 +834,35 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		return new NodeRef(Constants.storeRef, parentID);
 	}
-
 	@Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID,String childType){
 		NodeRef parentNodeRef = getParentRef(parentID);
 		if(childType==null) {
-			return nodeService.getChildAssocs(parentNodeRef);
+			return this.getChildAssocs(parentNodeRef);
 		}
 		else {
-			return nodeService.getChildAssocs(parentNodeRef,new HashSet<>(Arrays.asList(QName.createQName(childType))));
+			return this.getChildAssocs(parentNodeRef,new HashSet<>(Arrays.asList(QName.createQName(childType))));
 		}
 
 	}
+
+	private List<ChildAssociationRef> getChildAssocs(NodeRef parentNodeRef, QName qName, QNamePattern matchAll) {
+		return nodeService.getChildAssocs(parentNodeRef, qName, matchAll);
+	}
+	private List<ChildAssociationRef> getChildAssocs(NodeRef parentNodeRef) {
+		return nodeService.getChildAssocs(mapParentNodeLink(parentNodeRef));
+	}
+	private List<ChildAssociationRef> getChildAssocs(NodeRef parentNodeRef, Set<QName> qNames) {
+		return nodeService.getChildAssocs(mapParentNodeLink(parentNodeRef),qNames);
+	}
+
+	private NodeRef mapParentNodeLink(NodeRef parentNodeRef) {
+		if (parentNodeRef != null && nodeService.hasAspect(parentNodeRef, QName.createQName(CCConstants.CCM_ASPECT_MAP_REF))) {
+			parentNodeRef = (NodeRef) nodeService.getProperty(parentNodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_REF_TARGET));
+		}
+		return parentNodeRef;
+	}
+
 	public void createVersion(String nodeId, HashMap _properties) throws Exception{
 		apiClient.createVersion(nodeId, _properties);
 	}
@@ -938,7 +953,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 						oldNodeRef);
 				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
-				for(ChildAssociationRef child : nodeService.getChildAssocs(newNode)){
+				for(ChildAssociationRef child : this.getChildAssocs(newNode)){
 					policyBehaviourFilter.disableBehaviour(child.getChildRef());
 					setPublishedCopyProperties(oldNodeRef, child.getChildRef(), owner);
 					policyBehaviourFilter.enableBehaviour(child.getChildRef());

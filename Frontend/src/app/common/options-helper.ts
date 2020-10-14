@@ -720,7 +720,7 @@ export class OptionsHelperService {
         const copyNodes = new OptionItem('OPTIONS.COPY', 'content_copy', (node) =>
             this.cutCopyNode(node, true)
         );
-        copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch]
+        copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef]
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         copyNodes.key = 'KeyC';

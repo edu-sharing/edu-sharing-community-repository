@@ -55,12 +55,6 @@ public class NodeServiceInterceptor implements MethodInterceptor {
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		String methodName = invocation.getMethod().getName();
-		if (methodName.equals("getChildAssocs")) {
-			NodeRef parentNode = (NodeRef) invocation.getArguments()[0];
-			if (parentNode != null && nodeService.hasAspect(parentNode, QName.createQName(CCConstants.CCM_ASPECT_MAP_REF))) {
-				invocation.getArguments()[0] = nodeService.getProperty(parentNode, QName.createQName(CCConstants.CCM_PROP_MAP_REF_TARGET));
-			}
-		}
 
 		String runAsUser = AuthenticationUtil.getRunAsUser();
 

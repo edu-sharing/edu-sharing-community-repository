@@ -33,7 +33,7 @@ public class VirtualEduGroupFolderTool {
 		this.nodeService = nodeService;
 	}
 
-	public List<ChildAssociationRef> getGroupMapChildren2(NodeRef nodeRef) {
+	/*public List<ChildAssociationRef> getGroupMapChildren2(NodeRef nodeRef) {
 		if (QName.createQName(CCConstants.CCM_TYPE_MAP).equals(nodeService.getType(nodeRef))) {
 			String mapType = (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
 			if (mapType != null && mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP)) {
@@ -64,7 +64,7 @@ public class VirtualEduGroupFolderTool {
 			}
 		}
 		return null;
-	}
+	}*/
 
 	public Collection<NodeRef> getEduGroupNodeRefs() {
 		return EduGroupCache.getKeys();

@@ -23,7 +23,7 @@ public class DbNodeServiceImpl extends org.alfresco.repo.node.db.DbNodeServiceIm
 	@Override
 	public List<ChildAssociationRef> getChildAssocs(NodeRef nodeRef, QNamePattern typeQNamePattern, QNamePattern qnamePattern,
 			boolean preload) {
-	
+		nodeRef = switchToLinkNodeRef(nodeRef);
 		List<ChildAssociationRef> result = new VirtualEduGroupFolderTool(serviceRegistry,this).getGroupMapChildren(nodeRef);
 		if(result != null){
 			return result;
@@ -37,6 +37,7 @@ public class DbNodeServiceImpl extends org.alfresco.repo.node.db.DbNodeServiceIm
 	public List<ChildAssociationRef> getChildAssocs(NodeRef nodeRef, java.util.Set<QName> childNodeTypeQNames) {
 		// check if the maps are allowed to be displayed
 		if(childNodeTypeQNames==null || childNodeTypeQNames.contains(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
+			nodeRef = switchToLinkNodeRef(nodeRef);
 			List<ChildAssociationRef> result = new VirtualEduGroupFolderTool(serviceRegistry, this).getGroupMapChildren(nodeRef);
 			if (result != null) {
 				return result;
@@ -44,10 +45,11 @@ public class DbNodeServiceImpl extends org.alfresco.repo.node.db.DbNodeServiceIm
 		}
 		
 		return super.getChildAssocs(nodeRef, childNodeTypeQNames);
-	};
-	
+	}
+
 	@Override
 	public NodeRef getChildByName(NodeRef nodeRef, QName assocTypeQName, String childName) {
+		nodeRef = switchToLinkNodeRef(nodeRef);
 		NodeRef result =  super.getChildByName(nodeRef, assocTypeQName, childName);
 		if(result == null){
 			if(ContentModel.ASSOC_CONTAINS.equals(assocTypeQName) && QName.createQName(CCConstants.CCM_TYPE_MAP).equals(this.getType(nodeRef))){
@@ -71,9 +73,14 @@ public class DbNodeServiceImpl extends org.alfresco.repo.node.db.DbNodeServiceIm
 		
 		return result;
 	}
-	
-	
-	
+	private NodeRef switchToLinkNodeRef(NodeRef nodeRef){
+		// if it's a map ref/link, switch to the original folder
+		if(hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_MAP_REF))) {
+			return (NodeRef) getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_REF_TARGET));
+		}
+		return nodeRef;
+	}
+
 	public void setServiceRegistry(ServiceRegistry serviceRegistry) {
 		this.serviceRegistry = serviceRegistry;
 	}
