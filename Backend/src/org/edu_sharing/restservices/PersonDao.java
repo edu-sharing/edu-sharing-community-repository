@@ -155,14 +155,16 @@ public class PersonDao {
 			this.homeFolderId = baseClient.getHomeFolderID(userName);
 
 			// may causes performance penalties!
-			this.parentOrganizations = authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope());
+			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
+					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
+			);
 
 
 			try{
-				
+
 				boolean getGroupFolder = true;
 				//don't run into access denied wrapped by Transaction commit failed
-				if(!AuthenticationUtil.isRunAsUserTheSystemUser() 
+				if(!AuthenticationUtil.isRunAsUserTheSystemUser()
 						&& !AuthenticationUtil.getRunAsUser().equals(ApplicationInfoList.getHomeRepository().getUsername())
 						&& !AuthenticationUtil.getRunAsUser().equals(userName)) {
 					getGroupFolder = false;

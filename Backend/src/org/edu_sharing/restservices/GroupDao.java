@@ -135,8 +135,9 @@ public class GroupDao {
 			this.ref = authorityService.getAuthorityNodeRef(this.authorityName);
 
 			// may causes performance penalties!
-			this.parentOrganizations = authorityService.getEduGroups(this.authorityName, NodeServiceInterceptor.getEduSharingScope());
-			
+			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
+					authorityService.getEduGroups(this.authorityName, NodeServiceInterceptor.getEduSharingScope())
+			);
 		} catch (Throwable t) {
 			
 			throw DAOException.mapping(t);
