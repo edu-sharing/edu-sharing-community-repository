@@ -316,7 +316,11 @@ public class PersonDao {
 	}
 
 	private Map<String,String[]> getProperties() {
-		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(userInfo));
+           Map<String,Serializable> properties=userInfo;
+		if (!getShowEmail() || !isCurrentUserOrAdmin())
+			 properties.replace(CCConstants.CM_PROP_PERSON_EMAIL,null);
+
+		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
 	}
 
 	private UserQuota getQuota() {
@@ -687,9 +691,11 @@ public class PersonDao {
 	 * Boolean method to :
 	 *   -  check if exist user is ADMIN or simple USER,
 	 *   -  check if exist user is similar with userName
+	 *
+	 * @param userName get a userName as parameter to controll
 	 * @return TRUE if is Admin || FALSE if is simple User
 	 */
-	public boolean isCurrectUserAdminOrSameUSerAsUserName(String userName){
+	public boolean isCurrectUserAdminOrSameUserAsUserName(String userName){
 		try {
 			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
 			if (currentUser.equals(userName) || AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {

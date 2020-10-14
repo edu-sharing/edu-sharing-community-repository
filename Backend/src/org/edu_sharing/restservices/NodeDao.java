@@ -1238,7 +1238,7 @@ public class NodeDao {
 				.get(CCConstants.NODECREATOR_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODECREATOR_LASTNAME));
-		if(this.checkUserPermission((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
+		if(this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
 			ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
 
 		return ref;
@@ -1251,7 +1251,7 @@ public class NodeDao {
 		Person ref = new Person();
 		ref.setFirstName(owner.getGivenName());
 		ref.setLastName(owner.getSurname());
-		if(this.checkUserPermission(owner.getUsername()))//only admin can see even if users have hide email
+		if(this.checkUserHasPermissionToSeeMail(owner.getUsername()))//only admin can see even if users have hide email
 			ref.setMailbox(owner.getEmail());
 
 		return ref;
@@ -1263,10 +1263,10 @@ public class NodeDao {
 	 * @return true || false
 	 * @throws Throwable exception and return false everytime we have a exception
 	 */
-	private boolean checkUserPermission(String userName){
+	private boolean checkUserHasPermissionToSeeMail(String userName){
 		try {
 			return (PersonDao.getPerson(repoDao, userName).getShowEmail() ||  // User can see own email
-					PersonDao.getPerson(repoDao, userName).isCurrectUserAdminOrSameUSerAsUserName(userName)); //only admin  can see even if users have hide email
+					PersonDao.getPerson(repoDao, userName).isCurrectUserAdminOrSameUserAsUserName(userName)); //only admin  can see even if users have hide email
 		} catch (Throwable t) {
 			return false;
 		}
@@ -1290,7 +1290,7 @@ public class NodeDao {
 				.get(CCConstants.NODEMODIFIER_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODEMODIFIER_LASTNAME));
-		if(this.checkUserPermission((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
+		if(this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
 			ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
 
 		return ref;
