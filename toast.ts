@@ -80,6 +80,17 @@ export class Toast {
     }
 
     /**
+     * Generate a message dialog that a given toolpermission is missing
+     * @param toolpermission
+     */
+    toolpermissionError(permission: string) {
+        this.showConfigurableDialog({
+            title: 'TOOLPERMISSION_ERROR_TITLE',
+            message: this.getToolpermissionMessage(permission),
+            isCancelable: true
+        })
+    }
+    /**
      * Generates a toast error message
      */
     error(
@@ -133,20 +144,7 @@ export class Toast {
                     const permission = (json ? json.message : error).split(
                         ' ',
                     )[0];
-                    this.dialogMessage =
-                        this.injector
-                            .get(TranslateService)
-                            .instant('TOOLPERMISSION_ERROR_HEADER') +
-                        '\n- ' +
-                        this.injector
-                            .get(TranslateService)
-                            .instant('TOOLPERMISSION.' + permission) +
-                        '\n\n' +
-                        this.injector
-                            .get(TranslateService)
-                            .instant('TOOLPERMISSION_ERROR_FOOTER', {
-                                permission,
-                            });
+                    this.dialogMessage = this.getToolpermissionMessage(permission);
                 } else if (
                     json.error.indexOf('SystemFolderDeleteDeniedException') !==
                     -1
@@ -374,5 +372,21 @@ export class Toast {
             this.linkCallback = additional.link.callback;
         }
         return text;
+    }
+
+    private getToolpermissionMessage(permission: string) {
+        return this.injector
+            .get(TranslateService)
+            .instant('TOOLPERMISSION_ERROR_HEADER') +
+        '\n- ' +
+        this.injector
+            .get(TranslateService)
+            .instant('TOOLPERMISSION.' + permission) +
+        '\n\n' +
+        this.injector
+            .get(TranslateService)
+            .instant('TOOLPERMISSION_ERROR_FOOTER', {
+                permission,
+            });
     }
 }
