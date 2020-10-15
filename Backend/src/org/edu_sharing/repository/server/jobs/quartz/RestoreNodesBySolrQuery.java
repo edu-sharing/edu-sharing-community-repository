@@ -22,9 +22,12 @@ import java.util.List;
 
 public class RestoreNodesBySolrQuery extends AbstractJob{
 
-    String PARAM_QUERY = "QUERY";
-    String PARAM_EXECUTE = "EXECUTE";
-    String PARAM_FALLBACK_FOLDER = "FALLBACK";
+    public static final String PARAM_QUERY = "QUERY";
+    public static final String PARAM_EXECUTE = "EXECUTE";
+    public static final String PARAM_FALLBACK_FOLDER = "FALLBACK";
+
+    public static String DESCRIPTION = "takes a solrquery, executed over archive store, tries to restore nodes.";
+
 
     int PAGE_SIZE = 100;
 

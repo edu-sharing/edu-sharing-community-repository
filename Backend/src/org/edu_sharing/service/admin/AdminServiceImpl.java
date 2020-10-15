@@ -2,6 +2,7 @@ package org.edu_sharing.service.admin;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +59,7 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.repository.tomcat.ClassHelper;
 import org.edu_sharing.repository.update.*;
 import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -928,5 +930,34 @@ public class AdminServiceImpl implements AdminService  {
 		FileUtils.copyInputStreamToFile(is, upload);
 		return upload.getAbsolutePath();
 	}
-	
+
+	@Override
+	public List<JobDescription> getJobDescriptions() {
+
+		List<JobDescription> result = new ArrayList<>();
+
+		List<Class> jobClasses = ClassHelper.getSubclasses(AbstractJob.class);
+
+		for(Class clazz : jobClasses){
+			JobDescription desc = new JobDescription();
+			desc.setName(clazz.getName());
+			List<Field> staticFields = ClassHelper.getStaticFields(clazz);
+			List<String> params = new ArrayList<>();
+			desc.setParams(params);
+			for(Field staticField : staticFields){
+				try {
+					if(staticField.getName().startsWith("PARAM_")){
+						params.add((String)staticField.get(null));
+					}
+					if(staticField.getName().equals("DESCRIPTION")){
+						desc.setDescription((String)staticField.get(null));
+					}
+				} catch (IllegalAccessException e) {
+					logger.error(e.getMessage());
+				}
+			}
+			result.add(desc);
+		}
+		return result;
+	}
 }
