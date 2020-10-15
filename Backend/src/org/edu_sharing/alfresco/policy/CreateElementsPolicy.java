@@ -10,7 +10,6 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
-import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 public class CreateElementsPolicy implements OnCreateNodePolicy {
