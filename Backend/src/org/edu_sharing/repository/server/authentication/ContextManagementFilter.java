@@ -52,7 +52,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
 			((HttpServletResponse)res).setHeader("Access-Control-Expose-Headers","X-Edu-Scope");
 			((HttpServletResponse)res).setHeader("X-Edu-Scope", NodeServiceInterceptor.getEduSharingScope());
-			
+			SubsystemChainingAuthenticationService.setCurrentPath(((HttpServletRequest) req).getContextPath() + ((HttpServletRequest) req).getServletPath());
+
 			try {
 				NodeCustomizationPolicies.setEduSharingContext(ConfigServiceFactory.getCurrentContextId((HttpServletRequest) req));
 				AvailableMds[] availableMdss = ConfigServiceFactory.getCurrentConfig().values.availableMds;
@@ -77,7 +78,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			NodeServiceInterceptor.setEduSharingScope((String)null);
 			NodeCustomizationPolicies.setEduSharingContext(null);
 			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
-			
+			SubsystemChainingAuthenticationService.setCurrentPath((String)null);
+
 			HttpContext.setCurrentMetadataSet(null);
 			
 			/**
