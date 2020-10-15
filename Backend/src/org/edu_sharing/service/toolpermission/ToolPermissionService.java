@@ -1,9 +1,6 @@
 package org.edu_sharing.service.toolpermission;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -21,6 +18,7 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
+import org.edu_sharing.service.admin.model.ToolPermission;
 import org.edu_sharing.service.connector.Connector;
 import org.edu_sharing.service.connector.ConnectorList;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
@@ -32,6 +30,13 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 
 	private static String toolPermissionFolder=null;
 
+	ToolPermissionService(){
+		buildCache();
+	}
+
+	private void buildCache() {
+
+	}
 
 	public void setEduNodeService(org.edu_sharing.service.nodeservice.NodeService eduNodeService) {
 		this.eduNodeService = eduNodeService;
@@ -50,25 +55,27 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 	}
 	public List<String> getAllAvailableToolPermissions(boolean renew){
 		List<String> allowed=new ArrayList<>();
-		for(String permission : this.getAllToolPermissions()){
+		for(String permission : this.getAllToolPermissions(renew)){
 			if(hasToolPermission(permission, renew))
 				allowed.add(permission);
 		}
 		return allowed;
 	}
 
-	public List<String> getAllToolPermissions(){
+	public Collection<String> getAllToolPermissions(boolean refresh){
+		if(!refresh && !toolPermissionNodeCache.keySet().isEmpty()){
+			return toolPermissionNodeCache.keySet();
+		}
 		RunAsWork<List<String>> runas = new RunAsWork<List<String>>() {
 			@Override
 			public List<String> doWork() throws Exception {
 				List<String> result = new ArrayList<String>();
 				try {
-					
-					
 					String tpFolder = getEdu_SharingToolPermissionsFolder();
 					List<ChildAssociationRef> childAssocRefs = eduNodeService.getChildrenChildAssociationRef(tpFolder);
 					for(ChildAssociationRef childAssocRef : childAssocRefs) {
 						String name = eduNodeService.getProperty(childAssocRef.getChildRef().getStoreRef().getProtocol(), childAssocRef.getChildRef().getStoreRef().getIdentifier(), childAssocRef.getChildRef().getId(), CCConstants.CM_NAME);
+						toolPermissionNodeCache.put(name, childAssocRef.getChildRef().getId());
 						result.add(name);
 					}
 				}catch(Throwable e) {
@@ -77,7 +84,7 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 				return result;
 			}
 		};
-		
+
 		return AuthenticationUtil.runAsSystem(runas);
 	}
 	
@@ -106,12 +113,13 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 		}
 
 		String toolNodeId = AuthenticationUtil.runAsSystem(workTP);
-		AccessStatus accessStatus = permissionService.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toolNodeId), PermissionService.READ);
 		AccessStatus accessStatusDenied = permissionService.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toolNodeId), CCConstants.PERMISSION_DENY);
 		if(accessStatusDenied.equals(AccessStatus.ALLOWED)) {
-			logger.info("Toolpermission "+toolPermission+" has explicit Deny permission");;
+			logger.info("Toolpermission "+toolPermission+" has explicit Deny permission");
+			return false;
 		}
-		return accessStatus.equals(AccessStatus.ALLOWED) && !accessStatusDenied.equals(AccessStatus.ALLOWED);
+		AccessStatus accessStatus = permissionService.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toolNodeId), PermissionService.READ);
+		return accessStatus.equals(AccessStatus.ALLOWED);
 	}
 	public String getToolPermissionNodeId(String toolPermission) throws Throwable{
 		if(toolPermissionNodeCache.containsKey(toolPermission)) {
@@ -228,7 +236,7 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 	public void invalidateSessionCache() {
 		try{
 			HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-			for(String tp : this.getAllToolPermissions()){
+			for(String tp : this.getAllToolPermissions(false)){
 				session.removeAttribute(tp);
 			}
 		}catch(Throwable t){

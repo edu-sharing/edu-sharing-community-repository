@@ -139,7 +139,8 @@ public class AdminServiceImpl implements AdminService  {
 			throw new IllegalArgumentException("Toolpermissions are not supported for members of "+CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
 		}
 		Map<String,ToolPermission> toolpermissions=new HashMap<>();
-		for(String tp : tpService.getAllToolPermissions()) {
+		// refresh the tp in this case, since may a new one is created meanwhile by the client
+		for(String tp : tpService.getAllToolPermissions(true)) {
 			String nodeId=tpService.getToolPermissionNodeId(tp);
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
 			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
