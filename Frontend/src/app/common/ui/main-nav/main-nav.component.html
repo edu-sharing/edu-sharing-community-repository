@@ -1,17 +1,9 @@
-<!-- central access to all dialogs for actions -->
-<workspace-management #management></workspace-management>
 <div *ngIf="visible">
   <div class="preload" *ngIf="getPreloading()">
     <img src="assets/images/edu-sharing-loading-animation.svg" image-config alt="" />
   </div>
   <user-profile *ngIf="showProfile" (onCancel)="showProfile = false"></user-profile>
 
-  <div
-    class="dialog darken"
-    [style.z-index]="120"
-    *ngIf="licenseDialog"
-    [@fade]="licenseDialog"
-  ></div>
   <card
     *ngIf="licenseDialog"
     title="{{ 'LICENSE_INFORMATION' | translate }}"
@@ -20,7 +12,7 @@
     [isCancelable]="true"
     (onCancel)="licenseDialog = false"
   >
-    <div class="card-content-padding">
+    <div class="card-content-padding card-licenses">
       <spinner *ngIf="!licenseDetails"></spinner>
       <div [innerHTML]="licenseDetails"></div>
     </div>

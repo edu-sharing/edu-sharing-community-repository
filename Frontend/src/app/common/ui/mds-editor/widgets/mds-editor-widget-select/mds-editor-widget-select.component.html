@@ -1,0 +1,12 @@
+<app-mds-editor-widget-container
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="formControl"
+>
+  <mat-select [formControl]="formControl">
+    <mat-option *ngFor="let value of values | async" [value]="value">
+      {{ value.caption }}
+    </mat-option>
+  </mat-select>
+</app-mds-editor-widget-container>

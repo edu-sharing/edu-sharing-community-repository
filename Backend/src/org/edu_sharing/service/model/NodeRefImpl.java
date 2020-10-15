@@ -1,6 +1,8 @@
 package org.edu_sharing.service.model;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 
@@ -15,7 +17,9 @@ public class NodeRefImpl implements NodeRef {
 	String nodeId;
 	
 	HashMap<String, Object> properties;
-	
+	Map<String, Boolean> permissions;
+	private List<String> aspects;
+
 	public NodeRefImpl(){
 		
 	}
@@ -77,5 +81,24 @@ public class NodeRefImpl implements NodeRef {
 	public void setStoreProtocol(String storeProtocol) {
 		this.storeProtocol = storeProtocol;
 	}
-	
+
+	@Override
+	public Map<String, Boolean> getPermissions() {
+		return permissions;
+	}
+
+	@Override
+	public void setPermissions(Map<String, Boolean> permissions) {
+		this.permissions = permissions;
+	}
+
+	@Override
+	public void setAspects(List<String> aspects) {
+		this.aspects = aspects;
+	}
+
+	@Override
+	public List<String> getAspects() {
+		return aspects;
+	}
 }

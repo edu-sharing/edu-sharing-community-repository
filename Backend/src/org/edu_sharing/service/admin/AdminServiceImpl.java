@@ -40,7 +40,7 @@ import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -728,12 +728,13 @@ public class AdminServiceImpl implements AdminService  {
 	 * Import excel data and return the number of rows processed
 	 * @param parent
 	 * @param csv
+	 * @param addToCollection
 	 * @return
 	 * @throws Exception 
 	 */
 	@Override
-	public int importExcel(String parent,InputStream csv) throws Exception{
-		return new ExcelLOMImporter(parent,csv).getRowCount();
+	public int importExcel(String parent, InputStream csv, Boolean addToCollection) throws Exception{
+		return new ExcelLOMImporter(parent,csv,addToCollection).getRowCount();
 	}
 
 	@Override

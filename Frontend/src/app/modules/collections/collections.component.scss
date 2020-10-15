@@ -281,7 +281,7 @@ section {
 }
 .collections-header-textarea{
     background-color: rgba(0,0,0,0.1);
-    .collection-label{
+    .collection-label,.collection-metadata{
         margin-top:18px;
         padding-top: 18px;
         border-top: 1px solid rgba(0,0,0,.25);
@@ -306,9 +306,6 @@ section {
             }
         }
     }
-}
-.tab-icon{
-    margin-right: 5px;
 }
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
     :host ::ng-deep {

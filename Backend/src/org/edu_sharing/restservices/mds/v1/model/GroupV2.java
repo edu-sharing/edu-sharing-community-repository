@@ -12,30 +12,39 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 @ApiModel(description = "")
 public class GroupV2 {
-		private String id;
-		private List<String> views;
-	
-		public GroupV2(){}
-		public GroupV2(MetadataGroup group) {
-			this.id=group.getId();		
-			this.views=group.getViews();
-		}
+	private String id;
+	private List<String> views;
+	private MetadataGroup.Rendering rendering;
+
+	public GroupV2(){}
+	public GroupV2(MetadataGroup group) {
+		this.id=group.getId();
+		this.rendering=group.getRendering();
+		this.views=group.getViews();
+	}
 		
 		
-		@JsonProperty("id")
-		public String getId() {
-			return id;
-		}
-		public void setId(String id) {
-			this.id = id;
-		}
-		@JsonProperty("views")
-		public List<String> getViews() {
-			return views;
-		}
-		public void setViews(List<String> views) {
+	@JsonProperty("id")
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	@JsonProperty("views")
+	public List<String> getViews() {
+		return views;
+	}
+	public void setViews(List<String> views) {
 			this.views = views;
 		}
-		
+
+	public MetadataGroup.Rendering getRendering() {
+		return rendering;
 	}
+
+	public void setRendering(MetadataGroup.Rendering rendering) {
+		this.rendering = rendering;
+	}
+}
 

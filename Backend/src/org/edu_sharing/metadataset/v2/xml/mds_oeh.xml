@@ -1,0 +1,360 @@
+<metadataset id="oeh" label="OEH" hidden="false">
+	<i18n>mds</i18n>
+	<inherit>mds</inherit>
+	<name>Open Edu Hub</name>
+	<widgets>
+		<widget>
+			<caption>Fachgebiet</caption>
+			<id>ccm:taxonid</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/discipline/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Zielgruppe</caption>
+			<id>ccm:educationalintendedenduserrole</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/intendedEndUserRole/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Bildungsumfeld</caption>
+			<id>ccm:educationalcontext</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/educationalContext/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Materialart (LOM)</caption>
+			<id>ccm:educationallearningresourcetype</id>
+			<type>multivalueTree</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/learningResourceType/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Art der Seite</caption>
+			<bottomCaption>Für Quellen</bottomCaption>
+			<id>ccm:sourceContentType</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/sourceContentType/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Art des Tools</caption>
+			<bottomCaption>Für Tools/Werkzeuge</bottomCaption>
+			<id>ccm:toolCategory</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/toolCategory/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Typ des Objekts</caption>
+			<id>ccm:objecttype</id>
+			<type>singleoption</type>
+			<values>
+					<value cap="Material">MATERIAL</value>
+					<value cap="Tool">TOOL</value>
+					<value cap="Quelle">SOURCE</value>
+					<value cap="Unterrichtsplanung">LESSONPLANNING</value>
+			</values>
+		</widget>
+		<widget>
+			<id>ccm:replicationsource</id>
+			<type>multivalueFixedBadges</type>
+			<caption>Quelle</caption>
+			<hideIfEmpty>true</hideIfEmpty>
+		</widget>
+		<widget>
+			<id>cclom:location</id>
+			<caption>Link zur Themenseite</caption>
+			<bottomCaption>Nur bei Bedarf verändern, wird automatisch beim Erstellen generiert!</bottomCaption>
+			<type>text</type>
+			<link>_BLANK</link>
+		</widget>
+		<widget>
+			<id>cclom:general_keyword</id>
+			<type>multivalueBadges</type>
+			<caption>Freie Schlagworte / Stichworte</caption>
+			<placeholder>Stichwort ergänzen...</placeholder>
+			<hideIfEmpty>true</hideIfEmpty>
+			<searchable>true</searchable>
+		</widget>
+		<widget>
+			<id>ccm:editorial_state</id>
+			<caption>Redaktionsstatus / Sichtbarkeit</caption>
+			<bottomCaption>für Wordpress</bottomCaption>
+			<type>singleoption</type>
+			<values>
+				<value cap="Aktiviert / Sichtbar">activated</value>
+				<value cap="Deaktiviert / Ausgeblendet">deactivated</value>
+			</values>
+		</widget>
+		<widget>
+			<id>ccm:collection_ordered_position</id>
+			<caption>Reihenfolge</caption>
+			<bottomCaption>für Wordpress</bottomCaption>
+			<type>slider</type>
+			<min>1</min>
+			<max>100</max>
+		</widget>
+	</widgets>
+	<groups>
+		<group>
+			<id>io</id>
+			<views>
+				<view>node_general</view>
+			</views>
+		</group>
+		<group>
+			<id>io_wordpress</id>
+			<views>
+				<view>node_wordpress</view>
+			</views>
+		</group>
+		<group>
+			<id>io_render</id>
+			<views>
+				<view>node_general_render</view>
+			</views>
+		</group>
+	</groups>
+	<templates>
+		<template>
+				<id>node_general</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <ccm:wwwurl>			
+              <cm:name>
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+              <ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
+              <license>
+				]]></html>
+		</template>
+		<template>
+			<id>node_general_render</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <ccm:wwwurl>
+              <cm:name>
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+              <ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
+              <license>
+				]]></html>
+		</template>
+		<template>
+				<id>node_general_bulk</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+			  <ccm:sourceContentType>
+			  <ccm:toolCategory>
+				]]></html>
+		</template>
+		<template>
+			<id>collection_editorial</id>
+			<caption>collection_editorial</caption>
+			<html><![CDATA[
+						<style>
+						.cclom_location input{
+							opacity:0.5;
+						}
+						</style>
+				      <ccm:taxonid>
+					  <ccm:educationalintendedenduserrole>
+					  <ccm:educationalcontext>
+
+					  <cclom:location>
+					  <ccm:collection_ordered_position>
+					  <ccm:editorial_state>
+					  <cclom:general_description>
+					  <cclom:general_keyword>
+
+				]]></html>
+		</template>
+		<template>
+			<id>node_wordpress</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>ccm:usageressourceid
+			<html><![CDATA[
+              <cclom:title>
+              <cclom:general_keyword>
+              <cclom:general_description type="textarea">
+			  <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+				]]></html>
+		</template>
+		<template>
+			<id>node_general_simple</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<icon>description</icon>
+			<html><![CDATA[
+              <ccm:taxonid>
+			  <ccm:educationalintendedenduserrole>
+			  <ccm:educationalcontext>
+			  <ccm:educationallearningresourcetype>
+				]]></html>
+		</template>
+		<template>
+		<id>search</id>
+		<html><![CDATA[
+		  <ccm:objecttype type="checkboxHorizontal">
+		  <ccm:taxonid>
+		  <ccm:educationalcontext>
+		  <ccm:educationalintendedenduserrole>
+		  <ccm:replicationsource>
+		  <cclom:general_keyword>
+		  <ccm:educationallearningresourcetype>
+		  <license>
+		]]></html>
+		</template>
+		<template>
+			<id>search_suggestions</id>
+			<rel>suggestions</rel>
+			<html><![CDATA[
+		  <ccm:educationalcontext>
+		  <cclom:general_keyword>
+		]]></html>
+		</template>
+		<template>
+			<id>collection_sidebar</id>
+			<html><![CDATA[
+					<cm:description>
+					<ccm:taxonid>
+					<ccm:educationalintendedenduserrole>
+					<ccm:educationalcontext>
+					<cclom:general_keyword hideIfEmpty="true">
+					<cclom:location>
+				]]></html>
+		</template>
+	</templates>
+	<queries>
+		<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
+		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+		<query join="AND"  id="collections">
+			<basequery propertyNull="ngsearchword">@ccm\:educontextname:"${educontext}" AND @ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
+			<property name="ngsearchword">
+				<statement>@ccm\:educontextname:"${educontext}" AND (@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<exactMatching>false</exactMatching>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+		</query>
+		<query join="AND" id="ngsearch">
+			<basequery>@cm\:edu_metadataset:"mds_oeh" AND ISNULL:@ccm\:tool_category</basequery>
+			<property name="ccm:replicationsource">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalintendedenduserrole">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:objecttype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalcontext">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationallearningresourcetype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:sourceContentType">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:toolCategory">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:replicationsourceuuid">
+				<statement>@ccm\:replicationsourceuuid:"${value}"</statement>
+			</property>
+		</query>
+	</queries>
+	<queries syntax="dsl">
+		<basequery></basequery>
+		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+
+		<query join="AND" id="ngsearch">
+			<!--TODO basequery-->
+			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
+			<basequery>{"bool":{"must":[{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}},{"term":{"properties.cm:edu_metadataset.keyword":"mds_oeh"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}},{"exists":{"field":"ccm:tool_category"}}]}}</basequery>
+			<property name="ccm:replicationsource">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalintendedenduserrole">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:objecttype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationalcontext">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:educationallearningresourcetype">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:sourceContentType">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:toolCategory">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="ccm:replicationsourceuuid"/>
+		</query>
+	</queries>
+	<sorts>
+		<sort>
+			<id>collections</id>
+			<default>
+				<sortBy>cm:created</sortBy>
+				<sortAscending>true</sortAscending>
+			</default>
+		</sort>
+	</sorts>
+</metadataset>

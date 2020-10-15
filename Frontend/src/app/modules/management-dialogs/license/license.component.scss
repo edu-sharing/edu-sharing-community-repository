@@ -10,6 +10,11 @@
   width: 100%;
   margin:10px 0;
 }
+.custom{
+  >mat-form-field{
+    width: 100%;
+  }
+}
 :host ::ng-deep {
   .license-content {
     .mat-tab-labels {
@@ -40,10 +45,6 @@
   font-weight: bold;
   margin: 10px 0;
 }
-.contributors{
-  display: flex;
-  justify-content: center;
-}
 .cc h5{
   padding-bottom:5px;
 }
@@ -64,12 +65,6 @@
   h4,div{
     display: table-cell;
   }
-}
-.author-checkbox{
-  margin:20px 0 10px 10%;
-}
-.author-tabs{
-  margin-top: 15px;
 }
 .oerStatus{
   padding-left: 10px;
@@ -92,16 +87,6 @@
   width:100%;
   .ccAuthor{
     margin:5px 20px;
-  }
-}
-.authorFreetext,.authorPerson{
-  padding: 0 10px;
-}
-.authorFreetext{
-  width: 100%;
-  margin-top: 5px;
-  textarea{
-    overflow: hidden;
   }
 }
 mat-radio-button{

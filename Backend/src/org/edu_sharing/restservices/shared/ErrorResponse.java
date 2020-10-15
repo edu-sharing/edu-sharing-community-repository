@@ -8,6 +8,7 @@ import java.io.StringWriter;
 
 import javax.ws.rs.core.Response;
 
+import org.alfresco.error.AlfrescoRuntimeException;
 import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -39,6 +40,10 @@ public class ErrorResponse {
 	}
 	public static Response createResponse(Throwable t,ErrorResponseLogging logging){
 		handleLog(t,logging);
+		// in case alfresco transaction exception, map to causing exception which is the DAO exception
+		if(t instanceof AlfrescoRuntimeException) {
+			t = t.getCause();
+		}
 		if(t instanceof DAOValidationException) {
     		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
 		}

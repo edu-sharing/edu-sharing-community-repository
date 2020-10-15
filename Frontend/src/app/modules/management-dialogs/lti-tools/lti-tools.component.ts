@@ -10,6 +10,7 @@ import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestToolService} from "../../../core-module/core.module";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
+import { MdsType } from '../../../common/ui/mds-editor/types';
 
 @Component({
   selector: 'workspace-lti-tools',
@@ -75,7 +76,7 @@ export class WorkspaceLtiToolsComponent  {
       });
     }
     else {
-      this.options.push(new OptionItem('WORKSPACE.LTI_TOOLS.NEW_TOOL', 'add', () => this.onCreate.emit({type: MdsComponent.TYPE_TOOLDEFINITION})))
+      this.options.push(new OptionItem('WORKSPACE.LTI_TOOLS.NEW_TOOL', 'add', () => this.onCreate.emit({type: MdsType.ToolDefinition})))
     }
 
   }

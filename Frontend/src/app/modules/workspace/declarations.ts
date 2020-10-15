@@ -13,6 +13,7 @@ import {WorkspaceHistoryComponent} from "./share/history/history.component";
 import {WorkspaceShareLinkComponent} from "./share-link/share-link.component";
 import {WorkspaceWorkflowComponent} from "./workflow/workflow.component";
 import {WorkspaceUsageComponent} from './share/usage/usage.component';
+import {SharePublishComponent} from './share/share-publish/share-publish.component';
 
 export const DECLARATIONS_WORKSPACE = [
   WorkspaceRoutingComponent,
@@ -23,6 +24,7 @@ export const DECLARATIONS_WORKSPACE = [
   WorkspaceMetadataComponent,
   WorkspaceAddFolder,
   WorkspaceShareComponent,
+  SharePublishComponent,
   WorkspaceShareLinkComponent,
   WorkspaceShareChooseTypeComponent,
   WorkspacePermissionComponent,

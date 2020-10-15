@@ -55,7 +55,7 @@ public class WidgetV2 {
     			}
 
     }
-		private String id,caption,bottomCaption,icon,type,template;
+		private String id,caption,bottomCaption,icon,type,link,template;
 		private boolean hasValues;
 		private List<ValueV2> values;
 		private List<Subwidget> subwidgets;
@@ -67,7 +67,7 @@ public class WidgetV2 {
 		private Integer defaultMax;
 		private Integer step;
 		private boolean isExtended;
-		private boolean isRequired;
+		private MetadataWidget.Required isRequired;
 		private boolean allowempty;
 		private String defaultvalue;
 		private boolean isSearchable;
@@ -81,6 +81,7 @@ public class WidgetV2 {
 			this.bottomCaption=widget.getBottomCaption();
 			this.icon=widget.getIcon();
 			this.type=widget.getType();
+			this.link=widget.getLink();
 			this.defaultvalue=widget.getDefaultvalue();
 			this.placeholder=widget.getPlaceholder();
 			this.maxlength=widget.getMaxlength();
@@ -217,10 +218,10 @@ public class WidgetV2 {
 			this.allowempty = allowempty;
 		}
 		@JsonProperty("isRequired")
-		public boolean isRequired() {
+		public MetadataWidget.Required isRequired() {
 			return isRequired;
 		}
-		public void setRequired(boolean isRequired) {
+		public void setRequired(MetadataWidget.Required isRequired) {
 			this.isRequired = isRequired;
 		}
 		@JsonProperty("values")
@@ -253,6 +254,14 @@ public class WidgetV2 {
 		}
 		public void setType(String type) {
 			this.type = type;
+		}
+		@JsonProperty
+		public String getLink() {
+			return link;
+		}
+
+		public void setLink(String link) {
+			this.link = link;
 		}
 		@JsonProperty("id")
 		public String getId() {

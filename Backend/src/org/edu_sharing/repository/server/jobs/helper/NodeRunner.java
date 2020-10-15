@@ -81,6 +81,12 @@ public class NodeRunner {
     private TransactionMode transaction=TransactionMode.None;
 
     /**
+     * How to recurse across elements
+     * Default will only recurse into sub-folders, but not sub-elements (e.g. childobjects)
+     */
+    private RecurseMode recurseMode = RecurseMode.Folders;
+
+    /**
      * shall the cache for each processed node be invalidated/cleared?
      */
     private boolean invalidateCache = true;
@@ -90,7 +96,7 @@ public class NodeRunner {
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     private BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
-    
+
     public NodeRunner() {
 	}
     
@@ -170,9 +176,9 @@ public class NodeRunner {
         try {
             List<NodeRef> nodes;
             if (runAsSystem)
-                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, RecurseMode.Folders));
+                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode));
             else
-                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, RecurseMode.Folders);
+                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode);
 
             Predicate<? super NodeRef> callFilter = (ref) -> {
                 if (filter == null)
@@ -288,6 +294,15 @@ public class NodeRunner {
     public void setTransaction(TransactionMode transaction) {
         this.transaction = transaction;
     }
+
+    public RecurseMode getRecurseMode() {
+        return recurseMode;
+    }
+
+    public void setRecurseMode(RecurseMode recurseMode) {
+        this.recurseMode = recurseMode;
+    }
+
     public enum TransactionMode{
         None, // no transactions
         Global, // for whole task

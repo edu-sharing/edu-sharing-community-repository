@@ -5,6 +5,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,11 +33,15 @@ public class MetadataQueries extends MetadataQueryBase implements Serializable {
 		if(queries2.getBasequery()!=null)
 			setBasequery(queries2.getBasequery());
 		for(MetadataQuery query: queries2.getQueries()){
-			int pos=queries.lastIndexOf(query);
-			if(pos!=-1){
-				queries.get(pos).overrideWith(query);
-			}
-			else{
+			if(queries!=null) {
+				int pos = queries.lastIndexOf(query);
+				if (pos != -1) {
+					queries.get(pos).overrideWith(query);
+				} else {
+					queries.add(query);
+				}
+			} else {
+				queries = new ArrayList<>();
 				queries.add(query);
 			}
 		}

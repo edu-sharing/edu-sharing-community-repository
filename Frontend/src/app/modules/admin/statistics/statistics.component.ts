@@ -15,6 +15,7 @@ import {Helper} from '../../../core-module/rest/helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {SessionStorageService} from '../../../core-module/rest/services/session-storage.service';
 import {RestConnectorService} from "../../../core-module/rest/services/rest-connector.service";
+import {UIService} from '../../../core-module/rest/services/ui.service';
 
 // Charts.js
 declare var Chart: any;
@@ -177,6 +178,7 @@ export class AdminStatisticsComponent {
     constructor(
         private admin: RestAdminService,
         private statistics: RestStatisticsService,
+        private uiService: UIService,
         private toast: Toast,
         private storage: SessionStorageService,
         private connector: RestConnectorService,
@@ -252,7 +254,7 @@ export class AdminStatisticsComponent {
       return;
     }
     this.groupedNoData = false;
-    UIHelper.waitForComponent(this, 'groupedChartRef').subscribe(() => {
+    this.uiService.waitForComponent(this, 'groupedChartRef').subscribe(() => {
       const canvas: any = this.groupedChartRef.nativeElement;
       const ctx = canvas.getContext('2d');
       if (this.groupedChart) {

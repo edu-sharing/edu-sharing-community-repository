@@ -43,8 +43,14 @@
 				<hideIfEmpty>true</hideIfEmpty>
 			</widget>
 			<widget>
+				<id>cm:description</id>
+				<type>text</type>
+				<caption>lom_prop_educational_description</caption>
+				<placeholder>lom_prop_educational_description_placeholder</placeholder>
+			</widget>
+			<widget>
 				<id>cclom:general_keyword</id>
-				<type>multivalueBadges</type>
+				<type>multivalueSuggestBadges</type>
 				<caption>lom_prop_general_keyword</caption>
 				<placeholder>lom_prop_general_keyword_placeholder</placeholder>
 				<hideIfEmpty>true</hideIfEmpty>
@@ -53,12 +59,12 @@
 			<widget>
 				<id>cclom:general_keyword</id>
 				<template>search_suggestions</template>
-				<type>multivalueBadges</type>
+				<type>multivalueSuggestBadges</type>
 				<caption>lom_prop_general_keyword_tagcloud</caption>
 			</widget>
 			<widget>
 				<id>cclom:general_keyword</id>
-				<type>multivalueBadges</type>
+				<type>multivalueSuggestBadges</type>
 				<caption>lom_prop_general_keyword</caption>
 				<template>search</template>
 			</widget>
@@ -458,7 +464,15 @@
 				<html><![CDATA[
 			  <preview>
               <cm:name caption="{{cm_name_map}}" placeholder="{{cm_name_map_placeholder}}">
-              <template>
+              <maptemplate>
+				]]></html>
+			</template>
+			<template>
+				<id>node_map_ref</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <cm:name caption="{{cm_name_map}}" placeholder="{{cm_name_map_placeholder}}">
 				]]></html>
 			</template>
 			<template>
@@ -672,6 +686,12 @@
 				]]></html>
 			</template>
 			<template>
+				<id>collection_sidebar</id>
+				<html><![CDATA[
+					<cm:description>
+				]]></html>
+			</template>
+			<template>
 				<id>mediacenter_filter</id>
 				<html><![CDATA[
 				]]></html>
@@ -680,30 +700,35 @@
 		<groups>
 			<group>
 				<id>io</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_general</view>
 				</views>
 			</group>
 			<group>
 				<id>io_simple</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_general_simple</view>
 				</views>
 			</group>
 			<group>
 				<id>io_template</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_general_template</view>
 				</views>
 			</group>
 			<group>
 				<id>io_bulk</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_general_bulk</view>
 				</views>
 			</group>
 			<group>
 				<id>io_childobject</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_childobject</view>
 				</views>
@@ -722,6 +747,7 @@
 			</group>
 			<group>
 				<id>saved_search</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>saved_search_general</view>
 				</views>
@@ -765,8 +791,16 @@
 			</group>
 			<group>
 				<id>map</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>node_map</view>
+				</views>
+			</group>
+			<group>
+				<id>map_ref</id>
+				<rendering>angular</rendering>
+				<views>
+					<view>node_map_ref</view>
 				</views>
 			</group>
 			<group>
@@ -795,6 +829,12 @@
 				</views>
 			</group>
 			<group>
+				<id>collection_sidebar</id>
+				<views>
+					<view>collection_sidebar</view>
+				</views>
+			</group>
+			<group>
 				<id>mediacenter_filter</id>
 				<views>
 					<view>mediacenter_filter</view>
@@ -817,6 +857,13 @@
 					<!-- <column>cclom:title</column> -->
 					<!-- <column>ccm:replicationsource</column> -->
 				</columns>
+			</sort>
+			<sort>
+				<id>collections</id>
+				<default>
+					<sortBy>cm:modified</sortBy>
+					<sortAscending>false</sortAscending>
+				</default>
 			</sort>
 		</sorts>
 		<lists>
@@ -848,7 +895,7 @@
 			</list>
 		</lists>
 		<queries>
-			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
+			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND NOT PATH:"/app:company_home/ccm:Edu_Sharing_System/*" AND -ASPECT:"ccm:io_childobject"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
 			<query join="AND" id="ngsearch">
@@ -971,5 +1018,48 @@
                     <mandatory>false</mandatory>
 				</property>
 		   </query>
+		</queries>
+		<queries syntax="dsl">
+			<basequery></basequery>
+			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+
+			<query join="AND" id="ngsearch">
+				<!--TODO basequery-->
+				<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
+				<basequery>{"bool":{"must":[{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]}}</basequery>
+				<property name="ngsearchword">
+					<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:title":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*"}}},{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*"}}},{"wildcard":{"content.fulltext":{"value":"*${value}*"}}},{"term":{"properties.sys:node-uuid":{"value":"*${value}*"}}}]}}</statement>
+					<exactMatching>false</exactMatching>
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
+				</property>
+				<property name="cclom:general_keyword">
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
+				</property>
+				<property name="ccm:classification_purpose" />
+				<property name="ccm:commonlicense_key" />
+				<property name="ccm:educationallearningresourcetype">
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+				<property name="license">
+					<statement>{"wildcard":{"properties.ccm:commonlicense_key":{"value":"${value}"}}}</statement>
+					<statement value="OPEN">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}}]}}</statement>
+					<statement value="OER">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"PDM"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}</statement>
+					<statement value="CC_BY_OPEN">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_SA"}}}]}}</statement>
+					<statement value="CC_BY_RESTRICTED">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_ND"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_SA"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY_NC_ND"}}}]}}</statement>
+					<statement value="CC_BY_ALL">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_0"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"CC_BY*"}}}]}}</statement>
+					<statement value="COPYRIGHT_OTHERS">{"bool":{"should":[{"wildcard":{"properties.ccm:commonlicense_key":{"value":"COPYRIGHT*"}}},{"wildcard":{"properties.ccm:commonlicense_key":{"value":"SCHULFUNK"}}}]}}</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+				<property name="workflow">
+					<statement>@ccm\:wf_status:"${value}"</statement>
+					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+			</query>
 		</queries>
 </metadataset>

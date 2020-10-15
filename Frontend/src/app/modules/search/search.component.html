@@ -80,19 +80,19 @@
         height="xxlarge"
         [isCancelable]="true"
         (onCancel)="toggleSidenav()">
-        <mds #mdsMobile
+        <app-mds-editor-wrapper #mdsMobile
              [class.display-none]="currentRepository=='-all-'"
              [groupId]="queryId"
              [repository]="currentRepository"
              [setId]="mdsId"
              [embedded]="true"
-             [currentValues]="getValuesForMds()"
+             [currentValues]="currentValues"
              [suggestions]="mdsSuggestions"
              [mode]="'search'"
              [(extended)]="mdsExtended"
              (onMdsLoaded)="onMdsReady($event)"
              (onDone)="applyParameters($event)">
-        </mds>
+        </app-mds-editor-wrapper>
     </card>
   <div class="sidenav-container sidenav-container-tab-{{sidenavTab}}">
   <div class="apply" *ngIf="searchService.sidenavOpened && !isMdsLoading()"><actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar></div>
@@ -122,20 +122,20 @@
      </div>
 
 
-      <mds #mdsDesktop
+      <app-mds-editor-wrapper #mdsDesktop
        [class.display-none]="currentRepository=='-all-'"
         [groupId]="queryId"
         [repository]="currentRepository"
         [setId]="mdsId"
         [embedded]="true"
-        [currentValues]="getValuesForMds()"
+        [currentValues]="currentValues"
         [suggestions]="mdsSuggestions"
         [mode]="'search'"
         [(extended)]="mdsExtended"
         (onMdsLoaded)="onMdsReady($event)"
         (onDone)="applyParameters($event)"
       >
-      </mds>
+      </app-mds-editor-wrapper>
        <div class="mdsSelect" *ngIf="initalized">
          <div *ngIf="mdsSets && mdsSets.length>1">
            <label for="mds">{{'SEARCH.METADATASET' | translate}}</label>

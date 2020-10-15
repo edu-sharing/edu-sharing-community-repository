@@ -1,0 +1,22 @@
+<app-mds-editor-widget-container
+  #container
+  *ngIf="filteredSuggestions$ | async"
+  [widget]="widget"
+  [label]="true"
+>
+  <mat-chip-list
+    #chipList
+    [attr.aria-labelledby]="container.labelId"
+    [attr.aria-describedby]="container.descriptionId"
+  >
+    <mat-chip
+      *ngFor="let value of filteredSuggestions$ | async"
+      [selectable]="false"
+      (click)="add(value)"
+      (keydown.enter)="add(value)"
+    >
+      <mat-icon>add</mat-icon>
+      {{ value.caption }}
+    </mat-chip>
+  </mat-chip-list>
+</app-mds-editor-widget-container>

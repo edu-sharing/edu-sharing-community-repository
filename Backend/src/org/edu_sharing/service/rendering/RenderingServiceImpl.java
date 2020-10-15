@@ -84,6 +84,10 @@ public class RenderingServiceImpl implements RenderingService{
 		String renderingServiceUrl = "";
 		try {
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(this.appInfo.getAppId());
+			// switch to home repo if the defined app is "local" (secondary home repo)
+			if(appInfo.getRepositoryType().equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
+				appInfo = ApplicationInfoList.getHomeRepository();
+			}
 			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo,nodeId,parameters,displayMode);
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
@@ -108,7 +112,7 @@ public class RenderingServiceImpl implements RenderingService{
 			else {
 				info+=" do not match";
 				logger.warn(info);
-				throw new Exception(t.getMessage()+" ("+info+")",t);
+				throw t;
 			}
 			*/
 		}

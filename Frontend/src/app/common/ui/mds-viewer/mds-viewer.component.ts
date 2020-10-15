@@ -5,7 +5,7 @@ import {
   Sanitizer, ViewContainerRef, ComponentFactoryResolver, QueryList, ViewChildren
 } from '@angular/core';
 import {MdsWidgetComponent} from "./widget/mds-widget.component";
-import {RestMdsService} from "../../../core-module/core.module";
+import {RestConstants, RestMdsService} from "../../../core-module/core.module";
 import {DomSanitizer} from "@angular/platform-browser";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 
@@ -17,16 +17,34 @@ import {UIHelper} from "../../../core-ui-module/ui-helper";
 export class MdsViewerComponent{
   @ViewChildren('container') container : QueryList<ElementRef>;
   _groupId:string;
-  _data: string;
+  _setId:string;
+  _data: any;
   mds: any;
   templates: any[];
   @Input() set groupId(groupId:string){
     this._groupId=groupId;
     this.inflate();
   }
-  @Input() set data(data:string){
+  @Input() set setId(setId:string){
+    this._setId=setId;
+    this.mdsService.getSet(setId).subscribe((mds)=>{
+      this.mds=mds;
+      this.inflate();
+    });
+  }
+  @Input() set data(data: any) {
     this._data=data;
-    this.inflate();
+    if(this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] != null) {
+      this.mdsService.getSet(this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0]).subscribe((mds)=>{
+        this.mds=mds;
+        this.inflate();
+      });
+    } else {
+      this.mdsService.getSet().subscribe((mds)=>{
+        this.mds=mds;
+        this.inflate();
+      });
+    }
   }
   /**
    * show group headings (+ icons) for the individual templates
@@ -68,9 +86,6 @@ export class MdsViewerComponent{
               private factoryResolver:ComponentFactoryResolver,
               private containerRef:ViewContainerRef,
               private sanitizer:DomSanitizer){
-    this.mdsService.getSet().subscribe((mds)=>{
-      this.mds=mds;
-    });
   }
 
   /**

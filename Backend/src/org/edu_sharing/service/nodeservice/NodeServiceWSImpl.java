@@ -49,7 +49,7 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 	}
 
 	@Override
-	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props) {
+	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, ?> _props) {
 		return null;
 	}
 

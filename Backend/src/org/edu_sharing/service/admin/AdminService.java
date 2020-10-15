@@ -66,7 +66,7 @@ public interface AdminService {
 
 	HashMap<String, String> addApplicationFromStream(InputStream is) throws Exception;
 
-	int importExcel(String parent, InputStream csv) throws Exception;
+	int importExcel(String parent, InputStream csv, Boolean addToCollection) throws Exception;
 
 	Properties getPropertiesXML(String xmlFile) throws Exception;
 

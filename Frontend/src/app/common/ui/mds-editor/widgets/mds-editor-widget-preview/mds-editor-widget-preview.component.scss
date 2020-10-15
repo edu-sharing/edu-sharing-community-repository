@@ -1,0 +1,20 @@
+.image-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+    img {
+        width: 250px;
+        height: 175px;
+        object-fit: cover;
+    }
+    > .button-group {
+        position: absolute;
+        bottom: -10px;
+        margin-left: 320px;
+        display: flex;
+        > button {
+            margin: 0 7px;
+        }
+    }
+}

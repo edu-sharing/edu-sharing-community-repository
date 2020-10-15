@@ -132,7 +132,7 @@
 			<properties>
 				<!--0 = IO (Informationsobject), 1 = LS (Lernszenario) -->
 				<property name="ccm:objecttype">
-					<type>d:int</type>
+					<type>d:text</type>
 				</property>
 			</properties>
 			<associations>
@@ -613,6 +613,15 @@
 				</property>
 			</properties>
 		</aspect>
+		<aspect name="ccm:map_ref">
+			<title>aspect to mark a map that is simply referencing an other map</title>
+			<properties>
+				<!-- must be an other map -->
+				<property name="ccm:map_ref_target">
+					<type>d:noderef</type>
+				</property>
+			</properties>
+		</aspect>
 
 		<aspect name="ccm:basemetadata">
 			<title>Metadata for a CC base object</title>
@@ -733,6 +742,22 @@
 						<tokenised>both</tokenised>
 					</index>
 				</property>
+				<!-- used by the scrapy etl to store custom uuid + hash for detecting changes -->
+				<property name="ccm:replicationsourceuuid">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- used by the scrapy etl to store custom uuid + hash for detecting changes -->
+				<property name="ccm:replicationsourcehash">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 				<property name="ccm:replicationsourcetimestamp">
 					<type>d:text</type>
 				</property>
@@ -744,7 +769,10 @@
 				<property name="ccm:importmodified">
 					<type>d:datetime</type>
 				</property>
-
+				<!-- if import blocked, no reimport for that object is allowed -->
+				<property name="ccm:importblocked">
+					<type>d:boolean</type>
+				</property>
 				<!-- for elixier objects thumbnail url -->
 				<property name="ccm:thumbnailurl">
 					<type>d:text</type>
@@ -913,6 +941,15 @@
 	                  <stored>false</stored>
 	                  <tokenised>false</tokenised>
 	               </index>
+				</property>
+				<!-- status of a location (http code), set by CheckLinkJob -->
+				<property name="ccm:location_status">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
 				</property>
 				<!-- title of the sub source element -->
 				<property name="ccm:subsource_id">
@@ -1405,7 +1442,11 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>			
-				<property name="ccm:educational_use">
+				<property name="ccm:sourceContentType">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:toolCategory">
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
@@ -1821,6 +1862,14 @@
 	    		<property name="ccm:published_handle_id">
 	    			<type>d:text</type>
 	    		</property>
+				<!-- noderef of the original node this one is a copy of -->
+				<property name="ccm:published_original">
+					<type>d:noderef</type>
+				</property>
+				<!-- mode of publishing, direct or copy (on the original node) -->
+				<property name="ccm:published_mode">
+					<type>d:text</type>
+				</property>
 	    	</properties>
 	    </aspect>
 

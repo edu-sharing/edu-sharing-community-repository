@@ -42,12 +42,14 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_INVITE_HISTORY,
     ]},
     {name:"LICENSING",icon:"copyright",permissions:[
-        RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
-        RestConstants.TOOLPERMISSION_LICENSE,
-        RestConstants.TOOLPERMISSION_HANDLESERVICE,
+            RestConstants.TOOLPERMISSION_LICENSE,
+            RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+            RestConstants.TOOLPERMISSION_PUBLISH_COPY,
+            RestConstants.TOOLPERMISSION_HANDLESERVICE,
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
+        RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
             RestConstants.TOOLPERMISSION_COMMENT_WRITE,
             RestConstants.TOOLPERMISSION_RATE

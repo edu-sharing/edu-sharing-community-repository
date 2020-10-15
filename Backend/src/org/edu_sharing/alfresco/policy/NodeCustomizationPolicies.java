@@ -109,6 +109,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_WF_PROTOCOL,
 			CCConstants.CCM_PROP_WF_RECEIVER,
 			CCConstants.CCM_PROP_WF_STATUS,
+			CCConstants.CCM_PROP_IO_IMPORT_BLOCKED,
 			CCConstants.CCM_PROP_MAP_COLLECTIONREMOTEID,
 			CCConstants.CM_PROP_METADATASET_EDU_METADATASET,
 			CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET,
@@ -127,7 +128,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
 			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
-			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT
+			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT,
+			CCConstants.CCM_PROP_MAP_REF_TARGET,
 	};
 	/**
 	 * These are the properties that will be copied to all io_reference nodes inside collections
@@ -548,10 +550,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	}
 	private static String propertyToString(Object p){
-		if(p instanceof MLText){
+		if(p == null){
+			return "";
+		} else if(p instanceof MLText){
 			return ((MLText) p).getDefaultValue();
-		}
-		if(p instanceof String) {
+		} else if(p instanceof String) {
 			return (String)p;
 		}
 		return p.toString();
@@ -567,6 +570,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}
 	}
 	private static boolean propertyEquals(Serializable p1, Serializable p2) {
+		if(p1 instanceof MLText){
+			p1 = ((MLText) p1).getDefaultValue();
+		}
+		if(p2 instanceof MLText){
+			p2 = ((MLText) p2).getDefaultValue();
+		}
 		if(Objects.equals(p1,p2)) {
 			return true;
 		}

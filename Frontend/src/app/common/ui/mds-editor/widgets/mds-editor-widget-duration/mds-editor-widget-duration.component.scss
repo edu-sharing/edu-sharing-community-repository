@@ -1,0 +1,16 @@
+.duration-group{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    >*{
+        margin:0 5px;
+    }
+    >mat-form-field{
+        min-width: 50px;
+        flex-grow: 0;
+    }
+    >ng5-slider{
+        flex-grow: 1;
+    }
+}

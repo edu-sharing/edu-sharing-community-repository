@@ -23,7 +23,7 @@ public class DbNodeServiceImpl extends org.alfresco.repo.node.db.DbNodeServiceIm
 	@Override
 	public List<ChildAssociationRef> getChildAssocs(NodeRef nodeRef, QNamePattern typeQNamePattern, QNamePattern qnamePattern,
 			boolean preload) {
-	
+
 		List<ChildAssociationRef> result = new VirtualEduGroupFolderTool(serviceRegistry,this).getGroupMapChildren(nodeRef);
 		if(result != null){
 			return result;
@@ -45,7 +45,7 @@ public class DbNodeServiceImpl extends org.alfresco.repo.node.db.DbNodeServiceIm
 		
 		return super.getChildAssocs(nodeRef, childNodeTypeQNames);
 	};
-	
+
 	@Override
 	public NodeRef getChildByName(NodeRef nodeRef, QName assocTypeQName, String childName) {
 		NodeRef result =  super.getChildByName(nodeRef, assocTypeQName, childName);
@@ -71,9 +71,9 @@ public class DbNodeServiceImpl extends org.alfresco.repo.node.db.DbNodeServiceIm
 		
 		return result;
 	}
-	
-	
-	
+
+
+
 	public void setServiceRegistry(ServiceRegistry serviceRegistry) {
 		this.serviceRegistry = serviceRegistry;
 	}

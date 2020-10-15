@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -134,7 +135,21 @@ public class OrganizationDao {
 		this.groupName = generateGroupName(eduGroup);
 		this.ref = AuthorityServiceFactory.getAuthorityService(repoDao.getId()).getAuthorityNodeRef(this.authorityName);
 	}
-	/**
+
+	public static List<Organization> mapOrganizations(List<EduGroup> parentOrganizations) {
+		if(parentOrganizations != null && parentOrganizations.size() > 0){
+			return parentOrganizations.stream().map((org) -> {
+				try {
+					return OrganizationDao.getInstant(RepositoryDao.getHomeRepository(), org.getGroupname()).asOrganization();
+				} catch (DAOException e) {
+					throw new RuntimeException(e);
+				}
+			}).collect(Collectors.toList());
+		}
+		return null;
+	}
+
+    /**
 	 * returns true if the user is allowed to administer this org
 	 * @return
 	 */

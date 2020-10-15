@@ -36,9 +36,12 @@ import java.util.stream.Stream;
 
 public class MetadataReaderV2 {
 	
-	public static final String SUGGESTION_SOURCE_SOLR = "Solr";
+	public static final String SUGGESTION_SOURCE_SEARCH = "Search";
 	public static final String SUGGESTION_SOURCE_MDS = "Mds";
 	public static final String SUGGESTION_SOURCE_SQL = "Sql";
+	private static final String DEFAULT_QUERY_SYNTAX = MetadataReaderV2.QUERY_SYNTAX_LUCENE;
+	public static final String QUERY_SYNTAX_LUCENE = "lucene";
+	public static final String QUERY_SYNTAX_DSL = "dsl";
 	private static Logger logger = Logger.getLogger(MetadataReaderV2.class);
 	private static Map<String,MetadataSetV2> mdsCache=new HashMap<>();
 	XPathFactory pfactory = XPathFactory.newInstance();
@@ -68,8 +71,11 @@ public class MetadataReaderV2 {
 		return metadata.getWidgetsByNode(serviceRegistry.getNodeService().getType(node).toString(),
 				serviceRegistry.getNodeService().getAspects(node).stream().map(QName::toString).collect(Collectors.toList()));
 	}
-
 	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale) throws Exception{
+		return getMetadataset(appId, mdsSet, locale, true);
+	}
+
+	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale, boolean checkConfigurationState) throws Exception{
         MetadataReaderV2 reader;
         MetadataSetV2 mds;
         String mdsNameDefault = "mds";
@@ -79,17 +85,21 @@ public class MetadataReaderV2 {
                 mdsNameDefault = mdsNameDefault.substring(0, mdsNameDefault.length() - 4);
         }
         String mdsName = mdsNameDefault;
-        if (!mdsSet.equals("-default-") && !mdsSet.equals(CCConstants.metadatasetdefault_id)) {
+         if(!mdsSet.equals("-default-") && !mdsSet.equals(CCConstants.metadatasetdefault_id)) {
+			if (checkConfigurationState) {
 
-            if (ApplicationInfoList.getApplicationInfos().values().stream().map((a) -> a.getMetadatsetsV2()).
-					anyMatch((a) -> Arrays.asList(a).contains(mdsSet))) {
-                mdsName = mdsSet;
-                if (mdsName.toLowerCase().endsWith(".xml"))
-                    mdsName = mdsName.substring(0, mdsName.length() - 4);
-            } else {
-                throw new IllegalArgumentException("Invalid mds set " + mdsSet + ", was not found in any app");
-            }
-        }
+				if (ApplicationInfoList.getApplicationInfos().values().stream().map((a) -> a.getMetadatsetsV2()).
+						anyMatch((a) -> Arrays.asList(a).contains(mdsSet))) {
+					mdsName = mdsSet;
+					if (mdsName.toLowerCase().endsWith(".xml"))
+						mdsName = mdsName.substring(0, mdsName.length() - 4);
+				} else {
+					throw new IllegalArgumentException("Invalid mds set " + mdsSet + ", was not found in any app");
+				}
+			} else {
+				mdsName = mdsSet;
+			}
+		}
 	    try {
             String id = appId.getAppId() + "_" + mdsName + "_" + locale;
             if (mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
@@ -113,14 +123,25 @@ public class MetadataReaderV2 {
             if (!mdsName.equals(mdsNameDefault)) {
                 reader = new MetadataReaderV2(mdsName + ".xml", locale);
                 MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
-                mds.overrideWith(mdsOverride);
+				if (mdsOverride.getInherit() != null && !mdsOverride.getInherit().isEmpty()) {
+					logger.info("Mds " + mdsName + " is going to inherit data from mds " + mdsOverride.getInherit());
+					if(mdsOverride.getInherit().equals(mdsName)){
+						throw new RuntimeException("Detected cyclic dependency in your mds inherition. Please check your mds " + mdsName);
+					}
+					mds = getMetadataset(appId, mdsOverride.getInherit(), locale, false);
+					mds.overrideWith(mdsOverride);
+				} else {
+					// fallback for backward compatibility: use the default mds for inherition
+					logger.info("Mds " + mdsName + " is going to inherit data from the default mds (fallback)");
+					mds.overrideWith(mdsOverride);
+				}
             }
             try {
                 reader = new MetadataReaderV2(mdsName + "_override.xml", locale);
                 MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
                 mds.overrideWith(mdsOverride);
             } catch (IOException e) {
-            	logger.info("no mds_override.xml was found -> default metadataset will be used");
+            	logger.info("no "+mdsName+"_override.xml was found -> only default file will be used");
             }
             mdsCache.put(id, mds);
             return mds;
@@ -152,107 +173,120 @@ public class MetadataReaderV2 {
 		}
 		query.addCondition(result);
 	}
-	private MetadataQueries getQueries() throws Exception {
-		MetadataQueries result=new MetadataQueries();
-		Node queryNode = (Node) xpath.evaluate("/metadataset/queries", doc, XPathConstants.NODE);
-		if(queryNode==null)
-			return null;
-		NodeList list=queryNode.getChildNodes();
-		for(int i=0;i<list.getLength();i++){
-			Node data=list.item(i);
-			String name=data.getNodeName();
-			String value=data.getTextContent();
-			if(name.equals("basequery")) {
-				Map<String, String> basequery=new HashMap<>();
-				basequery.put(null, value);
-				result.setBasequery(basequery);
+	private Map<String,MetadataQueries> getQueries() throws Exception {
+		Map<String,MetadataQueries> result=new HashMap<>();
+		NodeList queryNodes = (NodeList) xpath.evaluate("/metadataset/queries", doc, XPathConstants.NODESET);
+		for(int a=0;a<queryNodes.getLength(); a++) {
+			MetadataQueries entry = new MetadataQueries();
+			Node queryNode = queryNodes.item(a);
+			if(queryNode==null)
+				continue;
+			NamedNodeMap attr = queryNode.getAttributes();
+			Node syntax = attr.getNamedItem("syntax");
+			String syntaxName;
+			if(syntax==null || syntax.getNodeValue().isEmpty()){
+				syntaxName = MetadataReaderV2.DEFAULT_QUERY_SYNTAX;
+			} else {
+				syntaxName = syntax.getNodeValue();
 			}
-			if(name.equals("allowSearchWithoutCriteria"))
-				result.setAllowSearchWithoutCriteria(value.equalsIgnoreCase("true"));
-			if(name.equals("condition")){
-				handleQueryCondition(data,result);
+			NodeList list = queryNode.getChildNodes();
+			for (int i = 0; i < list.getLength(); i++) {
+				Node data = list.item(i);
+				String name = data.getNodeName();
+				String value = data.getTextContent();
+				if (name.equals("basequery")) {
+					Map<String, String> basequery = new HashMap<>();
+					basequery.put(null, value);
+					entry.setBasequery(basequery);
+				}
+				if (name.equals("allowSearchWithoutCriteria"))
+					entry.setAllowSearchWithoutCriteria(value.equalsIgnoreCase("true"));
+				if (name.equals("condition")) {
+					handleQueryCondition(data, entry);
+				}
 			}
-		}
-		NodeList queriesNode = (NodeList) xpath.evaluate("/metadataset/queries/query", doc, XPathConstants.NODESET);
-		List<MetadataQuery> queries=new ArrayList<>();
-		for(int i=0;i<queriesNode.getLength();i++){
-			MetadataQuery query=new MetadataQuery();
-			Map<String, String> basequeries = new HashMap<>();
-			Node node=queriesNode.item(i);
-			NamedNodeMap nodeMap = node.getAttributes();
-			query.setId(nodeMap.getNamedItem("id").getTextContent());
-			if(nodeMap.getNamedItem("join")!=null)
-				query.setJoin(nodeMap.getNamedItem("join").getTextContent());
-			else
-				query.setJoin("AND");
+			NodeList queriesNode = (NodeList) xpath.evaluate("query", queryNode, XPathConstants.NODESET);
+			List<MetadataQuery> queries = new ArrayList<>();
+			for (int i = 0; i < queriesNode.getLength(); i++) {
+				MetadataQuery query = new MetadataQuery();
+				Map<String, String> basequeries = new HashMap<>();
+				Node node = queriesNode.item(i);
+				NamedNodeMap nodeMap = node.getAttributes();
+				query.setId(nodeMap.getNamedItem("id").getTextContent());
+				if (nodeMap.getNamedItem("join") != null)
+					query.setJoin(nodeMap.getNamedItem("join").getTextContent());
+				else
+					query.setJoin("AND");
 
-			if(nodeMap.getNamedItem("applyBasequery")!=null)
-				query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
+				if (nodeMap.getNamedItem("applyBasequery") != null)
+					query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
 
-			List<MetadataQueryParameter> parameters=new ArrayList<>();
+				List<MetadataQueryParameter> parameters = new ArrayList<>();
 
-			NodeList list2=node.getChildNodes();
-			
-			for(int j=0;j<list2.getLength();j++){
-				Node parameterNode=list2.item(j);
-				if(parameterNode.getNodeName().equals("basequery")){
-					basequeries.put(
-							parameterNode.getAttributes()==null ? null :
-							parameterNode.getAttributes().getNamedItem("propertyNull")==null ? null :
-							parameterNode.getAttributes().getNamedItem("propertyNull").getTextContent(),
-							parameterNode.getTextContent());
-				}
-				if(parameterNode.getNodeName().equals("condition")){
-					handleQueryCondition(parameterNode,query);
-				}
-				MetadataQueryParameter parameter=new MetadataQueryParameter();
-				NodeList list3=parameterNode.getChildNodes();
-				NamedNodeMap attributes = parameterNode.getAttributes();
-				if(attributes==null || attributes.getNamedItem("name")==null)
-					continue;
-				parameter.setName(attributes.getNamedItem("name").getTextContent());
-				Map<String, String> statements = new HashMap<String,String>();
-				for(int k=0;k<list3.getLength();k++){
-					Node data=list3.item(k);
-					String name=data.getNodeName();
-					String value=data.getTextContent();
-					if(name.equals("statement")) {
-						Node key=data.getAttributes().getNamedItem("value");
-						statements.put(key==null ? null : key.getTextContent(), value);
+				NodeList list2 = node.getChildNodes();
+
+				for (int j = 0; j < list2.getLength(); j++) {
+					Node parameterNode = list2.item(j);
+					if (parameterNode.getNodeName().equals("basequery")) {
+						basequeries.put(
+								parameterNode.getAttributes() == null ? null :
+										parameterNode.getAttributes().getNamedItem("propertyNull") == null ? null :
+												parameterNode.getAttributes().getNamedItem("propertyNull").getTextContent(),
+								parameterNode.getTextContent());
 					}
-					if(name.equals("facets")){
-						NodeList facets = data.getChildNodes();
-						List<String> facetsList=new ArrayList<>();
-						for(int l=0;l<facets.getLength();l++){
-							String facetName=facets.item(l).getNodeName();
-							String facetValue=facets.item(l).getTextContent();
-							if(facetName.equals("facet"))
-								facetsList.add(facetValue);
+					if (parameterNode.getNodeName().equals("condition")) {
+						handleQueryCondition(parameterNode, query);
+					}
+					MetadataQueryParameter parameter = new MetadataQueryParameter(syntaxName);
+					NodeList list3 = parameterNode.getChildNodes();
+					NamedNodeMap attributes = parameterNode.getAttributes();
+					if (attributes == null || attributes.getNamedItem("name") == null)
+						continue;
+					parameter.setName(attributes.getNamedItem("name").getTextContent());
+					Map<String, String> statements = new HashMap<String, String>();
+					for (int k = 0; k < list3.getLength(); k++) {
+						Node data = list3.item(k);
+						String name = data.getNodeName();
+						String value = data.getTextContent();
+						if (name.equals("statement")) {
+							Node key = data.getAttributes().getNamedItem("value");
+							statements.put(key == null ? null : key.getTextContent(), value);
 						}
-						if(facetsList.size()>0)
-							parameter.setFacets(facetsList);
+						if (name.equals("facets")) {
+							NodeList facets = data.getChildNodes();
+							List<String> facetsList = new ArrayList<>();
+							for (int l = 0; l < facets.getLength(); l++) {
+								String facetName = facets.item(l).getNodeName();
+								String facetValue = facets.item(l).getTextContent();
+								if (facetName.equals("facet"))
+									facetsList.add(facetValue);
+							}
+							if (facetsList.size() > 0)
+								parameter.setFacets(facetsList);
+						}
+						if (name.equals("ignorable"))
+							parameter.setIgnorable(Integer.parseInt(value));
+						if (name.equals("preprocessor"))
+							parameter.setPreprocessor(value);
+						if (name.equals("mandatory"))
+							parameter.setMandatory(value.equalsIgnoreCase("true"));
+						if (name.equals("exactMatching"))
+							parameter.setExactMatching(value.equalsIgnoreCase("true"));
+						if (name.equals("multiple"))
+							parameter.setMultiple(value.equalsIgnoreCase("true"));
+						if (name.equals("multiplejoin"))
+							parameter.setMultiplejoin(value);
 					}
-					if(name.equals("ignorable"))
-						parameter.setIgnorable(Integer.parseInt(value));
-					if(name.equals("preprocessor"))
-						parameter.setPreprocessor(value);
-                    if(name.equals("mandatory"))
-                        parameter.setMandatory(value.equalsIgnoreCase("true"));
-					if(name.equals("exactMatching"))
-						parameter.setExactMatching(value.equalsIgnoreCase("true"));
-					if(name.equals("multiple"))
-						parameter.setMultiple(value.equalsIgnoreCase("true"));
-					if(name.equals("multiplejoin"))
-						parameter.setMultiplejoin(value);
+					parameter.setStatements(statements);
+					parameters.add(parameter);
 				}
-				parameter.setStatements(statements);
-				parameters.add(parameter);
+				query.setBasequery(basequeries);
+				query.setParameters(parameters);
+				queries.add(query);
 			}
-			query.setBasequery(basequeries);
-			query.setParameters(parameters);
-			queries.add(query);
+			entry.setQueries(queries);
+			result.put(syntaxName, entry);
 		}
-		result.setQueries(queries);
 		return result;
 	}
 	
@@ -396,8 +430,15 @@ public class MetadataReaderV2 {
 					widget.setSuggestionSource(value);
 				if(name.equals("suggestionQuery"))
 					widget.setSuggestionQuery(value);
-				if(name.equals("required"))
-					widget.setRequired(value.equalsIgnoreCase("true"));
+				if(name.equals("required")) {
+					if(value.equalsIgnoreCase("true")){
+						widget.setRequired(MetadataWidget.Required.mandatory);
+					} else if (value.equalsIgnoreCase("false")){
+						widget.setRequired(MetadataWidget.Required.optional);
+					} else {
+						widget.setRequired(MetadataWidget.Required.valueOf(value));
+					}
+				}
 				if(name.equals("hideIfEmpty"))
 					widget.setHideIfEmpty(value.equalsIgnoreCase("true"));
 				if(name.equals("valuespace_i18n")){
@@ -490,7 +531,7 @@ public class MetadataReaderV2 {
 	private List<MetadataKey> getValuespaceExternal(String value) throws Exception {
 		ValuespaceReader reader = ValuespaceReader.getSupportedReader(value);
 		if(reader != null) {
-			return reader.getValuespace();
+			return reader.getValuespace(locale);
 		}
 		return null;
 	}
@@ -592,7 +633,9 @@ public class MetadataReaderV2 {
 				String name=data.getNodeName();
 				String value=data.getTextContent();
 				if(name.equals("id"))
-					group.setId(value);			
+					group.setId(value);
+				if(name.equals("rendering"))
+					group.setRendering(MetadataGroup.Rendering.valueOf(value));
 				if(name.equals("views")){
 					List<String> views=new ArrayList<>();
 					NodeList list3=data.getChildNodes();
@@ -779,8 +822,8 @@ public class MetadataReaderV2 {
 	public static void prepareMetadatasets() {
 		ApplicationInfo home = ApplicationInfoList.getHomeRepository();
 		try{
-			getMetadataset(home, "-default-","de_DE");
-			getMetadataset(home, "-default-","en_US");
+			getMetadataset(home, "-default-","de_DE", true);
+			getMetadataset(home, "-default-","en_US", true);
 		}catch(Throwable t){}
 	}
 	

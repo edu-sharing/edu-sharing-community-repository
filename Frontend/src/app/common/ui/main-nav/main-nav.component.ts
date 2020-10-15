@@ -12,7 +12,7 @@ import {
     ElementRef,
     EventEmitter,
     HostListener,
-    Input,
+    Input, OnDestroy,
     Output,
     ViewChild,
 } from '@angular/core';
@@ -53,6 +53,7 @@ import { WorkspaceManagementDialogsComponent } from '../../../modules/management
 import { MainMenuEntriesService } from '../../services/main-menu-entries.service';
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
+import {MainNavService} from '../../services/main-nav.service';
 
 /**
  * The main nav (top bar + menus)
@@ -103,10 +104,9 @@ import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar
         ]),
     ],
 })
-export class MainNavComponent implements AfterViewInit {
+export class MainNavComponent implements AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
-    @ViewChild('management') management: WorkspaceManagementDialogsComponent;
     @ViewChild('search') search: ElementRef;
     @ViewChild('topbar') topbar: ElementRef;
     @ViewChild('userRef') userRef: ElementRef;
@@ -214,6 +214,15 @@ export class MainNavComponent implements AfterViewInit {
     private fixScrollElements = false;
     private about: About;
 
+
+    /**
+     * @Deprecated
+     * Use the mainanv service getDialogs directly
+     */
+    get management() {
+        return this.mainnavService.getDialogs();
+    }
+
     constructor(
         private iam: RestIamService,
         private connector: RestConnectorService,
@@ -222,6 +231,7 @@ export class MainNavComponent implements AfterViewInit {
         private nodeService: RestNodeService,
         private configService: ConfigurationService,
         private uiService: UIService,
+        private mainnavService: MainNavService,
         private storage: TemporaryStorageService,
         private session: SessionStorageService,
         private http: HttpClient,
@@ -229,6 +239,7 @@ export class MainNavComponent implements AfterViewInit {
         private route: ActivatedRoute,
         private toast: Toast,
     ) {
+        this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
             TemporaryStorageService.OPTION_HIDE_MAINNAV,
             false,
@@ -494,7 +505,7 @@ export class MainNavComponent implements AfterViewInit {
 
     startTutorial() {
         if (this.connector.getCurrentLogin().statusCode === 'OK') {
-            UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
+            this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
                 this.tutorialElement = this.userRef;
             });
         }
@@ -943,5 +954,9 @@ export class MainNavComponent implements AfterViewInit {
             s = '0' + s;
         }
         return s;
+    }
+
+    ngOnDestroy(): void {
+        this.mainnavService.registerMainNav(null);
     }
 }

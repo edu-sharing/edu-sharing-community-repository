@@ -1,0 +1,155 @@
+<div class="group-padding">
+  <h4 class="mat-heading-4">
+    <!--<i icon iconId="public"></i>-->
+    {{ 'WORKSPACE.SHARE.PUBLISH_' + getType() | translate }}
+  </h4>
+  <ng-container *ngIf="!node?.isDirectory">
+    <info-message mode="info" *ngIf="getLicense()">
+      {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO' | translate:{license: getLicenseText()} }}
+      {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_AUTHOR' | translate }}: {{ node | nodeAuthorName}}
+      <ng-container *ngIf="shareModeCopy">
+        <br /><br />
+        {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO_COPY' | translate }}
+      </ng-container>
+      <div>
+        <button mat-button color="primary"
+                (click)="openLicense()"
+                appToolpermissionCheck
+                toolpermission="TOOLPERMISSION_LICENSE">
+          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
+        </button>
+      </div>
+    </info-message>
+    <info-message mode="warning"
+                  *ngIf="mdsCompletion?.completed !== mdsCompletion?.total">
+      {{'WORKSPACE.SHARE.PUBLISH.MISSING_METADATA' | translate:mdsCompletion }}
+      <div>
+        <button mat-button color="primary"
+                (click)="openMetadata()">
+          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.OPEN_METADATA' | translate}}
+        </button>
+      </div>
+    </info-message>
+    <info-message mode="warning" *ngIf="!getLicense()">
+      {{'WORKSPACE.SHARE.PUBLISH.NO_LICENSE' | translate}}
+      <div>
+        <button mat-button color="primary"
+                (click)="openLicense()"
+                appToolpermissionCheck
+                toolpermission="TOOLPERMISSION_LICENSE">
+          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
+        </button>
+      </div>
+    </info-message>
+  </ng-container>
+  <info-message mode="warning" *ngIf="inherited">
+    {{'WORKSPACE.SHARE.PUBLISH.INHERITED' | translate}}
+    <div>
+      <button mat-button color="primary" (click)="onDisableInherit.emit()">
+        <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.DISABLE_INHERIT' | translate}}
+      </button>
+    </div>
+  </info-message>
+  <info-message mode="info" *ngIf="isCopy">
+    {{'WORKSPACE.SHARE.PUBLISH.COPY_ACTIVE' | translate}}
+  </info-message>
+  <div *ngIf="!inherited && mdsCompletion?.completed === mdsCompletion?.total" class="share-type">
+    <mat-checkbox class="mat-checkbox-multiline"
+                  [(ngModel)]="shareModeDirect"
+                  (ngModelChange)="updateShareMode()"
+                  value="direct">
+      <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate}}</h4>
+      <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO' | translate}}</h5>
+    </mat-checkbox>
+    <mat-checkbox [(ngModel)]="shareModeCopy"
+                  class="mat-checkbox-multiline"
+                  (ngModelChange)="$event ? doiActive = true : null; updateShareMode()"
+                  [disabled]="!copyAllowed() || isCopy">
+      <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_COPY' | translate}}</h4>
+      <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_COPY_INFO' | translate}}</h5>
+    </mat-checkbox>
+    <div class="published-versions-container" *ngIf="shareModeCopy">
+      <div class="published-versions">
+        <div class="version-republish">
+          <mat-radio-group [(ngModel)]="republish"
+                           [disabled]="!copyAllowed()"
+                           (ngModelChange)="setRepublish()">
+            <mat-radio-button
+                    class="mat-radio-multiline"
+                    [disabled]="!isCopy"
+                    [value]="false">
+              <h4>{{'WORKSPACE.SHARE.PUBLISH.NO_REPUBLISH' | translate}}</h4>
+            </mat-radio-button>
+            <mat-radio-button class="mat-radio-multiline"
+                    [disabled]="currentVersionPublished()"
+                    [value]="true">
+              <h4>{{'WORKSPACE.SHARE.PUBLISH.REPUBLISH' | translate}}</h4>
+              <!--
+              <h5>
+                <span class="version-comment">{{ node | versionComment }}</span>
+                <span class="version-number">({{ node['properties']['cclom:version'][0] }})</span>
+              </h5>
+              -->
+            </mat-radio-button>
+          </mat-radio-group>
+          <info-message mode="info" *ngIf="!publishCopyPermission">
+            {{'WORKSPACE.SHARE.PUBLISH.NO_PUBLISH_COPY_PERMISSION' | translate}}
+          </info-message>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="doi" *ngIf="doiPermission && publishCopyPermission &&
+                        !inherited && shareModeCopy && republish">
+  <mat-checkbox [disabled]="doiDisabled"
+                [(ngModel)]="doiActive"
+                (ngModelChange)="updatePublishedVersions()"
+                id="doi">
+    <div class="strong label">
+      {{'WORKSPACE.SHARE.DOI' | translate}}
+      <i icon iconId="vpn_key"></i>
+    </div>
+    <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
+  </mat-checkbox>
+</div>
+<div class="published-versions-container" *ngIf="shareModeCopy">
+  <div class="published-versions">
+    <h6 class="published-versions mat-heading-6">{{'WORKSPACE.SHARE.PUBLISH.VERSIONS_PUBLISHED' | translate}}</h6>
+
+    <div class="no-versions" *ngIf="!allPublishedVersions?.length">
+      <spinner-small></spinner-small>
+    </div>
+    <div *ngFor="let v of allPublishedVersions" class="version" [class.version-virtual]="v.virtual">
+      <div class="version-group" >
+        <div>
+          <div class="version-comment">
+            <label>{{'WORKSPACE.SHARE.PUBLISH.VERSION_COMMENT' | translate}}</label>
+            {{ v | versionComment }}</div>
+          <div class="version-number">
+            <label>{{'WORKSPACE.SHARE.PUBLISH.VERSION_NUMBER' | translate}}</label>
+            {{ v['properties']['cclom:version'][0] }}
+          </div>
+        </div>
+        <div>
+          <div class="version-date">
+            <label>{{'WORKSPACE.SHARE.PUBLISH.VERSION_DATE' | translate}}</label>
+            {{ v.properties['ccm:published_date_LONG'][0] | formatDate }}
+          </div>
+        </div>
+      </div>
+      <div class="version-handle">
+        <i icon iconId="vpn_key"
+           matTooltip="{{'WORKSPACE.SHARE.DOI' | translate}}"
+           *ngIf="v.properties['ccm:published_handle_id']"></i>
+      </div>
+      <div class="version-actions">
+        <button mat-button color="primary"
+                [disabled]="v.virtual"
+                matTooltip="{{'WORKSPACE.SHARE.PUBLISH.OPEN_VERSION' | translate}}"
+                (click)="openVersion(v)"
+        ><i icon iconId="open_in_new"></i></button>
+      </div>
+    </div>
+  </div>
+</div>

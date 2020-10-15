@@ -1,6 +1,6 @@
 package org.edu_sharing.alfresco.jobs;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ConcurrentModificationException;
@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -22,11 +24,9 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.action.ActionStatus;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.TempFileProvider;
 import org.apache.log4j.Logger;
 import org.apache.tika.io.TikaInputStream;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -50,6 +50,7 @@ public class PreviewJob implements Job {
 	ActionService actionService = serviceRegistry.getActionService();
 	ContentService contentService = serviceRegistry.getContentService();
 	NodeService nodeService = serviceRegistry.getNodeService();
+	MimetypeService mimetypeService = serviceRegistry.getMimetypeService();
 
 	int maxRunning = 5;
 
@@ -66,53 +67,20 @@ public class PreviewJob implements Job {
 			@Override
 			public Void doWork() throws Exception {
 				ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
-				if(reader.getMimetype().contains("video")){
 
-					MovieBox moov =null;
-					IsoFile isoFile = null;
-					try{
-
-						TikaInputStream tstream = TikaInputStream.get(reader.getContentInputStream());
-						isoFile = new IsoFile(new FileDataSourceImpl(tstream.getFile()));
-						moov = isoFile.getMovieBox();
-
-						if(moov != null && moov.getBoxes() != null){
-							for(Box b : moov.getBoxes()) {
-
-
-								if(b instanceof TrackBox){
-									TrackHeaderBox thb = ((TrackBox)b).getTrackHeaderBox();
-
-									if(thb.getWidth() > 0 && thb.getHeight() > 0){
-										nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WIDTH), thb.getWidth());
-										nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_HEIGHT), thb.getHeight());
-									}
-
-								}
-
-							}
-						}
-
-					}catch(Exception e){
-						logger.error(e.getMessage(), e);
-					}finally {
-						if (isoFile != null) {
-							try {
-								isoFile.close();
-							} catch (IOException e) {
-								logger.error(e.getMessage(), e);
-							}
-						}
-
-						if (moov != null) {
-							try {
-								moov.close();
-							} catch (IOException e) {
-								logger.error(e.getMessage(), e);
-							}
-						}
+				try{
+					String notMatchesMimetype = mimetypeService.getMimetypeIfNotMatches(reader);
+					if(notMatchesMimetype != null){
+						logger.error("mimetype does not match, maybe file was renamed " + nodeRef +" guessed: "+ reader.getMimetype() +" heuristic: " + notMatchesMimetype);
+						return null;
 					}
 				}
+				catch (ContentIOException cioe)
+				{
+					logger.error(cioe);
+					return null;
+				}
+
 				// alfresco does not read image size for all images, so we try to fix it
 				// trying to load not the whole image but just the bounding rect, see also:
 				// http://stackoverflow.com/questions/1559253/java-imageio-getting-image-dimensions-without-reading-the-entire-file
@@ -139,6 +107,8 @@ public class PreviewJob implements Job {
 		
 		AuthenticationUtil.runAs(videoImageMetadataExtractor, runAs);
 	}
+
+
 	
 
 	@Override

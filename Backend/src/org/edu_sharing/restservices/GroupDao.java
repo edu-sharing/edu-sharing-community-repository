@@ -3,6 +3,7 @@ package org.edu_sharing.restservices;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -11,6 +12,8 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -18,6 +21,7 @@ import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
+import org.edu_sharing.restservices.shared.Organization;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.SearchService;
@@ -27,6 +31,7 @@ import org.edu_sharing.service.search.model.SortDefinition;
 public class GroupDao {
 
 	static Logger logger=Logger.getLogger(GroupDao.class);
+	private final ArrayList<EduGroup> parentOrganizations;
 
 	public static GroupDao getGroup(RepositoryDao repoDao, String groupName) throws DAOException {
 		
@@ -128,7 +133,11 @@ public class GroupDao {
 
 			this.groupEmail= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
 			this.ref = authorityService.getAuthorityNodeRef(this.authorityName);
-			
+
+			// may causes performance penalties!
+			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
+					authorityService.getEduGroups(this.authorityName, NodeServiceInterceptor.getEduSharingScope())
+			);
 		} catch (Throwable t) {
 			
 			throw DAOException.mapping(t);
@@ -261,6 +270,8 @@ public class GroupDao {
     	data.setRef(getRef());
     	data.setAuthorityName(getAuthorityName());
     	data.setAuthorityType(Authority.Type.GROUP);
+
+    	data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
     	
     	data.setGroupName(getGroupName());
 
@@ -273,6 +284,7 @@ public class GroupDao {
     	
     	return data;
 	}
+
 	private String getScopeType(){
 		return this.scopeType;
 	}

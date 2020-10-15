@@ -4,6 +4,9 @@
         width: 100%;
     }
 }
+::ng-deep .mat-menu-template{
+    max-width: 400px;
+}
 
 fieldset {
     border: none;
