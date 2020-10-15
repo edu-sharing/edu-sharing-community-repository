@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { MdsWidgetValue } from '../../types';
+import {MdsWidgetFacettValue, MdsWidgetValue} from '../../types';
 
 @Component({
     selector: 'app-mds-editor-widget-suggestion-chips',
@@ -12,7 +12,7 @@ import { MdsWidgetValue } from '../../types';
 export class MdsEditorWidgetSuggestionChipsComponent implements OnInit {
     @Input() widget: Widget;
 
-    filteredSuggestions$: Observable<MdsWidgetValue[]>;
+    filteredSuggestions$: Observable<MdsWidgetFacettValue[]>;
 
     /** The widget controlling the property that this widget is displaying suggestions for. */
     private primaryWidget: Widget;

@@ -96,6 +96,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [type in MdsWidgetType]?: Type<object>;
     } = {
         [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetSuggestionChipsComponent,
+        [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetSuggestionChipsComponent,
+        [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetSuggestionChipsComponent,
     };
 
     @ViewChild('container') container: ElementRef<HTMLDivElement>;

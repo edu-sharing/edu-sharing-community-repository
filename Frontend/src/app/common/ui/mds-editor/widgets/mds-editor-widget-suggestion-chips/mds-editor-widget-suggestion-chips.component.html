@@ -16,7 +16,7 @@
       (keydown.enter)="add(value)"
     >
       <mat-icon>add</mat-icon>
-      {{ value.caption }}
+      {{ value.caption }}<span class="count">({{value.count}})</span>
     </mat-chip>
   </mat-chip-list>
 </app-mds-editor-widget-container>

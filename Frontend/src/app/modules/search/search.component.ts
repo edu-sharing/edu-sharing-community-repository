@@ -626,6 +626,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.mdsSuggestions[facette.property].push({
                             id: value.value,
                             caption: cap ? cap.caption : value.value,
+                            count: value.count
                         });
                     }
                 }

@@ -805,6 +805,7 @@
 			</group>
 			<group>
 				<id>ngsearch</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>search</view>
 					<view>search_suggestions</view>

@@ -259,7 +259,7 @@
             "AUTHOR_LAST": "Nachname",
             "KEYWORDS": "Schlagwörter hinzufügen",
             "HINT_FILTER": "Begriff zum Durchsuchen der Werte eingeben",
-            "HINT_ENTER": "Schlagworte mit Enter bestätigen",
+            "HINT_ENTER": "Einträge mit Enter bestätigen",
             "AS_VERSION": "als Version",
             "VERSION": "Version",
             "VERSION_COMMENT": "Versionskommentar hinzufügen",

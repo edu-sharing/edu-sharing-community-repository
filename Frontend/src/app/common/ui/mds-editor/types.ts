@@ -149,6 +149,7 @@ export interface MdsWidgetValue {
     description?: string;
     parent?: string;
 }
+export type MdsWidgetFacettValue = (MdsWidgetValue & {count?: string});
 
 export interface MdsWidgetCondition {
     type: 'PROPERTY' | 'TOOLPERMISSION';

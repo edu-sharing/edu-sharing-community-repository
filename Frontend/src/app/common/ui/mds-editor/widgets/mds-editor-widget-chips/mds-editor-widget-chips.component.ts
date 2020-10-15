@@ -1,20 +1,13 @@
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
-import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
-import {
-    debounceTime,
-    distinctUntilChanged,
-    filter,
-    map,
-    startWith,
-    switchMap,
-} from 'rxjs/operators';
-import { MdsWidgetType, MdsWidgetValue } from '../../types';
-import { DisplayValue } from '../DisplayValues';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import {COMMA, ENTER} from '@angular/cdk/keycodes';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {FormControl} from '@angular/forms';
+import {MatAutocomplete, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {MatChipInputEvent} from '@angular/material/chips';
+import {BehaviorSubject, combineLatest, from, Observable} from 'rxjs';
+import {debounceTime, distinctUntilChanged, filter, map, startWith, switchMap,} from 'rxjs/operators';
+import {MdsWidgetType, MdsWidgetValue} from '../../types';
+import {DisplayValue} from '../DisplayValues';
+import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
 
 @Component({
     selector: 'app-mds-editor-widget-chips',
@@ -43,6 +36,11 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         this.indeterminateValues$ = new BehaviorSubject(
             this.widget.getInitialValues().individualValues,
         );
+        if(this.widget.definition.type === MdsWidgetType.MultiValueBadges ||
+            this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges) {
+            this.widget.definition.bottomCaption = this.widget.definition.bottomCaption ??
+                this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER');
+        }
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
@@ -91,6 +89,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     add(value: DisplayValue): void {
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
             this.chipsControl.setValue([...this.chipsControl.value, value]);
+            console.log(this.chipsControl.value);
         }
         this.removeFromIndeterminateValues(value.key);
     }
