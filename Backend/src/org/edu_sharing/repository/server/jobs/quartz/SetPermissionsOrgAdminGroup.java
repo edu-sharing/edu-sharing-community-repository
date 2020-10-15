@@ -22,7 +22,9 @@ public class SetPermissionsOrgAdminGroup extends AbstractJob {
 	ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
 	
 	OrganisationService organisationService = (OrganisationService)appContext.getBean("eduOrganisationService");
-	
+
+	public static String DESCRIPTION = "runs recursive over all/specified Organisations folder and sets coordinator permissions";
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		
