@@ -157,7 +157,7 @@ public class IamApi  {
 	    	UserEntry response = new UserEntry();
 	    	response.setPerson(personDao.asPerson());
 
-	    	org.edu_sharing.repository.server.authentication.Context context =  org.edu_sharing.repository.server.authentication.Context.getCurrentInstance();
+	    	org.edu_sharing.alfresco.repository.server.authentication.Context context =  org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance();
 	    String username = context.getSessionAttribute(CCConstants.AUTH_USERNAME);
 	    	String authType = context.getAuthType();
 		if(person.equals("-me-") || person.equals(username)) {

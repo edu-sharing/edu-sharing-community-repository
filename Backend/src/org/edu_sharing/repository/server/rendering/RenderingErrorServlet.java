@@ -2,12 +2,10 @@ package org.edu_sharing.repository.server.rendering;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.I18nServer;
-import org.springframework.extensions.webscripts.Runtime;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;

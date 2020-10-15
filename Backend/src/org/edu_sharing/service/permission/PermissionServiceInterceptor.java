@@ -1,12 +1,8 @@
 package org.edu_sharing.service.permission;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.xpath.operations.Bool;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 
 import java.util.HashMap;

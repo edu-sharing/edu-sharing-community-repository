@@ -23,11 +23,9 @@ import org.edu_sharing.restservices.about.v1.model.About;
 import org.edu_sharing.restservices.about.v1.model.Service;
 import org.edu_sharing.restservices.about.v1.model.ServiceInstance;
 import org.edu_sharing.restservices.about.v1.model.ServiceVersion;
-import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.monitoring.Monitoring;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.version.VersionService;
 
 import io.swagger.annotations.Api;
@@ -66,7 +64,7 @@ public class AboutApi  {
 	    	version.setRepository(VersionService.getVersionNoException(VersionService.Type.REPOSITORY));
 	    	version.setRenderservice(VersionService.getVersionNoException(VersionService.Type.RENDERSERVICE));
 	    	
-	    	logger.debug("Request via domain "+org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getServerName());
+	    	logger.debug("Request via domain "+ org.edu_sharing.alfresco.repository.server.authentication.Context.getCurrentInstance().getRequest().getServerName());
 	
 	    	about.setVersion(version);
 

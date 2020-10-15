@@ -24,6 +24,7 @@ import javax.net.ssl.X509TrustManager;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -34,7 +35,6 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServicePixabayImpl;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -160,8 +160,8 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			// download is currently broken
 			//properties.put(CCConstants.DOWNLOADURL,json.getString("webformatURL").replace("_640", "_960"));
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
-					Constants.storeRef.getProtocol(),
-					Constants.storeRef.getIdentifier(),properties);
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),properties);
 			data.add(ref);
 			NodeServicePixabayImpl.updateCache(properties);
 		}

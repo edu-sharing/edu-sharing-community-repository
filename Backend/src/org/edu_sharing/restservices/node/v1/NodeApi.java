@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.dspace.xoai.model.oaipmh.Error;
@@ -43,7 +44,7 @@ import org.edu_sharing.restservices.shared.NodeRemote;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.User;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
@@ -366,7 +367,7 @@ public class NodeApi  {
     	@Context HttpServletRequest req) {
     	
     	try{
-    		EditLockServiceFactory.getEditLockService().unlock(new org.alfresco.service.cmr.repository.NodeRef(Constants.storeRef,node));
+    		EditLockServiceFactory.getEditLockService().unlock(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node));
     	}catch(LockedException e){
     		return ErrorResponse.createResponse(e);    		
     	}
@@ -395,7 +396,7 @@ public class NodeApi  {
     	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Context HttpServletRequest req) {
 		try {
-			boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(Constants.storeRef, node));
+			boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node));
 			NodeLocked response = new NodeLocked();
 			response.setLocked(isLocked);
 

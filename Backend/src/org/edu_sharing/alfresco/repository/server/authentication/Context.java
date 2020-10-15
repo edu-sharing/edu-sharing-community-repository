@@ -1,4 +1,4 @@
-package org.edu_sharing.repository.server.authentication;
+package org.edu_sharing.alfresco.repository.server.authentication;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;

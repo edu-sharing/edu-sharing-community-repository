@@ -733,6 +733,7 @@ export class OptionsHelperService {
         );
         pasteNodes.elementType = [ElementType.Unknown];
         pasteNodes.constrains = [Constrain.NoSelection, Constrain.ClipboardContent, Constrain.AddObjects, Constrain.User];
+        pasteNodes.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS, RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
         pasteNodes.scopes = [Scope.WorkspaceList];
         pasteNodes.key = 'KeyV';
         pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];

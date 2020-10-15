@@ -15,6 +15,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PersonService;
@@ -27,7 +28,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.springframework.context.ApplicationContext;
@@ -194,7 +195,7 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 			tmEduGroup.setFolderName(tmEduGroup.getGroupDisplayName().replaceAll("GROUP_",""));
 			tmEduGroup.setScope(scope);
 			//try to get root folder of edugroups
-			ChildAssociationRef primaryParent = nodeService.getPrimaryParent(new NodeRef(Constants.storeRef,eduGroup.getFolderId()));
+			ChildAssociationRef primaryParent = nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,eduGroup.getFolderId()));
 			return authorityService.getOrCreateEduGroup(tmEduGroup,eduGroup, primaryParent.getParentRef().getId());
 		}
 		return check;
@@ -218,7 +219,7 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 				if(!scopedEduGroups.contains(tmEduGroup)){
 					
 					//try to get root folder of edugroups
-					ChildAssociationRef primaryParent = nodeService.getPrimaryParent(new NodeRef(Constants.storeRef,eduGroup.getFolderId()));
+					ChildAssociationRef primaryParent = nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,eduGroup.getFolderId()));
 					
 					EduGroup scopedEduGroup = authorityService.getOrCreateEduGroup(tmEduGroup,eduGroup, primaryParent.getParentRef().getId());
 				

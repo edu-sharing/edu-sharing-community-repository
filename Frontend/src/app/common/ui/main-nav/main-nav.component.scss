@@ -312,7 +312,7 @@ user-profile {
         background-color: white;
     }
     &[disabled] {
-        color: unset;
+        color: $textOnPrimaryLight;
     }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*6)) {

@@ -11,7 +11,7 @@ import org.alfresco.service.cmr.usage.ContentQuotaException;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.permission.PermissionException;
-import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 
 public class DAOException extends Exception {
 

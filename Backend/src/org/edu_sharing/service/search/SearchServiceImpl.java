@@ -22,6 +22,7 @@ import org.alfresco.util.Pair;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.Helper;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
@@ -35,9 +36,8 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.InsufficientPermissionException;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -179,7 +179,7 @@ public class SearchServiceImpl implements SearchService {
 
 		if(isAdmin) {
 			SearchParameters parameters = new SearchParameters();
-			parameters.addStore(Constants.storeRef);
+			parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 			parameters.addAllAttribute(org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 			parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
@@ -230,7 +230,7 @@ public class SearchServiceImpl implements SearchService {
 						org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry
 								.getSearchService();
 						SearchParameters parameters = new SearchParameters();
-						parameters.addStore(Constants.storeRef);
+						parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 						parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 						parameters.setSkipCount(skipCount);
 						parameters.setMaxItems(maxValues);
@@ -650,15 +650,15 @@ public class SearchServiceImpl implements SearchService {
 
 		HashMap<ContentType, SearchToken> lastTokens = getLastSearchTokens();
 		lastTokens.put(searchToken.getContentType(),searchToken);
-		org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
+		Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
 
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
 	@Override
 	public HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable {
-		if(org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS)!=null) {
-			return (HashMap<ContentType, SearchToken>) org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS);
+		if(Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS)!=null) {
+			return (HashMap<ContentType, SearchToken>) Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS);
 		}
 		return new HashMap<>();
 
@@ -793,7 +793,7 @@ public class SearchServiceImpl implements SearchService {
 
 		int skipCount = 0;
 		int maxItems = 100;
-		StoreRef storeRef = new StoreRef(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier());
+		StoreRef storeRef = new StoreRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier());
 
 		SearchParameters searchParameters = new ESSearchParameters();
 		searchParameters.addStore(storeRef);
@@ -818,7 +818,7 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public List<NodeRef> getWorkflowReceive(String user) {
 		SearchParameters parameters = new SearchParameters();
-		parameters.addStore(Constants.storeRef);
+		parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);

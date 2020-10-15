@@ -1,12 +1,10 @@
 package org.edu_sharing.repository.server.authentication;
 
-import com.benfante.jslideshare.App;
-import groovy.util.logging.Log;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.remote.Rocketchat;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;

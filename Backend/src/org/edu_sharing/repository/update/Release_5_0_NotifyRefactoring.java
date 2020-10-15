@@ -26,7 +26,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.service.Constants;
+
 
 import com.google.gson.Gson;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;

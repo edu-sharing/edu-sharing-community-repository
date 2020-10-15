@@ -1,4 +1,4 @@
-package org.edu_sharing.service.toolpermission;
+package org.edu_sharing.alfresco.service.toolpermission;
 
 import com.sun.star.uno.RuntimeException;
 

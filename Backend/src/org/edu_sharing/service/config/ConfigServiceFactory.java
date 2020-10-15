@@ -2,7 +2,7 @@ package org.edu_sharing.service.config;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.config.model.KeyValuePair;
 import org.edu_sharing.service.config.model.Language;

@@ -202,7 +202,17 @@
         <property name="transactionService">
             <ref bean="transactionService" />
         </property>
-   	 </bean>   	 
+   	 </bean>
+
+
+    <bean id="createElementsPolicy" class="org.edu_sharing.alfresco.policy.CreateElementsPolicy" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+    </bean>
  	
  	<!-- inherit permissions to false for maps and folders -->
   	<!-- <bean id="onCreateInheritPermFalsePolicy" class="org.edu_sharing.alfresco.policy.OnCreateInheritPermFalsePolicy" init-method="initForFolders">
