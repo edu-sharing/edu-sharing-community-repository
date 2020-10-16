@@ -29,6 +29,7 @@ export class MdsEditorCoreComponent {
         if (this.views) {
             // Make sure existing views are destroyed and reinitialized.
             this.views = [];
+            this.suggestionsViews = [];
             await tick();
         }
         this.views = this.mdsEditorInstance.views.filter((view) => !view.rel);
