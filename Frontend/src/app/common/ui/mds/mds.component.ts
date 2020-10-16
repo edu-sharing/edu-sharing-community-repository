@@ -2478,6 +2478,11 @@ export class MdsComponent {
                       this.globalProgress=false;
                       return;
                   }
+                  if(RestHelper.errorMatchesAny(error,RestConstants.CONTENT_VIRUS_EXCEPTION)){
+                      this.toast.error(null,"MDS.ADD_CHILD_OBJECT_VIRUS_DETECTED",{name:child.name});
+                      this.globalProgress=false;
+                      return;
+                  }
               });
           });
       }

@@ -51,7 +51,8 @@
         "UPLOAD_ERROR": {
             "UNKNOWN": "Fehler bei der Datenübertragung",
             "FORMAT": "Nicht identifizierbares Dateiformat",
-            "QUOTA": "Speicherplatz-Quota wurde überschritten"
+            "QUOTA": "Speicherplatz-Quota wurde überschritten",
+            "VIRUS":"Virus erkannt. Datei wurde gelöscht."
         },
         "ADD_FOLDER_TITLE": "Neuen Ordner erstellen",
         "ADD_FOLDER_METADATASET": "Metadatenset für Ordner",
