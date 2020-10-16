@@ -228,7 +228,9 @@ public class JobHandler {
 						JobExecutionContext jec = (JobExecutionContext) o;
 
 						if (jec.getJobInstance() instanceof AbstractJob && ((AbstractJob) jec.getJobInstance()).isStarted()
-								&& Arrays.asList(((AbstractJob) jec.getJobInstance()).getJobClasses()).contains(jec.getJobInstance().getClass())) {
+								//&& Arrays.asList(((AbstractJob) jec.getJobInstance()).getJobClasses()).contains(jec.getJobInstance().getClass())
+								&& jobExecutionContext.getJobInstance().getClass().equals(jec.getJobInstance().getClass())
+						) {
 							veto = true;
 							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "another job is running");
 							logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
