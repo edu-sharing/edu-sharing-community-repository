@@ -64,6 +64,9 @@ export class OptionsHelperService {
         }
         if (this.globalOptions) {
             const option = this.globalOptions.filter((o: OptionItem) => {
+                if(!o.isEnabled) {
+                    return false;
+                }
                 if (o.key !== event.code) {
                     return false;
                 }
@@ -690,7 +693,7 @@ export class OptionsHelperService {
             management.linkMap = this.getObjects(node)[0]
         );
         linkMap.constrains = [Constrain.NoBulk, Constrain.HomeRepository, Constrain.User, Constrain.Directory];
-        linkMap.toolpermissions = [RestConstants.TOOLPERMISSION_PUBLISH_COPY];
+        linkMap.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_MAP_LINK];
         linkMap.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         linkMap.permissionsMode = HideMode.Hide;
         linkMap.group = DefaultGroups.FileOperations;
@@ -720,6 +723,12 @@ export class OptionsHelperService {
         const copyNodes = new OptionItem('OPTIONS.COPY', 'content_copy', (node) =>
             this.cutCopyNode(node, true)
         );
+        // do not allow copy of map links if tp is missing
+        copyNodes.customEnabledCallback = ((node) =>
+            node?.some((n) => this.getTypeSingle(n) === ElementType.MapRef) ?
+                this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_MAP_LINK) : true
+        );
+
         copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef]
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
