@@ -136,7 +136,12 @@ export class Toast {
                 ) {
                     message = 'GENERIC_QUOTA_ERROR_TITLE';
                     this.dialogTitle = '';
-                } else if (
+                }
+                if(json.error.indexOf(RestConstants.CONTENT_VIRUS_EXCEPTION)!=-1){
+                    message = 'GENERIC_VIRUS_ERROR_TITLE';
+                    this.dialogTitle = '';
+                }
+                else if (
                     json.error.indexOf('DAOToolPermissionException') !== -1
                 ) {
                     this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
