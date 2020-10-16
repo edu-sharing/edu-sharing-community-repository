@@ -94,7 +94,7 @@
                  (nodesDragStart)="onNodesDragStart($event, node)"
                  (nodesDragEnd)="onNodesDragEnd()"
                  [appNodesDropTarget]="canDropNodes.bind(this, node)"
-                 [nodesDragAllowedActions]="isNodesDragSource ? ['move'] : ['move', 'copy']"
+                 [nodesDragAllowedActions]="['move', 'copy']"
                  (nodesDragEnter)="onNodesDragEnter(node)"
                  (nodesHoveringChange)="onNodesHoveringChange($event, node)"
                  (nodesDrop)="onNodesDrop($event, node)"
