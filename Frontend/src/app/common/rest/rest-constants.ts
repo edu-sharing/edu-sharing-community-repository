@@ -126,6 +126,7 @@ export class RestConstants {
     "educational_validator","script_writer","instructional_designer","subject_matter_expert"];
   public static CONTRIBUTOR_ROLES_METADATA=["creator","validator","provider"];
   public static CONTENT_QUOTA_EXCEPTION="DAOQuotaException";
+  public static CONTENT_VIRUS_EXCEPTION="DAOVirusDetectedException";
   public static USER_PRIMARY_AFFILIATIONS = ["teacher","student","employee","extern","system","function"];
   public static getAllVCardFields(){
       let list=[];

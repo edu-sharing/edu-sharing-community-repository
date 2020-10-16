@@ -1495,7 +1495,10 @@ public class NodeApi  {
     		logger.warn(t.getMessage(), t);
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
     		
-    	} catch (Throwable t) {
+    	}catch(DAOVirusDetectedException t){
+			logger.warn(t.getMessage(),t);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+		} catch (Throwable t) {
     		
     		logger.error(t.getMessage(), t);
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
