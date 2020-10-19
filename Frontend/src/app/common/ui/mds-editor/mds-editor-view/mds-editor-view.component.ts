@@ -204,6 +204,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             return;
         }
         this.updateWidgetWithHTMLAttributes(widget);
+        this.mdsEditorInstance.updateWidgetDefinition(widget);
         UIHelper.injectAngularComponent(
             this.factoryResolver,
             this.containerRef,
@@ -231,6 +232,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             widget.definition.id.replace(':', '\\:'),
         );
         htmlRef?.getAttributeNames().forEach((attribute) => {
+            // map the extended attribute
+            if(attribute === 'isextended' || attribute === 'extended'){
+                attribute = 'isExtended';
+            }
             (widget.definition as any)[attribute] = htmlRef.getAttribute(attribute);
         });
     }

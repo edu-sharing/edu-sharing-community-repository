@@ -101,12 +101,14 @@
 	<groups>
 		<group>
 			<id>io</id>
+			<rendering>angular</rendering>
 			<views>
 				<view>node_general</view>
 			</views>
 		</group>
 		<group>
 			<id>io_wordpress</id>
+			<rendering>angular</rendering>
 			<views>
 				<view>node_wordpress</view>
 			</views>

@@ -343,6 +343,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     mdsInitDone = new ReplaySubject<void>(1);
     /** Fires when all widgets have been injected. */
     mdsInflated = new ReplaySubject<void>(1);
+    widgetsChanged = new ReplaySubject<void>(1);
     suggestions$ = new BehaviorSubject<Suggestions>(null);
 
     /**
@@ -350,7 +351,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * Widgets are not added or removed after initialization, but hold mutable state.
      */
-    widgets: readonly Widget[];
+    widgets: Widget[];
     /**
      * Active, "native" widgets (which are not defined via mds properties directly).
      *
@@ -731,6 +732,22 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             this.updateHasChanges();
         });
+    }
+
+    /**
+     * lazy widget update (e.g. widget was inflated and attributes have been parsed and now change the widget data)
+     * @param widget
+     */
+    updateWidgetDefinition(widget: Widget) {
+        const index = this.widgets.findIndex(
+            (w) => w.definition.id === widget.definition.id && w.definition.template === widget.definition.template
+        );
+        if(index === -1) {
+            console.warn('widget not found', widget);
+        } else {
+            this.widgets.splice(index, 1, widget);
+            this.widgetsChanged.next();
+        }
     }
 }
 

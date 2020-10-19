@@ -19,6 +19,7 @@ import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { BulkMode, InputStatus, RequiredMode } from '../../types';
 import { ValueType } from '../mds-editor-widget-base';
+import {UIAnimation} from '../../../../../core-module/ui/ui-animation';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
 // its `FormFieldControl`.
@@ -72,17 +73,9 @@ export class RegisterFormFieldDirective {
             transition('hidden => shown', [
                 group([
                     // Animate hight, margin, and opacity to original values
-                    animate('.2s'),
+                    animate(UIAnimation.ANIMATION_TIME_FAST),
                     // Keep `overflow: hidden` until the widget is fully expanded
-                    animate('.2s', style({ overflow: 'hidden' })),
-                    // Highlight widget with slowly fading-out background color
-                    animate(
-                        '2s',
-                        keyframes([
-                            style({ backgroundColor: '#c90' }),
-                            style({ backgroundColor: '*' }),
-                        ]),
-                    ),
+                    animate(UIAnimation.ANIMATION_TIME_FAST, style({ overflow: 'hidden' }))
                 ]),
             ]),
             transition('shown => hidden', [
