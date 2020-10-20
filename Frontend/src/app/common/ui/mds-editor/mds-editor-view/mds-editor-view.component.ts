@@ -233,10 +233,11 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         );
         htmlRef?.getAttributeNames().forEach((attribute) => {
             // map the extended attribute
+            const value = htmlRef.getAttribute(attribute);
             if(attribute === 'isextended' || attribute === 'extended'){
                 attribute = 'isExtended';
             }
-            (widget.definition as any)[attribute] = htmlRef.getAttribute(attribute);
+            (widget.definition as any)[attribute] = value;
         });
     }
 
