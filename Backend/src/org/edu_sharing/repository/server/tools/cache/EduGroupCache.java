@@ -89,9 +89,14 @@ public class EduGroupCache {
 	public static Map<NodeRef,Map<QName,Serializable>> getAllEduGroupFolderAndEduGroupProps(){
 		Map<NodeRef,Map<QName,Serializable>> result = new HashMap<NodeRef,Map<QName,Serializable>>();
 		for(NodeRef groupNodeRef : EduGroupCache.cache.getKeys()){
-			
-			result.put((NodeRef)EduGroupCache.cache.get(groupNodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),
-					EduGroupCache.cache.get(groupNodeRef));
+
+			NodeRef homeDirNodeRef = (NodeRef)EduGroupCache.cache.get(groupNodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+			if(homeDirNodeRef != null) {
+				result.put(homeDirNodeRef,
+						EduGroupCache.cache.get(groupNodeRef));
+			}else{
+				logger.error("homeDirNodeRef is null for " + EduGroupCache.cache.get(groupNodeRef).get(ContentModel.PROP_AUTHORITY_NAME));
+			}
 		}
 		return result;
 	}

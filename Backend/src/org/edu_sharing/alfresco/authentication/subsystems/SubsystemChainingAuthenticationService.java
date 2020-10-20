@@ -26,6 +26,7 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
 	
 	
 	static ThreadLocal<String> successFullAuthenticationMethod = new ThreadLocal<String>();
+	static ThreadLocal<String> currentPath = new ThreadLocal<>();
 	
 	NodeService nodeService;
 	PersonService personService;
@@ -104,7 +105,15 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
     public static String getSuccessFullAuthenticationMethod() {
 		return successFullAuthenticationMethod.get();
 	}
-    
+
+    public static void setCurrentPath(String currentPath) {
+        SubsystemChainingAuthenticationService.currentPath.set(currentPath);
+    }
+
+    public static String getCurrentPath() {
+        return currentPath.get();
+    }
+
     public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
 	}

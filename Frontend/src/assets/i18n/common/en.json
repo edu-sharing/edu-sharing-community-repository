@@ -547,6 +547,7 @@
         "ADD_CHILD_OBJECT": "Add further materials",
         "ADD_CHILD_OBJECT_DESCRIPTION": "Create a series by attaching more materials to this object",
         "ADD_CHILD_OBJECT_QUOTA_REACHED": "Error while uploading \"{{ name }}\": Upload quota reached",
+        "ADD_CHILD_OBJECT_VIRUS_DETECTED":"Error while uploading \"{{ name }}\": Virus detected. File was deleted"
         "CONFIRM_DISCARD_TITLE": "Discard changes?",
         "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
         "REQUIRED_MESSAGE": "Field is required",

@@ -55,13 +55,13 @@ public class TrackingDAO {
         }
     }
 
-    private static Tracking.Authority convertAuthority(StatisticEntry.AuthorityInfo authorityInfo) {
+    private static Tracking.TrackingAuthority convertAuthority(StatisticEntry.AuthorityInfo authorityInfo) {
         if(authorityInfo==null)
             return null;
-        Tracking.Authority authority = new Tracking.Authority();
-        authority.setHash(authorityInfo.getAuthority());
+        Tracking.TrackingAuthority trackingAuthority = new Tracking.TrackingAuthority();
+        trackingAuthority.setHash(authorityInfo.getAuthority());
         if(authorityInfo.getOrganizations()!=null) {
-            authority.setOrganization(Arrays.stream(authorityInfo.getOrganizations()).map((organiation) ->
+            trackingAuthority.setOrganization(Arrays.stream(authorityInfo.getOrganizations()).map((organiation) ->
             {
                 try {
                     return OrganizationDao.getInstant(RepositoryDao.getHomeRepository(), organiation).asOrganization();
@@ -73,7 +73,7 @@ public class TrackingDAO {
             }).collect(Collectors.toList()));
         }
         if(authorityInfo.getMediacenters()!=null) {
-            authority.setMediacenter(Arrays.stream(authorityInfo.getMediacenters()).map((mediacenter) ->
+            trackingAuthority.setMediacenter(Arrays.stream(authorityInfo.getMediacenters()).map((mediacenter) ->
             {
                 try {
                     return GroupDao.getGroup(RepositoryDao.getHomeRepository(), mediacenter).asGroup();
@@ -84,6 +84,6 @@ public class TrackingDAO {
                 }
             }).collect(Collectors.toList()));
         }
-        return authority;
+        return trackingAuthority;
     }
 }

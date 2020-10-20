@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class UserStatus {
     @JsonProperty private PersonLifecycleService.PersonStatus status;
-    @JsonProperty private Date date;
+    @JsonProperty private long date;
 
     public PersonLifecycleService.PersonStatus getStatus() {
         return status;
@@ -17,11 +17,11 @@ public class UserStatus {
         this.status = status;
     }
 
-    public Date getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(long date) {
         this.date = date;
     }
 }
