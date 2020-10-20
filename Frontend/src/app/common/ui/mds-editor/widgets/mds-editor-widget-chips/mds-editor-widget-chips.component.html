@@ -26,6 +26,7 @@
       #input
       [formControl]="inputControl"
       [matAutocomplete]="auto"
+      [(ngModel)]="filterString"
       [placeholder]="widget.definition.placeholder"
       [matChipInputFor]="chipList"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
@@ -35,7 +36,7 @@
   </mat-chip-list>
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
     <mat-option *ngFor="let value of filteredValues | async" [value]="value">
-      {{ value.label }}
+      <span [innerHTML]="value.label | highlight: filterString"></span>
     </mat-option>
   </mat-autocomplete>
 </app-mds-editor-widget-container>

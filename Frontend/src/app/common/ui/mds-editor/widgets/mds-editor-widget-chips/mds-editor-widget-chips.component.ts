@@ -24,6 +24,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     chipsControl: FormControl;
     filteredValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
+    filterString: string;
 
     ngOnInit(): void {
         this.chipsControl = new FormControl(
