@@ -13,7 +13,7 @@
 			<caption>Text Widget</caption>
 			<placeholder>lom_prop_educational_description_placeholder</placeholder>
 			<bottomCaption>Bla bla bla bla bla</bottomCaption>
-			<required>mandatoryForPublish</required>
+			<required>mandatory</required>
 		</widget>
 		<widget>
 			<id>ccm:test_extended</id>
@@ -30,11 +30,36 @@
 			<type>checkbox</type>
 		</widget>
 		<widget>
+			<id>ccm:slider</id>
+			<caption>Slider Widget</caption>
+			<bottomCaption>Bla bla bla bla bla</bottomCaption>
+			<min>0</min>
+			<max>50</max>
+			<type>slider</type>
+		</widget>
+		<widget>
+			<id>ccm:range</id>
+			<caption>Range Widget</caption>
+			<bottomCaption>Bla bla bla bla bla</bottomCaption>
+			<min>0</min>
+			<max>50</max>
+			<type>range</type>
+		</widget>
+		<widget>
+			<id>ccm:duration</id>
+			<caption>Duration Widget</caption>
+			<bottomCaption>Bla bla bla bla bla</bottomCaption>
+			<min>0</min>
+			<max>120</max>
+			<type>duration</type>
+		</widget>
+		<widget>
 			<id>ccm:test_single_value_tree</id>
 			<caption>Single-value-tree Widget</caption>
 			<bottomCaption>Bla bla bla bla bla</bottomCaption>
 			<placeholder>Bla bla</placeholder>
 			<type>singlevalueTree</type>
+			<required>mandatory</required>
 			<values>
 				<value parent="" cap="Verantwortliches Ressourcenmanagement">70990101</value>
 				<value parent="70990101" cap="Finanz- und Vorsorgemanagement (Grundlagen)">7099010101</value>
@@ -42,7 +67,7 @@
 				<value parent="70990101" cap="Vielfalt individueller und gesellschaftlicher Ressourcen">7099010103</value>
 				<value parent="70990101" cap="Informations- und Beratungsangebote kennen und nutzen">7099010104</value>
 				<value parent="" cap="Reflektierte Konsumentscheidung">70990102</value>
-				<value parent="70990102" cap="Bedürfnisse und Wege der Bedarfsdeckung">7099010201</value>
+				<value parent="70990102" cap="BedÃ¼rfnisse und Wege der Bedarfsdeckung">7099010201</value>
 				<value parent="70990102" cap="Eigene Konsumbiografie und Lebensstil">7099010202</value>
 				<value parent="70990102" cap="Marktmechanismen und Wirtschaftssystem">7099010203</value>
 				<value parent="70990102" cap="Konsum- und Entscheidungsprozesse bewerten und gestalten">7099010204</value>
@@ -50,8 +75,8 @@
 				<value parent="70990103" cap="Verbraucherrechte und -pflichten">7099010301</value>
 				<value parent="70990103" cap="Vertragliche Bedingungen ">7099010302</value>
 				<value parent="70990103" cap="Informationsbeschaffung und -bewertung">7099010303</value>
-				<value parent="" cap="Qualitätsorientierte Konsumentscheidung">70990104</value>
-				<value parent="70990104" cap="Lebenszyklus von Marktgütern">7099010401</value>
+				<value parent="" cap="QualitÃ¤tsorientierte Konsumentscheidung">70990104</value>
+				<value parent="70990104" cap="Lebenszyklus von MarktgÃ¼tern">7099010401</value>
 				<value parent="70990104" cap="Handwerkliche und industrielle Herstellung ">7099010402</value>
 				<value parent="70990104" cap="Faktor Arbeit beim Herstellungsprozess">7099010403</value>
 				<value parent="70990104" cap="Lokale und globale Produktion">7099010404</value>
@@ -60,36 +85,36 @@
 				<value parent="70990105" cap="Nachhaltiges Konsum- und Alltagshandeln analysieren und bewerten">7099010502</value>
 				<value parent="70990105" cap="Lebensstile und Lebensweisen">7099010503</value>
 				<value parent="70990105" cap="Verantwortung in Nachhaltigkeitsprozessen">7099010504</value>
-				<value parent="" cap="Gesundheit und Ernährung">709902</value>
+				<value parent="" cap="Gesundheit und ErnÃ¤hrung">709902</value>
 				<value parent="709902" cap="Essbiografie reflektieren und gestalten">70990201</value>
-				<value parent="70990201" cap="Einflussfaktoren, Wirkungen und Bedeutungen für das Essverhalten">7099020101</value>
-				<value parent="70990201" cap="Alltagsvorstellungen und -theorien zur Ernährung">7099020102</value>
+				<value parent="70990201" cap="Einflussfaktoren, Wirkungen und Bedeutungen fÃ¼r das Essverhalten">7099020101</value>
+				<value parent="70990201" cap="Alltagsvorstellungen und -theorien zur ErnÃ¤hrung">7099020102</value>
 				<value parent="70990201" cap="Gestaltung der Essbiografie">7099020103</value>
-				<value parent="709902" cap="Ernährung gesundheitsförderlich gestalten">70990202</value>
-				<value parent="70990202" cap="Zusammenhang Ernährung und persönliche Gesundheit">7099020201</value>
-				<value parent="70990202" cap="Körpersignale wahrnehmen und verstehen">7099020202</value>
+				<value parent="709902" cap="ErnÃ¤hrung gesundheitsfÃ¶rderlich gestalten">70990202</value>
+				<value parent="70990202" cap="Zusammenhang ErnÃ¤hrung und persÃ¶nliche Gesundheit">7099020201</value>
+				<value parent="70990202" cap="KÃ¶rpersignale wahrnehmen und verstehen">7099020202</value>
 				<value parent="70990202" cap="Lebensmittelinhaltsstoffe und Stoffwechsel">7099020203</value>
-				<value parent="70990202" cap="Ernährungsempfehlungen und -regeln">7099020204</value>
-				<value parent="709902" cap="Mahlzeiten gesundheitsförderlich planen und gestalten">70990203</value>
+				<value parent="70990202" cap="ErnÃ¤hrungsempfehlungen und -regeln">7099020204</value>
+				<value parent="709902" cap="Mahlzeiten gesundheitsfÃ¶rderlich planen und gestalten">70990203</value>
 				<value parent="70990203" cap="Mahlzeiten situations- und alltagsgerecht planen und herstellen">7099020301</value>
 				<value parent="70990203" cap="Lebensmittelauswahl genussvoll, ausgewogen und nachhaltig gestalten">7099020302</value>
 				<value parent="70990203" cap="Techniken der Lebensmittelzubereitung">7099020303</value>
-				<value parent="709902" cap="Positives Selbstkonzept durch Ernährung">70990204</value>
-				<value parent="70990204" cap="Körperprozesse wahrnehmen, verstehen">7099020401</value>
-				<value parent="70990204" cap="Körperbilder und Gesellschaft">7099020402</value>
-				<value parent="70990204" cap="Bedeutung von Ernährung für das eigene Handeln erkennen">7099020403</value>
-				<value parent="70990204" cap="Verantwortungsbewusster Umgang mit dem Körper durch Essen und Trinken">7099020404</value>
-				<value parent="709902" cap="Gesundheitsförderlicher Lebensstil">70990205</value>
-				<value parent="70990205" cap="Gesundheitsfördernde Handlungsmöglichkeiten und Verhaltensweisen entwickeln und nutzen">7099020501</value>
-				<value parent="70990205" cap="Positive Bewältigungserfahrungen für gesundheitsförderlichen Kompetenzgewinn">7099020502</value>
-				<value parent="70990205" cap="Positives Selbstwertgefühl und Vertrauen">7099020503</value>
+				<value parent="709902" cap="Positives Selbstkonzept durch ErnÃ¤hrung">70990204</value>
+				<value parent="70990204" cap="KÃ¶rperprozesse wahrnehmen, verstehen">7099020401</value>
+				<value parent="70990204" cap="KÃ¶rperbilder und Gesellschaft">7099020402</value>
+				<value parent="70990204" cap="Bedeutung von ErnÃ¤hrung fÃ¼r das eigene Handeln erkennen">7099020403</value>
+				<value parent="70990204" cap="Verantwortungsbewusster Umgang mit dem KÃ¶rper durch Essen und Trinken">7099020404</value>
+				<value parent="709902" cap="GesundheitsfÃ¶rderlicher Lebensstil">70990205</value>
+				<value parent="70990205" cap="GesundheitsfÃ¶rdernde HandlungsmÃ¶glichkeiten und Verhaltensweisen entwickeln und nutzen">7099020501</value>
+				<value parent="70990205" cap="Positive BewÃ¤ltigungserfahrungen fÃ¼r gesundheitsfÃ¶rderlichen Kompetenzgewinn">7099020502</value>
+				<value parent="70990205" cap="Positives SelbstwertgefÃ¼hl und Vertrauen">7099020503</value>
 				<value parent="" cap="Datenschutz">709903</value>
 				<value parent="709903" cap="Datenschutz- und Datensicherheitsrisiken">70990301</value>
-				<value parent="70990301" cap="Datenschutz als Bürger- und Menschenrecht anerkennen">7099030101</value>
+				<value parent="70990301" cap="Datenschutz als BÃ¼rger- und Menschenrecht anerkennen">7099030101</value>
 				<value parent="70990301" cap="Verantwortungsbewusster Umgang mit dem Internet">7099030102</value>
 				<value parent="70990301" cap="Verantwortungsvoll medial kommunizieren">7099030103</value>
 				<value parent="70990301" cap="Reflektierter Umgang mit personenbezogenen Daten">7099030104</value>
-				<value parent="70990301" cap="Wertschätzung personenbezogener Daten">7099030105</value>
+				<value parent="70990301" cap="WertschÃ¤tzung personenbezogener Daten">7099030105</value>
 			</values>
 		</widget>
 		<widget>
@@ -98,6 +123,7 @@
 			<bottomCaption>Bla bla bla bla bla</bottomCaption>
 			<placeholder>Bla bla</placeholder>
 			<type>multivalueTree</type>
+			<required>mandatoryForPublish</required>
 			<values>
 				<value parent="" cap="Verantwortliches Ressourcenmanagement">70990101</value>
 				<value parent="70990101" cap="Finanz- und Vorsorgemanagement (Grundlagen)">7099010101</value>
@@ -105,7 +131,7 @@
 				<value parent="70990101" cap="Vielfalt individueller und gesellschaftlicher Ressourcen">7099010103</value>
 				<value parent="70990101" cap="Informations- und Beratungsangebote kennen und nutzen">7099010104</value>
 				<value parent="" cap="Reflektierte Konsumentscheidung">70990102</value>
-				<value parent="70990102" cap="Bedürfnisse und Wege der Bedarfsdeckung">7099010201</value>
+				<value parent="70990102" cap="BedÃ¼rfnisse und Wege der Bedarfsdeckung">7099010201</value>
 				<value parent="70990102" cap="Eigene Konsumbiografie und Lebensstil">7099010202</value>
 				<value parent="70990102" cap="Marktmechanismen und Wirtschaftssystem">7099010203</value>
 				<value parent="70990102" cap="Konsum- und Entscheidungsprozesse bewerten und gestalten">7099010204</value>
@@ -113,8 +139,8 @@
 				<value parent="70990103" cap="Verbraucherrechte und -pflichten">7099010301</value>
 				<value parent="70990103" cap="Vertragliche Bedingungen ">7099010302</value>
 				<value parent="70990103" cap="Informationsbeschaffung und -bewertung">7099010303</value>
-				<value parent="" cap="Qualitätsorientierte Konsumentscheidung">70990104</value>
-				<value parent="70990104" cap="Lebenszyklus von Marktgütern">7099010401</value>
+				<value parent="" cap="QualitÃ¤tsorientierte Konsumentscheidung">70990104</value>
+				<value parent="70990104" cap="Lebenszyklus von MarktgÃ¼tern">7099010401</value>
 				<value parent="70990104" cap="Handwerkliche und industrielle Herstellung ">7099010402</value>
 				<value parent="70990104" cap="Faktor Arbeit beim Herstellungsprozess">7099010403</value>
 				<value parent="70990104" cap="Lokale und globale Produktion">7099010404</value>
@@ -123,36 +149,47 @@
 				<value parent="70990105" cap="Nachhaltiges Konsum- und Alltagshandeln analysieren und bewerten">7099010502</value>
 				<value parent="70990105" cap="Lebensstile und Lebensweisen">7099010503</value>
 				<value parent="70990105" cap="Verantwortung in Nachhaltigkeitsprozessen">7099010504</value>
-				<value parent="" cap="Gesundheit und Ernährung">709902</value>
+				<value parent="" cap="Gesundheit und ErnÃ¤hrung">709902</value>
 				<value parent="709902" cap="Essbiografie reflektieren und gestalten">70990201</value>
-				<value parent="70990201" cap="Einflussfaktoren, Wirkungen und Bedeutungen für das Essverhalten">7099020101</value>
-				<value parent="70990201" cap="Alltagsvorstellungen und -theorien zur Ernährung">7099020102</value>
+				<value parent="70990201" cap="Einflussfaktoren, Wirkungen und Bedeutungen fÃ¼r das Essverhalten">7099020101</value>
+				<value parent="70990201" cap="Alltagsvorstellungen und -theorien zur ErnÃ¤hrung">7099020102</value>
 				<value parent="70990201" cap="Gestaltung der Essbiografie">7099020103</value>
-				<value parent="709902" cap="Ernährung gesundheitsförderlich gestalten">70990202</value>
-				<value parent="70990202" cap="Zusammenhang Ernährung und persönliche Gesundheit">7099020201</value>
-				<value parent="70990202" cap="Körpersignale wahrnehmen und verstehen">7099020202</value>
+				<value parent="709902" cap="ErnÃ¤hrung gesundheitsfÃ¶rderlich gestalten">70990202</value>
+				<value parent="70990202" cap="Zusammenhang ErnÃ¤hrung und persÃ¶nliche Gesundheit">7099020201</value>
+				<value parent="70990202" cap="KÃ¶rpersignale wahrnehmen und verstehen">7099020202</value>
 				<value parent="70990202" cap="Lebensmittelinhaltsstoffe und Stoffwechsel">7099020203</value>
-				<value parent="70990202" cap="Ernährungsempfehlungen und -regeln">7099020204</value>
-				<value parent="709902" cap="Mahlzeiten gesundheitsförderlich planen und gestalten">70990203</value>
+				<value parent="70990202" cap="ErnÃ¤hrungsempfehlungen und -regeln">7099020204</value>
+				<value parent="709902" cap="Mahlzeiten gesundheitsfÃ¶rderlich planen und gestalten">70990203</value>
 				<value parent="70990203" cap="Mahlzeiten situations- und alltagsgerecht planen und herstellen">7099020301</value>
 				<value parent="70990203" cap="Lebensmittelauswahl genussvoll, ausgewogen und nachhaltig gestalten">7099020302</value>
 				<value parent="70990203" cap="Techniken der Lebensmittelzubereitung">7099020303</value>
-				<value parent="709902" cap="Positives Selbstkonzept durch Ernährung">70990204</value>
-				<value parent="70990204" cap="Körperprozesse wahrnehmen, verstehen">7099020401</value>
-				<value parent="70990204" cap="Körperbilder und Gesellschaft">7099020402</value>
-				<value parent="70990204" cap="Bedeutung von Ernährung für das eigene Handeln erkennen">7099020403</value>
-				<value parent="70990204" cap="Verantwortungsbewusster Umgang mit dem Körper durch Essen und Trinken">7099020404</value>
-				<value parent="709902" cap="Gesundheitsförderlicher Lebensstil">70990205</value>
-				<value parent="70990205" cap="Gesundheitsfördernde Handlungsmöglichkeiten und Verhaltensweisen entwickeln und nutzen">7099020501</value>
-				<value parent="70990205" cap="Positive Bewältigungserfahrungen für gesundheitsförderlichen Kompetenzgewinn">7099020502</value>
-				<value parent="70990205" cap="Positives Selbstwertgefühl und Vertrauen">7099020503</value>
+				<value parent="709902" cap="Positives Selbstkonzept durch ErnÃ¤hrung">70990204</value>
+				<value parent="70990204" cap="KÃ¶rperprozesse wahrnehmen, verstehen">7099020401</value>
+				<value parent="70990204" cap="KÃ¶rperbilder und Gesellschaft">7099020402</value>
+				<value parent="70990204" cap="Bedeutung von ErnÃ¤hrung fÃ¼r das eigene Handeln erkennen">7099020403</value>
+				<value parent="70990204" cap="Verantwortungsbewusster Umgang mit dem KÃ¶rper durch Essen und Trinken">7099020404</value>
+				<value parent="709902" cap="GesundheitsfÃ¶rderlicher Lebensstil">70990205</value>
+				<value parent="70990205" cap="GesundheitsfÃ¶rdernde HandlungsmÃ¶glichkeiten und Verhaltensweisen entwickeln und nutzen">7099020501</value>
+				<value parent="70990205" cap="Positive BewÃ¤ltigungserfahrungen fÃ¼r gesundheitsfÃ¶rderlichen Kompetenzgewinn">7099020502</value>
+				<value parent="70990205" cap="Positives SelbstwertgefÃ¼hl und Vertrauen">7099020503</value>
 				<value parent="" cap="Datenschutz">709903</value>
 				<value parent="709903" cap="Datenschutz- und Datensicherheitsrisiken">70990301</value>
-				<value parent="70990301" cap="Datenschutz als Bürger- und Menschenrecht anerkennen">7099030101</value>
+				<value parent="70990301" cap="Datenschutz als BÃ¼rger- und Menschenrecht anerkennen">7099030101</value>
 				<value parent="70990301" cap="Verantwortungsbewusster Umgang mit dem Internet">7099030102</value>
 				<value parent="70990301" cap="Verantwortungsvoll medial kommunizieren">7099030103</value>
 				<value parent="70990301" cap="Reflektierter Umgang mit personenbezogenen Daten">7099030104</value>
-				<value parent="70990301" cap="Wertschätzung personenbezogener Daten">7099030105</value>
+				<value parent="70990301" cap="WertschÃ¤tzung personenbezogener Daten">7099030105</value>
+			</values>
+		</widget>
+		<widget>
+			<id>ccm:test_multi_option</id>
+			<caption>Multi-option Widget</caption>
+			<bottomCaption>Bla bla bla bla bla</bottomCaption>
+			<type>multivalueFixedBadges</type>
+			<values>
+				<value cap="Foo">foo</value>
+				<value cap="Bar">bar</value>
+				<value cap="Baz">baz</value>
 			</values>
 		</widget>
 		<widget>
@@ -160,6 +197,7 @@
 			<caption>Single-option Widget</caption>
 			<bottomCaption>Bla bla bla bla bla</bottomCaption>
 			<type>singleoption</type>
+			<required>mandatoryForPublish</required>
 			<values>
 				<value cap="Foo">foo</value>
 				<value cap="Bar">bar</value>
@@ -189,6 +227,10 @@
 					<ccm:test_text>
 					<ccm:test_extended>
 					<text:checkbox>
+					<ccm:slider>
+					<ccm:range>
+					<ccm:duration>
+					<ccm:test_multi_option>
 					<ccm:test_single_value_tree>
 					<ccm:test_multi_value_tree>
 					<ccm:test_single_option>
