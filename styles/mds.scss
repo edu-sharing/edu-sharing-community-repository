@@ -505,6 +505,22 @@ mds .mdsGroup{
 mds .mdsEmbedded{
    padding:0;
 }
+
+
+/**
+  angular mds
+ */
+
+.mat-autocomplete-panel,
+.suggestion-card {
+  mark {
+    font-weight: bold;
+    color: $primary;
+    background-color: transparent;
+  }
+}
+
+
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
   .vcard {
     flex-direction: column;
