@@ -4,6 +4,8 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -109,5 +111,9 @@ public class EduSharingNodeHelper {
 		//cmNameReadableName = cmNameReadableName.replaceAll("\\.$", "");
 		cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "").trim();
 		return cmNameReadableName;
+	}
+
+	public static String makeUniqueName(String name) {
+		return name+"_"+ DigestUtils.shaHex(System.currentTimeMillis()+""+ RandomUtils.nextLong());
 	}
 }

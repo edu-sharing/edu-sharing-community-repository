@@ -690,6 +690,7 @@
          <property name="transactionService">
              <ref bean="transactionService"/>
          </property>
+         <property name="dbNodeService"><ref bean="dbNodeService"/></property>
     </bean>
 
     <bean id="onRestoreCollectionPolicy" class="org.edu_sharing.alfresco.policy.OnRestoreCollectionPolicy" init-method="init">
