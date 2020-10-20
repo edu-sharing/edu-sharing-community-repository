@@ -43,6 +43,7 @@ public class Values implements Serializable {
 	@XmlElement	public AvailableMds[] availableMds;
 	@XmlElement	public String[] availableRepositories;
 	@XmlElement	public Integer searchViewType;
+	@XmlElement	public Integer workSpaceViewType;
 	@XmlElement	public Integer itemsPerRequest;
 	@XmlElement	public Rendering rendering;
 	@XmlElement	public SessionExpiredDialog sessionExpiredDialog;
