@@ -32,12 +32,13 @@ export class MdsEditorCardComponent implements OnInit {
     ngOnInit(): void {
         this.nodes = this.mdsEditorInstance.nodes$.value;
         this.jumpMarks = this.getJumpMarks();
-        this.mdsEditorInstance
+        /* this.mdsEditorInstance
             .observeCanSave()
             .pipe(delay(0))
             .subscribe((value) => {
                 this.buttons[1].disabled = !value;
             });
+         */
         this.mdsEditorInstance
             .getCompletionStatus()
             .pipe(delay(0))

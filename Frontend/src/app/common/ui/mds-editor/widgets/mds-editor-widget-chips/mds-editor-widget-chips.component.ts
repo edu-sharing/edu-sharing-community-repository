@@ -87,6 +87,10 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         this.inputControl.setValue(null);
     }
 
+    focus() {
+        this.input?.nativeElement?.focus();
+    }
+
     add(value: DisplayValue): void {
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
             this.chipsControl.setValue([...this.chipsControl.value, value]);

@@ -174,6 +174,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     async onSave(): Promise<void> {
         this.isLoading = true;
         try {
+            if(!this.mdsEditorInstance.canSave().value) {
+                this.mdsEditorInstance.showMissingRequiredWidgets();
+                return;
+            }
             const updatedNodes = await this.mdsEditorInstance.save();
             this.toast.toast('WORKSPACE.EDITOR.UPDATED');
             this.onDone.emit(updatedNodes);

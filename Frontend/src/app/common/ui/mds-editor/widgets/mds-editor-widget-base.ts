@@ -32,6 +32,13 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
         }
     }
 
+    /**
+     * this method should set focus on the primary input of the widget
+     */
+    focus(): void {
+        // default implementation will do nothing
+    }
+
     protected setValue(value: string[]): void {
         this.widget.setValue(value);
     }

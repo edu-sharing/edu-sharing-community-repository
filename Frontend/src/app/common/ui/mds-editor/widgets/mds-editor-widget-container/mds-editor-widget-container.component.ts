@@ -18,7 +18,7 @@ import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { BulkMode, InputStatus, RequiredMode } from '../../types';
-import { ValueType } from '../mds-editor-widget-base';
+import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
 import {UIAnimation} from '../../../../../core-module/ui/ui-animation';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
@@ -92,6 +92,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     readonly ValueType = ValueType;
 
     @Input() widget: Widget;
+    @Input() injectedView: MdsEditorWidgetBase;
     @Input() valueType: ValueType;
     @Input() label: string | boolean;
     @Input() control: AbstractControl;
@@ -171,6 +172,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
                     behavior: 'smooth',
                     block: 'start',
                 });
+                this.injectedView?.focus();
                 return true;
             } else {
                 return false;
