@@ -73,7 +73,7 @@
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
-			<type>multivalueBadges</type>
+			<type>multivalueSuggestBadges</type>
 			<caption>Freie Schlagworte / Stichworte</caption>
 			<placeholder>Stichwort ergänzen...</placeholder>
 			<hideIfEmpty>true</hideIfEmpty>
