@@ -519,6 +519,9 @@ mds .mdsEmbedded{
     background-color: transparent;
   }
 }
+mat-label .required-marker {
+  color: darken($colorStatusNegative, 20%);
+}
 
 
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
