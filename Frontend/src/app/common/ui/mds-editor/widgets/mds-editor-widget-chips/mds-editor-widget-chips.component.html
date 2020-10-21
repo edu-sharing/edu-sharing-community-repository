@@ -33,6 +33,7 @@
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
       [matChipInputAddOnBlur]="false"
       (matChipInputTokenEnd)="onInputTokenEnd($event)"
+      (blur)="filterString = ''"
     />
   </mat-chip-list>
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">

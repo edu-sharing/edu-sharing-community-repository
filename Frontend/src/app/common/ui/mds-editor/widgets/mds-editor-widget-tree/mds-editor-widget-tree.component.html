@@ -22,6 +22,7 @@
     <input
       #input
       autocomplete="off"
+      [(ngModel)]="filterString"
       [formControl]="inputControl"
       [placeholder]="widget.definition.placeholder"
       [matChipInputFor]="chipList"

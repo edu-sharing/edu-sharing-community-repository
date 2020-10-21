@@ -27,6 +27,7 @@ export class MdsEditorWidgetTreeComponent
     chipsControl: FormControl;
     indeterminateValues$: BehaviorSubject<string[]>;
     overlayIsVisible = false;
+    filterString = '';
     readonly overlayPositions: readonly ConnectedPosition[] = [
         {
             originX: 'center',
