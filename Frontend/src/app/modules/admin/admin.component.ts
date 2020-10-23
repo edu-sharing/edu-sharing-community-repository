@@ -44,6 +44,8 @@ import {RestNetworkService} from '../../common/rest/services/rest-network.servic
 export class AdminComponent {
   mailTemplates=[
       "invited",
+      "invited_safe",
+      "invited_collection",
       "nodeIssue"
   ];
   public tab : string;

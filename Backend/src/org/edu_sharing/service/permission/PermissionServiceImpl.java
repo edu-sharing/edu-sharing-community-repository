@@ -68,6 +68,7 @@ import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
@@ -388,6 +389,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					if(authority.equals(nodeServiceApp.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),_nodeId,CCConstants.CM_PROP_C_CREATOR))){
 						send=false;
 					}
+				}
+				if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
+					template = "invited_safe";
 				}
 				if(send) {
 					mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject(template, currentLocale),
