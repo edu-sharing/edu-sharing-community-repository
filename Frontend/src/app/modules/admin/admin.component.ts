@@ -47,6 +47,8 @@ import {DateHelper} from "../../common/ui/DateHelper";
 export class AdminComponent {
   mailTemplates=[
       "invited",
+      "invited_safe",
+      "invited_collection",
       "nodeIssue",
       "userRegister",
       "passwordRequest",
