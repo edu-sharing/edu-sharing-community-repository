@@ -16,7 +16,6 @@ import { Widget } from '../../../mds-editor-instance.service';
 import { MdsWidgetType } from '../../../types';
 import { DisplayValue } from '../../DisplayValues';
 import { Tree, TreeNode } from '../tree';
-import {MdsEditorWidgetTreeComponent} from '../mds-editor-widget-tree.component';
 
 @Component({
     selector: 'app-mds-editor-widget-tree-core',
@@ -24,8 +23,9 @@ import {MdsEditorWidgetTreeComponent} from '../mds-editor-widget-tree.component'
     styleUrls: ['./mds-editor-widget-tree-core.component.scss'],
 })
 export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDestroy {
-    @ViewChild('input') input: ElementRef<HTMLElement>;
-    @Input() parent: MdsEditorWidgetTreeComponent;
+    @ViewChild('input') input: ElementRef;
+    @Input() widget: Widget;
+    @Input() tree: Tree;
     @Input() values: DisplayValue[];
     @Input() indeterminateValues: string[];
     get filterString() {
@@ -43,6 +43,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
      */
     @Input() parentImpliesChildren = false;
 
+    @Output() close = new EventEmitter<void>();
     @Output() valuesChange = new EventEmitter<DisplayValue[]>();
     @Output() indeterminateValuesChange = new EventEmitter<string[]>();
 
@@ -55,9 +56,9 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
 
     ngOnInit(): void {
-        this.isMultiValue = this.parent.widget.definition.type === MdsWidgetType.MultiValueTree;
+        this.isMultiValue = this.widget.definition.type === MdsWidgetType.MultiValueTree;
         this.clearFilter();
-        this.dataSource.data = this.parent.tree.rootNodes;
+        this.dataSource.data = this.tree.rootNodes;
         this.filterString$
             .pipe(
                 map((filterString) => (filterString?.length >= 2 ? filterString : null)),
@@ -147,7 +148,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         if (node.isChecked && node.children && this.parentImpliesChildren) {
             // Toggle any checked child nodes off since they are already implicitly checked by this
             // node.
-            for (const childNode of this.parent.tree.iterate(node.children)) {
+            for (const childNode of this.tree.iterate(node.children)) {
                 if (childNode.isChecked) {
                     this.toggleNode(childNode, false);
                 }
@@ -188,7 +189,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     /** Call only via `toggleNode`. */
     private add(node: TreeNode): void {
         if (!this.values.find((value) => node.id === value.key)) {
-            this.values.push(this.parent.tree.nodeToDisplayValue(node));
+            this.values.push(this.tree.nodeToDisplayValue(node));
         }
     }
 
@@ -210,12 +211,12 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
 
     private clearAll(): void {
         for (const value of this.values) {
-            this.parent.tree.findById(value.key).isChecked = false;
+            this.tree.findById(value.key).isChecked = false;
         }
         this.values = [];
         if (this.indeterminateValues) {
             for (const key of this.indeterminateValues) {
-                this.parent.tree.findById(key).isIndeterminate = false;
+                this.tree.findById(key).isIndeterminate = false;
             }
             this.indeterminateValues = null;
             this.indeterminateValuesChange.emit(null);
@@ -223,7 +224,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     }
 
     private clearFilter(): void {
-        for (const node of this.parent.tree.iterate()) {
+        for (const node of this.tree.iterate()) {
             node.isHidden = false;
         }
     }
@@ -236,12 +237,12 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             return;
         }
         this.treeControl.collapseAll();
-        for (const node of this.parent.tree.iterate()) {
+        for (const node of this.tree.iterate()) {
             node.isHidden = true;
         }
         const filteredNodes = this.getFilteredNodes(filterString);
         for (const node of filteredNodes) {
-            for (const ancestor of this.parent.tree.getAncestors(node)) {
+            for (const ancestor of this.tree.getAncestors(node)) {
                 ancestor.isHidden = false;
                 if (ancestor !== node && expandedNodes++ <= MAX_EXPAND_NODES) {
                     this.treeControl.expand(ancestor);
@@ -251,7 +252,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     }
 
     private getFilteredNodes(filterString: string): TreeNode[] {
-        return this.parent.tree.find((node) => {
+        return this.tree.find((node) => {
             const nodeWords = node.caption.trim().toLowerCase().split(/\s+/);
             const filterWords = filterString.trim().toLowerCase().split(/\s+/);
             return filterWords.every((filterWord) =>
@@ -290,7 +291,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
 
     private findNextExpandedNode(node?: TreeNode): TreeNode | null {
         if (!node) {
-            return this.parent.tree.rootNodes[0];
+            return this.tree.rootNodes[0];
         } else if (node.children?.length > 0 && this.treeControl.isExpanded(node)) {
             return node.children[0];
         }
@@ -308,7 +309,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     private findPreviousExpandedNode(node?: TreeNode): TreeNode | null {
         if (!node) {
             return this.findLastExpandedDescendent(
-                this.parent.tree.rootNodes[this.parent.tree.rootNodes.length - 1],
+                this.tree.rootNodes[this.tree.rootNodes.length - 1],
             );
         }
         const previousSibling = this.findPreviousSibling(node);
@@ -326,7 +327,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     }
 
     private findNextSibling(node: TreeNode): TreeNode | null {
-        const nodesList = node.parent?.children ?? this.parent.tree.rootNodes;
+        const nodesList = node.parent?.children ?? this.tree.rootNodes;
         if (nodesList && nodesList.length >= nodesList.indexOf(node)) {
             return nodesList[nodesList.indexOf(node) + 1];
         } else {
@@ -335,7 +336,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     }
 
     private findPreviousSibling(node: TreeNode): TreeNode | null {
-        const nodesList = node.parent?.children ?? this.parent.tree.rootNodes;
+        const nodesList = node.parent?.children ?? this.tree.rootNodes;
         if (nodesList && nodesList.indexOf(node) > 0) {
             return nodesList[nodesList.indexOf(node) - 1];
         } else {

@@ -1,14 +1,14 @@
 <div class="tree">
   <div class="tree-header">
     <mat-form-field>
-      <mat-label>{{parent.widget.definition.caption}}</mat-label>
+      <mat-label>{{widget.definition.caption}}</mat-label>
       <mat-icon matPrefix>search</mat-icon>
       <input matInput
              #input
              autocomplete="off"
              [(ngModel)]="filterString">
     </mat-form-field>
-    <button mat-button (click)="parent.closeOverlay()"><i icon iconId="close"></i></button>
+    <button mat-button (click)="close.emit()"><i icon iconId="close"></i></button>
   </div>
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <!-- Leaf nodes -->

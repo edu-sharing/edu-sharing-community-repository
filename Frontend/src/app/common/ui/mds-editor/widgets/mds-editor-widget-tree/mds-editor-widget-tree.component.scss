@@ -1,9 +1,12 @@
 @import '~@angular/material/theming';
+@import '../../../../../core-ui-module/styles/variables';
 
 mat-form-field {
     width: 100%;
 }
-
+.mat-chip-label{
+    @include limitLineLength(200px);
+}
 .suggestion-card {
     width: 100%;
     max-height: 500px;

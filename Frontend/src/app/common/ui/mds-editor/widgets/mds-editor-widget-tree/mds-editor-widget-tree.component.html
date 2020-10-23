@@ -16,7 +16,7 @@
       (click)="revealInTree(value)"
       (removed)="remove(value)"
     >
-      {{ value.label }}
+      <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
     <input
@@ -42,10 +42,12 @@
   <div class="suggestion-card">
     <app-mds-editor-widget-tree-core
       #treeRef
-      [parent]="this"
+      [widget]="widget"
+      [tree]="tree"
       [values]="chipsControl.value"
       [indeterminateValues]="indeterminateValues$ | async"
       [parentImpliesChildren]="editorMode === 'search'"
+      (close)="closeOverlay()"
       (valuesChange)="onValuesChange($event)"
       (indeterminateValuesChange)="indeterminateValues$.next($event)"
     ></app-mds-editor-widget-tree-core>

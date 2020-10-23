@@ -1,3 +1,8 @@
+@import '../../../../../core-ui-module/styles/variables';
+
 mat-form-field {
     width: 100%;
+}
+.mat-chip-label{
+    @include limitLineLength(200px);
 }
