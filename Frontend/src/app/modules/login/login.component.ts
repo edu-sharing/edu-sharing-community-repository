@@ -84,17 +84,15 @@ export class LoginComponent implements OnInit {
                         this.username = params.username;
                     }
 
-                    this.connector.onAllRequestsReady().subscribe(() => {
-                        this.isLoading = false;
-                        GlobalContainerComponent.finishPreloading();
-                        setTimeout(() => {
-                            if (this.username && this.passwordInput) {
-                                this.passwordInput.nativeInput.nativeElement.focus();
-                            }
-                            else if (this.usernameInput) {
-                                this.usernameInput.nativeElement.focus();
-                            }
-                        }, 100);
+                    this.isLoading = false;
+                    GlobalContainerComponent.finishPreloading();
+                    setTimeout(() => {
+                        if (this.username && this.passwordInput) {
+                            this.passwordInput.nativeInput.nativeElement.focus();
+                        }
+                        else if (this.usernameInput) {
+                            this.usernameInput.nativeElement.focus();
+                        }
                     });
                     this.scope = params.scope;
                     if (!this.scope) {
