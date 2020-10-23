@@ -24,6 +24,12 @@
 @mixin materialShadowLarge($important: false){
   box-shadow:0 10px 70px rgba(0, 0, 0, 0.15) if($important,!important,null);
 }
+@mixin limitLineLength($width){
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: $width;
+}
 @mixin limitLineCount($count,$lineHeight:1.0){
   overflow: hidden;
   text-overflow: ellipsis;
