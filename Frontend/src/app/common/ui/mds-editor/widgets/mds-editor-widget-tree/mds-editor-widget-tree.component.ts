@@ -1,5 +1,5 @@
 import { CdkConnectedOverlay, ConnectedPosition, OverlayRef } from '@angular/cdk/overlay';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {AfterViewInit, ApplicationRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -8,6 +8,8 @@ import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
+import {TranslateService} from '@ngx-translate/core';
+import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 @Component({
     selector: 'app-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
@@ -18,6 +20,7 @@ export class MdsEditorWidgetTreeComponent
     implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
     @ViewChild('input') input: ElementRef<HTMLElement>;
+    @ViewChild('treeRef') treeRef: MdsEditorWidgetTreeCoreComponent;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
 
@@ -48,6 +51,14 @@ export class MdsEditorWidgetTreeComponent
     ];
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
+
+    constructor(
+        mdsEditorInstance: MdsEditorInstanceService,
+        translate: TranslateService,
+        private applicationRef: ApplicationRef
+    ) {
+        super(mdsEditorInstance, translate);
+    }
 
     ngOnInit(): void {
         if (this.widget.definition.type === MdsWidgetType.SingleValueTree) {
@@ -105,8 +116,10 @@ export class MdsEditorWidgetTreeComponent
             return;
         }
         // Don't interfere with change detection
-        setTimeout(() => {
+        setTimeout(async () => {
             this.overlayIsVisible = true;
+            await this.applicationRef.tick();
+            setTimeout(() => this.treeRef.input.nativeElement.focus());
             // Wait for overlay
             setTimeout(() => {
                 overlayClickOutside(

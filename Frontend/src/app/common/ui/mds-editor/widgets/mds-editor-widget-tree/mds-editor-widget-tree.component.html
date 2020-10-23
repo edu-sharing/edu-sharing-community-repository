@@ -41,11 +41,10 @@
 >
   <div class="suggestion-card">
     <app-mds-editor-widget-tree-core
-      [widget]="widget"
-      [tree]="tree"
+      #treeRef
+      [parent]="this"
       [values]="chipsControl.value"
       [indeterminateValues]="indeterminateValues$ | async"
-      [filterString]="inputControl.value"
       [parentImpliesChildren]="editorMode === 'search'"
       (valuesChange)="onValuesChange($event)"
       (indeterminateValuesChange)="indeterminateValues$.next($event)"
