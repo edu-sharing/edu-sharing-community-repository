@@ -31,7 +31,7 @@
 			Ihnen wurden die folgenden Rechte zugeteilt:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
-			Bitte wechseln Sie zum Safe-Bereich in edu-sharing, um das Material anzusehen.
+			Nach Login in den Safe ist das Element im Bereich "Für mich freigegeben" zu finden.
 			<br><br>
 			{{if message}}Nachricht vom Nutzer:<br>
 				{{message}}
