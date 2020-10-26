@@ -1,16 +1,18 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import {
-    Component, ElementRef,
+    Component,
+    ElementRef,
     EventEmitter,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
     Output,
-    SimpleChanges, ViewChild,
+    SimpleChanges,
+    ViewChild,
 } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import {BehaviorSubject, ReplaySubject} from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
 import { Widget } from '../../../mds-editor-instance.service';
 import { MdsWidgetType } from '../../../types';
@@ -31,7 +33,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     get filterString() {
         return this.filterString$.value;
     }
-    set filterString (filterString: string) {
+    set filterString(filterString: string) {
         this.filterString$.next(filterString);
     }
     /**
