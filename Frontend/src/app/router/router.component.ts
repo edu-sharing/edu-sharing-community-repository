@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {NodeRenderComponent} from "../common/ui/node-render/node-render.component";
-import {Router, ActivatedRoute} from "@angular/router";
+import {Router, ActivatedRoute, Routes} from "@angular/router";
 import { ApplyToLmsComponent} from "../common/ui/apply-to-lms/apply-to-lms.component";
 import {SearchComponent} from "../modules/search/search.component";
 import {WorkspaceMainComponent} from "../modules/workspace/workspace.component";
@@ -76,7 +76,7 @@ export class RouterComponent {
  */
 
 // Due to ahead of time, we need to create all routes manuall
-export var ROUTES=[
+export var ROUTES: Routes = [
   // global
     { path: '', component: StartupComponent },
     { path: UIConstants.ROUTER_PREFIX+'app', component: LoginAppComponent },
