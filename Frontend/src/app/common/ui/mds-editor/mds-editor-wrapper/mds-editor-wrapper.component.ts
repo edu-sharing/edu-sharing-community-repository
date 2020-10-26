@@ -174,7 +174,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     async onSave(): Promise<void> {
         this.isLoading = true;
         try {
-            if(!this.mdsEditorInstance.canSave().value) {
+            if(!this.mdsEditorInstance.getCanSave()) {
                 this.mdsEditorInstance.showMissingRequiredWidgets();
                 return;
             }

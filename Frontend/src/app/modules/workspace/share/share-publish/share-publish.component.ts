@@ -67,7 +67,7 @@ export class SharePublishComponent implements OnChanges {
       this.refresh();
       this.node = (await this.nodeService.getNodeMetadata(this.node.ref.id, [RestConstants.ALL]).toPromise()).node;
       this.refresh();
-      this.mdsService.getCompletionStatus().subscribe((completion) => {
+      this.mdsService.observeCompletionStatus().subscribe((completion) => {
         console.log(completion);
         this.mdsCompletion = {
           completed: (completion.mandatory.completed || 0) + (completion.mandatoryForPublish.completed || 0),

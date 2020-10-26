@@ -38,7 +38,7 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         // values once when initializing. This might mark the whole dialog as dirty without the user
         // interacting even if default values have not been provided. However, since the slider
         // always implies a state, to save that state seems to be the natural behavior.
-        this.updateValues();
+        this.updateValues(false);
         this.widget.observeIsDisabled().subscribe((isDisabled) => {
             this.sliderOptions = {
                 ...this.sliderOptions,
@@ -52,12 +52,15 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
         });
     }
 
-    updateValues() {
+    updateValues(dirty: boolean = true) {
         if (this.widget.definition.type === 'slider') {
             // emit single value
-            this.setValue([this.currentValue[0].toString()]);
+            this.setValue([this.currentValue[0].toString()], dirty);
         } else {
-            this.setValue([this.currentValue[0].toString(), this.currentValue[1].toString()]);
+            this.setValue(
+                [this.currentValue[0].toString(), this.currentValue[1].toString()],
+                dirty,
+            );
         }
     }
 

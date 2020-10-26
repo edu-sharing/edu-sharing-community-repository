@@ -40,7 +40,7 @@ export class MdsEditorCardComponent implements OnInit {
             });
          */
         this.mdsEditorInstance
-            .getCompletionStatus()
+            .observeCompletionStatus()
             .pipe(delay(0))
             .subscribe((completionStatus) => {
                 this.completedProperties = map(completionStatus, (entry) => entry.completed);
@@ -49,7 +49,7 @@ export class MdsEditorCardComponent implements OnInit {
     }
 
     confirmDiscard(): void {
-        if (this.mdsEditorInstance.getHasChanges()) {
+        if (this.mdsEditorInstance.getHasUserChanges()) {
             this.toast.showModalDialog(
                 'MDS.CONFIRM_DISCARD_TITLE',
                 'MDS.CONFIRM_DISCARD_MESSAGE',

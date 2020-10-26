@@ -76,6 +76,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private hasUnsavedDefault: boolean;
         private initialValues: InitialValues;
         private value$ = new BehaviorSubject<string[]>(null);
+        private isDirty = false;
         /**
          * Values that are shown as indeterminate to the user and will not be overwritten when
          * saving.
@@ -147,6 +148,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             return this.bulkMode.value;
         }
 
+        getIsDirty(): boolean {
+            return this.isDirty;
+        }
+
         async getSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
             if (this.definition.values) {
                 return this.getLocalSuggestedValues(searchString);
@@ -155,7 +160,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
         }
 
-        setValue(value: string[]): void {
+        setValue(value: string[], dirty: boolean = true): void {
+            this.isDirty = dirty;
             this.value$.next(value);
             this.updateHasChanged();
             this.mdsEditorInstanceService.updateHasChanges();
@@ -363,7 +369,13 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     // Mutable state
     private completionStatus$ = new ReplaySubject<CompletionStatus>(1);
-    private hasChanges$ = new BehaviorSubject(false);
+    /** Whether the value would be updated on save due to changes by the user. */
+    private hasUserChanges$ = new BehaviorSubject(false);
+    /**
+     * Whether the value would be updated on save without the user having touched the widget due to
+     * defaults.
+     */
+    private hasProgrammaticChanges$ = new BehaviorSubject(false);
     private isValid$ = new BehaviorSubject(true);
     private canSave$ = new BehaviorSubject(false);
     private lastScrolledIntoViewIndex: number = null;
@@ -375,8 +387,13 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restConnector: RestConnectorService,
         private searchService: SearchService,
     ) {
-        combineLatest([this.hasChanges$, this.isValid$])
-            .pipe(map(([hasChanged, isValid]) => hasChanged && isValid))
+        combineLatest([this.hasUserChanges$, this.hasProgrammaticChanges$, this.isValid$])
+            .pipe(
+                map(
+                    ([hasUserChanges, hasProgrammaticChanges, isValid]) =>
+                        (hasUserChanges || hasProgrammaticChanges) && isValid,
+                ),
+            )
             .subscribe(this.canSave$);
     }
 
@@ -451,17 +468,19 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
     }
 
-    getHasChanges(): boolean {
-        return this.hasChanges$.value;
+    getHasUserChanges(): boolean {
+        return this.hasUserChanges$.value;
     }
-    canSave() {
-        return this.canSave$;
+
+    getCanSave(): boolean {
+        return this.canSave$.value;
     }
+
     observeCanSave(): Observable<boolean> {
         return this.canSave$.asObservable();
     }
 
-    getCompletionStatus(): Observable<CompletionStatus> {
+    observeCompletionStatus(): Observable<CompletionStatus> {
         return this.completionStatus$.asObservable();
     }
 
@@ -613,13 +632,22 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private updateHasChanges(): void {
-        const someWidgetsHaveChanged = this.widgets.some(
+        const someWidgetsHaveUserChanges = this.widgets.some(
             (widget) =>
-                (widget.getHasChanged() || widget.getHasUnsavedDefault()) &&
+                widget.getHasChanged() && widget.getIsDirty() && widget.getStatus() !== 'DISABLED',
+        );
+        const someWidgetsHaveProgrammaticChanges = this.widgets.some(
+            (widget) =>
+                // Explicit default values, defined in MDS.
+                (widget.getHasUnsavedDefault() ||
+                    // Implicit default values, that have been set by the form without user
+                    // interaction based on the widget type, e.g. `false` on a checkbox.
+                    (widget.getHasChanged() && !widget.getIsDirty())) &&
                 widget.getStatus() !== 'DISABLED',
         );
-        const someNativeWidgetsHaveChanged = this.nativeWidgets.some((w) => w.hasChanges.value);
-        this.hasChanges$.next(someWidgetsHaveChanged || someNativeWidgetsHaveChanged);
+        const someNativeWidgetsHaveChanges = this.nativeWidgets.some((w) => w.hasChanges.value);
+        this.hasUserChanges$.next(someWidgetsHaveUserChanges || someNativeWidgetsHaveChanges);
+        this.hasProgrammaticChanges$.next(someWidgetsHaveProgrammaticChanges);
     }
 
     private updateIsValid(): void {

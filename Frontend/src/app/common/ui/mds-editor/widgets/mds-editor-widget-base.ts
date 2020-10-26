@@ -37,8 +37,8 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
         // default implementation will do nothing
     }
 
-    protected setValue(value: string[]): void {
-        this.widget.setValue(value);
+    protected setValue(value: string[], dirty?: boolean): void {
+        this.widget.setValue(value, dirty);
     }
 
     protected setStatus(value: InputStatus): void {
