@@ -1,8 +1,6 @@
-import { Input } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
-import {MdsEditorInstanceService, MdsEditorWidgetCore, Widget} from '../mds-editor-instance.service';
-import { assertUnreachable, InputStatus, EditorMode, RequiredMode } from '../types';
+import { MdsEditorWidgetCore } from '../mds-editor-instance.service';
+import { assertUnreachable, InputStatus, RequiredMode } from '../types';
 
 export enum ValueType {
     String,

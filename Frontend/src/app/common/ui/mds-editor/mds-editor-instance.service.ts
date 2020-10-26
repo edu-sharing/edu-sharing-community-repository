@@ -1,4 +1,5 @@
-import {EventEmitter, Injectable, Input, OnDestroy} from '@angular/core';
+import { EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -8,6 +9,7 @@ import {
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
+import { SearchService } from '../../../modules/search/search.service';
 import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
 import {
@@ -21,15 +23,12 @@ import {
     MdsWidget,
     MdsWidgetType,
     MdsWidgetValue,
-    NativeWidgetType,
     RequiredMode,
     Suggestions,
     Values,
     ViewRelation,
 } from './types';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {SearchService} from '../../../modules/search/search.service';
-import {TranslateService} from '@ngx-translate/core';
 
 export interface CompletionStatusEntry {
     completed: number;
@@ -49,6 +48,7 @@ export interface InitialValues {
      */
     readonly individualValues?: string[];
 }
+
 export abstract class MdsEditorWidgetCore {
     @Input() widget: Widget;
     readonly isBulk: boolean;
@@ -61,7 +61,6 @@ export abstract class MdsEditorWidgetCore {
         this.isBulk = this.mdsEditorInstance.isBulk;
         this.editorMode = this.mdsEditorInstance.editorMode;
     }
-
 }
 
 /**
@@ -420,7 +419,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             widget.initWithValues(initialValues);
         }
         for (const widget of this.nativeWidgets) {
-            if(widget instanceof MdsEditorWidgetCore) {
+            if (widget instanceof MdsEditorWidgetCore) {
                 (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
             }
         }
@@ -554,6 +553,39 @@ export class MdsEditorInstanceService implements OnDestroy {
             (widget) => (values = widget.getValues ? widget.getValues(values) : values),
         );
         return values;
+    }
+
+    registerNativeWidget(nativeWidget: NativeWidget): void {
+        this.nativeWidgets.push(nativeWidget);
+        nativeWidget.hasChanges.subscribe(() => {
+            if (this.isDestroyed) {
+                console.warn(
+                    'Native widget is pushing state after having been destroyed:',
+                    nativeWidget,
+                );
+                nativeWidget.hasChanges.complete();
+                return;
+            }
+            this.updateHasChanges();
+        });
+    }
+
+    /**
+     * Lazy widget update (e.g. widget was inflated and attributes have been parsed and now change
+     * the widget data)
+     */
+    updateWidgetDefinition(widget: Widget): void {
+        const index = this.widgets.findIndex(
+            (w) =>
+                w.definition.id === widget.definition.id &&
+                w.definition.template === widget.definition.template,
+        );
+        if (index === -1) {
+            console.warn('widget not found', widget);
+        } else {
+            this.widgets.splice(index, 1, widget);
+            this.widgetsChanged.next();
+        }
     }
 
     private async initMds(groupId: string, mdsId: string, repository?: string): Promise<void> {
@@ -719,37 +751,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             total: total.length,
             completed: completed.length,
         };
-    }
-
-    registerNativeWidget(nativeWidget: NativeWidget) {
-        this.nativeWidgets.push(nativeWidget);
-        nativeWidget.hasChanges.subscribe(() => {
-            if (this.isDestroyed) {
-                console.warn(
-                    'Native widget is pushing state after having been destroyed:',
-                    nativeWidget,
-                );
-                nativeWidget.hasChanges.complete();
-                return;
-            }
-            this.updateHasChanges();
-        });
-    }
-
-    /**
-     * lazy widget update (e.g. widget was inflated and attributes have been parsed and now change the widget data)
-     * @param widget
-     */
-    updateWidgetDefinition(widget: Widget) {
-        const index = this.widgets.findIndex(
-            (w) => w.definition.id === widget.definition.id && w.definition.template === widget.definition.template
-        );
-        if(index === -1) {
-            console.warn('widget not found', widget);
-        } else {
-            this.widgets.splice(index, 1, widget);
-            this.widgetsChanged.next();
-        }
     }
 }
 
