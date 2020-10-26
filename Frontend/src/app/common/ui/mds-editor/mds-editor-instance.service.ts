@@ -23,6 +23,7 @@ import {
     MdsWidget,
     MdsWidgetType,
     MdsWidgetValue,
+    NativeWidgetType,
     RequiredMode,
     Suggestions,
     Values,
@@ -549,6 +550,9 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
                 return acc;
             }, {} as { [key: string]: string[] });
+        // Native widgets don't necessarily match their ID and relevant property or even affect
+        // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
+        // `getValues()`.
         this.nativeWidgets.forEach(
             (widget) => (values = widget.getValues ? widget.getValues(values) : values),
         );
@@ -735,17 +739,27 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     private updateCompletionState(): void {
         this.completionStatus$.next(
-            Object.values(RequiredMode).reduce((acc, requiredMode) => {
-                acc[requiredMode] = this.getCompletionStatusEntry(requiredMode);
-                return acc;
-            }, {} as CompletionStatus),
+            Object.values(RequiredMode)
+                .filter((requiredMode) => requiredMode !== RequiredMode.Ignore)
+                .reduce((acc, requiredMode) => {
+                    acc[requiredMode] = this.getCompletionStatusEntry(requiredMode);
+                    return acc;
+                }, {} as CompletionStatus),
         );
     }
 
     private getCompletionStatusEntry(requiredMode: RequiredMode): CompletionStatusEntry {
-        const total = this.widgets.filter(
-            (widget) => widget.definition.isRequired === requiredMode,
-        );
+        const total = this.widgets
+            // Filter out widgets that are not shown to the user.
+            .filter((widget) => widget.definition.type !== MdsWidgetType.DefaultValue)
+            // Filter out native widgets since we cannot tell whether they set a value for now.
+            .filter(
+                (widget) =>
+                    !Object.values(NativeWidgetType).includes(
+                        widget.definition.id as NativeWidgetType,
+                    ),
+            )
+            .filter((widget) => widget.definition.isRequired === requiredMode);
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         return {
             total: total.length,
