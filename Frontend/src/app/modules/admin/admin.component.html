@@ -660,9 +660,13 @@
   </div>
   </div>
     <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'" class="search-list">
+        <actionbar #actionbarComponent></actionbar>
         <listTable
                 [viewType]="0"
                 [columns]="searchColumns"
+                [scope]="SCOPES.Admin"
+                [mainNav]="mainNav"
+                [actionbar]="actionbarComponent"
                 [hasHeading]="true"
                 [nodes]="luceneNodes"
                 [hasCheckbox]="true"

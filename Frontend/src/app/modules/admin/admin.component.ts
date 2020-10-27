@@ -44,6 +44,7 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
+import {Scope} from '../../core-ui-module/option-item';
 
 
 @Component({
@@ -55,6 +56,8 @@ import {NgxEditorModel} from 'ngx-monaco-editor';
   ]
 })
 export class AdminComponent {
+  readonly SCOPES = Scope;
+
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
