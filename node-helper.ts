@@ -21,7 +21,7 @@ import {
 import {FormatSizePipe} from './pipes/file-size.pipe';
 import {Observable, Observer} from 'rxjs';
 import {Router} from '@angular/router';
-import {OptionItem} from './option-item';
+import {DefaultGroups, OptionGroup, OptionItem} from './option-item';
 import {DateHelper} from './DateHelper';
 import {UIConstants} from '../core-module/ui/ui-constants';
 import {Helper} from '../core-module/rest/helper';
@@ -31,6 +31,31 @@ import {ConfigurationHelper} from '../core-module/rest/configuration-helper';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Toast} from './toast';
+
+export interface Entry {
+  name: string;
+  icon: string;
+  scope?: string;
+  isDisabled: boolean;
+  isSeparate: boolean;
+  isCustom: boolean;
+  position: number;
+  url: string;
+  open: () => void;
+}
+
+export interface ConfigOptionItem extends Entry {
+  mode: string;
+  scopes: string[];
+  ajax: boolean;
+  permission: string;
+  group: string;
+  toolpermission: string;
+  isDirectory: string;
+  showAsAction: boolean;
+  multiple: boolean;
+  changeStrategy: string;
+}
 
 export class NodeHelper {
   /**
@@ -74,17 +99,17 @@ export class NodeHelper {
         }
       }
       if(range[0]) {
-          if (range[0] == range[1] || !range[1]) {
-            return range[0].trim()+' '+translation.instant('LEARNINGAGE_YEAR');
-          }
-          else {
-            return range[0].trim()+'-'+range[1].trim()+' '+translation.instant('LEARNINGAGE_YEAR');
-          }
+        if (range[0] == range[1] || !range[1]) {
+          return range[0].trim()+' '+translation.instant('LEARNINGAGE_YEAR');
+        }
+        else {
+          return range[0].trim()+'-'+range[1].trim()+' '+translation.instant('LEARNINGAGE_YEAR');
+        }
       }
     }
     if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory) {
       const workflow=NodeHelper.getWorkflowStatus(config,node);
-      return '<div class="workflowStatus" style="background-color: '+workflow.color+'">'+translation.instant('WORKFLOW.'+workflow.id)+'</div>'
+      return '<div class="workflowStatus" style="background-color: '+workflow.color+'">'+translation.instant('WORKFLOW.'+workflow.id)+'</div>';
     }
     if(name==RestConstants.DIMENSIONS) {
       const width=node.properties[RestConstants.CCM_PROP_WIDTH];
@@ -136,8 +161,8 @@ export class NodeHelper {
    * returns true if all nodes have the requested right
    * mode (only works for collection refs):
    *   Local: check only rights of the node itself
-       Original: check only rights of the original node this refers to (collection ref). If it is not a collection ref, fallback to local
-       Both: check both rights of node + original combined via or
+   Original: check only rights of the original node this refers to (collection ref). If it is not a collection ref, fallback to local
+   Both: check both rights of node + original combined via or
    *
    */
   public static getNodesRight(nodes :any[],right : string,mode = NodesRightMode.Local) {
@@ -248,25 +273,25 @@ export class NodeHelper {
 
   public static downloadUrl(bridge:BridgeService,url:string,fileName='download') {
     if(bridge.isRunningCordova()) {
-        bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_STARTED', {name:fileName});
-        bridge.getCordova().downloadContent(url,fileName,(deviceFileName:string)=> {
-            if(bridge.getCordova().isAndroid()) {
-                bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_FINISHED_ANDROID', {name: fileName});
-            }
-            else {
-                bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_FINISHED_IOS', {name: fileName});
-            }
-        },()=> {
-            bridge.showTemporaryMessage(MessageType.error, 'TOAST.DOWNLOAD_FAILED',{name:fileName},{
-              link:{
-                caption:'TOAST.DOWNLOAD_TRY_AGAIN',
-                callback:()=> {this.downloadUrl(bridge,url,fileName)}
-              }
-            });
+      bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_STARTED', {name:fileName});
+      bridge.getCordova().downloadContent(url,fileName,(deviceFileName:string)=> {
+        if(bridge.getCordova().isAndroid()) {
+          bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_FINISHED_ANDROID', {name: fileName});
+        }
+        else {
+          bridge.showTemporaryMessage(MessageType.info, 'TOAST.DOWNLOAD_FINISHED_IOS', {name: fileName});
+        }
+      },()=> {
+        bridge.showTemporaryMessage(MessageType.error, 'TOAST.DOWNLOAD_FAILED',{name:fileName},{
+          link:{
+            caption:'TOAST.DOWNLOAD_TRY_AGAIN',
+            callback:()=> {this.downloadUrl(bridge,url,fileName);}
+          }
         });
+      });
     }
     else {
-        window.open(url);
+      window.open(url);
     }
   }
   /**
@@ -283,20 +308,20 @@ export class NodeHelper {
    * @param node
    */
   public static appendImageData(rest:RestConnectorService,node: Node,quality=60) : Observable<Node> {
-  return new Observable<Node>((observer : Observer<Node>)=> {
-    const options:any=rest.getRequestOptions();
-    options.responseType='blob';
+    return new Observable<Node>((observer : Observer<Node>)=> {
+      const options:any=rest.getRequestOptions();
+      options.responseType='blob';
 
-    rest.get(node.preview.url+'&quality='+quality,options,false).subscribe((data:HttpResponse<Blob>)=> {
-    // rest.get("http://localhost:8081/edu-sharing/rest/authentication/v1/validateSession",options,false).subscribe((data:Response)=>{
-      node.preview.data=data.body;
-      observer.next(node);
-      observer.complete();
-    },(error)=> {
-      observer.error(error);
-      observer.complete();
+      rest.get(node.preview.url+'&quality='+quality,options,false).subscribe((data:HttpResponse<Blob>)=> {
+        // rest.get("http://localhost:8081/edu-sharing/rest/authentication/v1/validateSession",options,false).subscribe((data:Response)=>{
+        node.preview.data=data.body;
+        observer.next(node);
+        observer.complete();
+      },(error)=> {
+        observer.error(error);
+        observer.complete();
+      });
     });
-  });
   }
 
   /**
@@ -378,9 +403,9 @@ export class NodeHelper {
   public static getUserDisplayName(user:AuthorityProfile|User) {
     return (user.profile.firstName+' '+user.profile.lastName).trim();
   }
-    static isSavedSearchObject(node: Node) {
-        return node.mediatype=='saved_search';
-    }
+  static isSavedSearchObject(node: Node) {
+    return node.mediatype=='saved_search';
+  }
   /**
    * Get an attribute (property) from a node
    * The attribute will be cached add the object
@@ -391,19 +416,19 @@ export class NodeHelper {
    * @returns {any}
    */
   public static getAttribute(translate:TranslateService,config:ConfigurationService,data : any,item : ListItem) : string {
-      if(!item){
-        return '';
-      }
-      if((data as any).propertiesConverted && (data as any).propertiesConverted[item.name]) {
-          return (data as any).propertiesConverted[item.name];
-      }
-      const value=this.getAttributeWithoutCache(translate,config,data,item);
-      // Store already converted data inside node/object
-      if(!(data as any).propertiesConverted) {
-          (data as any).propertiesConverted=[];
-      }
-      (data as any).propertiesConverted[item.name]=value;
-      return value;
+    if(!item){
+      return '';
+    }
+    if((data as any).propertiesConverted && (data as any).propertiesConverted[item.name]) {
+      return (data as any).propertiesConverted[item.name];
+    }
+    const value=this.getAttributeWithoutCache(translate,config,data,item);
+    // Store already converted data inside node/object
+    if(!(data as any).propertiesConverted) {
+      (data as any).propertiesConverted=[];
+    }
+    (data as any).propertiesConverted[item.name]=value;
+    return value;
   }
   public static getAttributeWithoutCache(translate:TranslateService,config:ConfigurationService,data : any,item : ListItem) : string {
     if(item.type=='NODE') {
@@ -454,78 +479,102 @@ export class NodeHelper {
   /**
    * Add custom options to the node menu (loaded via config)
    */
-  public static applyCustomNodeOptions(toast:Toast, http:HttpClient, connector:RestConnectorService, custom: any,allNodes:Node[], selectedNodes: Node[], options: OptionItem[],replaceUrl:any={}) {
+  public static applyCustomNodeOptions(toast:Toast, http:HttpClient, connector:RestConnectorService, custom: ConfigOptionItem[],allNodes:Node[], selectedNodes: Node[], options: OptionItem[],replaceUrl:any={}) {
     if (custom) {
       for (const c of custom) {
-        if(c.remove) {
-          const i=Helper.indexOfObjectArray(options,'name',c.name)
+        let item: OptionItem;
+        if(c.changeStrategy === 'custom') {
+          const i=Helper.indexOfObjectArray(options,'name',c.name);
           if(i!=-1)
             options.splice(i,1);
           continue;
+        } else if (c.changeStrategy === 'update'){
+          item = options.find((o) => o.name === c.name);
+        } else {
+          let callback = (node: Node) => {
+            const nodes = node == null ? selectedNodes : [node];
+            let ids = '';
+            if(nodes) {
+              for (const node of nodes) {
+                if (ids)
+                  ids += ',';
+                ids += node.ref.id;
+              }
+            }
+            let url = c.url.replace(':id', ids);
+            url = url.replace(':api', connector.getAbsoluteEndpointUrl());
+            if(replaceUrl) {
+              for(const key in replaceUrl) {
+                url = url.replace(key,encodeURIComponent(replaceUrl[key]));
+              }
+            }
+            if (!c.ajax) {
+              window.open(url);
+              return;
+            }
+            toast.showProgressDialog();
+            http.get(url).subscribe((data: any) => {
+              if (data.success)
+                toast.error(data.success, null, data.message ? data.success : data.message, data.message);
+              else if (data.error)
+                toast.error(null, data.error, null, data.message ? data.error : data.message, data.message);
+              else
+                toast.error(null);
+              toast.closeModalDialog();
+            }, (error: any) => {
+              toast.error(error);
+              toast.closeModalDialog();
+            });
+          };
+          item = new OptionItem(c.name, c.icon, callback);
         }
-        let position = c.position;
-        if (c.position < 0)
-          position = options.length - c.position;
-        const item = new OptionItem(c.name, c.icon, (node: Node) => {
-          const nodes = node == null ? selectedNodes : [node];
-          let ids = '';
-          if(nodes) {
-            for (const node of nodes) {
-              if (ids)
-                ids += ',';
-              ids += node.ref.id;
-            }
+        if(c.group) {
+          item.group = (DefaultGroups as any)[Object.keys(DefaultGroups).find(
+              (key) => ((DefaultGroups as any)[key] as OptionGroup).id === c.group
+          )];
+        }
+        if(c.position != null) {
+          console.log(c);
+          let position = c.position;
+          if (c.position < 0) {
+            position = options.
+            filter((o) => o.group.id === item.group.id).
+            reduce((o1, o2) => o1.priority > o2.priority ? o1 : o2).priority - c.position;
           }
-          let url = c.url.replace(':id', ids)
-          url = url.replace(':api', connector.getAbsoluteEndpointUrl());
-          if(replaceUrl) {
-            for(const key in replaceUrl) {
-              url = url.replace(key,encodeURIComponent(replaceUrl[key]));
-            }
-          }
-          if (!c.ajax) {
-            window.open(url);
-            return;
-          }
-          toast.showProgressDialog();
-          http.get(url).subscribe((data: any) => {
-            if (data.success)
-              toast.error(data.success, null, data.message ? data.success : data.message, data.message);
-            else if (data.error)
-              toast.error(null, data.error, null, data.message ? data.error : data.message, data.message);
-            else
-              toast.error(null);
-            toast.closeModalDialog();
-          }, (error: any) => {
-            toast.error(error);
-            toast.closeModalDialog();
-          });
-        });
-        item.isSeparate = c.isSeperate;
+          item.priority = c.position;
+        }
+        if(c.icon != null) {
+          item.icon = c.icon;
+        }
+        item.showAsAction = c.showAsAction;
+        item.isSeparate = c.isSeparate;
         item.enabledCallback=(node:Node)=> {
-            if (c.permission) {
-                return NodeHelper.getNodesRight(NodeHelper.getActionbarNodes(selectedNodes, node), c.permission);
-            }
-            return true;
-        }
+          if (c.permission) {
+            return NodeHelper.getNodesRight(NodeHelper.getActionbarNodes(selectedNodes, node), c.permission);
+          }
+          return true;
+        };
         item.isEnabled=item.enabledCallback(null);
         item.showCallback=(node:Node)=> {
-            const nodes=NodeHelper.getActionbarNodes(selectedNodes,node);
-            if(c.mode=='nodes' && (!nodes || nodes.length))
-                return false;
-            if(c.mode=='noNodes' && nodes && nodes.length)
-                return false;
-            if(c.mode=='noNodesNotEmpty' && (nodes && nodes.length || !allNodes || !allNodes.length))
-                return false;
-            if (c.mode=='nodes' && c.isDirectory != 'any' && nodes && c.isDirectory != nodes[0].isDirectory)
-                return false;
-            if(c.toolpermission && !connector.hasToolPermissionInstant(c.toolpermission))
-                return false;
-            if (!c.multiple && nodes && nodes.length > 1)
-                return false;
-            return true;
+          const nodes=NodeHelper.getActionbarNodes(selectedNodes,node);
+          if(c.mode=='nodes' && (!nodes || nodes.length))
+            return false;
+          if(c.mode=='noNodes' && nodes && nodes.length)
+            return false;
+          if(c.mode=='noNodesNotEmpty' && (nodes && nodes.length || !allNodes || !allNodes.length))
+            return false;
+          // @ts-ignore
+          if (c.mode=='nodes' && c.isDirectory != 'any' && nodes && c.isDirectory != nodes[0].isDirectory)
+            return false;
+          if(c.toolpermission && !connector.hasToolPermissionInstant(c.toolpermission))
+            return false;
+          if (!c.multiple && nodes && nodes.length > 1)
+            return false;
+          return true;
+        };
+        if(c.changeStrategy !== 'update') {
+          options.splice(position, 0, item);
         }
-        options.splice(position, 0, item);
       }
     }
   }
@@ -536,8 +585,8 @@ export class NodeHelper {
    * @param node
    */
   static addNodeToLms(router:Router,storage:TemporaryStorageService,node: Node,reurl:string) {
-      storage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE,node);
-      router.navigate([UIConstants.ROUTER_PREFIX+'apply-to-lms',node.ref.repo, node.ref.id],{queryParams:{reurl}});
+    storage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE,node);
+    router.navigate([UIConstants.ROUTER_PREFIX+'apply-to-lms',node.ref.repo, node.ref.id],{queryParams:{reurl}});
   }
   /**
    * Download one or multiple nodes
@@ -607,7 +656,7 @@ export class NodeHelper {
     if(value) value=value[0];
     if(!value)
       return NodeHelper.getWorkflows(config)[0];
-   return NodeHelper.getWorkflowStatusById(config,value);
+    return NodeHelper.getWorkflowStatusById(config,value);
   }
   static getWorkflows(config: ConfigurationService) : WorkflowDefinition[] {
     return config.instant('workflows',[
@@ -632,65 +681,65 @@ export class NodeHelper {
     }
     return allFiles;
   }
-    static allFolders(nodes: Node[]) {
-        let allFolders=true;
-        if(nodes) {
-            for (const node of nodes) {
-                if (!node.isDirectory)
-                    allFolders = false;
-            }
-        }
-        return allFolders;
+  static allFolders(nodes: Node[]) {
+    let allFolders=true;
+    if(nodes) {
+      for (const node of nodes) {
+        if (!node.isDirectory)
+          allFolders = false;
+      }
     }
+    return allFolders;
+  }
   static hasAnimatedPreview(node: Node) {
     return !node.preview.isIcon && (node.mediatype=='file-video' || node.mimetype=='image/gif');
   }
 
   static askCCPublish(translate:TranslateService,node: Node) {
-      const mail=node.createdBy.firstName+' '+node.createdBy.lastName+'<'+node.createdBy.mailbox+'>';
-      const subject=translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
-      window.location.href='mailto:'+mail+'?subject='+encodeURIComponent(subject);
+    const mail=node.createdBy.firstName+' '+node.createdBy.lastName+'<'+node.createdBy.mailbox+'>';
+    const subject=translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
+    window.location.href='mailto:'+mail+'?subject='+encodeURIComponent(subject);
   }
 
-    /**
-     * checks if a doi handle is active (node must be explicitly public and handle it must be present)
-     * @param {Node} node
-     * @param {Permissions} permissions
-     * @returns {boolean}
-     */
+  /**
+   * checks if a doi handle is active (node must be explicitly public and handle it must be present)
+   * @param {Node} node
+   * @param {Permissions} permissions
+   * @returns {boolean}
+   */
   static isDOIActive(node: Node, permissions: Permission[]) {
     if(node.aspects.indexOf(RestConstants.CCM_ASPECT_PUBLISHED)!=-1 && node.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]) {
-        for (const permission of permissions) {
-            if (permission.authority.authorityName === RestConstants.AUTHORITY_EVERYONE)
-                return true;
-        }
+      for (const permission of permissions) {
+        if (permission.authority.authorityName === RestConstants.AUTHORITY_EVERYONE)
+          return true;
+      }
     }
-      return false;
+    return false;
   }
 
   static propertiesFromConnector(event: any) {
-      const name=event.name+'.'+event.type.filetype;
-      const prop=RestHelper.createNameProperty(name);
-      prop[RestConstants.LOM_PROP_TECHNICAL_FORMAT]=[event.type.mimetype];
-      if(event.type.mimetype=='application/zip') {
-          prop[RestConstants.CCM_PROP_CCRESSOURCETYPE] = [event.type.ccressourcetype];
-          prop[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE] = [event.type.ccresourcesubtype];
-          prop[RestConstants.CCM_PROP_CCRESSOURCEVERSION] = [event.type.ccressourceversion];
-      }
-      if(event.type.editorType) {
-          prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
-      }
-      return prop;
+    const name=event.name+'.'+event.type.filetype;
+    const prop=RestHelper.createNameProperty(name);
+    prop[RestConstants.LOM_PROP_TECHNICAL_FORMAT]=[event.type.mimetype];
+    if(event.type.mimetype=='application/zip') {
+      prop[RestConstants.CCM_PROP_CCRESSOURCETYPE] = [event.type.ccressourcetype];
+      prop[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE] = [event.type.ccresourcesubtype];
+      prop[RestConstants.CCM_PROP_CCRESSOURCEVERSION] = [event.type.ccressourceversion];
+    }
+    if(event.type.editorType) {
+      prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
+    }
+    return prop;
   }
   public static getActionbarNodes<T>(nodes:T[],node:T):T[] {
-      return node ? [node] : nodes && nodes.length ? nodes  : null;
+    return node ? [node] : nodes && nodes.length ? nodes  : null;
   }
 
-    static referenceOriginalExists(node: Node|CollectionReference) {
-      if(node==null)
-        return true;
-      return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true)
-    }
+  static referenceOriginalExists(node: Node|CollectionReference) {
+    if(node==null)
+      return true;
+    return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true);
+  }
 
   static isNodeCollection(node: Node | any) {
     return node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !==-1 || node.collection;

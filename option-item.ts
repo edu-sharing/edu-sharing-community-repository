@@ -152,14 +152,14 @@ export enum HideMode {
   Hide
 }
 export enum Scope {
-  Render,
-  Search,
-  CollectionsReferences,
-  CollectionsCollection,
-  WorkspaceList,
-  WorkspaceTree,
-  Oer,
-  CreateMenu,
+  Render = 'Render',
+  Search = 'Search',
+  CollectionsReferences = 'CollectionsReferences',
+  CollectionsCollection = 'CollectionsCollection',
+  WorkspaceList = 'WorkspaceList',
+  WorkspaceTree = 'WorkspaceTree',
+  Oer = 'Oer',
+  CreateMenu = 'CreateMenu',
 }
 export enum ElementType {
   Node,
