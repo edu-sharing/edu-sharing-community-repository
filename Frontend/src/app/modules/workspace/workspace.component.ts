@@ -204,12 +204,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.connector.setRoute(this.route);
         this.globalProgress = true;
         this.cardHasOpenModals$ = card.hasOpenModals.delay(0);
-        this.setViewType(
-            this.config.instant('workSpaceViewType',
-                this.config.instant('workSpaceViewType', 0)
-            )
-        );
-    }
+}
 
     private hideDialog(): void {
         this.toast.closeModalDialog();
@@ -375,6 +370,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                 this.oldParams = params;
                                 if (params.viewType != null) {
                                     this.setViewType(params.viewType);
+                                } else{
+                                    this.setViewType(this.config.instant('workspaceViewType', 0));
                                 }
                                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
                                     this.root = params.root;
@@ -713,7 +710,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     private toggleView() {
         this.setViewType(1 - this.viewType);
-        this.refreshRoute();
         if (this.viewType === 0) {
             this.viewToggle.icon = 'view_module';
         }
@@ -785,6 +781,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private setViewType(viewType: number) {
         try {
             this.viewType = viewType;
+            this.refreshRoute();
         } catch (referenceError) {
             this.viewType = 0;
         }
