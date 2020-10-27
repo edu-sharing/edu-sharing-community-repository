@@ -17,18 +17,9 @@ import {
 } from '../../core-module/core.module';
 import { OPEN_URL_MODE } from '../../core-module/ui/ui-constants';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import {Entry} from '../../core-ui-module/node-helper';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
-
-export interface Entry {
-    name: string;
-    icon: string;
-    scope?: string;
-    isDisabled: boolean;
-    isSeparate: boolean;
-    isCustom: boolean;
-    open: () => void;
-}
 
 interface CustomEntryDefinition {
     name: string;
