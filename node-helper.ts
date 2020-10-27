@@ -534,7 +534,6 @@ export class NodeHelper {
           )];
         }
         if(c.position != null) {
-          console.log(c);
           let position = c.position;
           if (c.position < 0) {
             position = options.
