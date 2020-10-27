@@ -4,6 +4,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -68,8 +69,12 @@ public class RenamePersonHomeFolders extends AbstractJob{
         if(!currentName.equals(shouldName)){
             logger.info("will rename userhome folder user: " + creator+" currentName:"+currentName+" newName:"+shouldName + " scope:"+scope+" execute:"+execute);
             if(execute) {
-                serviceRegistry.getNodeService().setProperty(nodeRef,ContentModel.PROP_NAME,shouldName);
-                new RepositoryCache().remove(nodeRef.getId());
+                try {
+                    serviceRegistry.getNodeService().setProperty(nodeRef, ContentModel.PROP_NAME, shouldName);
+                    new RepositoryCache().remove(nodeRef.getId());
+                }catch (DuplicateChildNodeNameException e){
+                    logger.error(e.getMessage());
+                }
             }
         }
     }
