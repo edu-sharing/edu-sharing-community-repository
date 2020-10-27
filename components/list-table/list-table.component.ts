@@ -41,7 +41,7 @@ import {
     RestConstants,
     RestHelper,
     RestLocatorService,
-    RestNetworkService,
+    RestNetworkService, SessionStorageService,
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
@@ -426,6 +426,11 @@ export class ListTableComponent implements EventListener {
     @Output() onViewNode = new EventEmitter();
 
     /**
+     * Called when columns list must be updated (e.g. due to config change)
+     */
+    @Output() onInvalidateColumns = new EventEmitter();
+
+    /**
      * Called when the selection has changed.
      *
      * Emits an array of objects from the list (usually nodes, but depends how you filled it)
@@ -447,12 +452,7 @@ export class ListTableComponent implements EventListener {
         event: any;
         type: 'move' | 'copy';
     }>();
-
-    /**
-     * Called when the user changed the order of the columns.
-     */
-    @Output() columnsChanged = new EventEmitter<ListItem[]>();
-
+    
     /**
      * Called when the user clicked the delete for a missing reference object.
      */
@@ -494,6 +494,7 @@ export class ListTableComponent implements EventListener {
         private config: ConfigurationService,
         private changes: ChangeDetectorRef,
         private storage: TemporaryStorageService,
+        private sessionStorage: SessionStorageService,
         private network: RestNetworkService,
         private connectors: RestConnectorsService,
         private locator: RestLocatorService,
@@ -508,6 +509,11 @@ export class ListTableComponent implements EventListener {
             () => this.closeReorder(false),
             () => this.closeReorder(true),
         );
+        this.reorderButtons.splice(0, 0,
+            new DialogButton('RESET', + DialogButton.TYPE_CANCEL + DialogButton.TYPE_SECONDARY, () => {
+            this.sessionStorage.delete('workspaceColumns');
+            this.onInvalidateColumns.emit();
+        }));
         this.id = Math.random();
         frame.addListener(this);
         // wait for all bindings to finish
@@ -845,7 +851,7 @@ export class ListTableComponent implements EventListener {
         this.reorderDialogChange.emit(false);
         if (save) {
             this.columns = this.columnsAll;
-            this.columnsChanged.emit(this.columnsAll);
+            this.sessionStorage.set('workspaceColumns',this.columns);
         } else {
             this.columns = this.columnsOriginal;
         }

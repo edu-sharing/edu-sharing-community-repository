@@ -55,6 +55,7 @@ import { Ng5SliderModule } from 'ng5-slider';
 import {RouterLink, RouterModule} from "@angular/router";
 import {NodeUrlComponent} from "./components/node-url/node-url.component";
 import { DurationPipe } from './components/video-controls/duration.pipe';
+import {BitwisePipe} from './pipes/bitwise.pipe';
 
 @NgModule({
     declarations: [
@@ -91,6 +92,7 @@ import { DurationPipe } from './components/video-controls/duration.pipe';
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
+        BitwisePipe,
     ],
     imports: [
         A11yModule,

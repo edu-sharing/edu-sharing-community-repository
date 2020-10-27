@@ -40,13 +40,23 @@
       <div class="additional-action-area-content">
         <ng-content select="[action-area]"></ng-content>
       </div>
+      <div class="buttons-left">
+        <ng-container *ngFor="let button of _buttonsLeft"
+                      [ngTemplateOutlet]="buttonsTemplate"
+                      [ngTemplateOutletContext]="{ $implicit: button }">
+        </ng-container>
+      </div>
       <div class="buttons">
-        <ng-container *ngFor="let button of _buttons">
-          <button *ngIf="button.type==1" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
-          <button *ngIf="button.type==2" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
-          <button *ngIf="button.type==3" mat-flat-button color="warn" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+        <ng-container *ngFor="let button of _buttons"
+                      [ngTemplateOutlet]="buttonsTemplate"
+                      [ngTemplateOutletContext]="{ $implicit: button }">
         </ng-container>
       </div>
     </mat-card-actions>
   </mat-card>
 </div>
+<ng-template #buttonsTemplate let-button>
+  <button *ngIf="button.type | bitwise:{operator: 1}" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+  <button *ngIf="button.type | bitwise:{operator: 2}" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+  <button *ngIf="button.type | bitwise:{operator: 4}" mat-flat-button color="warn" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+</ng-template>

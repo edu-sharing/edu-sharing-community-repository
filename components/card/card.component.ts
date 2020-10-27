@@ -108,7 +108,11 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         }
     }
     @Input() set buttons(buttons: DialogButton[]) {
-        this._buttons = buttons;
+        // tslint:disable-next-line:no-bitwise
+        this._buttons = buttons?.filter((b) => (b.type & DialogButton.TYPE_SECONDARY) === 0);
+        // tslint:disable-next-line:no-bitwise
+        this._buttonsLeft = buttons?.filter((b) => (b.type & DialogButton.TYPE_SECONDARY) === DialogButton.TYPE_SECONDARY);
+        console.log(this._buttons, this._buttonsLeft);
     }
 
     /**
@@ -148,6 +152,10 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * Also use the DialogButton.getYesNo() and others if applicable!
      */
     _buttons: DialogButton[];
+    /**
+     * Buttons on the left side (Secondary)
+     */
+    _buttonsLeft: DialogButton[];
     jumpmarkActive: CardJumpmark;
 
     private static modalCards: CardComponent[] = [];
