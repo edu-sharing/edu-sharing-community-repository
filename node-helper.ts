@@ -32,19 +32,19 @@ import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Toast} from './toast';
 
-export interface Entry {
+export interface ConfigEntry {
   name: string;
   icon: string;
   scope?: string;
   isDisabled: boolean;
   isSeparate: boolean;
   isCustom: boolean;
-  position: number;
-  url: string;
-  open: () => void;
+  position?: number;
+  url?: string;
+  open?: () => void;
 }
 
-export interface ConfigOptionItem extends Entry {
+export interface ConfigOptionItem extends ConfigEntry {
   mode: string;
   scopes: string[];
   ajax: boolean;
@@ -573,7 +573,7 @@ export class NodeHelper {
           return true;
         };
         if(c.changeStrategy !== 'update') {
-          options.splice(position, 0, item);
+          options.splice(c.position ?? 0, 0, item);
         }
       }
     }
