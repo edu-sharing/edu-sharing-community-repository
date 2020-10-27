@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 public class RenamePersonHomeFolders extends AbstractJob{
 
     public static final String PARAM_EXECUTE = "EXECUTE";
+    public static final String DESCRIPTION = "Rename folders in person homedir i.e when system language changes.";
 
     ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry)appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
