@@ -97,7 +97,7 @@
     </div>
 </card>
 <workspace-workflow *ngIf="nodeWorkflow"
-                    [nodeId]="nodeWorkflow.ref.id"
+                    [nodes]="nodeWorkflow"
                     (onLoading)="globalProgress=$event"
                     (onDone)="closeWorkflow($event)"
                     (onClose)="closeWorkflow()"
