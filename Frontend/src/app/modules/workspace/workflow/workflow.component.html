@@ -15,9 +15,9 @@
           hint="{{'WORKSPACE.WORKFLOW.RECEIVERS_HINT' | translate}}"
         ></authority-search-input>
           <div class="status">
-            <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="chooseStatus=true" (click)="chooseStatus=true">
+            <button mat-raised-button (click)="chooseStatus=true">
               <i class="align-icon statusIcon" [style.background-color]="status.color">&nbsp;</i> {{'WORKFLOW.'+status.id | translate}}
-              <i class="material-icons align-icon right">keyboard_arrow_down</i></div>
+              <i class="material-icons align-icon right">keyboard_arrow_down</i></button>
           </div>
           <div *ngIf="chooseStatus" class="chooseStatus">
           <div class="dialog" (click)="chooseStatus=false"></div>
