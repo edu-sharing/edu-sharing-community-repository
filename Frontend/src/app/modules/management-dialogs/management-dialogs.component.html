@@ -78,7 +78,7 @@
     <qrcode [qrdata]="qr.data" elementType="img" margin="2" width="512" errorCorrectionLevel="M"></qrcode>
 </card>
 <workspace-workflow *ngIf="nodeWorkflow"
-                    [nodeId]="nodeWorkflow.ref.id"
+                    [nodes]="nodeWorkflow"
                     (onLoading)="globalProgress=$event"
                     (onDone)="closeWorkflow($event)"
                     (onClose)="closeWorkflow()"

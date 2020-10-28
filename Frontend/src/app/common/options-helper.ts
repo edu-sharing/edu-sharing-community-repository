@@ -567,9 +567,9 @@ export class OptionsHelperService {
         }
          */
         const workflowNode = new OptionItem('OPTIONS.WORKFLOW', 'swap_calls', (object) =>
-            management.nodeWorkflow =  this.getObjects(object)[0]
+            management.nodeWorkflow = this.getObjects(object)
         );
-        workflowNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.NoBulk, Constrain.User];
+        workflowNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         workflowNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         workflowNode.permissionsMode = HideMode.Disable;
         workflowNode.group = DefaultGroups.Edit;

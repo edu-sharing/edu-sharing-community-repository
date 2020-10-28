@@ -81,7 +81,7 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeDebugChange = new EventEmitter<Node[]>();
     @Input() nodeShareLink : Node;
     @Output() nodeShareLinkChange = new EventEmitter();
-    @Input() nodeWorkflow : Node;
+    @Input() nodeWorkflow : Node[];
     @Output() nodeWorkflowChange = new EventEmitter();
   @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
@@ -223,11 +223,11 @@ export class WorkspaceManagementDialogsComponent  {
      this.nodeShare = null
      this.nodeShareChange.emit(null);
  }
-    public closeWorkflow(node: Node = null){
+    public closeWorkflow(nodes: Node[] = null){
         this.nodeWorkflow = null;
         this.nodeWorkflowChange.emit(null);
-        if (node) {
-            this.onRefresh.emit([node]);
+        if (nodes) {
+            this.onRefresh.emit(nodes);
         }
     }
     private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
