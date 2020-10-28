@@ -483,13 +483,16 @@ export class NodeHelper {
     if (custom) {
       for (const c of custom) {
         let item: OptionItem;
-        if(c.changeStrategy === 'custom') {
+        if(c.changeStrategy === 'remove') {
           const i=Helper.indexOfObjectArray(options,'name',c.name);
           if(i!=-1)
             options.splice(i,1);
           continue;
-        } else if (c.changeStrategy === 'update'){
+        } else if (c.changeStrategy === 'update') {
           item = options.find((o) => o.name === c.name);
+          if(!item) {
+            continue;
+          }
         } else {
           let callback = (node: Node) => {
             const nodes = node == null ? selectedNodes : [node];
