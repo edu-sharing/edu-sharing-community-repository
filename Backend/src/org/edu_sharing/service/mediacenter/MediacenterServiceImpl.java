@@ -24,6 +24,7 @@ import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
+import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.Mediacenter;
@@ -541,27 +542,7 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
 
-    private HashMap<String, NodeRef> getImportedNodes(String startFolder) {
 
-        HashMap<String, NodeRef> result = new HashMap<String, NodeRef>();
-        NodeRunner runner = new NodeRunner();
-        runner.setTask((ref) -> {
-            String replicationSourceId = (String) nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID));
-            if (replicationSourceId != null) {
-                result.put(replicationSourceId, ref);
-            }
-        });
-
-        runner.setTypes(Collections.singletonList(CCConstants.CCM_TYPE_IO));
-        runner.setStartFolder(startFolder);
-        runner.setRunAsSystem(true);
-        runner.setTransaction(NodeRunner.TransactionMode.Local);
-        runner.setThreaded(false);
-
-        int processNodes = runner.run();
-        logger.info("processed nodes:" + processNodes + " size:" + result.size());
-        return result;
-    }
 
     List<String> getAllMediacenterIds() {
         Set<String> allGroups = authorityService.getAllAuthoritiesInZone(org.alfresco.service.cmr.security.AuthorityService.ZONE_APP_DEFAULT, AuthorityType.GROUP);
@@ -606,7 +587,7 @@ public class MediacenterServiceImpl implements MediacenterService {
             logger.error("no imported objects folder found");
             return;
         }
-        HashMap<String, NodeRef> importedNodes = getImportedNodes(impFolderId);
+        HashMap<String, NodeRef> importedNodes = new NodeHelper().getImportedNodes(impFolderId);
 
 
         HashMap<String, List<String>> sodisMediacenterIdNodes = new HashMap<>();
