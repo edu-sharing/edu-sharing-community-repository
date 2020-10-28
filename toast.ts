@@ -394,4 +394,10 @@ export class Toast {
                 permission,
             });
     }
+
+    clientConfigError(configKey: string, details: string = null) {
+        this.error(null, 'client.config.xml configuration for key (' + configKey + ')' +
+            (details ? ': ' + details : '')
+        );
+    }
 }

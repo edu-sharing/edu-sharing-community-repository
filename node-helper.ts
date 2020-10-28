@@ -32,6 +32,10 @@ import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Toast} from './toast';
 
+export type WorkflowDefinitionStatus = {
+  current: WorkflowDefinition
+  initial: WorkflowDefinition
+}
 export interface ConfigEntry {
   name: string;
   icon: string;
@@ -108,7 +112,7 @@ export class NodeHelper {
       }
     }
     if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory) {
-      const workflow=NodeHelper.getWorkflowStatus(config,node);
+      const workflow=NodeHelper.getWorkflowStatus(config,node).current;
       return '<div class="workflowStatus" style="background-color: '+workflow.color+'">'+translation.instant('WORKFLOW.'+workflow.id)+'</div>';
     }
     if(name==RestConstants.DIMENSIONS) {
@@ -653,15 +657,30 @@ export class NodeHelper {
     const workflow=workflows[pos];
     return workflow;
   }
-  public static getWorkflowStatus(config:ConfigurationService,node:Node) : WorkflowDefinition {
+  public static getWorkflowStatus(config:ConfigurationService,node:Node) : WorkflowDefinitionStatus {
     let value=node.properties[RestConstants.CCM_PROP_WF_STATUS];
     if(value) value=value[0];
-    if(!value)
-      return NodeHelper.getWorkflows(config)[0];
-    return NodeHelper.getWorkflowStatusById(config,value);
+    if(!value) {
+      const result = {
+        current: (null as WorkflowDefinition),
+        initial: (null as WorkflowDefinition)
+      }
+      result.initial = NodeHelper.getWorkflows(config)[0];
+      const defaultStatus = config.instant('workflow.defaultStatus');
+      if(defaultStatus) {
+          result.current = NodeHelper.getWorkflows(config).find((w) => w.id === defaultStatus);
+      } else {
+        result.current = result.initial;
+      }
+      return result;
+    }
+    return {
+      current: NodeHelper.getWorkflowStatusById(config,value),
+      initial: NodeHelper.getWorkflowStatusById(config,value)
+    };
   }
   static getWorkflows(config: ConfigurationService) : WorkflowDefinition[] {
-    return config.instant('workflows',[
+    return config.instant('workflow.workflows',[
       RestConstants.WORKFLOW_STATUS_UNCHECKED,
       RestConstants.WORKFLOW_STATUS_TO_CHECK,
       RestConstants.WORKFLOW_STATUS_HASFLAWS,
