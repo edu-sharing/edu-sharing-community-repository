@@ -163,7 +163,6 @@ export class ProfilesComponent {
     this.globalProgress=true;
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
       this.saveProfileSettings();
-      this.saveAvatar();
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -204,10 +203,9 @@ export class ProfilesComponent {
     }
   }
 
-
   private saveProfileSettings() {
     this.iamService.setProfileSettings(this.profileSettings, this.user.authorityName).subscribe(() => {
-      this.toast.toast('PROFILE_SETTINGS.' + (!this.profileSettings.showEmail ? 'HIDE_EMAIL' : 'SHOW_EMAIL'));
+      this.saveAvatar();
     }, (error) => {
       this.globalProgress = false;
       this.toast.error(error);

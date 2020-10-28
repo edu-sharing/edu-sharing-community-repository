@@ -256,16 +256,10 @@ $path:'../../../assets/images/';
   }
 }
 
-mat-slide-toggle {
-  padding-left: 20px;
+.email-group-form{
+  display: flow-root;
 }
-/deep/ .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
-  background-color: #ece4e5;
-}
-/deep/ .mat-slide-toggle-content{
-  color: white !important;
-  font-size: 1.1em;
-}
+
 :host ::ng-deep{
   input-password mat-form-field{
     width: 100%;
@@ -276,6 +270,10 @@ mat-slide-toggle {
     width: 100%;
     left: 0;
     padding-bottom: 20px + $mobileTabNavHeight;
+  }
+
+  .email-group-form{
+    margin-bottom: calc(#{$mobileTabNavHeight} / 2);
   }
 }
 @media only screen and (max-width: $mobileWidth - $mobileStage*2) {

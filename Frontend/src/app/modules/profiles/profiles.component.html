@@ -59,14 +59,14 @@
               <input matInput type="text" [(ngModel)]="userEdit.profile.lastName">
             </mat-form-field>
           </div>
-          <div>
+          <div class="email-group-form">
             <mat-form-field class="mat-form-field-bright email">
               <mat-label>{{'USER.email' | translate}}</mat-label>
               <input matInput type="email" [(ngModel)]="userEdit.profile.email">
             </mat-form-field>
-            <mat-slide-toggle [checked]="profileSettings.showEmail"
+            <mat-slide-toggle color="primary" class="mat-slide" [checked]="profileSettings.showEmail"
                               [(ngModel)]="profileSettings.showEmail">
-              <mat-label >{{ 'PROFILE_SETTINGS.SHOW_EMAIL_LABEL' | translate}}</mat-label>
+              <mat-label class="mat-slide-label">{{ 'PROFILE_SETTINGS.SHOW_EMAIL_LABEL' | translate}}</mat-label>
             </mat-slide-toggle>
           </div>
         </div>
