@@ -122,6 +122,11 @@ public class ImporterJob extends AbstractJob {
 		
 		String[] idArr = (oaiIds != null) ? oaiIds.split(",") : null;
 
+		// force update if single ids should be updated
+		if(idArr != null && idArr.length > 0){
+			jobDataMap.put(OAIConst.PARAM_FORCE_UPDATE, true);
+		}
+
 
 		byte[] xmlData= (byte[]) jobDataMap.get(OAIConst.PARAM_XMLDATA);
 
