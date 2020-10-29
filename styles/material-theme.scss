@@ -10,7 +10,7 @@
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $custom-typography: mat-typography-config(
-        $font-family: 'open_sansregular',
+        $font-family: $primaryFontFamily,
         $body-1: mat-typography-level(100%, normal, 400),
         $body-2: mat-typography-level(100%, normal, 600),
         $button: mat-typography-level(100%, normal, 400),
