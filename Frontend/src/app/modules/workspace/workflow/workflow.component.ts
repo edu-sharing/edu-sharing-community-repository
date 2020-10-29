@@ -225,13 +225,13 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         if (this.nodes.length > 1) {
             return this.receivers.length !== 0;
         } else {
-            const prop = this.nodes[0].properties[RestConstants.CCM_PROP_WF_RECEIVER];
+            const prop: string[] = this.nodes[0].properties[RestConstants.CCM_PROP_WF_RECEIVER];
             if (prop) {
                 if (prop.length !== this.receivers.length) {
                     return true;
                 }
-                for (const receiver of prop) {
-                    if (this.receivers.indexOf(receiver) === -1) {
+                for (const receiver of this.receivers) {
+                    if (prop.indexOf(receiver.authorityName) === -1) {
                         return true;
                     }
                 }
