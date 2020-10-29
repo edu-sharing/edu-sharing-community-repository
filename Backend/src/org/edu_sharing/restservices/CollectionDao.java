@@ -21,7 +21,7 @@ import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 public class CollectionDao {

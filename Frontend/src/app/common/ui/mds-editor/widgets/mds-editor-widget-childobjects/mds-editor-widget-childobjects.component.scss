@@ -2,7 +2,9 @@
 
 .childobject-wrapper{
   background-color: $cardLightBackground;
-  padding:20px;
+  padding:20px $cardPadding;
+  margin-left: $cardPadding*-1;
+  width: calc(100% + #{$cardPadding*2});
   .group {
     display: flex;
     flex-direction: column;

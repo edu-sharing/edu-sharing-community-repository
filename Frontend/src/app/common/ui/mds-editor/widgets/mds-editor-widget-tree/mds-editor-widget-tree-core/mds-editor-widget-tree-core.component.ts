@@ -1,6 +1,7 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import {
     Component,
+    ElementRef,
     EventEmitter,
     Input,
     OnChanges,
@@ -8,9 +9,10 @@ import {
     OnInit,
     Output,
     SimpleChanges,
+    ViewChild,
 } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
 import { Widget } from '../../../mds-editor-instance.service';
 import { MdsWidgetType } from '../../../types';
@@ -23,11 +25,17 @@ import { Tree, TreeNode } from '../tree';
     styleUrls: ['./mds-editor-widget-tree-core.component.scss'],
 })
 export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDestroy {
+    @ViewChild('input') input: ElementRef;
     @Input() widget: Widget;
     @Input() tree: Tree;
     @Input() values: DisplayValue[];
     @Input() indeterminateValues: string[];
-    @Input() filterString: string;
+    get filterString() {
+        return this.filterString$.value;
+    }
+    set filterString(filterString: string) {
+        this.filterString$.next(filterString);
+    }
     /**
      * Whether a checked parent node should visually indicate that child nodes are checked as well.
      *
@@ -37,6 +45,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
      */
     @Input() parentImpliesChildren = false;
 
+    @Output() close = new EventEmitter<void>();
     @Output() valuesChange = new EventEmitter<DisplayValue[]>();
     @Output() indeterminateValuesChange = new EventEmitter<string[]>();
 
@@ -45,7 +54,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     selectedNode: TreeNode;
     isMultiValue: boolean;
 
-    private filterString$ = new ReplaySubject<string>(1);
+    private filterString$ = new BehaviorSubject<string>(null);
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
 
     ngOnInit(): void {

@@ -28,13 +28,6 @@
 package org.edu_sharing.repository.server;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
@@ -42,29 +35,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
-import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.repository.server.tracking.TrackingTool;
-import org.edu_sharing.service.mime.MimeTypesV2;
-import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
-import org.edu_sharing.service.rendering.RenderingTool;
-import org.edu_sharing.service.tracking.NodeTrackingDetails;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
 public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 

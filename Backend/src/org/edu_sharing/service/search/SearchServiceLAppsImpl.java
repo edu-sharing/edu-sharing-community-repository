@@ -27,6 +27,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -35,7 +36,6 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceLAppsImpl;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -119,8 +119,8 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 			HashMap<String, Object> properties = NodeServiceLAppsImpl.getPropertiesForNode(repositoryId, map);
 			  						
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
-					Constants.storeRef.getProtocol(),
-					Constants.storeRef.getIdentifier(),properties);
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),properties);
 					
 			data.add(ref);
 		}

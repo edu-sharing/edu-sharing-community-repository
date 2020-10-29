@@ -6,6 +6,8 @@ $iconColor: scale-color($colorStatusPositive, $lightness: -50%);
 .mat-chip-list .mat-chip {
     background-color: $backgroundColor;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
     .mat-icon {
         color: $iconColor;
         margin-right: 8px;
@@ -13,5 +15,10 @@ $iconColor: scale-color($colorStatusPositive, $lightness: -50%);
         height: 18px;
         width: 18px;
         font-size: 18px;
+    }
+    .count{
+        margin-left: 5px;
+        color: $textLight;
+        font-size: $fontSizeXSmall;
     }
 }

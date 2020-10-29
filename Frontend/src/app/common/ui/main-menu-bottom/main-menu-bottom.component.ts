@@ -2,8 +2,8 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
     MainMenuEntriesService,
-    Entry,
 } from '../../services/main-menu-entries.service';
+import {ConfigEntry} from '../../../core-ui-module/node-helper';
 
 @Component({
     selector: 'app-main-menu-bottom',
@@ -13,7 +13,7 @@ import {
 export class MainMenuBottomComponent implements OnInit {
     @Input() currentScope: string;
 
-    entries$: Observable<Entry[]>;
+    entries$: Observable<ConfigEntry[]>;
 
     constructor(mainMenuEntries: MainMenuEntriesService) {
         this.entries$ = mainMenuEntries.entries$;

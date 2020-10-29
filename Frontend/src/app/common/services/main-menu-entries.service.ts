@@ -17,18 +17,9 @@ import {
 } from '../../core-module/core.module';
 import { OPEN_URL_MODE } from '../../core-module/ui/ui-constants';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import {ConfigEntry} from '../../core-ui-module/node-helper';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
-
-export interface Entry {
-    name: string;
-    icon: string;
-    scope?: string;
-    isDisabled: boolean;
-    isSeparate: boolean;
-    isCustom: boolean;
-    open: () => void;
-}
 
 interface CustomEntryDefinition {
     name: string;
@@ -54,9 +45,9 @@ interface EntryDefinition {
 
 @Injectable()
 export class MainMenuEntriesService {
-    entries$: Observable<Entry[]>;
+    entries$: Observable<ConfigEntry[]>;
 
-    private entries = new AsyncSubject<Entry[]>();
+    private entries = new AsyncSubject<ConfigEntry[]>();
 
     // Initialized on construction.
     private config: {
@@ -191,7 +182,7 @@ export class MainMenuEntriesService {
     }
 
     private initEntries() {
-        let entries: Entry[] = [];
+        let entries: ConfigEntry[] = [];
         if (this.loginInfo.isValidLogin) {
             entries = this.generateEntries();
             entries = this.filterHiddenEntries(entries);
@@ -201,8 +192,8 @@ export class MainMenuEntriesService {
         this.entries.complete();
     }
 
-    private generateEntries(): Entry[] {
-        const entries: Entry[] = [];
+    private generateEntries(): ConfigEntry[] {
+        const entries: ConfigEntry[] = [];
         for (const entryDefinition of this.defaultEntryDefinitions) {
             const isVisible =
                 typeof entryDefinition.isVisible === 'function'
@@ -215,7 +206,7 @@ export class MainMenuEntriesService {
         return entries;
     }
 
-    private filterHiddenEntries(entries: Entry[]): Entry[] {
+    private filterHiddenEntries(entries: ConfigEntry[]): ConfigEntry[] {
         if (this.config.hideMainMenu) {
             return entries.filter(
                 entry => !this.config.hideMainMenu.includes(entry.scope),
@@ -225,7 +216,7 @@ export class MainMenuEntriesService {
         }
     }
 
-    private insertCustomEntries(entries: Entry[]): Entry[] {
+    private insertCustomEntries(entries: ConfigEntry[]): ConfigEntry[] {
         if (this.config.menuEntries) {
             for (const customEntryDefinition of this.config.menuEntries) {
                 if (customEntryDefinition.onlyDesktop && this.ui.isMobile()) {
@@ -247,7 +238,7 @@ export class MainMenuEntriesService {
         return entries;
     }
 
-    private generateEntry(entryDefinition: EntryDefinition): Entry {
+    private generateEntry(entryDefinition: EntryDefinition): ConfigEntry {
         const entry = {
             name: entryDefinition.name,
             icon: entryDefinition.icon,
@@ -262,7 +253,7 @@ export class MainMenuEntriesService {
 
     private generateCustomEntry(
         customEntryDefinition: CustomEntryDefinition,
-    ): Entry {
+    ): ConfigEntry {
         const target: Target = customEntryDefinition.path
             ? { type: 'path', path: customEntryDefinition.path }
             : {
@@ -304,7 +295,7 @@ export class MainMenuEntriesService {
         );
     }
 
-    private async openEntry(entry: Entry, target: Target): Promise<void> {
+    private async openEntry(entry: ConfigEntry, target: Target): Promise<void> {
         this.frameEvents.broadcastEvent(
             FrameEventsService.EVENT_VIEW_SWITCHED,
             entry.scope,

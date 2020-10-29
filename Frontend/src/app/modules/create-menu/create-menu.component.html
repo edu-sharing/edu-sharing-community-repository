@@ -28,9 +28,9 @@
 <div *ngIf="!(cardHasOpenModals$ | async)" fileDrop [window]="true" (fileOver)="fileIsOver=$event" (onFileDrop)="onFileDrop($event)"></div>
 <div class="dialog darken drop-zone" *ngIf="fileIsOver">
     <div>
-        <i class="material-icons" *ngIf="allowed && !filesToUpload">cloud_upload</i>
-        <i class="material-icons" *ngIf="!(allowed && !filesToUpload)">cloud_off</i>
-        <p *ngIf="allowed">{{'WORKSPACE.DROP_FILES' |translate}}</p>
-        <p *ngIf="!allowed">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
+        <i class="material-icons" *ngIf="isAllowed()">cloud_upload</i>
+        <i class="material-icons" *ngIf="!isAllowed()">cloud_off</i>
+        <p *ngIf="isAllowed()">{{'WORKSPACE.DROP_FILES' |translate}}</p>
+        <p *ngIf="!isAllowed()">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
     </div>
 </div>

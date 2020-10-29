@@ -14,3 +14,10 @@
         flex-grow: 1;
     }
 }
+:host ::ng-deep{
+    .duration-group {
+        .mat-form-field-wrapper {
+            padding-bottom: 0;
+        }
+    }
+}

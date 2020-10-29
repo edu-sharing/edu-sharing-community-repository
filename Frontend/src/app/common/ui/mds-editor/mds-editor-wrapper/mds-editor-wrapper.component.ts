@@ -9,7 +9,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { first } from 'rxjs/operators';
-import { Node } from '../../../../core-module/core.module';
+import {Node, RestConstants} from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehaviour, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
@@ -51,7 +51,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() nodes: Node[];
     @Input() parentNode: Node;
     @Input() priority = 1;
-    @Input() repository: string;
+    @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() setId: string;
     @Input() suggestions: Suggestions;
 
@@ -174,6 +174,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     async onSave(): Promise<void> {
         this.isLoading = true;
         try {
+            if(!this.mdsEditorInstance.getCanSave()) {
+                this.mdsEditorInstance.showMissingRequiredWidgets();
+                return;
+            }
             const updatedNodes = await this.mdsEditorInstance.save();
             this.toast.toast('WORKSPACE.EDITOR.UPDATED');
             this.onDone.emit(updatedNodes);

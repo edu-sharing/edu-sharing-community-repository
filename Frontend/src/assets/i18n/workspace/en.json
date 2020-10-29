@@ -51,7 +51,8 @@
         "UPLOAD_ERROR": {
             "UNKNOWN": "Error while transfering data",
             "FORMAT": "Unknown file format",
-            "QUOTA": "Upload quota reached"
+            "QUOTA": "Upload quota reached",
+            "VIRUS":"Virus detected. File was deleted."
         },
         "ADD_FOLDER_TITLE": "Add new folder",
         "ADD_FOLDER_METADATASET": "Metadataset of folder",
@@ -215,7 +216,7 @@
             "AUTHOR_LAST": "Last name",
             "KEYWORDS": "Add keywords",
             "HINT_FILTER": "Enter term to filter values",
-            "HINT_ENTER": "Press enter to add keywords",
+            "HINT_ENTER": "Press enter to add entry",
             "AS_VERSION": "as Version",
             "VERSION": "Version",
             "VERSION_COMMENT": "Add version comment",

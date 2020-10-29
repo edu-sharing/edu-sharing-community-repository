@@ -38,13 +38,11 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.search.CMISSearchHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -103,7 +101,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable{
 			String nodeType = getType(nodeId);
 			String[] aspects = getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
-			String parentId = nodeService.getPrimaryParent(new NodeRef(Constants.storeRef,nodeId)).getParentRef().getId();
+			String parentId = nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).getParentRef().getId();
 			HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, parentId,null);
 			updateNodeNative(nodeId, toSafeProps);
 	}
@@ -111,19 +109,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public void createAssoc(String parentId, String childId, String assocName) {
 		nodeService.createAssociation(
-				new NodeRef(Constants.storeRef, parentId),
-				new NodeRef(Constants.storeRef, childId),
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId),
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, childId),
 				QName.createQName(assocName)
 		);
 	}
 
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
-		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 
 		CopyService copyService = serviceRegistry.getCopyService();
 
 		String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-		NodeRef copyNodeRef = copyService.copyAndRename(nodeRef, new NodeRef(Constants.storeRef, toNodeId), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
+		NodeRef copyNodeRef = copyService.copyAndRename(nodeRef, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
 				QName.createQName(name), copyChildren);
 		resetVersion(copyNodeRef);
 		return copyNodeRef;
@@ -146,11 +144,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)
 			throws Throwable {
 		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
-		return this.createNodeBasic(Constants.storeRef, parentId, nodeType,childAssociation, toSafeProps);
+		return this.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId, nodeType,childAssociation, toSafeProps);
 	}
 	@Override
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, ?> _props) {
-		return this.createNodeBasic(Constants.storeRef, parentID, nodeTypeString,CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
+		return this.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentID, nodeTypeString,CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
 	}
 	@Override
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, ?> _props) {
@@ -524,7 +522,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	
 	@Override
 	public void updateNodeNative(String nodeId, HashMap<String, ?> _props) {
-		this.updateNodeNative(Constants.storeRef, nodeId, _props);
+		this.updateNodeNative(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, _props);
 	}
 
 	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, ?> _props) {
@@ -627,7 +625,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	public void setOwner(String nodeId, String username) {
-		serviceRegistry.getOwnableService().setOwner(new NodeRef(Constants.storeRef, nodeId), username);
+		serviceRegistry.getOwnableService().setOwner(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), username);
 	}
 	
 	
@@ -639,7 +637,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception {
 
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
-		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 		if (inheritPermission != null) {
 			logger.info("setInheritParentPermissions " + inheritPermission);
 			permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
@@ -647,7 +645,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		if (permissions != null) {
 			for (String permission : permissions) {
-				permissionsService.setPermission(new NodeRef(Constants.storeRef, nodeId), authority, permission, true);
+				permissionsService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), authority, permission, true);
 			}
 		}
 
@@ -826,13 +824,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 			String startParentId = apiClient.getRootNodeId();
 			if (startParentId == null || startParentId.trim().equals("")) {
-				parentID = nodeService.getRootNode(Constants.storeRef).getId();
+				parentID = nodeService.getRootNode(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE).getId();
 			} else {
 				parentID = startParentId;
 			}
 		}
 
-		return new NodeRef(Constants.storeRef, parentID);
+		return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentID);
 	}
 	@Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID,String childType){

@@ -27,7 +27,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Encryption;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
@@ -132,7 +132,7 @@ public class ConnectorServlet extends HttpServlet  {
 			return;
 		}
 		
-		NodeRef nodeRef = new NodeRef(Constants.storeRef,nodeId);
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
 		NodeService nodeService=NodeServiceFactory.getLocalService();
 		HashMap<String, Object> properties=null;
 		try {

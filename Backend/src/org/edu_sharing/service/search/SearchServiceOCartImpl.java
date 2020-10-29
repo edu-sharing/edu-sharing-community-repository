@@ -22,6 +22,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -29,7 +30,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
@@ -120,8 +121,8 @@ public class SearchServiceOCartImpl extends SearchServiceAdapter{
 			result.put((String)props.get(CCConstants.SYS_PROP_NODE_UID), props);
 
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
-					Constants.storeRef.getProtocol(),
-					Constants.storeRef.getIdentifier(),props);
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),props);
 			data.add(ref);
 
 		}

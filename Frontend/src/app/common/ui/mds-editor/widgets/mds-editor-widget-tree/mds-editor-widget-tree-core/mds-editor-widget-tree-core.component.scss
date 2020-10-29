@@ -1,8 +1,25 @@
-// @import '../../../../../../core-ui-module/styles/variables';
+@import '../../../../../../core-ui-module/styles/variables';
 
 .tree {
+    background-color: $cardLightBackground;
     float: left; // Don't cull background color in case of horizontal overflow
     min-width: 100%;
+    .tree-header {
+        display: flex;
+        padding: 10px 20px;
+        width: 100%;
+        align-items: center;
+        mat-form-field {
+            flex-grow: 1;
+            .mat-form-field-wrapper {
+                margin-bottom: 0;
+            }
+        }
+        button {
+            margin-left: 20px;
+            height: 50px;
+        }
+    }
     li,
     ul {
         margin-top: 0;
@@ -21,12 +38,20 @@
     display: none;
 }
 
-:host ::ng-deep .mat-checkbox {
-    .mat-checkbox-layout {
-        white-space: unset;
-        padding: 5px 20px 5px 0;
+:host ::ng-deep {
+    mat-form-field {
+        .mat-form-field-wrapper {
+            padding-bottom: 0;
+        }
     }
-    .mat-checkbox-inner-container {
-        margin-top: auto !important; // Override !important styling from material
+    .mat-checkbox {
+        .mat-checkbox-layout {
+            white-space: unset;
+            padding: 5px 20px 5px 0;
+        }
+
+        .mat-checkbox-inner-container {
+            margin-top: auto !important; // Override !important styling from material
+        }
     }
 }

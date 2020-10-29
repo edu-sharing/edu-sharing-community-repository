@@ -34,7 +34,10 @@
   *ngIf="wrapInFormField"
   [class.warn]="missingRequired === RequiredMode.MandatoryForPublish"
 >
-  <mat-label>{{ widget.definition.caption }}</mat-label>
+  <mat-label>
+    {{ widget.definition.caption }}
+    <span *ngIf="widget.definition.isRequired === RequiredMode.Mandatory" class="required-marker">*</span>
+  </mat-label>
   <ng-container *ngTemplateOutlet="content"></ng-container>
   <mat-hint *ngIf="widget.definition.bottomCaption">
     {{ widget.definition.bottomCaption }}

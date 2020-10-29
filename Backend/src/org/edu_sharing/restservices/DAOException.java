@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices;
 
+import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.repo.domain.node.NodeExistsException;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -11,7 +12,7 @@ import org.alfresco.service.cmr.usage.ContentQuotaException;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.permission.PermissionException;
-import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 
 public class DAOException extends Exception {
 
@@ -50,6 +51,11 @@ public class DAOException extends Exception {
 		}
 		if (t instanceof ContentQuotaException){
 			return new DAOQuotaException(t,nodeId);
+		}
+		if(t instanceof AlfrescoRuntimeException
+				&& t.getCause() != null
+				&& t.getCause().getClass().getName().contains("VirusDetectedException")){
+			return new DAOVirusDetectedException(t.getCause(),nodeId);
 		}
 		if (t instanceof NodeExistsException) {
 			

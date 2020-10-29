@@ -18,11 +18,10 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.Mail;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
@@ -47,7 +46,6 @@ import javax.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PersonDao {
 
@@ -371,7 +369,11 @@ public class PersonDao {
 		UserStatus status = new UserStatus();
 		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null)
 			status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
-		status.setDate((Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE));
+		// cast to long for rest api
+		Date date = (Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE);
+		if(date != null) {
+			status.setDate(date.getTime());
+		}
 		return status;
 	}
 	private UserStats getStats() {

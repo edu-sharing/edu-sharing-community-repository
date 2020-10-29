@@ -43,7 +43,7 @@ import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -243,7 +243,7 @@ public class NodeDao {
 			ref.setId(nodeRef.getNodeId());
 			
 			String storeProtocol = nodeRef.getStoreProtocol();
-			if(Constants.archiveStoreRef.getProtocol().equals(storeProtocol)){
+			if(StoreRef.PROTOCOL_ARCHIVE.equals(storeProtocol)){
 				ref.setArchived(true);
 			}
 			
@@ -649,7 +649,7 @@ public class NodeDao {
 				ref.setId(childRef.getChildRef().getId());
 				
 				String storeProtocol = childRef.getChildRef().getStoreRef().getProtocol();
-				if(Constants.archiveStoreRef.getProtocol().equals(storeProtocol)){
+				if(StoreRef.PROTOCOL_ARCHIVE.equals(storeProtocol)){
 					ref.setArchived(true);
 				}
 			
@@ -678,7 +678,7 @@ public class NodeDao {
 				ref.setId(childRef.getTargetRef().getId());
 
 				String storeProtocol = childRef.getTargetRef().getStoreRef().getProtocol();
-				if(Constants.archiveStoreRef.getProtocol().equals(storeProtocol)){
+				if(StoreRef.PROTOCOL_ARCHIVE.equals(storeProtocol)){
 					ref.setArchived(true);
 				}
 
@@ -1181,7 +1181,7 @@ public class NodeDao {
 
 		NodeRef nodeRef = createNodeRef(repoDao,nodeId);
 		String storeProtocol = (String)this.nodeProps.get(CCConstants.SYS_PROP_STORE_PROTOCOL);
-		if(Constants.archiveStoreRef.getProtocol().equals(storeProtocol)){
+		if(StoreRef.PROTOCOL_ARCHIVE.equals(storeProtocol)){
 			nodeRef.setArchived(true);
 		}
 
@@ -1872,9 +1872,9 @@ public class NodeDao {
 
 	public void setProperty(String property, String value) {
 		if(value==null){
-			nodeService.removeProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property);
+			nodeService.removeProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property);
 		}else {
-			nodeService.setProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property, value);
+			nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property, value);
 		}
 	}
 

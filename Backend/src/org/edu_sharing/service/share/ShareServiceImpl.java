@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -24,17 +24,13 @@ import org.edu_sharing.alfresco.policy.ScopeNodeWrongScopeException;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.service.Constants;
-import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.toolpermission.ToolPermissionException;
-import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -92,7 +88,7 @@ public class ShareServiceImpl implements ShareService {
 		}
 		
 		//parent validation
-		NodeRef io = new NodeRef(Constants.storeRef,nodeId);
+		NodeRef io = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
 		if(!nodeService.exists(io)){
 			throw new NodeDoesNotExsistException();
 		}
@@ -181,7 +177,7 @@ public class ShareServiceImpl implements ShareService {
 	}
 	@Override
 	public void removeShare(String shareNodeId){
-		serviceRegistry.getNodeService().deleteNode(new NodeRef(Constants.storeRef,shareNodeId));
+		serviceRegistry.getNodeService().deleteNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,shareNodeId));
 	}
 	
 	@Override
@@ -189,8 +185,8 @@ public class ShareServiceImpl implements ShareService {
 			NodeDoesNotExsistException, PermissionFailedException {
 	}
 	public void updateDownloadCount(Share share){
-		throwIfScopedNode(new NodeRef(Constants.storeRef,share.getIoNodeId()));
-		serviceRegistry.getNodeService().setProperty(new NodeRef(Constants.storeRef, share.getNodeId()), SHARE_PROP_DOWNLOAD_COUNTER,share.getDownloadCount());
+		throwIfScopedNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,share.getIoNodeId()));
+		serviceRegistry.getNodeService().setProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, share.getNodeId()), SHARE_PROP_DOWNLOAD_COUNTER,share.getDownloadCount());
 	}
 	@Override
 	public void updateShare(Share share) {
@@ -201,8 +197,8 @@ public class ShareServiceImpl implements ShareService {
 			props.put(SHARE_PROP_PASSWORD, encryptPassword(share.getPassword()));
 		props.put(SHARE_PROP_SHARE_MAIL, share.getEmail());
 		props.put(SHARE_PROP_DOWNLOAD_COUNTER, share.getDownloadCount());
-		throwIfScopedNode(new NodeRef(Constants.storeRef,share.getIoNodeId()));
-		serviceRegistry.getNodeService().setProperties(new NodeRef(Constants.storeRef, share.getNodeId()), props);
+		throwIfScopedNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,share.getIoNodeId()));
+		serviceRegistry.getNodeService().setProperties(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, share.getNodeId()), props);
 	}
 	
 	@Override
@@ -210,7 +206,7 @@ public class ShareServiceImpl implements ShareService {
 		
 		Set<QName> qnameSet = new HashSet<QName>();
 		qnameSet.add(SHARE_TYPE);
-		List<ChildAssociationRef> childNodeRefs = serviceRegistry.getNodeService().getChildAssocs(new NodeRef(Constants.storeRef,nodeId),qnameSet);
+		List<ChildAssociationRef> childNodeRefs = serviceRegistry.getNodeService().getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),qnameSet);
 		
 		List<Share> result = new ArrayList<Share>();
 		for(ChildAssociationRef childRef : childNodeRefs){
@@ -223,7 +219,7 @@ public class ShareServiceImpl implements ShareService {
 	
 	
 	public Share getShare(String nodeId, String token){
-		List<ChildAssociationRef> childAssocRefs = serviceRegistry.getNodeService().getChildAssocsByPropertyValue(new NodeRef(Constants.storeRef,nodeId), SHARE_PROP_SHARE_TOKEN,token);
+		List<ChildAssociationRef> childAssocRefs = serviceRegistry.getNodeService().getChildAssocsByPropertyValue(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId), SHARE_PROP_SHARE_TOKEN,token);
 		if(childAssocRefs.size() == 1){
 			NodeRef shareNodeRef = childAssocRefs.get(0).getChildRef();
 			Share share = getNodeShareObject(nodeId, shareNodeRef);

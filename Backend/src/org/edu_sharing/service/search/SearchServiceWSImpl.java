@@ -9,25 +9,13 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.server.AuthenticationTool;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.util.AlfrescoDaoHelper;
-import org.edu_sharing.webservices.alfresco.extension.Facette;
-import org.edu_sharing.webservices.alfresco.extension.FacettePair;
-import org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper;
-import org.edu_sharing.webservices.alfresco.extension.RepositoryNode;
-import org.edu_sharing.webservices.alfresco.extension.SearchCriteria;
-import org.edu_sharing.webservices.util.EduWebServiceFactory;
 
 public class SearchServiceWSImpl extends SearchServiceAdapter {
 	

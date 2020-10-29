@@ -1,4 +1,4 @@
-import {Component, ViewChild, ViewEncapsulation} from '@angular/core';
+import {Component, NgZone, ViewChild, ViewEncapsulation} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {EventListener, FrameEventsService} from '../../../core-module/rest/services/frame-events.service';
 import {MdsComponent} from '../mds/mds.component';
@@ -9,18 +9,20 @@ import {Translation} from '../../../core-ui-module/translation';
 import {WorkspaceLicenseComponent} from '../../../modules/management-dialogs/license/license.component';
 import {Toast} from "../../../core-ui-module/toast";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
+import {MdsEditorWrapperComponent} from '../mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 @Component({
     selector: 'mds-embed',
     encapsulation: ViewEncapsulation.None,
     template: `
-        <mds #mdsRef [embedded]="true" [currentValues]="data" [invalidate]="refresh" [setId]="setId" [groupId]="groupId" (onMdsLoaded)="loadingDone()" *ngIf="component==='mds'"></mds>
+        <app-mds-editor-wrapper #mdsRef [embedded]="true" [currentValues]="data" [setId]="setId" [groupId]="groupId" *ngIf="component==='mds'"></app-mds-editor-wrapper>
         <workspace-license #licenseRef [properties]="data" [embedded]="true" *ngIf="component==='license'"></workspace-license>
     `,
     styleUrls: ['embed.component.scss']
 })
 export class EmbedComponent implements EventListener {
-    @ViewChild('mdsRef') mdsRef : MdsComponent;
+    @ViewChild('mdsRef') mdsRef : MdsEditorWrapperComponent;
     @ViewChild('licenseRef') licenseRef : WorkspaceLicenseComponent;
     component:string;
     data:any={};
@@ -31,6 +33,7 @@ export class EmbedComponent implements EventListener {
                 private config:ConfigurationService,
                 private storage:SessionStorageService,
                 private toast:Toast,
+                private ngZone:NgZone,
                 private route:ActivatedRoute,
                 private event : FrameEventsService) {
         this.event.addListener(this);
@@ -49,16 +52,17 @@ export class EmbedComponent implements EventListener {
                         this.data = JSON.parse(params.data);
                     }
                     if(this.component === 'mds') {
-                        this.refresh = new Boolean(true);
+                        UIHelper.waitForComponent(this.ngZone,this, 'mdsRef').subscribe(async () => {
+                            await this.mdsRef.reInit();
+                            this.mdsRef.mdsEditorInstance.editorMode = 'nodes';
+                            this.toast.closeModalDialog();
+                        });
                     } else {
                         this.toast.closeModalDialog();
                     }
                 });
             });
         });
-    }
-    loadingDone(){
-        this.toast.closeModalDialog();
     }
     onEvent(event: string, data: any): void {
         if(event==FrameEventsService.EVENT_PARENT_FETCH_DATA) {

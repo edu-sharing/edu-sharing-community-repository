@@ -10,7 +10,8 @@ public class MetadataWidget extends MetadataTranslatable{
 	public enum Required{
 		mandatory,
 		mandatoryForPublish,
-		optional
+		optional,
+		ignore
 	}
     public static class Subwidget implements Serializable {
 		private String id;

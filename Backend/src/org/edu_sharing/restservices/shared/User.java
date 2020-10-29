@@ -17,7 +17,6 @@ public class User extends UserSimple {
 	private NodeRef homeFolder = null;
 	private List<NodeRef> sharedFolders = new ArrayList<NodeRef>();
 	private UserQuota quota;
-	private Map<String, String[]> properties;
 
 	public User(){super();}
 	public User(org.edu_sharing.repository.client.rpc.User user) {
@@ -54,13 +53,5 @@ public class User extends UserSimple {
 		this.quota = quota;
 	}
 
-	@JsonProperty
-	public Map<String, String[]> getProperties() {
-		return properties;
-	}
-
-	public void setProperties(Map<String, String[]> properties) {
-        this.properties = properties;
-    }
 
 }

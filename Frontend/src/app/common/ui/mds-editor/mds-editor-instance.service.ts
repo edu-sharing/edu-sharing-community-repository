@@ -1,4 +1,5 @@
-import {EventEmitter, Injectable, Input, OnDestroy} from '@angular/core';
+import { EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -8,6 +9,7 @@ import {
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
+import { SearchService } from '../../../modules/search/search.service';
 import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
 import {
@@ -28,8 +30,6 @@ import {
     ViewRelation,
 } from './types';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {SearchService} from '../../../modules/search/search.service';
-import {TranslateService} from '@ngx-translate/core';
 
 export interface CompletionStatusEntry {
     completed: number;
@@ -49,6 +49,7 @@ export interface InitialValues {
      */
     readonly individualValues?: string[];
 }
+
 export abstract class MdsEditorWidgetCore {
     @Input() widget: Widget;
     readonly isBulk: boolean;
@@ -61,7 +62,6 @@ export abstract class MdsEditorWidgetCore {
         this.isBulk = this.mdsEditorInstance.isBulk;
         this.editorMode = this.mdsEditorInstance.editorMode;
     }
-
 }
 
 /**
@@ -76,6 +76,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private hasUnsavedDefault: boolean;
         private initialValues: InitialValues;
         private value$ = new BehaviorSubject<string[]>(null);
+        private isDirty = false;
         /**
          * Values that are shown as indeterminate to the user and will not be overwritten when
          * saving.
@@ -147,6 +148,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             return this.bulkMode.value;
         }
 
+        getIsDirty(): boolean {
+            return this.isDirty;
+        }
+
         async getSuggestedValues(searchString?: string): Promise<MdsWidgetValue[]> {
             if (this.definition.values) {
                 return this.getLocalSuggestedValues(searchString);
@@ -155,7 +160,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
         }
 
-        setValue(value: string[]): void {
+        setValue(value: string[], dirty: boolean = true): void {
+            this.isDirty = dirty;
             this.value$.next(value);
             this.updateHasChanged();
             this.mdsEditorInstanceService.updateHasChanges();
@@ -343,6 +349,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     mdsInitDone = new ReplaySubject<void>(1);
     /** Fires when all widgets have been injected. */
     mdsInflated = new ReplaySubject<void>(1);
+    widgetsChanged = new ReplaySubject<void>(1);
     suggestions$ = new BehaviorSubject<Suggestions>(null);
 
     /**
@@ -350,7 +357,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * Widgets are not added or removed after initialization, but hold mutable state.
      */
-    widgets: readonly Widget[];
+    widgets: Widget[];
     /**
      * Active, "native" widgets (which are not defined via mds properties directly).
      *
@@ -362,7 +369,13 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     // Mutable state
     private completionStatus$ = new ReplaySubject<CompletionStatus>(1);
-    private hasChanges$ = new BehaviorSubject(false);
+    /** Whether the value would be updated on save due to changes by the user. */
+    private hasUserChanges$ = new BehaviorSubject(false);
+    /**
+     * Whether the value would be updated on save without the user having touched the widget due to
+     * defaults.
+     */
+    private hasProgrammaticChanges$ = new BehaviorSubject(false);
     private isValid$ = new BehaviorSubject(true);
     private canSave$ = new BehaviorSubject(false);
     private lastScrolledIntoViewIndex: number = null;
@@ -374,8 +387,13 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restConnector: RestConnectorService,
         private searchService: SearchService,
     ) {
-        combineLatest([this.hasChanges$, this.isValid$])
-            .pipe(map(([hasChanged, isValid]) => hasChanged && isValid))
+        combineLatest([this.hasUserChanges$, this.hasProgrammaticChanges$, this.isValid$])
+            .pipe(
+                map(
+                    ([hasUserChanges, hasProgrammaticChanges, isValid]) =>
+                        (hasUserChanges || hasProgrammaticChanges) && isValid,
+                ),
+            )
             .subscribe(this.canSave$);
     }
 
@@ -419,7 +437,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             widget.initWithValues(initialValues);
         }
         for (const widget of this.nativeWidgets) {
-            if(widget instanceof MdsEditorWidgetCore) {
+            if (widget instanceof MdsEditorWidgetCore) {
                 (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
             }
         }
@@ -450,15 +468,19 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
     }
 
-    getHasChanges(): boolean {
-        return this.hasChanges$.value;
+    getHasUserChanges(): boolean {
+        return this.hasUserChanges$.value;
+    }
+
+    getCanSave(): boolean {
+        return this.canSave$.value;
     }
 
     observeCanSave(): Observable<boolean> {
         return this.canSave$.asObservable();
     }
 
-    getCompletionStatus(): Observable<CompletionStatus> {
+    observeCompletionStatus(): Observable<CompletionStatus> {
         return this.completionStatus$.asObservable();
     }
 
@@ -547,10 +569,46 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
                 return acc;
             }, {} as { [key: string]: string[] });
+        // Native widgets don't necessarily match their ID and relevant property or even affect
+        // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
+        // `getValues()`.
         this.nativeWidgets.forEach(
             (widget) => (values = widget.getValues ? widget.getValues(values) : values),
         );
         return values;
+    }
+
+    registerNativeWidget(nativeWidget: NativeWidget): void {
+        this.nativeWidgets.push(nativeWidget);
+        nativeWidget.hasChanges.subscribe(() => {
+            if (this.isDestroyed) {
+                console.warn(
+                    'Native widget is pushing state after having been destroyed:',
+                    nativeWidget,
+                );
+                nativeWidget.hasChanges.complete();
+                return;
+            }
+            this.updateHasChanges();
+        });
+    }
+
+    /**
+     * Lazy widget update (e.g. widget was inflated and attributes have been parsed and now change
+     * the widget data)
+     */
+    updateWidgetDefinition(widget: Widget): void {
+        const index = this.widgets.findIndex(
+            (w) =>
+                w.definition.id === widget.definition.id &&
+                w.definition.template === widget.definition.template,
+        );
+        if (index === -1) {
+            console.warn('widget not found', widget);
+        } else {
+            this.widgets.splice(index, 1, widget);
+            this.widgetsChanged.next();
+        }
     }
 
     private async initMds(groupId: string, mdsId: string, repository?: string): Promise<void> {
@@ -574,13 +632,22 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private updateHasChanges(): void {
-        const someWidgetsHaveChanged = this.widgets.some(
+        const someWidgetsHaveUserChanges = this.widgets.some(
             (widget) =>
-                (widget.getHasChanged() || widget.getHasUnsavedDefault()) &&
+                widget.getHasChanged() && widget.getIsDirty() && widget.getStatus() !== 'DISABLED',
+        );
+        const someWidgetsHaveProgrammaticChanges = this.widgets.some(
+            (widget) =>
+                // Explicit default values, defined in MDS.
+                (widget.getHasUnsavedDefault() ||
+                    // Implicit default values, that have been set by the form without user
+                    // interaction based on the widget type, e.g. `false` on a checkbox.
+                    (widget.getHasChanged() && !widget.getIsDirty())) &&
                 widget.getStatus() !== 'DISABLED',
         );
-        const someNativeWidgetsHaveChanged = this.nativeWidgets.some((w) => w.hasChanges.value);
-        this.hasChanges$.next(someWidgetsHaveChanged || someNativeWidgetsHaveChanged);
+        const someNativeWidgetsHaveChanges = this.nativeWidgets.some((w) => w.hasChanges.value);
+        this.hasUserChanges$.next(someWidgetsHaveUserChanges || someNativeWidgetsHaveChanges);
+        this.hasProgrammaticChanges$.next(someWidgetsHaveProgrammaticChanges);
     }
 
     private updateIsValid(): void {
@@ -700,37 +767,32 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     private updateCompletionState(): void {
         this.completionStatus$.next(
-            Object.values(RequiredMode).reduce((acc, requiredMode) => {
-                acc[requiredMode] = this.getCompletionStatusEntry(requiredMode);
-                return acc;
-            }, {} as CompletionStatus),
+            Object.values(RequiredMode)
+                .filter((requiredMode) => requiredMode !== RequiredMode.Ignore)
+                .reduce((acc, requiredMode) => {
+                    acc[requiredMode] = this.getCompletionStatusEntry(requiredMode);
+                    return acc;
+                }, {} as CompletionStatus),
         );
     }
 
     private getCompletionStatusEntry(requiredMode: RequiredMode): CompletionStatusEntry {
-        const total = this.widgets.filter(
-            (widget) => widget.definition.isRequired === requiredMode,
-        );
+        const total = this.widgets
+            // Filter out widgets that are not shown to the user.
+            .filter((widget) => widget.definition.type !== MdsWidgetType.DefaultValue)
+            // Filter out native widgets since we cannot tell whether they set a value for now.
+            .filter(
+                (widget) =>
+                    !Object.values(NativeWidgetType).includes(
+                        widget.definition.id as NativeWidgetType,
+                    ),
+            )
+            .filter((widget) => widget.definition.isRequired === requiredMode);
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         return {
             total: total.length,
             completed: completed.length,
         };
-    }
-
-    registerNativeWidget(nativeWidget: NativeWidget) {
-        this.nativeWidgets.push(nativeWidget);
-        nativeWidget.hasChanges.subscribe(() => {
-            if (this.isDestroyed) {
-                console.warn(
-                    'Native widget is pushing state after having been destroyed:',
-                    nativeWidget,
-                );
-                nativeWidget.hasChanges.complete();
-                return;
-            }
-            this.updateHasChanges();
-        });
     }
 }
 

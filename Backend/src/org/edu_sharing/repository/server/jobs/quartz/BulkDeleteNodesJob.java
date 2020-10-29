@@ -101,7 +101,7 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		});
 		runner.setTypes(types!=null && !types.isEmpty() ? types : null);
 		runner.setRunAsSystem(true);
-		runner.setThreaded(true);
+		runner.setThreaded(false);
 		runner.setStartFolder(startFolder);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);

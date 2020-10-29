@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
@@ -8,6 +8,8 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
     styleUrls: ['./mds-editor-widget-text.component.scss'],
 })
 export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements OnInit {
+    @ViewChild('inputElement') inputElement: ElementRef;
+    @ViewChild('textAreaElement') textAreaElement: ElementRef;
     readonly valueType: ValueType = ValueType.String;
     formControl: FormControl;
 
@@ -19,6 +21,10 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             .subscribe((value) => {
                 this.setValue([value]);
             });
+    }
+    focus(): void {
+        this.inputElement?.nativeElement?.focus();
+        this.textAreaElement?.nativeElement?.focus();
     }
 
     private getValidators(): ValidatorFn[] {

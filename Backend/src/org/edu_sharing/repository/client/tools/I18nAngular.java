@@ -3,14 +3,13 @@ package org.edu_sharing.repository.client.tools;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.model.KeyValuePair;
 import org.json.JSONObject;
 
 import javax.servlet.ServletContext;
 import java.io.File;
-import java.util.Collection;
 
 /**
  * Class to load language data from the angular i18n files (json)

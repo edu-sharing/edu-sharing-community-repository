@@ -34,6 +34,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.*;
 
+/**
+ * use static fields and naming scheme for params: prefix "PARAM_"
+ * use static field "DESCRIPTION" for job description
+ *
+ */
 public abstract class AbstractJob implements Job,InterruptableJob {
 	
 	protected Log logger = LogFactory.getLog(AbstractJob.class);

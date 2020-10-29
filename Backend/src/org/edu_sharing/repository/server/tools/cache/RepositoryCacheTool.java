@@ -22,7 +22,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.springframework.context.ApplicationContext;
@@ -98,9 +98,9 @@ public class RepositoryCacheTool {
 	public void buildStickyCache(HashMap authenticationInfo, String rootfolderId) throws Throwable {
 
 		
-		logger.info("preparing first level subfolders for folder: " + nodeService.getProperty(new NodeRef(Constants.storeRef,rootfolderId),ContentModel.PROP_NAME ));
+		logger.info("preparing first level subfolders for folder: " + nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,rootfolderId),ContentModel.PROP_NAME ));
 		List<ChildAssociationRef> childAssocRefs = nodeService
-				.getChildAssocs(new NodeRef(Constants.storeRef, rootfolderId));
+				.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, rootfolderId));
 
 		int i = 0;
 
@@ -154,7 +154,7 @@ public class RepositoryCacheTool {
 							long startMillies = System.currentTimeMillis();
 
 							logger.info("thread nr:" + nr + "	starting getChildrenRecursive for folder:" + nodeService
-									.getProperty(new NodeRef(Constants.storeRef, cr), ContentModel.PROP_NAME));
+									.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, cr), ContentModel.PROP_NAME));
 
 							try {
 								buildCache(cr, CCConstants.CCM_TYPE_IO);

@@ -18,20 +18,24 @@ public class SetPermissionsOrgAdminGroup extends AbstractJob {
 	Logger logger = Logger.getLogger(SetPermissionsOrgAdminGroup.class);
 
 	public static final String PARAM_ORGANISATIONS = "ORGANISATIONS";
+	public static final String PARAM_EXECUTE = "EXECUTE";
 	
 	ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
 	
 	OrganisationService organisationService = (OrganisationService)appContext.getBean("eduOrganisationService");
-	
+
+	public static String DESCRIPTION = "runs recursive over all/specified Organisations folder and sets coordinator permissions";
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		
 		String orgs = context.getJobDetail().getJobDataMap().getString(PARAM_ORGANISATIONS);
+		Boolean execute = new Boolean(context.getJobDetail().getJobDataMap().getString(PARAM_EXECUTE));
 		
 		RunAsWork<Void> runAs = new RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
-				run((orgs != null) ? orgs.split(",") : null);
+				run((orgs != null) ? orgs.split(",") : null, execute);
 				return null;
 			}
 		};
@@ -39,7 +43,7 @@ public class SetPermissionsOrgAdminGroup extends AbstractJob {
 		AuthenticationUtil.runAsSystem(runAs);
 	}
 	
-	private void run(String[] orgs) {
+	private void run(String[] orgs, boolean execute) {
 		if(orgs == null) {
 			orgs = EduGroupCache.getNames();
 		}
@@ -49,7 +53,7 @@ public class SetPermissionsOrgAdminGroup extends AbstractJob {
 		int i = 0;
 		for(String org : orgs) {
 			logger.info("org nr" + i);
-			organisationService.setOrgAdminPermissions(org);
+			organisationService.setOrgAdminPermissions(org,execute);
 			i++;
 		}
 	}

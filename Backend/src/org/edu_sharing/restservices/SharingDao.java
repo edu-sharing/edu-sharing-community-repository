@@ -32,7 +32,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
 import org.edu_sharing.restservices.sharing.v1.model.SharingInfo;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;

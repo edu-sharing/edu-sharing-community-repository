@@ -11,25 +11,16 @@ import io.swagger.annotations.*;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.config.v1.model.Config;
 import org.edu_sharing.restservices.config.v1.model.Language;
 import org.edu_sharing.restservices.config.v1.model.Variables;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.service.NotAnAdminException;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.DynamicConfig;
-import org.edu_sharing.service.config.model.Values;
 
-import org.edu_sharing.webservices.util.AuthenticationUtil;
 import org.json.JSONObject;
-import org.stringtemplate.v4.ST;
 
 @Path("/config/v1")
 @Api(tags = { "CONFIG v1" })

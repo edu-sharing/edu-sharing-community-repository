@@ -2,10 +2,8 @@ package org.edu_sharing.service.search;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONException;
 import org.json.JSONObject;

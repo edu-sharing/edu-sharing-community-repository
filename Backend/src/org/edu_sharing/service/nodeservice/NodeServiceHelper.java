@@ -56,7 +56,9 @@ public class NodeServiceHelper {
 	public static <T> Map<String, T> transformLongToShortProperties(Map<String, T> properties) {
 		HashMap<String, T> result = new HashMap<>();
 		for(Map.Entry<String, T> prop: properties.entrySet()){
-			result.put(CCConstants.getValidLocalName(prop.getKey()), prop.getValue());
+			if(CCConstants.getValidLocalName(prop.getKey()) != null) {
+				result.put(CCConstants.getValidLocalName(prop.getKey()), prop.getValue());
+			}
 		}
 		return result;
 	}

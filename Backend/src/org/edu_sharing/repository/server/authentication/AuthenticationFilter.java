@@ -2,7 +2,9 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -43,6 +45,8 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 	Logger log = Logger.getLogger(AuthenticationFilter.class);
 	
 	TokenService tokenService;
+
+	List<String> unprotectedPaths = Arrays.asList("components/sharing");
 	
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
@@ -161,7 +165,14 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 			httpRes.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return;
 		}
-		
+
+		String requestUri = httpReq.getRequestURI();
+		if(unprotectedPaths.stream().anyMatch(s -> requestUri.contains(s))){
+			//default stuff
+			chain.doFilter(req,res);
+			return;
+		}
+
 		//redirect to login page
 		this.redirectToLoginpage(httpReq, httpRes, chain);
 	}

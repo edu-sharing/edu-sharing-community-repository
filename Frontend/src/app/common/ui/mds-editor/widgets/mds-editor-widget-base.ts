@@ -1,8 +1,6 @@
-import { Input } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
-import {MdsEditorInstanceService, MdsEditorWidgetCore, Widget} from '../mds-editor-instance.service';
-import { assertUnreachable, InputStatus, EditorMode, RequiredMode } from '../types';
+import { MdsEditorWidgetCore } from '../mds-editor-instance.service';
+import { assertUnreachable, InputStatus, RequiredMode } from '../types';
 
 export enum ValueType {
     String,
@@ -32,8 +30,15 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
         }
     }
 
-    protected setValue(value: string[]): void {
-        this.widget.setValue(value);
+    /**
+     * this method should set focus on the primary input of the widget
+     */
+    focus(): void {
+        // default implementation will do nothing
+    }
+
+    protected setValue(value: string[], dirty?: boolean): void {
+        this.widget.setValue(value, dirty);
     }
 
     protected setStatus(value: InputStatus): void {

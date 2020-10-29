@@ -21,14 +21,10 @@ public class Values implements Serializable {
 	@XmlElement	public String[] hideMainMenu;
 	@XmlElement	public LogoutInfo logout;
 	@XmlElement	public MenuEntry[] menuEntries;
-	@XmlElement	public ContextMenuEntry[] nodeOptions;
-	@XmlElement	public ContextMenuEntry[] searchNodeOptions;
-	@XmlElement	public ContextMenuEntry[] renderNodeOptions;
-	@XmlElement	public ContextMenuEntry[] collectionNodeOptions;
-	@XmlElement	public ContextMenuEntry[] nodeStoreOptions;
+	@XmlElement	public ContextMenuEntry[] customOptions;
 	@XmlElement	public String[] allowedLicenses;
 	@XmlElement	public License[] customLicenses;
-	@XmlElement	public Workflow[] workflows;
+	@XmlElement	public ConfigWorkflow workflow;
 	@XmlElement	public Boolean licenseDialogOnUpload;
 	@XmlElement	public Boolean nodeReport;
 	@XmlElement	public Boolean branding;

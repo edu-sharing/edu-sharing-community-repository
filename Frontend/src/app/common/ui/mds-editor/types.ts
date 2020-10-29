@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { Sort, View } from '../../../core-module/core.module';
+import { Sort } from '../../../core-module/core.module';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
@@ -149,6 +149,7 @@ export interface MdsWidgetValue {
     description?: string;
     parent?: string;
 }
+export type MdsWidgetFacetValue = MdsWidgetValue & { count?: string };
 
 export interface MdsWidgetCondition {
     type: 'PROPERTY' | 'TOOLPERMISSION';
@@ -162,6 +163,7 @@ export enum RequiredMode {
     Mandatory = 'mandatory',
     MandatoryForPublish = 'mandatoryForPublish',
     Optional = 'optional',
+    Ignore = 'ignore',
 }
 
 export function assertUnreachable(x: never): never {

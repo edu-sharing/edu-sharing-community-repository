@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../types';
 
@@ -11,7 +11,7 @@ import { EditorMode, MdsView } from '../types';
 export class MdsEditorCoreComponent {
     views: MdsView[];
     suggestionsViews: MdsView[];
-    hasExtendedWidgets: boolean;
+    hasExtendedWidgets$: Observable<boolean>;
     readonly editorMode: EditorMode;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
 
@@ -19,6 +19,10 @@ export class MdsEditorCoreComponent {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
+        this.hasExtendedWidgets$ = this.mdsEditorInstance.widgetsChanged.map(
+            () => this.mdsEditorInstance.widgets.some(
+                (widget) => widget.definition.isExtended,
+            ))
     }
 
     clear(): void {
@@ -29,14 +33,12 @@ export class MdsEditorCoreComponent {
         if (this.views) {
             // Make sure existing views are destroyed and reinitialized.
             this.views = [];
+            this.suggestionsViews = [];
             await tick();
         }
         this.views = this.mdsEditorInstance.views.filter((view) => !view.rel);
         this.suggestionsViews = this.mdsEditorInstance.views.filter(
             (view) => view.rel === 'suggestions',
-        );
-        this.hasExtendedWidgets = this.mdsEditorInstance.widgets.some(
-            (widget) => widget.definition.isExtended,
         );
         // Wait for `MdsEditorViewComponent`s to be injected.
         await tick();

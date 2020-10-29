@@ -19,8 +19,8 @@ import {
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {
     MainMenuEntriesService,
-    Entry,
 } from '../../services/main-menu-entries.service';
+import {ConfigEntry} from '../../../core-ui-module/node-helper';
 
 @Component({
     selector: 'app-main-menu-sidebar',
@@ -39,7 +39,7 @@ export class MainMenuSidebarComponent implements OnInit {
 
     // Internal state
     show = false;
-    entries$: Observable<Entry[]>;
+    entries$: Observable<ConfigEntry[]>;
 
     // Global state, set on init
     loginInfo: LoginResult;

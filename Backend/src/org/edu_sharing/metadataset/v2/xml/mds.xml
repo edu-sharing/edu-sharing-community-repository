@@ -288,6 +288,7 @@
 				<caption>ccm_prop_io_license</caption>
 				<type>license</type>
 				<valuespace_i18n_prefix>license_info_</valuespace_i18n_prefix>
+				<defaultvalue>ignore</defaultvalue>
 				<values>
 					<entry description="description_OPEN">OPEN</entry>
 					<entry description="description_CC_BY_OPEN">CC_BY_OPEN</entry>
@@ -805,6 +806,7 @@
 			</group>
 			<group>
 				<id>ngsearch</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>search</view>
 					<view>search_suggestions</view>

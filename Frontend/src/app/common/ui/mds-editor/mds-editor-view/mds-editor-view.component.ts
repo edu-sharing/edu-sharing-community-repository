@@ -96,6 +96,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         [type in MdsWidgetType]?: Type<object>;
     } = {
         [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetSuggestionChipsComponent,
+        [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetSuggestionChipsComponent,
+        [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetSuggestionChipsComponent,
     };
 
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
@@ -202,6 +204,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             return;
         }
         this.updateWidgetWithHTMLAttributes(widget);
+        this.mdsEditorInstance.updateWidgetDefinition(widget);
         UIHelper.injectAngularComponent(
             this.factoryResolver,
             this.containerRef,
@@ -229,7 +232,12 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             widget.definition.id.replace(':', '\\:'),
         );
         htmlRef?.getAttributeNames().forEach((attribute) => {
-            (widget.definition as any)[attribute] = htmlRef.getAttribute(attribute);
+            // map the extended attribute
+            const value = htmlRef.getAttribute(attribute);
+            if(attribute === 'isextended' || attribute === 'extended'){
+                attribute = 'isExtended';
+            }
+            (widget.definition as any)[attribute] = value;
         });
     }
 

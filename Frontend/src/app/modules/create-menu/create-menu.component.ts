@@ -107,6 +107,7 @@ export class CreateMenuComponent {
     _parent: Node = null;
     inbox: Node = null;
     addFolderName: string = null;
+    filesCreateAllowed: boolean;
 
     showUploadSelect = false;
     filesToUpload: FileList;
@@ -145,7 +146,8 @@ export class CreateMenuComponent {
             this.updateOptions();
         });
         this.connector.isLoggedIn(false).subscribe((login) => {
-            if(login.statusCode == RestConstants.STATUS_CODE_OK){
+            this.filesCreateAllowed = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
+            if(login.statusCode === RestConstants.STATUS_CODE_OK) {
                 this.nodeService
                     .getNodeMetadata(RestConstants.INBOX)
                     .subscribe(node => {
@@ -204,6 +206,7 @@ export class CreateMenuComponent {
                 Constrain.AddObjects,
                 Constrain.User,
             ];
+            pasteNodes.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS, RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
             pasteNodes.key = 'KeyV';
             pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
             pasteNodes.group = DefaultGroups.Primary;
@@ -218,12 +221,13 @@ export class CreateMenuComponent {
             );
             newCollection.elementType = [ElementType.Unknown];
             newCollection.constrains = [Constrain.NoSelection, Constrain.User];
+            newCollection.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS];
             newCollection.group = DefaultGroups.Create;
             newCollection.priority = 5;
             this.options.push(newCollection);
         }
         if (this.allowBinary) {
-            if(this._parent && NodeHelper.isNodeCollection(this._parent)){
+            if(this._parent && NodeHelper.isNodeCollection(this._parent)) {
                 const search = new OptionItem(
                     'OPTIONS.SEARCH_OBJECT',
                     'redo',
@@ -240,6 +244,7 @@ export class CreateMenuComponent {
                 () => this.showUploadSelect = true,
             );
             upload.elementType = [ElementType.Unknown];
+            upload.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
             upload.group = DefaultGroups.Create;
             upload.priority = 10;
             this.options.push(upload);
@@ -267,6 +272,7 @@ export class CreateMenuComponent {
                     () => (this.openCamera()),
                 );
                 camera.elementType = [ElementType.Unknown];
+                camera.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
                 camera.group = DefaultGroups.Create;
                 camera.priority = 20;
                 this.options.push(camera);
@@ -279,6 +285,7 @@ export class CreateMenuComponent {
                 () => (this.addFolderName = ''),
             );
             addFolder.elementType = [ElementType.Unknown];
+            addFolder.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS];
             addFolder.group = DefaultGroups.Create;
             addFolder.priority = 30;
             this.options.push(addFolder);
@@ -294,6 +301,9 @@ export class CreateMenuComponent {
             this.options,
             Target.CreateMenu,
         );
+    }
+    public hasUsableOptions() {
+        return this.options.some((o) => o.isEnabled);
     }
 
     getParent() {
@@ -357,6 +367,10 @@ export class CreateMenuComponent {
         }
         if (this.filesToUpload) {
             this.toast.error(null, 'WORKSPACE.TOAST.ONGOING_UPLOAD');
+            return;
+        }
+        if(!this.filesCreateAllowed) {
+            this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
             return;
         }
         this.showUploadSelect = false;
@@ -488,5 +502,9 @@ export class CreateMenuComponent {
                     }
                 },
             );
+    }
+
+    isAllowed() {
+        return this.allowed && !this.filesToUpload && this.filesCreateAllowed;
     }
 }

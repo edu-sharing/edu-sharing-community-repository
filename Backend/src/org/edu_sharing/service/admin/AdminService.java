@@ -12,6 +12,7 @@ import java.util.Properties;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
+import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
@@ -107,4 +108,6 @@ public interface AdminService {
 
     void updateConfigFile(String filename,String content) throws Throwable;
 	String getConfigFile(String filename) throws Throwable;
+
+	List<JobDescription> getJobDescriptions();
 }

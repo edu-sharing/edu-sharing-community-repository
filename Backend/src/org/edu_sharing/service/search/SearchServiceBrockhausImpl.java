@@ -2,6 +2,7 @@ package org.edu_sharing.service.search;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -13,7 +14,6 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceBrockhausImpl;
@@ -95,8 +95,8 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CCM_PROP_IO_WWWURL,buildUrl(apiKey,document.getString("url")));
 
 			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
-					Constants.storeRef.getProtocol(),
-					Constants.storeRef.getIdentifier(),properties);
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),properties);
 			data.add(ref);
 
 			NodeServiceBrockhausImpl.updateCache(properties);

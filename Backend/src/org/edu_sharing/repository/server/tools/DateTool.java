@@ -10,7 +10,7 @@ import java.util.TimeZone;
 import org.alfresco.util.ISO8601DateFormat;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 
 public class DateTool {
 
