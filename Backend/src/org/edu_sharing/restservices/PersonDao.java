@@ -555,15 +555,16 @@ public class PersonDao {
 	}
 
 	/**
-	 * retrieve value from alfresco db 
-	 * @return boolean value true|false 
+	 * retrieve All property for ProfileSetting from alfresco db
+	 *
+	 * @return object of ProfileSettings
 	 */
-	public boolean getShowEmail() {
-		try{
-			return (boolean)this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
-		}catch(Exception e) {
-			return true;
-		}
+	public ProfileSettings getProfileSettings() {
+		ProfileSettings profileSettings = new ProfileSettings();
+		profileSettings.setShowEmail(
+				(this.userInfo.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) ? (boolean) this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) : false)
+		);
+		return profileSettings;
 	}
 
 	/**

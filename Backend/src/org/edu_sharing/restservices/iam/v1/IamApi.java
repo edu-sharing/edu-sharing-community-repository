@@ -372,10 +372,8 @@ public class IamApi  {
 				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			PersonDao personDao = PersonDao.getPerson(repoDao, person);
-			Boolean getShowEmail = personDao.getShowEmail();
-			ProfileSettings profileSettings = new ProfileSettings();
-			profileSettings.setShowEmail(getShowEmail);
-			return Response.status(Response.Status.OK).entity(profileSettings).build();
+			ProfileSettings personDaoProfileSettings = personDao.getProfileSettings();
+			return Response.status(Response.Status.OK).entity(personDaoProfileSettings).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
