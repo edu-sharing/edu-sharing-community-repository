@@ -661,23 +661,26 @@ export class NodeHelper {
     let value=node.properties[RestConstants.CCM_PROP_WF_STATUS];
     if(value) value=value[0];
     if(!value) {
-      const result = {
-        current: (null as WorkflowDefinition),
-        initial: (null as WorkflowDefinition)
-      }
-      result.initial = NodeHelper.getWorkflows(config)[0];
-      const defaultStatus = config.instant('workflow.defaultStatus');
-      if(defaultStatus) {
-          result.current = NodeHelper.getWorkflows(config).find((w) => w.id === defaultStatus);
-      } else {
-        result.current = result.initial;
-      }
-      return result;
+      return NodeHelper.getDefaultWorkflowStatus(config);
     }
     return {
       current: NodeHelper.getWorkflowStatusById(config,value),
       initial: NodeHelper.getWorkflowStatusById(config,value)
     };
+  }
+  static getDefaultWorkflowStatus(config: ConfigurationService): WorkflowDefinitionStatus {
+    const result = {
+      current: (null as WorkflowDefinition),
+      initial: (null as WorkflowDefinition)
+    }
+    result.initial = NodeHelper.getWorkflows(config)[0];
+    const defaultStatus = config.instant('workflow.defaultStatus');
+    if(defaultStatus) {
+        result.current = NodeHelper.getWorkflows(config).find((w) => w.id === defaultStatus);
+    } else {
+      result.current = result.initial;
+    }
+    return result;
   }
   static getWorkflows(config: ConfigurationService) : WorkflowDefinition[] {
     return config.instant('workflow.workflows',[
