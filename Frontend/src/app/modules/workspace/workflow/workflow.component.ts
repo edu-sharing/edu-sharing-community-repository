@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {DialogButton, RestNodeService} from "../../../core-module/core.module";
+import {DialogButton, Group, RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {
   NodeWrapper, Node, IamUsers, WorkflowEntry, NodePermissions,
@@ -20,6 +20,8 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {RestHelper} from "../../../core-module/core.module";
 
+type WorkflowReceiver = UserSimple|Group;
+
 @Component({
   selector: 'workspace-workflow',
   templateUrl: 'workflow.component.html',
@@ -37,7 +39,7 @@ export class WorkspaceWorkflowComponent{
   public dialogButtons:DialogButton[];
   public loading=true;
   public node: Node;
-  public receivers:UserSimple[]=[];
+  public receivers: WorkflowReceiver[]=[];
   public status=RestConstants.WORKFLOW_STATUS_UNCHECKED;
   public initialStatus=RestConstants.WORKFLOW_STATUS_UNCHECKED;
   public chooseStatus = false;
@@ -62,8 +64,9 @@ export class WorkspaceWorkflowComponent{
           this.receivers = workflow[0].receiver;
         if(!this.receivers || (this.receivers.length==1 && !this.receivers[0]))
           this.receivers=[];
-        this.status=NodeHelper.getWorkflowStatus(this.config,this.node);
-        this.initialStatus=this.status;
+        this.status = NodeHelper.getWorkflowStatus(this.config,this.node).current;
+        this.initialStatus = NodeHelper.getWorkflowStatus(this.config,this.node).initial;
+        this.updateButtons();
       },(error:any)=>{
         this.toast.error(error);
         this.cancel();
@@ -98,7 +101,7 @@ export class WorkspaceWorkflowComponent{
   public getWorkflowForId(id:string){
     return NodeHelper.getWorkflowStatusById(this.config,id);
   }
-  public removeReceiver(data : UserSimple){
+  public removeReceiver(data : WorkflowReceiver) {
     let pos=this.receivers.indexOf(data);
     if(pos!=-1){
       this.receivers.splice(pos,1);
@@ -109,7 +112,7 @@ export class WorkspaceWorkflowComponent{
     return this.statusChanged() || this.receiversChanged();
   }
   public saveWorkflow(){
-    if(!this.comment && this.receiversChanged()){
+    if(!this.comment && this.receiversChanged() && this.config.instant('workflow.commentRequired', true)) {
       this.toast.error(null,'WORKSPACE.WORKFLOW.NO_COMMENT');
       return;
     }
@@ -138,7 +141,7 @@ export class WorkspaceWorkflowComponent{
     }
     this.saveWorkflowFinal(receivers);
   }
-  private saveWorkflowFinal(receivers:UserSimple[]){
+  private saveWorkflowFinal(receivers: WorkflowReceiver[]){
     let entry=new WorkflowEntry();
     let receiversClean:any[]=[];
     for(let r of receivers){
@@ -175,11 +178,19 @@ export class WorkspaceWorkflowComponent{
   ){
     this.updateButtons();
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
-    this.config.getAll().subscribe(()=> {
+    this.config.getAll().subscribe(async ()=> {
       this.validStatus = NodeHelper.getWorkflows(this.config);
+      const receiver = this.config.instant('workflow.defaultReceiver');
+      if(receiver) {
+        try {
+          this.receivers = [(await this.iam.getGroup(receiver).toPromise()).group];
+        } catch (e) {
+          toast.clientConfigError('workflow.defaultReceiver', 'group not found');
+        }
+      }
     });
   }
-  private receiversChanged(){
+  private receiversChanged() {
       let prop=this.node.properties[RestConstants.CCM_PROP_WF_RECEIVER];
       if(prop){
         if(prop.length!=this.receivers.length)
@@ -194,8 +205,8 @@ export class WorkspaceWorkflowComponent{
   }
   private statusChanged() {
     if(this.node.properties[RestConstants.CCM_PROP_WF_STATUS])
-      return this.status!=this.node.properties[RestConstants.CCM_PROP_WF_STATUS][0];
-    return this.status!=RestConstants.WORKFLOW_STATUS_UNCHECKED;
+      return this.status.id !== this.node.properties[RestConstants.CCM_PROP_WF_STATUS][0];
+    return this.status.id !== NodeHelper.getWorkflows(this.config)[0].id;
   }
 
   private addWritePermission(authority: string) {

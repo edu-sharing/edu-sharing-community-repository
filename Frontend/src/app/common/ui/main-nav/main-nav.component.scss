@@ -20,6 +20,11 @@
         align-items: center;
     }
 }
+:host ::ng-deep .card-licenses{
+    pre{
+        white-space: pre-wrap;
+    }
+}
 .preload {
     position: fixed;
     z-index: 140;
@@ -307,7 +312,7 @@ user-profile {
         background-color: white;
     }
     &[disabled] {
-        color: unset;
+        color: $textOnPrimaryLight;
     }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*6)) {

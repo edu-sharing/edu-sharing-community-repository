@@ -15,10 +15,9 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.RestConstants;
 import io.swagger.client.model.NodeEntry;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.remote.RemoteObjectService;
@@ -49,7 +48,7 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 	}
 
 	@Override
-	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props) {
+	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, ?> _props) {
 		return null;
 	}
 

@@ -1,6 +1,8 @@
 package org.edu_sharing.service.model;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public interface NodeRef {
 	
@@ -23,5 +25,13 @@ public interface NodeRef {
 	public HashMap<String,Object> getProperties();
 	
 	public void setProperties(HashMap<String,Object> properties);
+
+	public Map<String,Boolean> getPermissions();
+
+	public void setPermissions(Map<String,Boolean> permissions);
+
+	void setAspects(List<String> aspects);
+
+	public List<String> getAspects();
 
 }

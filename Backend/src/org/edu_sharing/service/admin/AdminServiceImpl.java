@@ -2,6 +2,7 @@ package org.edu_sharing.service.admin;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +41,7 @@ import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -49,7 +50,7 @@ import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.StringTool;
 import org.edu_sharing.repository.server.*;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
@@ -58,6 +59,7 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.repository.tomcat.ClassHelper;
 import org.edu_sharing.repository.update.*;
 import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -137,7 +139,8 @@ public class AdminServiceImpl implements AdminService  {
 			throw new IllegalArgumentException("Toolpermissions are not supported for members of "+CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
 		}
 		Map<String,ToolPermission> toolpermissions=new HashMap<>();
-		for(String tp : tpService.getAllToolPermissions()) {
+		// refresh the tp in this case, since may a new one is created meanwhile by the client
+		for(String tp : tpService.getAllToolPermissions(true)) {
 			String nodeId=tpService.getToolPermissionNodeId(tp);
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
 			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
@@ -728,12 +731,13 @@ public class AdminServiceImpl implements AdminService  {
 	 * Import excel data and return the number of rows processed
 	 * @param parent
 	 * @param csv
+	 * @param addToCollection
 	 * @return
 	 * @throws Exception 
 	 */
 	@Override
-	public int importExcel(String parent,InputStream csv) throws Exception{
-		return new ExcelLOMImporter(parent,csv).getRowCount();
+	public int importExcel(String parent, InputStream csv, Boolean addToCollection) throws Exception{
+		return new ExcelLOMImporter(parent,csv,addToCollection).getRowCount();
 	}
 
 	@Override
@@ -927,5 +931,34 @@ public class AdminServiceImpl implements AdminService  {
 		FileUtils.copyInputStreamToFile(is, upload);
 		return upload.getAbsolutePath();
 	}
-	
+
+	@Override
+	public List<JobDescription> getJobDescriptions() {
+
+		List<JobDescription> result = new ArrayList<>();
+
+		List<Class> jobClasses = ClassHelper.getSubclasses(AbstractJob.class);
+
+		for(Class clazz : jobClasses){
+			JobDescription desc = new JobDescription();
+			desc.setName(clazz.getName());
+			List<Field> staticFields = ClassHelper.getStaticFields(clazz);
+			List<String> params = new ArrayList<>();
+			desc.setParams(params);
+			for(Field staticField : staticFields){
+				try {
+					if(staticField.getName().startsWith("PARAM_")){
+						params.add((String)staticField.get(null));
+					}
+					if(staticField.getName().equals("DESCRIPTION")){
+						desc.setDescription((String)staticField.get(null));
+					}
+				} catch (IllegalAccessException e) {
+					logger.error(e.getMessage());
+				}
+			}
+			result.add(desc);
+		}
+		return result;
+	}
 }

@@ -2,17 +2,30 @@
 
 .widget-label{
   font-size: 90%;
-  color: $textLight;
-  text-transform: uppercase;
+  opacity: 0.8;
 }
 .widget-data{
   padding:4px 0 10px 0;
+  word-break: break-word;
   &.widget-type-slider {
-    color: $textLight;
+    opacity: 0.8;
     .slider-value {
-      color: $textMain;
+      opacity: 0.9;
       font-weight: bold;
     }
+  }
+  &.widget-type-array {
+    .array-entry{
+      display: inline-flex;
+      &:not(:last-child):after{
+        content: ', ';
+        padding-right: 0.3em;
+      }
+    }
+  }
+  &.widget-link{
+    text-decoration: underline;
+    cursor: pointer;
   }
 }
 .widget-type-text >div{

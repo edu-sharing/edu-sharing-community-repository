@@ -1,0 +1,5 @@
+<h3 *ngIf="view.caption" id="{{ view.id }}_header" class="card-title-element heading">
+  <i class="material-icons">{{ view.icon }}</i>
+  <ng-container>{{ view.caption }}</ng-container>
+</h3>
+<div class="content" #container [innerHTML]="html"></div>

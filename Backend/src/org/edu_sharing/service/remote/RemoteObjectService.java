@@ -14,17 +14,14 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceHelper;
-import org.reflections.Store;
 
 public class RemoteObjectService {
 
@@ -203,7 +200,7 @@ public class RemoteObjectService {
 				}
 				if(nodes.size()==0) {
 					// create
-					String containerId = NodeServiceHelper.getContainerId(ROOT_PATH, "yyyy/MM/dd");
+					String containerId = NodeServiceHelper.getContainerIdByPath(ROOT_PATH, "yyyy/MM/dd");
 					return nodeService.createNodeBasic(containerId, CCConstants.CCM_TYPE_IO, props);
 				}
 				else{

@@ -2,7 +2,6 @@
 <card *ngIf="!isLoading"
       avatar="assets/images/app-icon.svg"
       [buttons]="updateButtons()"
-      modal="always"
       title="{{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}"
       subtitle="{{'REGISTER.ORGANIZATION_TITLE' | translate}}"
       width="normal"

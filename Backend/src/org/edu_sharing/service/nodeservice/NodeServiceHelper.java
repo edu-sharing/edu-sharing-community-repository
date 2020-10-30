@@ -56,7 +56,9 @@ public class NodeServiceHelper {
 	public static <T> Map<String, T> transformLongToShortProperties(Map<String, T> properties) {
 		HashMap<String, T> result = new HashMap<>();
 		for(Map.Entry<String, T> prop: properties.entrySet()){
-			result.put(CCConstants.getValidLocalName(prop.getKey()), prop.getValue());
+			if(CCConstants.getValidLocalName(prop.getKey()) != null) {
+				result.put(CCConstants.getValidLocalName(prop.getKey()), prop.getValue());
+			}
 		}
 		return result;
 	}
@@ -111,6 +113,9 @@ public class NodeServiceHelper {
 	 */
     public static String getProperty(NodeRef nodeRef,String key){
 		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
+	}
+	public static void setProperty(NodeRef nodeRef,String key, Serializable value){
+		NodeServiceFactory.getLocalService().setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key,value);
 	}
 	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -187,6 +192,20 @@ public class NodeServiceHelper {
 		}
         return null;
     }
+	/**
+	 * Get all properties automatically concated from multivalue to singlevalue
+	 * Each property is always returned as an array
+	 * @return
+	 * @throws Throwable
+	 */
+	public static HashMap<String, Object> getPropertiesSinglevalue(Map<String, String[]> properties) {
+		HashMap<String, Object> propertiesMultivalue = new HashMap<>();
+		if(properties!=null) {
+			properties.forEach((key, value) -> convertMutlivaluePropToGeneric(value, propertiesMultivalue, key));
+			return propertiesMultivalue;
+		}
+		return null;
+	}
     public static boolean downloadAllowed(String nodeId){
 		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
 		return new MCAlfrescoAPIClient().downloadAllowed(
@@ -223,6 +242,9 @@ public class NodeServiceHelper {
 	public static GetPreviewResult getPreview(NodeRef ref) {
 		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(), null, null);
 	}
+	public static GetPreviewResult getPreview(NodeRef ref, HashMap<String, Object> nodeProps) {
+		return NodeServiceFactory.getLocalService().getPreview(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId(), nodeProps, null);
+	}
 	public static GetPreviewResult getPreview(org.edu_sharing.service.model.NodeRef ref) {
 		return NodeServiceFactory.getNodeService(ref.getRepositoryId()).getPreview(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(), null, null);
 	}
@@ -233,59 +255,66 @@ public class NodeServiceHelper {
 	}
 
 
+	public static String getContainerId(String rootId, String pattern) {
+		String result = null;
+		try{
+			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
+			// request node
+
+
+			String[] patterns = pattern.split(SEPARATOR);
+
+			DateFormat[] formatter = new DateFormat[patterns.length];
+			for (int i = 0, c = patterns.length; i<c; ++i) {
+				formatter[i] = new SimpleDateFormat(patterns[i]);
+			}
+
+			String[] items = new String[formatter.length];
+			StringBuilder path = new StringBuilder();
+
+			Date date = new Date();
+
+			for (int i = 0, c = formatter.length; i < c; ++i) {
+				items[i] = formatter[i].format(date);
+
+				if (i > 0) {
+					path.append(SEPARATOR);
+				}
+				path.append(items[i]);
+			}
+
+			try{
+				lock.lock();
+				String key = path.toString();
+				result = cache.get(key);
+				if(result == null){
+					result = new NodeTool().createOrGetNodeByName(client, rootId, items);
+					cache.put(key, result);
+				}
+			}finally{
+				lock.unlock();
+			}
+
+		}catch (Throwable e) {
+			logger.error(e.getMessage(), e);
+		}
+		return result;
+	}
 	/**
 	 * Find the path to a container based on a pattern
 	 * @param rootPath
 	 * @param pattern Splitted by "/" - a date like pattern, e.g. yyyy/MM/dd/HH/mm/ss/SS
 	 * @return the node id of the target folder
 	 */
-	public static String getContainerId(String rootPath, String pattern){
-			String result = null;
-			try{
-				MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
-				// request node
-				String rootId = getContainerRootPath(rootPath);
-
-
-				String[] patterns = pattern.split(SEPARATOR);
-
-				DateFormat[] formatter = new DateFormat[patterns.length];
-				for (int i = 0, c = patterns.length; i<c; ++i) {
-					formatter[i] = new SimpleDateFormat(patterns[i]);
-				}
-
-				String[] items = new String[formatter.length];
-				StringBuilder path = new StringBuilder();
-
-				Date date = new Date();
-
-				for (int i = 0, c = formatter.length; i < c; ++i) {
-					items[i] = formatter[i].format(date);
-
-					if (i > 0) {
-						path.append(SEPARATOR);
-					}
-					path.append(items[i]);
-				}
-
-				try{
-					lock.lock();
-					String key = path.toString();
-					result = cache.get(key);
-					if(result == null){
-						result = new NodeTool().createOrGetNodeByName(client, rootId, items);
-						cache.put(key, result);
-					}
-				}finally{
-					lock.unlock();
-				}
-
-			}catch (Throwable e) {
-				logger.error(e.getMessage(), e);
-				e.printStackTrace();
-			}
-			return result;
+	public static String getContainerIdByPath(String rootPath, String pattern){
+		try {
+			String rootId = getContainerRootPath(rootPath);
+			return getContainerId(rootId, pattern);
+		}catch(Throwable t){
+			logger.error(t.getMessage(), t);
 		}
+		return null;
+	}
 
 	public static String getContainerRootPath(String rootPath) throws Throwable {
 		MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
@@ -310,5 +339,20 @@ public class NodeServiceHelper {
 			rootId = search.keySet().iterator().next();
 		}
 		return rootId;
+	}
+
+	public static void convertMutlivaluePropToGeneric(String[] arr, HashMap<String, Object> target, String property) {
+		if(arr != null){
+			if(arr.length==0)
+				target.put(property,null);
+			else if(arr.length > 1)
+				target.put(property,new ArrayList<String>(Arrays.asList(arr)));
+			else
+				target.put(property, arr[0]);
+		}
+	}
+
+	public static void copyProperty(NodeRef sourceNode, NodeRef targetNode, String property) {
+		NodeServiceHelper.setProperty(targetNode, property, NodeServiceHelper.getProperty(sourceNode, property));
 	}
 }

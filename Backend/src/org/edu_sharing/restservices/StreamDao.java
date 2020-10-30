@@ -3,11 +3,8 @@ package org.edu_sharing.restservices;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.shared.Node;
@@ -15,7 +12,6 @@ import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.stream.v1.model.StreamEntry;
 import org.edu_sharing.restservices.stream.v1.model.StreamEntryInput;
 import org.edu_sharing.restservices.stream.v1.model.StreamList;
-import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.StreamService;
@@ -25,9 +21,8 @@ import org.edu_sharing.service.stream.model.ContentEntry;
 import org.edu_sharing.service.stream.model.ContentEntry.Audience.STATUS;
 import org.edu_sharing.service.stream.model.StreamSearchRequest;
 import org.edu_sharing.service.stream.model.StreamSearchResult;
-import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.edu_sharing.service.usage.Usage2Service;
 
 public class StreamDao {
 	public static StreamEntryInput addEntry(RepositoryDao repoDao,StreamEntryInput newEntry) throws DAOException{
@@ -130,7 +125,7 @@ public class StreamDao {
 						continue;
 					}
 					// load permissions with the current user
-					nodeDao.refreshPermissions();
+					nodeDao.refreshPermissions(null);
 					AuthenticationUtil.runAsSystem(()-> {
 						nodes.add(nodeDao.asNode());
 						return null;

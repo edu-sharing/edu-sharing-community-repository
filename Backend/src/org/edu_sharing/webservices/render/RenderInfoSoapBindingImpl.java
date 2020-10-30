@@ -7,24 +7,16 @@
 
 package org.edu_sharing.webservices.render;
 
-import java.awt.*;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
 import javax.xml.soap.SOAPException;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.axis.AxisFault;
 import org.apache.axis.MessageContext;
 import org.apache.axis.message.SOAPHeaderElement;
@@ -33,28 +25,12 @@ import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.MimeTypes;
-import org.edu_sharing.repository.client.tools.Theme;
-import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
-import org.edu_sharing.repository.server.tracking.TrackingTool;
-import org.edu_sharing.service.license.LicenseService;
-import org.edu_sharing.service.mime.MimeTypesV2;
-import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
-import org.edu_sharing.service.tracking.NodeTrackingDetails;
-import org.edu_sharing.service.tracking.TrackingService;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
-import org.edu_sharing.service.usage.AlfServicesWrapper;
-import org.edu_sharing.service.usage.UsageDAO;
-import org.edu_sharing.service.usage.UsageService;
 import org.edu_sharing.webservices.types.KeyValue;
 import org.edu_sharing.webservices.usage.UsageResult;
 import org.w3c.dom.Node;

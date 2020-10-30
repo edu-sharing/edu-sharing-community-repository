@@ -26,8 +26,10 @@ import javax.ws.rs.core.Response;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.dspace.xoai.model.oaipmh.Error;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -42,7 +44,7 @@ import org.edu_sharing.restservices.shared.NodeRemote;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.User;
-import org.edu_sharing.service.Constants;
+
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
@@ -178,8 +180,87 @@ public class NodeApi  {
 	    	}
 
 	    }
-	
-	  	@PUT
+
+	@POST
+	@Path("/nodes/{repository}/{node}/publish")
+
+	@ApiOperation(
+			value = "Publish",
+			notes = "Create a published copy of the current node ")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response publishCopy(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao published = nodeDao.publishCopy();
+			NodeEntry response = new NodeEntry();
+			response.setNode(published.asNode());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+	@GET
+	@Path("/nodes/{repository}/{node}/publish")
+
+	@ApiOperation(
+			value = "Publish",
+			notes = "Get all published copies of the current node")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntries.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getPublishedCopies(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao originalDao = NodeDao.getNode(repoDao, node);
+			List<NodeDao> published = originalDao.getPublishedCopies();
+			NodeEntries response = new NodeEntries();
+			response.setNodes(published.stream().map(dao -> {
+				try {
+					return dao.asNode();
+				} catch (DAOException e) {
+					throw new RuntimeException(e);
+				}
+			}).collect(Collectors.toList()));
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@PUT
 	    @Path("/nodes/{repository}/{node}/aspects")
 	        
 	    @ApiOperation(
@@ -286,7 +367,7 @@ public class NodeApi  {
     	@Context HttpServletRequest req) {
     	
     	try{
-    		EditLockServiceFactory.getEditLockService().unlock(new org.alfresco.service.cmr.repository.NodeRef(Constants.storeRef,node));
+    		EditLockServiceFactory.getEditLockService().unlock(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node));
     	}catch(LockedException e){
     		return ErrorResponse.createResponse(e);    		
     	}
@@ -315,7 +396,7 @@ public class NodeApi  {
     	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Context HttpServletRequest req) {
 		try {
-			boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(Constants.storeRef, node));
+			boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node));
 			NodeLocked response = new NodeLocked();
 			response.setLocked(isLocked);
 
@@ -1506,7 +1587,10 @@ public class NodeApi  {
     		logger.warn(t.getMessage(), t);
     		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
     		
-    	} catch (Throwable t) {
+    	}catch(DAOVirusDetectedException t){
+			logger.warn(t.getMessage(),t);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+		} catch (Throwable t) {
     		
     		logger.error(t.getMessage(), t);
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
@@ -1552,25 +1636,8 @@ public class NodeApi  {
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+    		return ErrorResponse.createResponse(t);
     	}
 
     }

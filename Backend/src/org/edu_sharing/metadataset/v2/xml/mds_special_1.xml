@@ -1,19 +1,11 @@
 <metadataset id="default" label="default" hidden="false">
 		<name>Sample MDS</name>
 		<i18n>mds</i18n>
+		<inherit>mds_special_inherit</inherit>
 		<create>
 			<onlyMetadata>true</onlyMetadata>
 		</create>
 		<widgets>
-			<widget>
-				<id>ccm:group_test</id>
-				<caption>Gruppentest</caption>
-				<type>multivalueGroup</type>
-				<subwidgets>
-					<widget>ccm:classification_purpose</widget>
-					<widget>ccm:educationaltypicalagerange</widget>
-				</subwidgets>
-			</widget>
 			<widget>
 				<id>ccm:classification_purpose</id>
 				<type>defaultvalue</type>
@@ -40,7 +32,10 @@
 				<caption>Bildungsbereich/-sektor</caption>
 				<placeholder>z.B. Physik</placeholder>
 				<type>multivalueTree</type>
-				<valuespace>lisum_taxon.xml</valuespace>
+				<values>
+					<value cap="Mathematik">mathematics</value>
+					<value cap="Physik">physics</value>
+				</values>
 			</widget>
 			<widget>
 				<id>ccm:educationaltypicalagerange</id>
@@ -86,6 +81,7 @@
 				<caption>Erweitert</caption>
 				<icon>help_outline</icon>
 				<html><![CDATA[
+				Overriden:
               <ccm:group_test>
               <ccm:taxonid>
               <ccm:educationaltypicalagerange extended="true">

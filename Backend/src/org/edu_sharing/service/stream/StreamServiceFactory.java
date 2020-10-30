@@ -1,11 +1,7 @@
 package org.edu_sharing.service.stream;
 
 import com.typesafe.config.Config;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
-import org.edu_sharing.service.register.RegisterService;
-
-import java.util.Properties;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
 public class StreamServiceFactory {
 	public static StreamService getStreamService() {

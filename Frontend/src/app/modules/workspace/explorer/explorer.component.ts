@@ -159,9 +159,6 @@ export class WorkspaceExplorerComponent {
       this.loading=false;
       this.showLoading=false;
   }
-  public columnsChanged(columns:ListItem[]){
-    this.storage.set("workspaceColumns",columns);
-  }
   constructor(
     private connector : RestConnectorService,
     private translate : TranslateService,
@@ -172,13 +169,8 @@ export class WorkspaceExplorerComponent {
     private toast : Toast,
     private nodeApi : RestNodeService) {
     //super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
-    this.config.get('workspaceColumns').subscribe((data:string[])=> {
-      this.storage.get('workspaceColumns').subscribe((columns:any[])=> {
-        this.columns = this.getColumns(columns, data);
-      });
-    });
+    this.initColumns();
     this.storage.get(SessionStorageService.KEY_WORKSPACE_SORT, null).subscribe((sort) => {
-      console.log(sort);
       if(sort?.sortBy != null) {
         this.setSorting(sort);
       }
@@ -323,5 +315,13 @@ export class WorkspaceExplorerComponent {
 
   private getRealNodeCount() {
     return this._nodes.filter((n) => !n.virtual).length;
+  }
+
+  initColumns() {
+    this.config.get('workspaceColumns').subscribe((data:string[])=> {
+      this.storage.get('workspaceColumns').subscribe((columns:any[])=> {
+        this.columns = this.getColumns(columns, data);
+      });
+    });
   }
 }

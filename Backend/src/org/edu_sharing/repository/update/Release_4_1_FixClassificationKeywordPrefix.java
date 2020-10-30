@@ -9,6 +9,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
@@ -16,7 +17,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.Constants;
+
 import org.springframework.context.ApplicationContext;
 
 public class Release_4_1_FixClassificationKeywordPrefix extends UpdateAbstract{
@@ -50,7 +51,7 @@ public static final String ID = "Release_4_1_FixClassificationKeywordPrefix";
 				SearchService ss = serviceRegistry.getSearchService();
 				NodeService ns = serviceRegistry.getNodeService();
 				SearchParameters sp = new SearchParameters();
-				sp.addStore(Constants.storeRef);
+				sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 				sp.setLanguage(SearchService.LANGUAGE_LUCENE);
 				sp.setMaxItems(-1);
 				sp.setQuery("TYPE:\"ccm:io\" AND @cclom\\:classification_keyword:\"*\"");

@@ -429,6 +429,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_REF_VIDEO_VTT = "{http://www.campuscontent.de/model/1.0}ref_video_vtt";
 
+	public final static String CCM_PROP_MAP_REF_TARGET = "{http://www.campuscontent.de/model/1.0}map_ref_target";
+
 	public final static String CCM_PROP_ADDRESS_POSTALCODE = "{http://www.campuscontent.de/model/1.0}postalCode";
 
 	public final static String CCM_PROP_ADDRESS_CITY = "{http://www.campuscontent.de/model/1.0}city";
@@ -438,6 +440,8 @@ public class CCConstants {
 	public final static String CCM_ASPECT_COMMON_LICENSES ="{http://www.campuscontent.de/model/1.0}commonlicenses";
 
 	public final static String CCM_ASPECT_EDUGROUP = "{http://www.campuscontent.de/model/1.0}edugroup";
+
+	public final static String CCM_ASPECT_MAP_REF = "{http://www.campuscontent.de/model/1.0}map_ref";
 
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
 
@@ -753,9 +757,15 @@ public class CCConstants {
 	
 	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
 
+	public final static String CCM_PROP_IO_LOCATION_STATUS = "{http://www.campuscontent.de/model/1.0}location_status";
+
 	public final static String CCM_PROP_IO_EDITORIAL_CHECKLIST = "{http://www.campuscontent.de/model/1.0}editorial_checklist";
 
 	public final static String CCM_PROP_IO_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
+
+	public final static String CCM_PROP_IO_PUBLISHED_MODE = "{http://www.campuscontent.de/model/1.0}published_mode";
+
+	public final static String CCM_PROP_IO_PUBLISHED_ORIGINAL = "{http://www.campuscontent.de/model/1.0}published_original";
 
 	/**
 	 * published
@@ -817,6 +827,10 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_WORKSPACE = "TOOLPERMISSION_WORKSPACE";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS = "TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS";
+	public final static String CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FILES = "TOOLPERMISSION_CREATE_ELEMENTS_FILES";
+	public final static String CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS = "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY";
@@ -860,6 +874,10 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT = "TOOLPERMISSION_VIDEO_AUDIO_CUT";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE = "TOOLPERMISSION_MEDIACENTER_MANAGE";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY = "TOOLPERMISSION_PUBLISH_COPY";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK = "TOOLPERMISSION_CREATE_MAP_LINK";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
@@ -1053,6 +1071,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestamp";
 	public final static String CCM_PROP_IO_REPLICATION_MODIFIED = "{http://www.campuscontent.de/model/1.0}replicationmodified";
 	public final static String CCM_PROP_IO_IMPORT_MODIFIED = "{http://www.campuscontent.de/model/1.0}importmodified";
+	public final static String CCM_PROP_IO_IMPORT_BLOCKED = "{http://www.campuscontent.de/model/1.0}importblocked";
 
 	//replicationsourcetimestampFORMATED is an generated prop, to keep the original
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMPFORMATED = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestampFORMATED";
@@ -2070,5 +2089,9 @@ public class CCConstants {
 	public static final String ISO8601_SUFFIX = "ISO8601";
 
 	public static final String VERSION_COMMENT_PREVIEW_CHANGED = "PREVIEW_CHANGED";
+
+	public static final String VERSION_COMMENT_BULK_CREATE = "BULK_CREATE";
+	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
+	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 
 }

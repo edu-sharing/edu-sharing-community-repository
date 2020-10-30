@@ -1,6 +1,6 @@
 package org.edu_sharing.service.toolpermission;
 
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 
 public class ToolPermissionHelper {
     public static void throwIfToolpermissionMissing(String toolpermission){

@@ -1,58 +1,42 @@
 package org.edu_sharing.service.toolpermission;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.admin.model.ToolPermission;
 import org.edu_sharing.service.connector.Connector;
 import org.edu_sharing.service.connector.ConnectorList;
-import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
-import org.springframework.context.ApplicationContext;
 
-import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
-
-public class ToolPermissionService {
-
-
-	Logger logger = Logger.getLogger(ToolPermissionService.class);
-	
-	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-
-	private ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	private PermissionService permissionService = serviceRegistry.getPermissionService();
-
-	private NodeService nodeService = serviceRegistry.getNodeService();
-	private ConnectorService connectorService;
-
+public class ToolPermissionService extends ToolPermissionBaseService {
+	private Logger logger = Logger.getLogger(ToolPermissionService.class);
 	org.edu_sharing.service.nodeservice.NodeService eduNodeService;
-	
-	AuthenticationService authService = serviceRegistry.getAuthenticationService();
+	private static Map<String,String> toolPermissionNodeCache = new HashMap<>();
 
 	private static String toolPermissionFolder=null;
 
+	ToolPermissionService(){
+		buildCache();
+	}
+
+	private void buildCache() {
+
+	}
 
 	public void setEduNodeService(org.edu_sharing.service.nodeservice.NodeService eduNodeService) {
 		this.eduNodeService = eduNodeService;
@@ -71,25 +55,27 @@ public class ToolPermissionService {
 	}
 	public List<String> getAllAvailableToolPermissions(boolean renew){
 		List<String> allowed=new ArrayList<>();
-		for(String permission : this.getAllToolPermissions()){
+		for(String permission : this.getAllToolPermissions(renew)){
 			if(hasToolPermission(permission, renew))
 				allowed.add(permission);
 		}
 		return allowed;
 	}
-	
-	public List<String> getAllToolPermissions(){
+
+	public Collection<String> getAllToolPermissions(boolean refresh){
+		if(!refresh && !toolPermissionNodeCache.keySet().isEmpty()){
+			return toolPermissionNodeCache.keySet();
+		}
 		RunAsWork<List<String>> runas = new RunAsWork<List<String>>() {
 			@Override
 			public List<String> doWork() throws Exception {
 				List<String> result = new ArrayList<String>();
 				try {
-					
-					
 					String tpFolder = getEdu_SharingToolPermissionsFolder();
 					List<ChildAssociationRef> childAssocRefs = eduNodeService.getChildrenChildAssociationRef(tpFolder);
 					for(ChildAssociationRef childAssocRef : childAssocRefs) {
 						String name = eduNodeService.getProperty(childAssocRef.getChildRef().getStoreRef().getProtocol(), childAssocRef.getChildRef().getStoreRef().getIdentifier(), childAssocRef.getChildRef().getId(), CCConstants.CM_NAME);
+						toolPermissionNodeCache.put(name, childAssocRef.getChildRef().getId());
 						result.add(name);
 					}
 				}catch(Throwable e) {
@@ -98,42 +84,8 @@ public class ToolPermissionService {
 				return result;
 			}
 		};
-		
+
 		return AuthenticationUtil.runAsSystem(runas);
-	}
-
-	public boolean hasToolPermission(String toolPermission) {
-		return hasToolPermission(toolPermission, false);
-	}
-
-	/**
-	 *
-	 * @param toolPermission
-	 * @param renew should the cache be skipped / renewed
-	 * @return
-	 */
-	public boolean hasToolPermission(String toolPermission, boolean renew) {
-		
-		
-		try{
-			if(isAdmin()){
-				return true;
-			}
-		}catch(Exception e){
-			logger.error(e.getMessage(),e);
-		}
-		
-		/**
-		 * try to use session cache
-		 */
-		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-		Boolean hasToolPerm = (Boolean)session.getAttribute(toolPermission);
-		if(hasToolPerm == null || renew){
-			hasToolPerm = hasToolPermissionWithoutCache(toolPermission);
-			session.setAttribute(toolPermission, hasToolPerm);
-		}
-		return hasToolPerm;
-		
 	}
 	
 	
@@ -161,14 +113,14 @@ public class ToolPermissionService {
 		}
 
 		String toolNodeId = AuthenticationUtil.runAsSystem(workTP);
-		AccessStatus accessStatus = permissionService.hasPermission(new NodeRef(Constants.storeRef, toolNodeId), PermissionService.READ);
-		AccessStatus accessStatusDenied = permissionService.hasPermission(new NodeRef(Constants.storeRef, toolNodeId), CCConstants.PERMISSION_DENY);
+		AccessStatus accessStatusDenied = permissionService.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toolNodeId), CCConstants.PERMISSION_DENY);
 		if(accessStatusDenied.equals(AccessStatus.ALLOWED)) {
-			logger.info("Toolpermission "+toolPermission+" has explicit Deny permission");;
+			logger.info("Toolpermission "+toolPermission+" has explicit Deny permission");
+			return false;
 		}
-		return accessStatus.equals(AccessStatus.ALLOWED) && !accessStatusDenied.equals(AccessStatus.ALLOWED);
+		AccessStatus accessStatus = permissionService.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toolNodeId), PermissionService.READ);
+		return accessStatus.equals(AccessStatus.ALLOWED);
 	}
-	static Map<String,String> toolPermissionNodeCache = new HashMap<>();
 	public String getToolPermissionNodeId(String toolPermission) throws Throwable{
 		if(toolPermissionNodeCache.containsKey(toolPermission)) {
 			String nodeId=toolPermissionNodeCache.get(toolPermission);
@@ -179,7 +131,7 @@ public class ToolPermissionService {
 		String systemFolderId = getEdu_SharingToolPermissionsFolder();
 
 
-        NodeRef sysObject = eduNodeService.getChild(Constants.storeRef, systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, CCConstants.CM_NAME, toolPermission);
+        NodeRef sysObject = eduNodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, CCConstants.CM_NAME, toolPermission);
 		
 		if(sysObject == null){
 
@@ -215,7 +167,7 @@ public class ToolPermissionService {
 			throw new Exception("Admin group required");
 		}
 		String companyHomeNodeId = eduNodeService.getCompanyHome();
-		NodeRef edu_SharingSysMap = eduNodeService.getChild(Constants.storeRef, companyHomeNodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
+		NodeRef edu_SharingSysMap = eduNodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, companyHomeNodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
 		
 		String result = null;
 		if(edu_SharingSysMap == null){
@@ -233,7 +185,7 @@ public class ToolPermissionService {
 			newEdu_SharingSysMapProps.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
 			
 			result = eduNodeService.createNodeBasic(companyHomeNodeId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
-			permissionService.setInheritParentPermissions(new NodeRef(Constants.storeRef,result),false);
+			permissionService.setInheritParentPermissions(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,result),false);
 		}else{
 			result = edu_SharingSysMap.getId();
 		}
@@ -246,7 +198,7 @@ public class ToolPermissionService {
 			return toolPermissionFolder;
 		logger.info("fully: "+AuthenticationUtil.getFullyAuthenticatedUser() +" runAs:"+AuthenticationUtil.getRunAsUser());
 		String systemFolderId = getEdu_SharingSystemFolderBase();
-		NodeRef edu_SharingSystemFolderToolPermissions = eduNodeService.getChild(Constants.storeRef, systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS);
+		NodeRef edu_SharingSystemFolderToolPermissions = eduNodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS);
 		String result = null;
 		if(edu_SharingSystemFolderToolPermissions == null){
 			logger.info("ToolPermission Folder does not exsist. will create it.");
@@ -277,35 +229,14 @@ public class ToolPermissionService {
 		}
 		
 	}
-	
-	
-	private boolean isAdmin(){
-		 try {
-			   Set<String> testUsetAuthorities = serviceRegistry.getAuthorityService().getAuthoritiesForUser(AuthenticationUtil.getRunAsUser());
-			   for (String testAuth : testUsetAuthorities) {
 
-			    if (testAuth.equals("GROUP_ALFRESCO_ADMINISTRATORS")) {
-			     return true;
-			    }
-			   }
-			  } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-			  }catch(AuthenticationCredentialsNotFoundException e){
-				  System.out.println(e.getMessage());
-				  return false;
-			  }
-		 
-		if(AuthenticationUtil.isRunAsUserTheSystemUser())
-			return true;
-		
-		return false;
-	}
 	/**
 	 * Clears previously stored tool permissions in the current http session, e.g. when user changes
 	 */
 	public void invalidateSessionCache() {
 		try{
 			HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-			for(String tp : this.getAllToolPermissions()){
+			for(String tp : this.getAllToolPermissions(false)){
 				session.removeAttribute(tp);
 			}
 		}catch(Throwable t){
@@ -332,6 +263,8 @@ public class ToolPermissionService {
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
 		return toInit;
 	}
 	public List<String> getAllPredefinedToolPermissions(){
@@ -354,6 +287,9 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_LICENSE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_UNCHECKEDCONTENT);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_WORKSPACE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FILES);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
 
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
@@ -369,6 +305,8 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;

@@ -639,7 +639,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					}
 					
 				}
-				
+				// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
+				if(mimetype.startsWith("image/svg")){
+					mimetype = "image/svg+xml";
+				}
 				resp.setContentType(mimetype);
 				
 				resp.setContentLength((int) in.available());

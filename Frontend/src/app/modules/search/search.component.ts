@@ -10,7 +10,7 @@ import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { ActionbarComponent } from '../../common/ui/actionbar/actionbar.component';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
-import { MdsComponent } from '../../common/ui/mds/mds.component';
+import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { CollectionWrapper, ConfigurationHelper, ConfigurationService, DialogButton, ListItem, LoginResult, MdsInfo, MdsMetadatasets, NetworkRepositories, Node, NodeList, NodeWrapper, Repository, RestCollectionService, RestConnectorService, RestConstants, RestHelper, RestIamService, RestMdsService, RestNetworkService, RestNodeService, RestSearchService, SearchList, SessionStorageService, SortItem, TemporaryStorageService, UIService } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
@@ -25,6 +25,7 @@ import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchService } from './search.service';
 import { WindowRefService } from './window-ref.service';
+import {Values} from '../../common/ui/mds-editor/types';
 
 @Component({
     selector: 'app-search',
@@ -36,8 +37,8 @@ import { WindowRefService } from './window-ref.service';
 export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
 
-    @ViewChild('mdsMobile') mdsMobileRef: MdsComponent;
-    @ViewChild('mdsDesktop') mdsDesktopRef: MdsComponent;
+    @ViewChild('mdsMobile') mdsMobileRef: MdsEditorWrapperComponent;
+    @ViewChild('mdsDesktop') mdsDesktopRef: MdsEditorWrapperComponent;
     @ViewChild('list') list: ListTableComponent;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
@@ -103,7 +104,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private enabledRepositories: string[];
     // we only initalize the banner once to prevent flickering
     private bannerInitalized = false;
-    private currentValues: any;
+    currentValues: Values;
     private currentMdsSet: any;
     private mdsActions: OptionItem[];
     private mdsButtons: DialogButton[];
@@ -285,20 +286,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     handleScroll(event: Event) {
         this.searchService.offset =
             window.pageYOffset || document.documentElement.scrollTop;
-    }
-
-    getValuesForMds() {
-        // add the primary search word to the currentValuesAll so that the mds is aware of it
-        let values = Helper.deepCopy(this.currentValues);
-        if (!values) {
-            values = [];
-        }
-        if (this.searchService.searchTerm) {
-            values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
-                this.searchService.searchTerm,
-            ];
-        }
-        return values;
     }
 
     setRepository(repository: string) {
@@ -633,10 +620,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 for (let facette of data.facettes) {
                     facette.values = facette.values.slice(0, 5);
                     this.mdsSuggestions[facette.property] = [];
+                    const widget = MdsHelper.getWidget(facette.property, null, this.currentMdsSet?.widgets);
                     for (let value of facette.values) {
+                        const cap =  widget?.values?.find((v: any) => v.id === value.value);
                         this.mdsSuggestions[facette.property].push({
                             id: value.value,
-                            caption: value.value,
+                            caption: cap ? cap.caption : value.value,
+                            count: value.count
                         });
                     }
                 }
@@ -738,7 +728,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.setFixMobileNav();
         // init mobile mds
         if(this.hasMobileMds()) {
-            UIHelper.waitForComponent(this, 'mdsMobileRef').subscribe(() => {
+            this.uiService.waitForComponent(this, 'mdsMobileRef').subscribe(() => {
                 this.mdsMobileRef.loadMds();
             });
         }
@@ -1042,18 +1032,25 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             offset: this.searchService.skipcount[position],
             propertyFilter: [properties],
         };
+        let facettes;
+        try {
+            facettes = MdsHelper.getUsedWidgets(this.currentMdsSet, 'search_suggestions').map((w: any) => w.id);
+        } catch(e) {
+            console.warn('Could not load used facettes from search_suggestions', e);
+            facettes = [RestConstants.LOM_PROP_GENERAL_KEYWORD];
+        }
         let queryRequest =
         this.search
             .search(
                 criterias,
-                [RestConstants.LOM_PROP_GENERAL_KEYWORD],
+                facettes,
                 request,
                 RestConstants.CONTENT_TYPE_FILES,
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,
                 mdsId,
             );
             const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed && this.isHomeRepository();
-            console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
+            // console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
             }
@@ -1138,7 +1135,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mdsActions = [];
         this.mdsActions.push(
             new OptionItem('SEARCH.APPLY_FILTER', 'search', () => {
-                this.applyParameters(this.getActiveMds().saveValues());
+                this.applyParameters(this.getActiveMds().getValues());
             }),
         );
         if (this.applyMode) {

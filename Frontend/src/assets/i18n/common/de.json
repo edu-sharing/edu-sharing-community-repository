@@ -14,6 +14,7 @@
     "APPLY": "Übernehmen",
     "CANCEL": "Abbrechen",
     "YES_DELETE": "Ja, löschen",
+    "RESET": "Zurücksetzen",
     "START": "Start",
     "STOP": "Stopp",
     "RENAME": "Umbenennen",
@@ -96,6 +97,7 @@
     "CONNECTOR_QUOTA_REACHED_TITLE": "Speicherplatz-Quota überschritten",
     "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Sie das Speicherplatz-Quota vollständig überschritten haben.\n\nLöschen Sie einige Dateien, um Speicherplatz zu schaffen und versuchen Sie es anschließend erneut.",
     "TOOLPERMISSION_ERROR": "Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
+    "TOOLPERMISSION_ERROR_INLINE": "Sie dürfen diese Aktion nicht durchführen, da die Berechtigung \"{{permission}}\" fehlt.",
     "TOOLPERMISSION_ERROR_TITLE": "Fehlende Berechtigung",
     "TOOLPERMISSION_ERROR_HEADER": "Folgende Berechtigung ist für Ihren aktuellen Nutzer nicht freigegeben:",
     "TOOLPERMISSION_ERROR_FOOTER": "Falls Sie dies für einen Fehler halten, kontaktieren Sie den Administrator und fragen Sie nach Freigabe der Berechtigung {{permission}}",
@@ -106,6 +108,7 @@
         "TOOLPERMISSION_INVITE_HISTORY": "Die Berechtigung zum Anzeigen der Freigabe-Historie",
         "TOOLPERMISSION_INVITE_SHARE": "Die Berechtigung zum Freigeben von Materialien in gemeinsamen Ordnern",
         "TOOLPERMISSION_INVITE_ALLAUTHORITIES": "Die Berechtigung zum Freigeben von Materialien an alle Nutzer",
+        "TOOLPERMISSION_PUBLISH_COPY": "Die Berechtigung zum Erstellen veröffentlichter Kopien von Materialien",
         "TOOLPERMISSION_COLLECTION_EDITORIAL": "Redaktionelle Sammlungen erstellen",
         "TOOLPERMISSION_LICENSE": "Lizenzdialog verwenden",
         "TOOLPERMISSION_INVITE_SAFE": "Die Berechtigung zum Freigeben von Materialien im Safe",
@@ -121,6 +124,9 @@
         "TOOLPERMISSION_CONFIDENTAL": "Zugriff auf gesicherten Bereich (Safe)",
         "TOOLPERMISSION_UNCHECKEDCONTENT": "Quellen wie zbsp. Youtube in der Suche anzeigen",
         "TOOLPERMISSION_WORKSPACE": "Zugriff auf den Workspace",
+        "TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS": "Ordner anlegen",
+        "TOOLPERMISSION_CREATE_ELEMENTS_FILES": "Dateien anlegen/hochladen",
+        "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS": "Sammlungen anlegen",
         "TOOLPERMISSION_HANDLESERVICE": "Eindeutige Ids für Materialien beim Handleservice anfordern",
         "TOOLPERMISSION_USAGE_STATISTIC": "Informationen über die Verwendung aller Objekte dieses Repositories abfragen",
         "TOOLPERMISSION_COMMENT_WRITE":"Kommentare an Objekten verfassen",
@@ -132,7 +138,8 @@
         "TOOLPERMISSION_RATE": "Die Berechtigung zum Bewerten von Materialien",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
-        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden"
+        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
+        "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken"
     },
     "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
     "NODE_SEARCH": "Elemente suchen...",
@@ -314,7 +321,7 @@
         "FILE_PICKER_TITLE": "Speicherort wählen",
         "CREATE": "Anlegen",
         "CREATE_EDIT": "Anlegen & Öffnen",
-        "CREATED": "Die Variante wurde angelegt und in <b>\"{{folder}}\"</b> Ordner gespeichert",
+        "CREATED": "Die Variante wurde angelegt und im Ordner <b>\"{{folder}}\"</b> gespeichert",
         "CREATED_LINK": "anzeigen",
         "WARNING": {
             "NO_LICENSE": "Dieses Material besitzt noch keine Lizenz.\nSetzen Sie sich ggf. mit dem Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
@@ -322,6 +329,17 @@
             "ND": "Dieses Material besitzt eine Non Derivative Lizenz. Diese Lizenz legt fest, dass das Material nicht verändert werden darf.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
             "LINK": "Lizenzinformationen anzeigen"
         }
+    },
+    "MAP_LINK": {
+        "TITLE": "Link erstellen",
+        "NAME": "Name des Links",
+        "INFO": "Es wird ein Link auf diesen Ordner erstellt. Dieser zeigt auf alle Inhalte des gewählten Ordners. Die Sichtbarkeit der Inhalte hängt von dem Rechten der Originalobjekte ab. Bearbeitungsaktionen innerhalb der Daten beziehen sich auf die echten Elemente",
+        "BREADCRUMB_INFO": "Link-Objekt speichern in:",
+        "CHOOSE": "Speicherort ändern",
+        "FILE_PICKER_TITLE": "Speicherort wählen",
+        "CREATE": "Link erstellen",
+        "CREATED": "Der Link wurde angelegt und im Ordner <b>\"{{folder}}\"</b> gespeichert",
+        "CREATED_LINK": "anzeigen"
     },
     "NODE_REPORT": {
         "TITLE": "Problem melden",
@@ -499,6 +517,7 @@
         "DEBUG": "Debug",
         "INVITE": "Freigeben",
         "EDIT": "Infos bearbeiten",
+        "EDIT_ORIGINAL": "Quelle bearbeiten",
         "EDIT_SIMPLE": "Schnell-Bearbeitung",
         "COLLECTION_EDIT": "Bearbeiten",
         "COLLECTION_PIN": "Sammlung pinnen",
@@ -511,6 +530,8 @@
         "NODE_REPORT": "Problem melden",
         "ADD_NODE_STORE": "Auf Merkliste",
         "DELETE": "Löschen",
+        "UNPUBLISH": "Veröffentlichung aufheben",
+        "UNBLOCK_IMPORT": "Reaktivieren",
         "REMOVE_REF": "Aus Sammlung entfernen",
         "CUT": "Ausschneiden",
         "COPY": "Kopieren",
@@ -519,7 +540,7 @@
         "COLLECTION": "In Sammlung",
         "COLLECTION_OTHER": "In Weitere Sammlung",
         "STREAM": "Auf Stream",
-        "LICENSE": "Lizenz (& Veröffentlichung)",
+        "LICENSE": "Lizenz",
         "CONTRIBUTOR": "Beteiligte",
         "SHARE_LINK": "Download-Link freigeben",
         "WORKFLOW": "Workflow",
@@ -529,11 +550,14 @@
         "QR_CODE": "QR-Code Link",
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
-        "NEW_COLLECTION": "Neue Sammlung"
+        "NEW_COLLECTION": "Neue Sammlung",
+        "LINK_MAP": "Verlinkung erstellen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
     "MDS": {
+        "DIFFERENT_VALUES": "(Verschiedene Werte)",
+        "HAS_CHANGES": "geändert",
         "TITLE": "Infos bearbeiten",
         "SHOW_EXTENDED": "Erweitere Infos anzeigen",
         "SHOW_EXTENDED_SEARCH": "Weitere Filter anzeigen",
@@ -541,11 +565,10 @@
         "AUTHOR_FREETEXT": "Freie Urheber-Angabe",
         "AUTHOR_FREETEXT_PLACEHOLDER": "Wer sind die Urheber des Werks? Wie sollen sie genannt werden?",
         "AUTHOR_PERSON": "Autoren & Beteiligte",
+        "AUTHOR_UNSET": "<keine Angabe>",
         "LICENSE": "Lizenz",
         "WORKFLOW": "Workflow-Status",
-        "BULK_OVERRIDE": "Ersetzen",
-        "BULK_REPLACE": "Ersetzen",
-        "BULK_APPEND": "Hinzufügen",
+        "BULK_EDIT": "Bearbeiten",
         "LICENSE_LINK": "Lizenz verwalten",
         "TEMPLATE_LINK": "Metadaten-Vorlage verwalten",
         "CONTRIBUTOR_LINK": "Weitere Beteiligte",
@@ -557,7 +580,13 @@
         "LICENSE_NO_PERMISSIONS_SAFE": "Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern",
         "ADD_CHILD_OBJECT": "Weitere Materialien hinzufügen",
         "ADD_CHILD_OBJECT_DESCRIPTION": "Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen",
-        "ADD_CHILD_OBJECT_QUOTA_REACHED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten"
+        "ADD_CHILD_OBJECT_QUOTA_REACHED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten",
+        "ADD_CHILD_OBJECT_VIRUS_DETECTED" :"Fehler beim Hochladen des Objekts \"{{ name }}\": Virus entdeckt. Objekt wurde gelöscht",
+        "CONFIRM_DISCARD_TITLE": "Änderungen verwerfen?",
+        "CONFIRM_DISCARD_MESSAGE": "Dialog schließen, ohne die Änderungen zu speichern?",
+        "REQUIRED_MESSAGE": "Pflichtfeld",
+        "REQUIRED_FOR_PUBLISH_MESSAGE": "Für die Veröffentlichung erforderliches Feld",
+        "INDETERMINATE_NOTICE": "Klicken Sie auf den Wert, um ihn allen Elementen hinzuzufügen, oder entfernen Sie ihn, um ihn aus allen Elementen zu löschen (wenn \"Ersetzen\" ausgewählt ist)."
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",
@@ -579,6 +608,7 @@
             "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist in dieser Ansicht nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
             "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
             "UNSET": "Nicht festgelegt",
+            "PUBLISH": "Alle (Veröffentlichen)",
             "GROUP_TYPES": {
                 "ORG_ADMINISTRATORS": "Nur Administratoren",
                 "TEACHER": "Nur Lehrkräfte"
@@ -685,6 +715,12 @@
         "file_upload": "Datei hochladen",
         "delete": "Löschen",
         "add": "Neu"
+    },
+    "FILL_STATUS": {
+        "MESSAGE": "Felder ausgefüllt",
+        "REQUIRED": "erforderliche Felder",
+        "REQUIREDPUBLISH": "für Veröffentlichung erforderliche Felder",
+        "SHOW": "zeigen"
     },
     "LANGUAGE": {
         "INTERNATIONAL": "International",

@@ -25,7 +25,7 @@ import {
     TemporaryStorageService,
     UIService,
     CollectionReference,
-    CollectionFeedback, NodesRightMode, Permission,
+    CollectionFeedback, NodesRightMode, Permission, MdsMetadatasets, ConfigurationHelper, RestNetworkService, SortDefault, RequestObject,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
 import {DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
@@ -86,6 +86,8 @@ export class CollectionsMainComponent {
     @ViewChild('listCollections')
     listCollections: ListTableComponent;
 
+    viewTypeNodes = ListTableComponent.VIEW_TYPE_GRID;
+
     dialogTitle: string;
     dialogCancelable = false;
     dialogMessage: string;
@@ -134,6 +136,7 @@ export class CollectionsMainComponent {
     tutorialElement: ElementRef;
     customNodeList = false;
     permissions: Permission[];
+    private sortCollections: SortDefault;
     set collectionShare(collectionShare: Node) {
         this._collectionShare = collectionShare;
         this.refreshAll();
@@ -229,6 +232,7 @@ export class CollectionsMainComponent {
         private location: Location,
         private collectionService: RestCollectionService,
         private nodeService: RestNodeService,
+        private networkService: RestNetworkService,
         private organizationService: RestOrganizationService,
         private iamService: RestIamService,
         private mdsService: RestMdsService,
@@ -262,17 +266,11 @@ export class CollectionsMainComponent {
                 translationService,
                 config,
             );
-            this.mdsService.getSet().subscribe((data: MdsMetadataset) => {
-                this.referencesColumns = MdsHelper.getColumns(
-                    this.translationService,
-                    data,
-                    'collectionReferences',
-                );
-            });
-
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
                     if (data.isValidLogin && data.currentScope == null) {
+                        this.addMaterialBinaryOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
+                        this.createSubCollectionOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
                         this.isGuest = data.isGuest;
                         this.collectionService
                             .getCollectionSubcollections(
@@ -291,7 +289,26 @@ export class CollectionsMainComponent {
                                 this.hasMediacenter =
                                     data.collections.length > 0;
                             });
-                        this.initialize();
+                        this.mdsService.getSets().subscribe(
+                            (data: MdsMetadatasets) => {
+                                const mdsSets = ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY,
+                                    data.metadatasets,
+                                    this.config,
+                                );
+                                this.mdsService.getSet(mdsSets[0].id).subscribe((mds) => {
+                                    this.referencesColumns = MdsHelper.getColumns(
+                                        this.translationService,
+                                        mds,
+                                        'collectionReferences',
+                                    );
+                                    const info = MdsHelper.getSortInfo(mds, 'collections');
+                                    this.sortCollections = info.default;
+                                    this.initialize();
+                                });
+                            },(e) => {
+                                console.warn(e);
+                                this.initialize();
+                            });
                     } else {
                         RestHelper.goToLogin(this.router, this.config);
                     }
@@ -392,7 +409,7 @@ export class CollectionsMainComponent {
         if (
             RestHelper.hasAccessPermission(
                 this.collectionContent.node,
-                RestConstants.PERMISSION_DELETE,
+                RestConstants.PERMISSION_WRITE,
             )
         ) {
             return true;
@@ -640,9 +657,15 @@ export class CollectionsMainComponent {
         GlobalContainerComponent.finishPreloading();
 
         // set correct scope
-        const request: any = Helper.deepCopy(
+        const request: RequestObject = Helper.deepCopy(
             CollectionsMainComponent.DEFAULT_REQUEST,
         );
+        if(this.sortCollections) {
+            request.sortBy = [this.sortCollections.sortBy];
+            request.sortAscending = [this.sortCollections.sortAscending];
+        } else {
+            console.warn('Sort for collections is not defined in the mds!');
+        }
         // when loading child collections, we load all of them
         if (!this.isRootLevelCollection()) {
             request.count = RestConstants.COUNT_UNLIMITED;
@@ -665,12 +688,13 @@ export class CollectionsMainComponent {
                         this.finishCollectionLoading(callback);
                         return;
                     }
-                    request.count = null;
+                    const requestRefs = Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
+                    requestRefs.count = null;
                     this.collectionService
                         .getCollectionReferences(
                             this.collectionContent.node.ref.id,
                             CollectionsMainComponent.PROPERTY_FILTER,
-                            request,
+                            requestRefs,
                             this.collectionContent.node.ref.repo,
                         )
                         .subscribe(refs => {
@@ -946,6 +970,12 @@ export class CollectionsMainComponent {
                 this.isReady = true;
                 // subscribe to parameters of url
                 this.route.queryParams.subscribe(params => {
+                    const diffs = Helper.getDifferentKeys(this.params, params);
+                    if(Object.keys(diffs).length === 1 && diffs.viewType) {
+                        this.params = params;
+                        this.viewTypeNodes = diffs.viewType;
+                        return;
+                    }
                     this.params = params;
                     if (params.scope) {
                         this.tabSelected = params.scope;
@@ -979,7 +1009,7 @@ export class CollectionsMainComponent {
                                 this.addToOther = [data.node];
                             });
                     }
-                    if (params.nodeId) {
+                    /*if (params.nodeId) {
                         let node = params.nodeId.split('/');
                         node = node[node.length - 1];
                         this.collectionService
@@ -992,7 +1022,7 @@ export class CollectionsMainComponent {
                                     //this.displayCollectionById(id)
                                 },
                             );
-                    } else {
+                    } else {*/
                         this.showCollection = id != '-root-';
                         this.displayCollectionById(id, () => {
                             if (params.content) {
@@ -1008,7 +1038,7 @@ export class CollectionsMainComponent {
                                 FrameEventsService.EVENT_INVALIDATE_HEIGHT,
                             );
                         });
-                    }
+                    // }
                 });
             },
             error => {

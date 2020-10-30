@@ -1,0 +1,20 @@
+<div class="extended-toggle-container">
+  <mat-slide-toggle
+    *ngIf="hasExtendedWidgets$ | async"
+    class="extended-toggle"
+    [ngModel]="shouldShowExtendedWidgets$ | async"
+    (ngModelChange)="shouldShowExtendedWidgets$.next($event)"
+    >{{ 'MDS.SHOW_EXTENDED' | translate }}</mat-slide-toggle
+  >
+</div>
+<app-mds-editor-view *ngFor="let view of views" [view]="view"></app-mds-editor-view>
+<button
+  *ngIf="editorMode === 'search'"
+  mat-button
+  color="primary"
+  class="clear-button"
+  (click)="clear()"
+>
+  {{ 'CLEAR_FILTERS' | translate }}
+</button>
+<app-mds-editor-view *ngFor="let view of suggestionsViews" [view]="view"></app-mds-editor-view>

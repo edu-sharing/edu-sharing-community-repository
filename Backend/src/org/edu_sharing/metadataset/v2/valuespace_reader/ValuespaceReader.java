@@ -5,15 +5,24 @@ import org.edu_sharing.metadataset.v2.MetadataKey;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class ValuespaceReader {
     static Logger logger = Logger.getLogger(ValuespaceReader.class);
+    protected final String valuespaceUrl;
+
+    public ValuespaceReader(String valuespaceUrl) {
+        this.valuespaceUrl = valuespaceUrl;
+    }
+
     public static ValuespaceReader getSupportedReader(String valuespaceUrl){
         List<ValuespaceReader> readers = new ArrayList<>();
 
         readers.add(new OpenSALTReader(valuespaceUrl));
         readers.add(new CurriculumReader(valuespaceUrl));
+        readers.add(new SKOSReader(valuespaceUrl));
 
         readers = readers.stream().filter(ValuespaceReader::supportsUrl).collect(Collectors.toList());
 
@@ -31,7 +40,13 @@ public abstract class ValuespaceReader {
         return null;
     }
 
-    public abstract List<MetadataKey> getValuespace() throws Exception;
+    public Matcher matches(String regex){
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matched = pattern.matcher(valuespaceUrl);
+        return matched;
+    }
+
+    public abstract List<MetadataKey> getValuespace(String locale) throws Exception;
 
     protected abstract boolean supportsUrl();
 }

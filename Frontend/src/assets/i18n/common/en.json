@@ -14,6 +14,7 @@
     "APPLY": "apply",
     "CANCEL": "cancel",
     "YES_DELETE": "Yes, delete",
+    "RESET": "Reset",
     "START": "Start",
     "STOP": "Stop",
     "RENAME": "rename",
@@ -99,6 +100,7 @@
     "CONNECTOR_QUOTA_REACHED_TITLE": "Upload quota exceeded",
     "CONNECTOR_QUOTA_REACHED_MESSAGE": "This function is unavailable because the upload quota is fully exceeded.\n\nDelete files to reclaim storage space and try it again.",
     "TOOLPERMISSION_ERROR": "You have insufficient permissions for this task",
+    "TOOLPERMISSION_ERROR_INLINE": "You can't do this action because the permission \"{{permission}}\" is missing",
     "TOOLPERMISSION_ERROR_TITLE": "Insufficient permissions",
     "TOOLPERMISSION_ERROR_HEADER": "The following permission is missing for your account:",
     "TOOLPERMISSION_ERROR_FOOTER": "If you think that's an error, contact your administrator and ask for permission {{permission}}",
@@ -110,6 +112,7 @@
         "TOOLPERMISSION_INVITED": "The permission to see the list of invited users",
         "TOOLPERMISSION_INVITE_SHARE": "The permission to share content in shared folders",
         "TOOLPERMISSION_INVITE_ALLAUTHORITIES": "The permission to share content to all users",
+        "TOOLPERMISSION_PUBLISH_COPY": "The permission to create published copies of materials",
         "TOOLPERMISSION_COLLECTION_EDITORIAL": "Creating editorial collections",
         "TOOLPERMISSION_LICENSE": "Using the license dialog",
         "TOOLPERMISSION_INVITE_SAFE": "The permission to release materials in the safe",
@@ -124,6 +127,9 @@
         "TOOLPERMISSION_CONFIDENTAL": "Access to the secure area (safe)",
         "TOOLPERMISSION_UNCHECKEDCONTENT": "Show sources like YouTube in your search",
         "TOOLPERMISSION_WORKSPACE": "Access to the workspace",
+        "TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS": "Create folders",
+        "TOOLPERMISSION_CREATE_ELEMENTS_FILES": "Create/upload files",
+        "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS": "Create collections",
         "TOOLPERMISSION_HANDLESERVICE": "Resolve unique ids from a handle service for materials",
         "TOOLPERMISSION_USAGE_STATISTIC": "Fetch information about the usage of all nodes of the repository",
         "TOOLPERMISSION_COMMENT_WRITE":"Creating comments on objects",
@@ -135,7 +141,8 @@
         "TOOLPERMISSION_RATE": "The permission to rate materials",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" can be used",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
-        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed"
+        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed",
+        "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders"
     },
     "NO_WRITE_PERMISSIONS": "No permissions",
     "NODE_SEARCH": "Search elements...",
@@ -250,7 +257,7 @@
         "FILE_PICKER_TITLE": "Choose storage location",
         "CREATE": "Create",
         "CREATE_EDIT": "Create & Open",
-        "CREATED": "New variant was created and saved in a folder <b>\"{{folder}}\"</b>",
+        "CREATED": "New variant was created and saved in folder <b>\"{{folder}}\"</b>",
         "CREATED_LINK": "show",
         "WARNING": {
             "NO_LICENSE": "This material has no license attached.\nMay get in touch with the author of the material in order to prevent license infringements.",
@@ -258,6 +265,17 @@
             "ND": "This material has a non derivative license attached, which does not allow to change the material.\nMay get in touch with the author of the material in order to prevent license infringements.",
             "LINK": "Lizenzinformationen anzeigen"
         }
+    },
+    "MAP_LINK": {
+        "TITLE": "Create Link",
+        "NAME": "Link name",
+        "INFO": "A link to this folder will be created. It links to all contents of this folder. The visibility of the contents depends on the visibility of the original elements. Editing elements itself will edit the original elements.",
+        "BREADCRUMB_INFO": "Save link in:",
+        "CHOOSE": "Storage location",
+        "FILE_PICKER_TITLE": "Choose storage location",
+        "CREATE": "Create link",
+        "CREATED": "Link was created and saved in folder <b>\"{{folder}}\"</b>",
+        "CREATED_LINK": "show"
     },
     "NODE_REPORT": {
         "TITLE": "Report problem",
@@ -466,6 +484,7 @@
         "DEBUG": "Debug",
         "INVITE": "Invite",
         "EDIT": "Edit info",
+        "EDIT_ORIGINAL": "Edit source",
         "EDIT_SIMPLE": "Quick-Edit",
         "COLLECTION_EDIT": "Edit",
         "COLLECTION_PIN": "Pin collection",
@@ -478,6 +497,8 @@
         "NODE_REPORT": "Report problem",
         "ADD_NODE_STORE": "Add to memo list",
         "DELETE": "Delete",
+        "UNPUBLISH": "Unpublish",
+        "UNBLOCK_IMPORT": "Reactivate",
         "REMOVE_REF": "Remove from collection",
         "CUT": "Cut",
         "COPY": "Copy",
@@ -496,11 +517,14 @@
         "QR_CODE": "QR-Code Link",
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
-        "NEW_COLLECTION": "Add collection"
+        "NEW_COLLECTION": "Add collection",
+        "LINK_MAP": "Create link"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",
     "MDS": {
+        "DIFFERENT_VALUES": "(Different values)",
+        "HAS_CHANGES": "changed",
         "TITLE": "Edit info",
         "SHOW_EXTENDED": "Show extended info",
         "SHOW_EXTENDED_SEARCH": "Show more filters",
@@ -508,11 +532,10 @@
         "AUTHOR_FREETEXT": "General Author information",
         "AUTHOR_FREETEXT_PLACEHOLDER": "Who are the authors of this work? How should they be attributed?",
         "AUTHOR_PERSON": "Author & Contributors",
+        "AUTHOR_UNSET": "<not set>",
         "LICENSE": "license",
         "WORKFLOW": "workflow state",
-        "BULK_OVERRIDE": "Replace",
-        "BULK_REPLACE": "Replace",
-        "BULK_APPEND": "Append",
+        "BULK_EDIT": "Edit",
         "LICENSE_LINK": "manage license",
         "TEMPLATE_LINK": "Manage metadata template",
         "CONTRIBUTOR_LINK": "Additional Contributors",
@@ -524,7 +547,13 @@
         "LICENSE_NO_PERMISSIONS_SAFE": "You may not change licenses in safe environment",
         "ADD_CHILD_OBJECT": "Add further materials",
         "ADD_CHILD_OBJECT_DESCRIPTION": "Create a series by attaching more materials to this object",
-        "ADD_CHILD_OBJECT_QUOTA_REACHED": "Error while uploading \"{{ name }}\": Upload quota reached"
+        "ADD_CHILD_OBJECT_QUOTA_REACHED": "Error while uploading \"{{ name }}\": Upload quota reached",
+        "ADD_CHILD_OBJECT_VIRUS_DETECTED":"Error while uploading \"{{ name }}\": Virus detected. File was deleted",
+        "CONFIRM_DISCARD_TITLE": "Discard changes?",
+        "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
+        "REQUIRED_MESSAGE": "Field is required",
+        "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing",
+        "INDETERMINATE_NOTICE": "Click on the value in order to add it to all elements, or remove it in order to delete it from all elements (when \"replace\" is selected)."
     },
 
      "SIMPLE_EDIT": {
@@ -545,8 +574,9 @@
             "ERROR_PERMISSION_MISSING": "It is not possible to set permissions because you have insufficient permissions on the element",
             "ERROR_TOOLPERMISSION_MISSING": "It is not possible to set permissions because your profile has no permissions to do so",
             "ERROR_INHERIT": "It is not possible to set permissions in this view because the item(s) already receive(s) invitations from the parent folder:",
-            "ERROR_HELP": "Please use the option \"Adavanced invitations\" to configure the permissions",
+            "ERROR_HELP": "Please use the option \"Advanced invitations\" to configure the permissions",
             "UNSET": "Not set",
+            "PUBLISH": "All (Publish)",
             "GROUP_TYPES": {
                 "ORG_ADMINISTRATORS": "Administrators only",
                 "TEACHER": "Teachers only"
@@ -638,6 +668,11 @@
         "file_upload": "file upload",
         "delete": "delete",
         "add": "New"
+    },
+    "FILL_STATUS": {
+        "REQUIRED": "required fields",
+        "REQUIREDPUBLISH": "for publishing required fields",
+        "SHOW": "show"
     },
     "LANGUAGE": {
         "INTERNATIONAL": "international",

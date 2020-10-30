@@ -10,9 +10,9 @@ import { map } from 'rxjs/operators';
 import { DropdownComponent } from '../../../core-ui-module/components/dropdown/dropdown.component';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import {
-    Entry,
     MainMenuEntriesService,
 } from '../../services/main-menu-entries.service';
+import {ConfigEntry} from '../../../core-ui-module/node-helper';
 
 @Component({
     selector: 'app-main-menu-dropdown',
@@ -40,7 +40,7 @@ export class MainMenuDropdownComponent implements OnChanges {
         );
     }
 
-    private toOptionItems(entries: Entry[]): OptionItem[] {
+    private toOptionItems(entries: ConfigEntry[]): OptionItem[] {
         return entries.map(entry => {
             const optionItem = new OptionItem(
                 entry.name,

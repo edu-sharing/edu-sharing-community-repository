@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
 
 import javax.transaction.UserTransaction;
 
+import com.google.common.base.CharMatcher;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.query.PagingRequest;
@@ -129,14 +130,13 @@ import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.SearchResult;
-import org.edu_sharing.repository.client.rpc.SearchToken;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -944,7 +944,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if (renderServiceUrlPreview != null) {
 				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, renderServiceUrlPreview);
 			} else {
-				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview((nodeRef)).getUrl());
+				propsCopy.put(CCConstants.CM_ASSOC_THUMBNAILS, NodeServiceHelper.getPreview(nodeRef, propsCopy).getUrl());
 			}
 		}
 
@@ -1833,12 +1833,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	public String createNode(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
 
+		String name = (String)_props.get(CCConstants.CM_NAME);
+		_props.put(CCConstants.CM_NAME,CharMatcher.JAVA_ISO_CONTROL.removeFrom(name));
 		Map<QName, Serializable> properties = transformPropMap(_props);
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
 		QName nodeType = QName.createQName(nodeTypeString);
 
-		String assocName = (String) _props.get(CCConstants.CM_NAME);
+      	String assocName = (String) _props.get(CCConstants.CM_NAME);
 		if (assocName == null) {
 			assocName = "defaultAssociationName";
 		} else {
@@ -1865,6 +1867,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public void updateNode(StoreRef store, String nodeId, HashMap<String, Object> _props) {
 
 		try {
+			String name = (String)_props.get(CCConstants.CM_NAME);
+			_props.put(CCConstants.CM_NAME,CharMatcher.JAVA_ISO_CONTROL.removeFrom(name));
 			Map<QName, Serializable> props = transformPropMap(_props);
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 

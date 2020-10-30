@@ -37,6 +37,11 @@
   import { UserAvatarTestComponent } from './common/test/user-avatar/user-avatar-test.component';
   import { ModalTestComponent } from './common/test/modal/modal-test.component';
   import {CreateMenuComponent} from './modules/create-menu/create-menu.component';
+  import {VersionLabelPipe} from './common/ui/version-label.pipe';
+  import {ToolpermissionCheckDirective} from './common/directives/toolpermission-check.directive';
+  import {InputFillProgressComponent} from './common/ui/input-fill-progress/input-fill-progress.component';
+  import {NodeAuthorNamePipe} from './common/ui/node-author-name.pipe';
+import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-editor-widget-container/mds-editor-widget-container.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -48,6 +53,8 @@
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       NodeTitlePipe,
+      NodeAuthorNamePipe,
+      VersionLabelPipe,
       TimePipe,
       FileChooserComponent,
       ActionbarComponent,
@@ -74,8 +81,11 @@
       PoweredByComponent,
       BannerComponent,
       FooterComponent,
+      InputFillProgressComponent,
       CookieInfoComponent,
       TutorialComponent,
       ImageConfigDirective,
       EmbedComponent,
+      ToolpermissionCheckDirective,
+      RegisterFormFieldDirective,
     ];

@@ -28,12 +28,7 @@
 package org.edu_sharing.repository.server.importer;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -129,7 +124,8 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		ArrayList<String> generalTitleI18n = getMultiLangValueNew((Node) xpath.evaluate("metadata/lom/general/title", nodeRecord, XPathConstants.NODE));
 
 		if(generalTitleI18n == null || generalTitleI18n.size() == 0){
-			throw new Exception("title is required!");
+			logger.warn("No title for " + replicationId +", will use id as name");
+			generalTitleI18n = new ArrayList<>(Collections.singletonList(replicationId));
 		}
 
 		List generallanguage = convertListToString((NodeList)xpath.evaluate("metadata/lom/general/language", nodeRecord, XPathConstants.NODESET));
@@ -203,10 +199,6 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 
 		if(generalDescriptionI18n != null && generalDescriptionI18n.size() > 0){
 			toSafeMap.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, generalDescriptionI18n.get(0));
-		}
-
-		if(generalTitleI18n == null || generalTitleI18n.size() == 0){
-			throw new Exception("title is required!");
 		}
 
 		if (generalKeywords != null && generalKeywords.size() > 0) {

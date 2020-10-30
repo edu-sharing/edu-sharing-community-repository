@@ -1,61 +1,105 @@
-import { Component } from '@angular/core';
-import {NodeRenderComponent} from "../common/ui/node-render/node-render.component";
-import {Router, ActivatedRoute} from "@angular/router";
-import { ApplyToLmsComponent} from "../common/ui/apply-to-lms/apply-to-lms.component";
-import {SearchComponent} from "../modules/search/search.component";
-import {WorkspaceMainComponent} from "../modules/workspace/workspace.component";
-import {RecycleMainComponent} from "../modules/node-list/recycle/recycle.component";
-import {TasksMainComponent} from "../modules/node-list/tasks/tasks.component";
-import {CollectionNewComponent} from "../modules/collections/collection-new/collection-new.component";
-import {CollectionsMainComponent} from "../modules/collections/collections.component";
-import {LoginComponent} from "../modules/login/login.component";
-import {LoginAppComponent} from "../modules/login-app/login-app.component";
-import {PermissionsRoutingComponent} from "../modules/permissions/permissions-routing.component";
-import {PermissionsMainComponent} from "../modules/permissions/permissions.component";
-import {OerComponent} from "../modules/oer/oer.component";
-import {MdsTestComponent} from "../common/test/mds-test/mds-test.component";
-import {ConfigurationService} from "../core-module/core.module";
-import {AdminComponent} from "../modules/admin/admin.component";
-import {MessagesComponent} from "../modules/messages/messages.component";
-import {UIConstants} from "../core-module/ui/ui-constants";
-import {StreamComponent} from "../modules/stream/stream.component";
-import {ProfilesComponent} from "../modules/profiles/profiles.component";
-import {StartupComponent} from '../modules/startup/startup.component';
-import {ShareAppComponent} from "../modules/share-app/share-app.component";
-import {SharingComponent} from "../modules/sharing/sharing.component";
-import {RegisterComponent} from '../modules/register/register.component';
-import {ServicesComponent} from "../modules/services/services.components";
-import {FileUploadComponent} from '../modules/file-upload/file-upload.component';
-import {EmbedComponent} from "../common/ui/embed/embed.component";
-
-
+import { AfterViewInit, Component, DoCheck, NgZone, ViewChild } from '@angular/core';
+import { MainNavService } from '../common/services/main-nav.service';
+import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
+import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
+import { EmbedComponent } from '../common/ui/embed/embed.component';
+import { NodeRenderComponent } from '../common/ui/node-render/node-render.component';
+import { UIConstants } from '../core-module/ui/ui-constants';
+import { AdminComponent } from '../modules/admin/admin.component';
+import { CollectionNewComponent } from '../modules/collections/collection-new/collection-new.component';
+import { CollectionsMainComponent } from '../modules/collections/collections.component';
+import { FileUploadComponent } from '../modules/file-upload/file-upload.component';
+import { LoginAppComponent } from '../modules/login-app/login-app.component';
+import { LoginComponent } from '../modules/login/login.component';
+import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
+import { MessagesComponent } from '../modules/messages/messages.component';
+import { RecycleMainComponent } from '../modules/node-list/recycle/recycle.component';
+import { TasksMainComponent } from '../modules/node-list/tasks/tasks.component';
+import { OerComponent } from '../modules/oer/oer.component';
+import { PermissionsRoutingComponent } from '../modules/permissions/permissions-routing.component';
+import { PermissionsMainComponent } from '../modules/permissions/permissions.component';
+import { ProfilesComponent } from '../modules/profiles/profiles.component';
+import { RegisterComponent } from '../modules/register/register.component';
+import { SearchComponent } from '../modules/search/search.component';
+import { ServicesComponent } from '../modules/services/services.components';
+import { ShareAppComponent } from '../modules/share-app/share-app.component';
+import { SharingComponent } from '../modules/sharing/sharing.component';
+import { StartupComponent } from '../modules/startup/startup.component';
+import { StreamComponent } from '../modules/stream/stream.component';
+import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
 
 @Component({
-  selector: 'router',
-  templateUrl: 'router.component.html'
+    selector: 'router',
+    templateUrl: 'router.component.html',
+    providers: [MainNavService],
 })
-export class RouterComponent {
-  /**
-   * adds a prefix to all routes for compatibility with tomcat
-   * @param route
-   * @returns {any}
-   */
-  static transformRoute(route: any): any {
-    let result: any = []; // we need a deep copy
-    for (let r of route) {
-      let a: any = {
-        path: r.path,
-        component: r.component,
-        children: r.children
-      };
+export class RouterComponent implements DoCheck, AfterViewInit {
+    private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 60;
+    private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
 
-      if (a.path)
-        a.path = UIConstants.ROUTER_PREFIX + r.path;
-      result.push(a);
+    @ViewChild('management') management: WorkspaceManagementDialogsComponent;
+
+    private numberOfChecks = 0;
+    private consecutiveTransgression = 0;
+    private checksMonitorInterval: number;
+
+    /**
+     * Adds a prefix to all routes for compatibility with tomcat.
+     */
+    static transformRoute(route: any): any {
+        const result: any = []; // we need a deep copy
+        for (const r of route) {
+            const a: any = {
+                path: r.path,
+                component: r.component,
+                children: r.children,
+            };
+
+            if (a.path) a.path = UIConstants.ROUTER_PREFIX + r.path;
+            result.push(a);
+        }
+        return result;
     }
-    return result;
-  }
+
+    constructor(private mainNavService: MainNavService, private ngZone: NgZone) {
+        this.ngZone.runOutsideAngular(() => {
+            // Do not trigger change detection with setInterval.
+            this.checksMonitorInterval = window.setInterval(() => this.monitorChecks(), 1000);
+        });
+    }
+
+    ngDoCheck(): void {
+        this.numberOfChecks++;
+    }
+
+    ngAfterViewInit(): void {
+        this.mainNavService.registerDialogs(this.management);
+    }
+
+    private monitorChecks(): void {
+        // console.log('Change detections run in the past second:', this.numberOfChecks);
+        if (this.numberOfChecks > RouterComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD) {
+            this.consecutiveTransgression++;
+            if (
+                this.consecutiveTransgression >= RouterComponent.CONSECUTIVE_TRANSGRESSION_THRESHOLD
+            ) {
+                console.warn(
+                    'Change detection triggered more than ' +
+                        RouterComponent.CHECKS_PER_SECOND_WARNING_THRESHOLD +
+                        ' times per second for the past ' +
+                        RouterComponent.CONSECUTIVE_TRANSGRESSION_THRESHOLD +
+                        ' seconds consecutively.' +
+                        ' Not showing any more warnings.',
+                );
+                window.clearInterval(this.checksMonitorInterval);
+            }
+        } else {
+            this.consecutiveTransgression = 0;
+        }
+        this.numberOfChecks = 0;
+    }
 }
+
 // RouterComponent.transformRoute
 // this fails for aot because it can't call static functions
 /*
@@ -75,66 +119,71 @@ export class RouterComponent {
  .concat(ROUTES_PERMISSIONS)
  */
 
-// Due to ahead of time, we need to create all routes manuall
-export var ROUTES=[
-  // global
+// Due to ahead of time, we need to create all routes manually.
+export const ROUTES = [
+    // global
     { path: '', component: StartupComponent },
-    { path: UIConstants.ROUTER_PREFIX+'app', component: LoginAppComponent },
-    { path: UIConstants.ROUTER_PREFIX+'app/share', component: ShareAppComponent },
-    { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
-    { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
-    { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},
-    { path: UIConstants.ROUTER_PREFIX+'render/:node/:version', component: NodeRenderComponent},
-    { path: UIConstants.ROUTER_PREFIX+'apply-to-lms/:repo/:node', component: ApplyToLmsComponent},
-  // search
-    { path: UIConstants.ROUTER_PREFIX+'search', component: SearchComponent },
-  // workspace
-    { path: UIConstants.ROUTER_PREFIX+'workspace', component: WorkspaceMainComponent},
-    { path: UIConstants.ROUTER_PREFIX+'workspace/:mode', component: WorkspaceMainComponent},
-  // recycle/node component
-    { path: UIConstants.ROUTER_PREFIX+'recycle', component: RecycleMainComponent},
-    { path: UIConstants.ROUTER_PREFIX+'tasks', component: TasksMainComponent},
-  // collections
-    { path: UIConstants.ROUTER_PREFIX+'collections', component: CollectionsMainComponent},
-    { path: UIConstants.ROUTER_PREFIX+'collections/collection/:mode/:id', component: CollectionNewComponent},
-  // login
-    { path: UIConstants.ROUTER_PREFIX+'login', component: LoginComponent },
-  // register
-    { path: UIConstants.ROUTER_PREFIX+'register', component: RegisterComponent },
-    { path: UIConstants.ROUTER_PREFIX+'register/:status', component: RegisterComponent },
-    { path: UIConstants.ROUTER_PREFIX+'register/:status/:key', component: RegisterComponent },
-    { path: UIConstants.ROUTER_PREFIX+'register/:status/:key/:email', component: RegisterComponent },
-  // file upload
-    { path: UIConstants.ROUTER_PREFIX+'upload', component: FileUploadComponent },
-  // admin
-    { path: UIConstants.ROUTER_PREFIX+'admin', component: AdminComponent },
-  // permissions
-    { path: UIConstants.ROUTER_PREFIX+'permissions', component: PermissionsRoutingComponent,
-      children:[
-        { path: '', component: PermissionsMainComponent }
-      ]
-
+    { path: UIConstants.ROUTER_PREFIX + 'app', component: LoginAppComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'app/share', component: ShareAppComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'test/mds', component: MdsTestComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'render/:node', component: NodeRenderComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'render/:node/:version', component: NodeRenderComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'apply-to-lms/:repo/:node',
+        component: ApplyToLmsComponent,
+    },
+    // search
+    { path: UIConstants.ROUTER_PREFIX + 'search', component: SearchComponent },
+    // workspace
+    { path: UIConstants.ROUTER_PREFIX + 'workspace', component: WorkspaceMainComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'workspace/:mode', component: WorkspaceMainComponent },
+    // recycle/node component
+    { path: UIConstants.ROUTER_PREFIX + 'recycle', component: RecycleMainComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'tasks', component: TasksMainComponent },
+    // collections
+    { path: UIConstants.ROUTER_PREFIX + 'collections', component: CollectionsMainComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'collections/collection/:mode/:id',
+        component: CollectionNewComponent,
+    },
+    // login
+    { path: UIConstants.ROUTER_PREFIX + 'login', component: LoginComponent },
+    // register
+    { path: UIConstants.ROUTER_PREFIX + 'register', component: RegisterComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'register/:status', component: RegisterComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'register/:status/:key', component: RegisterComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'register/:status/:key/:email',
+        component: RegisterComponent,
+    },
+    // file upload
+    { path: UIConstants.ROUTER_PREFIX + 'upload', component: FileUploadComponent },
+    // admin
+    { path: UIConstants.ROUTER_PREFIX + 'admin', component: AdminComponent },
+    // permissions
+    {
+        path: UIConstants.ROUTER_PREFIX + 'permissions',
+        component: PermissionsRoutingComponent,
+        children: [{ path: '', component: PermissionsMainComponent }],
     },
     // oer
-    { path: UIConstants.ROUTER_PREFIX+'oer', component: OerComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'oer', component: OerComponent },
     // stream
-    { path: UIConstants.ROUTER_PREFIX+'stream', component: StreamComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'stream', component: StreamComponent },
     // profiles
-    { path: UIConstants.ROUTER_PREFIX+'profiles/:authority', component: ProfilesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'profiles/:authority', component: ProfilesComponent },
 
     // messages
-    { path: UIConstants.ROUTER_PREFIX+'messages/:message', component: MessagesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'messages/:message', component: MessagesComponent },
     // error (same as message)
-    { path: UIConstants.ROUTER_PREFIX+'error/:message', component: MessagesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'error/:message', component: MessagesComponent },
 
     // link-share
-    { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
     // services
-    { path: UIConstants.ROUTER_PREFIX+'services', component: ServicesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'services', component: ServicesComponent },
 
     // embed
-    { path: UIConstants.ROUTER_PREFIX+'embed/:component', component: EmbedComponent },
-
-    ]
-;
-
+    { path: UIConstants.ROUTER_PREFIX + 'embed/:component', component: EmbedComponent },
+];

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, UrlSerializer } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigurationService, DialogButton, RestConnectorService, RestHelper, SessionStorageService } from '../../core-module/core.module';
+import {ConfigurationService, DialogButton, RestConnectorService, RestHelper, SessionStorageService, UIService} from '../../core-module/core.module';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
 import { Translation } from '../../core-ui-module/translation';
@@ -49,6 +49,7 @@ export class RegisterComponent {
         private urlSerializer: UrlSerializer,
         private router: Router,
         private translate: TranslateService,
+        private uiService: UIService,
         private configService: ConfigurationService,
         private changes: ChangeDetectorRef,
         private title: Title,
@@ -94,7 +95,7 @@ export class RegisterComponent {
         this.changes.detectChanges();
         // will loose state when going back to register form
         // this.router.navigate([UIConstants.ROUTER_PREFIX,"register","done","-",email]);
-        UIHelper.waitForComponent(this, 'registerDone').subscribe(() => {
+        this.uiService.waitForComponent(this, 'registerDone').subscribe(() => {
             this.registerDone.email = email;
             this.changes.detectChanges();
         });

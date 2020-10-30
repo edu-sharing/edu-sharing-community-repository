@@ -4,24 +4,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-
-import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.EditLockCache;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 
 public class EditLockServiceImpl implements EditLockService {
@@ -190,7 +186,7 @@ public class EditLockServiceImpl implements EditLockService {
 					 * use original
 					 */
 					if (aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-						String originalNodeId = client.getProperty(Constants.storeRef.getProtocol(),
+						String originalNodeId = client.getProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
 								MCAlfrescoAPIClient.storeRef.getIdentifier(), nodeRef.getId(),
 								CCConstants.CCM_PROP_IO_ORIGINAL);
 						return new NodeRef(MCAlfrescoAPIClient.storeRef, originalNodeId);

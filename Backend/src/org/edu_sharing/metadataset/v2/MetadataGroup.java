@@ -4,7 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 
 public class MetadataGroup implements Serializable {
+	public enum Rendering{
+		legacy,
+		angular
+	};
 	private String id;
+	private Rendering rendering = Rendering.legacy;
 	public String getId() {
 		return id;
 	}
@@ -17,6 +22,15 @@ public class MetadataGroup implements Serializable {
 	public void setViews(List<String> views) {
 		this.views = views;
 	}
+
+	public Rendering getRendering() {
+		return rendering;
+	}
+
+	public void setRendering(Rendering rendering) {
+		this.rendering = rendering;
+	}
+
 	private List<String> views;
 	
 	@Override

@@ -753,6 +753,7 @@ export class AdminComponent {
     const checks = [
         RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+        RestConstants.TOOLPERMISSION_PUBLISH_COPY,
         RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
         RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
     ];
@@ -929,7 +930,12 @@ export class AdminComponent {
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob'),
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob'),
             new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteNodesJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob')
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RestoreNodesBySolrQuery'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.SyncOrganisationFolderName'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.SetPermissionsOrgAdminGroup'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.TrashcanCleanerSolrJob'),
+            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.CheckLinkJob')
         ];
         const deleteAuthorities = new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteAuthoritiesJob')
         deleteAuthorities.originalObject = {upload: true};

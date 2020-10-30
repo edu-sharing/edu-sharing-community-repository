@@ -1,8 +1,7 @@
 package org.edu_sharing.restservices;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -11,6 +10,8 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -18,8 +19,10 @@ import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
+import org.edu_sharing.restservices.shared.Organization;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -27,6 +30,9 @@ import org.edu_sharing.service.search.model.SortDefinition;
 public class GroupDao {
 
 	static Logger logger=Logger.getLogger(GroupDao.class);
+	private final HashMap<String, Object> properties;
+	private final String[] aspects;
+	private final ArrayList<EduGroup> parentOrganizations;
 
 	public static GroupDao getGroup(RepositoryDao repoDao, String groupName) throws DAOException {
 		
@@ -123,12 +129,18 @@ public class GroupDao {
 						new IllegalArgumentException("Group does not exist: "+groupName));
 				
 			}
-			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-			this.scopeType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_SCOPE_TYPE);
-
-			this.groupEmail= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
 			this.ref = authorityService.getAuthorityNodeRef(this.authorityName);
-			
+			this.properties = NodeServiceHelper.getProperties(ref);
+			this.aspects = NodeServiceHelper.getAspects(ref);
+			this.groupType= (String) properties.get(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+			this.scopeType= (String) properties.get(CCConstants.CCM_PROP_SCOPE_TYPE);
+			this.groupEmail= (String) properties.get(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
+
+
+			// may causes performance penalties!
+			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
+					authorityService.getEduGroups(this.authorityName, NodeServiceInterceptor.getEduSharingScope())
+			);
 		} catch (Throwable t) {
 			
 			throw DAOException.mapping(t);
@@ -261,7 +273,9 @@ public class GroupDao {
     	data.setRef(getRef());
     	data.setAuthorityName(getAuthorityName());
     	data.setAuthorityType(Authority.Type.GROUP);
-    	
+
+    	data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
+
     	data.setGroupName(getGroupName());
 
     	GroupProfile profile = new GroupProfile();
@@ -270,9 +284,23 @@ public class GroupDao {
     	profile.setScopeType(getScopeType());
     	profile.setGroupEmail(getGoupEmail());
     	data.setProfile(profile);
-    	
-    	return data;
+		data.setProperties(getProperties());
+		data.setAspects(getAspects());
+
+
+		return data;
 	}
+
+	private List<String> getAspects() {
+		return Arrays.stream(aspects).map((a) -> CCConstants.getValidLocalName(a)).collect(Collectors.toList());
+	}
+
+	private Map<String, String[]> getProperties() {
+		return NodeServiceHelper.getPropertiesMultivalue(
+				NodeServiceHelper.transformLongToShortProperties(properties)
+		);
+	}
+
 	private String getScopeType(){
 		return this.scopeType;
 	}

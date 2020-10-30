@@ -175,6 +175,14 @@ a:focus,
     border-radius:5pt;
   }
 }
+.toolpermission-missing {
+  display: flex;
+  white-space: pre-line;
+  margin: 10px;
+  padding:10px;
+  border:1px solid rgba(0,0,0,.25);
+}
+
 @media screen and (max-width: $mobileWidth) {
   .hidemobile {
     display: none;

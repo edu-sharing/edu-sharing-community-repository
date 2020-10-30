@@ -49,6 +49,8 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 			//don't delete handle when it's an collection ref
 			return;
 		}
+		// not wanted anymore since handle should NEVER be removed but instead pointing simply to a delete/unpublished file
+		/*
 		if(handleService != null) {
 			String handleId = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
 			if(handleId != null && handleId.trim().length() > 0) {
@@ -77,13 +79,9 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 							logger.error(e.getMessage(), e);
 						}
 					}
-					
-					/**
-					 * not able to remove aspect published here cause version can not be manipulated
-					 */
 				}
 			}
-		}
+		}*/
 	}
 
 	private void removeCollectionRefUsage(NodeRef nodeRef) {

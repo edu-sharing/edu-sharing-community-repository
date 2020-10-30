@@ -13,9 +13,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.springframework.context.ApplicationContext;
 
 public class SQLUpdater extends UpdateAbstract {

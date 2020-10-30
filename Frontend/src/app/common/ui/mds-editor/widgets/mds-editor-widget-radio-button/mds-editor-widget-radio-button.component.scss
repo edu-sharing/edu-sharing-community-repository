@@ -1,0 +1,18 @@
+$button-margin-horizontal: 20px;
+$button-margin-vertical: 10px;
+
+.mat-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -$button-margin-horizontal;
+    margin-bottom: -$button-margin-vertical;
+    padding: 5px 20px;
+    &.vertical {
+        flex-direction: column;
+    }
+}
+
+.mat-radio-button {
+    margin-right: $button-margin-horizontal;
+    margin-bottom: $button-margin-vertical;
+}

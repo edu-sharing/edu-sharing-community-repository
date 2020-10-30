@@ -35,7 +35,6 @@ export class WorkspacePermissionComponent  {
        check[0]!=RestConstants.PERMISSION_COLLABORATOR && check[0]!=RestConstants.PERMISSION_COORDINATOR);
   }
   @Input() inherit = false;
-  @Input() added = false;
   @Input() readOnly = true;
   @Input() showDelete = true;
   @Input() isDeleted = false;

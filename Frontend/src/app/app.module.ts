@@ -37,6 +37,33 @@ import { MainMenuSidebarComponent } from './common/ui/main-menu-sidebar/main-men
 import { MainMenuBottomComponent } from './common/ui/main-menu-bottom/main-menu-bottom.component';
 import { MainMenuDropdownComponent } from './common/ui/main-menu-dropdown/main-menu-dropdown.component';
 import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-memory/lucene-template-memory.component';
+import { MdsEditorWrapperComponent } from './common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { MdsEditorCardComponent } from './common/ui/mds-editor/mds-editor-card/mds-editor-card.component';
+import { MdsEditorCoreComponent } from './common/ui/mds-editor/mds-editor-core/mds-editor-core.component';
+import { MdsEditorViewComponent } from './common/ui/mds-editor/mds-editor-view/mds-editor-view.component';
+import { MdsEditorWidgetTextComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-text/mds-editor-widget-text.component';
+import { MdsEditorWidgetContainerComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-container/mds-editor-widget-container.component';
+import { MdsEditorWidgetPreviewComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
+import { MdsEditorWidgetErrorComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-error/mds-editor-widget-error.component';
+import { MdsEditorWidgetChipsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
+import { MdsEditorWidgetVersionComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import { MdsEditorWidgetLinkComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-link/mds-editor-widget-link.component';
+import {MdsEditorWidgetSelectComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-select/mds-editor-widget-select.component';
+import {MdsEditorWidgetSliderComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
+import {Ng5SliderModule} from 'ng5-slider';
+import { MdsEditorWidgetTreeComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
+import { MdsEditorWidgetTreeCoreComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
+import {MdsEditorWidgetAuthorComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
+import { HighlightPipe } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/highlight.pipe';
+import {MdsEditorWidgetChildobjectsComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import { MdsEditorWidgetCheckboxComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
+import { MdsEditorWidgetRadioButtonComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-radio-button/mds-editor-widget-radio-button.component';
+import { MdsEditorWidgetCheckboxesComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-checkboxes/mds-editor-widget-checkboxes.component';
+import {MdsEditorWidgetDurationComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
+import {MdsEditorWidgetLicenseComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-license/mds-editor-widget-license.component';
+import { MdsEditorEmbeddedComponent } from './common/ui/mds-editor/mds-editor-embedded/mds-editor-embedded.component';
+import { MdsEditorWidgetSuggestionChipsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -69,9 +96,38 @@ import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-m
         MainMenuSidebarComponent,
         MainMenuBottomComponent,
         MainMenuDropdownComponent,
-        LuceneTemplateMemoryComponent
+        LuceneTemplateMemoryComponent,
+        MdsEditorWrapperComponent,
+        MdsEditorCardComponent,
+        MdsEditorCoreComponent,
+        MdsEditorViewComponent,
+        MdsEditorWidgetTextComponent,
+        MdsEditorWidgetContainerComponent,
+        MdsEditorWidgetPreviewComponent,
+        MdsEditorWidgetAuthorComponent,
+        MdsEditorWidgetChildobjectsComponent,
+        MdsEditorWidgetErrorComponent,
+        MdsEditorWidgetChipsComponent,
+        MdsEditorWidgetSelectComponent,
+        MdsEditorWidgetSliderComponent,
+        MdsEditorWidgetDurationComponent,
+        MdsEditorWidgetVersionComponent,
+        MdsEditorWidgetLinkComponent,
+        MdsEditorWidgetLicenseComponent,
+        MdsEditorWidgetTreeComponent,
+        MdsEditorWidgetTreeCoreComponent,
+        HighlightPipe,
+        MdsEditorWidgetCheckboxComponent,
+        MdsEditorWidgetRadioButtonComponent,
+        MdsEditorWidgetCheckboxesComponent,
+        MdsEditorEmbeddedComponent,
+        MdsEditorWidgetSuggestionChipsComponent,
     ],
-    imports: IMPORTS,
+    imports: [
+        IMPORTS,
+        Ng5SliderModule,
+        DragDropModule
+    ],
     providers: [
         PROVIDERS,
         PROVIDERS_SEARCH,

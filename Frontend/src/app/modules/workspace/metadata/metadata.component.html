@@ -137,7 +137,7 @@
         ({{ version.version.major }}.{{version.version.minor}})</div>
       <div class="versionAuthor">{{version.modifiedBy.firstName}} {{version.modifiedBy.lastName}}</div>
       <div class="versionDate">{{version.modifiedAt | formatDate}}</div>
-      <div class="versionComment">{{version.comment && version.comment!="null" ? version.comment : ""}}</div>
+      <div class="versionComment">{{version | versionComment}}</div>
       <div class="btn-flat btn-shadow btn-icon btnVersion" (click)="displayVersion(version)"><i class="material-icons">remove_red_eye</i> {{ 'WORKSPACE.METADATA.VIEW_VERSION' | translate}}</div>
       <div *ngIf="!isCurrentVersion(version)" class="btn-flat btn-shadow btn-icon-only" [class.disabled]="!canRevert()" (click)="restoreVersion(version)"><i class="material-icons">restore</i></div>
     </div>

@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server.rendering;
 
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;

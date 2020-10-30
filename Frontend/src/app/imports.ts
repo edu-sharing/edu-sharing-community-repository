@@ -37,6 +37,8 @@ import {CoreUiModule} from "./core-ui-module/core-ui.module";
 import {MonacoEditorModule} from "ngx-monaco-editor";
 import {QRCodeModule} from 'angularx-qrcode';
 import { A11yModule } from "@angular/cdk/a11y";
+import {MatTreeModule} from '@angular/material/tree';
+import {OverlayModule} from '@angular/cdk/overlay';
 
 
 export const IMPORTS=[
@@ -47,6 +49,7 @@ export const IMPORTS=[
   HttpClientModule,
   LazyLoadImageModule,
   QRCodeModule,
+  OverlayModule,
   MatButtonModule,
   MatTabsModule,
   MatSidenavModule,
@@ -74,6 +77,7 @@ export const IMPORTS=[
   ReactiveFormsModule,
   MatInputModule,
   MatIconModule,
+  MatTreeModule,
   CoreModule,
   CoreBridgeModule,
   CoreUiModule,

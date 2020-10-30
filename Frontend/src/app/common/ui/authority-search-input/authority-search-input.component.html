@@ -37,11 +37,16 @@
                 <div class="primary">{{ suggestion.title }}</div>
                 <div class="secondary" *ngIf="suggestion.secondaryTitle">{{ suggestion.secondaryTitle }}</div>
               </div>
-              <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">
-                {{ suggestion.originalObject | authorityAffiliation }}
-              </div>
-              <div class="affiliation affiliation-group" *ngIf="affiliation && suggestion.originalObject.profile.displayName">
-                {{ 'AUTHORITY_TYPE_GROUP' | translate }}
+              <div class="secondary-data">
+                <div class="parent-orgs" *ngIf="suggestion.originalObject.organizations">
+                  <span *ngFor="let org of suggestion.originalObject.organizations">{{ org | authorityName }}</span>
+                </div>
+                <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">
+                  {{ suggestion.originalObject | authorityAffiliation }}
+                </div>
+                <div class="affiliation affiliation-group" *ngIf="affiliation && suggestion.originalObject.profile.displayName">
+                  {{ 'AUTHORITY_TYPE_GROUP' | translate }}
+                </div>
               </div>
             </div>
           </div>

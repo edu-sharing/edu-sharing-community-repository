@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search;
 
+import com.sun.star.lang.IllegalArgumentException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -21,11 +22,11 @@ import org.alfresco.util.Pair;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.Helper;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataQueries;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.SearchCriterias;
+import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.Authority;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -34,9 +35,9 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
-import org.edu_sharing.service.Constants;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
+
 import org.edu_sharing.service.InsufficientPermissionException;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -88,7 +89,8 @@ public class SearchServiceImpl implements SearchService {
 		token.setContentType(contentType);
 
 		token.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ 	"AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
+				+ " AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE+"\""
+				+ " AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
 		return search(token);
 	}
 
@@ -110,6 +112,7 @@ public class SearchServiceImpl implements SearchService {
 
 		StringBuilder query= new StringBuilder("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") "
 				+ "AND ISNOTNULL:\"ccm:ph_users\" "
+				+ "AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE+"\""
 				+ "AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
 				+ " AND (");
 		int i=0;
@@ -176,7 +179,7 @@ public class SearchServiceImpl implements SearchService {
 
 		if(isAdmin) {
 			SearchParameters parameters = new SearchParameters();
-			parameters.addStore(Constants.storeRef);
+			parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 			parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 			parameters.addAllAttribute(org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE);
 			parameters.addSort(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME,true);
@@ -227,7 +230,7 @@ public class SearchServiceImpl implements SearchService {
 						org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry
 								.getSearchService();
 						SearchParameters parameters = new SearchParameters();
-						parameters.addStore(Constants.storeRef);
+						parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 						parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 						parameters.setSkipCount(skipCount);
 						parameters.setMaxItems(maxValues);
@@ -637,7 +640,7 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query,Map<String,String[]> criterias,
 			SearchToken searchToken) throws Throwable {
-		MetadataQueries queries = mds.getQueries();
+		MetadataQueries queries = mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE);
 		searchToken.setMetadataQuery(queries,query,criterias);
 		SearchCriterias scParam = new SearchCriterias();
 		scParam.setRepositoryId(mds.getRepositoryId());
@@ -647,15 +650,15 @@ public class SearchServiceImpl implements SearchService {
 
 		HashMap<ContentType, SearchToken> lastTokens = getLastSearchTokens();
 		lastTokens.put(searchToken.getContentType(),searchToken);
-		org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
+		Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
 
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
 	@Override
 	public HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable {
-		if(org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS)!=null) {
-			return (HashMap<ContentType, SearchToken>) org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS);
+		if(Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS)!=null) {
+			return (HashMap<ContentType, SearchToken>) Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS);
 		}
 		return new HashMap<>();
 
@@ -790,7 +793,7 @@ public class SearchServiceImpl implements SearchService {
 
 		int skipCount = 0;
 		int maxItems = 100;
-		StoreRef storeRef = new StoreRef(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier());
+		StoreRef storeRef = new StoreRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier());
 
 		SearchParameters searchParameters = new ESSearchParameters();
 		searchParameters.addStore(storeRef);
@@ -815,7 +818,7 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public List<NodeRef> getWorkflowReceive(String user) {
 		SearchParameters parameters = new SearchParameters();
-		parameters.addStore(Constants.storeRef);
+		parameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
@@ -838,7 +841,7 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws InsufficientPermissionException {
+	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws Exception {
 		if(globalContext)
 			checkGlobalSearchPermission();
 		List<String> searchFields = new ArrayList<>();
@@ -937,5 +940,85 @@ public class SearchServiceImpl implements SearchService {
 		return new SearchResult<String>(result, from, (int) resultSet.getNumberFound());
 
 	}
+	private static String getLuceneSuggestionQuery(MetadataQueryParameter parameter,String value){
+		//return "("+queries.getBasequery()+") AND ("+parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*")+")";
+		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");
+	}
+	@Override
+	public List<? extends Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+			List<Suggestion> result = new ArrayList<>();
+			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+			org.alfresco.service.cmr.search.SearchService searchService = (org.alfresco.service.cmr.search.SearchService)applicationContext.getBean("scopedSearchService");
 
+			SearchParameters searchParameters = new SearchParameters();
+			searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+			searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+
+			searchParameters.setSkipCount(0);
+			searchParameters.setMaxItems(1);
+			MetadataQueryParameter parameter = mds.findQuery(queryId, MetadataReaderV2.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId);
+			String luceneQuery = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")";
+			if(criterias != null && criterias.size() > 0 ) {
+
+				Map<String,String[]> criteriasMap=new HashMap<>();
+				for(MdsQueryCriteria criteria : criterias){
+					criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
+				}
+				MetadataQueries queries = mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE);
+				MetadataQuery queryObj = queries.findQuery(queryId);
+				queryObj.setApplyBasequery(false);
+				queryObj.setBasequery(null);
+
+				SearchCriterias scParam = new SearchCriterias();
+				scParam.setRepositoryId(mds.getRepositoryId());
+				scParam.setMetadataSetId(mds.getId());
+				scParam.setMetadataSetQuery(queryId);
+				try {
+					luceneQuery = "(" + luceneQuery + ") AND " +  MetadataSearchHelper.getLuceneString(queries,queryObj,scParam, criteriasMap);
+					//System.out.println("MetadataSearchHelper lucenequery suggest:" +luceneQuery);
+				} catch (IllegalArgumentException e) {
+					logger.error(e.getMessage(), e);
+				}
+
+			}
+			searchParameters.setQuery(luceneQuery);
+
+			String facetName = "@" + parameter.getName();
+			List<String> facets = parameter.getFacets() == null ? Arrays.asList(new String[]{facetName}) : parameter.getFacets();
+			for(String facet : facets){
+				FieldFacet fieldFacet = new FieldFacet(facet);
+				fieldFacet.setLimit(100);
+				fieldFacet.setMinCount(1);
+				searchParameters.addFieldFacet(fieldFacet);
+			}
+
+			ResultSet rs = searchService.query(searchParameters);
+			Map<String, MetadataKey> captions = mds.findWidget(parameterId).getValuesAsMap();
+
+			for(String facet : facets) {
+				List<Pair<String, Integer>> facettPairs = rs.getFieldFacet(facet);
+
+				for (Pair<String, Integer> pair : facettPairs) {
+
+					//solr 4 bug: leave out zero values
+					if (pair.getSecond() == 0) {
+						continue;
+					}
+
+					String hit = pair.getFirst(); // new String(pair.getFirst().getBytes(), "UTF-8");
+
+					if (hit.toLowerCase().contains(value.toLowerCase())) {
+
+						Suggestion dto = new Suggestion();
+						dto.setKey(hit);
+						dto.setDisplayString(captions.containsKey(hit) ? captions.get(hit).getCaption() : null);
+
+						result.add(dto);
+					}
+				}
+			}
+			return result;
+
+
+	}
 }

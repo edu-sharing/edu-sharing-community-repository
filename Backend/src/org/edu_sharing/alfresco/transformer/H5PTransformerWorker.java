@@ -83,7 +83,6 @@ public class H5PTransformerWorker extends ContentTransformerHelper implements Co
 					&& (MimetypeMap.MIMETYPE_IMAGE_PNG.equals(targetMimetype) || MimetypeMap.MIMETYPE_IMAGE_JPEG.equals(targetMimetype))
 					&& RessourceInfoExecuter.CCM_RESSOURCETYPE_H5P.equals(nodeService.getProperty(options.getSourceNodeRef(), QName.createQName(RessourceInfoExecuter.CCM_PROP_IO_RESSOURCETYPE)))
 				);
-			logger.info("h5p transform "+sourceMimetype+" "+targetMimetype+": "+convert);
 			return convert;
 		}
 

@@ -1,14 +1,9 @@
 package org.edu_sharing.alfresco.policy;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies.OnContentUpdatePolicy;
@@ -39,32 +34,15 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
-import org.apache.tika.io.TikaInputStream;
-import org.edu_sharing.alfresco.jobs.PreviewJob;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
-import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.service.nodeservice.NodeServiceImpl;
-import org.quartz.JobDetail;
-import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
 import org.springframework.security.crypto.codec.Base64;
-
-import com.coremedia.iso.IsoFile;
-import com.coremedia.iso.boxes.Box;
-import com.coremedia.iso.boxes.MovieBox;
-import com.coremedia.iso.boxes.TrackBox;
-import com.coremedia.iso.boxes.TrackHeaderBox;
-import com.googlecode.mp4parser.FileDataSourceImpl;
 
 /**
  * 
@@ -109,6 +87,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_WF_PROTOCOL,
 			CCConstants.CCM_PROP_WF_RECEIVER,
 			CCConstants.CCM_PROP_WF_STATUS,
+			CCConstants.CCM_PROP_IO_IMPORT_BLOCKED,
 			CCConstants.CCM_PROP_MAP_COLLECTIONREMOTEID,
 			CCConstants.CM_PROP_METADATASET_EDU_METADATASET,
 			CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET,
@@ -127,7 +106,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
 			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
-			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT
+			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT,
+			CCConstants.CCM_PROP_MAP_REF_TARGET,
 	};
 	/**
 	 * These are the properties that will be copied to all io_reference nodes inside collections
@@ -548,10 +528,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	}
 	private static String propertyToString(Object p){
-		if(p instanceof MLText){
+		if(p == null){
+			return "";
+		} else if(p instanceof MLText){
 			return ((MLText) p).getDefaultValue();
-		}
-		if(p instanceof String) {
+		} else if(p instanceof String) {
 			return (String)p;
 		}
 		return p.toString();
@@ -567,6 +548,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}
 	}
 	private static boolean propertyEquals(Serializable p1, Serializable p2) {
+		if(p1 instanceof MLText){
+			p1 = ((MLText) p1).getDefaultValue();
+		}
+		if(p2 instanceof MLText){
+			p2 = ((MLText) p2).getDefaultValue();
+		}
 		if(Objects.equals(p1,p2)) {
 			return true;
 		}

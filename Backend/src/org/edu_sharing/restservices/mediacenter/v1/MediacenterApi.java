@@ -18,6 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
@@ -239,7 +240,9 @@ public class MediacenterApi {
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 			MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getRepositoryInfoById(repoDao.getId()),
 					CCConstants.metadatasetdefault_id);
-			String query = MetadataSearchHelper.getLuceneSearchQuery(mds.getQueries(), "mediacenter_filter", MetadataSearchHelper.convertCriterias(parameters.getCriterias()));
+			String query = MetadataSearchHelper.getLuceneSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE),
+					"mediacenter_filter",
+					MetadataSearchHelper.convertCriterias(parameters.getCriterias()));
 			System.out.println(query);
 			searchToken.setLuceneString(query);
 

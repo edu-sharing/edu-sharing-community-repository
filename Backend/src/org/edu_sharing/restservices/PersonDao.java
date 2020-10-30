@@ -10,17 +10,18 @@ import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.Mail;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
@@ -44,14 +45,14 @@ import javax.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PersonDao {
 
 	Logger logger = Logger.getLogger(PersonDao.class);
-
 	public static final String ME = "-me-";
-	
+
+	private final ArrayList<EduGroup> parentOrganizations;
+
 	public static PersonDao getPerson(RepositoryDao repoDao, String userName) throws DAOException {
 		
 		try {
@@ -150,11 +151,18 @@ public class PersonDao {
 
 			this.userInfo = authorityService.getUserInfo(userName);
 			this.homeFolderId = baseClient.getHomeFolderID(userName);
+
+			// may causes performance penalties!
+			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
+					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
+			);
+
+
 			try{
-				
+
 				boolean getGroupFolder = true;
 				//don't run into access denied wrapped by Transaction commit failed
-				if(!AuthenticationUtil.isRunAsUserTheSystemUser() 
+				if(!AuthenticationUtil.isRunAsUserTheSystemUser()
 						&& !AuthenticationUtil.getRunAsUser().equals(ApplicationInfoList.getHomeRepository().getUsername())
 						&& !AuthenticationUtil.getRunAsUser().equals(userName)) {
 					getGroupFolder = false;
@@ -286,9 +294,11 @@ public class PersonDao {
     	data.setAuthorityType(Authority.Type.USER);
     	
     	data.setUserName(getUserName());
-    	
 
-    	data.setProfile(getProfile());
+		data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
+
+
+		data.setProfile(getProfile());
     	data.setStats(getStats());
     	data.setStatus(getStatus());
     	data.setProperties(getProperties());
@@ -348,7 +358,11 @@ public class PersonDao {
 		UserStatus status = new UserStatus();
 		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null)
 			status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
-		status.setDate((Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE));
+		// cast to long for rest api
+		Date date = (Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE);
+		if(date != null) {
+			status.setDate(date.getTime());
+		}
 		return status;
 	}
 	private UserStats getStats() {
@@ -432,6 +446,7 @@ public class PersonDao {
     	data.setUserName(getUserName());    	
     	data.setProfile(getProfile());
 		data.setStatus(getStatus());
+		data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
 		if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());

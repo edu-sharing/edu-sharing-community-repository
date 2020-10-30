@@ -27,18 +27,14 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.PropertyRequiredException;
-import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.DAOException;
-import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.service.Constants;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+
 import org.edu_sharing.service.NotAnAdminException;
 import org.springframework.context.ApplicationContext;
 
@@ -367,7 +363,7 @@ public EduGroup getEduGroup(String authority){
 							folderProps.put(ContentModel.PROP_NAME, folderName);
 
 							String assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + folderName;
-							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(Constants.storeRef, folderParentId),
+							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, folderParentId),
 									ContentModel.ASSOC_CONTAINS, QName.createQName(assocName),
 									QName.createQName(CCConstants.CCM_TYPE_MAP), folderProps);
 							
@@ -382,7 +378,7 @@ public EduGroup getEduGroup(String authority){
 						// edugroup aspect
 						Map<QName, Serializable> propsAspectEduGroup = new HashMap<QName, Serializable>();
 						propsAspectEduGroup.put(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR),
-								new NodeRef(Constants.storeRef, eduGroupHomeFolderId));
+								new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, eduGroupHomeFolderId));
 						nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP),
 								propsAspectEduGroup);
 						
@@ -404,7 +400,7 @@ public EduGroup getEduGroup(String authority){
 									nodeService.addAspect(groupAdministratorsNodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE), propsAspectEduScope);
 									
 									authorityService.addAuthority(eduGroup.getGroupname(), groupAdministrators);
-									permissionService.setPermission(new NodeRef(Constants.storeRef,eduGroupHomeFolderId), groupAdministrators, CCConstants.PERMISSION_ES_CHILD_MANAGER, true);
+									permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,eduGroupHomeFolderId), groupAdministrators, CCConstants.PERMISSION_ES_CHILD_MANAGER, true);
 								}
 							}
 						}

@@ -86,7 +86,8 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 			}
 		}else if(type.equals("application/zip")) {
-			return new ZipArchiveInputStream(is, contentreader.getEncoding(), true);
+		    // allowStoredEntriesWithDataDescriptor = true because some h5p might have this
+			return new ZipArchiveInputStream(is, contentreader.getEncoding(), true, true);
 		}else {
 			logger.info("unknown format:" +  type);
 		}

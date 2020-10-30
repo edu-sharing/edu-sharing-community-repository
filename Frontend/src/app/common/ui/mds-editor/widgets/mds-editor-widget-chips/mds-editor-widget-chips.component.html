@@ -1,0 +1,45 @@
+<app-mds-editor-widget-container
+  [injectedView]="this"
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="chipsControl"
+>
+  <mat-chip-list #chipList [formControl]="chipsControl" *ngIf="chipsControl">
+    <mat-chip
+      *ngFor="let value of chipsControl.value"
+      [selectable]="false"
+      [removable]="true"
+      (click)="add(value)"
+      (removed)="remove(value)"
+      [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
+      [matTooltip]="
+        (widget.observeIsDisabled() | async) === false &&
+        (indeterminateValues$ | async)?.includes(value.key)
+          ? ('MDS.INDETERMINATE_NOTICE' | translate)
+          : undefined
+      "
+    >
+      <span class="mat-chip-label">{{ value.label }}</span>
+      <mat-icon matChipRemove>cancel</mat-icon>
+    </mat-chip>
+    <input
+      #input
+      autocomplete="off"
+      [formControl]="inputControl"
+      [matAutocomplete]="auto"
+      [(ngModel)]="filterString"
+      [placeholder]="widget.definition.placeholder"
+      [matChipInputFor]="chipList"
+      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+      [matChipInputAddOnBlur]="false"
+      (matChipInputTokenEnd)="onInputTokenEnd($event)"
+      (blur)="filterString = ''"
+    />
+  </mat-chip-list>
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+    <mat-option *ngFor="let value of filteredValues | async" [value]="value">
+      <span [innerHTML]="value.label | highlight: filterString"></span>
+    </mat-option>
+  </mat-autocomplete>
+</app-mds-editor-widget-container>

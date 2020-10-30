@@ -15,9 +15,9 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -75,7 +75,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 			((HttpServletResponse)res).setHeader("Access-Control-Expose-Headers","X-Edu-Scope");
 			((HttpServletResponse)res).setHeader("X-Edu-Scope", NodeServiceInterceptor.getEduSharingScope());
-			
+			SubsystemChainingAuthenticationService.setCurrentPath(((HttpServletRequest) req).getContextPath() + ((HttpServletRequest) req).getServletPath());
+
 			try {
 				NodeCustomizationPolicies.setEduSharingContext(ConfigServiceFactory.getCurrentContextId((HttpServletRequest) req));
 				AvailableMds[] availableMdss = ConfigServiceFactory.getCurrentConfig().values.availableMds;
@@ -104,7 +105,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			NodeCustomizationPolicies.setEduSharingContext(null);
 			QueryUtils.setUserInfo(null);
 			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
-			
+			SubsystemChainingAuthenticationService.setCurrentPath((String)null);
+
 			HttpContext.setCurrentMetadataSet(null);
 			
 			/**

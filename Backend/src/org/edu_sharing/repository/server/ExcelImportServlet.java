@@ -88,7 +88,7 @@ public class ExcelImportServlet extends HttpServlet implements SingleThreadModel
 			}
 			
 			try{
-				new ExcelLOMImporter(parentId, dfi.getInputStream());
+				new ExcelLOMImporter(parentId, dfi.getInputStream(), false);
 			}catch(Exception e){
 				e.printStackTrace();
 			}

@@ -6,14 +6,17 @@ import com.fasterxml.jackson.databind.AnnotationIntrospector.ReferenceProperty.T
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.Map;
+
 @ApiModel(description = "")
 public class Authority {
 
-	public static enum Type {USER, GROUP, OWNER, EVERYONE, GUEST};
-	
+	public static enum Type {USER, GROUP, OWNER, EVERYONE, GUEST;};
+
 	private String authorityName;
 	private Type authorityType;
-	
+	private Map<String, String[]> properties;
+
 	public Authority(){}
 	public Authority(String authorityName, String authorityType) {
 		this.authorityName=authorityName;
@@ -58,6 +61,16 @@ public class Authority {
 
 	public void setAuthorityType(Type authorityType) {
 		this.authorityType = authorityType;
+	}
+
+
+	@JsonProperty
+	public Map<String, String[]> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Map<String, String[]> properties) {
+		this.properties = properties;
 	}
 	
 	@Override

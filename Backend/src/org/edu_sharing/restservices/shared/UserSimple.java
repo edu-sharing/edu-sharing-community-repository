@@ -6,13 +6,16 @@ import io.swagger.annotations.ApiModelProperty;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.UserStatus;
 
+import java.util.List;
+
 public class UserSimple extends Authority{
 	private String userName;
 	private UserProfile profile = null;
 	private UserStats stats = null;
     private UserStatus status;
+	private List<Organization> organizations;
 
-    public UserSimple(){super();}
+	public UserSimple(){super();}
 	public UserSimple(org.edu_sharing.repository.client.rpc.User user) {
 		super(user.getAuthorityName(),user.getAuthorityType());
 		userName=user.getAuthorityDisplayName();
@@ -66,4 +69,14 @@ public class UserSimple extends Authority{
     public UserStatus getStatus() {
         return status;
     }
+
+	@JsonProperty
+	public List<Organization> getOrganizations() {
+		return organizations;
+	}
+
+	public void setOrganizations(List<Organization> organizations) {
+		this.organizations = organizations;
+	}
+
 }

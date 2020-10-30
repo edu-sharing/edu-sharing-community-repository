@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.SearchCriterias;
@@ -14,7 +15,6 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeServiceYouTube;
 import org.edu_sharing.service.search.model.SearchToken;
 
@@ -126,8 +126,8 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 							//resultData.put((String) esResult.get(CCConstants.SYS_PROP_NODE_UID), esResult);
 							
 							org.edu_sharing.service.model.NodeRef enr = new org.edu_sharing.service.model.NodeRefImpl(this.repositoryId, 
-									Constants.storeRef.getProtocol(),
-									Constants.storeRef.getIdentifier(), esResult);
+									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
+									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), esResult);
 							nodeRefs.add(enr);
 						}
 						

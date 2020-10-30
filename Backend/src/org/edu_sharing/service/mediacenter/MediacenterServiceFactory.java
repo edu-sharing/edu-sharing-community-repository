@@ -28,6 +28,9 @@ public class MediacenterServiceFactory {
 			return getLocalService();
 
 		}else{
+			if(appInfo.ishomeNode()){
+				return getLocalService();
+			}
 			//return ProviderHelper.getProviderByApp(appInfo).getMediacenterService();
 			throw new RuntimeException("not yet implemented");
 		}

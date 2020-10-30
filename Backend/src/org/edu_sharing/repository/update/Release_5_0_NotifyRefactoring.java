@@ -26,7 +26,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.service.Constants;
+
 
 import com.google.gson.Gson;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -73,7 +73,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		NodeRunner runner=new NodeRunner();
 		runner.setRunAsSystem(true);
 		runner.setTypes(Arrays.asList(CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP));
-		runner.setThreaded(true);
+		runner.setThreaded(false);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int[] processed=new int[]{0};
