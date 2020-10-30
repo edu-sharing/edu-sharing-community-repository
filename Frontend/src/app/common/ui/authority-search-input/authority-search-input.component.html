@@ -21,14 +21,12 @@
       matInput
       [matAutocomplete]="autoGroup"
       placeholder="{{ placeholder | translate }}"
-      (focusin)="showSuggestions()"
       name="authoritySearch"
-      [(ngModel)]="inputValue"
-      (keyup)="updateSuggestions()"
+      [formControl]="input"
     />
     <mat-hint *ngIf="hint">{{ hint }}</mat-hint>
     <mat-autocomplete #autoGroup="matAutocomplete" class="mat-autocomplete-high" (optionSelected)="setOption($event)">
-      <mat-optgroup *ngFor="let group of suggestionGroups" label="{{ group.label | translate }}">
+      <mat-optgroup *ngFor="let group of suggestionGroups$ | async" label="{{ group.label | translate }}">
         <mat-option class="authority-search-input-option" *ngFor="let suggestion of group.values" [value]="suggestion">
           <div class="suggestion-content">
             <user-avatar [user]="suggestion.originalObject" size="small"></user-avatar>
