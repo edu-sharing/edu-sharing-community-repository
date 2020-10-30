@@ -1,28 +1,23 @@
-import {RestAdminService} from '../../../core-module/rest/services/rest-admin.service';
-import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {
-    NodeStatistics,
-    Node,
-    Statistics,
-    IamGroup,
-    Group,
-    NodeList,
-    Mediacenter
-} from '../../../core-module/rest/data-object';
+import {Group, IamGroup, Mediacenter, Node} from '../../../core-module/rest/data-object';
 // import {NodeList} from "../../../core-module/core.module";
 import {ListItem} from '../../../core-module/ui/list-item';
 import {RestConstants} from '../../../core-module/rest/rest-constants';
 import {RestHelper} from '../../../core-module/rest/rest-helper';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
-import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
-import {DialogButton, RestConnectorService, RestIamService, RestMdsService, RestMediacenterService, RestSearchService} from '../../../core-module/core.module';
+import {
+    DialogButton,
+    RestConnectorService,
+    RestIamService,
+    RestMdsService,
+    RestMediacenterService,
+    RestSearchService
+} from '../../../core-module/core.module';
 import {Helper} from '../../../core-module/rest/helper';
 import {Toast} from '../../../core-ui-module/toast';
-import {OptionItem} from '../../../core-ui-module/option-item';
+import {CustomOptions, ElementType, OptionItem} from '../../../core-ui-module/option-item';
 import {MdsComponent} from '../../../common/ui/mds/mds.component';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
-import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 // Charts.js
 declare var Chart: any;
@@ -54,7 +49,9 @@ export class AdminMediacenterComponent {
 
     groupColumns: ListItem[];
     nodeColumns: ListItem[];
-    groupActions: OptionItem[];
+    groupActions: CustomOptions = {
+        useDefaultOptions: false
+    };
     currentTab = 0;
     mediacenterMdsReload = new Boolean(true);
     private isAdmin: boolean;
@@ -85,16 +82,15 @@ export class AdminMediacenterComponent {
         this.mdsService.getSet().subscribe((mds) => {
             this.nodeColumns = MdsHelper.getColumns(this.translate, mds, 'mediacenterManaged');
         });
-
-        this.groupActions = [
-            new OptionItem('ADMIN.MEDIACENTER.GROUPS.REMOVE', 'delete', (authority: Group) => {
-                this.toast.showModalDialog('ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE', 'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
-                    DialogButton.getYesNo(() => this.toast.closeModalDialog(), () => {
-                        this.toast.closeModalDialog();
-                        this.deleteGroup(authority)
-                    }), true, () => this.toast.closeModalDialog(), {name: authority.profile.displayName});
-            })
-        ];
+        const remove = new OptionItem('ADMIN.MEDIACENTER.GROUPS.REMOVE', 'delete', (authority: Group) => {
+            this.toast.showModalDialog('ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE', 'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
+                DialogButton.getYesNo(() => this.toast.closeModalDialog(), () => {
+                    this.toast.closeModalDialog();
+                    this.deleteGroup(authority)
+                }), true, () => this.toast.closeModalDialog(), {name: authority.profile.displayName});
+        });
+        remove.elementType = [ElementType.Group];
+        this.groupActions.addOptions = [remove];
     }
 
 
