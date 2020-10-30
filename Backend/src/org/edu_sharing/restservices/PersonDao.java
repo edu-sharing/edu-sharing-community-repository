@@ -327,7 +327,7 @@ public class PersonDao {
 
 	private Map<String, String[]> getProperties() {
 		Map<String, Serializable> properties = userInfo;
-		if (!(getShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
+		if (!(getProfileSettings().getShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
 			properties.replace(CCConstants.CM_PROP_PERSON_EMAIL, null);
 
 		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
@@ -353,7 +353,7 @@ public class PersonDao {
 		profile.setLastName(getLastName());
 		// Admin user can see all email even if they are not showed
 		// hide only for non admin user and if showEmail is false
-		if (getShowEmail() || isCurrentUserOrAdmin())
+		if (getProfileSettings().getShowEmail()|| isCurrentUserOrAdmin())
 			profile.setEmail(getEmail());
 		else
 			profile.setEmail("");
@@ -703,25 +703,5 @@ public class PersonDao {
 				logger.warn("Can not send status notify mail to user: "+e.getMessage(),e);
 			}
 		}
-	}
-
-	/**
-	 * Boolean method to :
-	 *   -  check if exist user is ADMIN or simple USER,
-	 *   -  check if exist user is similar with userName
-	 *
-	 * @param userName get a userName as parameter to controll
-	 * @return TRUE if is Admin || FALSE if is simple User
-	 */
-	public boolean isCurrentUserAdminOrSameUserAsUserName(String userName){
-		try {
-			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-			if (currentUser.equals(userName) || AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
-				return true;
-			}
-		}catch(Exception e) {
-			return false;
-		}
-		return false;
 	}
 }
