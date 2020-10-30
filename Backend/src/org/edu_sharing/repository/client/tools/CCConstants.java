@@ -2096,4 +2096,14 @@ public class CCConstants {
 	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 
+	/**
+	 * Methos that set all the Properties for ProfileSettings
+	 * @return (List) list of all properties we want to be in ProfileSettings
+	 */
+	public static List<String> getAllPropertiesOfProfileSettings(){
+		List<String> listOfProperties=new ArrayList<>();
+		listOfProperties.add(CCM_PROP_PERSON_SHOW_EMAIL);
+		return listOfProperties;
+	}
+
 }
