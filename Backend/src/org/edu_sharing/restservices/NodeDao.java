@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -43,7 +44,8 @@ import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
-
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -87,7 +89,7 @@ public class NodeDao {
 	private RepositoryDao remoteRepository;
 
 	private String version;
-
+	private AuthorityService authorityService;
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
@@ -457,7 +459,7 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
-
+            this.authorityService= AuthorityServiceFactory.getAuthorityService(repoDao.getId());
 			/**
 			 * call getProperties on demand
 			 */
@@ -1265,18 +1267,50 @@ public class NodeDao {
 		return ref;
 	}
 
+
 	/**
-	 * Check if user has permision to see email
-	 * @param person userName of person
+	 * Check if normal USER has permision to see email
+	 * ADMIN can see the email even if the email is private for specific USER
+	 *
+	 * @param (String) userName  of Person,
 	 * @return true || false
-	 * @throws Throwable exception and return false everytime we have a exception
 	 */
-	private boolean checkUserHasPermissionToSeeMail(String userName){
+	private boolean checkUserHasPermissionToSeeMail(String userName) {
 		try {
-			return (PersonDao.getPerson(repoDao, userName).getShowEmail() ||  // User can see own email
-					PersonDao.getPerson(repoDao, userName).isCurrentUserAdminOrSameUserAsUserName(userName)); //only admin  can see even if users have hide email
-		} catch (Throwable t) {
+			if (this.isCurrentUserAdminOrSameUserAsUserName(userName)) // if is ADMIN or sameUser, don't need to countinue;
+				return true;
+			else {
+				Map<String, Serializable> profileSettings = authorityService.getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+				boolean isEmailPublic = false;
+				if (profileSettings.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL)) {
+					isEmailPublic = (boolean) profileSettings.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+				}
+				return isEmailPublic;
+			}
+
+		} catch (Exception e) {
+			logger.warn("Cannot check if current User has permision to see email or not  : " + e.getMessage(), e);
 			return false;
+		}
+	}
+
+	/**
+	 * Method which check if:
+	 * -  login User is ADMIN or simple USER,
+	 * -  login User is similar with userName
+	 *
+	 * @param userName get a userName as parameter to controll
+	 * @return TRUE if is ADMIN or Same USER || FALSE in other cases
+	 */
+	public boolean isCurrentUserAdminOrSameUserAsUserName(String userName) {
+		if (AuthorityServiceFactory.getLocalService().isGlobalAdmin()) // if userLogin is ADMIN, don't need to countinue;
+			return true;
+		else {
+			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+			if (currentUser.equals(userName))
+				return true;
+			else
+				return false;
 		}
 	}
 
