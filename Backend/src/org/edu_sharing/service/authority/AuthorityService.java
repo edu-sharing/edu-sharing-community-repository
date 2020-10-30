@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.MD5;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 
 public interface AuthorityService {
 	Set<String> getMemberships(String username) throws Exception;
@@ -85,4 +86,14 @@ public interface AuthorityService {
 	String[] getMembershipsOfGroup(String groupName);
 
 	void createGroupWithType(String groupName, String displayName, String parentGroup, String groupType) throws Exception;
+
+	/**
+	 * method to get all property of ProfileSettings for specfic User
+	 *
+	 * @param (String) userName  of Person, When is empty, it  get from current userLogin
+	 * @param (String) property  of profileSettings, When is empty, it  get all the properties
+	 * @return (Map<String, Serializable>) retun map with ONE or ALL properties for ProfileSettings
+	 * @throws Exception
+	 */
+	Map<String, Serializable> getProfileSettingsProperties(String userName,String profileSettingsProperty) throws Exception;
 }
