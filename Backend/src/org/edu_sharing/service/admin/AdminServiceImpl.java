@@ -779,7 +779,7 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate) throws Exception{
+	public void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate, String from, String until) throws Exception{
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));
 		
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
@@ -815,6 +815,11 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		if(oaiIds != null && !oaiIds.trim().isEmpty()){
 			paramsMap.put(OAIConst.PARAM_OAI_IDS,oaiIds);
+		}
+		if(from != null && !from.trim().equals("")
+				&& until != null && !until.trim().equals("")){
+			paramsMap.put(OAIConst.PARAM_FROM,from);
+			paramsMap.put(OAIConst.PARAM_UNTIL,until);
 		}
 		
 		paramsMap.put(OAIConst.PARAM_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());

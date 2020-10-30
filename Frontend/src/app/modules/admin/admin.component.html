@@ -348,6 +348,14 @@
             <input matInput type="text" [(ngModel)]="oai.ids">
         </mat-form-field>
         <mat-form-field>
+            <mat-label>{{'ADMIN.IMPORT.OAI_FROM' | translate}} (yyyy-MM-dd)</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.from">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>{{'ADMIN.IMPORT.OAI_UNTIL' | translate}} (yyyy-MM-dd)</mat-label>
+            <input matInput type="text" [(ngModel)]="oai.until">
+        </mat-form-field>
+        <mat-form-field>
             <mat-label>{{'ADMIN.IMPORT.OAI_CLASS_NAME' | translate}}</mat-label>
             <mat-select [(ngModel)]="oai.className">
                 <mat-option *ngFor="let option of oaiClasses" [value]="option">{{ option }}</mat-option>

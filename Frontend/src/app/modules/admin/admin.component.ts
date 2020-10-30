@@ -489,7 +489,7 @@ export class AdminComponent {
     else {
         this.admin.importOAI(this.oai.url, this.oai.set, this.oai.prefix, this.oai.className, this.oai.importerClassName,
             this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName, this.oai.metadata,
-            this.oai.file, this.oai.ids, this.oai.forceUpdate).subscribe(() => {
+            this.oai.file, this.oai.ids, this.oai.forceUpdate,this.oai.from,this.oai.until).subscribe(() => {
             this.globalProgress = false;
             const additional: any = {
                 link: {

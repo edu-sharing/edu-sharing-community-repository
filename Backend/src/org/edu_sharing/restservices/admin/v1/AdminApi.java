@@ -759,10 +759,12 @@ public class AdminApi {
 			@ApiParam(value = "url to file", required = false) @QueryParam("fileUrl") String fileUrl,
 			@ApiParam(value = "OAI Ids to import, can be null than the whole set will be imported", required = false, defaultValue = "") @QueryParam("oaiIds") String oaiIds,
 			@ApiParam(value = "force Update of all entries", required = false, defaultValue = "false") @QueryParam("forceUpdate") Boolean forceUpdate,
+			@ApiParam(value = "from: datestring yyyy-MM-dd)", required = false, defaultValue = "") @QueryParam("from") String from,
+			@ApiParam(value = "until: datestring yyyy-MM-dd)", required = false, defaultValue = "") @QueryParam("until") String until,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().importOai(set, fileUrl, baseUrl, metadataset, metadataPrefix, className,
-					importerClassName, recordHandlerClassName, binaryHandlerClassName, oaiIds, forceUpdate != null ? forceUpdate.booleanValue() : false);
+					importerClassName, recordHandlerClassName, binaryHandlerClassName, oaiIds, forceUpdate != null ? forceUpdate.booleanValue() : false, from, until);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

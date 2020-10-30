@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.importer;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 
 import java.lang.reflect.Constructor;
+import java.util.Date;
 
 public interface Importer {
 	
@@ -29,6 +30,10 @@ public interface Importer {
 	public void setJob(ImporterJob importerJob);
 
 	public void setMetadataSetId(String metadataSetId);
+
+	public void setFrom(Date from);
+
+	public void setUntil(Date until);
 
 	RecordHandlerInterface getRecordHandler();
 }
