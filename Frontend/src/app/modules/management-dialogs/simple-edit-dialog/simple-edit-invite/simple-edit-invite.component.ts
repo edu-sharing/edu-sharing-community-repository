@@ -204,6 +204,13 @@ export class SimpleEditInviteComponent {
         this.nodesPermissions = permissions.map((p) => p.permissions);
         this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
         this.organizationApi.getOrganizations().subscribe((orgs) => {
+          const filter = this.configService.instant('simpleEdit.organizationFilter');
+          if(filter) {
+            const reg = new RegExp(filter);
+            orgs.organizations = orgs.organizations.filter((o) => {
+              return reg.exec(o.authorityName) != null;
+            });
+          }
           // @TODO: Only allow for one org
           if(orgs.organizations.length >= 1) {
             this.organization = {
