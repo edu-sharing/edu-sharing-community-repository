@@ -36,4 +36,14 @@ mat-tab-group {
         display: flex;
         margin-left: 62px;
     }
+
+    .vcardGroup:first-child {
+        margin-right: -10%;
+
+        .mat-form-field-no-padding {
+            width: 90px;
+        }
+    }
+
+
 }

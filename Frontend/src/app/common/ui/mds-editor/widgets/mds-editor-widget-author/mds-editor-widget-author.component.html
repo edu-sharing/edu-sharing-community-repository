@@ -21,16 +21,28 @@
         }}</mat-checkbox>
       </div>
       <div class="vcard authorPerson">
+        <!-- <i icon iconId="person"></i> -->
         <div class="vcardGroup">
-          <!-- <i icon iconId="person"></i> -->
+          <mat-form-field class="mat-form-field-no-padding ">
+            <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
+            <input
+                    matInput
+                    class="vcard_Title vcardFirstInput"
+                    [(ngModel)]="author.author.title"
+                    (ngModelChange)="onChange()"
+                    [disabled]="userAuthor"
+            />
+          </mat-form-field>
+        </div>
+        <div class="vcardGroup">
           <mat-form-field class="mat-form-field-no-padding">
             <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
             <input
-              matInput
-              class="vcard_Givenname vcardFirstInput"
-              [(ngModel)]="author.author.givenname"
-              (ngModelChange)="onChange()"
-              [disabled]="userAuthor"
+                    matInput
+                    class="vcard_Givenname vcardFirstInput"
+                    [(ngModel)]="author.author.givenname"
+                    (ngModelChange)="onChange()"
+                    [disabled]="userAuthor"
             />
           </mat-form-field>
         </div>
@@ -38,11 +50,11 @@
           <mat-form-field class="mat-form-field-no-padding">
             <mat-label>{{ 'VCARD.Surname' | translate }}</mat-label>
             <input
-              matInput
-              class="vcard_Surname vcardFirstInput"
-              [(ngModel)]="author.author.surname"
-              (ngModelChange)="onChange()"
-              [disabled]="userAuthor"
+                    matInput
+                    class="vcard_Surname vcardFirstInput"
+                    [(ngModel)]="author.author.surname"
+                    (ngModelChange)="onChange()"
+                    [disabled]="userAuthor"
             />
           </mat-form-field>
         </div>
