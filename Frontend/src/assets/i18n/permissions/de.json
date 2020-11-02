@@ -204,6 +204,22 @@
                 "assign": "Neuem Nutzer zuweisen",
                 "delete": "Unwiderruflich löschen"
             }
+        },
+        "ORG_SIGNUP_SAVED": "Einschreibungseinstellungen aktualisiert",
+        "ORG_SIGNUP": "Einschreibung konfigurieren",
+        "ORG_SIGNUP_LIST": "Freigabeliste anzeigen",
+        "ORG_SIGNUP_METHOD": "Methode der Einschreibung",
+        "ORG_SIGNUP_PASSWORD": "Passwort für Einschreibung",
+        "ORG_SIGNUP_PASSWORD_HINT": "Wenn bereits ein Passwort gesetzt ist und dieses Feld leer gelassen wird bleibt das bestehende Passwort",
+        "ORG_SIGNUP_METHODS":{
+            "disabled": "Keine Einschreibung erlaubt",
+            "simple": "Einschreibung ohne Einschränkung",
+            "password": "Einschreibung mit Passwort",
+            "list": "Einschreibung mit Freigabeliste",
+            "disabled_DETAILS": "Nutzer können sich nicht selbstständig in die Organisation einschreiben, sondern müssen manuell von einem Administrator hinzugefügt werden",
+            "simple_DETAILS": "Nutzer können sich selbstständig in die Organisation einschreiben und werden sofort Mitglied",
+            "password_DETAILS": "Nutzer können sich selbstständig in die Organisation einschreiben und werden sofort Mitglied, sofern sie das korrekte Passwort kennen",
+            "list_DETAILS": "Nutzer können sich selbstständig in die Organisation einschreiben und werden auf eine Freigabeliste gesetzt. Ein Administrator muss die Einschreibung anschließend bestätigen."
         }
     }
 }

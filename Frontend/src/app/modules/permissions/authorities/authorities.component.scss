@@ -24,6 +24,22 @@
     justify-content: flex-end;
   }
 }
+.org-signup{
+  mat-form-field, input-password{
+    width: 100%;
+  }
+  input-password {
+    display: flex;
+    margin-top: 20px;
+  }
+}
+::ng-deep {
+  .org-signup input-password{
+    mat-form-field{
+      width: 100%;
+    }
+  }
+}
 .memberActions{
   height:50px;
   display: table;

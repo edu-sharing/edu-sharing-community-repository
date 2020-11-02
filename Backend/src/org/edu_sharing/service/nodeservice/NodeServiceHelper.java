@@ -117,6 +117,15 @@ public class NodeServiceHelper {
 	public static void setProperty(NodeRef nodeRef,String key, Serializable value){
 		NodeServiceFactory.getLocalService().setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key,value);
 	}
+	public static void addAspect(NodeRef nodeRef,String aspect){
+		NodeServiceFactory.getLocalService().addAspect(nodeRef.getId(),aspect);
+	}
+	public static void removeAspect(NodeRef nodeRef,String aspect){
+		NodeServiceFactory.getLocalService().removeAspect(nodeRef.getId(),aspect);
+	}
+	public static void removeProperty(NodeRef nodeRef,String key){
+		NodeServiceFactory.getLocalService().removeProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
+	}
 	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);

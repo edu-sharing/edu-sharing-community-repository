@@ -9,6 +9,7 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -16,6 +17,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
+import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
@@ -23,6 +25,7 @@ import org.edu_sharing.restservices.shared.Organization;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.organization.GroupSignupMethod;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -286,9 +289,17 @@ public class GroupDao {
     	data.setProfile(profile);
 		data.setProperties(getProperties());
 		data.setAspects(getAspects());
-
+		data.setSignupMethod(getSignupMethod(ref));
 
 		return data;
+	}
+
+	public static GroupSignupMethod getSignupMethod(NodeRef ref) {
+		String method = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD);
+		if(method == null) {
+			return null;
+		}
+		return GroupSignupMethod.valueOf(method);
 	}
 
 	private List<String> getAspects() {
@@ -344,5 +355,20 @@ public class GroupDao {
 			return new GroupDao(repoDao, authority.get());
 		}
 		throw new IllegalArgumentException("Group does not contain sub group of type " + type);
+	}
+
+	public void setSignup(GroupSignupDetails details) {
+		if(details.getSignupMethod() == null){
+			NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD);
+			NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
+		} else {
+			NodeServiceHelper.addAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
+			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString());
+			if(details.getSignupPassword() != null) {
+				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_PASSWORD,
+						DigestUtils.sha1Hex(details.getSignupPassword())
+				);
+			}
+		}
 	}
 }

@@ -1260,6 +1260,13 @@ public class CCConstants {
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE = "EDUSYSTEM_VALUESPACE";
 
 
+	public final static String CCM_ASPECT_GROUP_SIGNUP = "{http://www.campuscontent.de/model/1.0}group_signup";
+
+	public final static String CCM_PROP_GROUP_SIGNUP_METHOD = "{http://www.campuscontent.de/model/1.0}group_signup_method";
+
+	public final static String CCM_PROP_GROUP_SIGNUP_PASSWORD = "{http://www.campuscontent.de/model/1.0}group_signup_password";
+
+
 	public final static String CCM_VALUE_IO_NAME_CONFIG_NODE_NAME = "RepositoryConfig";
 
 

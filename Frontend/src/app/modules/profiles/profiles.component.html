@@ -133,9 +133,9 @@
           </div>
         </div>
         <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
-          <input-password label="{{'OLD_PASSWORD' | translate }}" [hint]="false" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>
+          <input-password label="{{'OLD_PASSWORD' | translate }}" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>
           <!--<input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="" required="true">-->
-          <input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" [hint]="true" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
+          <input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
           <div class="change-buttons">
             <button mat-raised-button color="primary" [disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (click)="savePassword()">{{'SAVE' | translate}}</button>
           </div>

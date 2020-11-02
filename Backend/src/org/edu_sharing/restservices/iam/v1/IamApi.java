@@ -32,6 +32,7 @@ import org.edu_sharing.restservices.iam.v1.model.Preferences;
 import org.edu_sharing.restservices.iam.v1.model.UserEntries;
 import org.edu_sharing.restservices.iam.v1.model.UserEntry;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
+import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
@@ -894,7 +895,44 @@ public class IamApi  {
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
     }
 
-    @GET
+	@POST
+	@Path("/groups/{repository}/{group}/signup/config")
+
+	@ApiOperation(
+			value = "set group signup options",
+			notes =" requires admin rights"
+	)
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response signupGroupDetails(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of organization",required=true) @PathParam("group") String group,
+			@ApiParam(value = "Details to edit",required=true) GroupSignupDetails details,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			GroupDao.getGroup(repoDao,group).setSignup(details);
+			return Response.status(Response.Status.OK).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+
+	@GET
 
     @Path("/people/{repository}/{person}/memberships")
 
