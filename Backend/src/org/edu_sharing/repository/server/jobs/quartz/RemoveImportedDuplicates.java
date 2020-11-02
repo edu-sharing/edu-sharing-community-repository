@@ -86,7 +86,7 @@ public class RemoveImportedDuplicates extends AbstractJob{
                 logger.error(entry.getKey() + ": can not remove " + oldestNodeRef + " cause of ccm:curriculum: " + String.join(",",curriculum));
                 continue;
             }
-            logger.info("would delete oldest:" + oldestNodeRef);
+            logger.info(entry.getKey()+": would delete oldest:" + oldestNodeRef);
             if(execute){
                 NodeRef fNodeRef = oldestNodeRef;
                 nodeService.addAspect(fNodeRef, ContentModel.ASPECT_TEMPORARY, null);
