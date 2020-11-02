@@ -70,7 +70,7 @@ export class MdsComponent {
     @Input() bulkBehaviour = BulkBehaviour.Default;
 
     private activeAuthorType: number;
-    private static VCARD_FIELDS = ['Surname', 'Givenname'];
+    private static VCARD_FIELDS=["Title","Givenname","Surname"];
     /**
      * Can the node content be replaced?
      */
@@ -1216,7 +1216,7 @@ export class MdsComponent {
     private renderVCardWidget(widget: any, attr: string) {
         let html = '<div class="vcard">';
         let i = 0;
-        for (let field of [MdsComponent.VCARD_FIELDS[1], MdsComponent.VCARD_FIELDS[0]]) {
+        for (let field of MdsComponent.VCARD_FIELDS) {
             let id = this.getWidgetDomId(widget) + '_' + field;
             let caption = this.translate.instant('VCARD.' + field);
             html += `<div class="vcardGroup">`;
@@ -1224,7 +1224,7 @@ export class MdsComponent {
                 html += `<i class="material-icons">person</i>`;
             }
             html +=
-                `<div><label for="` +
+                `<div class="vcard_group_`+field+`"><label for="` +
                 id +
                 `">` +
                 caption +

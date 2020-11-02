@@ -13,6 +13,28 @@
     }
 
   }
+  .vcardGroup:first-child {
+    display: contents;
+  }
+
+  .vcard_group_Title {
+    margin-top: 10px;
+  }
+
+  .vcard_Title {
+    max-width: 40px;
+    display: grid;
+  }
+
+  @media only screen and (max-width: ($mobileWidth - $mobileStage*1)) {
+    .vcardGroup:first-child {
+      display: inherit;
+    }
+    .vcard_group_Title {
+      margin-top: 10px;
+      margin-right: 15%;
+    }
+  }
 }
 .loading{
   position: relative;
