@@ -43,7 +43,7 @@
 
         <div *ngIf="!edit">
           <div class="name">{{user | authorityName}}</div>
-          <div *ngIf="profileSettings.showEmail || isMe " class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
+          <div *ngIf="profileSettings.showEmail ||(isMe || isCurrentUserAdmin) " class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
           <!--<div class="authorityName">-->
           <!--<div>{{'USER.authorityName' | translate}}: {{ user.authorityName }}</div>-->
           <!--</div>-->

@@ -2,7 +2,7 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from "../../core-ui-module/translation";
 import {UIHelper} from "../../core-ui-module/ui-helper";
-import {ProfileSettings, SessionStorageService} from "../../core-module/core.module";
+import {ProfileSettings, RestConnectorsService, SessionStorageService} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {DomSanitizer, Title} from "@angular/platform-browser";
 import {ActivatedRoute, Router} from '@angular/router';
@@ -35,6 +35,7 @@ export class ProfilesComponent {
   public userEdit: User;
   public globalProgress = true;
   public isMe: boolean;
+  private isCurrentUserAdmin:boolean;
   public edit: boolean;
   public avatarFile: any;
   public changePassword: boolean;
@@ -64,7 +65,8 @@ export class ProfilesComponent {
           this.editProfileUrl=this.config.instant("editProfileUrl");
           this.editProfile=this.config.instant("editProfile",true);
           this.loadUser(params['authority']);
-          this.getProfileSetting(params['authority'])
+          this.getProfileSetting(params['authority']);
+          this.isCurrentUserAdmin=this.connector.getCurrentLogin().isAdmin;
         });
       });
   }
