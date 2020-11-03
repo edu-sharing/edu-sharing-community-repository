@@ -18,7 +18,7 @@ export class InputPasswordComponent {
     @Input() required = false;
     @Input() autocomplete: string;
     @Input() inputClass = '';
-    @Input() hint = false;
+    @Input() hint = '';
     @Input() label = '';
     @Input() floatLabel = 'auto';
     @Input() displayStrength = false;

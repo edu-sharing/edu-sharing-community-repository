@@ -21,6 +21,7 @@ $buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.0
 $workspaceNewBackground: $itemSelectedBackground;
 $secondaryBarHeight: 65px; // the white bar height in search and workspace
 $workspaceSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px) no-repeat;
+$listItemSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(red($primary), green($primary), blue($primary), 0.15) 5px,rgba(red($primary), green($primary), blue($primary), 0.15) 5px) no-repeat;
 $workspaceTreeBackground: #f7f7f7;
 $mainnavHeight: 70px;
 $dialogRightWidth: 320px;

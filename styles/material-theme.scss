@@ -389,6 +389,9 @@ mat-label.mat-label-standalone{
     }
   }
 }
+.mat-menu-panel {
+  min-height: initial !important;
+}
 
 .cdk-drag-preview {
   box-sizing: border-box;

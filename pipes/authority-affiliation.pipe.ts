@@ -6,7 +6,7 @@ export class AuthorityAffiliationPipe implements PipeTransform {
   constructor(
       private translate : TranslateService
   ){}
-  transform(authority : any|User,args:string[]): string {
+  transform(authority : any|User,args:string[] = null): string {
     if(!authority)
       return "invalid";
     if(authority.profile && authority.profile.primaryAffiliation) {
