@@ -416,7 +416,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.isBulk = this.getIsBulk(this.nodes$.value);
         const groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
         const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
-        await this.initMds(groupId, mdsId);
+        await this.initMds(groupId, mdsId, undefined, this.nodes$.value);
         for (const widget of this.widgets) {
             widget.initWithNodes(this.nodes$.value);
         }
@@ -450,7 +450,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         // outside the component. Therefore, we have to reload and redraw everything here.
         //
         // TODO: Handle values in a way that allows dynamic updates.
-        await this.initMds(this.groupId, this.mdsId, this.repository);
+        await this.initMds(this.groupId, this.mdsId, this.repository, this.nodes$.value);
         for (const widget of this.widgets) {
             widget.initWithValues();
         }
@@ -611,7 +611,12 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
     }
 
-    private async initMds(groupId: string, mdsId: string, repository?: string): Promise<void> {
+    private async initMds(
+        groupId: string,
+        mdsId: string,
+        repository?: string,
+        nodes?: Node[],
+    ): Promise<void> {
         if (this.mdsId !== mdsId || this.repository !== repository || this.groupId !== groupId) {
             this.mdsId = mdsId;
             this.repository = repository;
@@ -623,7 +628,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         const mdsDefinition = this.mdsDefinition$.value;
         const group = this.getGroup(mdsDefinition, groupId);
         this.views = this.getViews(mdsDefinition, group);
-        this.widgets = this.generateWidgets(mdsDefinition, this.views);
+        this.widgets = this.generateWidgets(mdsDefinition, this.views, nodes);
         this.mdsInitDone.next();
     }
 
