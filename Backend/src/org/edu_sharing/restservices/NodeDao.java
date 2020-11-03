@@ -1307,10 +1307,7 @@ public class NodeDao {
 			return true;
 		else {
 			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-			if (currentUser.equals(userName))
-				return true;
-			else
-				return false;
+			return currentUser.equals(userName);
 		}
 	}
 

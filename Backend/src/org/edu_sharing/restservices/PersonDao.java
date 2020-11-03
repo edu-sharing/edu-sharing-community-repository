@@ -353,7 +353,7 @@ public class PersonDao {
 		profile.setLastName(getLastName());
 		// Admin user can see all email even if they are not showed
 		// hide only for non admin user and if showEmail is false
-		if (getProfileSettings().getShowEmail()|| isCurrentUserOrAdmin())
+		if (getProfileSettings().getShowEmail() || isCurrentUserOrAdmin())
 			profile.setEmail(getEmail());
 		else
 			profile.setEmail("");
