@@ -245,6 +245,16 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             false,
         );
         this.setMenuStyle();
+        this.management.signupGroupChange.subscribe((value: boolean) => {
+            this.router.navigate(['./'], {
+                relativeTo: this.route,
+                queryParamsHandling: 'merge',
+                queryParams: {
+                    signupGroup : value || null
+                }
+            })
+        });
+
         this.connector.setRoute(this.route).subscribe(() => {
             this.connector.getAbout().subscribe(about => {
                 this.about = about;
@@ -259,6 +269,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
+                        this.management.signupGroup = params.signupGroup;
                         this.showNodeStore = params.nodeStore === 'true';
                         this.isGuest = data.isGuest;
                         this._showUser =
@@ -719,6 +730,14 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                     this.openProfile(),
                 ),
             );
+            if(this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_SIGNUP_GROUP)) {
+                this.userMenuOptions.push(
+                    new OptionItem('SIGNUP_GROUP.TITLE', 'group_add', () => {
+                        this.management.signupGroup = true;
+                        this.management.signupGroupChange.emit(true);
+                    })
+                );
+            }
         }
         if (this.isGuest) {
             if (this.config.loginOptions) {

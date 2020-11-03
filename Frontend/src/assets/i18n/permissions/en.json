@@ -124,6 +124,7 @@
                 "SHARING": "Sharing",
                 "LICENSING": "Licensing & Publishing",
                 "DATA_MANAGEMENT": "File Management",
+                "ACCOUNT_MANAGEMENT": "Account Management",
                 "SAFE": "Secure Area (Safe)",
                 "COLLECTIONS": "Collections",
                 "CONNECTORS": "Connectors & Editors",
@@ -204,6 +205,23 @@
                 "assign": "Assign to new user",
                 "delete": "Delete irreversibly"
             }
+        },
+        "ORG_SIGNUP_SAVED": "Enrollment settings updated",
+        "ORG_SIGNUP": "Configure enrollment",
+        "ORG_SIGNUP_LIST": "Show waiting list",
+        "ORG_SIGNUP_METHOD": "enrollment method",
+        "ORG_SIGNUP_PASSWORD": "Password for registration",
+        "ORG_SIGNUP_PASSWORD_HINT": "If a password has already been set and this field is left blank, the original password will be used.",
+        "ORG_SIGNUP_NO_EMAIL": "The current organization/group does not yet has an e-mail assigned. Please set an e-mail to get nofifications about joined users.",
+        "ORG_SIGNUP_METHODS":{
+            "disabled": "No enrollment allowed",
+            "simple": "self-enrollment without password",
+            "password": "self-enrollment with password",
+            "list": "self-enrollment with waiting list",
+            "disabled_DETAILS": "Users cannot enroll in the organization/group on their own, but must be added manually by an administrator.",
+            "simple_DETAILS": "Users can register independently in the organization/group and become members immediately.",
+            "password_DETAILS": "Users can enroll in the organization/group independently and become members at once if they know the correct password.",
+            "list_DETAILS": "Users can enroll in the organization/group on their own and are placed on a waiting list. An administrator must then confirm the registration."
         }
     }
 }

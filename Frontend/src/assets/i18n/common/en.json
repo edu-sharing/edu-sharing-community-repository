@@ -142,7 +142,8 @@
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" can be used",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed",
-        "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders"
+        "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders",
+        "TOOLPERMISSION_SIGNUP_GROUP": "Signup to an organisation/group (only applies to organisation/groups which are configured for signup)"
     },
     "NO_WRITE_PERMISSIONS": "No permissions",
     "NODE_SEARCH": "Search elements...",
@@ -364,6 +365,7 @@
         "SOURCE": "source"
     },
     "AUTHORITY_TYPE_GROUP": "Group",
+    "AUTHORITY_TYPE_ORG": "Organisation",
     "GROUP": {
         "displayName": "group name",
         "groupEmail": "e-mail",

@@ -48,7 +48,6 @@ export class AuthoritySearchInputComponent {
 
     inputValue = '';
     suggestionGroups: any;
-    affiliation = true;
 
     constructor(
         private iam: RestIamService,

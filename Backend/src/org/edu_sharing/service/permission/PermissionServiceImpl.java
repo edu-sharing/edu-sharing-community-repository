@@ -1124,8 +1124,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
-		boolean fuzzyGroupSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
+	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck) {
+		boolean fuzzyGroupSearch = skipTpCheck || !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 		
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:authorityContainer AND NOT @ccm\\:scopetype:system");
@@ -1201,7 +1201,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
 		}
-		boolean hasToolPermission = toolPermission
+		boolean hasToolPermission = skipTpCheck || toolPermission
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
 
 		if (globalContext) {
@@ -1321,7 +1321,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		searchFields.add("lastName");
 
 		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,searchFields, globalContext);
-		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext);
+		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext, false);
 
 		/**
 		 * don't find groups of scopes when no scope is provided
@@ -1411,7 +1411,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	@Override
 	public Result<List<Group>> findGroups(String searchWord, boolean globalContext, int from, int nrOfResults) {
 
-		StringBuffer searchQuery = getFindGroupsSearchString(searchWord, globalContext);
+		StringBuffer searchQuery = getFindGroupsSearchString(searchWord, globalContext, false);
 
 		if (searchQuery == null) {
 			return new Result<List<Group>>();

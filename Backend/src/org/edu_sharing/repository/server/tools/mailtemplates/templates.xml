@@ -236,6 +236,34 @@
 		]]>
 		</message>
 	</template>
+	<template name="groupSignupList">
+		<subject>A new user wants to join "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello!</h1>
+			<h2>{{firstName}} {{lastName}} wants to join "{{group}}".</h2>
+			<br>
+			Please go to the user management and manage the waiting list of your group.
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupUser">
+		<subject>Joined "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			<h2>You've successfully joined "{{group}}".</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupAdmin">
+		<subject>A new user joined "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello!</h1>
+			<h2>{{firstName}} {{lastName}} just joined "{{group}}".</h2>
+			<br>
+			You can manage the members of your group in the user management.
+		]]>
+		</message>
+	</template>
 	<template name="footer">
 		<message><![CDATA[
 			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>

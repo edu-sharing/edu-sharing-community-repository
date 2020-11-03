@@ -126,6 +126,34 @@
 		]]>
 		</message>
 	</template>
+	<template name="groupSignupList">
+		<subject>Ein Nutzer möchte "{{group}}" beitreten</subject>
+		<message><![CDATA[
+			<h1>Hallo!</h1>
+			<h2>{{firstName}} {{lastName}} möchte "{{group}}" beitreten.</h2>
+			<br>
+			Bitte wechseln Sie zur Nutzerverwaltung und prüfen Sie die Warteliste der Gruppe.
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupUser">
+		<subject>Joined {{group}}</subject>
+		<message><![CDATA[
+			<h1>Hallo {{firstName}} {{lastName}}!</h1>
+			<h2>Sie sind erfolgreich "{{group}}" beigetreten.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupAdmin">
+		<subject>A new member joined {{group}}</subject>
+		<message><![CDATA[
+			<h1>Hallo!</h1>
+			<h2> {{firstName}} {{lastName}} ist soeben "{{group}}" beigetreten.</h2>
+			<br>
+			You can manage the members of your group in the user management.
+		]]>
+		</message>
+	</template>
 	<template name="footer">
 		<message><![CDATA[
 			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>

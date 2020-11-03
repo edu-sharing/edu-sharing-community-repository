@@ -25,12 +25,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
-import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
-import org.edu_sharing.restservices.iam.v1.model.GroupEntry;
-import org.edu_sharing.restservices.iam.v1.model.Preferences;
-import org.edu_sharing.restservices.iam.v1.model.UserEntries;
-import org.edu_sharing.restservices.iam.v1.model.UserEntry;
+import org.edu_sharing.restservices.iam.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.*;
@@ -661,7 +656,8 @@ public class IamApi  {
         		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
         		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
         		@ApiParam(value = "find a specific groupType",required=false) @QueryParam("groupType") String groupType,
-        		@ApiParam(value = "global search context, defaults to true, otherwise just searches for groups within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
+				@ApiParam(value = "find a specific signupMethod for groups (or asterisk for all including one)",required=false) @QueryParam("signupMethod") String signupMethod,
+				@ApiParam(value = "global search context, defaults to true, otherwise just searches for groups within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
         		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
         	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
         	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
@@ -673,6 +669,9 @@ public class IamApi  {
         		if(groupType!=null && !groupType.isEmpty()){
         			props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
         		}
+				if(signupMethod!=null && !signupMethod.isEmpty()){
+					props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD), signupMethod);
+				}
     	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
     	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
     	    					AuthorityType.GROUP,
@@ -915,7 +914,7 @@ public class IamApi  {
 
 	public Response signupGroupDetails(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of organization",required=true) @PathParam("group") String group,
+			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
 			@ApiParam(value = "Details to edit",required=true) GroupSignupDetails details,
 			@Context HttpServletRequest req) {
 
@@ -931,6 +930,39 @@ public class IamApi  {
 
 	}
 
+	@POST
+	@Path("/groups/{repository}/{group}/signup")
+
+	@ApiOperation(
+			value = "let the current user signup to the given group"
+	)
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = GroupSignupResult.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response signupGroupDetails(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
+			@ApiParam(value = "Password for signup (only required if signupMethod == password)",required=false) @QueryParam("password") String password,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			return Response.status(Response.Status.OK).entity(GroupDao.getGroup(repoDao,group).signupUser(password)).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
 
 	@GET
 
@@ -1187,6 +1219,7 @@ public class IamApi  {
     		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
     		@ApiParam(value = "global search context, defaults to true, otherwise just searches for users within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
 			@ApiParam(value = "find a specific groupType (does nothing for persons)",required=false) @QueryParam("groupType") String groupType,
+			@ApiParam(value = "find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)",required=false) @QueryParam("signupMethod") String signupMethod,
 			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     		@Context HttpServletRequest req) {
@@ -1195,6 +1228,9 @@ public class IamApi  {
 			HashMap<String, String> props = new HashMap<>();
 			if(groupType!=null && !groupType.isEmpty()){
 				props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
+			}
+			if(signupMethod!=null && !signupMethod.isEmpty()){
+				props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD), signupMethod);
 			}
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(

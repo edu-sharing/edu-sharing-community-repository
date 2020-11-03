@@ -45,12 +45,16 @@
 </card>
 <card *ngIf="groupSignupDetails"
       title="{{'PERMISSIONS.ORG_SIGNUP' | translate }}"
+      height="auto"
       [node]="groupSignup"
       [isCancelable]="true"
       [buttons]="signupButtons"
       (onCancel)="groupSignupDetails = null"
       >
   <div class="card-content-padding org-signup">
+    <info-message mode="warning" class="warning-email" *ngIf="!groupSignup.profile.groupEmail">
+      {{'PERMISSIONS.ORG_SIGNUP_NO_EMAIL' | translate}}
+    </info-message>
     <mat-form-field>
       <mat-label>{{'PERMISSIONS.ORG_SIGNUP_METHOD' | translate}}</mat-label>
       <mat-select [(ngModel)]="groupSignupDetails.signupMethod">

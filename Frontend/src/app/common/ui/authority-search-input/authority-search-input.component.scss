@@ -19,78 +19,8 @@ user-avatar{
 .mat-option{
   height: auto;
 }
-.suggestion-content{
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-  >i{
-    color: #6d6d6d;
-    font-size: 30px;
-  }
-  .text-content {
-    display: flex;
-    flex-grow: 1;
-    justify-content: center;
-    > .data {
-      flex-grow: 1;
-      margin: 0 15px;
-      width: 0;
-      >div{
-        @include limitLineCount(1,1.6);
-        word-break: break-all;
-        color:$textMain;
-      }
-      >.primary{
-        font-size: 110%;
-      }
-      >.secondary{
-        font-size: 90%;
-        color:$textLight;
-      }
-    }
-    > .secondary-data {
-      display: flex;
-      flex-direction: column;
-      max-width: 30%;
-      > .affiliation {
-        color: $textMediumLight;
-        text-transform: uppercase;
-        font-size: $fontSizeXSmall;
-        @include limitLineCount(1, 2);
-        word-break: break-all;
-        display: flex;
-        justify-content: flex-end;
-      }
-
-      > .parent-orgs {
-        color: $textMediumLight;
-        font-size: $fontSizeXSmall;
-        @include limitLineCount(1);
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 5px;
-        word-break: break-all;
-        > span:not(:last-child):after {
-          content: ', ';
-        }
-      }
-    }
+.authority-search-input-option{
+  app-authority-row{
+    width: 100%;
   }
 }
-@media screen and (max-width: $mobileWidth) {
-  .suggestion-content .text-content{
-    flex-direction: column;
-    >.data{
-      width: 100%;
-    }
-    >.secondary-data{
-      max-width: unset;
-      margin: 3px 15px 0 15px;
-      > * {
-        justify-content: flex-start!important;
-      }
-    }
-  }
-}
-

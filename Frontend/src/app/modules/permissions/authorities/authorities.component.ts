@@ -323,7 +323,7 @@ export class PermissionsAuthoritiesComponent {
       newOrg.constrains = [Constrain.Admin, Constrain.NoSelection];
       options.push(newOrg);
     }
-    const orgSignupList = new OptionItem('PERMISSIONS.ORG_SIGNUP_LIST', 'playlist_add_check', async (data) => {
+    const orgSignupList = new OptionItem('PERMISSIONS.ORG_SIGNUP_LIST', 'playlist_add', async (data) => {
           this.groupSignup = this.getList(data)[0];
           this.groupSignupList = (await this.iam.getGroupSignupList(this.groupSignup.authorityName).toPromise()).users;
         }
@@ -621,7 +621,7 @@ export class PermissionsAuthoritiesComponent {
       }
       else if (this._mode == 'GROUP'){
         this.offset += this.connector.numberPerRequest;
-        this.iam.searchGroups(query, true, '', request).subscribe((data: IamGroups) => {
+        this.iam.searchGroups(query, true, '', '', request).subscribe((data: IamGroups) => {
           for (const auth of data.groups)
             this.list.push(auth);
           this.loading = false;

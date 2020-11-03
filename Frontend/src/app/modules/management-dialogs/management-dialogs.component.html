@@ -13,7 +13,10 @@
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
 ></add-stream>
-
+<app-signup-group *ngIf="signupGroup"
+    (onCancel)="signupGroup = false; signupGroupChange.emit(false)"
+>
+</app-signup-group>
 <workspace-metadata *ngIf="nodeSidebar"
                     [@fromRight]="nodeSidebar"
                     class="metadata-sidebar"

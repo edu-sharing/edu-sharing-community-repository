@@ -106,6 +106,10 @@ export class AdminComponent {
   mailTemplates=[
       'invited',
       'nodeIssue',
+      'userStatusChanged',
+      'groupSignupList',
+      'groupSignupUser',
+      'groupSignupAdmin',
       'userRegister',
       'passwordRequest',
       'userRegisterInformation'

@@ -25,6 +25,10 @@
   }
 }
 .org-signup{
+  .warning-email{
+    display: flex;
+    margin-bottom: 20px;
+  }
   mat-form-field, input-password{
     width: 100%;
   }
