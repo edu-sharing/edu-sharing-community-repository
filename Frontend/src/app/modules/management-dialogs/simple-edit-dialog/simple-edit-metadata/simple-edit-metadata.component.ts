@@ -18,7 +18,7 @@ import {NodeHelper} from "../../../../core-ui-module/node-helper";
 import {OPEN_URL_MODE} from "../../../../core-module/ui/ui-constants";
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {BulkBehaviour, MdsComponent} from '../../../../common/ui/mds/mds.component';
-import {Observable, Observer} from 'rxjs';
+import {BehaviorSubject, Observable, Observer} from 'rxjs';
 
 @Component({
   selector: 'app-simple-edit-metadata',
@@ -34,8 +34,8 @@ export class SimpleEditMetadataComponent  {
   @ViewChild('mds') mds : MdsComponent;
   @Input() nodes : Node[];
   @Input() fromUpload : boolean;
-  @Output() onInitFinished = new EventEmitter<void>();
   @Output() onError = new EventEmitter<void>();
+  isInited = new BehaviorSubject(false);
 
   constructor(
     private nodeApi : RestNodeService,
