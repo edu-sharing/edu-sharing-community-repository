@@ -167,7 +167,7 @@ export class NodeRenderComponent implements EventListener {
   public nodeMetadata: Node[];
   public nodeShare: Node;
   public nodeShareLink: Node;
-  public nodeWorkflow: Node;
+  public nodeWorkflow: Node[];
   public addNodesStream: Node[];
   public nodeDelete: Node[];
   public nodeVariant: Node;

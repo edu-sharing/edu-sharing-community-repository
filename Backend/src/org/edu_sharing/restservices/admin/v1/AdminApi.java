@@ -735,6 +735,7 @@ public class AdminApi {
 			@ApiParam(value = "Excel file to import", required = true) @FormDataParam("excel") InputStream is,
 			@Context HttpServletRequest req) {
 		try {
+			addToCollection = (addToCollection == null) ? false : addToCollection;
 			int count = AdminServiceFactory.getInstance().importExcel(parent, is, addToCollection);
 			ExcelResult result = new ExcelResult();
 			result.setRows(count);
