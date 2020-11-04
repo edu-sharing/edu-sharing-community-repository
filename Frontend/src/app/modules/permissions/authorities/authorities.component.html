@@ -75,19 +75,33 @@
 </card>
 <card *ngIf="groupSignupList"
       title="{{'PERMISSIONS.ORG_SIGNUP_LIST' | translate }}"
+      height="large"
       [node]="groupSignup"
       [isCancelable]="true"
       [buttons]="signupListButtons"
       (onCancel)="groupSignupList = null"
 >
   <div class="card-content-padding org-signup-list">
-    <actionbar #signupActionbar></actionbar>
+    <div class="actionbar">
+      <actionbar #signupActionbar
+               [numberOfAlwaysVisibleOptions]="1"
+               [numberOfAlwaysVisibleOptionsMobile]="1"></actionbar>
+    </div>
+    <h3 class="mat-heading-3" *ngIf="!groupSignupList?.length">
+      {{'PERMISSIONS.ORG_SIGNUP_LIST_EMPTY' | translate}}
+    </h3>
     <listTable
+            *ngIf="groupSignupList?.length"
+            [columns]="addMemberColumns"
             [actionbar]="signupActionbar"
-            [
+            [customOptions]="signupActions"
+            [selectedNodes]="groupSignupSelected"
+            (selectionChanged)="groupSignupSelected = $event"
             [hasCheckbox]="true"
+            [selectOnClick]="true"
             [hasHeading]="true"
             [hasIcon]="true"
+            icon="person"
             [nodes]="groupSignupList"></listTable>
   </div>
 

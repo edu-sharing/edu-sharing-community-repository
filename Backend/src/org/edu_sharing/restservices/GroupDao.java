@@ -25,8 +25,10 @@ import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
+import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.organization.GroupSignupMethod;
 import org.edu_sharing.service.search.SearchService;
@@ -413,6 +415,7 @@ public class GroupDao {
 					if (authorityService.getMemberships(AuthenticationUtil.getFullyAuthenticatedUser()).contains(authorityName)) {
 						return GroupSignupResult.AlreadyMember;
 					}
+					addMember(AuthenticationUtil.getFullyAuthenticatedUser());
 					HashMap<String, String> replace = new HashMap<>();
 					replace.put("group", getDisplayName());
 					replace.put("firstName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_FIRSTNAME));
@@ -428,6 +431,74 @@ public class GroupDao {
 			});
 		}catch (Exception e){
 			throw DAOException.mapping(e);
+		}
+	}
+
+	public List<PersonDao> signupUserList() throws DAOException {
+		try {
+			checkAdminAccess();
+			if (!NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD).equals(GroupSignupMethod.list.toString())) {
+				throw new IllegalArgumentException("Group " + groupName + " is not configured with the proper signup mode");
+			}
+			ArrayList<NodeRef> userRefs =
+					(ArrayList<NodeRef>) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST);
+			return userRefs.stream().map((userRef) -> {
+				try {
+					return PersonDao.getPerson(repoDao, NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_USERNAME));
+				} catch (DAOException e) {
+					logger.info("Could not handle person ref: " + userRef, e);
+					return null;
+				}
+			})
+					.filter(Objects::nonNull)
+			 		.collect(Collectors.toList());
+		} catch(Exception e){
+			throw DAOException.mapping(e);
+		}
+	}
+	private void handleSignup(String user, boolean add){
+		checkAdminAccess();
+		AuthenticationUtil.runAsSystem(() -> {
+			ArrayList<NodeRef> userRefs =
+					(ArrayList<NodeRef>) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST);
+			Optional<NodeRef> userRef = userRefs.stream().filter((r) -> NodeServiceHelper.getProperty(r, CCConstants.CM_PROP_PERSON_USERNAME).equals(user)).findFirst();
+			if (!userRef.isPresent()) {
+				throw new IllegalArgumentException("User " + user + " is not on the waiting list of " + groupName);
+			}
+			// filter the user
+			userRefs = userRefs.stream().
+					filter((r) -> !r.equals(userRef.get())).
+					collect(Collectors.toCollection(ArrayList::new));
+			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, userRefs);
+			if(add) {
+				addMember(user);
+			}
+			if (NodeServiceHelper.getProperty(userRef.get(), CCConstants.CM_PROP_PERSON_EMAIL) != null) {
+				String template = "groupSignupConfirmed";
+				if(!add){
+					template="groupSignupRejected";
+				}
+				HashMap<String, String> replace = new HashMap<>();
+				replace.put("group", getDisplayName());
+				replace.put("firstName", NodeServiceHelper.getProperty(userRef.get(), CCConstants.CM_PROP_PERSON_FIRSTNAME));
+				replace.put("lastName", NodeServiceHelper.getProperty(userRef.get(), CCConstants.CM_PROP_PERSON_LASTNAME));
+				MailTemplate.sendMail(NodeServiceHelper.getProperty(userRef.get(), CCConstants.CM_PROP_PERSON_EMAIL),  template, replace);
+			}
+			return null;
+		});
+	}
+	public void confirmSignup(String user) throws DAOException {
+		try {
+			handleSignup(user, true);
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+	public void rejectSignup(String user) throws DAOException {
+		try {
+			handleSignup(user, false);
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
 		}
 	}
 }

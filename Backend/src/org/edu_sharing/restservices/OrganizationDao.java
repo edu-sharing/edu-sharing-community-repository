@@ -136,13 +136,13 @@ public class OrganizationDao {
 
 	public static List<Organization> mapOrganizations(List<EduGroup> parentOrganizations) {
 		if(parentOrganizations != null && parentOrganizations.size() > 0){
-			return parentOrganizations.stream().map((org) -> {
+			return AuthenticationUtil.runAsSystem(() -> parentOrganizations.stream().map((org) -> {
 				try {
 					return OrganizationDao.getInstant(RepositoryDao.getHomeRepository(), org.getGroupname()).asOrganization();
 				} catch (DAOException e) {
 					throw new RuntimeException(e);
 				}
-			}).collect(Collectors.toList());
+			}).collect(Collectors.toList()));
 		}
 		return null;
 	}

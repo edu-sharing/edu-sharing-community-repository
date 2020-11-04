@@ -23,7 +23,7 @@ import {
 import {Toast} from '../../../core-ui-module/toast';
 import {Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Constrain, CustomOptions, DefaultGroups, ElementType, OptionItem} from '../../../core-ui-module/option-item';
+import {Constrain, CustomOptions, DefaultGroups, ElementType, OptionGroup, OptionItem} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {SuggestItem} from '../../../common/ui/autocomplete/autocomplete.component';
 import {NodeHelper} from '../../../core-ui-module/node-helper';
@@ -33,6 +33,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'permissions-authorities',
@@ -125,6 +126,10 @@ export class PermissionsAuthoritiesComponent {
   private memberListOffset: number;
   // show primary affiliations as list (or free text)
   primaryAffiliationList = true;
+  signupActions: CustomOptions = {
+    useDefaultOptions: false,
+  };
+  groupSignupSelected: UserSimple[] = [];
   private updateMemberSuggestions(event: any){
     if (this.editMembers == this.org || this.org == null){
       this.iam.searchUsers(event.input).subscribe(
@@ -324,10 +329,12 @@ export class PermissionsAuthoritiesComponent {
       options.push(newOrg);
     }
     const orgSignupList = new OptionItem('PERMISSIONS.ORG_SIGNUP_LIST', 'playlist_add', async (data) => {
-          this.groupSignup = this.getList(data)[0];
-          this.groupSignupList = (await this.iam.getGroupSignupList(this.groupSignup.authorityName).toPromise()).users;
-        }
-    );
+      this.toast.showProgressDialog();
+      this.groupSignup = this.getList(data)[0];
+      this.groupSignupSelected = [];
+      this.groupSignupList = (await this.iam.getGroupSignupList(this.groupSignup.authorityName).toPromise());
+      this.toast.closeModalDialog();
+    });
     orgSignupList.elementType = [ElementType.Group];
     orgSignupList.group = DefaultGroups.Edit;
     orgSignupList.customShowCallback = (nodes) => {
@@ -440,6 +447,40 @@ export class PermissionsAuthoritiesComponent {
     if (this.listRef) {
       this.listRef.refreshAvailableOptions();
     }
+
+    const signupAdd = new OptionItem('PERMISSIONS.ORG_SIGNUP_ADD', 'person_add', (node: UserSimple) => {
+      this.toast.showProgressDialog();
+      const users = NodeHelper.getActionbarNodes(this.groupSignupSelected, node);
+      Observable.forkJoin(users.map((u) =>
+          this.iam.confirmSignup(this.groupSignup.authorityName, u.authorityName)
+      )).subscribe(() => {
+        this.groupSignupList = null;
+        this.toast.toast('PERMISSIONS.ORG_SIGNUP_ADD_CONFIRM');
+        this.toast.closeModalDialog();
+      }, error => {
+        this.toast.error(error);
+        this.toast.closeModalDialog();
+      })
+    });
+    signupAdd.elementType = [ElementType.Person];
+    signupAdd.group = DefaultGroups.Primary;
+    const signupRemove = new OptionItem('PERMISSIONS.ORG_SIGNUP_REJECT', 'close', (node: UserSimple) => {
+        this.toast.showProgressDialog();
+        const users = NodeHelper.getActionbarNodes(this.groupSignupSelected, node);
+        Observable.forkJoin(users.map((u) =>
+            this.iam.rejectSignup(this.groupSignup.authorityName, u.authorityName)
+        )).subscribe(() => {
+          this.groupSignupList = null;
+          this.toast.toast('PERMISSIONS.ORG_SIGNUP_REJECT_CONFIRM');
+          this.toast.closeModalDialog();
+        }, error => {
+          this.toast.error(error);
+          this.toast.closeModalDialog();
+        })
+    });
+    signupRemove.elementType = [ElementType.Person];
+    signupRemove.group = DefaultGroups.Delete;
+    this.signupActions.addOptions = [signupAdd, signupRemove];
   }
   private cancelEdit(){
     this.edit = null;

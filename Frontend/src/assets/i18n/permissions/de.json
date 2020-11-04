@@ -213,6 +213,9 @@
         "ORG_SIGNUP_PASSWORD": "Passwort für Einschreibung",
         "ORG_SIGNUP_PASSWORD_HINT": "Wenn bereits ein Passwort gesetzt ist und dieses Feld leer gelassen wird, bleibt das ursprünglich bestehende Passwort",
         "ORG_SIGNUP_NO_EMAIL": "Die aktuelle Organisation/Gruppe besitzt keine E-Mail-Adresse. Bitte legen Sie eine E-Mail-Adresse fest, damit Informationen zu neuen Mitgliedern empfangen werden können.",
+        "ORG_SIGNUP_ADD": "Mitgliedschaft bestätigen",
+        "ORG_SIGNUP_REJECT": "Mitgliedschaft ablehnen",
+        "ORG_SIGNUP_LIST_EMPTY": "Keine Nutzer auf der Warteliste",
         "ORG_SIGNUP_METHODS":{
             "disabled": "Keine Einschreibung erlaubt",
             "simple": "Einschreibung ohne Einschränkung",

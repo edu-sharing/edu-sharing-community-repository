@@ -254,6 +254,22 @@
 		]]>
 		</message>
 	</template>
+	<template name="groupSignupConfirmed">
+		<subject>Joined "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			<h2>You're request to join "{{group}}" has been accepted! You are now member of this group.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupRejected">
+		<subject>Could not join "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			<h2>We're sorry to inform you that your request to join "{{group}}" has been rejected by the group administrator.</h2>
+		]]>
+		</message>
+	</template>
 	<template name="groupSignupAdmin">
 		<subject>A new user joined "{{group}}"</subject>
 		<message><![CDATA[
