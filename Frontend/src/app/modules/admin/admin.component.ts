@@ -109,6 +109,8 @@ export class AdminComponent {
       'userStatusChanged',
       'groupSignupList',
       'groupSignupUser',
+      'groupSignupConfirmed',
+      'groupSignupRejected',
       'groupSignupAdmin',
       'userRegister',
       'passwordRequest',

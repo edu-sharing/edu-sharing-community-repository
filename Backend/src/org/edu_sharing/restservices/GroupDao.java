@@ -438,6 +438,9 @@ public class GroupDao {
 			}
 			ArrayList<NodeRef> userRefs =
 					(ArrayList<NodeRef>) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST);
+			if(userRefs == null){
+				return new ArrayList<>();
+			}
 			return userRefs.stream().map((userRef) -> {
 				try {
 					return PersonDao.getPerson(repoDao, NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_USERNAME));
