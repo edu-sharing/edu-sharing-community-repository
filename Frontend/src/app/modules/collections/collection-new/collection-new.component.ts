@@ -157,7 +157,7 @@ export class CollectionNewComponent {
           this.route.queryParams.subscribe(params => {
             this.mainnav=params['mainnav']!='false';
           });
-          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
+          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL, '', {count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
             this.editorialGroups=data.groups;
           });
           this.route.params.subscribe(params => {
