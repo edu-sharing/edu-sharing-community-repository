@@ -12,15 +12,16 @@ import {
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
-    DialogButton,
+    DialogButton, Group,
     Node,
     RestHelper,
-    UIService,
+    UIService, UserSimple,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { CardService } from '../../card.service';
 import { UIHelper } from '../../ui-helper';
+import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
 
 /**
  * A common edu-sharing modal card
@@ -86,7 +87,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * Optional, bind a Node or Node-Array to this element
      * If this is used, the subtitle and avatar is automatically set depending on the given data
      */
-    @Input() set node(node: Node | Node[]) {
+    @Input() set node(node: Node | Node[] | Group) {
         if (!node) {
             return;
         }
@@ -96,8 +97,14 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         }
         if (nodes && nodes.length) {
             if (nodes.length === 1 && nodes[0]) {
-                this.avatar = nodes[0].iconURL;
-                this.subtitle = RestHelper.getTitle(nodes[0]);
+                // Group
+                if((nodes[0] as any).profile) {
+                    this.icon = 'group';
+                    this.subtitle = new AuthorityNamePipe(this.translate).transform(nodes[0]);
+                } else {
+                    this.avatar = nodes[0].iconURL;
+                    this.subtitle = RestHelper.getTitle(nodes[0]);
+                }
             } else {
                 this.avatar = null;
                 this.subtitle = this.translate.instant(
