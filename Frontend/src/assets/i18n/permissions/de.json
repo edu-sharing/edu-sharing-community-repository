@@ -216,6 +216,8 @@
         "ORG_SIGNUP_ADD": "Mitgliedschaft bestätigen",
         "ORG_SIGNUP_REJECT": "Mitgliedschaft ablehnen",
         "ORG_SIGNUP_LIST_EMPTY": "Keine Nutzer auf der Warteliste",
+        "ORG_SIGNUP_ADD_CONFIRM": "Nutzer wurde(n) der Gruppe hinzugefügt",
+        "ORG_SIGNUP_REJECT_CONFIRM": "Nutzer wurde(n) von der Warteliste entfernt und nicht in die Gruppe hinzugefügt",
         "ORG_SIGNUP_METHODS":{
             "disabled": "Keine Einschreibung erlaubt",
             "simple": "Einschreibung ohne Einschränkung",

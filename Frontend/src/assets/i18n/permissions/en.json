@@ -216,6 +216,8 @@
         "ORG_SIGNUP_ADD": "Confirm Membership",
         "ORG_SIGNUP_REJECT": "Reject Membership",
         "ORG_SIGNUP_LIST_EMPTY": "No users on waiting list",
+        "ORG_SIGNUP_ADD_CONFIRM": "User(s) added to group",
+        "ORG_SIGNUP_REJECT_CONFIRM": "User(s) removed from waiting list and added to group",
         "ORG_SIGNUP_METHODS":{
             "disabled": "No enrollment allowed",
             "simple": "self-enrollment without password",
