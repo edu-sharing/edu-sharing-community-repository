@@ -698,13 +698,20 @@ a.rowInner {
     align-items: center;
 }
 .cardSmallList {
-    .row_1 .rowInner {
-        min-height: 3.15rem;
-    }
     .rowInner {
-        max-height: 3.15rem;
         word-break: normal;
         overflow-wrap: break-word;
+    }
+  .row_1 {
+    top: 1.5em;
+    font-size: 110%;
+    .rowInner {
+      @include limitLineCount(2, 1.25);
+      justify-content: center;
+      /*display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 2.45em;*/
     }
 }
 .row_1,
