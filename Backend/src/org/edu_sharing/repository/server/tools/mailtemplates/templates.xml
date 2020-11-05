@@ -119,6 +119,22 @@
 		]]>
 		</message>
 	</template>
+	<template name="invited_safe">
+		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a material.</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} invited you to: "{{name}}".</h2>
+			Your access rights are:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			Please go to the safe area in edu-sharing to access the invited material.
+			<br><br>
+			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="invited_collection">
 		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a collection.</subject>
 		<message><![CDATA[

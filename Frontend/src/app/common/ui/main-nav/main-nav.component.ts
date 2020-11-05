@@ -493,9 +493,13 @@ export class MainNavComponent implements AfterViewInit {
     }
 
     startTutorial() {
-        if (this.connector.getCurrentLogin().statusCode === 'OK') {
-            UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
-                this.tutorialElement = this.userRef;
+        if(this.connector.getCurrentLogin().statusCode=='OK') {
+            this.iam.getUser().subscribe((user) => {
+                if(user.editProfile && this.configService.instant('editProfile', false)) {
+                    UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
+                        this.tutorialElement = this.userRef;
+                    });
+                }
             });
         }
     }
