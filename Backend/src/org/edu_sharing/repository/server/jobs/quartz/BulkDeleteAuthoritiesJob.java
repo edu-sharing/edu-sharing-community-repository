@@ -99,7 +99,8 @@ public class BulkDeleteAuthoritiesJob extends AbstractJob{
 				entry = entry.trim();
 				try {
 					if(entry.startsWith(PermissionService.GROUP_PREFIX)) {
-						authorityService.deleteAuthority(entry);
+						// use alf authority service to remove admin groups
+						serviceRegistry.getAuthorityService().deleteAuthority(entry);
 					} else {
 						NodeRef personRef = personService.getPersonOrNull(entry);
 						if(personRef == null){
