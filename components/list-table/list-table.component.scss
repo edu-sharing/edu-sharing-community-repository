@@ -707,16 +707,18 @@ a.rowInner {
         overflow-wrap: break-word;
     }
   .row_1 {
-    top: 1.5em;
-    font-size: 110%;
-    .rowInner {
-      @include limitLineCount(2, 1.25);
-      justify-content: center;
-      /*display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 2.45em;*/
-    }
+      top: 1.5em;
+      font-size: 110%;
+
+      .rowInner {
+          @include limitLineCount(2, 1.25);
+          justify-content: center;
+          /*display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 2.45em;*/
+      }
+  }
 }
 .row_1,
 .node_ccm_commonlicense_key,
