@@ -160,6 +160,7 @@ export enum Scope {
   WorkspaceTree = 'WorkspaceTree',
   Oer = 'Oer',
   CreateMenu = 'CreateMenu',
+  Admin = 'Admin', // Admin Tools / Debugging
 }
 export enum ElementType {
   Node,

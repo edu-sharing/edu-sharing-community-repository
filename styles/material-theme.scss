@@ -10,7 +10,7 @@
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $custom-typography: mat-typography-config(
-        $font-family: 'open_sansregular',
+        $font-family: $primaryFontFamily,
         $body-1: mat-typography-level(100%, normal, 400),
         $body-2: mat-typography-level(100%, normal, 600),
         $button: mat-typography-level(100%, normal, 400),
@@ -227,7 +227,7 @@ input.mat-input-element, mat-label, .mat-select-value{
   }
   &.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label,
   &.mat-form-field-can-float .mat-input-server:focus + .mat-form-field-label-wrapper .mat-form-field-label {
-    transform: translateY(calc(-1.68748em - #{$mat-form-field-floating-label-offset})) scale(0.75);  
+    transform: translateY(calc(-1.68748em - #{$mat-form-field-floating-label-offset})) scale(0.75);
   }
 }
 .mat-autocomplete-high{

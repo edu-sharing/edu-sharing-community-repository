@@ -10,6 +10,8 @@ $textLight:     #585858;
 $textMediumLight:     #888;
 $textVeryLight:     #aaa;
 $textMain: #383838;
+$fontSizeXLarge:120%;
+$fontSizeLarge:110%;
 $fontSizeSmall:90%;
 $fontSizeXSmall:85%;
 $backgroundColor: #fff;
@@ -71,6 +73,7 @@ $topBarMobileZIndex: 80;
 $mobileTabsZIndex: 110;
 $mobileTabSwitchWidth:   $mobileWidth+$mobileStage*2;
 $mobileTabNavHeight:62px;
+$primaryFontFamily: 'open_sansregular';
 
 // for variable overrides, include it again
 @import "branding";
