@@ -1,0 +1,17 @@
+services:
+
+  repository-cache:
+    expose:
+      - "6379"
+
+  repository-database:
+    expose:
+      - "5432"
+
+  repository-search-elastic:
+    expose:
+      - "9200"
+
+  repository-search-solr4:
+    expose:
+      - "8080"

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-deploy</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-deploy-docker</artifactId>
+  <packaging>pom</packaging>
+
+  <name>edu_sharing-community-deploy-docker</name>
+
+  <properties>
+
+    <docker.registry>community.docker.edu-sharing.com</docker.registry>
+    <docker.verbose>true</docker.verbose>
+
+  </properties>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>docker-maven-plugin</artifactId>
+          <configuration>
+            <images>
+              <image>
+                <name>%a:%v</name>
+                <registry>${docker.registry}</registry>
+                <build>
+                  <contextDir>${project.build.directory}/build</contextDir>
+                  <dockerFile>Dockerfile</dockerFile>
+                </build>
+              </image>
+            </images>
+          </configuration>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
+
+<modules>  <module>deploy</module>
+    <module>rendering</module>
+    <module>repository</module>
+  </modules>
+</project>

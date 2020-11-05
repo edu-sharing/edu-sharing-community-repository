@@ -1,0 +1,7 @@
+services:
+
+  rendering-init:
+    image: "${project.parent.artifactId}-build-init:${project.version}"
+
+  rendering-service:
+    image: "${project.parent.artifactId}-build-service:${project.version}"

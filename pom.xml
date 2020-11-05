@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-parent</artifactId>
+    <version>develop-SNAPSHOT</version>
+    <relativePath/>
+  </parent>
+
+  <artifactId>edu_sharing-community</artifactId>
+  <packaging>pom</packaging>
+  <version>git</version>
+
+  <name>edu_sharing-community</name>
+
+  <scm>
+    <connection>scm:git:https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git</connection>
+    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git
+    </developerConnection>
+    <url>https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git</url>
+  </scm>
+
+  <properties>
+
+    <community.rendering.version>feature-maven-${project.parent.version}</community.rendering.version>
+    <community.repository.version>feature-maven-${project.parent.version}</community.repository.version>
+
+  </properties>
+
+  <modules>
+    <module>deploy</module>
+  </modules>
+
+  <dependencyManagement>
+
+    <dependencies>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-rendering-deploy</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-repository-deploy</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-rendering</artifactId>
+        <version>${community.rendering.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
+        <version>${community.repository.version}</version>
+        <type>amp</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-tomcat</artifactId>
+        <version>${community.repository.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-config</artifactId>
+        <version>${community.repository.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-webapp</artifactId>
+        <version>${community.repository.version}</version>
+        <type>war</type>
+      </dependency>
+
+    </dependencies>
+
+  </dependencyManagement>
+
+  <repositories>
+
+    <repository>
+      <id>edu-sharing.public.releases</id>
+      <url>https://artifacts.edu-sharing.com/repository/public-releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <repository>
+      <id>edu-sharing.public.snapshots</id>
+      <url>https://artifacts.edu-sharing.com/repository/public-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
+
+  </repositories>
+
+  <distributionManagement>
+
+    <repository>
+      <id>edu-sharing.community.releases</id>
+      <url>https://artifacts.edu-sharing.com/repository/community-releases/</url>
+    </repository>
+
+    <snapshotRepository>
+      <id>edu-sharing.community.snapshots</id>
+      <url>https://artifacts.edu-sharing.com/repository/community-snapshots/</url>
+    </snapshotRepository>
+
+  </distributionManagement>
+
+</project>

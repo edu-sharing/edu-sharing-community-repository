@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-deploy-docker-repository-build</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-deploy-docker-repository-build-service</artifactId>
+  <packaging>jar</packaging>
+
+  <name>edu_sharing-community-deploy-docker-repository-build-service</name>
+  
+  <build>
+
+    <resources>
+      <resource>
+        <directory>src/main/build</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <outputDirectory>${project.build.directory}/build</outputDirectory>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>artifacts</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <includeArtifactIds>
+                alfresco-content-services-share-distribution,
+                alfresco-pdf-renderer,
+                alfresco-platform-community-distributionzip,
+                edu_sharing-community-repository-backend-tomcat,
+                edu_sharing-community-repository-config,
+                edu_sharing-community-repository-webapp,
+                postgresql,
+                redisson-all,
+                redisson-tomcat-7
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/artifacts</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>amps</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-alfresco-module
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/amps</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <phase>install</phase>
+          </execution>
+          <execution>
+            <id>push</id>
+            <goals>
+              <goal>push</goal>
+            </goals>
+            <phase>deploy</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>alfresco-content-services-share-distribution</artifactId>
+      <type>zip</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>alfresco-pdf-renderer</artifactId>
+      <type>tgz</type>
+      <classifier>linux</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>alfresco-platform-community-distributionzip</artifactId>
+      <type>zip</type>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
+      <type>amp</type>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-tomcat</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-config</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-webapp</artifactId>
+      <type>war</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-all</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-tomcat-7</artifactId>
+    </dependency>
+
+  </dependencies>
+
+</project>

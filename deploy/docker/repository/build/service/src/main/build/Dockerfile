@@ -1,0 +1,193 @@
+FROM docker.io/tomcat:${repository.tomcat.version}-jdk8
+
+
+RUN set -eux \
+    && echo 'deb http://deb.debian.org/debian stretch-backports main' >> /etc/apt/sources.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+	    ffmpeg \
+    && apt-get install -y --no-install-recommends -t stretch-backports \
+        exiftool \
+	    ghostscript \
+	    gsfonts \
+	    imagemagick \
+	    jq \
+        postgresql-client \
+        ruby-hocon \
+        wait-for-it \
+        xmlstarlet \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+
+ENV ALF_HOME /opt/alfresco
+ENV PATH $ALF_HOME/bin:$PATH
+
+WORKDIR $ALF_HOME
+
+COPY assets/entrypoint.sh bin/
+
+RUN set -eux \
+    && chmod +x bin/entrypoint.sh
+
+RUN useradd -ms /bin/bash worker
+
+RUN set -eux \
+    && ln -sf /usr/local/tomcat tomcat \
+    && chown -RL worker:worker . \
+    && chown -RL worker:worker /tmp
+
+USER worker
+
+
+RUN set -eux \
+    && mkdir -p tomcat/shared/classes/alfresco \
+    && mkdir -p tomcat/shared/lib \
+    && mkdir -p tomcat/logs \
+    && touch tomcat/logs/catalina.out \
+    && sed -i -r \
+        's|^[#]*\s*shared\.loader=.*|shared.loader=${catalina.base}/shared/classes,${catalina.base}/shared/lib/*.jar|' \
+        tomcat/conf/catalina.properties
+
+COPY artifacts/postgresql-${repository.postgres.client.version}.jar tomcat/lib/
+COPY artifacts/redisson-all-${repository.redis.client.version}.jar tomcat/lib/
+COPY artifacts/redisson-tomcat-7-${repository.redis.client.version}.jar tomcat/lib/
+
+COPY assets/tomcat/logging.properties tomcat/conf/logging.properties
+COPY assets/tomcat/redisson.yaml tomcat/conf/redisson.yaml
+
+
+COPY artifacts/alfresco-platform-community-distributionzip-${repository.alfresco.platform.version}.zip \
+    /tmp/alfresco-platform-community-distributionzip.zip
+
+RUN set -eux \
+    && mkdir -p /tmp/install \
+	&& unzip /tmp/alfresco-platform-community-distributionzip.zip -d /tmp/install \
+	&& rm -f /tmp/alfresco-platform-community-distributionzip.zip \
+	&& mv /tmp/install/alfresco-platform-community-distributionzip* /tmp/install/alfresco-platform \
+    && mv /tmp/install/alfresco-platform/alf_data . \
+    && mv /tmp/install/alfresco-platform/licenses . \
+    && mv /tmp/install/alfresco-platform/README.txt . \
+    && cp -rf /tmp/install/alfresco-platform/bin/* bin \
+    && cp -rf /tmp/install/alfresco-platform/web-server/* tomcat/ \
+    && rm -rf /tmp/install/alfresco-platform \
+    && mkdir -p tomcat/webapps/alfresco \
+    && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco -x "WEB-INF/lib/hazelcast*" \
+    && rm -f tomcat/webapps/alfresco.war \
+    && mv tomcat/shared/classes/alfresco-global.properties.sample tomcat/shared/classes/alfresco-global.properties \
+    && sed -i 's/$/\n/' tomcat/shared/classes/alfresco-global.properties \
+    && sed -i -r \
+        's|^[#]*\s*dir\.root=.*|dir.root='"$ALF_HOME/alf_data"'|' \
+        tomcat/shared/classes/alfresco-global.properties \
+    && mv alf_data/keystore . \
+    && sed -i -r \
+        's|^[#]*\s*dir\.keystore=.*|dir.keystore='"$ALF_HOME/keystore"'|' \
+        tomcat/shared/classes/alfresco-global.properties \
+    && sed -i -r \
+        's|^[#]*\s*img\.root=.*|img.root=/usr|' \
+        tomcat/shared/classes/alfresco-global.properties \
+    && sed -i -r \
+        's|^[#]*\s*img\.gslib=.*|img.gslib=/usr/bin|' \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'exiftool.dyn=/usr/bin' >> \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'exiftool.exe=${exiftool.dyn}/exiftool' >> \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'ffmpeg.dyn=/usr/bin' >> \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'img.dyn=/usr/bin' >> \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'img.exe=${img.dyn}/convert' >> \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'cifs.enabled=false' >> \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'ftp.enabled=false' >> \
+        tomcat/shared/classes/alfresco-global.properties
+
+COPY assets/alfresco/log4j.properties tomcat/webapps/alfresco/WEB-INF/classes/log4j.properties
+
+
+COPY artifacts/alfresco-content-services-share-distribution-${repository.alfresco.share.version}.zip \
+    /tmp/alfresco-content-services-share-distribution.zip
+
+RUN set -eux \
+    && mkdir -p /tmp/install \
+	&& unzip /tmp/alfresco-content-services-share-distribution.zip -d /tmp/install \
+	&& rm -f /tmp/alfresco-content-services-share-distribution.zip \
+	&& mv /tmp/install/alfresco-content-services-share-distribution* /tmp/install/alfresco-share \
+	&& java -jar bin/alfresco-mmt.jar install /tmp/install/alfresco-share/amps/alfresco-share-services.amp \
+        tomcat/webapps/alfresco -nobackup -force \
+    && mv /tmp/install/alfresco-share/web-extension* tomcat/shared/classes/alfresco/web-extension \
+    && cp -rf /tmp/install/alfresco-share/web-server/* tomcat/ \
+    && rm -rf /tmp/install/alfresco-share \
+    && mkdir -p tomcat/webapps/share \
+    && unzip tomcat/webapps/share.war -d tomcat/webapps/share \
+    && rm -f tomcat/webapps/share.war
+
+COPY assets/alfresco/log4j.properties tomcat/webapps/share/WEB-INF/classes/log4j.properties
+
+
+COPY artifacts/alfresco-pdf-renderer-${repository.alfresco.pdf-renderer.version}-linux.tgz /tmp/alfresco-pdf-renderer.tgz
+
+RUN set -eux \
+	&& mkdir -p /tmp/install/alfresco-pdf-renderer \
+    && tar -xvzf /tmp/alfresco-pdf-renderer.tgz -C /tmp/install/alfresco-pdf-renderer \
+    && rm -f /tmp/alfresco-pdf-renderer.tgz \
+    && mkdir -p common \
+    && mv /tmp/install/alfresco-pdf-renderer common/alfresco-pdf-renderer \
+    && echo 'alfresco-pdf-renderer.root='"$ALF_HOME/common/alfresco-pdf-renderer" >> \
+        tomcat/shared/classes/alfresco-global.properties \
+    && echo 'alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer' >> \
+        tomcat/shared/classes/alfresco-global.properties
+
+
+COPY artifacts/edu_sharing-community-repository-backend-tomcat-${community.repository.version}.jar tomcat/lib/
+
+
+COPY artifacts/edu_sharing-community-repository-config-${community.repository.version}.jar tomcat/shared/lib/
+
+RUN set -eux \
+	&& unzip tomcat/shared/lib/edu_sharing-community-repository-config-${community.repository.version}.jar \
+	    -d tomcat/shared/classes -x META-INF/* \
+	&& rm -f tomcat/shared/lib/edu_sharing-community-repository-config-${community.repository.version}.jar
+
+
+COPY amps/* amps/
+
+RUN set -eux \
+    && java -jar bin/alfresco-mmt.jar install amps tomcat/webapps/alfresco -directory -nobackup -force
+
+
+COPY artifacts/edu_sharing-community-repository-webapp-${community.repository.version}.war tomcat/webapps/
+
+RUN set -eux \
+    && mkdir -p tomcat/webapps/edu-sharing \
+	&& unzip tomcat/webapps/edu_sharing-community-repository-webapp-${community.repository.version}.war -d tomcat/webapps/edu-sharing \
+	&& rm -f tomcat/webapps/edu_sharing-community-repository-webapp-${community.repository.version}.war \
+	&& mv tomcat/webapps/edu-sharing/META-INF/context.xml tomcat/conf/Catalina/localhost/edu-sharing.xml
+
+COPY assets/edu-sharing/log4j2.xml tomcat/webapps/edu-sharing/WEB-INF/log4j2.xml
+
+
+RUN set -eux \
+	&& touch tomcat/shared/classes/config/edu-sharing.deployment.conf \
+	&& touch tomcat/shared/classes/config/edu-sharing.conf \
+    && tar cvf tomcat/shared.tar tomcat/shared
+
+
+EXPOSE 8080 8081
+
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["catalina.sh", "run"]
+
+
+LABEL community.version=${community.repository.version}
+LABEL git.branch=${git.branch}
+LABEL git.closest.tag.name=${git.closest.tag.name}
+LABEL git.commit.id=${git.commit.id}
+LABEL git.dirty=${git.dirty}
+LABEL mvn.project.artifactId=${project.artifactId}
+LABEL mvn.project.groupId=${project.groupId}
+LABEL mvn.project.version=${project.version}

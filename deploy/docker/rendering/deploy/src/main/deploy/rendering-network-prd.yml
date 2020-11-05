@@ -1,0 +1,9 @@
+services:
+
+  rendering-cache:
+    expose:
+      - "6379"
+
+  rendering-database:
+    expose:
+      - "3306"

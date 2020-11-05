@@ -1,0 +1,10 @@
+services:
+
+  repository-search-solr4:
+    image: "${docker.registry}/${project.parent.artifactId}-build-search:${project.version}"
+
+  repository-service:
+    image: "${docker.registry}/${project.parent.artifactId}-build-service:${project.version}"
+
+  repository-transform:
+    image: "${docker.registry}/${project.parent.artifactId}-build-transform:${project.version}"
