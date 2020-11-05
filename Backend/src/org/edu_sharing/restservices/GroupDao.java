@@ -6,11 +6,16 @@ import java.util.stream.Collectors;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -26,6 +31,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.springframework.context.ApplicationContext;
 
 public class GroupDao {
 
@@ -103,6 +109,10 @@ public class GroupDao {
 
 	private NodeRef ref;
 
+	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	org.edu_sharing.alfresco.service.OrganisationService eduOrganisationService = (org.edu_sharing.alfresco.service.OrganisationService) applicationContext
+			.getBean("eduOrganisationService");
+
 	public GroupDao(RepositoryDao repoDao, String groupName) throws DAOException  {
 
 		try {
@@ -151,23 +161,39 @@ public class GroupDao {
 		
 		try {
 			checkModifyAccess();
-			AuthenticationUtil.runAsSystem(() -> {
-				((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
-				setGroupType(profile);
-				setGroupEmail(profile);
-				setScopeType(profile);
 
-				// rename admin group
-				renameSubGroup(profile, org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP , org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
-				renameSubGroup(profile, org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP , org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
-				return null;
-			});
+			AuthenticationUtil.RunAsWork<Void> runAs = new RunAsWork<Void>() {
+				@Override
+				public Void doWork() throws Exception {
+					((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
+					setGroupType(profile);
+					setGroupEmail(profile);
+					setScopeType(profile);
+
+					// rename admin group
+					renameSubGroup(profile, org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP , org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+					renameSubGroup(profile, org.edu_sharing.alfresco.service.AuthorityService.MEDIACENTER_ADMINISTRATORS_GROUP , org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX);
+					renameOrganisationFolder();
+					return null;
+				}
+			};
+			try {
+				AuthenticationUtil.runAsSystem(runAs);
+			}catch (DuplicateChildNodeNameException e){
+				String displayName = EduSharingNodeHelper.makeUniqueName(profile.getDisplayName());
+				profile.setDisplayName(displayName);
+				AuthenticationUtil.runAsSystem(runAs);
+			}
 			
 		} catch (Throwable t) {
 			
 			throw DAOException.mapping(t);
 		}
 
+	}
+
+	private void renameOrganisationFolder(){
+		this.eduOrganisationService.syncOrganisationFolder(this.authorityName);
 	}
 
 	private void renameSubGroup(GroupProfile profile, String subgroup, String postfix) {

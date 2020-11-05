@@ -238,12 +238,8 @@ public class MediacenterApi {
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getRepositoryInfoById(repoDao.getId()),
-					CCConstants.metadatasetdefault_id);
-			String query = MetadataSearchHelper.getLuceneSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE),
-					"mediacenter_filter",
-					MetadataSearchHelper.convertCriterias(parameters.getCriterias()));
-			System.out.println(query);
+			String query = MetadataSearchHelper.getLuceneString( "mediacenter_filter", MetadataSearchHelper.convertCriterias(parameters.getCriterias()));
+			logger.debug(query);
 			searchToken.setLuceneString(query);
 
 			String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter);

@@ -1,14 +1,8 @@
 package org.edu_sharing.alfresco.service;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.node.db.DbNodeServiceImpl;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.*;
@@ -17,8 +11,6 @@ import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -26,13 +18,17 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.Cache;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
+
+import java.io.Serializable;
+import java.util.*;
 
 public class OrganisationService {
 
 	AuthorityService eduAuthorityService;
 
 	NodeService nodeService;
+
+	DbNodeServiceImpl dbNodeService;
 
 	org.alfresco.service.cmr.security.AuthorityService authorityService;
 
@@ -102,6 +98,36 @@ public class OrganisationService {
 		}
 
 		return groupName;
+	}
+
+	public void syncOrganisationFolder(String authorityName){
+		NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authorityName);
+		if(authorityNodeRef == null){
+			logger.error("authority not found " + authorityName);
+			return;
+		}
+
+		if(!nodeService.hasAspect(authorityNodeRef,QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) return;
+
+		NodeRef orgFolder = (NodeRef)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+		if(orgFolder == null) return;
+
+		String displayName = (String)nodeService.getProperty(authorityNodeRef,ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
+		String folderName = (String)nodeService.getProperty(orgFolder,ContentModel.PROP_NAME);
+
+		if(!displayName.equals(folderName)){
+			logger.info("syncing organisation folder name:" + folderName + "with displayName:" + displayName);
+			String newFolderName = EduSharingNodeHelper.cleanupCmName(displayName);
+			Cache repCache = new RepositoryCache();
+			/**
+			 * use dbnodeservice here to prevent DuplicateChildNodeNameException
+			 * leads to transaction status = 1. So give client code the opportunity to
+			 * react on this exception in the same transaction
+			 */
+			dbNodeService.setProperty(orgFolder, ContentModel.PROP_NAME, newFolderName);
+			dbNodeService.setProperty(orgFolder, ContentModel.PROP_TITLE, newFolderName);
+			repCache.remove(orgFolder.getId());
+		}
 	}
 	
 	/**
@@ -365,5 +391,9 @@ public class OrganisationService {
 
 	public void setTransactionService(TransactionService transactionService) {
 		this.transactionService = transactionService;
+	}
+
+	public void setDbNodeService(DbNodeServiceImpl dbNodeService) {
+		this.dbNodeService = dbNodeService;
 	}
 }

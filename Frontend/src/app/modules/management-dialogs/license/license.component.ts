@@ -98,9 +98,16 @@ export class WorkspaceLicenseComponent  {
   }
 
   private _oerMode=true;
-  public set oerMode(oerMode:boolean){
+  public set oerMode(oerMode:boolean) {
     this._oerMode=oerMode;
     this.showCcAuthor=false;
+    if(oerMode) {
+        if(this.isOerLicense()) {
+            return;
+        } else {
+            this.type = 'NONE';
+        }
+    }
   }
   public get oerMode(){
     return this._oerMode;

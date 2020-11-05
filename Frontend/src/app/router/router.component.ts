@@ -27,6 +27,7 @@ import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
+import {Routes} from '@angular/router';
 
 @Component({
     selector: 'router',
@@ -120,7 +121,7 @@ export class RouterComponent implements DoCheck, AfterViewInit {
  */
 
 // Due to ahead of time, we need to create all routes manually.
-export const ROUTES = [
+export const ROUTES: Routes = [
     // global
     { path: '', component: StartupComponent },
     { path: UIConstants.ROUTER_PREFIX + 'app', component: LoginAppComponent },

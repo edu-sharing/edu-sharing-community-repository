@@ -938,6 +938,12 @@
 					<multiplejoin>OR</multiplejoin>
 				</property>
 			</query>
+			<query join="AND" id="sharedToMe">
+				<basequery>(TYPE:"ccm:io" OR TYPE:"ccm:map") AND NOT ASPECT:"ccm:collection_io_reference" AND NOT ASPECT:"ccm:collection"</basequery>
+			</query>
+			<query join="AND" id="sharedByMe">
+				<basequery>(TYPE:"ccm:io" OR TYPE:"ccm:map") AND NOT ASPECT:"ccm:collection_io_reference" AND NOT ASPECT:"ccm:collection"</basequery>
+			</query>
 			<query join="AND" id="mediacenter_filter">
 				<basequery>TYPE:"ccm:io"</basequery>
 				<property name="ngsearchword">

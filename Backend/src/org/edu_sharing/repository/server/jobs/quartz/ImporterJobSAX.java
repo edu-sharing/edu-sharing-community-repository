@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
@@ -24,7 +25,7 @@ public class ImporterJobSAX extends ImporterJob {
 	
 	
 	@Override
-	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList) {
+	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList, Date from, Date until) {
 		try{
 			for(String set: sets){
 				long millisec = System.currentTimeMillis();

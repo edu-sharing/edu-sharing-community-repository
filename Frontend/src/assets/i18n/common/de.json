@@ -607,11 +607,11 @@
             "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen von Berechtigungen ist nicht möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
             "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist in dieser Ansicht nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
             "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
-            "UNSET": "Nicht festgelegt",
+            "UNSET": "Keine hinzufügen",
             "PUBLISH": "Alle (Veröffentlichen)",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Nur Administratoren",
-                "TEACHER": "Nur Lehrkräfte"
+                "ORG_ADMINISTRATORS": "Administratoren meiner Schule",
+                "TEACHER": "Lehrkräfte meiner Schule"
             }
         },
         "LICENSE": {

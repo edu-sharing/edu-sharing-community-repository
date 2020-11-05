@@ -44,6 +44,7 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
+import {Scope} from '../../core-ui-module/option-item';
 
 
 @Component({
@@ -55,6 +56,8 @@ import {NgxEditorModel} from 'ngx-monaco-editor';
   ]
 })
 export class AdminComponent {
+  readonly SCOPES = Scope;
+
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -105,6 +108,8 @@ export class AdminComponent {
   static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   mailTemplates=[
       'invited',
+      'invited_safe',
+      'invited_collection',
       'nodeIssue',
       'userRegister',
       'passwordRequest',
@@ -486,7 +491,7 @@ export class AdminComponent {
     else {
         this.admin.importOAI(this.oai.url, this.oai.set, this.oai.prefix, this.oai.className, this.oai.importerClassName,
             this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName, this.oai.metadata,
-            this.oai.file, this.oai.ids, this.oai.forceUpdate).subscribe(() => {
+            this.oai.file, this.oai.ids, this.oai.forceUpdate,this.oai.from,this.oai.until).subscribe(() => {
             this.globalProgress = false;
             const additional: any = {
                 link: {
