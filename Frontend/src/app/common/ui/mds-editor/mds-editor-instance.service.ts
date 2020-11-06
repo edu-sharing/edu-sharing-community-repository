@@ -339,6 +339,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     /** Whether the editor is in bulk mode to edit multiple nodes at once. */
     isBulk: boolean;
     editorMode: EditorMode;
+    isEmbedded: boolean;
 
     // Mutable state
     shouldShowExtendedWidgets$ = new BehaviorSubject(false);
