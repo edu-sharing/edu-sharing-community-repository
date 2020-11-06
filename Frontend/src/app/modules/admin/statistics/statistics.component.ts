@@ -510,7 +510,9 @@ export class AdminStatisticsComponent {
   }
 
   getGroupKey(element: any, key: string) {
-    return element.entry.groups[key] ? Object.keys(element.entry.groups[key])[0] : null;
+    console.log(element, key);
+    const data = element.entry?.groups?.[element.action]?.[key];
+    return data ? Object.keys(data)[0] : null;
   }
 
   export() {
