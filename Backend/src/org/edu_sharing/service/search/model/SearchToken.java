@@ -88,7 +88,7 @@ public class SearchToken implements Serializable {
 			return MetadataSearchHelper.getLuceneString(queries,query,searchCriterias,parameters);
 		}
 		if(searchCriterias!=null){
-			logger.warn("Using lucene string only search");
+			logger.debug("Using lucene string only search");
 			/*QueryBuilder queryBuilder = new QueryBuilder();
 			queryBuilder.setSearchCriterias(searchCriterias);
 			if(luceneString==null || luceneString.trim().isEmpty())
