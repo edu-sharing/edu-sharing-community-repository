@@ -39,12 +39,11 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
+import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
-import org.edu_sharing.repository.tomcat.ClassHelper;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.DAOException;
@@ -283,7 +282,7 @@ public class AdminApi {
 
 	@ApiOperation(value = "get all available jobs")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = JobInfo[].class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = JobDescription[].class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),

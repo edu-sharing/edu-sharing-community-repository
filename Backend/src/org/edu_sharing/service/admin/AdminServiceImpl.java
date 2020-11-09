@@ -1,22 +1,11 @@
 package org.edu_sharing.service.admin;
 
 import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
@@ -55,6 +44,7 @@ import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
 import org.edu_sharing.repository.server.jobs.quartz.*;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
@@ -947,21 +937,19 @@ public class AdminServiceImpl implements AdminService  {
 		for(Class clazz : jobClasses){
 			JobDescription desc = new JobDescription();
 			desc.setName(clazz.getName());
-			List<Field> staticFields = ClassHelper.getStaticFields(clazz);
-			List<String> params = new ArrayList<>();
-			desc.setParams(params);
-			for(Field staticField : staticFields){
-				try {
-					if(staticField.getName().startsWith("PARAM_")){
-						params.add((String)staticField.get(null));
-					}
-					if(staticField.getName().equals("DESCRIPTION")){
-						desc.setDescription((String)staticField.get(null));
-					}
-				} catch (IllegalAccessException e) {
-					logger.error(e.getMessage());
-				}
+			if(clazz.isAnnotationPresent(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.class)) {
+				org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription annotationDesc = (org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription) clazz.getAnnotation(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.class);
+				desc.setDescription(annotationDesc.description());
 			}
+			desc.setParams(Arrays.stream(clazz.getDeclaredFields()).filter(
+					(f) -> f.isAnnotationPresent(JobFieldDescription.class)
+			).map((f) -> {
+				JobDescription.JobFieldDescription fieldDesc = new JobDescription.JobFieldDescription();
+				fieldDesc.setName(f.getName());
+				fieldDesc.setType(f.getType());
+				fieldDesc.setDescription(f.getAnnotation(JobFieldDescription.class).description());
+				return fieldDesc;
+			}).collect(Collectors.toList()));
 			result.add(desc);
 		}
 		return result;

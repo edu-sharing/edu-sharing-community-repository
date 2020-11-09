@@ -29,21 +29,19 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.namespace.QName;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,17 +56,28 @@ import java.util.stream.Collectors;
  * types: the types of nodes to process, e.g. ccm:io (comma seperated string)
  *
  */
+@JobDescription(description = "Bulk change metadata of nodes")
 public class BulkEditNodesJob extends AbstractJob{
-
 	protected Logger logger = Logger.getLogger(BulkEditNodesJob.class);
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
+	@JobFieldDescription(description = "folder id to start from")
+	private String startFolder;
+	@JobFieldDescription(description = "property to modify, e.g. cm:name")
 	private String property;
+	@JobFieldDescription(description = "Value to replace target property with")
 	private Serializable value;
+	@JobFieldDescription(description = "property to copy value from, if mode == copy")
 	private String copy;
+	@JobFieldDescription(description = "token to replace, if mode == replaceToken")
 	private String searchToken;
+	@JobFieldDescription(description = "Token to replace with, if mode == replaceToken")
 	private String replaceToken;
+	@JobFieldDescription(description = "Mode to use")
 	private Mode mode;
+	@JobFieldDescription(description = "Element types to modify (comma seperated list), e.g. ccm:map,ccm:io")
 	private List<String> types;
+	@JobFieldDescription(description = "RecurseMode to use")
+	private RecurseMode recurseMode;
 
 	private enum Mode{
 		Replace,
@@ -113,7 +122,7 @@ public class BulkEditNodesJob extends AbstractJob{
 			replaceToken = prepareParam(context, "replaceToken", true);
 		}
 
-		String startFolder =prepareParam(context, "startFolder", true);
+		startFolder =prepareParam(context, "startFolder", true);
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
@@ -122,7 +131,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		if(types==null || types.isEmpty()) {
 			throwMissingParam("types");
 		}
-		RecurseMode recurseMode = RecurseMode.Folders;
+		recurseMode = RecurseMode.Folders;
 		try {
 			if(context.getJobDetail().getJobDataMap().get("recurseMode") != null) {
 				recurseMode = RecurseMode.valueOf((String) context.getJobDetail().getJobDataMap().get("recurseMode"));
