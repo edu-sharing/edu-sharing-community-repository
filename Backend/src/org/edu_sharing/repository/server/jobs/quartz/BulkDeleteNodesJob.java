@@ -38,6 +38,8 @@ import org.apache.xpath.operations.Bool;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -63,22 +65,27 @@ import java.util.stream.Collectors;
  * types: the types of nodes to process, e.g. ccm:io (comma seperated string)
  *
  */
+@JobDescription(description = "Bulk delete nodes (for large folders)")
 public class BulkDeleteNodesJob extends AbstractJob{
 
 	protected Logger logger = Logger.getLogger(BulkDeleteNodesJob.class);
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
-	private List<String> types;
 	private NodeService nodeServiceEdu;
 
-	public static final String PARAM_STARTFOLDER = "startFolder";
 
-	public static final String PARAM_RECYCLE = "recycle";
+	@JobFieldDescription(description = "folder id to start from")
+	private String startFolder;
+	@JobFieldDescription(description = "move to recycle (false will immediately remove)")
+	private boolean recycle;
+	@JobFieldDescription(description = "Force delete (for broken nodes)")
+	private boolean force;
+	@JobFieldDescription(description = "Cleanup/remove collection references")
+	private boolean collectionRefsCleanup;
+	@JobFieldDescription(description = "Element types to delete (comma seperated list), e.g. ccm:map,ccm:io")
+	private List<String> types;
 
-	public static final String PARAM_FORCE = "force";
 
-	public static final String PARAM_COLLECTION_REFS_CLEANUP = "collection_refs_cleanup";
 
-	public static final String PARAM_TYPES = "types";
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -90,22 +97,20 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		nodeService = serviceRegistry.getNodeService();
 		nodeServiceEdu = NodeServiceFactory.getLocalService();
 
-		String startFolder = (String) context.getJobDetail().getJobDataMap().get(PARAM_STARTFOLDER);
+		startFolder = (String) context.getJobDetail().getJobDataMap().get("startFolder");
 		if(startFolder==null){
-			throw new IllegalArgumentException("Missing required parameter '"+PARAM_STARTFOLDER+"'");
+			throw new IllegalArgumentException("Missing required parameter 'startFolder'");
 		}
-		Object recycleStr = context.getJobDetail().getJobDataMap().get(PARAM_RECYCLE);
+		Object recycleStr = context.getJobDetail().getJobDataMap().get("recycle");
 		if(recycleStr==null){
-			throw new IllegalArgumentException("Missing required boolean parameter '"+PARAM_RECYCLE+"'");
+			throw new IllegalArgumentException("Missing required boolean parameter 'recycle'");
 		}
-		boolean recycle = Boolean.parseBoolean(recycleStr.toString());
-
-		boolean force = new Boolean((String)context.getJobDetail().getJobDataMap().get(PARAM_FORCE));
-
-		boolean collectionRefsCleanup = new Boolean((String)context.getJobDetail().getJobDataMap().get(PARAM_COLLECTION_REFS_CLEANUP));
+		recycle = Boolean.parseBoolean(recycleStr.toString());
+		force = Boolean.parseBoolean((String) context.getJobDetail().getJobDataMap().get("force"));
+		collectionRefsCleanup = Boolean.parseBoolean((String) context.getJobDetail().getJobDataMap().get("collectionRefsCleanup"));
 
 		try {
-			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get(PARAM_TYPES)).
+			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList());
 		}catch(Throwable t){}
