@@ -549,8 +549,8 @@
             "ERROR_HELP": "Please use the option \"Adavanced invitations\" to configure the permissions",
             "UNSET": "Add none",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Administrators from school",
-                "TEACHER": "Teachers from school"
+                "ORG_ADMINISTRATORS": "Administrators from\n\"{{school}}\"",
+                "TEACHER": "Teachers from\n\"{{school}}\""
             }
         },
         "LICENSE": {

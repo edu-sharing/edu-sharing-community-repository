@@ -1,8 +1,8 @@
 <info-message message="SIMPLE_EDIT.INVITE.ERROR_TOOLPERMISSION_MISSING" *ngIf="!tpInvite">
 </info-message>
 <info-message
-  message="SIMPLE_EDIT.INVITE.ERROR_PERMISSION_MISSING"
-  *ngIf="missingNodePermissions && tpInvite"
+        message="SIMPLE_EDIT.INVITE.ERROR_PERMISSION_MISSING"
+        *ngIf="missingNodePermissions && tpInvite"
 >
 </info-message>
 <info-message message="SIMPLE_EDIT.INVITE.ERROR_MULTIPLE_PARENTS" *ngIf="multipleParents">
@@ -12,7 +12,7 @@
   <div class="parent-authorities">
     <span *ngFor="let authority of parentAuthorities" class="authorities">{{
       authority | authorityName
-    }}</span>
+      }}</span>
   </div>
   <div>{{ 'SIMPLE_EDIT.INVITE.ERROR_HELP' | translate }}</div>
 </info-message>
@@ -26,37 +26,40 @@
     <div role="group" aria-labelledby="global-groups-label">
       <div>
         <mat-button-toggle-group
-          #orgGroup="matButtonToggleGroup"
-          class="toggle-full-size"
-          (change)="updateValue('org')"
+                #orgGroup="matButtonToggleGroup"
+                class="toggle-full-size toggle-org"
+                (change)="updateValue('org')"
         >
-          <mat-button-toggle [value]="'unset'">
+          <mat-button-toggle
+                  class="button-toggle-org"
+                  [value]="'unset'">
             {{ 'SIMPLE_EDIT.INVITE.UNSET' | translate }}
           </mat-button-toggle>
-          <ng-container *ngIf="organization">
+          <ng-container *ngFor="let organization of organizations">
             <mat-button-toggle
-              [value]="group"
-              [disabled]="!organization.groups[group]"
-              *ngFor="let group of organizationGroups"
-            >
-              {{ 'SIMPLE_EDIT.INVITE.GROUP_TYPES.' + group | translate }}
-            </mat-button-toggle>
-            <mat-button-toggle [value]="'org'">
-              {{ organization.organization | authorityName }}
-            </mat-button-toggle>
+                    class="button-toggle-org"
+                    [value]="organization.groups[group]?.authorityName"
+                    [disabled]="!organization.groups[group]"
+                    *ngFor="let group of organizationGroups"
+            >{{ 'SIMPLE_EDIT.INVITE.GROUP_TYPES.' + group |
+                    translate:{school: organization.organization|authorityName} }}</mat-button-toggle>
+            <mat-button-toggle
+                    class="button-toggle-org"
+                    [value]="organization.organization.authorityName">{{ organization.organization | authorityName }}</mat-button-toggle>
           </ng-container>
         </mat-button-toggle-group>
       </div>
       <div *ngIf="globalGroups.length > 0">
         <mat-button-toggle-group
-          #globalGroup="matButtonToggleGroup"
-          class="toggle-full-size"
-          (change)="updateValue('global')"
+                class="toggle-full-size"
+                #globalGroup="matButtonToggleGroup"
+                (change)="updateValue('global')"
         >
           <mat-button-toggle
-            *ngFor="let group of globalGroups"
-            [disabled]="group.authorityName === 'GROUP_EVERYONE' && !tpInviteEveryone"
-            [value]="group.authorityName"
+                  class="button-toggle-global"
+                  *ngFor="let group of globalGroups"
+                  [disabled]="group.authorityName === 'GROUP_EVERYONE' && !tpInviteEveryone"
+                  [value]="group.authorityName"
           >
             {{ group | authorityName }}
           </mat-button-toggle>
@@ -67,13 +70,13 @@
   <div *ngIf="recentAuthorities && recentAuthorities.length" class="field-group">
     <label id="last-invitations-label">{{
       'SIMPLE_EDIT.INVITE.RECENT_AUTHORITIES' | translate
-    }}</label>
+      }}</label>
     <div class="tiles" aria-labelledby="last-invitations-label">
       <app-user-tile
-        *ngFor="let authority of recentAuthorities"
-        [user]="authority"
-        (click)="toggleInvitation(authority)"
-        [active]="isInvited(authority)"
+              *ngFor="let authority of recentAuthorities"
+              [user]="authority"
+              (click)="toggleInvitation(authority)"
+              [active]="isInvited(authority)"
       ></app-user-tile>
     </div>
   </div>
