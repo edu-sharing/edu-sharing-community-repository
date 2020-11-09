@@ -33,6 +33,7 @@ import java.util.Map;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 
 public class DuplicateFinder {
 	
@@ -152,9 +153,9 @@ public class DuplicateFinder {
 
 			//replace ending dot with nothing
 			cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "");
-			
-			cmNameReadableName = new DuplicateFinder().getUniqueValue(currentLevelObjects, CCConstants.CM_NAME, cmNameReadableName);
+			cmNameReadableName = NodeServiceHelper.cleanupCmName(cmNameReadableName);
 
+			cmNameReadableName = new DuplicateFinder().getUniqueValue(currentLevelObjects, CCConstants.CM_NAME, cmNameReadableName);
 			propsToSafe.put(CCConstants.CM_NAME, cmNameReadableName);
 
 		}
