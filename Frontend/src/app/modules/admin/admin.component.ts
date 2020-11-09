@@ -4,7 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
 import {
   ConfigurationService,
-  DialogButton,
+  DialogButton, JobDescription,
   ListItem,
   RestIamService,
   RestMediacenterService
@@ -80,7 +80,6 @@ export class AdminComponent {
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-          this.prepareJobClasses();
           this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       GlobalContainerComponent.finishPreloading();
@@ -124,7 +123,11 @@ export class AdminComponent {
   public cacheName:string;
   public cacheInfo:string;
   public oai:any={};
-  public job:any={};
+  public job: {
+    params?: string;
+    name?:string,
+    class?:string,
+    object?:JobDescription} = {};
   public jobs: any;
   public jobsOpen: boolean[]=[];
   public jobsLogFilter:any = [];
@@ -163,6 +166,7 @@ export class AdminComponent {
   @ViewChild('dynamic') dynamicComponent : any;
 
   buttons:any[]=[];
+  availableJobs: JobDescription[];
   private excelFile: File;
   private collectionsFile: File;
   private uploadTempFile: File;
@@ -928,27 +932,12 @@ export class AdminComponent {
     }
 
     private prepareJobClasses() {
-        const jobs=[
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteNodesJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RestoreNodesBySolrQuery'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.SyncOrganisationFolderName'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.SetPermissionsOrgAdminGroup'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.TrashcanCleanerSolrJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.CheckLinkJob')
-        ];
-        const deleteAuthorities = new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteAuthoritiesJob')
-        deleteAuthorities.originalObject = {upload: true};
-        jobs.push(deleteAuthorities);
-        this.jobClasses=jobs.map((job)=> {
-          const id=job.id.split('.');
-          job.title=this.translate.instant('ADMIN.JOBS.NAMES.'+id[id.length-1]);
+        this.jobClasses=this.availableJobs.map((j)=> {
+          const job = new SuggestItem('');
+          const id=j.name.split('.');
+          job.title=j.description;
           job.secondaryTitle=id[id.length-1];
+          job.originalObject = j;
           return job;
         });
     }
@@ -963,7 +952,9 @@ export class AdminComponent {
 
   updateJobSuggestions(event: any) {
     const name=event ? event.input.toString().toLowerCase() : '';
-    this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
+    this.jobClassesSuggested=this.jobClasses.filter((j)=>
+        j.title?.toLowerCase().indexOf(name) !== -1 ||
+        j.secondaryTitle?.toLowerCase().indexOf(name) !== -1);
   }
 
   refreshUpdateList() {
@@ -1117,6 +1108,10 @@ export class AdminComponent {
             this.reloadJobStatus();
             this.runTpChecks();
             this.runChecks();
+            this.admin.getAllJobs().subscribe((jobs) => {
+              this.availableJobs = jobs;
+              this.prepareJobClasses();
+            });
             setInterval(() => {
                 if (this.mode == 'JOBS')
                     this.reloadJobStatus();
@@ -1187,6 +1182,29 @@ export class AdminComponent {
       this.admin.setToolpermissions(RestConstants.AUTHORITY_EVERYONE, tp).subscribe(() => this.runTpChecks());
     });
 
+  }
+
+  supportsUpload(job: JobDescription) {
+    return job?.params?.some((p) => p.file);
+  }
+
+  setJob(item: any) {
+    this.job.name=item.item.title;
+    this.job.class=item.id;
+    this.job.object=item.item.originalObject;
+    const data: any = {};
+    let modified = false;
+    for(const param of this.job.object.params) {
+      if (param.file) {
+        continue;
+      }
+      data[param.name] = param.description + ' (' + param.type + ')';
+      modified = true;
+    }
+    console.log(data, this.job);
+    if(modified) {
+      this.job.params = JSON.stringify(data, null, 2);
+    }
   }
 }
 

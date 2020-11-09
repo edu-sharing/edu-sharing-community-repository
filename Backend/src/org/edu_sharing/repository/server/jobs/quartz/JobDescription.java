@@ -35,6 +35,7 @@ public class JobDescription {
         String name;
         Class<?> type;
         String description;
+        boolean file;
 
         public String getName() {
             return name;
@@ -58,6 +59,14 @@ public class JobDescription {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+
+        public boolean isFile() {
+            return file;
+        }
+
+        public void setFile(boolean file) {
+            this.file = file;
         }
     }
 }

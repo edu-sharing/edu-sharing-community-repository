@@ -8,7 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface JobDescription {
-    String description = "no description present";
-
-    String description();
+    String description() default "no description present";
 }

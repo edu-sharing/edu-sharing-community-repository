@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface JobFieldDescription {
-    String description = null;
-    String description();
+    String description() default "";
+    boolean file() default false;
 }

@@ -948,6 +948,7 @@ public class AdminServiceImpl implements AdminService  {
 				fieldDesc.setName(f.getName());
 				fieldDesc.setType(f.getType());
 				fieldDesc.setDescription(f.getAnnotation(JobFieldDescription.class).description());
+				fieldDesc.setFile(f.getAnnotation(JobFieldDescription.class).file());
 				return fieldDesc;
 			}).collect(Collectors.toList()));
 			result.add(desc);

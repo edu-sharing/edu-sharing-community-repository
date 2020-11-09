@@ -430,7 +430,7 @@
                             [allowAny]="true"
                             [inputMinLength]="1"
                             (updateInput)="updateJobSuggestions($event)"
-                            (addItem)="job.name=$event.item.title;job.class=$event.item.id;job.object=$event.item.originalObject"
+                            (addItem)="setJob($event)"
                             (addAny)="job.name='';job.class=$event"></autocomplete>
                     <div class="job-title" *ngIf="job && job.name">{{job.name | translate}}</div>
                     <div class="job-class" *ngIf="job && job.class">{{job.class}}</div>
@@ -442,7 +442,7 @@
                                name="jobParams"
                                class="jobParams materialize-textarea"
             ></ngx-monaco-editor>
-            <div class="inputGroupGrow" *ngIf="job?.object?.upload">
+            <div class="inputGroupGrow" *ngIf="supportsUpload(job.object)">
                 <input #uploadJobSelect type="file" style="display:none" (change)="updateUploadFile($event, 'uploadJobsFile')">
                 <label>{{ 'ADMIN.JOBS.UPLOAD_FILE_LABEL' | translate }}</label>
                 <div class="inputGroup">
