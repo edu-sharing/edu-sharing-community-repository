@@ -578,8 +578,8 @@
             "UNSET": "Add none",
             "PUBLISH": "All (Publish)",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Administrators from school",
-                "TEACHER": "Teachers from school"
+                "ORG_ADMINISTRATORS": "Administrators from\n\"{{school}}\"",
+                "TEACHER": "Teachers from\n\"{{school}}\""
             }
         },
         "LICENSE": {
