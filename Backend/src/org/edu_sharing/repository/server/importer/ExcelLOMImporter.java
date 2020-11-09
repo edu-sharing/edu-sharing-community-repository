@@ -31,6 +31,7 @@ import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 
 
 public class ExcelLOMImporter {
@@ -188,6 +189,7 @@ public class ExcelLOMImporter {
 							createNode = false;
 						}
 						if(createNode) {
+							nodeName = NodeServiceHelper.cleanupCmName(nodeName);
 							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
 							
 							HashMap<String,Object> versProps = new HashMap<String,Object> ();
