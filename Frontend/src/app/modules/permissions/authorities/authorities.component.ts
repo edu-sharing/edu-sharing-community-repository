@@ -88,6 +88,7 @@ export class PermissionsAuthoritiesComponent {
   editStatus: UserSimple;
   editStatusNotify = true;
   editStatusButtons: DialogButton[];
+  hasMore: boolean;
   private _org: Organization;
   @Output() onDeselectOrg = new EventEmitter();
   @Input() set searchQuery(searchQuery: string){
@@ -556,6 +557,7 @@ export class PermissionsAuthoritiesComponent {
           if (org.administrationAccess) {
             this.list.push(org);
           }
+          this.hasMore = this.list.length < orgs.pagination.total;
         }
         this.loading = false;
         this.updateOptions();
@@ -581,24 +583,30 @@ export class PermissionsAuthoritiesComponent {
       if (this.org) {
         this.offset += this.connector.numberPerRequest;
         this.iam.getGroupMembers(this.org.authorityName, query, this._mode, request).subscribe((data: IamAuthorities) => {
-          for (const auth of data.authorities)
-            this.list.push(auth);
+          for (const auth of data.authorities) {
+              this.list.push(auth);
+          }
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }
       else if (this._mode == 'GROUP'){
         this.offset += this.connector.numberPerRequest;
         this.iam.searchGroups(query, true, '', request).subscribe((data: IamGroups) => {
-          for (const auth of data.groups)
-            this.list.push(auth);
+          for (const auth of data.groups) {
+              this.list.push(auth);
+          }
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }
       else if (this._mode == 'USER'){
         this.offset += this.connector.numberPerRequest;
         this.iam.searchUsers(query, true, '', request).subscribe((data: IamUsers) => {
-          for (const auth of data.users)
-            this.list.push(auth);
+          for (const auth of data.users) {
+              this.list.push(auth);
+          }
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }
