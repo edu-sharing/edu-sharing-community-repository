@@ -95,7 +95,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private renderedNode: Node;
     private viewToggle: OptionItem;
     // Max items to fetch at all (afterwards no more infinite scroll)
-    private static MAX_ITEMS_COUNT = 500;
+    private static MAX_ITEMS_COUNT = 2000;
     private repositoryIds: any[] = [];
     private mdsSets: MdsInfo[];
     private _mdsId: string;
@@ -469,6 +469,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             SearchComponent.MAX_ITEMS_COUNT
         ) {
             this.searchService.showspinner = false;
+            this.searchService.complete = true;
             this.isSearching = false;
             return;
         }
