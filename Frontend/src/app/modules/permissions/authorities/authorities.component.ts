@@ -586,7 +586,8 @@ export class PermissionsAuthoritiesComponent {
           for (const auth of data.authorities) {
               this.list.push(auth);
           }
-          this.hasMore = this.list.length < data.pagination.total;
+          // org endpoint does not support proper pagination, so check if result was empty
+          this.hasMore = data.authorities.length > 0;
           this.loading = false;
         });
       }
