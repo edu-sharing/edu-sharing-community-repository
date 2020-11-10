@@ -1180,6 +1180,8 @@ public class CCConstants {
 
 	public final static String LOM_PROP_TECHNICAL_SIZE = "{http://www.campuscontent.de/model/lom/1.0}size";
 
+	public final static String LOM_PROP_TECHNICAL_OTHERPLATFORMREQUIREMENTS = "{http://www.campuscontent.de/model/lom/1.0}otherplatformrequirements";
+
 	public final static String LOM_PROP_RELATION_KIND = "{http://www.campuscontent.de/model/lom/1.0}kind";
 
 	public final static String LOM_PROP_RESOURCE_DESCRIPTION = "{http://www.campuscontent.de/model/lom/1.0}resource_description";
