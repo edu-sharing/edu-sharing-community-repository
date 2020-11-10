@@ -32,6 +32,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -100,6 +101,9 @@ public class OAIPMHLOMImporter implements Importer{
 	private ImporterJob job;
 	private String metadataSetId;
 
+	Date from;
+	Date until;
+
 	/**
 	 * @param oai_base_url
 	 * @param recordHandler
@@ -130,6 +134,13 @@ public class OAIPMHLOMImporter implements Importer{
 		//take identifiers list cause some of the sets don't work: XML-Verarbeitungsfehler: nicht wohlgeformt
 		String url = this.oai_base_url+"?verb=ListIdentifiers&metadataPrefix="+this.metadataPrefix;
 		String setUrl = url+"&set="+set;
+		if(this.from != null && this.until != null){
+			String fromString = OAIConst.DATE_FORMAT.format(this.from);
+			String untilString = OAIConst.DATE_FORMAT.format(this.until);
+			setUrl+="&from="+fromString;
+			setUrl+="&until="+untilString;
+		}
+
 		this.updateWithIdentifiersList(setUrl);
 	}
 	
@@ -587,5 +598,15 @@ public class OAIPMHLOMImporter implements Importer{
 		String output = writer.getBuffer().toString();
 		logger.info("Import xml "+output);
 		return handleRecordInternal(null,xmlRecord);
+	}
+
+	@Override
+	public void setFrom(Date from) {
+		this.from = from;
+	}
+
+	@Override
+	public void setUntil(Date until) {
+		this.until = until;
 	}
 }

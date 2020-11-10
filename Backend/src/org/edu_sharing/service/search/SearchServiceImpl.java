@@ -87,10 +87,11 @@ public class SearchServiceImpl implements SearchService {
 		token.setMaxResult(maxItems);
 		token.setSortDefinition(sortDefinition);
 		token.setContentType(contentType);
-
-		token.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ " AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE+"\""
-				+ " AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedByMe",
+				null
+		);
+		token.setLuceneString(mdsQuery + " AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
 		return search(token);
 	}
 
@@ -109,11 +110,12 @@ public class SearchServiceImpl implements SearchService {
 		memberships.add(username);
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
-
-		StringBuilder query= new StringBuilder("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") "
-				+ "AND ISNOTNULL:\"ccm:ph_users\" "
-				+ "AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE+"\""
-				+ "AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedToMe",
+				null
+		);
+		StringBuilder query= new StringBuilder(mdsQuery + " AND ("
+				+ "NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
 				+ " AND (");
 		int i=0;
 		for(String m : memberships){
@@ -121,6 +123,7 @@ public class SearchServiceImpl implements SearchService {
 				query.append(" OR ");
 			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
 		}
+		query.append(")");
 		query.append(")");
 		token.setLuceneString(query.toString());
 

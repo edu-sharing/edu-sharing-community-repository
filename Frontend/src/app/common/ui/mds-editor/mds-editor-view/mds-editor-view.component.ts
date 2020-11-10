@@ -103,13 +103,16 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
     @Input() view: MdsView;
     html: SafeHtml;
+    isEmbedded: boolean;
 
     constructor(
         private sanitizer: DomSanitizer,
         private factoryResolver: ComponentFactoryResolver,
         private containerRef: ViewContainerRef,
         private mdsEditorInstance: MdsEditorInstanceService,
-    ) {}
+    ) {
+        this.isEmbedded = this.mdsEditorInstance.isEmbedded;
+    }
 
     ngOnInit(): void {
         this.html = this.getHtml();
@@ -144,7 +147,11 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private injectNativeWidget(widget: Widget, widgetName: NativeWidgetType, element: Element): void {
+    private injectNativeWidget(
+        widget: Widget,
+        widgetName: NativeWidgetType,
+        element: Element,
+    ): void {
         const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
         if (!WidgetComponent) {
             UIHelper.injectAngularComponent(
@@ -180,7 +187,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             element,
             {
                 widgetName,
-                widget
+                widget,
             },
         );
         this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance);
@@ -234,7 +241,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         htmlRef?.getAttributeNames().forEach((attribute) => {
             // map the extended attribute
             const value = htmlRef.getAttribute(attribute);
-            if(attribute === 'isextended' || attribute === 'extended'){
+            if (attribute === 'isextended' || attribute === 'extended') {
                 attribute = 'isExtended';
             }
             (widget.definition as any)[attribute] = value;

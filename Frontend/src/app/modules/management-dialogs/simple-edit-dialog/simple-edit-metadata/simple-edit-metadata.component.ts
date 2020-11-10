@@ -18,7 +18,8 @@ import {NodeHelper} from "../../../../core-ui-module/node-helper";
 import {OPEN_URL_MODE} from "../../../../core-module/ui/ui-constants";
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {BulkBehaviour, MdsComponent} from '../../../../common/ui/mds/mds.component';
-import {Observable, Observer} from 'rxjs';
+import {BehaviorSubject, Observable, Observer} from 'rxjs';
+import {MdsEditorWrapperComponent} from '../../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 @Component({
   selector: 'app-simple-edit-metadata',
@@ -31,19 +32,22 @@ import {Observable, Observer} from 'rxjs';
 })
 export class SimpleEditMetadataComponent  {
   readonly BulkBehaviour = BulkBehaviour;
-  @ViewChild('mds') mds : MdsComponent;
+  @ViewChild('mds') mds : MdsEditorWrapperComponent;
   @Input() nodes : Node[];
   @Input() fromUpload : boolean;
-  @Output() onInitFinished = new EventEmitter<void>();
   @Output() onError = new EventEmitter<void>();
+  isInited = new BehaviorSubject(false);
 
   constructor(
     private nodeApi : RestNodeService,
     private toast : Toast,
   ) {
   }
-  isDirty(){
-    return this.mds.isDirty();
+  isDirty() {
+    if(this.mds.mdsRef){
+      return this.mds.mdsRef.isDirty();
+    }
+    return this.mds.mdsEditorInstance.getHasUserChanges();
   }
   save() {
     return new Observable<void>((observer) => {
@@ -53,7 +57,7 @@ export class SimpleEditMetadataComponent  {
         return;
       }
       Observable.forkJoin(this.nodes.map((n) => {
-        const props = this.mds.getValues(n.properties);
+        const props = this.mds.getValues(n);
         delete props[RestConstants.CM_NAME];
         return this.nodeApi.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_METADATA_UPDATE, props);
       })).subscribe(() => {

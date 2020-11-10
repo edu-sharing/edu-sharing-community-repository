@@ -31,6 +31,7 @@ import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 
 
 public class ExcelLOMImporter {
@@ -273,7 +274,7 @@ public class ExcelLOMImporter {
 		eduProps.put(CCConstants.LOM_PROP_GENERAL_TITLE, nodeName);
 		new DuplicateFinder().transformToSafeName(currentLevelObjects, eduProps);
 		toSafe.put(QName.createQName(CCConstants.CM_NAME), (String)eduProps.get(CCConstants.CM_NAME));
-		return nodeName;
+		return (String)toSafe.get(QName.createQName(CCConstants.CM_NAME));
 	}
 
 	private void addToCollections(ChildAssociationRef newNode, LinkedHashSet<String> collectionsForNode, Boolean addToCollection){

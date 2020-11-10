@@ -38,6 +38,8 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -56,9 +58,13 @@ import java.util.List;
  * Convert a multivalue field to a singlevalue
  * If there are still multivalues found, they will combined into a string using the "seperator"
  */
+@JobDescription(description = "Convert a property from multi-value to single-value")
 public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 
-	private String property,seperator;
+	@JobFieldDescription(description = "property to convert, e.g. cclom:general_keyword")
+	private String property;
+	@JobFieldDescription(description = "Seperator to combine previous multivalues ([#] is default)")
+	private String seperator;
 
 	protected Logger logger = Logger.getLogger(ConvertMultivalueToSinglevalueJob.class);
 	private org.alfresco.service.cmr.repository.NodeService nodeService;

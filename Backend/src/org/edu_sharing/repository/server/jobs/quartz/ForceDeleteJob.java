@@ -6,6 +6,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -31,25 +32,10 @@ public class ForceDeleteJob extends AbstractJob {
 
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry sr = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-
-            sr.getRetryingTransactionHelper().doInTransaction(()->{
-                DbNodeServiceImpl dbNodeService = (DbNodeServiceImpl)applicationContext.getBean("alfrescoDefaultDbNodeService");
-                Method method = null;
-                try {
-                    method = dbNodeService.getClass().getDeclaredMethod("deleteNode", NodeRef.class,boolean.class);
-                    method.setAccessible(true);
-
-                    Object r = method.invoke(dbNodeService,nodeRef,false);
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
+            sr.getRetryingTransactionHelper().doInTransaction(()-> {
+                NodeServiceFactory.getLocalService().removeNodeForce(store, protocol, id,false);
                 return null;
             });
-
             return null;
         });
     }

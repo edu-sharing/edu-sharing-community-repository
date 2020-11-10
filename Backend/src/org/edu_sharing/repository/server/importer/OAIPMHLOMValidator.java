@@ -6,6 +6,8 @@ import javax.xml.xpath.XPathConstants;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import java.util.Date;
+
 public class OAIPMHLOMValidator extends OAIPMHLOMImporter{
 	
 	Logger logger = Logger.getLogger(OAIPMHLOMValidator.class);
@@ -65,5 +67,14 @@ public class OAIPMHLOMValidator extends OAIPMHLOMImporter{
 			e.printStackTrace();
 		}
 	}
-	
+
+	@Override
+	public void setFrom(Date from) {
+
+	}
+
+	@Override
+	public void setUntil(Date until) {
+
+	}
 }

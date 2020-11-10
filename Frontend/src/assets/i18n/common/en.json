@@ -582,11 +582,11 @@
             "ERROR_TOOLPERMISSION_MISSING": "It is not possible to set permissions because your profile has no permissions to do so",
             "ERROR_INHERIT": "It is not possible to set permissions in this view because the item(s) already receive(s) invitations from the parent folder:",
             "ERROR_HELP": "Please use the option \"Advanced invitations\" to configure the permissions",
-            "UNSET": "Not set",
+            "UNSET": "Add none",
             "PUBLISH": "All (Publish)",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Administrators only",
-                "TEACHER": "Teachers only"
+                "ORG_ADMINISTRATORS": "Administrators from\n\"{{school}}\"",
+                "TEACHER": "Teachers from\n\"{{school}}\""
             }
         },
         "LICENSE": {

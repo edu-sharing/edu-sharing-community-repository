@@ -141,7 +141,11 @@ public class MetadataReaderV2 {
                 MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
                 mds.overrideWith(mdsOverride);
             } catch (IOException e) {
-            	logger.info("no "+mdsName+"_override.xml was found -> only default file will be used");
+            	if(e.toString().contains(mdsName)) {
+					logger.info("no " + mdsName + "_override.xml was found -> only default file will be used");
+				} else {
+            		logger.warn("IOException parsing " + mdsName + "_override.xml:" + e.toString(),e);
+				}
             }
             mdsCache.put(id, mds);
             return mds;

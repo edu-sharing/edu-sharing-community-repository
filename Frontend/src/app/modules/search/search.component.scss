@@ -616,6 +616,11 @@ div.dialog.darken {
       /* margin-bottom: 40px; */
     }
   }
+  app-mds-editor-embedded {
+    app-mds-editor-core {
+      padding: 0 20px;
+    }
+  }
 }
 .rowFrame, .searchUngrouped listtable {
   background-color: #fff !important;

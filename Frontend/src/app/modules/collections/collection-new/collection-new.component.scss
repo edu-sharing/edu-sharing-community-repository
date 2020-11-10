@@ -226,9 +226,19 @@ $imagePath: '../../../../assets/images/collections/';
 }
 .collection-metadata{
   .noGroups{
-    font-size:120%;
+    font-size:$fontSizeXLarge;
     color:$textLight;
     text-align: center;
+  }
+  .noPermission{
+    color:$textLight;
+    text-align: center;
+    h4{
+      font-size: $fontSizeXLarge;
+    }
+    h5{
+      font-size: 100%;
+    }
   }
 }
 .groupLabel{

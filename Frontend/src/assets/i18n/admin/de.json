@@ -241,6 +241,8 @@
             "OAI_FORCE_UPDATE": "Alle bestehenden Nodes neu importieren/überschreiben",
             "OAI_START": "OAI Import",
             "OAI_SAVE": "Werte für nächsten Import speichern",
+            "OAI_FROM": "von",
+            "OAI_UNTIL": "bis",
             "REMOVE_IMPORTS": "Gelöschte Importe entfernen",
             "IMPORTS_REMOVED": "Gelöschte OAI-Elemente werden entfernt.\nÜberprüfen Sie die Aufgabenliste, um den Status einzusehen",
             "EXCEL_IMPORTED": "Excel-Datei importiert ({{ rows }} Zeilen importiert)",
@@ -337,6 +339,8 @@
             "LOG_LEVEL_0": "Fatal",
             "UPLOAD_FILE_LABEL": "Datei für Job bereitstellen",
             "CHOOSE_UPLOAD_FILE": "Datei wählen",
+            "PARAMETERS": "Job-Parameter",
+            "APPLY_TEMPLATE": "Als Vorlage einfügen",
             "NAMES": {
                 "RemoveImportedObjectsJob": "Alle importierten Nodes löschen",
                 "RemoveOrphanCollectionReferencesJob": "Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen",

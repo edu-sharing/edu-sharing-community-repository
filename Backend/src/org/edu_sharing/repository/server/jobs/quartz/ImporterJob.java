@@ -29,10 +29,8 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.lang.reflect.Constructor;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -122,6 +120,22 @@ public class ImporterJob extends AbstractJob {
 		
 		String[] idArr = (oaiIds != null) ? oaiIds.split(",") : null;
 
+		// force update if single ids should be updated
+		if(idArr != null && idArr.length > 0){
+			jobDataMap.put(OAIConst.PARAM_FORCE_UPDATE, true);
+		}
+
+		Date from = null;
+		Date until = null;
+		try {
+			from = OAIConst.DATE_FORMAT.parse((String)jobDataMap.get(OAIConst.PARAM_FROM));
+			until = OAIConst.DATE_FORMAT.parse((String)jobDataMap.get(OAIConst.PARAM_UNTIL));
+		} catch (ParseException e) {
+			logger.error(e.getMessage());
+		}catch (NullPointerException e){
+			logger.error(e.getMessage());
+		}
+
 
 		byte[] xmlData= (byte[]) jobDataMap.get(OAIConst.PARAM_XMLDATA);
 
@@ -136,7 +150,7 @@ public class ImporterJob extends AbstractJob {
 		if (xmlData != null) {
 			return start(xmlData, recordHandlerClass, binaryHandlerClass);
 		}
-		start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr);
+		start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr, from, until);
 		return null;
 	}
 
@@ -175,7 +189,7 @@ public class ImporterJob extends AbstractJob {
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-			String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList) {
+						 String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList, Date from, Date until) {
 		try {
 			for(String set : sets) {
 				Importer importer = null;
@@ -219,6 +233,8 @@ public class ImporterJob extends AbstractJob {
 				importer.setMetadataSetId(metadataSetId);
 				importer.setRecordHandler(recordHandler);
 				importer.setJob(this);
+				importer.setFrom(from);
+				importer.setUntil(until);
 				if (urlImport != null) {
 					RecordHandlerLOM recordHandlerLom = new RecordHandlerLOM(null);
 					((OAIPMHLOMImporter) importer).importOAIObjectsFromFile(urlImport, recordHandlerLom);

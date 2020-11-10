@@ -8,6 +8,8 @@ public class SimpleEdit implements Serializable {
     public String[] globalGroups;
     @XmlElement
     public SimpleEditOrganization organization;
+    @XmlElement
+    public String organizationFilter;
 
     private static class SimpleEditOrganization implements Serializable{
         @XmlElement

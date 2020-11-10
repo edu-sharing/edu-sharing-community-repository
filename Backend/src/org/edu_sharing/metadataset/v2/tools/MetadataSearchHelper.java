@@ -46,17 +46,20 @@ public class MetadataSearchHelper {
 		}
 		return criteriasMap;
 	}
-	public static String getLuceneSearchQuery(MetadataQueries queries, String queryId, Map<String,String[]> parameters) throws IllegalArgumentException{
+	static String getLuceneSearchQuery(MetadataQueries queries, String queryId, Map<String,String[]> parameters) throws IllegalArgumentException{
 		return getLuceneSearchQuery(queries.findQuery(queryId), parameters);
 	}
-	public static String getLuceneSearchQuery(MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException{
+	static String getLuceneSearchQuery(MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException{
 
 				// We need to add the basequery, it's currently still getting the base query from the old mds -> added at other stage
 				//String queryString="("+queries.getBasequery()+")";
 				String queryString="";
-				String basequery = query.findBasequery(parameters.keySet());
+				String basequery = query.findBasequery(parameters != null ? parameters.keySet() : null);
 				if(basequery!=null && !basequery.trim().isEmpty()){
 					queryString+="("+replaceCommonQueryVariables(basequery)+")";
+				}
+				if(parameters == null){
+					return queryString;
 				}
 				for(String name : parameters.keySet()){
 					MetadataQueryParameter parameter = query.findParameterByName(name);
@@ -257,7 +260,14 @@ public class MetadataSearchHelper {
 		result = result + ")";
 		return result;
 	}
+	public static String getLuceneString(String queryId,Map<String,String[]> parameters) throws Exception {
+		MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE);
+		return getLuceneString(queries, queries.findQuery(queryId), null, parameters);
+	}
 	public static String getLuceneString(MetadataQueries queries,MetadataQuery query, SearchCriterias searchCriterias,Map<String,String[]> parameters) throws IllegalArgumentException {
+		if(parameters == null){
+			parameters = new HashMap<>();
+		}
 		String lucene=getLuceneSearchQuery(query, parameters);
 		if(query.isApplyBasequery()){
 			String andQuery="";

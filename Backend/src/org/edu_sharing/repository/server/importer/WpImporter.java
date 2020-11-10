@@ -225,4 +225,13 @@ public class WpImporter implements Importer{
 		}
 	}
 
+	@Override
+	public void setFrom(Date from) {
+
+	}
+
+	@Override
+	public void setUntil(Date until) {
+
+	}
 }

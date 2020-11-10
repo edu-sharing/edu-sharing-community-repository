@@ -1,7 +1,7 @@
 import { CdkConnectedOverlay, ConnectedPosition, OverlayRef } from '@angular/cdk/overlay';
 import {AfterViewInit, ApplicationRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
+import {BehaviorSubject, fromEvent, merge, Observable, ReplaySubject} from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { MdsWidgetType } from '../../types';
 import { DisplayValue } from '../DisplayValues';
@@ -90,11 +90,15 @@ export class MdsEditorWidgetTreeComponent
     }
 
     ngAfterViewInit(): void {
-        fromEvent(this.input.nativeElement, 'focus')
-            .pipe(takeUntil(this.destroyed$))
+        merge(
+            fromEvent(this.input.nativeElement, 'focus'),
+            fromEvent(this.input.nativeElement, 'keyup'),
+            fromEvent(this.input.nativeElement, 'mouseup')
+        ).pipe(takeUntil(this.destroyed$))
             .subscribe(() => {
                 this.openOverlay();
             });
+
     }
 
     ngOnDestroy() {
@@ -110,14 +114,12 @@ export class MdsEditorWidgetTreeComponent
     }
 
     openOverlay(): void {
-        if (this.overlayIsVisible) {
-            return;
-        }
         // Don't interfere with change detection
         setTimeout(async () => {
             this.overlayIsVisible = true;
-            await this.applicationRef.tick();
-            setTimeout(() => this.treeRef.input.nativeElement.focus());
+            setTimeout(() => {
+                this.treeRef.input.nativeElement.focus()
+            });
             // Wait for overlay
             setTimeout(() => {
                 overlayClickOutside(

@@ -25,21 +25,21 @@
     </mat-chip>
     <input
       #input
+      #trigger="matAutocompleteTrigger"
       autocomplete="off"
       [formControl]="inputControl"
       [matAutocomplete]="auto"
-      [(ngModel)]="filterString"
       [placeholder]="widget.definition.placeholder"
       [matChipInputFor]="chipList"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
       [matChipInputAddOnBlur]="false"
       (matChipInputTokenEnd)="onInputTokenEnd($event)"
-      (blur)="filterString = ''"
+      (blur)="inputControl.setValue(null)"
     />
   </mat-chip-list>
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
     <mat-option *ngFor="let value of filteredValues | async" [value]="value">
-      <span [innerHTML]="value.label | highlight: filterString"></span>
+      <span [innerHTML]="value.label | highlight: inputControl.value"></span>
     </mat-option>
   </mat-autocomplete>
 </app-mds-editor-widget-container>

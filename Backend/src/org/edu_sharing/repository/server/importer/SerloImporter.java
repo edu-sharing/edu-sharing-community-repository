@@ -319,4 +319,13 @@ public class SerloImporter implements Importer{
 		return null;
 	}
 
+	@Override
+	public void setFrom(Date from) {
+
+	}
+
+	@Override
+	public void setUntil(Date until) {
+
+	}
 }

@@ -52,12 +52,12 @@ export class CollectionNewComponent {
   public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
   public isLoading = true;
   public showPermissions = false;
-  private currentCollection: EduData.Node;
+  currentCollection: EduData.Node;
   public newCollectionType:string;
   public properties:any;
   public reloadMds:Boolean;
   private hasUserAnyOrgasYet = false;
-  private user : User;
+  user : User;
   public mainnav = true;
   public editPermissionsId: string;
   private permissions: LocalPermissions = null;
@@ -157,7 +157,7 @@ export class CollectionNewComponent {
           this.route.queryParams.subscribe(params => {
             this.mainnav=params['mainnav']!='false';
           });
-          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
+          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL, '', {count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
             this.editorialGroups=data.groups;
           });
           this.route.params.subscribe(params => {
@@ -636,6 +636,7 @@ export class CollectionNewComponent {
     }
 
   switchToAuthorFreetext() {
+    this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
     this.authorFreetext=true;
     this.currentCollection.collection.authorFreetext=new AuthorityNamePipe(this.translationService).transform(
         this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ||

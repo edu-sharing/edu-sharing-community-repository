@@ -27,7 +27,7 @@ public class SKOSReader extends ValuespaceReader{
     public SKOSReader(String valuespaceUrl) {
         super(valuespaceUrl);
         // e.g. http://localhost:8000/api/v1/curricula/metadatasets
-        Matcher matched = matches("(https?:\\/\\/.*\\/)w3id.org\\/.*\\.json");
+        Matcher matched = matches("(https?:\\/\\/.*\\/)w3id\\.org\\/.*\\.json");
         if(matched.matches()){
             url = valuespaceUrl;
             logger.info("matched SKOS at "+matched.group(1));

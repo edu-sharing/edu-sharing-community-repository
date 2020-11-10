@@ -101,12 +101,12 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         }
     }
 
-    getValues(): { [property: string]: string[] } {
+    getValues(node: Node = null): { [property: string]: string[] } {
         switch (this.editorType) {
             case 'legacy':
-                return this.mdsRef.getValues();
+                return this.mdsRef.getValues(node?.properties);
             case 'angular':
-                return this.mdsEditorInstance.getValues();
+                return this.mdsEditorInstance.getValues(node);
             default:
                 console.warn('getValues() was called before init finished');
                 return null;
@@ -196,7 +196,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         this.isLoading = true;
         try {
             if (this.nodes) {
-                this.editorType = await this.mdsEditorInstance.initForNodes(this.nodes);
+                this.editorType = await this.mdsEditorInstance.initForNodes(this.nodes, this.groupId);
             } else {
                 this.editorType = await this.mdsEditorInstance.initForSearch(
                     this.groupId,

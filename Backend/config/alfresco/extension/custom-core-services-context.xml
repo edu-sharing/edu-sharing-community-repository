@@ -247,6 +247,18 @@
 			<ref bean="ServiceRegistry" />
 		</property>
    	 </bean>
+
+    <bean id="beforeUpdateMap" class="org.edu_sharing.alfresco.policy.BeforeUpdateMap" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="authorityService">
+            <ref bean="authorityService" />
+        </property>
+    </bean>
    
     <!-- edu-sharing group folder policies -->
    	 
@@ -688,6 +700,7 @@
          <property name="transactionService">
              <ref bean="transactionService"/>
          </property>
+         <property name="dbNodeService"><ref bean="dbNodeService"/></property>
     </bean>
 
     <bean id="onRestoreCollectionPolicy" class="org.edu_sharing.alfresco.policy.OnRestoreCollectionPolicy" init-method="init">

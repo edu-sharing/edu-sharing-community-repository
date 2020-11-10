@@ -183,7 +183,11 @@ export class WorkspaceExplorerComponent {
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_CREATOR));
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
     if(this.connector.getCurrentLogin() ? this.connector.getCurrentLogin().isAdmin : false){
-        defaultColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+      defaultColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+
+      const repsource = new ListItem("NODE", RestConstants.CCM_PROP_REPLICATIONSOURCEID);
+      repsource.visible = false;
+      defaultColumns.push(repsource);
     }
     let title = new ListItem("NODE", RestConstants.LOM_PROP_TITLE);
     title.visible = false;

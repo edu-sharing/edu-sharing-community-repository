@@ -32,15 +32,12 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.quartz.*;
 
-/**
- * use static fields and naming scheme for params: prefix "PARAM_"
- * use static field "DESCRIPTION" for job description
- *
- */
 public abstract class AbstractJob implements Job,InterruptableJob {
-	
+	// add your job description
+	static JobDescription JOB_DESCRIPTION;
 	protected Log logger = LogFactory.getLog(AbstractJob.class);
 	
 	boolean isStarted = false;

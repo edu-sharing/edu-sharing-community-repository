@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {ApplicationRef, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {Authority, AuthorityProfile, DialogButton, Group, LocalPermissions, Permission, Permissions, RestConnectorService, RestOrganizationService} from '../../../../core-module/core.module';
 import {Toast} from '../../../../core-ui-module/toast';
 import {RestNodeService} from '../../../../core-module/core.module';
@@ -23,6 +23,7 @@ import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {Helper} from '../../../../core-module/rest/helper';
 import {ShareMode, SharePublishComponent} from '../../../workspace/share/share-publish/share-publish.component';
 
+type Org = {organization: Group, groups?: any};
 @Component({
   selector: 'app-simple-edit-invite',
   templateUrl: 'simple-edit-invite.component.html',
@@ -40,17 +41,17 @@ export class SimpleEditInviteComponent {
   dirty = false;
   parentPermissions: Permission[];
   parentAuthorities: Permission[] = [];
-  organization: {organization: Group, groups?: any};
+  organizations: Org[];
   /**
    * When true, we know that we only handling with simple permissions
    * this will cause that editing permission will REPLACE the permissions, rather than EXPAND them
    */
   stablePermissionState = false;
-  private organizationGroups: string[];
-  private globalGroups: Group[]|any = [];
+  organizationGroups: string[];
+  globalGroups: Group[]|any = [];
   private nodesPermissions: Permissions[];
-  private initialState: Group;
-  private recentAuthorities: AuthorityProfile[];
+  private initialState: string;
+  recentAuthorities: AuthorityProfile[];
   private currentPermissions: Permission[];
   tpInvite: boolean;
   tpInviteEveryone: boolean;
@@ -64,21 +65,20 @@ export class SimpleEditInviteComponent {
   @Output() onInitFinished = new EventEmitter<boolean>();
   @Output() onError = new EventEmitter<any>();
 
-  orgValue = 'unset';
-  globalValue: any = null;
   constructor(
-    private nodeApi : RestNodeService,
-    private connector : RestConnectorService,
-    private configService : ConfigurationService,
-    private iamApi : RestIamService,
-    private organizationApi : RestOrganizationService,
-    private toast : Toast,
+      private nodeApi : RestNodeService,
+      private connector : RestConnectorService,
+      private applicationRef : ApplicationRef,
+      private configService : ConfigurationService,
+      private iamApi : RestIamService,
+      private organizationApi : RestOrganizationService,
+      private toast : Toast,
   ) {
     this.configService.get('simpleEdit.organization.groupTypes',
         [RestConstants.GROUP_TYPE_ADMINISTRATORS]).subscribe((data) => this.organizationGroups = data);
     this.configService.get('simpleEdit.globalGroups',
         [RestConstants.AUTHORITY_EVERYONE]).subscribe((data) => {
-          this.loadGlobalGroups(data);
+      this.loadGlobalGroups(data);
     });
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((tp) => this.tpInvite = tp);
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((tp) => this.tpInviteEveryone = tp);
@@ -90,7 +90,6 @@ export class SimpleEditInviteComponent {
     if (this.dirty) {
       return true;
     }
-    console.log(this.initialState, this.getSelectedAuthority());
     return this.getSelectedAuthority()!=null && !Helper.objectEquals(this.initialState, this.getSelectedAuthority());
   }
   save() {
@@ -102,12 +101,13 @@ export class SimpleEditInviteComponent {
       }
       const authority = this.getSelectedAuthority();
       let addPermission: Permission = null;
-      const publish = authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
+      const publish = authority === RestConstants.AUTHORITY_EVERYONE
       if (authority != null) {
         addPermission = new Permission();
         addPermission.authority = {
-          authorityName: authority.authorityName,
-          authorityType: authority.authorityType,
+          authorityName: authority,
+          authorityType: authority.startsWith(RestConstants.GROUP_PREFIX) ?
+              RestConstants.AUTHORITY_TYPE_GROUP : RestConstants.AUTHORITY_TYPE_USER,
         };
         // if EVERYONE, we do a "publishing"
         if(publish) {
@@ -155,18 +155,16 @@ export class SimpleEditInviteComponent {
     if (this.hasInvalidState()) {
       return null;
     }
-    let authority: Group = null;
+    let authority: string = null;
     if (this.orgGroup.value) {
       if (this.orgGroup.value === 'unset') {
         console.log('unset');
         // do nothing
-      } else if (this.orgGroup.value === 'org') {
-        authority = this.organization.organization;
       } else {
-        authority = this.organization.groups[this.orgGroup.value];
+        authority = this.orgGroup.value;
       }
     } else if (this.globalGroup.value) {
-      authority = this.globalGroups.find((g: Group) => g.authorityName === this.globalGroup.value);
+      authority = this.globalGroup.value;
     } else {
       console.warn('invalid value for button toggle in simple invite dialog');
     }
@@ -194,7 +192,7 @@ export class SimpleEditInviteComponent {
       ));
       // now, convert them back to objects
       this.parentAuthorities = authorities.map((a) =>
-        this.parentPermissions.find((p) => p.authority.authorityName === a)
+          this.parentPermissions.find((p) => p.authority.authorityName === a)
       );
     }, error => {
       if(error.status === RestConstants.HTTP_FORBIDDEN) {
@@ -204,32 +202,46 @@ export class SimpleEditInviteComponent {
       }
     });
     Observable.forkJoin((this._nodes.map((n) => this.nodeApi.getNodePermissions(n.ref.id)))).
-      subscribe((permissions) => {
-        this.nodesPermissions = permissions.map((p) => p.permissions);
-        this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
-        this.organizationApi.getOrganizations().subscribe((orgs) => {
-          // @TODO: Only allow for one org
-          if(orgs.organizations.length >= 1) {
-            this.organization = {
-              organization: orgs.organizations[0],
+    subscribe((permissions) => {
+      this.nodesPermissions = permissions.map((p) => p.permissions);
+      this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
+      this.organizationApi.getOrganizations().subscribe((orgs) => {
+        const filter = this.configService.instant('simpleEdit.organizationFilter');
+        if(filter) {
+          const reg = new RegExp(filter);
+          orgs.organizations = orgs.organizations.filter((o) => {
+            return reg.exec(o.authorityName) != null;
+          });
+        }
+        if(orgs.organizations.length >= 1) {
+          this.organizations = orgs.organizations.map((o) => {
+            return {
+              organization: o,
               groups: {}
-            }
-            Observable.forkJoin(
-                this.organizationGroups.map((g) =>
-                    this.iamApi.getSubgroupByType(this.organization.organization.authorityName, g)
-                )).subscribe((groups) => {
-                    groups.forEach((g) => this.organization.groups[g.group.profile.groupType] = g.group);
-                    this.detectPermissionState();
-                }, error => {
-                    console.warn(error);
-                    this.detectPermissionState();
-            });
-          } else {
+            }});
+          Observable.forkJoin(
+              this.organizations.map((o) => {
+                return new Observable<Org>((observer) => {
+                  Observable.forkJoin(this.organizationGroups.map((g) =>
+                      this.iamApi.getSubgroupByType(o.organization.authorityName, g)
+                  )).subscribe(groups => {
+                    groups.forEach((g) => {
+                      o.groups[g.group.profile.groupType] = g.group;
+                    });
+                    observer.next(o);
+                    observer.complete();
+                  });
+                });
+              })).subscribe((o) => {
+            this.organizations = o;
             this.detectPermissionState();
-          }
-        });
+          });
+        } else {
+          this.detectPermissionState();
+        }
+      });
     }, error => {
-        this.onError.emit(error);
+      this.onError.emit(error);
     });
   }
 
@@ -253,12 +265,14 @@ export class SimpleEditInviteComponent {
     if(mode === 'org') {
       this.globalGroup.value = null;
     } else {
-        this.orgGroup.value = null;
+      this.orgGroup.value = null;
     }
   }
 
-  private detectPermissionState() {
-    if(this.hasInvalidState()) {
+  private async detectPermissionState() {
+    // wait 1 tick so that the mat toggle is ready to accept values
+    await this.applicationRef.tick();
+    if (this.hasInvalidState()) {
       this.setInitialState();
       return;
     }
@@ -268,20 +282,18 @@ export class SimpleEditInviteComponent {
     let activeToggle: string;
     for (const perm of this.nodesPermissions) {
       const list = perm.localPermissions.permissions;
-                // filter((p) => p.authority.authorityName !== this.connector.getCurrentLogin().authorityName);
-      if(this._nodes.length===1) {
+      // filter((p) => p.authority.authorityName !== this.connector.getCurrentLogin().authorityName);
+      if (this._nodes.length === 1) {
         this.currentPermissions = list;
       } else {
         this.currentPermissions = [];
       }
-      if(list.length > 0) {
+      if (list.length > 0) {
         const consumers = list.filter((p) => p.permissions.indexOf(RestConstants.PERMISSION_CONSUMER) !== -1);
-        const toggle = consumers.filter((c)=> availableToggleGroups.indexOf(c.authority.authorityName) !== -1);
-        console.log(toggle);
-        if(toggle.length===1 && (!activeToggle || activeToggle === toggle[0].authority.authorityName)) {
+        const toggle = consumers.filter((c) => availableToggleGroups.indexOf(c.authority.authorityName) !== -1);
+        if (toggle.length === 1 && (!activeToggle || activeToggle === toggle[0].authority.authorityName)) {
           activeToggle = toggle[0].authority.authorityName;
-        }
-        else {
+        } else {
           invalid = true;
         }
       } else {
@@ -293,17 +305,24 @@ export class SimpleEditInviteComponent {
     if (unset || invalid) {
       this.orgGroup.value = 'unset';
     } else {
-      if(this.organization && activeToggle === this.organization.organization.authorityName) {
-        this.orgGroup.value = 'org';
-        this.setInitialState();
-        return;
+      if (this.organizations?.length && activeToggle) {
+        const match = this.organizations.find(
+            (o) => o.organization.authorityName === activeToggle
+        );
+        if (match) {
+          this.orgGroup.value = match.organization.authorityName;
+          this.setInitialState();
+          return;
+        }
       }
-      if(this.organization) {
-        for (const key of Object.keys(this.organization.groups)) {
-          if (activeToggle === this.organization.groups[key].authorityName) {
-            this.orgGroup.value = key;
-            this.setInitialState();
-            return;
+      if (this.organizations?.length) {
+        for (const org of this.organizations) {
+          for (const key of Object.keys(org.groups)) {
+            if (activeToggle === org.groups[key].authorityName) {
+              this.orgGroup.value = activeToggle;
+              this.setInitialState();
+              return;
+            }
           }
         }
       }
@@ -322,11 +341,15 @@ export class SimpleEditInviteComponent {
   }
 
   private getAvailableGlobalGroups() {
-    const availableToggleGroups: string[] = [];
-    if (this.organization) {
-      availableToggleGroups.push(this.organization.organization.authorityName);
-      for (const key of Object.keys(this.organization.groups)) {
-        availableToggleGroups.push(this.organization.groups[key].authorityName);
+    let availableToggleGroups: string[] = [];
+    if (this.organizations?.length) {
+      availableToggleGroups = availableToggleGroups.concat(this.organizations.map(
+          (o) => o.organization.authorityName)
+      );
+      for(const org of this.organizations) {
+        for (const key of Object.keys(org.groups)) {
+          availableToggleGroups.push(org.groups[key].authorityName);
+        }
       }
     }
     if (this.globalGroups) {
@@ -339,7 +362,7 @@ export class SimpleEditInviteComponent {
 
   hasInvalidState() {
     return this.multipleParents || (this.inherited && this.parentAuthorities.length > 0) ||
-           !this.tpInvite || this.missingNodePermissions;
+        !this.tpInvite || this.missingNodePermissions;
   }
 
   private setInitialState() {

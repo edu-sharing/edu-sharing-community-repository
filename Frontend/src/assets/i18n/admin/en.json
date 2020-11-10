@@ -239,6 +239,8 @@
             "OAI_FORCE_UPDATE": "Re-import/overwrite all existing nodes",
             "OAI_START": "OAI Import",
             "OAI_SAVE": "Save values for next import",
+            "OAI_FROM": "from",
+            "OAI_UNTIL": "until",
             "REMOVE_IMPORTS": "Remove deleted imports",
             "IMPORTS_REMOVED": "Deleted OAI items will be removed.\n Check the task list to see the status",
             "EXCEL_IMPORTED": "Excel file imported ({{{ rows }} rows imported)",

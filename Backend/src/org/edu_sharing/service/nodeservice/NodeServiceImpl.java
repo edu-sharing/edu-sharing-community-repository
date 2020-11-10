@@ -2,12 +2,15 @@ package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.node.db.DbNodeServiceImpl;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -891,6 +894,30 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 		}
 		apiClient.removeNode(nodeId, parentId, recycle);
+	}
+
+	@Override
+	public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle) {
+		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId),nodeId);
+		if(!recycle){
+			nodeServiceAlfresco.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+		}
+		//serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
+			Method method = null;
+			try {
+				method = nodeServiceAlfresco.getClass().getDeclaredMethod("deleteNode", NodeRef.class,boolean.class);
+				method.setAccessible(true);
+
+				Object r = method.invoke(nodeServiceAlfresco,nodeRef,false);
+			} catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+			}
+		/*	return null;
+		});*/
 	}
 	
 	@Override

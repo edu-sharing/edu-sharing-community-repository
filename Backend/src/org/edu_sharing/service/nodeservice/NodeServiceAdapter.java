@@ -379,4 +379,8 @@ public class NodeServiceAdapter implements NodeService {
 		return null;
 	}
 
+	@Override
+	public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle) {
+
+	}
 }
