@@ -897,8 +897,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public void removeNodeForce(String storeProtocol, String storeId, String nodeId) {
+	public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle) {
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId),nodeId);
+		if(!recycle){
+			nodeServiceAlfresco.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+		}
 		//serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
 			Method method = null;
 			try {

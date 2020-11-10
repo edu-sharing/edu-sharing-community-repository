@@ -120,29 +120,32 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
 			logger.info("removing node " + ref);
+			try {
+				if (collectionRefsCleanup) {
+					List<ChildAssociationRef> childRefs = nodeServiceEdu.getChildrenChildAssociationRefType(ref.getId(), CCConstants.CCM_TYPE_USAGE);
+					for (ChildAssociationRef childRef : childRefs) {
+						String usageResourceId = nodeServiceEdu.getProperty(childRef.getChildRef().getStoreRef().getProtocol(),
+								childRef.getChildRef().getStoreRef().getIdentifier(),
+								childRef.getChildRef().getId(),
+								CCConstants.CCM_PROP_USAGE_RESSOURCEID);
+						String storeProtocol = childRef.getChildRef().getStoreRef().getProtocol();
+						String storeId = childRef.getChildRef().getStoreRef().getIdentifier();
+						if (nodeServiceEdu.exists(storeProtocol, storeId, usageResourceId)
+								&& nodeServiceEdu.hasAspect(storeProtocol, storeId, usageResourceId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
 
-			if(collectionRefsCleanup){
-				List<ChildAssociationRef> childRefs = nodeServiceEdu.getChildrenChildAssociationRefType(ref.getId(),CCConstants.CCM_TYPE_USAGE);
-				for(ChildAssociationRef childRef : childRefs){
-					String usageResourceId = nodeServiceEdu.getProperty(childRef.getChildRef().getStoreRef().getProtocol(),
-							childRef.getChildRef().getStoreRef().getIdentifier(),
-							childRef.getChildRef().getId(),
-							CCConstants.CCM_PROP_USAGE_RESSOURCEID);
-					String storeProtocol = childRef.getChildRef().getStoreRef().getProtocol();
-					String storeId = childRef.getChildRef().getStoreRef().getIdentifier();
-					if(nodeServiceEdu.exists(storeProtocol,storeId , usageResourceId)
-							&& nodeServiceEdu.hasAspect(storeProtocol, storeId, usageResourceId,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-
-						collectionRefIds.add(usageResourceId);
+							collectionRefIds.add(usageResourceId);
+						}
 					}
 				}
-			}
 
-			logger.info("will delete node" + ref.getId());
-			if(force){
-				nodeServiceEdu.removeNodeForce(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId());
-			}else {
-				nodeServiceEdu.removeNode(ref.getId(), null, recycle);
+				logger.info("will delete node:" + ref.getId());
+				if (force) {
+					nodeServiceEdu.removeNodeForce(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(),recycle);
+				} else {
+					nodeServiceEdu.removeNode(ref.getId(), null, recycle);
+				}
+			}catch (Exception e){
+				logger.error(e.getMessage(),e);
 			}
 		});
 		runner.setTypes(types!=null && !types.isEmpty() ? types : null);
@@ -157,14 +160,17 @@ public class BulkDeleteNodesJob extends AbstractJob{
 
 			for(String collectionRefId : collectionRefIds){
 				logger.info("will delete collection_ref: " + collectionRefId);
-				if(force){
-					serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
-						nodeServiceEdu.removeNodeForce(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),collectionRefId);
-						return null;
-					});
-
-				}else{
-					nodeServiceEdu.removeNode(collectionRefId,null,recycle);
+				try {
+					if (force) {
+						serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+							nodeServiceEdu.removeNodeForce(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionRefId,recycle);
+							return null;
+						});
+					} else {
+						nodeServiceEdu.removeNode(collectionRefId, null, recycle);
+					}
+				}catch (Exception e){
+					logger.error(e.getMessage(),e);
 				}
 			}
 
