@@ -89,7 +89,7 @@ export class MdsComponent {
    * mode, currently "search" or "default"
    * @type {string}
    */
-  @Input() mode:string='default';
+  @Input() mode : 'search' | 'default'='default';
 
   @Output() extendedChange=new EventEmitter();
   private static AUTHOR_TYPE_FREETEXT = 0;
@@ -1198,7 +1198,10 @@ export class MdsComponent {
             property: id,
             pattern: element.value,
         },
-        criterias:RestSearchService.convertCritierias(Helper.arrayJoin(this._currentValues,this.getValues()),this.mds.widgets)
+        criterias:this.mode==='search' ?
+            RestSearchService.convertCritierias(
+                Helper.arrayJoin(this._currentValues,this.getValues()),this.mds.widgets
+            ) : null,
     },this._setId,this._repository).subscribe((data:MdsValueList)=>{
       if(this.lastMdsQuery!=element.value)
         return;
