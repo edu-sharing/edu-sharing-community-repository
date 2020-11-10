@@ -54,7 +54,6 @@ export class AuthoritySearchInputComponent {
 
     input = new FormControl('');
     suggestionGroups$: Observable<SuggestionGroup[]>;
-    affiliation = true;
 
     constructor(
         private iam: RestIamService,
