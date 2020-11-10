@@ -199,7 +199,7 @@ export class AdminComponent {
     this.globalProgress=true;
     this.admin.startJob(this.job.class,JSON.parse(this.job.params), this.uploadJobsFile).subscribe(()=> {
         this.globalProgress=false;
-        this.uploadJobsFile = null;
+        // this.uploadJobsFile = null;
         this.toast.toast('ADMIN.JOBS.JOB_STARTED');
     },(error:any)=> {
         this.globalProgress=false;
@@ -953,9 +953,14 @@ export class AdminComponent {
 
   updateJobSuggestions(event: any) {
     const name=event ? event.input.toString().toLowerCase() : '';
-    this.jobClassesSuggested=this.jobClasses.filter((j)=>
-        j.title?.toLowerCase().indexOf(name) !== -1 ||
-        j.secondaryTitle?.toLowerCase().indexOf(name) !== -1);
+    if(name === '*') {
+      this.jobClassesSuggested = this.jobClasses;
+    } else {
+      console.log(name);
+      this.jobClassesSuggested = this.jobClasses.filter((j) =>
+          j.title && j.title.toLowerCase().indexOf(name) !== -1 ||
+          j.secondaryTitle && j.secondaryTitle.toLowerCase().indexOf(name) !== -1)
+    }
   }
 
   refreshUpdateList() {

@@ -429,6 +429,7 @@
                             [suggestions]="jobClassesSuggested"
                             [allowAny]="true"
                             [inputMinLength]="1"
+                            [maxSuggestions]="1000"
                             (updateInput)="updateJobSuggestions($event)"
                             (addItem)="setJob($event)"
                             (addAny)="job.name='';job.class=$event"></autocomplete>
