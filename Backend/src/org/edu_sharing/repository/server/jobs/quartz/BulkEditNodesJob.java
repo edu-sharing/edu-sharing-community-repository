@@ -217,8 +217,9 @@ public class BulkEditNodesJob extends AbstractJob{
 		} else if (mode.equals(Mode.ReplaceMapping)) {
 			List<Map<String, String>> filtered = csv.getLines().stream().
 					filter((l) -> !l.get("oldValue").isEmpty()).
-					filter((l) -> l.get("oldValue").equals(value)).collect(Collectors.toList());
+					filter((l) -> l.get("oldValue").trim().equals(value.trim())).collect(Collectors.toList());
 			if(filtered.size() == 0){
+				logger.warn("No mapping found for '" + value + "'! Check your csv data if this value should be mapped");
 				return value;
 			}
 			if(filtered.size() == 1){
