@@ -436,6 +436,36 @@
                     <div class="job-class" *ngIf="job && job.class">{{job.class}}</div>
                 </div>
             </div>
+            <div class="inputGroupRow params" *ngIf="job.object?.params?.length">
+                <h5 class="mat-heading-5">{{'ADMIN.JOBS.PARAMETERS' | translate}}</h5>
+                <div class="param-table">
+                    <div class="param-row" *ngFor="let param of job.object.params">
+                        <div class="param-name">{{param.name}} <span *ngIf="param.file">(file)</span></div>
+                        <div>{{param.description}}</div>
+                        <div class="param-value">
+                            <ng-container *ngIf="param.values">
+                                <div class="param-table">
+                                    <div class="param-row" *ngFor="let value of param.values">
+                                        <div>{{value.name}}</div>
+                                        <div>{{value.description}}</div>
+                                    </div>
+                                </div>
+                            </ng-container>
+                            <ng-container *ngIf="!param.values">
+                                <ng-container *ngIf="param.file">
+                                    File
+                                </ng-container>
+                                <ng-container *ngIf="!param.file">
+                                    {{param.type.replace("java.lang.","")}}
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button mat-raised-button (click)="setJobParamsTemplate()">{{'ADMIN.JOBS.APPLY_TEMPLATE' | translate}}</button>
+                </div>
+            </div>
             <ngx-monaco-editor [options]="jobCodeOptions"
                                [(ngModel)]="job.params"
                                [ngModelOptions]="{standalone: true}"
@@ -497,7 +527,7 @@
                         </mat-form-field>
                         <mat-form-field class="job-row log-level">
                             <mat-label for="logLevel">{{'ADMIN.JOBS.LOG_LEVEL' | translate}}</mat-label>
-                            <mat-select id="logLevel"[(ngModel)]="jobsLogLevel[i]" (ngModelChange)="updateJobLogs()">
+                            <mat-select id="logLevel" [(ngModel)]="jobsLogLevel[i]" (ngModelChange)="updateJobLogs()">
                                 <mat-option value="">Alles</mat-option>
                                 <mat-option value="4">{{'ADMIN.JOBS.LOG_LEVEL_4' | translate}}</mat-option>
                                 <mat-option value="3">{{'ADMIN.JOBS.LOG_LEVEL_3' | translate}}</mat-option>
@@ -623,7 +653,7 @@
                 <mat-hint>{{'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
             </mat-form-field>
         </div>
-        <app-lucene-template-memory 
+        <app-lucene-template-memory
             [(query)]="lucene.query"
             [(properties)]="lucene.properties"
         ></app-lucene-template-memory>

@@ -948,7 +948,20 @@ public class AdminServiceImpl implements AdminService  {
 				fieldDesc.setName(f.getName());
 				fieldDesc.setType(f.getType());
 				fieldDesc.setDescription(f.getAnnotation(JobFieldDescription.class).description());
+				fieldDesc.setSampleValue(f.getAnnotation(JobFieldDescription.class).sampleValue());
 				fieldDesc.setFile(f.getAnnotation(JobFieldDescription.class).file());
+				if(f.getType().isEnum()){
+					fieldDesc.setValues(Arrays.stream(f.getType().getDeclaredFields()).
+							filter((v) -> !v.getName().startsWith("$")).
+							map((v) -> {
+						JobDescription.JobFieldDescription value = new JobDescription.JobFieldDescription();
+						value.setName(v.getName());
+						if(v.isAnnotationPresent(JobFieldDescription.class)){
+							value.setDescription(v.getAnnotation(JobFieldDescription.class).description());
+						}
+						return value;
+					}).collect(Collectors.toList()));
+				}
 				return fieldDesc;
 			}).collect(Collectors.toList()));
 			result.add(desc);

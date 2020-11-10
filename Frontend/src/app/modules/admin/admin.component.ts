@@ -935,8 +935,9 @@ export class AdminComponent {
         this.jobClasses=this.availableJobs.map((j)=> {
           const job = new SuggestItem('');
           const id=j.name.split('.');
-          job.title=j.description;
-          job.secondaryTitle=id[id.length-1];
+          job.id = j.name;
+          job.title = j.description;
+          job.secondaryTitle = id[id.length-1];
           job.originalObject = j;
           return job;
         });
@@ -1190,15 +1191,20 @@ export class AdminComponent {
 
   setJob(item: any) {
     this.job.name=item.item.title;
-    this.job.class=item.id;
+    this.job.class=item.item.id;
     this.job.object=item.item.originalObject;
+  }
+  setJobParamsTemplate() {
     const data: any = {};
     let modified = false;
     for(const param of this.job.object.params) {
       if (param.file) {
         continue;
       }
-      data[param.name] = param.description + ' (' + param.type + ')';
+      data[param.name] = param.sampleValue ?? '';
+      if(param.values) {
+        data[param.name] = param.values.map((v) => v.name).join('|');
+      }
       modified = true;
     }
     console.log(data, this.job);

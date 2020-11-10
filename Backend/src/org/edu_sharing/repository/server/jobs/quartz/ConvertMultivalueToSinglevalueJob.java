@@ -58,7 +58,7 @@ import java.util.List;
  * Convert a multivalue field to a singlevalue
  * If there are still multivalues found, they will combined into a string using the "seperator"
  */
-@JobDescription(description = "Convert a property multi-value to single-value")
+@JobDescription(description = "Convert a property from multi-value to single-value")
 public class ConvertMultivalueToSinglevalueJob extends AbstractJob{
 
 	@JobFieldDescription(description = "property to convert, e.g. cclom:general_keyword")

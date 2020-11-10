@@ -36,6 +36,8 @@ public class JobDescription {
         Class<?> type;
         String description;
         boolean file;
+        List<JobFieldDescription> values;
+        String sampleValue;
 
         public String getName() {
             return name;
@@ -67,6 +69,22 @@ public class JobDescription {
 
         public void setFile(boolean file) {
             this.file = file;
+        }
+
+        public List<JobFieldDescription> getValues() {
+            return values;
+        }
+
+        public void setValues(List<JobFieldDescription> values) {
+            this.values = values;
+        }
+
+        public void setSampleValue(String sampleValue) {
+            this.sampleValue = sampleValue;
+        }
+
+        public String getSampleValue() {
+            return sampleValue;
         }
     }
 }

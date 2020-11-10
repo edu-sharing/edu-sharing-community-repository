@@ -62,27 +62,31 @@ public class BulkEditNodesJob extends AbstractJob{
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
 	@JobFieldDescription(description = "folder id to start from")
 	private String startFolder;
-	@JobFieldDescription(description = "property to modify, e.g. cm:name")
+	@JobFieldDescription(description = "Mode to use")
+	private Mode mode;
+	@JobFieldDescription(description = "property to modify, e.g. cm:name", sampleValue = "cm:name")
 	private String property;
 	@JobFieldDescription(description = "Value to replace target property with")
 	private Serializable value;
-	@JobFieldDescription(description = "property to copy value from, if mode == copy")
+	@JobFieldDescription(description = "property to copy value from, if mode == Copy", sampleValue = "cclom:title")
 	private String copy;
-	@JobFieldDescription(description = "token to replace, if mode == replaceToken")
+	@JobFieldDescription(description = "token to replace, if mode == ReplaceToken")
 	private String searchToken;
-	@JobFieldDescription(description = "Token to replace with, if mode == replaceToken")
+	@JobFieldDescription(description = "Token to replace with, if mode == ReplaceToken")
 	private String replaceToken;
-	@JobFieldDescription(description = "Mode to use")
-	private Mode mode;
-	@JobFieldDescription(description = "Element types to modify (comma seperated list), e.g. ccm:map,ccm:io")
+	@JobFieldDescription(description = "Element types to modify (comma seperated list), e.g. ccm:map,ccm:io", sampleValue = "ccm:map,ccm:io")
 	private List<String> types;
 	@JobFieldDescription(description = "RecurseMode to use")
 	private RecurseMode recurseMode;
 
 	private enum Mode{
+		@JobFieldDescription(description = "Replace a property with a fixed string")
 		Replace,
+		@JobFieldDescription(description = "Search and Replace a string value inside the properties")
 		ReplaceToken,
+		@JobFieldDescription(description = "Currently Unsupported")
 		Append,
+		@JobFieldDescription(description = "Remove the property")
 		Remove
 	};
 

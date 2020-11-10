@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface JobFieldDescription {
     String description() default "";
+    String sampleValue() default "";
     boolean file() default false;
 }

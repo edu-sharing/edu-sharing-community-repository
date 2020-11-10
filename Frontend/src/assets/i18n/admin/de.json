@@ -339,6 +339,8 @@
             "LOG_LEVEL_0": "Fatal",
             "UPLOAD_FILE_LABEL": "Datei für Job bereitstellen",
             "CHOOSE_UPLOAD_FILE": "Datei wählen",
+            "PARAMETERS": "Job-Parameter",
+            "APPLY_TEMPLATE": "Als Vorlage einfügen",
             "NAMES": {
                 "RemoveImportedObjectsJob": "Alle importierten Nodes löschen",
                 "RemoveOrphanCollectionReferencesJob": "Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen",

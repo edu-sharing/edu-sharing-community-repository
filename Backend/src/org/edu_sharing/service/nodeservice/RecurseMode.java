@@ -1,6 +1,10 @@
 package org.edu_sharing.service.nodeservice;
 
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+
 public enum RecurseMode {
-    Folders, // Only recursing folders, so not childobjects, comments, ratings etc. are returned (default)
-    All, // will recurse everything until no more children are available
+    @JobFieldDescription(description = "Only recursing folders, so no childobjects, comments, ratings etc. are returned (default)")
+    Folders,
+    @JobFieldDescription(description = "recurse everything until no more children are available")
+    All,
 }
