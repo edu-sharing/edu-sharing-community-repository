@@ -20,6 +20,7 @@ import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {Helper} from "../../core-module/rest/helper";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 
 @Component({
   selector: 'app-profiles',
@@ -32,7 +33,6 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
 export class ProfilesComponent {
   public user: User;
   public userEdit: User;
-  public globalProgress = true;
   public isMe: boolean;
   public edit: boolean;
   public avatarFile: any;
@@ -47,6 +47,7 @@ export class ProfilesComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
   private userEditProfile: boolean;
+  actions: OptionItem[];
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private title: Title,
@@ -64,16 +65,22 @@ export class ProfilesComponent {
           this.loadUser(params['authority']);
         });
       });
+      const editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
+      editAction.group = DefaultGroups.Edit;
+      editAction.showAsAction = true;
+        this.actions = [
+            editAction,
+        ];
   }
   public loadUser(authority:string){
-    this.globalProgress=true;
+    this.toast.showProgressDialog();
     this.connector.isLoggedIn().subscribe((login)=> {
         this.iamService.getUser(authority).subscribe((profile: IamUser) => {
             this.user = profile.person;
             this.userEditProfile = profile.editProfile;
             let name = new AuthorityNamePipe(this.translate).transform(this.user, null);
             UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name: name});
-            this.globalProgress = false;
+            this.toast.closeModalDialog();
             this.userEdit=Helper.deepCopy(this.user);
             GlobalContainerComponent.finishPreloading();
             this.iamService.getUser().subscribe((me)=>{
@@ -83,7 +90,7 @@ export class ProfilesComponent {
                 }
             });
         }, (error: any) => {
-            this.globalProgress = false;
+            this.toast.closeModalDialog();
             GlobalContainerComponent.finishPreloading();
             this.toast.error(null, 'PROFILES.LOAD_ERROR');
         });
@@ -113,10 +120,10 @@ export class ProfilesComponent {
   }
   public savePassword(){
     if(this.changePassword){
-      this.globalProgress=true;
+      this.toast.showProgressDialog();
       if(this.password.length<ProfilesComponent.PASSWORD_MIN_LENGTH){
         this.toast.error(null,'PASSWORD_MIN_LENGTH',{length:ProfilesComponent.PASSWORD_MIN_LENGTH});
-        this.globalProgress=false;
+        this.toast.closeModalDialog();
         return;
       }
       let credentials={oldPassword:this.oldPassword,newPassword:this.password};
@@ -125,7 +132,7 @@ export class ProfilesComponent {
       },(error:any)=>{
         if(RestHelper.errorMessageContains(error,"BadCredentialsException")){
           this.toast.error(null,"WRONG_PASSWORD");
-          this.globalProgress=false;
+          this.toast.closeModalDialog();
         }
         else {
           this.toast.error(error);
@@ -150,11 +157,11 @@ export class ProfilesComponent {
       this.toast.error(null,'PROFILES.ERROR.EMAIL');
       return;
     }
-    this.globalProgress=true;
+    this.toast.showProgressDialog();
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
       this.saveAvatar();
     },(error:any)=>{
-      this.globalProgress=false;
+      this.toast.closeModalDialog();
       this.toast.error(error);
     });
   }
@@ -185,7 +192,7 @@ export class ProfilesComponent {
       });
     }
     else{
-      this.globalProgress=false;
+      this.toast.closeModalDialog();
       this.edit=false;
       this.editAbout=false;
       this.toast.toast('PROFILE_UPDATED');

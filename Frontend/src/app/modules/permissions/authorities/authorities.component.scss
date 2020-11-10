@@ -24,6 +24,40 @@
     justify-content: flex-end;
   }
 }
+.org-signup{
+  .warning-email{
+    display: flex;
+    margin-bottom: 20px;
+  }
+  mat-form-field, input-password{
+    width: 100%;
+  }
+  input-password {
+    display: flex;
+    margin-top: 20px;
+  }
+}
+.org-signup-list {
+  h3{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    color:$textLight;
+  }
+  .actionbar {
+    display: flex;
+    width: 100%;
+    height: 45px;
+    justify-content: flex-end;
+  }
+}
+::ng-deep {
+  .org-signup input-password{
+    mat-form-field{
+      width: 100%;
+    }
+  }
+}
 .memberActions{
   height:50px;
   display: table;

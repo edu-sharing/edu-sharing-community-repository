@@ -56,6 +56,9 @@ export class ToolpermissionManagerComponent {
             RestConstants.TOOLPERMISSION_COMMENT_WRITE,
             RestConstants.TOOLPERMISSION_RATE
     ]},
+    {name:"ACCOUNT_MANAGEMENT",icon:"group",permissions:[
+              RestConstants.TOOLPERMISSION_SIGNUP_GROUP,
+    ]},
     {name:"SAFE",icon:"lock",permissions:[
         RestConstants.TOOLPERMISSION_CONFIDENTAL,
         RestConstants.TOOLPERMISSION_INVITE_SAFE,

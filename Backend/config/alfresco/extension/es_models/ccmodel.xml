@@ -1584,6 +1584,28 @@
 				</property>
 			</properties>
 		</aspect>
+		<!-- campuscontent aspect for alfresco groups extending them and making it,
+			possible to signup to  -->
+		<aspect name="ccm:group_signup">
+			<title>EduGroup - for schools, universities, etc</title>
+			<properties>
+				<property name="ccm:group_signup_method">
+					<title>Method to signup, check @OrganizationSignupMethod enum</title>
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
+				<property name="ccm:group_signup_password">
+					<title>password (sha hash) required for signup, only if group_signup_method == password</title>
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+				</property>
+				<property name="ccm:group_signup_list">
+					<title>List of users waiting for being accepted, only if group_signup_method == list</title>
+					<type>d:noderef</type>
+					<multiple>true</multiple>
+				</property>
+			</properties>
+		</aspect>
 		
 		<aspect name="ccm:groupExtension">
 			<title>extension of metadata of alfresco groups</title>

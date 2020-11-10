@@ -307,6 +307,7 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;

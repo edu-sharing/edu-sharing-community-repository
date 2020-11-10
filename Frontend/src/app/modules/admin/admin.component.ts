@@ -110,6 +110,12 @@ export class AdminComponent {
       'invited_safe',
       'invited_collection',
       'nodeIssue',
+      'userStatusChanged',
+      'groupSignupList',
+      'groupSignupUser',
+      'groupSignupConfirmed',
+      'groupSignupRejected',
+      'groupSignupAdmin',
       'userRegister',
       'passwordRequest',
       'userRegisterInformation'

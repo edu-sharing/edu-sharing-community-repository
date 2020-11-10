@@ -52,8 +52,8 @@ export class AuthoritySearchInputComponent {
 
     @Output() onChooseAuthority = new EventEmitter();
 
-    input = new FormControl('');
-    suggestionGroups$: Observable<SuggestionGroup[]>;
+    inputValue = '';
+    suggestionGroups: any;
     affiliation = true;
 
     constructor(

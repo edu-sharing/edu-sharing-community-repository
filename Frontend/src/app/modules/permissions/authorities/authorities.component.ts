@@ -9,7 +9,7 @@ import {
   IamUsers,
   ListItem,
   NodeList,
-  Organization,
+  Organization, GroupSignupDetails,
   OrganizationOrganizations,
   RestConnectorService,
   RestConstants,
@@ -23,7 +23,7 @@ import {
 import {Toast} from '../../../core-ui-module/toast';
 import {Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Constrain, CustomOptions, DefaultGroups, ElementType, OptionItem} from '../../../core-ui-module/option-item';
+import {Constrain, CustomOptions, DefaultGroups, ElementType, OptionGroup, OptionItem} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {SuggestItem} from '../../../common/ui/autocomplete/autocomplete.component';
 import {NodeHelper} from '../../../core-ui-module/node-helper';
@@ -33,6 +33,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'permissions-authorities',
@@ -85,9 +86,14 @@ export class PermissionsAuthoritiesComponent {
   private embeddedQuery: string;
   editButtons: DialogButton[];
   memberButtons: DialogButton[];
+  signupButtons: DialogButton[];
+  signupListButtons: DialogButton[];
   editStatus: UserSimple;
   editStatusNotify = true;
   editStatusButtons: DialogButton[];
+  groupSignup: Organization;
+  groupSignupList: UserSimple[];
+  groupSignupDetails: GroupSignupDetails;
   private _org: Organization;
   @Output() onDeselectOrg = new EventEmitter();
   @Input() set searchQuery(searchQuery: string){
@@ -120,6 +126,10 @@ export class PermissionsAuthoritiesComponent {
   private memberListOffset: number;
   // show primary affiliations as list (or free text)
   primaryAffiliationList = true;
+  signupActions: CustomOptions = {
+    useDefaultOptions: false,
+  };
+  groupSignupSelected: UserSimple[] = [];
   private updateMemberSuggestions(event: any){
     if (this.editMembers == this.org || this.org == null){
       this.iam.searchUsers(event.input).subscribe(
@@ -233,6 +243,7 @@ export class PermissionsAuthoritiesComponent {
       this.connector.isLoggedIn().subscribe(() => {
         this.isAdmin = data.canCreate;
         this.updateOptions();
+        this.updateButtons();
       });
     });
   }
@@ -317,6 +328,34 @@ export class PermissionsAuthoritiesComponent {
       newOrg.constrains = [Constrain.Admin, Constrain.NoSelection];
       options.push(newOrg);
     }
+    const orgSignupList = new OptionItem('PERMISSIONS.ORG_SIGNUP_LIST', 'playlist_add', async (data) => {
+      this.toast.showProgressDialog();
+      this.groupSignup = this.getList(data)[0];
+      this.groupSignupSelected = [];
+      this.groupSignupList = (await this.iam.getGroupSignupList(this.groupSignup.authorityName).toPromise());
+      this.toast.closeModalDialog();
+    });
+    orgSignupList.elementType = [ElementType.Group];
+    orgSignupList.group = DefaultGroups.Edit;
+    orgSignupList.customShowCallback = (nodes) => {
+      return nodes[0].signupMethod === 'list';
+    };
+    orgSignupList.priority = 20;
+    orgSignupList.constrains = [Constrain.Admin, Constrain.NoBulk];
+    options.push(orgSignupList);
+    const orgSignup = new OptionItem('PERMISSIONS.ORG_SIGNUP', 'checkbox', (data) => {
+          this.groupSignup = this.getList(data)[0];
+          this.groupSignupDetails = {
+            signupMethod: this.getList(data)[0].signupMethod ?? 'disabled',
+            signupPassword: ''
+          }
+        }
+    );
+    orgSignup.elementType = [ElementType.Group];
+    orgSignup.group = DefaultGroups.Edit;
+    orgSignup.priority = 30;
+    orgSignup.constrains = [Constrain.Admin, Constrain.NoBulk];
+    options.push(orgSignup);
     const addToGroup = new OptionItem('PERMISSIONS.MENU_ADD_TO_GROUP', 'group_add', (data) =>
         this.addToGroup(data)
     );
@@ -408,6 +447,40 @@ export class PermissionsAuthoritiesComponent {
     if (this.listRef) {
       this.listRef.refreshAvailableOptions();
     }
+
+    const signupAdd = new OptionItem('PERMISSIONS.ORG_SIGNUP_ADD', 'person_add', (node: UserSimple) => {
+      this.toast.showProgressDialog();
+      const users = NodeHelper.getActionbarNodes(this.groupSignupSelected, node);
+      Observable.forkJoin(users.map((u) =>
+          this.iam.confirmSignup(this.groupSignup.authorityName, u.authorityName)
+      )).subscribe(() => {
+        this.groupSignupList = null;
+        this.toast.toast('PERMISSIONS.ORG_SIGNUP_ADD_CONFIRM');
+        this.toast.closeModalDialog();
+      }, error => {
+        this.toast.error(error);
+        this.toast.closeModalDialog();
+      })
+    });
+    signupAdd.elementType = [ElementType.Person];
+    signupAdd.group = DefaultGroups.Primary;
+    const signupRemove = new OptionItem('PERMISSIONS.ORG_SIGNUP_REJECT', 'close', (node: UserSimple) => {
+        this.toast.showProgressDialog();
+        const users = NodeHelper.getActionbarNodes(this.groupSignupSelected, node);
+        Observable.forkJoin(users.map((u) =>
+            this.iam.rejectSignup(this.groupSignup.authorityName, u.authorityName)
+        )).subscribe(() => {
+          this.groupSignupList = null;
+          this.toast.toast('PERMISSIONS.ORG_SIGNUP_REJECT_CONFIRM');
+          this.toast.closeModalDialog();
+        }, error => {
+          this.toast.error(error);
+          this.toast.closeModalDialog();
+        })
+    });
+    signupRemove.elementType = [ElementType.Person];
+    signupRemove.group = DefaultGroups.Delete;
+    this.signupActions.addOptions = [signupAdd, signupRemove];
   }
   private cancelEdit(){
     this.edit = null;
@@ -1000,7 +1073,9 @@ export class PermissionsAuthoritiesComponent {
         this.editStatusButtons = [
         new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {this.editStatus = null; }),
         new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.savePersonStatus())
-      ];
+        ];
+        this.signupButtons = DialogButton.getSaveCancel(() => this.groupSignup = null, () => this.saveGroupSignup());
+        this.signupListButtons = [new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.groupSignupList = null)];
     }
   private setPersonStatus(data: UserSimple) {
     this.editStatus = data;
@@ -1015,6 +1090,19 @@ export class PermissionsAuthoritiesComponent {
     }, (error) => {
       this.toast.closeModalDialog();
       this.toast.error(error);
+    });
+  }
+
+  saveGroupSignup() {
+    this.toast.showProgressDialog();
+    this.iam.editGroupSignup(this.groupSignup.authorityName, this.groupSignupDetails).subscribe(() => {
+      this.groupSignupDetails = null;
+      this.refresh();
+      this.toast.toast('PERMISSIONS.ORG_SIGNUP_SAVED');
+      this.toast.closeModalDialog();
+    }, error => {
+      this.toast.error(error);
+      this.toast.closeModalDialog();
     });
   }
 }

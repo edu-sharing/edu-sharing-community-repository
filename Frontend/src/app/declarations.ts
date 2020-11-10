@@ -42,6 +42,7 @@
   import {InputFillProgressComponent} from './common/ui/input-fill-progress/input-fill-progress.component';
   import {NodeAuthorNamePipe} from './common/ui/node-author-name.pipe';
 import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-editor-widget-container/mds-editor-widget-container.component';
+  import {AuthorityRowComponent} from './common/ui/authority-search-input/authority-row/authority-row.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -52,6 +53,7 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
       CalendarComponent,
       AutocompleteComponent,
       AuthoritySearchInputComponent,
+      AuthorityRowComponent,
       NodeTitlePipe,
       NodeAuthorNamePipe,
       VersionLabelPipe,

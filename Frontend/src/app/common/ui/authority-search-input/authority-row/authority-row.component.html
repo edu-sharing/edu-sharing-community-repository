@@ -1,0 +1,24 @@
+
+<div class="suggestion-content">
+  <user-avatar [user]="authority" size="small"></user-avatar>
+  <div class="text-content">
+    <div class="data">
+      <div class="primary">{{ authority | authorityName}}</div>
+      <div class="secondary" *ngIf="secondaryTitle">{{ secondaryTitle }}</div>
+    </div>
+    <div class="secondary-data">
+      <div class="parent-orgs">
+        <ng-container *ngIf="authority.organizations">
+          <span *ngFor="let org of authority.organizations">{{ org | authorityName }}</span>
+        </ng-container>
+        <ng-container *ngIf="!authority.organizations">&nbsp;</ng-container>
+      </div>
+      <div class="affiliation" *ngIf="authority.profile.primaryAffiliation">
+        {{ authority | authorityAffiliation }}
+      </div>
+      <div class="affiliation affiliation-group" *ngIf="authority.profile.displayName">
+        {{ 'AUTHORITY_TYPE_' + (authority.properties['ccm:edu_homedir'] ? 'ORG' : 'GROUP') | translate }}
+      </div>
+    </div>
+  </div>
+</div>

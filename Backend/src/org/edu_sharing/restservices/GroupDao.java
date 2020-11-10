@@ -1,8 +1,5 @@
 package org.edu_sharing.restservices;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -11,6 +8,7 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -21,17 +19,24 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
+import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.restservices.iam.v1.model.GroupSignupResult;
+import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
-import org.edu_sharing.restservices.shared.Organization;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.organization.GroupSignupMethod;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class GroupDao {
 
@@ -312,9 +317,17 @@ public class GroupDao {
     	data.setProfile(profile);
 		data.setProperties(getProperties());
 		data.setAspects(getAspects());
-
+		data.setSignupMethod(getSignupMethod(ref));
 
 		return data;
+	}
+
+	public static GroupSignupMethod getSignupMethod(NodeRef ref) {
+		String method = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD);
+		if(method == null) {
+			return null;
+		}
+		return GroupSignupMethod.valueOf(method);
 	}
 
 	private List<String> getAspects() {
@@ -370,5 +383,147 @@ public class GroupDao {
 			return new GroupDao(repoDao, authority.get());
 		}
 		throw new IllegalArgumentException("Group does not contain sub group of type " + type);
+	}
+
+	public void setSignup(GroupSignupDetails details) {
+		if(details.getSignupMethod() == null){
+			NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD);
+			NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
+		} else {
+			NodeServiceHelper.addAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
+			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString());
+			if(details.getSignupPassword() != null && !details.getSignupPassword().isEmpty()) {
+				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_PASSWORD,
+						DigestUtils.sha1Hex(details.getSignupPassword())
+				);
+			}
+		}
+	}
+
+	public GroupSignupResult signupUser(String password) throws DAOException {
+		try {
+			ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP);
+			return AuthenticationUtil.runAsSystem(() -> {
+				GroupSignupMethod method = getSignupMethod(ref);
+				boolean addMember = false;
+				NodeRef userRef = authorityService.getAuthorityNodeRef(AuthenticationUtil.getFullyAuthenticatedUser());
+				if (GroupSignupMethod.simple.equals(method)) {
+					addMember = true;
+				} else if (GroupSignupMethod.password.equals(method)) {
+					if (!NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_PASSWORD).equals(DigestUtils.sha1Hex(password))) {
+						return GroupSignupResult.InvalidPassword;
+					}
+					addMember = true;
+				} else if (GroupSignupMethod.list.equals(method)) {
+					ArrayList<NodeRef> list = (ArrayList<NodeRef>) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST);
+					if (list == null)
+						list = new ArrayList<>();
+					if (list.contains(userRef)) {
+						return GroupSignupResult.AlreadyInList;
+					}
+					list.add(userRef);
+					NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, list);
+					HashMap<String, String> replace = new HashMap<>();
+					replace.put("group", getDisplayName());
+					replace.put("firstName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_FIRSTNAME));
+					replace.put("lastName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_LASTNAME));
+					if(groupEmail != null) {
+						MailTemplate.sendMail(groupEmail, "groupSignupList", replace);
+					}
+				} else {
+					throw new IllegalArgumentException("The group " + authorityName + " is not allowed for signup");
+				}
+				if (addMember) {
+					if (authorityService.getMemberships(AuthenticationUtil.getFullyAuthenticatedUser()).contains(authorityName)) {
+						return GroupSignupResult.AlreadyMember;
+					}
+					addMember(AuthenticationUtil.getFullyAuthenticatedUser());
+					HashMap<String, String> replace = new HashMap<>();
+					replace.put("group", getDisplayName());
+					replace.put("firstName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_FIRSTNAME));
+					replace.put("lastName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_LASTNAME));
+					if(NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_EMAIL) != null) {
+						MailTemplate.sendMail(NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_EMAIL), "groupSignupUser", replace);
+					}
+					if(groupEmail != null) {
+						MailTemplate.sendMail(groupEmail, "groupSignupAdmin", replace);
+					}
+				}
+				return GroupSignupResult.Ok;
+			});
+		}catch (Exception e){
+			throw DAOException.mapping(e);
+		}
+	}
+
+	public List<PersonDao> signupUserList() throws DAOException {
+		try {
+			checkAdminAccess();
+			if (!NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD).equals(GroupSignupMethod.list.toString())) {
+				throw new IllegalArgumentException("Group " + groupName + " is not configured with the proper signup mode");
+			}
+			ArrayList<NodeRef> userRefs =
+					(ArrayList<NodeRef>) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST);
+			if(userRefs == null){
+				return new ArrayList<>();
+			}
+			return userRefs.stream().map((userRef) -> {
+				try {
+					return PersonDao.getPerson(repoDao, NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_USERNAME));
+				} catch (DAOException e) {
+					logger.info("Could not handle person ref: " + userRef, e);
+					return null;
+				}
+			})
+					.filter(Objects::nonNull)
+			 		.collect(Collectors.toList());
+		} catch(Exception e){
+			throw DAOException.mapping(e);
+		}
+	}
+	private void handleSignup(String user, boolean add){
+		checkAdminAccess();
+		AuthenticationUtil.runAsSystem(() -> {
+			ArrayList<NodeRef> userRefs =
+					(ArrayList<NodeRef>) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST);
+			Optional<NodeRef> userRef = userRefs.stream().filter((r) -> NodeServiceHelper.getProperty(r, CCConstants.CM_PROP_PERSON_USERNAME).equals(user)).findFirst();
+			if (!userRef.isPresent()) {
+				throw new IllegalArgumentException("User " + user + " is not on the waiting list of " + groupName);
+			}
+			// filter the user
+			userRefs = userRefs.stream().
+					filter((r) -> !r.equals(userRef.get())).
+					collect(Collectors.toCollection(ArrayList::new));
+			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, userRefs);
+			if(add) {
+				addMember(user);
+			}
+			if (NodeServiceHelper.getProperty(userRef.get(), CCConstants.CM_PROP_PERSON_EMAIL) != null) {
+				String template = "groupSignupConfirmed";
+				if(!add){
+					template="groupSignupRejected";
+				}
+				HashMap<String, String> replace = new HashMap<>();
+				replace.put("group", getDisplayName());
+				replace.put("firstName", NodeServiceHelper.getProperty(userRef.get(), CCConstants.CM_PROP_PERSON_FIRSTNAME));
+				replace.put("lastName", NodeServiceHelper.getProperty(userRef.get(), CCConstants.CM_PROP_PERSON_LASTNAME));
+				MailTemplate.sendMail(NodeServiceHelper.getProperty(userRef.get(), CCConstants.CM_PROP_PERSON_EMAIL),  template, replace);
+			}
+			return null;
+		});
+	}
+	public void confirmSignup(String user) throws DAOException {
+		try {
+			handleSignup(user, true);
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+	public void rejectSignup(String user) throws DAOException {
+		try {
+			handleSignup(user, false);
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
 	}
 }

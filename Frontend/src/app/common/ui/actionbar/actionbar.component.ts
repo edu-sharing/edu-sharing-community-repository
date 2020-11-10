@@ -46,7 +46,7 @@ export class ActionbarComponent {
    * backgroundType for color matching, either bright, dark or primary
    * @type {boolean}
    */
-  @Input() backgroundType = 'bright';
+  @Input() backgroundType: 'bright' | 'dark' | 'primary' = 'bright';
   /**
    * Set a node that will be returned by callbacks (optional, otherwise the return value is always null)
    * @type {null}
@@ -55,7 +55,7 @@ export class ActionbarComponent {
    * Style, currently default or 'flat' if all always visible icons should get a flat look
    * @type {string}
    */
-  @Input() style = 'default';
+  @Input() style: 'default' | 'flat' = 'default';
   /**
    * Should disabled ("greyed out") options be shown or hidden?
    * @type {boolean}
@@ -78,10 +78,11 @@ export class ActionbarComponent {
       this.optionsAlways=UIHelper.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
     }
     this.optionsMenu=this.hideActionOptions(UIHelper.filterToggleOptions(options,false),this.optionsAlways);
-    if(this.optionsMenu.length<2) {
+    // may causes weird looking
+    /*if(this.optionsMenu.length<2) {
       this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
       this.optionsMenu=[];
-    }
+    }*/
   }
 
   public getNumberOptions() {
