@@ -33,7 +33,7 @@ public class ForceDeleteJob extends AbstractJob {
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry sr = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
             sr.getRetryingTransactionHelper().doInTransaction(()-> {
-                NodeServiceFactory.getLocalService().removeNodeForce(store, protocol, id);
+                NodeServiceFactory.getLocalService().removeNodeForce(store, protocol, id,false);
                 return null;
             });
             return null;

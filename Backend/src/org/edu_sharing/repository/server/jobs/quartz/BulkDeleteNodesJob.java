@@ -140,7 +140,7 @@ public class BulkDeleteNodesJob extends AbstractJob{
 
 				logger.info("will delete node:" + ref.getId());
 				if (force) {
-					nodeServiceEdu.removeNodeForce(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId());
+					nodeServiceEdu.removeNodeForce(ref.getStoreRef().getProtocol(), ref.getStoreRef().getIdentifier(), ref.getId(),recycle);
 				} else {
 					nodeServiceEdu.removeNode(ref.getId(), null, recycle);
 				}
@@ -163,7 +163,7 @@ public class BulkDeleteNodesJob extends AbstractJob{
 				try {
 					if (force) {
 						serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
-							nodeServiceEdu.removeNodeForce(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionRefId);
+							nodeServiceEdu.removeNodeForce(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionRefId,recycle);
 							return null;
 						});
 					} else {

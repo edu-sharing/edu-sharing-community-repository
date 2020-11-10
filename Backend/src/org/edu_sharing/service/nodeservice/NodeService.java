@@ -119,7 +119,7 @@ public interface NodeService {
 	
 	public void removeNode(String potocol, String store, String nodeId);
 
-	public void removeNodeForce(String storeProtocol, String storeId, String nodeId);
+	public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle);
 
 	public void removeAspect(String nodeId, String aspect);
 

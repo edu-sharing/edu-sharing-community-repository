@@ -380,7 +380,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public void removeNodeForce(String storeProtocol, String storeId, String nodeId) {
-		
+	public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle) {
+
 	}
 }
