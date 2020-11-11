@@ -78,11 +78,8 @@ public class OAILOMExporter {
 		
 		Element lom = doc.createElement("lom");
 		doc.appendChild(lom);
-		
-		lom.setAttribute("xmlns", "http://ltsc.ieee.org/xsd/LOM");
-		lom.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		lom.setAttribute("xsi:schemaLocation", "http://www.w3.org/2001/XMLSchema-instance");
-		lom.setAttribute("xsi:schemaLocation", "http://ltsc.ieee.org/xsd/LOM  http://ltsc.ieee.org/xsd/lomv1.0/lom.xsd");
+
+		createNameSpace(lom);
 
 		construction(lom);
 
@@ -94,6 +91,13 @@ public class OAILOMExporter {
 			logger.error(e.getMessage(),e);
 		}
 
+	}
+
+	public void createNameSpace(Element lom) {
+		lom.setAttribute("xmlns", "http://ltsc.ieee.org/xsd/LOM");
+		lom.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		lom.setAttribute("xsi:schemaLocation", "http://www.w3.org/2001/XMLSchema-instance");
+		lom.setAttribute("xsi:schemaLocation", "http://ltsc.ieee.org/xsd/LOM  http://ltsc.ieee.org/xsd/lomv1.0/lom.xsd");
 	}
 
 	public void createClassification(Element lom) {
