@@ -124,10 +124,13 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     }
 
     private getHtml(): SafeHtml {
-        const html = closeTags(this.view.html, [
+        // Close any known tags and additionally any tags that include a colon (which indicates the
+        // user probably meant to define the respective widget) as these would mess up the HTML
+        // structure if left unclosed.
+        const html = closeTags(this.view.html, (tagName) => [
             ...Object.values(NativeWidgetType),
             ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
-        ]);
+        ].includes(tagName) || tagName.includes(':'));
         return this.sanitizer.bypassSecurityTrustHtml(html);
     }
 
@@ -142,9 +145,24 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             } else {
                 if (widget) {
                     this.injectWidget(widget, element);
+                } else if (tagName.includes(':')) {
+                    this.injectMissingWidgetWarning(tagName, element);
                 }
             }
         }
+    }
+
+    private injectMissingWidgetWarning(widgetName: string, element: Element): void {
+        UIHelper.injectAngularComponent(
+            this.factoryResolver,
+            this.containerRef,
+            MdsEditorWidgetErrorComponent,
+            element,
+            {
+                widgetName,
+                reason: 'Widget definition missing in MDS',
+            },
+        );
     }
 
     private injectNativeWidget(
@@ -263,14 +281,34 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     }
 }
 
-function closeTags(html: string, tags: string[]): string {
-    for (const tag of tags) {
-        const start = html.indexOf('<' + tag);
-        if (start === -1) {
-            continue;
+/**
+ * Closes any tags satisfying `predicate` and returns the resulting HTML.
+ */
+function closeTags(html: string, predicate: (tag: string) => boolean): string {
+    let index = 0;
+    while (true) {
+        index = html.indexOf('<', index);
+        if (index === -1) {
+            break;
         }
-        const end = html.indexOf('>', start) + 1;
-        html = html.substring(0, end) + '</' + tag + '>' + html.substring(end);
+        const endIndex = html.indexOf('>', index + 1);
+        if (endIndex === -1) {
+            throw new Error('Invalid template html: ' + html);
+        }
+        let tagNameEndIndex = endIndex;
+        const tag = html.substring(index, endIndex + 1); // The complete tag, e.g. '<foo bar="baz">'
+        const whiteSpaceIndex = tag.search(/\s/);
+        if (whiteSpaceIndex !== -1) {
+            tagNameEndIndex = index + whiteSpaceIndex;
+        }
+        const tagName = html.substring(index + 1, tagNameEndIndex); // The tag name, e.g. 'foo'
+        if (predicate(tagName)) {
+            const htmlProcessed = html.substring(0, endIndex + 1) + '</' + tagName + '>'
+            html = htmlProcessed + html.substring(endIndex + 1);
+            index = htmlProcessed.length;
+        } else {
+            index = endIndex + 1;
+        }
     }
     return html;
 }
