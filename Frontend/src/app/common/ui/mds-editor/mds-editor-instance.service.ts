@@ -462,9 +462,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
     }
 
-    getWidget(propertyName: string, viewId: string): Widget {
+    getWidgetByTagName(tagName: string, viewId: string): Widget {
+        tagName = tagName.toLowerCase();
         return this.widgets.find(
-            (widget) => widget.definition.id === propertyName && widget.viewId === viewId,
+            (widget) => widget.definition.id.toLowerCase() === tagName && widget.viewId === viewId,
         );
     }
 

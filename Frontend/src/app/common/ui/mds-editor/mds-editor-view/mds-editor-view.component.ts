@@ -135,7 +135,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         const elements = this.container.nativeElement.getElementsByTagName('*');
         for (const element of Array.from(elements)) {
             const tagName = element.localName;
-            const widget = this.mdsEditorInstance.getWidget(tagName, this.view.id);
+            const widget = this.mdsEditorInstance.getWidgetByTagName(tagName, this.view.id);
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
                 this.injectNativeWidget(widget, widgetName, element);
