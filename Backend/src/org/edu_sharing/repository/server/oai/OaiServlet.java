@@ -15,6 +15,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.oai.OAIExporterFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -139,14 +140,9 @@ public class OaiServlet extends HttpServlet{
 
         @Override
         public EduItem getItem(String id) {
-            try {
-                ByteArrayOutputStream os=new ByteArrayOutputStream();
-                new OAILOMExporter(id).write(os);
-                return new EduItem(id,new String(os.toByteArray()));
-            } catch (ParserConfigurationException e) {
-                logger.warn(e.getMessage(),e);
-                return null;
-            }
+            ByteArrayOutputStream os=new ByteArrayOutputStream();
+            OAIExporterFactory.getOAILOMExporter().write(os,id);
+            return new EduItem(id,new String(os.toByteArray()));
         }
     }
 }

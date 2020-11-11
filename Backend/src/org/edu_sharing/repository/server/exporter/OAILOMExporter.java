@@ -12,6 +12,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.MLText;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.xml.serialize.OutputFormat;
@@ -42,12 +43,11 @@ public class OAILOMExporter {
 
 	Document doc;
 
-	public OAILOMExporter(String ioId) throws ParserConfigurationException {
+	public OAILOMExporter() throws ParserConfigurationException {
 		ApplicationContext context = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) context.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
 
-		nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, ioId);
 
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -55,7 +55,8 @@ public class OAILOMExporter {
 		// root element record
 		doc = docBuilder.newDocument();
 	}
-	public void export(String outputDir) {
+	public void export(String outputDir, String ioId) {
+		nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ioId);
 		try {
 			String sourceId = nodeRef.getId();
 
@@ -66,8 +67,8 @@ public class OAILOMExporter {
 			logger.error(e.getMessage(), e);
 		}
 	}
-	public void write(OutputStream os) {
-
+	public void write(OutputStream os,String ioId) {
+		nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ioId);
 		QName type = nodeService.getType(nodeRef);
 
 		if (!type.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
@@ -238,8 +239,8 @@ public class OAILOMExporter {
 		createAndAppendElement("value",ieur,QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE));
 
 		//@todo when its available
-		String tarFrom = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM));
-		String tarTo = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO));
+		Integer tarFrom = (Integer)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM));
+		Integer tarTo = (Integer)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO));
 
 		if(tarFrom != null && tarTo != null){
 			String tar = tarFrom + "-" + tarTo;
@@ -441,21 +442,21 @@ public class OAILOMExporter {
 	}
 
 	public Element createAndAppendElement(String elementName, Element parent, String textContent, boolean cdata) {
-        if (elementName != null && !elementName.isEmpty() && textContent != null && !textContent.isEmpty() && parent != null) {
-		Element element = doc.createElement(elementName);
-		
-		if (textContent != null) {
-			textContent = textContent.trim();
-			
-			if (cdata) {
-				element.appendChild(doc.createCDATASection(textContent));
-			} else {
-				element.setTextContent(textContent);
+        if (elementName != null && !elementName.isEmpty()) {
+			Element element = doc.createElement(elementName);
+
+			if (textContent != null) {
+				textContent = textContent.trim();
+
+				if (cdata) {
+					element.appendChild(doc.createCDATASection(textContent));
+				} else {
+					element.setTextContent(textContent);
+				}
 			}
+			parent.appendChild(element);
+			return element;
 		}
-		parent.appendChild(element);
-		return element;
-	}
         return null;
     }
 
