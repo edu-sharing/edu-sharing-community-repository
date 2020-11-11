@@ -64,6 +64,7 @@ export enum MdsWidgetType {
     DefaultValue = 'defaultvalue',
 }
 
+// Entries must be lowercase only.
 export enum NativeWidgetType {
     Preview = 'preview',
     Version = 'version',
