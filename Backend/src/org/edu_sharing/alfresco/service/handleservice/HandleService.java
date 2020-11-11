@@ -45,10 +45,10 @@ public class HandleService {
 	public HandleService() throws HandleServiceNotConfiguredException{
 		config = LightbendConfigLoader.get().getConfig("repository.handleservice");
 		if(this.handleServerAvailable()) {
-			handleServerPrefix = config.getString("repository");
+			handleServerPrefix = config.getString("prefix");
 			handleServerRepoId = config.getString("repoid");
 			privkeyPath = config.getString("privkey");
-			id = "0.NA/"+config.getString("prefix");
+			id = "0.NA/"+handleServerPrefix;
 		}else {
 			throw new HandleServiceNotConfiguredException();
 		}
