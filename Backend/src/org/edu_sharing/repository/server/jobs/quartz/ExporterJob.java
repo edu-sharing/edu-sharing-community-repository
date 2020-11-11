@@ -15,6 +15,7 @@ import org.edu_sharing.repository.server.exporter.OAILOMExporter;
 import org.edu_sharing.repository.server.exporter.OAILOMWithSubobjectsExporter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.oai.OAIExporterFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -55,7 +56,7 @@ public class ExporterJob extends AbstractJob {
 						if(withSubObjects){
 							new OAILOMWithSubobjectsExporter(nodeId).export(outputdir);
 						}else{
-							new OAILOMExporter(nodeId).export(outputdir);
+							OAIExporterFactory.getOAILOMExporter().export(outputdir,nodeId);
 						}
 					}
 
