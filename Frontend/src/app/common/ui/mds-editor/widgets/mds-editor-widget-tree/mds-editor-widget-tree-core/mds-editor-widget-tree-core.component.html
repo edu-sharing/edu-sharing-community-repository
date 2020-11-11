@@ -6,6 +6,7 @@
       <input matInput
              #input
              autocomplete="off"
+             [placeholder]="widget.definition.placeholder"
              [(ngModel)]="filterString">
     </mat-form-field>
     <button mat-button (click)="close.emit()"><i icon iconId="close"></i></button>
