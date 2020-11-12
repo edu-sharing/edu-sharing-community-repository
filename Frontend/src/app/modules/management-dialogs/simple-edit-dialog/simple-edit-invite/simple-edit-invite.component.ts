@@ -128,7 +128,7 @@ export class SimpleEditInviteComponent {
           }
         }
         if (this.currentPermissions && this.currentPermissions.length) {
-          // all global group will get removed
+          // all global groups will get removed
           this.currentPermissions = this.currentPermissions.filter((p) =>
               this.getAvailableGlobalGroups().indexOf(p.authority.authorityName) === -1
           );
@@ -203,7 +203,7 @@ export class SimpleEditInviteComponent {
       this.nodesPermissions = permissions.map((p) => p.permissions);
       this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
       // The amount of orgs is still limited to the maximum amount returned by default!
-      this.organizationApi.getOrganizations().subscribe((orgs) => {
+      this.organizationApi.getOrganizations('', true).subscribe((orgs) => {
         const filter = this.configService.instant('simpleEdit.organizationFilter');
         if(filter) {
           const reg = new RegExp(filter);
