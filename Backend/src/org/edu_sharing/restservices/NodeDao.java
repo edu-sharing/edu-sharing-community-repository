@@ -78,6 +78,7 @@ public class NodeDao {
 	private static Logger logger = Logger.getLogger(NodeDao.class);
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 	private static final String[] DAO_PERMISSIONS = new String[]{
+			org.alfresco.service.cmr.security.PermissionService.READ,
 			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
 			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
