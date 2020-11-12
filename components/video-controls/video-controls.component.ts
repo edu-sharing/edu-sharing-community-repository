@@ -82,7 +82,7 @@ export class VideoControlsComponent implements OnInit {
     }
 
     async save(): Promise<void> {
-        if (this.isCollectionRef(this.node)) {
+        if (this.isCollectionRef(this.node) && this.isOwner(this.node)) {
             const node = await this.writeVideoControlsValues(this.node, this.values);
             if (node) {
                 this.updateCurrentNode.emit(node);
@@ -149,7 +149,7 @@ export class VideoControlsComponent implements OnInit {
             return false;
         } else {
             if (this.isCollectionRef(node)) {
-                if(node.properties[RestConstants.CM_CREATOR][0] === this.connector.getCurrentLogin().authorityName) {
+                if(this.isOwner(node)) {
                     return NodeHelper.getNodesRight([node], RestConstants.ACCESS_WRITE);
                 } else{
                     return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH, NodesRightMode.Original);
@@ -255,5 +255,9 @@ export class VideoControlsComponent implements OnInit {
 
     private isCollectionRef(node: Node) {
         return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
+    }
+
+    private isOwner(node: Node) {
+        return node.properties[RestConstants.CM_CREATOR][0] === this.connector.getCurrentLogin().authorityName;
     }
 }
