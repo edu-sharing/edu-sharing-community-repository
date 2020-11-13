@@ -61,7 +61,7 @@ public class SortDefinition implements Serializable {
 				SortDefinitionEntry entry = new SortDefinitionEntry();
 				Boolean sortAsc=sortAscending.size()==1 ? sortAscending.get(0) : sortAscending.get(i);
 				entry.setAscending(sortAsc);
-				entry.setProperty(namespace!=null ? "{"+namespace+"}"+sortProp : sortProp);
+				entry.setProperty(namespace!=null && sortProp.split(":").length == 1 ? "{"+namespace+"}"+sortProp : sortProp);
 				addSortDefinitionEntry(entry);
 				i++;
 			}
