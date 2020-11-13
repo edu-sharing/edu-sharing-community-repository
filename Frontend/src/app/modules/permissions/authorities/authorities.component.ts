@@ -530,12 +530,12 @@ export class PermissionsAuthoritiesComponent {
   public loadAuthorities() {
     this.loading = true;
     let sort = RestConstants.AUTHORITY_NAME;
-    if (this._mode == 'ORG')
-      sort = RestConstants.CM_PROP_AUTHORITY_AUTHORITYNAME;
-    if (this._mode == 'GROUP' && !this.org) {
+    if (this._mode == 'ORG') {
+        sort = RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME;
+    } else if (this._mode == 'GROUP' && !this.org) {
       sort = this.sortBy;
       if (sort == RestConstants.AUTHORITY_DISPLAYNAME){
-        sort = RestConstants.AUTHORITY_NAME;
+        sort = RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME;
       }
       if (sort == RestConstants.AUTHORITY_GROUPTYPE) {
         sort = RestConstants.CCM_PROP_AUTHORITY_GROUPTYPE;
