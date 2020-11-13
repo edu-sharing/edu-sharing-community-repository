@@ -581,8 +581,8 @@
             "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
             "UNSET": "Keine hinzufügen",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Administratoren von\n\"{{school}}\"",
-                "TEACHER": "Lehrkräfte von\n\"{{school}}\""
+                "ORG_ADMINISTRATORS": "Administratoren von\n{{school}}",
+                "TEACHER": "Lehrkräfte von\n{{school}}"
             }
         },
         "LICENSE": {
