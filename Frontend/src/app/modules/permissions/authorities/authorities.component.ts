@@ -531,18 +531,22 @@ export class PermissionsAuthoritiesComponent {
     this.loading = true;
     let sort = RestConstants.AUTHORITY_NAME;
     if (this._mode == 'ORG') {
-        sort = RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME;
-    } else if (this._mode == 'GROUP' && !this.org) {
+        sort = RestConstants.AUTHORITY_NAME;
+    }
+    if (this._mode == 'GROUP' && !this.org) {
       sort = this.sortBy;
       if (sort == RestConstants.AUTHORITY_DISPLAYNAME){
-        sort = RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME;
+        sort = RestConstants.AUTHORITY_NAME;
       }
       if (sort == RestConstants.AUTHORITY_GROUPTYPE) {
         sort = RestConstants.CCM_PROP_AUTHORITY_GROUPTYPE;
       }
+    } else  if (this._mode == 'USER' && !this.org) {
+        sort = this.sortBy;
+        if(sort === RestConstants.AUTHORITY_STATUS){
+            sort = RestConstants.CM_ESPERSONSTATUS;
+        }
     }
-    if (this._mode == 'USER' && !this.org)
-      sort = this.sortBy;
 
     const request = {sortBy: [sort], sortAscending: this.sortAscending, offset: this.offset};
     const query = this._searchQuery ? this._searchQuery : '';
