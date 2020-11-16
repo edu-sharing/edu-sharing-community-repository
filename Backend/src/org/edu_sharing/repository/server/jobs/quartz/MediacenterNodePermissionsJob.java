@@ -57,6 +57,14 @@ public class MediacenterNodePermissionsJob extends AbstractJob {
 			logger.error(e.getMessage());
 		}
 
+		if(fromLocal == null && untilLocal == null){
+			Long periodInDays = new Long((String)jobDataMap.get(OAIConst.PARAM_PERIOD_IN_DAYS));
+			Long periodInMs = periodInDays * 24 * 60 * 60 * 1000;
+			untilLocal = new Date();
+			fromLocal = new Date((untilLocal.getTime() - periodInMs));
+			logger.info("using from:" + fromLocal + " until:" + untilLocal);
+		}
+
 		Date from = fromLocal;
 		Date until = untilLocal;
 		AuthenticationUtil.RunAsWork<Void> runAs = new AuthenticationUtil.RunAsWork<Void>() {
