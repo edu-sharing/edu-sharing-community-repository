@@ -692,11 +692,14 @@ public class MediacenterServiceImpl implements MediacenterService {
                         CCConstants.PERMISSION_CONSUMER);
 
                 if(!hasPublishPermission || !hasConsumerPermission){
-                    policyBehaviourFilter.disableBehaviour(nodeRef);
-                    logger.info(mediacenterName + " add consumer and publish permission for " + nodeRef);
-                    permissionService.setPermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CONSUMER, true);
-                    permissionService.setPermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CC_PUBLISH, true);
-                    policyBehaviourFilter.enableBehaviour(nodeRef);
+                    serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                        policyBehaviourFilter.disableBehaviour(nodeRef);
+                        logger.info(mediacenterName + " add consumer and publish permission for " + nodeRef);
+                        permissionService.setPermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CONSUMER, true);
+                        permissionService.setPermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CC_PUBLISH, true);
+                        policyBehaviourFilter.enableBehaviour(nodeRef);
+                        return null;
+                    });
                 }
             }
 
@@ -715,16 +718,22 @@ public class MediacenterServiceImpl implements MediacenterService {
                         CCConstants.PERMISSION_CONSUMER);
 
                 if(hasPublishPermission){
-                    policyBehaviourFilter.disableBehaviour(nodeRef);
-                    logger.info(mediacenterName+ " remove publish permission for " + nodeRef);
-                    permissionService.deletePermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CC_PUBLISH);
-                    policyBehaviourFilter.enableBehaviour(nodeRef);
+                    serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                        policyBehaviourFilter.disableBehaviour(nodeRef);
+                        logger.info(mediacenterName + " remove publish permission for " + nodeRef);
+                        permissionService.deletePermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CC_PUBLISH);
+                        policyBehaviourFilter.enableBehaviour(nodeRef);
+                        return null;
+                    });
                 }
                 if(hasConsumerPermission){
-                    policyBehaviourFilter.disableBehaviour(nodeRef);
-                    logger.info(mediacenterName+ " remove consumer permission for " + nodeRef);
-                    permissionService.deletePermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CONSUMER);
-                    policyBehaviourFilter.enableBehaviour(nodeRef);
+                    serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                        policyBehaviourFilter.disableBehaviour(nodeRef);
+                        logger.info(mediacenterName + " remove consumer permission for " + nodeRef);
+                        permissionService.deletePermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CONSUMER);
+                        policyBehaviourFilter.enableBehaviour(nodeRef);
+                        return null;
+                    });
                 }
             }
         }
