@@ -2,6 +2,8 @@ package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -228,6 +230,21 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				logger.info("will save property "+widget.getId()+" with predefined defaultvalue "+widget.getDefaultvalue());
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
+			} else if("date".equals(widget.getType())){
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					List<Date> dates = Arrays.stream(props.get(id)).map((p) -> {
+						try {
+							return sdf.parse(p);
+						} catch (ParseException e) {
+							throw new RuntimeException(e);
+						}
+					}).collect(Collectors.toList());
+					toSafe.put(id, dates);
+
+				}catch(Throwable t){
+					logger.warn("Could not parse date for widget id " + widget.getId(), t);
+				}
 			}
 			// changed: otherwise reset values for multivalue fields is not possible
 			// if(values==null || values.length==0)

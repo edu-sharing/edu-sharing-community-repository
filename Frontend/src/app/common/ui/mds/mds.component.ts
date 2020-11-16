@@ -22,6 +22,7 @@ import {
 import {CardJumpmark} from "../../../core-ui-module/components/card/card.component";
 import {MdsHelper} from "../../../core-module/rest/mds-helper";
 import {Observable} from 'rxjs';
+import {DateHelper} from '../../../core-ui-module/DateHelper';
 declare var noUiSlider: any;
 
 @Component({
@@ -829,6 +830,9 @@ export class MdsComponent {
           }
           else if(widget.type=='singleoption'){
             element.value=props[0] ? props[0] : "";
+          }
+          else if(widget.type == 'date') {
+            element.value=props[0] ? DateHelper.formatDateByPattern(props[0],'y-M-d') : '';
           }
           else {
             let caption=props[0];
