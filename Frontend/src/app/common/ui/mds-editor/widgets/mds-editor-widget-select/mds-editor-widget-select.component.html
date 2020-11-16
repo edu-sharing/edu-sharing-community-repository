@@ -5,6 +5,7 @@
   [control]="formControl"
 >
   <mat-select [formControl]="formControl">
+    <mat-option [value]="null" *ngIf="widget.definition.allowempty"></mat-option>
     <mat-option *ngFor="let value of values | async" [value]="value">
       {{ value.caption }}
     </mat-option>
