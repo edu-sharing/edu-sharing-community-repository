@@ -1,6 +1,7 @@
 package org.edu_sharing.service.mediacenter;
 
 import java.io.InputStream;
+import java.util.Date;
 
 public interface MediacenterService {
 	
@@ -12,8 +13,18 @@ public interface MediacenterService {
 
 	/**
 	 * adjustment of licenses for mediacenters on nodes given by an {@link MediacenterLicenseProvider}
+	 * does a full sync, compares LicensProvider nodes with local nodes and adds or removes permission
 	 */
 	public void manageNodeLicenses();
+
+	/**
+	 * adjustment of licenses for mediacenters on nodes given by an {@link MediacenterLicenseProvider}
+	 * instead of full sync done by {@link #manageNodeLicenses()} manageNodeLicenses}
+	 * this method only get's changes of {@link MediacenterLicenseProvider}
+	 * @param from
+	 * @param until
+	 */
+	public void manageNodeLicenses(Date from, Date until);
 
 	public boolean isActive(String authorityName);
 
