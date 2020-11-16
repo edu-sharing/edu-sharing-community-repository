@@ -35,6 +35,7 @@ import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -45,6 +46,8 @@ public class MediacenterNodePermissionsJob extends AbstractJob {
 	
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+
+		JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
 
 		Date fromLocal = null;
 		Date untilLocal = null;
@@ -58,11 +61,14 @@ public class MediacenterNodePermissionsJob extends AbstractJob {
 		}
 
 		if(fromLocal == null && untilLocal == null){
-			Long periodInDays = new Long((String)jobDataMap.get(OAIConst.PARAM_PERIOD_IN_DAYS));
-			Long periodInMs = periodInDays * 24 * 60 * 60 * 1000;
-			untilLocal = new Date();
-			fromLocal = new Date((untilLocal.getTime() - periodInMs));
-			logger.info("using from:" + fromLocal + " until:" + untilLocal);
+			String periodInDaysStr = (String)jobDataMap.get(OAIConst.PARAM_PERIOD_IN_DAYS);
+			if(periodInDaysStr != null) {
+				Long periodInDays = new Long(periodInDaysStr);
+				Long periodInMs = periodInDays * 24 * 60 * 60 * 1000;
+				untilLocal = new Date();
+				fromLocal = new Date((untilLocal.getTime() - periodInMs));
+				logger.info("using from:" + fromLocal + " until:" + untilLocal);
+			}
 		}
 
 		Date from = fromLocal;
