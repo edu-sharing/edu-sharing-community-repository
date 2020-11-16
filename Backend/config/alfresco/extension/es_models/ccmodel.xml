@@ -955,6 +955,76 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
+				<!-- Access permissions rights required to access a source, e.g. logins etc. -->
+				<property name="ccm:conditionsOfAccess">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- Info about advertisment of a source -->
+				<property name="ccm:containsAdvertisement">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- price/cost of a source/material -->
+				<property name="ccm:price">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- details about accessibility conformity of a material -->
+				<property name="ccm:accessibilitySummary">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- details about data protection conformity (e.g. DSGVO) of a material -->
+				<property name="ccm:dataProtectionConformity">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- details about fsk rating -->
+				<property name="ccm:fskRating">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- any custom notes attached to a content as text -->
+				<property name="ccm:notes">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 		</aspect>
 

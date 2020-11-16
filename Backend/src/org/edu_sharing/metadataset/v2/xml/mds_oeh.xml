@@ -48,6 +48,59 @@
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/toolCategory/index.json</valuespace>
 		</widget>
 		<widget>
+			<caption>Zugangsbedingungen (Login)</caption>
+			<id>ccm:conditionsOfAccess</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/conditionsOfAccess/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Enthält Werbung</caption>
+			<id>ccm:containsAdvertisement</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/containsAdvertisement/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Kosten</caption>
+			<id>ccm:price</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/price/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Barrierefreiheit</caption>
+			<id>ccm:accessibilitySummary</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/accessibilitySummary/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>DSGVO</caption>
+			<id>ccm:dataProtectionConformity</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/dataProtectionConformity/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>FSK</caption>
+			<id>ccm:fskRating</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/fskRating/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Notizen / Bermerkungen (intern)</caption>
+			<id>ccm:notes</id>
+			<type>textarea</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<toolpermission>TOOLPERMISSION_COLLECTION_EDITORIAL</toolpermission>
+		</widget>
+		<widget>
 			<caption>Typ des Objekts</caption>
 			<id>ccm:objecttype</id>
 			<type>singleoption</type>
@@ -104,6 +157,7 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>node_general</view>
+				<view>node_editorial</view>
 			</views>
 		</group>
 		<group>
@@ -117,6 +171,7 @@
 			<id>io_render</id>
 			<views>
 				<view>node_general_render</view>
+				<view>node_editorial</view>
 			</views>
 		</group>
 	</groups>
@@ -139,6 +194,20 @@
 			  <ccm:sourceContentType>
 			  <ccm:toolCategory>
               <license>
+				]]></html>
+		</template>
+		<template>
+			<id>node_editorial</id>
+			<caption>Erweitert + Redaktionell</caption>
+			<icon>school</icon>
+			<html><![CDATA[
+				<ccm:conditionsOfAccess>
+				<ccm:containsAdvertisement>
+				<ccm:price>
+				<ccm:accessibilitySummary>
+				<ccm:dataProtectionConformity>
+				<ccm:fskRating>
+				<ccm:notes>
 				]]></html>
 		</template>
 		<template>
