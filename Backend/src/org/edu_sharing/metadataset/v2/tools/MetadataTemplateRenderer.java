@@ -23,6 +23,7 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
+import javax.swing.text.NumberFormatter;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.*;
@@ -459,6 +460,21 @@ public class MetadataTemplateRenderer {
 					}
 				}catch(Throwable t){
 					// wrong data or text
+				}
+			} else if (widget.getType().equals("duration")){
+				try {
+					NumberFormat nf = NumberFormat.getInstance();
+					nf.setMaximumFractionDigits(0);
+					nf.setMinimumIntegerDigits(1);
+					long time = Long.parseLong(value) / 1000 / 60;
+					long mins = time % 60;
+					long hours = time / 60;
+					value = nf.format(hours) + "h ";
+					nf.setMinimumIntegerDigits(2);
+					value += nf.format(mins) + "m";
+
+				}catch(Throwable ignored) {
+
 				}
 			}
 			if(widget.getType().equals("filesize")){
