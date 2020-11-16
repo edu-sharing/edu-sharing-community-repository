@@ -217,7 +217,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				continue;
 			}
 			id=CCConstants.getValidGlobalName(id);
-			String [] values = props.get(id);
+			String[] propsValue = props.get(id);
+			List<Serializable> values = propsValue != null ? Arrays.asList(propsValue) : null;
 			if("range".equals(widget.getType())){
 				String [] valuesFrom = props.get(id+"_from");
 				String [] valuesTo = props.get(id+"_to");
@@ -233,30 +234,30 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			} else if("date".equals(widget.getType())){
 				try {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-					List<Date> dates = Arrays.stream(props.get(id)).map((p) -> {
+					values = Arrays.stream(props.get(id)).map((p) -> {
 						try {
 							return sdf.parse(p);
 						} catch (ParseException e) {
 							throw new RuntimeException(e);
 						}
 					}).collect(Collectors.toList());
-					toSafe.put(id, dates);
 
 				}catch(Throwable t){
 					logger.warn("Could not parse date for widget id " + widget.getId(), t);
+					values = new ArrayList<>();
 				}
 			}
 			// changed: otherwise reset values for multivalue fields is not possible
 			// if(values==null || values.length==0)
 			if(values==null)
 				continue;
-			if(!widget.isMultivalue() && values.length>1)
+			if(!widget.isMultivalue() && values.size()>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
 			if(widget.isMultivalue()){
-				toSafe.put(id,values.length==0 ? null : new ArrayList<String>(Arrays.asList(values)));
+				toSafe.put(id,values.size()==0 ? null : new ArrayList<>(values));
 			}
 			else{
-				toSafe.put(id,values.length==0 ? null : values[0]);
+				toSafe.put(id,values.size()==0 ? null : values.get(0));
 			}
 		}
 
