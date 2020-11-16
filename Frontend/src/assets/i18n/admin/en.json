@@ -241,7 +241,7 @@
             "OAI_SAVE": "Save values for next import",
             "OAI_FROM": "from",
             "OAI_UNTIL": "until",
-            "OAI_PERIOD_IN_DAYS":"period in days",
+            "OAI_PERIOD_IN_DAYS":"period in days (leave from/until empty)",
             "REMOVE_IMPORTS": "Remove deleted imports",
             "IMPORTS_REMOVED": "Deleted OAI items will be removed.\n Check the task list to see the status",
             "EXCEL_IMPORTED": "Excel file imported ({{{ rows }} rows imported)",
