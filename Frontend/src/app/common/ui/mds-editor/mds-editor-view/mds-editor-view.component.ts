@@ -105,6 +105,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     html: SafeHtml;
     isEmbedded: boolean;
 
+    private knownWidgetTags: string[];
+
     constructor(
         private sanitizer: DomSanitizer,
         private factoryResolver: ComponentFactoryResolver,
@@ -112,6 +114,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         private mdsEditorInstance: MdsEditorInstanceService,
     ) {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
+        this.knownWidgetTags = [
+            ...Object.values(NativeWidgetType),
+            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
+        ];
     }
 
     ngOnInit(): void {
@@ -127,10 +133,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         // Close any known tags and additionally any tags that include a colon (which indicates the
         // user probably meant to define the respective widget) as these would mess up the HTML
         // structure if left unclosed.
-        const html = closeTags(this.view.html, (tagName) => [
-            ...Object.values(NativeWidgetType),
-            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
-        ].includes(tagName) || tagName.includes(':'));
+        const html = closeTags(
+            this.view.html,
+            (tagName) => this.knownWidgetTags.includes(tagName) || tagName.includes(':'),
+        );
         return this.sanitizer.bypassSecurityTrustHtml(html);
     }
 
@@ -145,6 +151,9 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             } else {
                 if (widget) {
                     this.injectWidget(widget, element);
+                } else if (this.knownWidgetTags.includes(tagName)) {
+                    // The widget is defined, but was disabled due to unmet conditions.
+                    continue;
                 } else if (tagName.includes(':')) {
                     this.injectMissingWidgetWarning(tagName, element);
                 }
@@ -303,7 +312,7 @@ function closeTags(html: string, predicate: (tag: string) => boolean): string {
         }
         const tagName = html.substring(index + 1, tagNameEndIndex); // The tag name, e.g. 'foo'
         if (predicate(tagName)) {
-            const htmlProcessed = html.substring(0, endIndex + 1) + '</' + tagName + '>'
+            const htmlProcessed = html.substring(0, endIndex + 1) + '</' + tagName + '>';
             html = htmlProcessed + html.substring(endIndex + 1);
             index = htmlProcessed.length;
         } else {
