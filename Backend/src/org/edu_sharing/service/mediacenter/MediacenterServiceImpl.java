@@ -15,6 +15,7 @@ import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -560,6 +561,23 @@ public class MediacenterServiceImpl implements MediacenterService {
         return result;
     }
 
+    boolean hasPermissionSet(NodeRef nodeRef, String authority, String permission) {
+        boolean hasPermission = false;
+        Set<AccessPermission> permissionsSet = permissionService.getAllSetPermissions(nodeRef);
+
+        for(AccessPermission ap : permissionsSet){
+            if(authority.equals(ap.getAuthority())
+                    && permission.equals(ap.getPermission())
+                    && AccessStatus.ALLOWED.equals(ap.getAccessStatus())){
+                if(!ap.isInherited()) {
+                    hasPermission = true;
+                }else{
+                    logger.warn(nodeRef + " permission"+ ap.getPermission() + " is inherited");
+                }
+            }
+        }
+        return hasPermission;
+    }
 
     boolean hasPermission(NodeRef nodeRef, String authority, String permission) {
         AuthenticationUtil.RunAsWork<Boolean> runAs = () -> {
@@ -619,9 +637,9 @@ public class MediacenterServiceImpl implements MediacenterService {
 
             for (Map.Entry<String, NodeRef> entry : importedNodes.entrySet()) {
 
-                boolean hasPublishPermission = hasPermission(entry.getValue(), mediacenterName,
+                boolean hasPublishPermission = hasPermissionSet(entry.getValue(), mediacenterName,
                         CCConstants.PERMISSION_CC_PUBLISH);
-                boolean hasConsumerPermission = hasPermission(entry.getValue(), mediacenterName,
+                boolean hasConsumerPermission = hasPermissionSet(entry.getValue(), mediacenterName,
                         CCConstants.PERMISSION_CONSUMER);
 
                 if (sodisLicensedNodes.contains(entry.getKey()) && (!hasConsumerPermission || !hasPublishPermission)) {
@@ -686,9 +704,9 @@ public class MediacenterServiceImpl implements MediacenterService {
                     logger.warn("no node found in repo for:" + replicationsourceId);
                     continue;
                 }
-                boolean hasPublishPermission = hasPermission(nodeRef, mediacenterName,
+                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterName,
                         CCConstants.PERMISSION_CC_PUBLISH);
-                boolean hasConsumerPermission = hasPermission(nodeRef, mediacenterName,
+                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterName,
                         CCConstants.PERMISSION_CONSUMER);
 
                 if(!hasPublishPermission || !hasConsumerPermission){
@@ -712,9 +730,9 @@ public class MediacenterServiceImpl implements MediacenterService {
                     logger.warn("no node found in repo for:" + replicationsourceId);
                     continue;
                 }
-                boolean hasPublishPermission = hasPermission(nodeRef, mediacenterName,
+                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterName,
                         CCConstants.PERMISSION_CC_PUBLISH);
-                boolean hasConsumerPermission = hasPermission(nodeRef, mediacenterName,
+                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterName,
                         CCConstants.PERMISSION_CONSUMER);
 
                 if(hasPublishPermission){
