@@ -191,7 +191,12 @@ public class NodeFrontpage {
                 if(val instanceof org.alfresco.repo.domain.node.ContentDataWithId){
                     continue;
                 }
-                builder.field(CCConstants.getValidLocalName(prop.getKey().toString()),val);
+                String field = CCConstants.getValidLocalName(prop.getKey().toString());
+                if(field != null) {
+                    builder.field(field, val);
+                }else{
+                    logger.error("no valid local name for:" + prop.getKey());
+                }
             }
             builder.endObject();
             builder.startArray("aspects");
