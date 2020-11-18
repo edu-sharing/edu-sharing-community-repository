@@ -205,8 +205,8 @@ public class NodeFrontpage {
                     if(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP.equals(prop.getKey().toString())){
                        try {
                            val = sdf.parse((String) val);
-                       }catch(ParseException e){
-                           logger.error("error while parsing date:" + val);
+                       }catch(ParseException | NumberFormatException e){
+                           logger.error(ref+ "error while parsing date:" + val);
                            val = null;
                        }
                     }
