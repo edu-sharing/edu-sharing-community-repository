@@ -192,7 +192,12 @@ public class NodeFrontpage {
             builder.field("type",CCConstants.getValidLocalName(NodeServiceHelper.getType(ref)));
             builder.startObject("properties");
             for(Map.Entry<QName, Serializable> prop : NodeServiceHelper.getPropertiesNative(ref).entrySet()){
-                builder.field(CCConstants.getValidLocalName(prop.getKey().toString()),prop.getValue());
+                String field =CCConstants.getValidLocalName(prop.getKey().toString());
+                if(field != null) {
+                    builder.field(field, prop.getValue());
+                }else{
+                    logger.error("no valid local name for: " + prop.getKey());
+                }
             }
             builder.endObject();
             builder.startArray("aspects");
