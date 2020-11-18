@@ -21,6 +21,7 @@ import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
+import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
@@ -60,6 +61,9 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,6 +78,9 @@ public class NodeFrontpage {
     private PermissionService permissionService= PermissionServiceFactory.getLocalService();
     private RestHighLevelClient client;
     private HashMap<String, Date> APPLY_DATES;
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
     public NodeFrontpage(){
         APPLY_DATES=new HashMap<>();
         Calendar calendar = Calendar.getInstance();
@@ -194,7 +201,18 @@ public class NodeFrontpage {
             for(Map.Entry<QName, Serializable> prop : NodeServiceHelper.getPropertiesNative(ref).entrySet()){
                 String field =CCConstants.getValidLocalName(prop.getKey().toString());
                 if(field != null) {
-                    builder.field(field, prop.getValue());
+                    Serializable val = prop.getValue();
+                    if(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP.equals(prop.getKey().toString())){
+                       try {
+                           val = sdf.parse((String) val);
+                       }catch(ParseException e){
+                           logger.error("error while parsing date:" + val);
+                           val = null;
+                       }
+                    }
+                    if(val != null) {
+                        builder.field(field, val);
+                    }
                 }else{
                     logger.error("no valid local name for: " + prop.getKey());
                 }
@@ -209,6 +227,7 @@ public class NodeFrontpage {
             logger.info(t.getMessage(),t);
         }
     }
+
 
     private void addRatings(NodeRef ref, XContentBuilder builder) throws IOException {
         RatingService ratingService = RatingServiceFactory.getLocalService();
