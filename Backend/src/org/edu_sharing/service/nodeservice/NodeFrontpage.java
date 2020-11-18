@@ -206,7 +206,7 @@ public class NodeFrontpage {
                        try {
                            val = sdf.parse((String) val);
                        }catch(ParseException | NumberFormatException e){
-                           logger.error(ref+ "error while parsing date:" + val);
+                           logger.error(ref+ "error while parsing replicationsourcetimestamp:" + val);
                            val = null;
                        }
                     }
