@@ -1063,17 +1063,26 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	private ContentReader getContentReader(String storeProtocol, String storeId, String nodeId,String version,String contentProp){
 		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if(version==null) {
-			return contentService.getReader(nodeRef, QName.createQName(contentProp)).getReader();
+			ContentReader cr = contentService.getReader(nodeRef, QName.createQName(contentProp));
+			if(cr != null) {
+				return cr.getReader();
+			}else return null;
 		}
 		else{
 			VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
 			Version versionObj = versionHistory.getVersion(version);
-			return contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
+			ContentReader cr = contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
+			if(cr != null) {
+				return cr.getReader();
+			}else return null;
 		}
 	}
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String version,String contentProp) throws Throwable{
-		return getContentReader(storeProtocol,storeId,nodeId,version,contentProp).getContentInputStream();
+		ContentReader cr = getContentReader(storeProtocol,storeId,nodeId,version,contentProp);
+		if(cr != null) {
+			return cr.getContentInputStream();
+		}else return null;
 	}
 
 	@Override
