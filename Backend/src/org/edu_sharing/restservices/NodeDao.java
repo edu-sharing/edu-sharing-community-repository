@@ -947,9 +947,10 @@ public class NodeDao {
 		if(!isFromRemoteRepository())
 			return null;
 		Remote remote=new Remote();
-		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
+		String remoteObjectRepositoryId = (String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
+		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY) && remoteObjectRepositoryId != null){
 			remote.setId((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-			remote.setRepository(RepositoryDao.getRepository((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)).asRepo());
+			remote.setRepository(RepositoryDao.getRepository(remoteObjectRepositoryId).asRepo());
 		} else if(remoteId!=null){
 			remote.setId(remoteId);
 			remote.setRepository(remoteRepository.asRepo());
