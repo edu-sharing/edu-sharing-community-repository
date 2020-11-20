@@ -153,23 +153,24 @@ public class RenderingServiceImpl implements RenderingService{
 		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
 		Node node = nodeDao.asNode();
 
-		if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,
-				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-				nodeId,
-				CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-			String original = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
+		if(appInfo.ishomeNode()) {
+			if (nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-					nodeId,CCConstants.CCM_PROP_IO_ORIGINAL);
-			AuthenticationUtil.runAsSystem(()->{
-				try {
-					NodeDao originalNodeDao = NodeDao.getNode(repoDao, original);
-					node.setContent(originalNodeDao.asNode().getContent());
-				}catch (DAOException e){
-					logger.error(e.getMessage());
-				}
-				return null;
-			});
-
+					nodeId,
+					CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+				String original = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+						nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+				AuthenticationUtil.runAsSystem(() -> {
+					try {
+						NodeDao originalNodeDao = NodeDao.getNode(repoDao, original);
+						node.setContent(originalNodeDao.asNode().getContent());
+					} catch (DAOException e) {
+						logger.error(e.getMessage());
+					}
+					return null;
+				});
+			}
 		}
 		// remove any javascript (important for title)
 		node.setProperties(MetadataTemplateRenderer.cleanupHTMLMultivalueProperties(node.getProperties()));
