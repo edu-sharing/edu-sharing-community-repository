@@ -114,6 +114,18 @@ public class NodeFrontpage {
                         TrackingServiceFactory.getTrackingService().trackActivityOnNode(ref,null, TrackingService.EventType.DOWNLOAD_MATERIAL);
                         return null;
                     });*/
+
+                    String storeProt = ref.getStoreRef().getProtocol();
+                    String storeId = ref.getStoreRef().getIdentifier();
+                    if(nodeService.hasAspect(storeProt, storeId, ref.getId(), CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+                        String original = nodeService.getProperty(ref.getStoreRef().getProtocol(), storeProt, storeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+                        if(original == null || !nodeService.exists(storeProt, storeId,
+                                ref.getId())){
+                            logger.warn("leave out collection ref object cause original does not exist:" + ref +" orig:"+original);
+                            return;
+                        }
+                    }
+
                     XContentBuilder builder = jsonBuilder().startObject();
                     addAuthorities(ref, builder);
                     addNodeMetadata(ref, builder);
