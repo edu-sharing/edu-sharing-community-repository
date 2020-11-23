@@ -928,5 +928,6 @@
     },
     "ROCKETCHAT": {
         "TITLE": "Chat"
-    }
+    },
+    "MAIN_NAV_LABEL": "main"
 }

@@ -1005,5 +1005,6 @@
       },
     "ROCKETCHAT": {
         "TITLE": "Chat"
-    }
+    },
+    "MAIN_NAV_LABEL": "Hauptmenü"
 }

@@ -1,4 +1,4 @@
-<div *ngIf="visible">
+<div *ngIf="visible" role="navigation" [attr.aria-label]="'MAIN_NAV_LABEL' | translate">
   <div class="preload" *ngIf="getPreloading()">
     <img src="assets/images/edu-sharing-loading-animation.svg" image-config alt="" />
   </div>
@@ -78,7 +78,7 @@
     [class.noUser]="!_showUser"
   >
     <div class="mobile-move-top2">
-      <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle" >
+      <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle">
         <ng-container *ngSwitchCase="'dropdown'">
           <app-main-menu-dropdown
             #mainMenuDropdown
