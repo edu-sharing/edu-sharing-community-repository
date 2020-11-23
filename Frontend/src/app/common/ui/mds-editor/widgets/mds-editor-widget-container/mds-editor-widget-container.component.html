@@ -35,7 +35,7 @@
   [floatLabel]="widget.definition.placeholder ? 'always' : 'auto'"
   [class.warn]="missingRequired === RequiredMode.MandatoryForPublish"
 >
-  <mat-label>
+  <mat-label [id]="labelId">
     {{ widget.definition.caption }}
     <span *ngIf="widget.definition.isRequired === RequiredMode.Mandatory" class="required-marker">*</span>
   </mat-label>

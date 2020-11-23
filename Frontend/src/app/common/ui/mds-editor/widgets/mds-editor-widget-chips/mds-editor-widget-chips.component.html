@@ -1,11 +1,17 @@
 <app-mds-editor-widget-container
+  #container
   [injectedView]="this"
   [widget]="widget"
   [label]="false"
   [valueType]="valueType"
   [control]="chipsControl"
 >
-  <mat-chip-list #chipList [formControl]="chipsControl" *ngIf="chipsControl">
+  <mat-chip-list
+    #chipList
+    [formControl]="chipsControl"
+    *ngIf="chipsControl"
+    [attr.aria-labelledby]="container.labelId"
+  >
     <mat-chip
       *ngFor="let value of chipsControl.value"
       [selectable]="false"
