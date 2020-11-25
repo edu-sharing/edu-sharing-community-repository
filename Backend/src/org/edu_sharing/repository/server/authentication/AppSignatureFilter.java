@@ -28,8 +28,7 @@ public class AppSignatureFilter implements javax.servlet.Filter {
             if (appInfo == null) {
                 String message = "application request could not be verified";
                 logger.error(message);
-                //resp.sendError(HttpServletResponse.SC_FORBIDDEN, message);
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, message);
                 return;
             } else {
                 appInfoThreadLocal.set(appInfo);
