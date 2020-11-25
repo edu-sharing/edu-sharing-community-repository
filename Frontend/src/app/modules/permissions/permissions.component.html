@@ -7,7 +7,14 @@
             [searchPlaceholder]="'PERMISSIONS.SEARCH_'+TABS[tab]"
             (onSearch)="doSearch($event.query)"
   ></main-nav>
-  <mat-tab-group mat-stretch-tabs color="dark" [selectedIndex]="tab" (selectedIndexChange)="setTab($event)">
+  <mat-tab-group
+    role="main"
+    appSkipTarget="MAIN_CONTENT"
+    mat-stretch-tabs
+    color="dark"
+    [selectedIndex]="tab"
+    (selectedIndexChange)="setTab($event)"
+  >
     <mat-tab label="{{'PERMISSIONS.TAB.ORG' | translate}}">
       <ng-template matTabContent>
         <permissions-authorities

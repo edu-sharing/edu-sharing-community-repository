@@ -187,7 +187,12 @@
         >
             <spinner></spinner>
         </section>
-        <div class="collections-master-div" [class.collections-master-div-notabs]="!showTabs()">
+        <div
+            role="main"
+            appSkipTarget="MAIN_CONTENT"
+            class="collections-master-div"
+            [class.collections-master-div-notabs]="!showTabs()"
+        >
             <!-- breadcrumbs -->
             <div class="breadcrumb-space" *ngIf="!isRootLevelCollection() && !isLoading">
                 <breadcrumbs

@@ -1006,5 +1006,11 @@
     "ROCKETCHAT": {
         "TITLE": "Chat"
     },
-    "MAIN_NAV_LABEL": "Hauptmenü"
+    "NAV": {
+        "MAIN": "Hauptmenü",
+        "SKIP": "Sprungmarken"
+    },
+    "SKIP_LINKS": {
+        "MAIN_CONTENT": "Springe zum Hauptinhalt"
+    }
 }

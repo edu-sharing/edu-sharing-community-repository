@@ -230,7 +230,13 @@
 
    </div>
     <div class="content-with-footer">
-        <div class="content_wrapper" [class.content_wrapper_grouped]="currentRepository=='-all-' && groupResults" [class.contentSidenav]="searchService.sidenavOpened">
+        <div
+            role="main"
+            appSkipTarget="MAIN_CONTENT"
+            class="content_wrapper"
+            [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
+            [class.contentSidenav]="searchService.sidenavOpened"
+        >
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
                 <div *ngIf="searchService.searchResultCollections.length>0 && !addToCollection">
                     <div class="collectionsHeading">

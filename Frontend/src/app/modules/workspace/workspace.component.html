@@ -67,6 +67,8 @@
 </div></div>
   <workspace-explorer class="explorer"
                       #explorer
+                      role="main"
+                      appSkipTarget="MAIN_CONTENT"
                       appCreateContextMenu
                       *ngIf="root!='RECYCLE'"
                       [current]="currentFolder"
