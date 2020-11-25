@@ -366,11 +366,7 @@ export class ListTableComponent implements EventListener {
      *
      * Called with same parameters as onDrop event.
      */
-    @Input() canDrop: (arg: {
-        source: Node[];
-        target: Node;
-        event: DragEvent;
-    }) => boolean = () => true;
+    @Input() canDrop: (arg0: DropData) => boolean = () => true;
 
     @Input() optionItems: OptionItem[];
 
@@ -690,7 +686,7 @@ export class ListTableComponent implements EventListener {
         this.isNodesDragSource = true;
     }
 
-    canDropNodes(target: Node, { event, nodes }: DragData) {
+    canDropNodes(target: Node, { event, nodes, dropAction }: DragData): boolean {
         if (
             this.orderElements &&
             this.isNodesDragSource &&
@@ -698,7 +694,7 @@ export class ListTableComponent implements EventListener {
         ) {
             return true;
         }
-        return this.canDrop({ source: nodes, target, event });
+        return this.canDrop({ event, nodes, dropAction, target });
     }
 
     onNodesDragEnter(target: Node) {

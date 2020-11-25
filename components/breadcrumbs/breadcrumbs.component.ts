@@ -43,7 +43,7 @@ export class BreadcrumbsComponent {
      * Allow Dropping of other items (nodes) on to the breadcrumb items
      * A function that should return true or false and gets the same argument object as the onDrop callback
      */
-    @Input() canDrop: Function = () => {
+    @Input() canDrop: Function = (arg0: DropData) => {
         return false;
     };
     /**
@@ -106,8 +106,8 @@ export class BreadcrumbsComponent {
         private ui: UIService,
     ) {}
 
-    canDropNodes(target: Node, { event, nodes }: DragData) {
-        return this.canDrop({ source: nodes, target, event });
+    canDropNodes(target: Node, { event, nodes, dropAction }: DragData) {
+        return this.canDrop({ event, nodes, dropAction, target });
     }
 
     onNodesHoveringChange(nodesHovering: boolean, target: Node) {

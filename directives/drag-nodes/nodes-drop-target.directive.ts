@@ -63,7 +63,7 @@ export class NodesDropTargetDirective {
     /**
      * Triggered when one or more nodes are dropped onto the element.
      */
-    @Output() nodesDrop = new EventEmitter<DropData>();
+    @Output() nodesDrop = new EventEmitter<DragData>();
 
     /**
      * Difference of enter- and leave events.
@@ -148,7 +148,7 @@ export class NodesDropTargetDirective {
     private getCanDrop(event: DragEvent): boolean {
         if (typeof this.canDrop === 'function') {
             const nodes = readDraggedNodes();
-            return this.canDrop({ event, nodes });
+            return this.canDrop({ event, nodes, dropAction: this.getDropAction(event) });
         }
         return this.canDrop;
     }

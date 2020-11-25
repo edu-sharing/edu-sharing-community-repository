@@ -5,10 +5,11 @@ export type DropAction = 'move' | 'copy' | 'link';
 export interface DragData {
     event: DragEvent;
     nodes: Node[];
+    dropAction: DropAction;
 }
 
 export interface DropData extends DragData {
-    dropAction: DropAction;
+    target: Node;
 }
 
 export const dragNodesTransferType = 'application/nodes';
