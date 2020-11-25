@@ -1,6 +1,6 @@
 package org.edu_sharing.restservices.login.v1;
 
-import java.util.HashMap;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -27,6 +27,7 @@ import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
 import org.edu_sharing.restservices.node.v1.NodeApi;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserProfile;
+import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.service.authentication.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -203,6 +204,9 @@ public class LoginApi  {
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
     }
 
+    static List<String> disallowedProps = Arrays.asList(new String[]{CCConstants.CM_PROP_PERSON_SIZE_QUOTA});
+
+
 	@POST
 	@Path("/appauth/{userId}")
 	@ApiOperation(
@@ -218,7 +222,7 @@ public class LoginApi  {
 					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 			})
 	public Response authenticate(@ApiParam(value = "User Id", required=true ) @PathParam("userId") String userId,
-								 @ApiParam(value = "User Profile", required=false) UserProfile userProfile,
+								 @ApiParam(value = "User Profile", required=false) UserProfileAppAuth userProfile,
 								 @Context HttpServletRequest req){
 
 		try {
@@ -243,6 +247,34 @@ public class LoginApi  {
 			 * @org.edu_sharing.service.authentication.AuthMethodTrustedApplication.authenticate
 			 */
 			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP,verifiedApp.getHost());
+
+			if(userProfile != null){
+				String firstNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_FIRSTNAME);
+				if(firstNameProp != null && userProfile.getFirstName() != null){
+					ssoDataMap.put(firstNameProp,userProfile.getFirstName());
+				}
+				String lastNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_LASTNAME);
+				if(lastNameProp != null && userProfile.getLastName() != null){
+					ssoDataMap.put(lastNameProp,userProfile.getLastName());
+				}
+				String mailProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_EMAIL);
+				if(mailProp != null && userProfile.getEmail() != null){
+					ssoDataMap.put(mailProp,userProfile.getEmail());
+				}
+				String affiliationProp = ssoMapper.getUserAttribute(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+				if(affiliationProp != null && userProfile.getPrimaryAffiliation() != null){
+					ssoDataMap.put(affiliationProp, userProfile.getPrimaryAffiliation());
+				}
+
+				if(userProfile.getExtendedAttributes() != null){
+					for(Map.Entry<String,String[]> extAtt : userProfile.getExtendedAttributes().entrySet()){
+						String val = (extAtt.getValue() != null) ? String.join(",",extAtt.getValue()) : null;
+						if(val != null){
+							ssoDataMap.put(extAtt.getKey(),val);
+						}
+					}
+				}
+			}
 
 			EduAuthentication authService = (EduAuthentication) eduApplicationContext.getBean("authenticationService");
 			authService.authenticateByTrustedApp(ssoDataMap);

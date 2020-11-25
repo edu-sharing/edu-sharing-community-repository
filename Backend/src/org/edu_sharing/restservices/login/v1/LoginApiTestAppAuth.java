@@ -6,11 +6,13 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
+import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.filter.LoggingFilter;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -21,7 +23,7 @@ public class LoginApiTestAppAuth {
 
     public static void main(String[] args) {
         java.util.logging.Logger jaxlogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-        Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFilter(jaxlogger,false)));
+        Client client = ClientBuilder.newClient(new ClientConfig().register(new LoggingFilter(jaxlogger,true)));
 
         String username = "admin";
         try {
@@ -37,16 +39,29 @@ public class LoginApiTestAppAuth {
 
             WebTarget webTarget = client.target("http://localhost:8080/edu-sharing/rest/");
             WebTarget currentWebTarget = webTarget.path("authentication/v1/appauth").path(username);
+
+            UserProfileAppAuth up = new UserProfileAppAuth();
+            up.setFirstName("Dan");
+            up.setLastName("rud");
+            up.setEmail("test@d.de");
+
+            //additionalAttributes bean must be set in edu-sharing-sso-context.xml
+            up.getExtendedAttributes().put("eduPersonScopedAffiliation",new String[]{"student"});
+
+            Entity<UserProfileAppAuth> e = Entity.entity(up,MediaType.APPLICATION_JSON);
+
+            System.out.println(e.toString());
+
             Response response = currentWebTarget
                     .request(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .accept(MediaType.APPLICATION_JSON)
                     .header("X-Edu-App-Id", appId)
                     .header("X-Edu-App-Sig",new String(signature))
                     .header("X-Edu-App-Signed",signData)
                     .header("X-Edu-App-Ts",timestamp)
-                    .post(null);
+                    .post(e);
 
-            System.out.println(response.getStatus());
+            System.out.println(response.getStatus()+" "+response.getStatusInfo());
             AuthenticationToken token = response.readEntity(AuthenticationToken.class);
             System.out.println(token.getTicket());
 
