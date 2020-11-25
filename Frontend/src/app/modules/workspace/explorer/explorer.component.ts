@@ -7,6 +7,7 @@ import {Helper} from "../../../core-module/rest/helper";
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
+import {DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 @Component({
   selector: 'workspace-explorer',
@@ -313,7 +314,7 @@ export class WorkspaceExplorerComponent {
       }
     });
   }
-  canDrop = (event:any)=>{
+  canDrop = (event: DropData)=> {
     return event.target.isDirectory;
   }
 
