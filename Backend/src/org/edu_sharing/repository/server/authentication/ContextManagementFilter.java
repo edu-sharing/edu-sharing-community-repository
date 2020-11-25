@@ -37,8 +37,6 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
-	public static ThreadLocal<String> accessAppId = new ThreadLocal<>();
-
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -144,7 +142,6 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	 */
 	private void handleAppSignature(HttpServletRequest httpReq) {
         accessToolType.set(null);
-		accessAppId.set(null);
 
 		String appId = httpReq.getHeader("X-Edu-App-Id");
 		if(appId != null) {
@@ -153,7 +150,6 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				logger.debug("application request could not be verified:" + appId);
 			}else{
 				accessToolType.set(appInfo.getType());
-				accessAppId.set(appInfo.getAppId());
 			}
 		}
 	}
