@@ -145,27 +145,16 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	private void handleAppSignature(HttpServletRequest httpReq) {
         accessToolType.set(null);
 		accessAppId.set(null);
-		if(httpReq.getHeader("X-Edu-App-Id")!=null){
-			String appId=httpReq.getHeader("X-Edu-App-Id");
-			String sig=httpReq.getHeader("X-Edu-App-Sig");
-			String signed=httpReq.getHeader("X-Edu-App-Signed");
-			String ts=httpReq.getHeader("X-Edu-App-Ts");
-			ApplicationInfo app = ApplicationInfoList.getRepositoryInfoById(appId);
-			if(app==null){
-				logger.warn("X-Edu-App-Id header was sent but the tool "+appId+" was not found in the list of registered apps");
-			}
-			else{
-				SignatureVerifier.Result result = new SignatureVerifier().verify(appId, sig, signed, ts);
-				if(result.getStatuscode() == HttpServletResponse.SC_OK){
-					accessToolType.set(app.getType());
-					accessAppId.set(app.getAppId());
-					logger.debug("Connector request verified, setting accessToolType to "+accessToolType.get());
-				}
-				else{
-					logger.warn("X-Edu-App-Id header was sent but signature check failed: "+result.getMessage());
-				}
-			}
 
+		String appId = httpReq.getHeader("X-Edu-App-Id");
+		if(appId != null) {
+			ApplicationInfo appInfo = new SignatureVerifier().verifyAppSignature(httpReq);
+			if(appInfo == null){
+				logger.debug("application request could not be verified:" + appId);
+			}else{
+				accessToolType.set(appInfo.getType());
+				accessAppId.set(appInfo.getAppId());
+			}
 		}
 	}
 

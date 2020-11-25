@@ -8,9 +8,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.authentication.AppSignatureFilter;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -22,6 +24,7 @@ import org.edu_sharing.restservices.login.v1.model.Login;
 import org.edu_sharing.restservices.login.v1.model.LoginCredentials;
 import org.edu_sharing.restservices.login.v1.model.ScopeAccess;
 import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
+import org.edu_sharing.restservices.node.v1.NodeApi;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.service.authentication.*;
@@ -40,6 +43,7 @@ import org.springframework.context.ApplicationContext;
 @ApiService(value="AUTHENTICATION", major=1, minor=0)
 public class LoginApi  {
 
+	Logger logger = Logger.getLogger(LoginApi.class);
 
 	@GET       
 	@Path("/validateSession")
@@ -200,10 +204,10 @@ public class LoginApi  {
     }
 
 	@POST
-	@Path("/appauth/{appId}/{userId}")
+	@Path("/appauth/{userId}")
 	@ApiOperation(
 			value = "authenticate user of an registered application.",
-			notes = "authenticate user of an registered application")
+			notes = "headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts")
 	@ApiResponses(
 			value = {
 					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = AuthenticationToken.class),
@@ -213,41 +217,32 @@ public class LoginApi  {
 					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 			})
-	public Response authenticate(@ApiParam(value = "App Id", required=true ) @PathParam("appId") String appId,
-								 @ApiParam(value = "User Id", required=true ) @PathParam("userId") String userId,
+	public Response authenticate(@ApiParam(value = "User Id", required=true ) @PathParam("userId") String userId,
 								 @ApiParam(value = "User Profile", required=false) UserProfile userProfile,
 								 @Context HttpServletRequest req){
 
 		try {
-			System.out.println("NETWORKAUTH called:"+appId+" u:"+userId);
 			ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 			SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper) eduApplicationContext.getBean("ssoAuthorityMapper");
 
-
-			String authenticatedApp = ContextManagementFilter.accessAppId.get();
-			if (authenticatedApp == null) {
-				return Response.status(Response.Status.PROXY_AUTHENTICATION_REQUIRED).entity("signature authentication failed").build();
-			}
-			if (!authenticatedApp.equals(appId)) {
-				return Response.status(Response.Status.PRECONDITION_FAILED).entity("appId not equals signature appId").build();
-			}
-
-			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-			if (appInfo == null) {
-				return Response.status(Response.Status.PRECONDITION_FAILED).entity("appId is not registered").build();
+			ApplicationInfo verifiedApp = AppSignatureFilter.getAppInfo();
+			if(verifiedApp == null){
+				String msg = "no app was verified. check if AppSignatureFilter is configured";
+				logger.error(msg);
+				return Response.status(Response.Status.PRECONDITION_FAILED).entity(msg).build();
 			}
 
 			HashMap<String, String> ssoDataMap = new HashMap<>();
 			ssoDataMap.put(ssoMapper.getSSOUsernameProp(), userId);
 
 			//add authByAppData
-			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_ID, appId);
+			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_ID, verifiedApp.getAppId());
 			ssoDataMap.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_AuthByApp);
 			/**
 			 * @TODO check if host validation still needed
 			 * @org.edu_sharing.service.authentication.AuthMethodTrustedApplication.authenticate
 			 */
-			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP,"allHostsAreTrusted");
+			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP,verifiedApp.getHost());
 
 			EduAuthentication authService = (EduAuthentication) eduApplicationContext.getBean("authenticationService");
 			authService.authenticateByTrustedApp(ssoDataMap);

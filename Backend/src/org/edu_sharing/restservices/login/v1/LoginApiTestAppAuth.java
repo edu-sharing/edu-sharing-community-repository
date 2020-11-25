@@ -36,7 +36,7 @@ public class LoginApiTestAppAuth {
             signature = new Base64().encode(signature);
 
             WebTarget webTarget = client.target("http://localhost:8080/edu-sharing/rest/");
-            WebTarget currentWebTarget = webTarget.path("authentication/v1/appauth").path(appId).path(username);
+            WebTarget currentWebTarget = webTarget.path("authentication/v1/appauth").path(username);
             Response response = currentWebTarget
                     .request(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
