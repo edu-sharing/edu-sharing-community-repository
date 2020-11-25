@@ -6,6 +6,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
+import org.edu_sharing.restservices.login.v1.model.Login;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.filter.LoggingFilter;
@@ -63,7 +64,20 @@ public class LoginApiTestAppAuth {
 
             System.out.println(response.getStatus()+" "+response.getStatusInfo());
             AuthenticationToken token = response.readEntity(AuthenticationToken.class);
-            System.out.println(token.getTicket());
+            System.out.println(token.getUserId() + " " + token.getTicket());
+
+            /**
+             * check ticket
+             */
+            currentWebTarget = webTarget.path("authentication/v1/validateSession");
+            response = currentWebTarget
+                    .request(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("Authorization",CCConstants.AUTH_HEADER_EDU_TICKET + token.getTicket()).get();
+
+            Login l = response.readEntity(Login.class);
+
+            System.out.println("valid ticket:" + l.isValidLogin());
 
         } catch (Exception e) {
             e.printStackTrace();
