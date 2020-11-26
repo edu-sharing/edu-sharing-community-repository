@@ -116,7 +116,7 @@
                     <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                     <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
                     <div class="checkbox column" *ngIf="hasCheckbox">
-                        <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation()"></mat-checkbox>
+                        <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation()" aria-label="{{ 'SELECT' | translate:{element: node.name} }}"></mat-checkbox>
                     </div>
                     <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
                     <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
