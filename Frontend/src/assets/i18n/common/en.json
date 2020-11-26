@@ -932,7 +932,8 @@
     },
     "NAV": {
         "MAIN": "main",
-        "SKIP": "skip"
+        "SKIP": "skip",
+        "COLLECTIONS": "collections"
     },
     "SKIP_LINKS": {
         "MAIN_CONTENT": "Skip to main content"

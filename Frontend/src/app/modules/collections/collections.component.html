@@ -25,6 +25,8 @@
     (onCancel)="infoClose()"
 ></infobar>
 <mat-tab-group
+    role="navigation"
+    [attr.aria-label]="'NAV.COLLECTIONS' | translate"
     mat-stretch-tabs
     color="dark"
     [(selectedIndex)]="tabSelectedIndex"
@@ -67,6 +69,7 @@
 <!-- collection header -->
 <div
     *ngIf="!isRootLevelCollection() && !isLoading && isReady && tabSelected.length >= -1"
+    role="complementary"
     class="collections-header"
     [class.alignWithBanner]="isMobileWidth()"
     [class.scrollWithBanner]="!isMobileWidth()"
@@ -194,7 +197,12 @@
             [class.collections-master-div-notabs]="!showTabs()"
         >
             <!-- breadcrumbs -->
-            <div class="breadcrumb-space" *ngIf="!isRootLevelCollection() && !isLoading">
+            <div
+                role="navigation"
+                [attr.aria-label]="'NAV.COLLECTIONS' | translate"
+                class="breadcrumb-space"
+                *ngIf="!isRootLevelCollection() && !isLoading"
+            >
                 <breadcrumbs
                     class="collections-breadcrumb"
                     [home]="'COLLECTIONS.TAB.' + tabSelected"

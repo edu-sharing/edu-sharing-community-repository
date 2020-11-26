@@ -1009,7 +1009,8 @@
     },
     "NAV": {
         "MAIN": "Hauptmenü",
-        "SKIP": "Sprungmarken"
+        "SKIP": "Sprungmarken",
+        "COLLECTIONS": "Sammlungen"
     },
     "SKIP_LINKS": {
         "MAIN_CONTENT": "Springe zum Hauptinhalt"
