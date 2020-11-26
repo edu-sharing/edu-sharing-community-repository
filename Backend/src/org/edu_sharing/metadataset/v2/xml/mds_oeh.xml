@@ -99,7 +99,7 @@
 			<type>singleoption</type>
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
-			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/fskRating/index.json</valuespace>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oer/index.json</valuespace>
 		</widget>
 		<widget>
 			<caption>Interner Quellenname</caption>
