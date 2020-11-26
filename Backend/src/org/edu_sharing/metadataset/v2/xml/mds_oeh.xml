@@ -94,6 +94,20 @@
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/fskRating/index.json</valuespace>
 		</widget>
 		<widget>
+			<caption>Nutzungsrechte</caption>
+			<id>ccm:license_oer</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/fskRating/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Interner Quellenname</caption>
+			<id>ccm:replicationsource</id>
+			<type>text</type>
+			<hideIfEmpty>true</hideIfEmpty>
+		</widget>
+		<widget>
 			<caption>Notizen / Bermerkungen (intern)</caption>
 			<id>ccm:notes</id>
 			<type>textarea</type>
@@ -198,8 +212,8 @@
 		</template>
 		<template>
 			<id>node_editorial</id>
-			<caption>Erweitert + Redaktionell</caption>
-			<icon>school</icon>
+			<caption>Quellen-Informationen</caption>
+			<icon>archive</icon>
 			<html><![CDATA[
 				<ccm:conditionsOfAccess>
 				<ccm:containsAdvertisement>
@@ -207,6 +221,8 @@
 				<ccm:accessibilitySummary>
 				<ccm:dataProtectionConformity>
 				<ccm:fskRating>
+				<ccm:license_oer>
+				<ccm:replicationsource>
 				<ccm:notes>
 				]]></html>
 		</template>

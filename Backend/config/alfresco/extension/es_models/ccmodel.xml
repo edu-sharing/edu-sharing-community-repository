@@ -1633,6 +1633,16 @@
 	         			<tokenised>false</tokenised>
 	         		</index>
 				</property>
+				<!-- info about the oer validity of this source, e.g. all are oer or just some -->
+				<property name="ccm:license_oer">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 		</aspect>
 
