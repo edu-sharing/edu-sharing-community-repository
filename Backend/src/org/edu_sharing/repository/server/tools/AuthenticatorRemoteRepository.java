@@ -116,7 +116,7 @@ public class AuthenticatorRemoteRepository {
 			}
 		}
 		//TODO if exception repository unreachable -> special handling
-		logger.info("REMOTE APPID:"+ remoteAppInfo.getAppId() +"REMOTE USERNAME:"+AuthenticationUtils.getAuthenticationDetails().getUserName()+" REMOTETICKET:"+AuthenticationUtils.getAuthenticationDetails().getTicket()) ;
+		logger.info("REMOTE APPID:"+ remoteAppInfo.getAppId() +"REMOTE USERNAME:"+authToken.getUserId()+" REMOTETICKET:"+authToken.getTicket()) ;
 		resultAuthInfo.put(CCConstants.AUTH_USERNAME,authToken.getUserId());
 		resultAuthInfo.put(CCConstants.AUTH_TICKET,authToken.getTicket());
 		AuthenticatorRemoteAppResult result = new AuthenticatorRemoteAppResult();
