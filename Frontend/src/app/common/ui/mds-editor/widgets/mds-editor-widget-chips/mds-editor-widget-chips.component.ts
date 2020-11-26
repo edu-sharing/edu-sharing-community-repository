@@ -1,5 +1,5 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {
     MatAutocomplete,
@@ -7,6 +7,7 @@ import {
     MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
+import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import {
     debounceTime,
@@ -16,6 +17,7 @@ import {
     startWith,
     switchMap,
 } from 'rxjs/operators';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
@@ -38,6 +40,14 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     filteredValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
 
+    constructor(
+        mdsEditorInstance: MdsEditorInstanceService,
+        translate: TranslateService,
+        private changeDetectorRef: ChangeDetectorRef,
+    ) {
+        super(mdsEditorInstance, translate);
+    }
+
     ngOnInit(): void {
         this.chipsControl = new FormControl(
             [
@@ -56,6 +66,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             this.widget.definition.bottomCaption =
                 this.widget.definition.bottomCaption ??
                 this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER');
+            this.changeDetectorRef.detectChanges();
         }
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
