@@ -828,7 +828,9 @@ public class MetadataReaderV2 {
 		try{
 			getMetadataset(home, "-default-","de_DE", true);
 			getMetadataset(home, "-default-","en_US", true);
-		}catch(Throwable t){}
+		}catch(Throwable t){
+			logger.warn("Error occured while preparing the default mds: ", t);
+		}
 	}
 	
 }
