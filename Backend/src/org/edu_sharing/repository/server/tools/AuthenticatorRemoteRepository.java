@@ -194,7 +194,7 @@ public class AuthenticatorRemoteRepository {
 		 */
 		Signing signing = new Signing();
 		String timestamp = ""+System.currentTimeMillis();
-		String signData = username + appId + timestamp;
+		String signData = username + localAppId + timestamp;
 
 		byte[] signature = signing.sign(signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM), signData, CCConstants.SECURITY_SIGN_ALGORITHM);
 		signature = new Base64().encode(signature);
@@ -208,7 +208,7 @@ public class AuthenticatorRemoteRepository {
 		Response response = currentWebTarget
 				.request(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.header("X-Edu-App-Id", appId)
+				.header("X-Edu-App-Id", localAppId)
 				.header("X-Edu-App-Sig",new String(signature))
 				.header("X-Edu-App-Signed",signData)
 				.header("X-Edu-App-Ts",timestamp)
