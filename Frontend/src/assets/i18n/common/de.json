@@ -74,6 +74,7 @@
     "DEFAULT_METADATASET": "Standard-Metadatenset ({{name}})",
     "NO_MATCHES": "Keine übereinstimmenden Einträge",
     "NO_CC_PUBLISH": "Kein Recht zum Veröffentlichen",
+    "SELECT": "{{ element }} auswählen",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
         "SEARCH_COLLECTIONS": "Sammlung suchen...",
