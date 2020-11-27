@@ -140,11 +140,13 @@ public class MetadataReaderV2 {
                 reader = new MetadataReaderV2(mdsName + "_override.xml", locale);
                 MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
                 mds.overrideWith(mdsOverride);
-            } catch (IOException e) {
+            }catch(org.apache.http.conn.ConnectTimeoutException e){
+            	logger.error(e.getMessage(),e);
+			}catch (IOException e) {
             	if(e.toString().contains(mdsName)) {
 					logger.info("no " + mdsName + "_override.xml was found -> only default file will be used");
 				} else {
-            		logger.warn("IOException parsing " + mdsName + "_override.xml:" + e.toString(),e);
+            		logger.error("IOException parsing " + mdsName + "_override.xml:" + e.toString(),e);
 				}
             }
             mdsCache.put(id, mds);
@@ -525,7 +527,7 @@ public class MetadataReaderV2 {
 				if("caption".equals(widget.getValuespaceSort())){
 					return o1.getCaption().compareTo(o2.getCaption());
 				}
-				logger.warn("Invalid value for valuespaceSort '"+widget.getValuespaceSort()+"' for widget '"+widget.getId()+"'");
+				logger.error("Invalid value for valuespaceSort '"+widget.getValuespaceSort()+"' for widget '"+widget.getId()+"'");
 				return 0;
 			});
 		}
@@ -828,7 +830,9 @@ public class MetadataReaderV2 {
 		try{
 			getMetadataset(home, "-default-","de_DE", true);
 			getMetadataset(home, "-default-","en_US", true);
-		}catch(Throwable t){}
+		}catch(Throwable t){
+			logger.error("Error occured while preparing the default mds: ", t);
+		}
 	}
 	
 }

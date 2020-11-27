@@ -4,7 +4,12 @@
           [currentScope]="'collections'"
           [searchEnabled]="false"
 ></main-nav>
-<div class="collections-master-div" [class.collections-master-div-mainnav]="mainnav">
+<div
+  role="main"
+  appSkipTarget="MAIN_CONTENT"
+  class="collections-master-div"
+  [class.collections-master-div-mainnav]="mainnav"
+>
 
 <global-progress *ngIf="isLoading"></global-progress>
 

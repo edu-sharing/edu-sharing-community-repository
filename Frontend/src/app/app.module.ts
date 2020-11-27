@@ -64,6 +64,8 @@ import {MdsEditorWidgetDurationComponent} from './common/ui/mds-editor/widgets/m
 import {MdsEditorWidgetLicenseComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 import { MdsEditorEmbeddedComponent } from './common/ui/mds-editor/mds-editor-embedded/mds-editor-embedded.component';
 import { MdsEditorWidgetSuggestionChipsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
+import { SkipTargetDirective } from './common/ui/skip-nav/skip-target.directive';
+import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -122,6 +124,8 @@ import { MdsEditorWidgetSuggestionChipsComponent } from './common/ui/mds-editor/
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorEmbeddedComponent,
         MdsEditorWidgetSuggestionChipsComponent,
+        SkipTargetDirective,
+        SkipNavComponent,
     ],
     imports: [
         IMPORTS,

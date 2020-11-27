@@ -73,7 +73,11 @@
         </div>
     </div>
 </div>
-<div class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}">
+<div
+    role="main"
+    appSkipTarget="MAIN_CONTENT"
+    class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}"
+>
 <!-- for dynamically added components from extensions -->
 <ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
 <div *ngIf="modeIsActive('INFO')" class="content info">

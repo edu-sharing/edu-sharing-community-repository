@@ -205,6 +205,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                     this.currentValues,
                 );
             }
+            if(!this.editorType){
+                console.warn('mds ' + this.setId + ' at ' + this.repository + ' did not specify any rendering type');
+                this.editorType = 'legacy';
+            }
         } catch (error) {
             this.handleError(error);
         } finally {

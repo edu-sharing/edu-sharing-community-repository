@@ -25,7 +25,7 @@ import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchService } from './search.service';
 import { WindowRefService } from './window-ref.service';
-import {Values} from '../../common/ui/mds-editor/types';
+import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
 
 @Component({
     selector: 'app-search',
@@ -105,7 +105,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     // we only initalize the banner once to prevent flickering
     private bannerInitalized = false;
     currentValues: Values;
-    private currentMdsSet: any;
+    private currentMdsSet: MdsDefinition;
     private mdsActions: OptionItem[];
     private mdsButtons: DialogButton[];
     private currentSavedSearch: Node;
@@ -1466,9 +1466,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                                         this.mdsSets,
                                         'id',
                                         param.mds,
-                                    ) != -1
-                                )
+                                    ) !== -1
+                                ) {
                                     this.mdsId = param.mds;
+                                }
                             } catch (e) {
                                 console.warn(
                                     'got invalid mds list from repository:',

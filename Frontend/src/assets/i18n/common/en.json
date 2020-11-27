@@ -75,6 +75,7 @@
     "DEFAULT_METADATASET": "Default-Metadataset ({{name}})",
     "NO_MATCHES": "No matches found",
     "NO_CC_PUBLISH": "no publishing permissions for object",
+    "SELECT": "select {{ element }}",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "Add to recently used collections",
         "SEARCH_COLLECTIONS": "Find collection...",
@@ -929,5 +930,12 @@
     "ROCKETCHAT": {
         "TITLE": "Chat"
     },
-    "MAIN_NAV_LABEL": "main"
+    "NAV": {
+        "MAIN": "main",
+        "SKIP": "skip",
+        "COLLECTIONS": "collections"
+    },
+    "SKIP_LINKS": {
+        "MAIN_CONTENT": "Skip to main content"
+    }
 }

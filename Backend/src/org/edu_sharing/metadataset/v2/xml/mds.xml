@@ -735,6 +735,7 @@
 			</group>
 			<group>
 				<id>collection_editorial</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>collection_editorial</view>
 				</views>
