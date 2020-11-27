@@ -103,7 +103,7 @@
 		</widget>
 		<widget>
 			<caption>Interner Quellenname</caption>
-			<id>ccm:replicationsource</id>
+			<id>ccm:general_identifier</id>
 			<type>text</type>
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
@@ -222,7 +222,7 @@
 				<ccm:dataProtectionConformity>
 				<ccm:fskRating>
 				<ccm:license_oer>
-				<ccm:replicationsource>
+				<ccm:general_identifier>
 				<ccm:notes>
 				]]></html>
 		</template>
