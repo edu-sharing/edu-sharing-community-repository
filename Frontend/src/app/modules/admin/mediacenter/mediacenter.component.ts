@@ -57,8 +57,8 @@ export class AdminMediacenterComponent {
     };
     currentTab = 0;
     mediacenterMdsReload = new Boolean(true);
-    private isAdmin: boolean;
-    private hasManagePermissions: boolean;
+    isAdmin: boolean;
+    hasManagePermissions: boolean;
     public mediacentersFile: File;
     public organisationsFile: File;
     public orgMcFile: File;
