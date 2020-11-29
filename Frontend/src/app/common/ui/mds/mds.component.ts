@@ -957,7 +957,7 @@ export class MdsComponent {
       return `<div class="bulk-enable switch" `+(this.bulkBehaviour === BulkBehaviour.Replace ? 'style="display:none"' : '')+`>
                 <label>
                   ` + this.translate.instant('MDS.BULK_OVERRIDE') + `
-                  <input type="checkbox" id="` + id + `" 
+                  <input type="checkbox" id="` + id + `"
                     onchange="` + this.getWindowComponent() + `.toggleBulk('` + widget.id + `', event)"
                     `+(this.bulkBehaviour === BulkBehaviour.Replace ? 'checked' : '')+`>
                   <span class="lever"></span>
@@ -1309,7 +1309,7 @@ export class MdsComponent {
     let postfix='_suggestionsInput';
 
     html+=`<div class="auto-suggest-field"><input type="text" id="`+this.getWidgetDomId(widget)+postfix+`" `
-    html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
+    html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`"
             onkeyup="`+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',event,`+allowCustom+`,`+(widget.values ? true  : false)+`,false,true)">`;
     if(widget.type=='singleoption' && !widget.allowempty){
       setTimeout(()=>{
@@ -1329,7 +1329,7 @@ export class MdsComponent {
       },5);
     }
     if(openCallback){
-      html+=`<a class="btn-flat suggestOpen" 
+      html+=`<a class="btn-flat suggestOpen"
               onclick="`+openCallback+`"
               `;
       html+=`"><i class="material-icons">`+openIcon+`</i></a>`;
@@ -1419,7 +1419,7 @@ export class MdsComponent {
     }
     let html=this.autoSuggestField(widget,'',false,
                 this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
-        +`     <div class="dialog darken" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
+        +`     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+domId+`_tree').style.display='none';"><i class="material-icons">close</i></div>
@@ -1529,7 +1529,7 @@ export class MdsComponent {
                     document.getElementById('`+id+`_minutes').value=Math.floor(unencoded%60);
                   };
                   slider.noUiSlider.on('slide', sliderUpdate);
-                  slider.noUiSlider.on('update', sliderUpdate);                 
+                  slider.noUiSlider.on('update', sliderUpdate);
             `);
     },5);
     return html;
@@ -1877,14 +1877,14 @@ export class MdsComponent {
         preview+=`<img id="`+this.getDomId('preview')+`" `+attr+` alt=""></div>`;
       if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
         preview += `<div class="changePreview">
-                      <a tabindex="0" 
-                      onclick="document.getElementById('`+this.getDomId('preview-select')+`').click()" 
+                      <a tabindex="0"
+                      onclick="document.getElementById('`+this.getDomId('preview-select')+`').click()"
                       onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW')+`">file_upload</i></a>
-                          <a tabindex="0" 
+                          <a tabindex="0"
                           id="`+this.getDomId('preview-delete')+`"
                           `+(this.currentNodes[0].preview.isGenerated ? 'style="display:none"' : '')+`
-                          onclick="`+this.getWindowComponent()+`.deletePreview()" 
-                          onkeydown="if(event.keyCode==13) this.click();" 
+                          onclick="`+this.getWindowComponent()+`.deletePreview()"
+                          onkeydown="if(event.keyCode==13) this.click();"
                           class="btn-circle"><i class="material-icons" aria-label="`+this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW')+`">delete</i></a>
                       </div>`;
       }
@@ -1921,8 +1921,8 @@ export class MdsComponent {
   private renderChildObject(data: any,pos:number){
     let list=document.getElementById(this.getDomId('mdsChildobjects'));
     list.innerHTML+=`
-        <div class="childobject" 
-        draggable="true" 
+        <div class="childobject"
+        draggable="true"
         ondragstart="`+this.getWindowComponent()+`.startChildobjectDrag(event,`+pos+`)"
         ondragover="`+this.getWindowComponent()+`.childobjectDragOver(event,`+pos+`)">
             <div class="icon"><img src="`+data.icon+`"></div>
