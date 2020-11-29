@@ -66,6 +66,10 @@ export class CollectionChooserComponent implements OnInit {
     private columns: ListItem[] = ListItem.getCollectionDefaults();
     private sortBy: string[];
     private sortAscending = false;
+    /**
+     * shall more than 5 recent collections be shown
+     */
+    showMore = false;
 
     constructor(
         private connector: RestConnectorService,
@@ -125,6 +129,7 @@ export class CollectionChooserComponent implements OnInit {
         requestCall.subscribe(data => {
                 this.isLoadingLatest = false;
                 this.hasMoreToLoad = data.collections.length > 0;
+                this.showMore = !!this.lastSearchQuery;
                 this.listLatest = this.listLatest.concat(data.collections);
             }, (error) => {
                 this.isLoadingLatest = false;
