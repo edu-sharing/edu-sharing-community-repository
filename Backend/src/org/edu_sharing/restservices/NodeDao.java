@@ -523,7 +523,12 @@ public class NodeDao {
         NodeEntries result=new NodeEntries();
         List<Node> nodes=new ArrayList<>();
         for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
-            nodes.add(NodeDao.getNode(repoDao,children.get(i).getId(),propFilter).asNode());
+        	try {
+				nodes.add(NodeDao.getNode(repoDao, children.get(i).getId(), propFilter).asNode());
+			}
+        	catch(DAOMissingException daoException){
+        		logger.warn("Missing node " + children.get(i).getId()+" tryed to fetch, skipping fetch", daoException);
+			}
         }
 
         Pagination pagination=new Pagination();
