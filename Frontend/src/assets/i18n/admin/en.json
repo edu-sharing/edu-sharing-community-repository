@@ -424,7 +424,7 @@
             "DELETED": "Media Center \"{{name}}\"was deleted",
             "DATA": {
                 "TITLE": "Basic data",
-                "EDIT_NOT_ALLOWED": "To make further changes to the data, please contact the responsible administrator of the system",
+                "EDIT_NOT_ALLOWED": "The current user is missing the editing mediacenter permission. To make further changes to the data, please contact the responsible administrator of the system",
                 "id": "Internal ID",
                 "location": "Location",
                 "districtAbbreviation": "District abbreviation",
