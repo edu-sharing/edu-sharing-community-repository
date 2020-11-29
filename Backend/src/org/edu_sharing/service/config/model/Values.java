@@ -26,6 +26,7 @@ public class Values implements Serializable {
 	@XmlElement	public ContextMenuEntry[] renderNodeOptions;
 	@XmlElement	public ContextMenuEntry[] collectionNodeOptions;
 	@XmlElement	public ContextMenuEntry[] nodeStoreOptions;
+	@XmlElement	public ContextMenuEntry[] customOptions;
 	@XmlElement	public String[] allowedLicenses;
 	@XmlElement	public License[] customLicenses;
 	@XmlElement	public Workflow[] workflows;
