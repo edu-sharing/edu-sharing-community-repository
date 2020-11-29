@@ -427,7 +427,7 @@
             "DELETED": "Medienzentrum \"{{name}}\" wurde gelöscht",
             "DATA": {
                 "TITLE": "Basisdaten",
-                "EDIT_NOT_ALLOWED": "Um weitere Änderungen an den Daten durchzuführen, kontaktieren Sie bitte den zuständigen Administrator des Systems",
+                "EDIT_NOT_ALLOWED": "Ihrem aktuellen Nutzer fehlen Berechtigungen, Medienzentren zu bearbeiten. Um weitere Änderungen an den Daten durchzuführen, kontaktieren Sie bitte den zuständigen Administrator des Systems",
                 "id": "Interne ID",
                 "location": "Standort",
                 "districtAbbreviation": "Kreiskürzel",
