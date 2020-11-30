@@ -71,7 +71,6 @@ export class VideoControlsComponent implements OnInit {
             throw new Error('Missing required input `video`');
         }
         this.hasRequiredPermissions = this.getHasRequiredPermissions(this.node);
-        console.log(this.hasRequiredPermissions);
         if (this.video.duration) {
             this.onVideoLoaded();
         } else {
