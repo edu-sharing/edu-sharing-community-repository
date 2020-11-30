@@ -39,6 +39,7 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -50,6 +51,7 @@ import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLEncoder;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -245,12 +247,7 @@ public class SearchServiceImpl implements SearchService {
 						
 						//only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
 						StringBuilder additionalQuery=null;
-						if(isAdmin){
-
-						} else if(onlyMemberShips) {
-							
-						
-							
+						if(onlyMemberShips) {
 							List<String> memberShibsOrg = new ArrayList<String>(); 
 							if(memberships != null && memberships.size() > 0) {
 								for(String membershib : memberships) {
@@ -279,7 +276,7 @@ public class SearchServiceImpl implements SearchService {
 								}
 								
 							}
-						} else {
+						} else if(!isAdmin) {
 							additionalQuery = new StringBuilder();
 							additionalQuery.append(" AND NOT ISNULL:\"ccm:group_signup_method\"");
 						}
