@@ -24,10 +24,13 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.NodeTool;
 import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -261,6 +264,16 @@ public class NodeServiceHelper {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 		return repositoryHelper.getCompanyHome();
+	}
+	public static NodeRef getNodeInCompanyNode(String name){
+		return getNodeByName(getCompanyHome(), CCConstants.CCM_TYPE_MAP, name);
+	}
+	public static NodeRef getNodeByName(NodeRef parent, String type, String name){
+		return NodeServiceFactory.getLocalService().getChild(parent.getStoreRef(), parent.getId(), type, CCConstants.CM_NAME, name);
+	}
+	public static void blockImport(NodeRef node) throws Exception {
+		setProperty(node, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED, true);
+		PermissionServiceFactory.getLocalService().setPermissions(node.getId(), new ArrayList<>(), false);
 	}
 
 
