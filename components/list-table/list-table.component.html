@@ -171,7 +171,7 @@
 
                     <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable">
                         <div class="icon-bg">
-                            <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" [attr.role]="presentation" alt=""/>
+                            <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" alt="{{ (node.mediatype ? 'MEDIATYPE.' + node.mediatype : '') | translate}}"/>
                             <i *ngIf="!isCollection(node) && icon" icon iconId="{{icon}}"></i>
                             <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
                         </div>
