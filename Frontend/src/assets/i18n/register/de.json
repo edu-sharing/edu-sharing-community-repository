@@ -32,6 +32,7 @@
         "REQUEST": {
             "TITLE": "Passwort zurücksetzen",
             "HEADLINE": "Passwort vergessen?",
+            "EMAIL_ACCOUNT_NAME": "E-Mail / Accountname",
             "INFO": "Bitte geben Sie Ihre E-Mail-Adresse ein, um ein neues Passwort anzufordern",
             "BUTTON": "Passwort zurücksetzen",
             "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um ein neues Passwort festzulegen."
