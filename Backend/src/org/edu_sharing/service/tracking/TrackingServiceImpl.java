@@ -99,11 +99,13 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             try {
                 statement.setArray(2,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
             } catch (Exception e) {
+                statement.setArray(2, null);
                 logger.info("Failed to track organizations of user",e);
             }
             try {
                 statement.setArray(3,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
             } catch (Exception e) {
+                statement.setArray(3, null);
                 logger.info("Failed to track mediacenter of user",e);
             }
             statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
