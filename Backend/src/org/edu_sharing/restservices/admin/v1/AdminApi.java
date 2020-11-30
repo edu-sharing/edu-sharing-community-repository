@@ -593,8 +593,8 @@ public class AdminApi {
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
 	public Response removeCacheEntry(
-            @ApiParam(value="cacheIndex", defaultValue="false") @QueryParam("cacheIndex") Integer cacheIndex,
-            @ApiParam(value="bean", defaultValue="false") @QueryParam("bean") String bean,
+            @ApiParam(value="cacheIndex") @QueryParam("cacheIndex") Integer cacheIndex,
+            @ApiParam(value="bean") @QueryParam("bean") String bean,
             @Context HttpServletRequest req){
 		try {
             AdminServiceFactory.getInstance().removeCacheEntry(cacheIndex, bean);
