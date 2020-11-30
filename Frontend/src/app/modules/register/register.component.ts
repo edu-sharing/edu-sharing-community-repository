@@ -117,8 +117,8 @@ export class RegisterComponent{
     }
 
     onPasswordRequested() {
-        let email=this.request.email;
-        this.state='done-reset';
-        setTimeout(()=>this.registerDone.email=email);
+        const email = this.request.emailFormControl.value;
+        this.state = 'done-reset';
+        setTimeout(() => this.registerDone.email = email);
     }
 }

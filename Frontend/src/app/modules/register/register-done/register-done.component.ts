@@ -88,7 +88,7 @@ export class RegisterDoneComponent{
             setTimeout(()=>this.checkStatus(),RegisterDoneComponent.STATUS_INTERVAL);
         });
     }
-    private activate(keyUrl: string) {
+    activate(keyUrl: string) {
         this.loading=true;
         if(this.inputState=='done') {
             this.register.activate(keyUrl).subscribe(() => {

@@ -31,6 +31,7 @@
     "REQUEST": {
       "TITLE": "Reset Password",
       "HEADLINE": "Forgot your password?",
+      "EMAIL_ACCOUNT_NAME": "E-Mail / Account name",
       "INFO": "Please enter your e-mail address to set a new password",
       "BUTTON":"Reset password",
       "MAIL_NOTE": "Use the link in the e-mail or enter the activation code to set a new password."
