@@ -53,6 +53,7 @@ import { WorkspaceManagementDialogsComponent } from '../../../modules/management
 import { MainMenuEntriesService } from '../../services/main-menu-entries.service';
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
+import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
 
 /**
  * The main nav (top bar + menus)
@@ -114,6 +115,7 @@ export class MainNavComponent implements AfterViewInit {
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
     @ViewChild('mainMenuSidebar') mainMenuSidebar: MainMenuSidebarComponent;
+    @ViewChild('mainMenuDropdown') mainMenuDropdown: MainMenuDropdownComponent;
 
     /**
      * Show and enables the search field
@@ -354,8 +356,13 @@ export class MainNavComponent implements AfterViewInit {
     }
 
     toggleMenuSidebar() {
-        if (this.canOpen && this.mainMenuSidebar) {
-            this.mainMenuSidebar.toggle();
+        if (this.canOpen) {
+
+            if(this.mainMenuSidebar) {
+                this.mainMenuSidebar.toggle();
+            } else if(this.mainMenuDropdown) {
+                this.mainMenuDropdown.dropdown.menuTrigger.openMenu();
+            }
         }
     }
 
