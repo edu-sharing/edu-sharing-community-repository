@@ -252,7 +252,8 @@ public class MetadataTemplateRenderer {
 						continue;
 					value=renderWidgetValue(widget,value);
 					boolean isLink=false;
-					if(widget.getLink()!=null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)){
+					// do not use global link for vcard, they handle links seperately
+					if(!widget.getType().equals("vcard") && widget.getLink()!=null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)){
 						widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 						isLink=true;
 					}
@@ -260,14 +261,18 @@ public class MetadataTemplateRenderer {
 						try {
 							HashMap<String, Object> data = VCardConverter.vcardToHashMap(value).get(0);
 							value = VCardConverter.getNameForVCard("",data);
-							if (data.get(CCConstants.VCARD_URL) != null) {
-								String url = data.get(CCConstants.VCARD_URL).toString();
-								if(!url.isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
-									if (!url.contains("://"))
-										url = "http://" + url;
-									widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
-									isLink = true;
+							Object linkUrl = data.get(widget.getLink() == null ? CCConstants.VCARD_URL :
+									widget.getLink().equals("email") ? CCConstants.VCARD_EMAIL
+											: null);
+							String url=linkUrl != null ? linkUrl.toString() : "";
+							if(!url.isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
+								if(widget.getLink().equals("email")) {
+									url = "mailto:" + url;
+								} else if (!url.contains("://")) {
+									url = "http://" + url;
 								}
+								widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
+								isLink = true;
 							}
 						}catch(Throwable t){
 							// empty or invalid value
