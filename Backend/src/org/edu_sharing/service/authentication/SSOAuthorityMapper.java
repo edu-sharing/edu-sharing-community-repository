@@ -180,7 +180,7 @@ public class SSOAuthorityMapper {
 				return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
 			}
 		};
-		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
+		return AuthenticationUtil.runAsSystem(runAs);
 	}
 	
 	
@@ -617,13 +617,17 @@ public class SSOAuthorityMapper {
 	}
 
 	public String getSSOUsernameProp() {
-		String userName = null;
+		return getUserAttribute(CCConstants.CM_PROP_PERSON_USERNAME);
+	}
+
+	public String getUserAttribute(String alfrescoUserAtt){
+		String result = null;
 		for (Map.Entry<String, String> entry : mappingConfig.getPersonMapping().entrySet()) {
-			if (entry.getValue().equals(CCConstants.CM_PROP_PERSON_USERNAME)) {
-				userName = entry.getKey();
+			if (entry.getValue().equals(alfrescoUserAtt)) {
+				result = entry.getKey();
 			}
 		}
-		return userName;
+		return result;
 	}
 
 	private void logErrorParams(String missing, HashMap<String, String> ssoAttributes) {

@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.tools.security;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -109,5 +110,34 @@ public class SignatureVerifier {
 			
 			return new Result(HttpServletResponse.SC_OK, "OK");
 		
+	}
+
+	/**
+	 *
+	 * @param httpReq
+	 * @return ApplicationInfo of verified app
+	 */
+	public ApplicationInfo verifyAppSignature(HttpServletRequest httpReq) {
+		ApplicationInfo appResult = null;
+		if(httpReq.getHeader("X-Edu-App-Id")!=null){
+			String appId=httpReq.getHeader("X-Edu-App-Id");
+			String sig=httpReq.getHeader("X-Edu-App-Sig");
+			String signed=httpReq.getHeader("X-Edu-App-Signed");
+			String ts=httpReq.getHeader("X-Edu-App-Ts");
+			ApplicationInfo app = ApplicationInfoList.getRepositoryInfoById(appId);
+			if(app==null){
+				logger.warn("X-Edu-App-Id header was sent but the tool "+appId+" was not found in the list of registered apps");
+			}else{
+				SignatureVerifier.Result result = this.verify(appId, sig, signed, ts);
+				if(result.getStatuscode() == HttpServletResponse.SC_OK){
+					appResult = app;
+					logger.debug("Application request verified returning "+ appResult.getAppId());
+				}
+				else{
+					logger.warn("X-Edu-App-Id header was sent but signature check failed for app "+appId+":"+result.getMessage());
+				}
+			}
+		}
+		return appResult;
 	}
 }

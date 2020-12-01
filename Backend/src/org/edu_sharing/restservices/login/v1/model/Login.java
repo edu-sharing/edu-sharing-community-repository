@@ -42,6 +42,9 @@ public class Login  {
   public final static String STATUS_CODE_PASSWORD_EXPIRED = "PASSWORD_EXPIRED";
 
 
+  public Login(){
+
+  }
 
 
 public Login(boolean isValidLogin, String scope, HttpSession session) {
