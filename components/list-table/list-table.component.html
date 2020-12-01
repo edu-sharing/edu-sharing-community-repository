@@ -164,7 +164,7 @@
                             <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
                             <div class="subline">{{'ORIGINAL_DELETED_INFO' | translate }}</div>
                             <button mat-button color="primary"
-                                    (click)="delete(node); $event.stopPropagation();" *ngIf="canDelete ? canDelete(node) : false"
+                                    (click)="delete(node); $event.stopPropagation();$event.preventDefault();" *ngIf="canDelete ? canDelete(node) : false"
                             >{{ 'ORIGINAL_DELETE' | translate}}</button>
                         </div>
                     </div>
