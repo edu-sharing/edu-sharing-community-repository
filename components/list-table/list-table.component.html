@@ -106,7 +106,7 @@
                         <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
                     </div>
                     <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
-                        <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="presentation">
+                        <img src="{{getIconUrl(node)}}" alt="{{ (node.mediatype ? 'NODE.mediatype' : '') | translate}} {{ (node.mediatype ? 'MEDIATYPE.' + node.mediatype : '') | translate}}"/>
                     </div>
                     <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                         <div class="nodeRating"></div>
