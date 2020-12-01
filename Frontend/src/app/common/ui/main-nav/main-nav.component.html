@@ -143,6 +143,8 @@
           [style.top]="createMenuY + 'px'"
           #dropdownTriggerDummy="matMenuTrigger"
           [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+          tabindex="-1"
+          aria-hidden="true"
         ></button>
       </div>
       <div class="topBarSearch" [class.noScope]="!showScope">
