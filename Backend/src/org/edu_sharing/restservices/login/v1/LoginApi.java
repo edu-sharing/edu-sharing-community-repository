@@ -61,6 +61,7 @@ public class LoginApi  {
 		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
 			personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
 		}
+		String status = null;
 		if(authenticated && personActiveStatus != null && !personActiveStatus.trim().equals("")) {
 			String username = (String)req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
 			NodeRef authorityNodeRef = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(username);
@@ -71,10 +72,16 @@ public class LoginApi  {
 			if(!personActiveStatus.equals(personStatus)) {
 				authenticated = false;
 				authTool.logoutWithoutSecurityContext(authTool.getTicketFromSession(req.getSession()));
+				status = Login.STATUS_CODE_PERSON_BLOCKED;
 				req.getSession().invalidate();
 			}
 		}
-    	return Response.ok(new Login(authenticated,authTool.getScope(),req.getSession())).build();
+
+		if(status != null){
+			return Response.ok(new Login(authenticated,authTool.getScope(),null, req.getSession(), status)).build();
+		}else{
+			return Response.ok(new Login(authenticated,authTool.getScope(),req.getSession())).build();
+		}
     }
     
     
