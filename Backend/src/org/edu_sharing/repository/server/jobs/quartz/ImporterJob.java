@@ -133,7 +133,7 @@ public class ImporterJob extends AbstractJob {
 		} catch (ParseException e) {
 			logger.error(e.getMessage());
 		}catch (NullPointerException e){
-			logger.error(e.getMessage());
+			logger.debug("from/until not set");
 		}
 
 		if(from == null && until == null){

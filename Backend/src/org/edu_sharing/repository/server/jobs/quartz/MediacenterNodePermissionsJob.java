@@ -62,7 +62,7 @@ public class MediacenterNodePermissionsJob extends AbstractJob {
 
 		if(fromLocal == null && untilLocal == null){
 			String periodInDaysStr = (String)jobDataMap.get(OAIConst.PARAM_PERIOD_IN_DAYS);
-			if(periodInDaysStr != null) {
+			if(periodInDaysStr != null && !periodInDaysStr.trim().equals("")) {
 				Long periodInDays = new Long(periodInDaysStr);
 				Long periodInMs = periodInDays * 24 * 60 * 60 * 1000;
 				untilLocal = new Date();
