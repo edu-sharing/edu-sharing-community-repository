@@ -1,6 +1,15 @@
 
 <div #drag class="dragBadge" [style.top]="(id*-9999999)+'px'"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
-<button #menuTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [style.left]="dropdownLeft" [style.top]="dropdownTop" [matMenuTriggerFor]="dropdown.menu"></button>
+<button
+    #menuTrigger="matMenuTrigger"
+    mat-button
+    class="dropdown-dummy"
+    [style.left]="dropdownLeft"
+    [style.top]="dropdownTop"
+    [matMenuTriggerFor]="dropdown.menu"
+    tabindex="-1"
+    aria-hidden="true"
+></button>
 <dropdown #dropdown [options]="dropdownOptions" [callbackObject]="selectedNodes ? selectedNodes[0] : null"></dropdown>
 
 <card
@@ -99,7 +108,8 @@
                  (nodesHoveringChange)="onNodesHoveringChange($event, node)"
                  (nodesDrop)="onNodesDrop($event, node)"
                  tabindex="0"
-                 (keyup.enter)="doubleClick(node)">
+                 (keyup.enter)="doubleClick(node)"
+            >
                 <!-- custom data binding from outside -->
                 <app-node-url [node]="node" [nodes]="_nodes" [scope]="scope" [unclickable]="!createLink">
                     <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
