@@ -18,7 +18,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * {"LUCENE_QUERY":"@cm\\:edu_metadataset:\"mds_oeh\" AND ISNOTNULL:\"ccm:wwwurl\" AND -ASPECT:\"ccm:collection_io_reference\" AND PARENT:\"workspace://SpacesStore/b462fb4f-824b-47df-917c-3890f7e136da\"","MIME_TYPE":"text/plain","EXECUTE":"true"}
@@ -37,7 +37,7 @@ public class FixMimeTypeJob extends AbstractJob {
     NodeService nodeService = serviceRegistry.getNodeService();
     ContentService contentService = serviceRegistry.getContentService();
 
-    private static final int PAGE_SIZE = 100;
+    private static final int PAGE_SIZE = 1000;
     BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
 
@@ -59,14 +59,15 @@ public class FixMimeTypeJob extends AbstractJob {
         Boolean execute = new Boolean((String) jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_EXECUTE));
 
         AuthenticationUtil.runAsSystem(()->{
-            execute(0,execute, luceneQuery, mimeType);
+            Set<NodeRef> collect = new HashSet<>();
+            execute(0,luceneQuery, collect);
+            fix(collect,execute,mimeType);
             return null;
         });
 
     }
 
-
-    private void execute(int page, boolean execute, String query, String mimeType) {
+    private void execute(int page, String query, Set<NodeRef> collect) {
         logger.info("page:" + page);
         SearchParameters sp = new SearchParameters();
         sp.setLanguage(SearchService.LANGUAGE_LUCENE);
@@ -80,11 +81,20 @@ public class FixMimeTypeJob extends AbstractJob {
         ResultSet resultSet = searchService.query(sp);
 
         for (NodeRef nodeRef : resultSet.getNodeRefs()) {
+            collect.add(nodeRef);
+        }
+        if(resultSet.hasMore()) {
+            execute(page + PAGE_SIZE,query,collect);
+        }
+    }
 
+    public void fix(Set<NodeRef> nodeRefs, boolean execute, String mimeType){
+        logger.info("fixing:" + nodeRefs.size());
+        for(NodeRef nodeRef:nodeRefs){
             ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
-            logger.info("fixing mimetype:" + reader.getMimetype()+ " to:" + mimeType);
+            logger.info("fixing mimetype:" + reader.getMimetype()+ " to:" + mimeType +" "+ nodeRef);
+            nodeRefs.add(nodeRef);
             if (execute) {
-
                 serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
                     try {
                         policyBehaviourFilter.disableBehaviour(nodeRef);
@@ -99,10 +109,6 @@ public class FixMimeTypeJob extends AbstractJob {
                     }
                 });
             }
-
-        }
-        if(resultSet.hasMore()) {
-            execute(page + PAGE_SIZE,execute,query,mimeType);
         }
     }
 }
