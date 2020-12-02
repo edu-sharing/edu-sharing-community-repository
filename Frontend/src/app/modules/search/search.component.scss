@@ -96,6 +96,8 @@ $sidenavTopBaseOffset:110px;
 .sorting{
   position: absolute;
   right: 10px;
+  border: unset;
+  background: unset;
   .sorting-info {
     padding: 0 10px;
     display: flex;

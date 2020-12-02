@@ -266,12 +266,18 @@
                         <div>
                             {{ 'SEARCH.MATERIALS' | translate}}
                             <span *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</span>
-                            <div *ngIf="searchService.sort.materialsColumns" class="sorting" [class.clickable]="searchService.sort.materialsColumns" (click)="searchService.sort.materialsColumns ? searchService.sort.materials=true : null">
+                            <!-- TODO: make popup menu usable with keyboard -->
+                            <button
+                                *ngIf="searchService.sort.materialsColumns"
+                                class="sorting clickable"
+                                (click)="searchService.sort.materials = true"
+                                aria-haspopup="true"
+                            >
                                 <div class="sorting-info">
                                     <div>{{'NODE.'+searchService.sort.materialsSortBy | translate}}</div>
                                     <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
                                 </div>
-                            </div>
+                            </button>
                             <sort-dropdown [(open)]="searchService.sort.materials"
                                            [columns]="searchService.sort.materialsColumns"
                                            [sortAscending]="searchService.sort.materialsSortAscending"
