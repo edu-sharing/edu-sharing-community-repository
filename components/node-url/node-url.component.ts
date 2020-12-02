@@ -7,7 +7,8 @@ import { NodeHelper } from '../../node-helper';
 
 @Component({
     selector: 'app-node-url',
-    template: ` <ng-template #content><ng-content></ng-content></ng-template>
+    template: `
+        <ng-template #content><ng-content></ng-content></ng-template>
         <a *ngIf="unclickable">
             <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
@@ -18,7 +19,9 @@ import { NodeHelper } from '../../node-helper';
             [queryParams]="get('queryParams')"
         >
             <ng-container *ngTemplateOutlet="content"></ng-container>
-        </a>`,
+        </a>
+    `,
+    styleUrls: ['node-url.component.scss'],
 })
 export class NodeUrlComponent {
     @Input() set node(node: Node) {
