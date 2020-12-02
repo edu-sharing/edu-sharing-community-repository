@@ -107,7 +107,7 @@
                  (nodesDragEnter)="onNodesDragEnter(node)"
                  (nodesHoveringChange)="onNodesHoveringChange($event, node)"
                  (nodesDrop)="onNodesDrop($event, node)"
-                 tabindex="0"
+                 [tabindex]="createLink ? -1 : 0"
                  (keyup.enter)="doubleClick(node)"
             >
                 <!-- custom data binding from outside -->
