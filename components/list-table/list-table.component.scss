@@ -839,6 +839,11 @@ a.rowInner {
     border-radius: 2pt;
     &:not(.option-item) {
         border-bottom: 5px solid $primary;
+        // Compensate border-bottom for focus highlight
+        overflow: visible;
+        app-node-url {
+            height: calc(100% + 5px);
+        }
     }
 }
 
