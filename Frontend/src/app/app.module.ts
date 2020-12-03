@@ -66,6 +66,7 @@ import { MdsEditorEmbeddedComponent } from './common/ui/mds-editor/mds-editor-em
 import { MdsEditorWidgetSuggestionChipsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
 import { SkipTargetDirective } from './common/ui/skip-nav/skip-target.directive';
 import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
+import {MdsEditorWidgetFileUploadComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -116,6 +117,7 @@ import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
         MdsEditorWidgetVersionComponent,
         MdsEditorWidgetLinkComponent,
         MdsEditorWidgetLicenseComponent,
+        MdsEditorWidgetFileUploadComponent,
         MdsEditorWidgetTreeComponent,
         MdsEditorWidgetTreeCoreComponent,
         HighlightPipe,

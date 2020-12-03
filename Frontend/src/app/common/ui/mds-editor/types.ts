@@ -71,6 +71,7 @@ export enum NativeWidgetType {
     ChildObjects = 'childobjects',
     Maptemplate = 'maptemplate',
     License = 'license',
+    FileUpload = 'fileupload',
     Workflow = 'workflow',
     Author = 'author',
 }

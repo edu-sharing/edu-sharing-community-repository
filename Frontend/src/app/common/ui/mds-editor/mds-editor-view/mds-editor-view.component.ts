@@ -39,6 +39,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {MdsEditorWidgetFileUploadComponent} from '../widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -64,6 +65,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         childobjects: MdsEditorWidgetChildobjectsComponent,
         maptemplate: MdsEditorWidgetLinkComponent,
         license: MdsEditorWidgetLicenseComponent,
+        fileupload: MdsEditorWidgetFileUploadComponent,
         workflow: null as null,
     };
     private static readonly widgetComponents: {
