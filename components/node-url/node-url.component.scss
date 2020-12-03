@@ -1,8 +1,10 @@
 @import '../../styles/variables';
 
 // Draw focus highlight above content background
-a {
+:host {
     position: relative;
+}
+a {
     &:focus {
         box-shadow: unset !important;
         &:before {

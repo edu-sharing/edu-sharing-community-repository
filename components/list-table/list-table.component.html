@@ -79,7 +79,7 @@
               class="clickable option-item item"
           ></app-list-option-item>
         </div>
-        <div matRipple matRippleColor="primary" *ngFor="let node of _nodes; let i = index"
+        <div *ngFor="let node of _nodes; let i = index"
             class="rowFrame item-container item"
             [class.order-animation]="orderElementsActive"
             [class.nodeCollection]="isCollection(node)"
@@ -111,7 +111,7 @@
                  (keyup.enter)="doubleClick(node)"
             >
                 <!-- custom data binding from outside -->
-                <app-node-url [node]="node" [nodes]="_nodes" [scope]="scope" [unclickable]="!createLink">
+                <app-node-url matRipple matRippleColor="primary" [node]="node" [nodes]="_nodes" [scope]="scope" [unclickable]="!createLink">
                     <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
                     <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                         <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
