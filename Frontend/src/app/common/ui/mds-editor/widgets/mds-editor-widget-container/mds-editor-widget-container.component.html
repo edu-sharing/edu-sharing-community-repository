@@ -33,6 +33,7 @@
   appRegisterFormField
   *ngIf="wrapInFormField"
   [floatLabel]="widget.definition.placeholder ? 'always' : 'auto'"
+  class="widget-form-field-{{widget.definition.id.replace(':','-')}}"
   [class.warn]="missingRequired === RequiredMode.MandatoryForPublish"
 >
   <mat-label [id]="labelId">

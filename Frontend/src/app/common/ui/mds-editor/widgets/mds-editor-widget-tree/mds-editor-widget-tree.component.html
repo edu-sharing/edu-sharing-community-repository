@@ -22,7 +22,7 @@
     <input
       #input
       autocomplete="off"
-      [placeholder]="widget.definition.placeholder"
+      [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
       [matChipInputFor]="chipList"
     />
   </mat-chip-list>

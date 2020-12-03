@@ -35,7 +35,7 @@
       autocomplete="off"
       [formControl]="inputControl"
       [matAutocomplete]="auto"
-      [placeholder]="widget.definition.placeholder"
+      [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
       [matChipInputFor]="chipList"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
       [matChipInputAddOnBlur]="false"
