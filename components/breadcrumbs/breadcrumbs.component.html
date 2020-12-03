@@ -1,144 +1,137 @@
-<div
-  *ngIf="clickable"
-  class="breadcrumb"
-  [class.breadcrumbDesktop]="short == 'auto'"
-  [class.breadrumbVisible]="short == 'never'"
->
-  <div>
-    <button
-      mat-button
-      color="primary"
-      *ngIf="home"
-      tabindex="0"
-      class="home mat-button-no-uppercase"
-      [class.clickable]="clickable"
-      (click)="openBreadcrumb(0)"
-    >
-      {{ home | translate }}
-    </button>
-    <button
-      mat-button
-      color="primary"
-      *ngIf="!home"
-      tabindex="0"
-      class="home homeIcon mat-button-no-uppercase"
-      [class.clickable]="clickable"
-      (click)="openBreadcrumb(0)"
-    >
-      <i icon iconId="home"></i>
-    </button>
+<ng-container *ngIf="clickable">
+  <!-- Full (not short) breadcrumbs -->
+  <div class="breadcrumb breadcrumb-full">
+    <ng-container
+      *ngTemplateOutlet="simpleBreadcrumbElement; context: { index: 0, inner: homeInner }"
+    ></ng-container>
+    <ng-container *ngFor="let node of nodes; let index = index">
+      <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+      <ng-container
+        *ngTemplateOutlet="nodeBreadcrumbElement; context: { node: node, index: index }"
+      ></ng-container>
+    </ng-container>
   </div>
-  <ng-container *ngFor="let node of _breadcrumbsAsNode; let i = index">
-    <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
-    <app-node-url [node]="node" [unclickable]="!createLink" (click)="openBreadcrumb(i)">
-      <button
-        *ngIf="clickable"
-        mat-button
-        color="primary"
-        [appNodesDropTarget]="canDropNodes.bind(this, node)"
-        (nodesHoveringChange)="onNodesHoveringChange($event, node)"
-        (nodesDrop)="onNodesDrop($event, node)"
-        [class.homeIsIcon]="!home"
-        class="folder mat-button-no-uppercase"
-        [class.clickable]="clickable"
-        [class.selected]="node && dragHover == node"
-      >
-        {{ node ? node.name : '' }}
-      </button>
-    </app-node-url>
-  </ng-container>
-</div>
-<div
-  *ngIf="!clickable"
-  class="breadcrumb breadcrumb-readonly"
-  [class.breadcrumbShort]="short == 'always'"
-  [class.breadcrumbDesktop]="short == 'auto'"
-  [class.breadrumbVisible]="short == 'never'"
->
-  <span>
-    <span *ngIf="home" class="home mat-button-no-uppercase">{{ home | translate }}</span>
-    <span *ngIf="!home" class="home homeIcon mat-button-no-uppercase"
-      ><i icon iconId="home"></i
-    ></span>
-  </span>
-  <span *ngIf="short === 'always' && _breadcrumbsAsNode.length > 1">
+
+  <!-- Short breadcrumbs
+  
+  Show only the last breadcrumbs and either a back- or a home button.
+  -->
+  <div class="breadcrumb breadcrumb-short">
+    <!-- root / home breadcrumb -->
+    <ng-container *ngIf="nodes.length <= 1">
+      <ng-container
+        *ngTemplateOutlet="
+          simpleBreadcrumbElement;
+          context: {
+            index: 0,
+            inner: homeInner,
+            classes: 'breadcrumb-element-home'
+          }
+        "
+      ></ng-container>
+      <i
+        *ngIf="nodes.length === 1"
+        aria-hidden="true"
+        icon
+        iconId="keyboard_arrow_right"
+        class="breadcrumb-arrow"
+      ></i>
+    </ng-container>
+    <!-- back / level-up breadcrumb -->
+    <ng-container *ngIf="nodes.length > 1">
+      <ng-container
+        *ngTemplateOutlet="
+          nodeBreadcrumbElement;
+          context: { node: nodes[nodes.length - 2], index: nodes.length - 2, inner: backInner }
+        "
+      ></ng-container>
+    </ng-container>
+    <!-- breadcrumb for current node -->
+    <ng-container *ngIf="nodes.length > 0">
+      <ng-container
+        *ngTemplateOutlet="
+          nodeBreadcrumbElement;
+          context: { node: nodes[nodes.length - 1], index: nodes.length - 1 }
+        "
+      ></ng-container>
+    </ng-container>
+  </div>
+</ng-container>
+
+<!-- Read-only breadcrumbs.
+
+Short version works only with `short="always"`.
+-->
+<div *ngIf="!clickable" class="breadcrumb breadcrumb-readonly">
+  <span *ngIf="home" class="home mat-button-no-uppercase">{{ home | translate }}</span>
+  <span *ngIf="!home" class="home home-icon mat-button-no-uppercase"
+    ><i icon iconId="home"></i
+  ></span>
+  <ng-container *ngIf="short === 'always' && nodes.length > 1">
     <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="folder">...</span>
-  </span>
-  <span
-    *ngFor="
-      let node of short === 'always' && _breadcrumbsAsNode.length > 1
-        ? [_breadcrumbsAsNode[_breadcrumbsAsNode.length - 1]]
-        : _breadcrumbsAsNode
-    "
+  </ng-container>
+  <ng-container
+    *ngFor="let node of short === 'always' && nodes.length > 1 ? [nodes[nodes.length - 1]] : nodes"
   >
     <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="folder">{{ node ? node.name : '' }}</span>
-  </span>
+  </ng-container>
 </div>
-<div
-  class="breadcrumb"
-  [class.breadcrumbMobile]="short == 'auto'"
-  [class.breadrumbVisible]="short == 'always'"
-  *ngIf="_breadcrumbsAsNodeShort"
->
-  <button
-    style="margin-left: 20px"
-    mat-button
-    color="primary"
-    *ngIf="home && _breadcrumbsAsNode.length < 2"
-    tabindex="0"
-    class="home mat-button-no-uppercase"
-    [class.clickable]="clickable"
-    (click)="openBreadcrumb(0)"
-    (keyup.enter)="openBreadcrumb(0)"
-  >
+
+<ng-template #homeInner>
+  <ng-container *ngIf="home">
     {{ home | translate }}
-    <i
-      *ngIf="_breadcrumbsAsNode.length < 1"
-      icon
-      iconId="keyboard_arrow_down"
-      class="dropdown-icon"
-    ></i>
-    <i
-      *ngIf="_breadcrumbsAsNode.length >= 1"
-      icon
-      iconId="keyboard_arrow_right"
-      class="breadcrumb-arrow"
-    ></i>
-  </button>
-  <button
-    mat-button
-    color="primary"
-    *ngIf="!home && _breadcrumbsAsNode.length < 2"
+  </ng-container>
+  <ng-container *ngIf="!home">
+    <i icon iconId="home" class="home-icon"></i>
+  </ng-container>
+  <!-- (Christopher 2020-12-04) The condition for this seems kind of arbitrary. Is this still used
+  somewhere? -->
+  <i *ngIf="home && nodes.length < 1" icon iconId="keyboard_arrow_down" class="dropdown-icon"></i>
+</ng-template>
+
+<ng-template #backInner>
+  <i icon iconId="keyboard_arrow_left" class="breadcrumb-arrow"></i>
+</ng-template>
+
+<ng-template #simpleBreadcrumbElement let-index="index" let-inner="inner" let-classes="classes">
+  <div
+    #trigger
+    cdkMonitorElementFocus
+    class="breadcrumb-element clickable {{ classes }}"
+    role="button"
     tabindex="0"
-    class="home homeIcon mat-button-no-uppercase"
-    [class.clickable]="clickable"
-    (click)="openBreadcrumb(0)"
-    (keyup.enter)="openBreadcrumb(0)"
+    (click)="openBreadcrumb(index)"
   >
-    <i icon iconId="home"></i>
-  </button>
+    <div class="breadcrumb-inner">
+      <ng-container *ngTemplateOutlet="inner"></ng-container>
+    </div>
+    <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
+  </div>
+</ng-template>
+
+<ng-template #nodeBreadcrumbElement let-node="node" let-index="index" let-inner="inner">
   <app-node-url
-    *ngIf="_breadcrumbsAsNodeShort.length > 1"
-    [node]="_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length - 2]"
+    #trigger="appElementRef"
+    appElementRef
+    cdkMonitorSubtreeFocus
+    class="breadcrumb-element clickable"
+    [node]="node"
     [unclickable]="!createLink"
-    class="mat-button-no-uppercase"
-    (click)="openBreadcrumb(_breadcrumbsAsNode.length - 1)"
-    ><button mat-button><i icon iconId="keyboard_arrow_left" class="breadcrumb-arrow"></i></button
-  ></app-node-url>
-  <app-node-url
-    *ngIf="_breadcrumbsAsNodeShort.length"
-    [node]="_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length - 1]"
-    [unclickable]="!createLink"
-    (click)="openBreadcrumb(_breadcrumbsAsNode.length)"
+    (click)="openBreadcrumb(index + 1)"
   >
-    <button mat-button color="primary" class="mat-button-no-uppercase">
-      {{
-        _breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length - 1]
-          ? _breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length - 1].name
-          : ''
-      }}
-    </button>
+    <div
+      class="breadcrumb-inner"
+      [appNodesDropTarget]="canDropNodes.bind(this, node)"
+      (nodesHoveringChange)="onNodesHoveringChange($event, node)"
+      (nodesDrop)="onNodesDrop($event, node)"
+      [class.selected]="node && dragHover == node"
+    >
+      <ng-container *ngIf="!inner; else inner">
+        {{ node ? node.name : '' }}
+      </ng-container>
+    </div>
+    <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
   </app-node-url>
-</div>
+</ng-template>

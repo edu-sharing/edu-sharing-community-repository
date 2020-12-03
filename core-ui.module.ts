@@ -56,6 +56,7 @@ import {RouterLink, RouterModule} from "@angular/router";
 import {NodeUrlComponent} from "./components/node-url/node-url.component";
 import { DurationPipe } from './components/video-controls/duration.pipe';
 import {BitwisePipe} from './pipes/bitwise.pipe';
+import { ElementRefDirective } from './directives/element-ref.directive';
 
 @NgModule({
     declarations: [
@@ -93,6 +94,7 @@ import {BitwisePipe} from './pipes/bitwise.pipe';
         DistinctClickDirective,
         DurationPipe,
         BitwisePipe,
+        ElementRefDirective,
     ],
     imports: [
         A11yModule,

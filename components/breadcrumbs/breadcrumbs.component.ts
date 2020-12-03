@@ -1,17 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { UIHelper } from '../../ui-helper';
-import {
-    NodeList,
-    Node,
-    RestNodeService,
-    TemporaryStorageService,
-    UIService,
-} from '../../../core-module/core.module';
-import { Router } from '@angular/router';
+import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
+import { Node, RestNodeService } from '../../../core-module/core.module';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 
 /**
- * A module that provides breadcrumbs for nodes or collections
+ * Breadcrumbs for nodes or collections.
  */
 @Component({
     selector: 'breadcrumbs',
@@ -20,91 +12,78 @@ import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 })
 export class BreadcrumbsComponent {
     /**
-     * Caption of the home, if not set, an icon is used
+     * Caption of the home, if not set, an icon is used.
      */
     @Input() home: string;
     /**
-     * Attach a clickable class so the user cursor will be a hand
+     * Attach a clickable class so the user cursor will be a hand.
      */
     @Input() clickable = true;
     /**
-     * Show a short variant (only the last item)
-     * auto (default) decides via media query
-     * Also possible: never, always
+     * Show a short variant (only the last item).
+     *
+     * `auto` (default) decides via media query.
      */
-    @Input() short = 'auto';
-
+    @HostBinding('attr.short')
+    @Input() short: 'never' | 'always' | 'auto' = 'auto';
     /**
-     * should automatically be linked via angular routing
-     * If set true, the onClick emitter will only be fired for the "root" element
+     * Should automatically be linked via angular routing.
+     *
+     * If set true, the onClick emitter will only be fired for the "root" element.
      */
     @Input() createLink = true;
     /**
-     * Allow Dropping of other items (nodes) on to the breadcrumb items
-     * A function that should return true or false and gets the same argument object as the onDrop callback
+     * Allow Dropping of other items (nodes) on to the breadcrumb items.
+     *
+     * A function that should return true or false and gets the same argument object as the onDrop
+     * callback.
      */
-    @Input() canDrop: Function = (arg0: DropData) => {
+    @Input() canDrop: (arg0: DropData) => boolean = (arg0: DropData) => {
         return false;
     };
     /**
-     * Set the id of the parent where all sub-nodes are currently in, e.g. SHARED_FILES
-     */
-    @Input() set homeId(homeId: string) {
-        if (!homeId) return;
-        this.node.getChildren(homeId).subscribe((data: NodeList) => {
-            this.mainParents = data.nodes;
-        });
-    }
-    /**
-     * Set a search query so the breadcrumbs will show this query
+     * Set a search query so the breadcrumbs will show this query.
      */
     @Input() set searchQuery(searchQuery: string) {
         this._searchQuery = searchQuery;
         this.addSearch();
     }
     /**
-     * Set the breadcrumb list as a @Node array
+     * Set the breadcrumb list as a @Node array.
      */
     @Input() set breadcrumbsAsNode(nodes: Node[]) {
         if (nodes == null) return;
-        this._breadcrumbsAsNode = nodes;
-        this.generateShort();
+        this.nodes = nodes;
     }
     /**
-     * Set the breadcrumb main id
-     * The breadcrumb nodes will get async resolved via api
+     * Set the breadcrumb main id.
+     *
+     * The breadcrumb nodes will get async resolved via API.
      */
     @Input() set breadcrumbsForId(id: string) {
         if (id == null) return;
-        this.node.getNodeParents(id).subscribe(nodes => {
-            this._breadcrumbsAsNode = nodes.nodes.reverse();
-            this.generateShort();
+        this.node.getNodeParents(id).subscribe((nodes) => {
+            this.nodes = nodes.nodes.reverse();
         });
     }
 
-    @Output() onClick = new EventEmitter();
     /**
-     * Called when an item is dropped on the breadcrumbs
+     * A breadcrumb is clicked.
      *
-     * @type {EventEmitter<any>}
+     * Passes the index **starting at 1** of the clicked breadcrumb, or 0 for the root element.
+     */
+    @Output() onClick = new EventEmitter<number>();
+    /**
+     * Called when an item is dropped on the breadcrumbs.
      */
     @Output() onDrop = new EventEmitter();
 
-    _breadcrumbsAsNode: Node[] = [];
-    _breadcrumbsAsNodeShort: Node[] = [];
+    nodes: Node[] = [];
     dragHover: Node;
 
-    private _breadcrumbsAsId: string[];
     private _searchQuery: string;
-    private isBuilding = false;
-    private mainParents: Node[];
 
-    constructor(
-        private node: RestNodeService,
-        private router: Router,
-        private storage: TemporaryStorageService,
-        private ui: UIService,
-    ) {}
+    constructor(private node: RestNodeService) {}
 
     canDropNodes(target: Node, { event, nodes, dropAction }: DragData) {
         return this.canDrop({ event, nodes, dropAction, target });
@@ -135,51 +114,27 @@ export class BreadcrumbsComponent {
         });
     }
 
-    private openBreadcrumb(position: number) {
+    openBreadcrumb(position: number) {
         this.onClick.emit(position);
     }
 
-    private generateShort() {
-        this.addSearch();
-        if (this._breadcrumbsAsNode.length < 2)
-            this._breadcrumbsAsNodeShort = this._breadcrumbsAsNode.slice();
-        else
-            this._breadcrumbsAsNodeShort = this._breadcrumbsAsNode.slice(
-                this._breadcrumbsAsNode.length - 2,
-            );
-    }
-
     private addSearch() {
-        let add = !(
-            this._breadcrumbsAsNode.length > 0 &&
-            this._breadcrumbsAsNode[this._breadcrumbsAsNode.length - 1] &&
-            this._breadcrumbsAsNode[this._breadcrumbsAsNode.length - 1].type ==
-                'SEARCH'
+        const add = !(
+            this.nodes.length > 0 &&
+            this.nodes[this.nodes.length - 1] &&
+            this.nodes[this.nodes.length - 1].type === 'SEARCH'
         );
         if (this._searchQuery) {
-            let search = new Node();
-            search.name = "'" + this._searchQuery + "'";
+            const search = new Node();
+            search.name = `'${this._searchQuery}'`;
             search.type = 'SEARCH';
             if (add) {
-                this._breadcrumbsAsNode.splice(
-                    this._breadcrumbsAsNode.length,
-                    0,
-                    search,
-                );
+                this.nodes.splice(this.nodes.length, 0, search);
             } else {
-                this._breadcrumbsAsNode[
-                    this._breadcrumbsAsNode.length - 1
-                ] = search;
+                this.nodes[this.nodes.length - 1] = search;
             }
         } else if (!add) {
-            this._breadcrumbsAsNode.splice(this._breadcrumbsAsNode.length, 1);
+            this.nodes.splice(this.nodes.length, 1);
         }
-    }
-
-    private parentContains(id: String) {
-        for (let node of this.mainParents) {
-            if (node.ref.id == id) return true;
-        }
-        return false;
     }
 }

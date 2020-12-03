@@ -1,94 +1,111 @@
-@import "../../styles/variables";
+@import '../../styles/variables';
 
-.breadcrumb::before{
-  content:''!important;
-}
-.breadcrumbMobile .homeIsIcon{
-  word-break: break-all;
+:host {
+    display: flex;
+    align-items: center;
 }
 
-.breadcrumb{
-  width:100%;
-  max-height:1.5em;
-  align-items: center;
-  overflow:hidden;
-  cursor: default;
-  display: none;
-  button {
+:host[short='always'] .breadcrumb-full {
+    display: none;
+}
+
+:host[short='never'] .breadcrumb-short {
+    display: none;
+}
+
+:host[short='auto'] {
+    @media screen and (max-width: $mobileTabSwitchWidth) {
+        .breadcrumb-full {
+            display: none;
+        }
+    }
+    @media screen and (min-width: $mobileTabSwitchWidth) {
+        .breadcrumb-short {
+            display: none;
+        }
+    }
+}
+
+.breadcrumb::before {
+    content: '' !important;
+}
+
+.breadcrumb {
+    display: flex;
+    width: 100%;
+    max-height: 1.5em;
+    align-items: center;
+    overflow: hidden;
+    &:not(.breadcrumb-readonly) {
+        @media screen and (max-width: $mobileTabSwitchWidth) {
+            margin-top: -2px;
+            min-height: 25px;
+            margin-left: -10px;
+            .breadcrumb-element-home {
+                margin-left: 20px;
+            }
+        }
+    }
+    &.breadcrumb-readonly {
+        // This should wrap as a whole with '>' separators blending into lines.
+        display: inline;
+        font-size: $fontSizeSmall;
+        i {
+            position: relative;
+            top: 5px;
+        }
+    }
+}
+
+.breadcrumb-element {
+    position: relative;
+    max-height: 1.5em;
+    display: flex;
+    align-items: center;
+    &.cdk-keyboard-focused {
+        background-color: $primaryLight;
+    }
+    i {
+        width: 35px;
+        text-align: center;
+    }
+}
+
+.breadcrumb-inner {
     color: $primary;
+    display: flex;
     padding: 2px 4px;
     font-size: 95%;
-    word-break: break-all;
-    min-width: unset;
-  }
-  .dropdown-icon{
+    white-space: nowrap;
+}
+
+.mat-ripple {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.home-icon {
+    margin-top: 3px;
+}
+
+.dropdown-icon {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: 4px;
-  }
-  .breadcrumb-arrow {
+}
+
+.breadcrumb-arrow {
     font-size: 15pt;
     color: $textLight;
-  }
-  a {
-    display: flex;
-    align-items: center;
+}
 
-    .homeIsIcon {
-      margin-top: 3px;
-    }
-
-    .homeIcon {
-      margin-top: 0;
-      max-height: none;
-      min-width: 30px;
-    }
-  }
-  &.breadcrumb-readonly{
-    display: inline;
-    font-size: $fontSizeSmall;
-    span{
-      line-height: 2;
-    }
-    i{
-      position: relative;
-      top: 5px;
-    }
-    &.breadcrumbShort{
-      //@include limitLineCount(1);
-      span{
-        line-height: 1;
-      }
-    }
-  }
-}
-.selected{
-  background-color: #fff;
-  border:2px dashed $primary;
-  padding:0 2px!important;
-}
-.breadcrumb div:last-child{
-  button{
-    font-weight: bold;
-    color: $textMain;
-  }
-}
-.breadcrumbDesktop {
-  display: flex;
-}
-@media screen and (max-width: $mobileTabSwitchWidth) {
-  .breadcrumbMobile{
-    display:flex;
-    align-items: center;
-    margin-top: -2px;
-    min-height: 25px;
-    margin-left: -10px;
-    .folder{
-      max-width: calc(100% - 24px);
-    }
-  }
-  .breadcrumbDesktop{
-    display:none;
-  }
+.selected {
+    background-color: #fff;
+    border: 2px dashed $primary;
+    padding: 0 2px !important;
 }
