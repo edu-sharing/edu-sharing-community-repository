@@ -1,0 +1,55 @@
+{{- define "edusharing_repository_search_solr4.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "edusharing_repository_search_solr4.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "edusharing_repository_search_solr4.fullname" -}}
+{{- if .Values.fullnameOverride -}}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "edusharing_repository_search_solr4.labels" -}}
+{{ include "edusharing_repository_search_solr4.labels.instance" . }}
+helm.sh/chart: {{ include "edusharing_repository_search_solr4.chart" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{- define "edusharing_repository_search_solr4.labels.instance" -}}
+{{ include "edusharing_repository_search_solr4.labels.app" . }}
+{{ include "edusharing_repository_search_solr4.labels.version" . }}
+{{- end -}}
+
+{{- define "edusharing_repository_search_solr4.labels.version" -}}
+version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end -}}
+
+{{- define "edusharing_repository_search_solr4.labels.app" -}}
+app: {{ include "edusharing_repository_search_solr4.fullname" . }}
+app.kubernetes.io/name: {{ include "edusharing_repository_search_solr4.fullname" . }}
+{{- end -}}
+
+{{- define "edusharing_repository_search_solr4.edusharing_repository_service" -}}
+{{- if .Values.edusharing_repository_service.fullnameOverride -}}
+{{- .Values.edusharing_repository_service.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "edusharing-repository-service" .Values.edusharing_repository_service.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

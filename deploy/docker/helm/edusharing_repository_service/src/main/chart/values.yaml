@@ -1,0 +1,316 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  cluster:
+    domain: cluster.local
+
+  image:
+    registry: ${docker.registry}
+    pullPolicy: Always
+    pullSecrets: []
+
+  ingress:
+    annotations:
+      kubernetes.io/ingress.class: nginx
+#     cert-manager.io/cluster-issuer:
+
+  istio:
+    enabled: false
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: &nameOverride edusharing-repository-service
+fullnameOverride: &fullnameOverride ""
+
+########################################################################################################################
+
+image:
+
+  repository: ${docker.image}-repository-service
+  tag: ${docker.tag}
+
+########################################################################################################################
+
+replicaCount: &replicaCount 1
+
+########################################################################################################################
+
+service:
+
+  port:
+    api:
+      external: 8080
+      internal: &servicePortApiInternal 8081
+    gossip: 5701
+
+########################################################################################################################
+
+ingress:
+
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: edusharing-repository
+    nginx.ingress.kubernetes.io/session-cookie-path: "*"
+    nginx.ingress.kubernetes.io/proxy-body-size: 5g
+#    nginx.ingress.kubernetes.io/configuration-snippet: |
+#      location /alfresco/service/api/solr/ {return 403;}
+#      location /alfresco/s/api/solr/ {return 403;}
+#      location /alfresco/wcservice/api/solr/ {return 403;}
+#      location /alfresco/wcs/api/solr/ {return 403;}
+#      location /share/proxy/alfresco/api/solr/ {return 403 ;}
+#      location /share/-default-/proxy/alfresco/api/ {return 403;}
+
+  hosts:
+    - repository.127.0.0.1.xip.io
+
+  tls: []
+#   - secretName: edusharing-repository-tls
+#     hosts:
+#       - repository.127.0.0.1.xip.io
+
+  paths:
+    - /edu-sharing
+    - /alfresco
+    - /share
+
+########################################################################################################################
+
+config:
+
+  admin:
+    password: admin
+
+  cache:
+    extra: ""  # https://github.com/redisson/redisson/wiki/2.-Configuration#23-common-settings
+
+    # ONLY FOR EXTERNAL REDIS (edusharing_redis.enabled == false):
+    # host: localhost
+    # port: 6379
+
+  cluster:
+    backupCount: 1
+    readBackupData: true
+
+  database:
+    database: &databaseDatabase repository
+    username: &databaseUsername repository
+    password: &databasePassword repository
+    extra: ""
+
+    # ONLY FOR EXTERNAL DATABASES (if postgresql.enabled == false):
+    # driver: org.postgresql.Driver
+    # host: localhost
+    # port: 5432
+    # protocol: postgresql
+
+    pool:
+      max: 80
+      sql: "SELECT 1"
+
+  guest:
+    username: ""
+    password: ""
+
+  jvm:
+    ram:
+      minPercentage: "75.0"
+      maxPercentage: "75.0"
+
+  saml:
+    enabled: false
+#   config: ""
+#   extra: {}
+#   mapping: ""
+
+  smtp:
+    addReplyTo: false
+    from: noreply@repository.127.0.0.1.xip.io
+    host: localhost
+    port: 25
+    auth: ""
+    username: ""
+    password: ""
+
+  search:
+
+    elastic: {}
+
+      # ONLY FOR EXTERNAL ELASTICSEARCH (if edusharing_repository_search_elastic.enabled == false):
+      # host: localhost
+      # port: 9200
+
+    solr4: {}
+
+      # ONLY FOR EXTERNAL SOLR4 (if edusharing_repository_search_solr4.enabled == false):
+      # host: localhost
+      # port: 8080
+
+########################################################################################################################
+
+persistence:
+
+  share:
+    spec:
+      accessModes: [ "ReadWriteMany" ]
+#     storageClassName:
+      resources:
+        requests:
+          storage: 5Gi
+
+########################################################################################################################
+
+nodeAffinity: {}
+podAntiAffinity: "" # "soft" or "hard"
+
+tolerations: []
+
+########################################################################################################################
+
+podSecurityContext:
+
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+
+  capabilities:
+    drop:
+      - ALL
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 300
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 4Gi
+
+########################################################################################################################
+# DEPENDENCY
+########################################################################################################################
+
+edusharing_rendering_service:
+
+  enabled: true
+
+  nameOverride: edusharing-rendering-service
+  fullnameOverride: ""
+
+  edusharing_repository_service:
+    nameOverride: *nameOverride
+    fullnameOverride: *fullnameOverride
+    service:
+      port:
+        api:
+          internal: *servicePortApiInternal
+
+########################################################################################################################
+
+edusharing_repository_transform:
+
+  enabled: true
+
+  nameOverride: edusharing-repository-transform
+  fullnameOverride: ""
+
+  replicaCount: *replicaCount
+
+  service:
+    port:
+      api: 8100
+
+########################################################################################################################
+
+edusharing_repository_search_solr4:
+
+  enabled: true
+
+  nameOverride: edusharing-repository-search-solr4
+  fullnameOverride: ""
+
+  service:
+    port:
+      api: 8080
+
+  edusharing_repository_service:
+    nameOverride: *nameOverride
+    fullnameOverride: *fullnameOverride
+    service:
+      port:
+        api:
+          internal: *servicePortApiInternal
+
+########################################################################################################################
+
+edusharing_repository_search_elastic:
+
+  enabled: true
+
+  nameOverride: edusharing-repository-search-elastic
+  fullnameOverride: ""
+
+  service:
+    port:
+      api: 9200
+
+########################################################################################################################
+
+edusharing_repository_postgresql:
+
+  enabled: true
+
+  nameOverride: edusharing-repository-postgresql
+  fullnameOverride: ""
+
+  config:
+    database: *databaseDatabase
+    username: *databaseUsername
+    password: *databasePassword
+
+  service:
+    port:
+      api: 5432
+
+########################################################################################################################
+# IMPORT
+########################################################################################################################
+
+edusharing_rediscluster:
+
+  enabled: true
+
+  nameOverride: edusharing-rediscluster
+  fullnameOverride: ""
+
+  service:
+    port:
+      api: 6379
+
+########################################################################################################################

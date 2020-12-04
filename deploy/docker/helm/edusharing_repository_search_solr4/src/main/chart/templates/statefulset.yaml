@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "edusharing_repository_search_solr4.fullname" . }}
+  labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{ include "edusharing_repository_search_solr4.labels.instance" . | nindent 6 }}
+  serviceName: {{ include "edusharing_repository_search_solr4.fullname" . }}-headless
+  template:
+    metadata:
+      name: {{ include "edusharing_repository_search_solr4.fullname" . }}
+      labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 8 }}
+      annotations:
+        checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.global.istio.enabled }}
+        sidecar.istio.io/inject: "true"
+        {{- end }}
+    spec:
+      initContainers:
+        - name: {{ include "edusharing_repository_search_solr4.name" . }}-init-permission
+          image: bitnami/minideb:buster
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          command:
+            - "/bin/bash"
+            - "-ec"
+            - |
+              chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/alfresco/alf_data
+          volumeMounts:
+            - name: data
+              mountPath: /usr/local/alfresco/alf_data
+              subPath: data/
+          securityContext:
+            runAsUser: 0
+      containers:
+      - name: {{ include "edusharing_repository_search_solr4.name" . }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "edusharing_repository_search_solr4.fullname" . }}-env
+        ports:
+        - name: api
+          containerPort: 8080
+        volumeMounts:
+        - name: data
+          mountPath: /usr/local/alfresco/alf_data
+          subPath: data/
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          tcpSocket:
+            port: api
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          httpGet:
+            path: /solr4
+            port: api
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.global.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{ with .Values.terminationGracePeriod }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      {{- if or .Values.nodeAffinity .Values.podAntiAffinity }}
+      affinity:
+        {{- with .Values.nodeAffinity }}
+        nodeAffinity: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.podAntiAffinity }}
+        podAntiAffinity:
+          {{- if eq .Values.podAntiAffinity "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels: {{ include "edusharing_repository_search_solr4.labels.instance" . | nindent 16 }}
+          {{- else if eq .Values.podAntiAffinity "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels: {{ include "edusharing_repository_search_solr4.labels.instance" . | nindent 18 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 8 }}
+    spec: {{ toYaml .Values.persistence.data.spec | nindent 6 }}

@@ -1,0 +1,12 @@
+{{- if .Values.config.saml.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_repository_service.fullname" . }}-saml
+  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+data:
+  securityContext.xml: |
+    {{- .Values.config.saml.config | indent 4 }}
+  edu-sharing-sso-context.xml: |
+    {{- .Values.config.saml.mapping | indent 4 }}
+{{- end }}

@@ -1,7 +1,0 @@
-services:
-
-  rendering-init:
-    image: "${docker.registry}/${project.parent.artifactId}-build-init:${project.version}"
-
-  rendering-service:
-    image: "${docker.registry}/${project.parent.artifactId}-build-service:${project.version}"

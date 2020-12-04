@@ -1,0 +1,9 @@
+apiVersion: v2
+
+name: edusharing_mariadb
+description: edusharing_mariadb
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}

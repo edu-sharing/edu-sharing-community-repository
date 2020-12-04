@@ -47,9 +47,7 @@ RUN set -eux \
 ########################################################################################################################
 
 RUN set -eux \
-	&& adduser --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker
-
-RUN set -eux \
+	&& adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
     && chown -RL worker:worker .
 
 USER worker
@@ -62,7 +60,6 @@ ENTRYPOINT ["entrypoint.sh"]
 
 ########################################################################################################################
 
-LABEL community.version=${community.repository.version}
 LABEL git.branch=${git.branch}
 LABEL git.closest.tag.name=${git.closest.tag.name}
 LABEL git.commit.id=${git.commit.id}

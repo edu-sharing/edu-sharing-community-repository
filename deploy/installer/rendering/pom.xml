@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +17,7 @@
   <packaging>jar</packaging>
 
   <name>edu_sharing-community-deploy-installer-rendering</name>
-  
+
   <build>
 
     <plugins>
@@ -27,7 +30,7 @@
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
-            <phase>prepare-package</phase>
+            <phase>package</phase>
             <configuration>
               <includeArtifactIds>edu_sharing-community-rendering</includeArtifactIds>
               <type>tar.gz</type>
@@ -41,17 +44,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>src/main/assembly/bin.xml</descriptor>
-          </descriptors>
-        </configuration>
         <executions>
           <execution>
             <goals>
               <goal>single</goal>
             </goals>
             <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
       </plugin>

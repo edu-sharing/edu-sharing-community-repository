@@ -1,0 +1,13 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "edusharing_repository_service.fullname" . }}
+  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+spec:
+{{- if .Values.config.cluster.enabled }}
+  maxUnavailable: {{ .Values.config.cluster.backupCount }}
+{{- else }}
+  minAvailable: 1
+{{- end }}
+  selector:
+    matchLabels: {{ include "edusharing_repository_service.labels.instance" . | nindent 6 }}

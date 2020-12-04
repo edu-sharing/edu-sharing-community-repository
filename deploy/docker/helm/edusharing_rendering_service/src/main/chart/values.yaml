@@ -1,0 +1,219 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  image:
+    registry: ${docker.registry}
+    pullPolicy: Always
+    pullSecrets: []
+
+  ingress:
+    annotations:
+      kubernetes.io/ingress.class: nginx
+#     cert-manager.io/cluster-issuer:
+
+  istio:
+    enabled: false
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-rendering-service
+fullnameOverride: ""
+
+########################################################################################################################
+
+image:
+
+  repository: ${docker.image}-rendering-service
+  tag: ${docker.tag}
+
+########################################################################################################################
+
+replicaCount: 1
+
+########################################################################################################################
+
+service:
+
+  port:
+    api:
+      external: 8080
+      internal: 8081
+
+########################################################################################################################
+
+ingress:
+
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: edusharing-rendering
+    nginx.ingress.kubernetes.io/session-cookie-path: "*"
+    nginx.ingress.kubernetes.io/proxy-body-size: 5g
+#    nginx.ingress.kubernetes.io/configuration-snippet: |
+#      location /esrender/application/ {return 403;}
+#      location /esrender/conf/ {return 403;}
+
+  hosts:
+    - rendering.127.0.0.1.xip.io
+
+  tls: []
+#   - secretName: edusharing-rendering-tls
+#     hosts:
+#       - rendering.127.0.0.1.xip.io
+
+  paths:
+    - /esrender
+
+########################################################################################################################
+
+config:
+
+  cache:
+    extra: "&distribute=0&failover=error&prefix=edusharing-rendering:" # https://github.com/phpredis/phpredis/blob/develop/cluster.markdown#session-handler
+
+    # ONLY FOR EXTERNAL REDIS (edusharing_rediscluster.enabled == false):
+    # host: localhost
+    # port: 6379
+    # type: "redis"
+    # protocol: "tcp://"
+
+  database:
+    database: &databaseDatabase rendering
+    username: &databaseUsername rendering
+    password: &databasePassword rendering
+
+    # ONLY FOR EXTERNAL DATABASES (edusharing_rendering_mariadb.enabled == false):
+    # driver: mysql
+    # host: localhost
+    # port: 3306
+
+########################################################################################################################
+
+persistence:
+
+  share:
+    spec:
+      accessModes: [ "ReadWriteMany" ]
+#     storageClassName:
+      resources:
+        requests:
+          storage: 5Gi
+
+########################################################################################################################
+
+nodeAffinity: {}
+podAntiAffinity: ""
+
+tolerations: []
+
+########################################################################################################################
+
+podSecurityContext:
+
+  runAsUser: 0
+  fsGroup: 33
+
+securityContext: {}
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 300
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 100m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 1Gi
+
+########################################################################################################################
+
+job:
+
+  cachecleaner:
+
+    resources: {}
+    schedule: "*/5 * * * *"
+    securityContext: {}
+
+  init:
+
+    resources: {}
+    securityContext: {}
+
+########################################################################################################################
+# DEPENDENCY
+########################################################################################################################
+
+edusharing_rendering_mariadb:
+
+  enabled: true
+
+  nameOverride: edusharing-rendering-mariadb
+  fullnameOverride: ""
+
+  config:
+
+    database: *databaseDatabase
+    username: *databaseUsername
+    password: *databasePassword
+
+  service:
+    port:
+      api: 3306
+
+########################################################################################################################
+# IMPORT
+########################################################################################################################
+
+edusharing_repository_service:
+
+  nameOverride: edusharing-repository-service
+  fullnameOverride: ""
+
+  service:
+    port:
+      api:
+        internal: 8081
+
+  config:
+    admin:
+      password: admin
+
+########################################################################################################################
+
+edusharing_rediscluster:
+
+  enabled: true
+
+  nameOverride: edusharing-rediscluster
+  fullnameOverride: ""
+
+  service:
+    port:
+      api: 6379
+
+########################################################################################################################

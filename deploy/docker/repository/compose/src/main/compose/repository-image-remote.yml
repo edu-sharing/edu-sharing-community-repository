@@ -1,0 +1,19 @@
+services:
+
+  repository-cache:
+    image: "${docker.registry}/${docker.image}-redis:${docker.tag}"
+
+  repository-database:
+    image: "${docker.registry}/${docker.image}-postgresql:${docker.tag}"
+
+  repository-search-elastic:
+    image: "${docker.registry}/${docker.image}-elasticsearch:${docker.tag}"
+
+  repository-search-solr4:
+    image: "${docker.registry}/${docker.image}-repository-search-solr4:${docker.tag}"
+
+  repository-service:
+    image: "${docker.registry}/${docker.image}-repository-service:${docker.tag}"
+
+  repository-transform:
+    image: "${docker.registry}/${docker.image}-repository-transform:${docker.tag}"

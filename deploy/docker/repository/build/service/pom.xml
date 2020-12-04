@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -17,22 +20,7 @@
   
   <build>
 
-    <resources>
-      <resource>
-        <directory>src/main/build</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-
     <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <configuration>
-          <outputDirectory>${project.build.directory}/build</outputDirectory>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -43,7 +31,7 @@
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
-            <phase>prepare-package</phase>
+            <phase>package</phase>
             <configuration>
               <includeArtifactIds>
                 alfresco-content-services-share-distribution,
@@ -64,10 +52,14 @@
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
-            <phase>prepare-package</phase>
+            <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-backend-alfresco-module
+                edu_sharing-community-repository-backend-alfresco-module,
+                edu_sharing-community-repository-backend-alfresco-module,
+                edu_sharing-plugin-cluster-repository-backend-alfresco-module,
+                edu_sharing-plugin-logineo-idm-repository-backend-alfresco-module,
+                edu_sharing-plugin-remote-repository-backend-alfresco-module
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/amps</outputDirectory>
             </configuration>
@@ -78,6 +70,13 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
+        <configuration>
+          <images>
+            <image>
+              <name>${docker.image}-repository-service:${docker.tag}</name>
+            </image>
+          </images>
+        </configuration>
         <executions>
           <execution>
             <id>build</id>

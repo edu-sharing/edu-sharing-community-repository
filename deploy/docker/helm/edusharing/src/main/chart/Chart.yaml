@@ -1,0 +1,21 @@
+apiVersion: v2
+
+name: edusharing
+description: edusharing
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}
+
+dependencies:
+
+  - name: edusharing_rediscluster
+    repository: "file://../../../edusharing_rediscluster/target/chart"
+    version: ${chart.version}
+    condition: edusharing_rediscluster.enabled
+
+  - name: edusharing_repository_service
+    repository: "file://../../../edusharing_repository_service/target/chart"
+    version: ${chart.version}
+    condition: edusharing_repository_service.enabled

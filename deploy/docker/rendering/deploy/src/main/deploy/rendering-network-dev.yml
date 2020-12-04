@@ -1,9 +1,0 @@
-services:
-
-  rendering-cache:
-    ports:
-      - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_CACHE_PORT_REDIS:-9001}:6379"
-
-  rendering-database:
-    ports:
-      - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_DATABASE_PORT_SQL:-9000}:3306"

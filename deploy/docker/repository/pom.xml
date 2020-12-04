@@ -16,6 +16,6 @@
   <name>edu_sharing-community-deploy-docker-repository</name>
 
 <modules>  <module>build</module>
-    <module>deploy</module>
+    <module>compose</module>
   </modules>
 </project>

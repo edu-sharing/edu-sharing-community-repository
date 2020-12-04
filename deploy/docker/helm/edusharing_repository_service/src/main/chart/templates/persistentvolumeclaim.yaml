@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "edusharing_repository_service.pvc.share" . }}
+  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep
+spec: {{ toYaml .Values.persistence.share.spec | nindent 2 }}

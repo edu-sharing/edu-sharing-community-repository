@@ -15,6 +15,11 @@
 
   <name>edu_sharing-community-deploy</name>
 
+  <properties>
+    <build.timestamp>${maven.build.timestamp}</build.timestamp>
+    <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+  </properties>
+
 <modules>  <module>docker</module>
     <module>installer</module>
   </modules>

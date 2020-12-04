@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "edusharing_postgresql.fullname" . }}
+  labels: {{ include "edusharing_postgresql.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{ include "edusharing_postgresql.labels.instance" . | nindent 6 }}
+  serviceName: {{ include "edusharing_postgresql.fullname" . }}-headless
+  template:
+    metadata:
+      name: {{ include "edusharing_postgresql.fullname" . }}
+      labels: {{ include "edusharing_postgresql.labels" . | nindent 8 }}
+      annotations:
+        checksum/configmap-conf: {{ include (print .Template.BasePath "/configmap-conf.yaml") . | sha256sum | trunc 63 }}
+        checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
+        checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.global.istio.enabled }}
+        sidecar.istio.io/inject: "true"
+        {{- end }}
+    spec:
+      initContainers:
+      - name: {{ include "edusharing_postgresql.name" . }}-init-permission
+        image: bitnami/minideb:buster
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        command:
+        - "/bin/bash"
+        - "-ec"
+        - |
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /bitnami/postgresql
+        volumeMounts:
+        - name: data
+          mountPath: /bitnami/postgresql
+          subPath: data/
+        securityContext:
+          runAsUser: 0
+      containers:
+      - name: {{ include "edusharing_postgresql.name" . }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "edusharing_postgresql.fullname" . }}-env
+        - secretRef:
+            name: {{ include "edusharing_postgresql.fullname" . }}-env
+        ports:
+        - name: api
+          containerPort: 5432
+        volumeMounts:
+        - name: conf
+          mountPath: /bitnami/postgresql/conf/conf.d/extended.conf
+          subPath: extended.conf
+        - name: data
+          mountPath: /bitnami/postgresql
+          subPath: data/
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          tcpSocket:
+            port: api
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          exec:
+            command:
+            - "/bin/bash"
+            - "-ec"
+            - |
+              exec pg_isready -U "${POSTGRESQL_USERNAME}" -d "${POSTGRESQL_DATABASE}"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.global.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{ with .Values.terminationGracePeriod }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      {{- with .Values.nodeAffinity }}
+      affinity:
+        nodeAffinity: {{ toYaml . | nindent 10 }}
+      {{- end }}
+      volumes:
+      - name: conf
+        configMap:
+          name: {{ include "edusharing_postgresql.fullname" . }}-conf
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels: {{ include "edusharing_postgresql.labels" . | nindent 8 }}
+    spec: {{ toYaml .Values.persistence.data.spec | nindent 6 }}

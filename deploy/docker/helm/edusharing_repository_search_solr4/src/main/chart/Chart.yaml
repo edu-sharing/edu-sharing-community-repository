@@ -1,0 +1,10 @@
+apiVersion: v2
+
+name: edusharing_repository_search_solr4
+description: edusharing_repository_search_solr4
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}
+

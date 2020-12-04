@@ -1,0 +1,10 @@
+apiVersion: v2
+
+name: edusharing_repository_transform
+description: edusharing_repository_transform
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}
+

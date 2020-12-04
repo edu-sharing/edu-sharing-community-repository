@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -28,10 +31,14 @@
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
-            <phase>prepare-package</phase>
+            <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-backend-alfresco-module
+                edu_sharing-community-repository-backend-alfresco-module,
+                edu-sharing-community-repository-backend-alfresco-module,
+                edu_sharing-plugin-cluster-repository-backend-alfresco-module,
+                edu_sharing-plugin-logineo-idm-repository-backend-alfresco-module,
+                edu_sharing-plugin-remote-repository-backend-alfresco-module
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/dist/amps</outputDirectory>
             </configuration>
@@ -41,7 +48,7 @@
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
-            <phase>prepare-package</phase>
+            <phase>package</phase>
             <configuration>
               <includeArtifactIds>
                 edu_sharing-community-repository-backend-tomcat,
@@ -55,7 +62,7 @@
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
-            <phase>prepare-package</phase>
+            <phase>package</phase>
             <configuration>
               <includeArtifactIds>edu_sharing-community-repository-config</includeArtifactIds>
               <outputDirectory>${project.build.directory}/dist/tomcat/shared/classes</outputDirectory>
@@ -66,7 +73,7 @@
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
-            <phase>prepare-package</phase>
+            <phase>package</phase>
             <configuration>
               <includeArtifactIds>edu_sharing-community-repository-webapp</includeArtifactIds>
               <outputDirectory>${project.build.directory}/dist/tomcat/webapps/edu-sharing</outputDirectory>
@@ -78,17 +85,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>src/main/assembly/bin.xml</descriptor>
-          </descriptors>
-        </configuration>
         <executions>
           <execution>
             <goals>
               <goal>single</goal>
             </goals>
             <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
       </plugin>

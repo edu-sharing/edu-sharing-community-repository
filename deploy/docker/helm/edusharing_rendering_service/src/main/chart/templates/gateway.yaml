@@ -1,0 +1,27 @@
+{{- if .Values.global.istio.enabled }}
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1beta1" }}
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ include "edusharing_rendering_service.fullname" . }}
+  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+spec:
+  selector: {{ .Values.global.istio.gateway.selector | nindent 4 }}
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts: {{ toYaml .Values.ingress.hosts | nindent 6 }}
+  {{- range .Values.ingress.tls }}
+  - port:
+    number: 443
+    name: https
+    protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: {{ .secretName }}
+    hosts: {{ toYaml .hosts | nindent 6 }}
+  {{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,10 @@
+apiVersion: v2
+
+name: edusharing_elasticsearch
+description: edusharing_elasticsearch
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}
+

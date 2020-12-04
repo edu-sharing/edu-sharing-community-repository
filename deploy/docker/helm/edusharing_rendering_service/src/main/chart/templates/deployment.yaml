@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "edusharing_rendering_service.fullname" . }}
+  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{ include "edusharing_rendering_service.labels.instance" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "edusharing_rendering_service.labels" . | nindent 8 }}
+      annotations:
+        checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
+        checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.global.istio.enabled }}
+        sidecar.istio.io/inject: "true"
+        traffic.sidecar.istio.io/excludeOutboundPorts: "3306"
+        {{- end }}
+    spec:
+      initContainers:
+      - name: {{ include "edusharing_rendering_service.name" . }}-init-permission
+        image: bitnami/minideb:buster
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        command:
+        - "/bin/bash"
+        - "-ec"
+        - |
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender
+        volumeMounts:
+        - name: share
+          mountPath: /var/cache/esrender
+          subPath: data/
+        securityContext:
+          runAsUser: 0
+      containers:
+      - name: {{ include "edusharing_rendering_service.name" . }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "edusharing_rendering_service.fullname" . }}-env
+        - secretRef:
+            name: {{ include "edusharing_rendering_service.fullname" . }}-env
+        ports:
+        - name: api-internal
+          containerPort: 8080
+        - name: api-external
+          containerPort: 8081
+        volumeMounts:
+        - name: share
+          mountPath: /var/cache/esrender
+          subPath: data/
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          tcpSocket:
+            port: api-internal
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          httpGet:
+            path: /esrender/admin/
+            port: api-internal
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.global.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{ with .Values.terminationGracePeriod }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      {{- if or .Values.nodeAffinity .Values.podAntiAffinity }}
+      affinity:
+        {{- with .Values.nodeAffinity }}
+        nodeAffinity: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.podAntiAffinity }}
+        podAntiAffinity:
+          {{- if eq .Values.podAntiAffinity "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels: {{ include "edusharing_rendering_service.labels.instance" . | nindent 16 }}
+          {{- else if eq .Values.podAntiAffinity "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels: {{ include "edusharing_rendering_service.labels.instance" . | nindent 18 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      volumes:
+      - name: share
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_rendering_service.pvc.share" . }}

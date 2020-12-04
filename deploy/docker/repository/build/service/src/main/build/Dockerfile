@@ -1,3 +1,4 @@
+
 FROM docker.io/tomcat:${repository.tomcat.version}-jdk8
 
 
@@ -25,15 +26,16 @@ ENV PATH $ALF_HOME/bin:$PATH
 
 WORKDIR $ALF_HOME
 
+RUN set -eux \
+    && ln -sf /usr/local/tomcat tomcat
+
 COPY assets/entrypoint.sh bin/
 
 RUN set -eux \
     && chmod +x bin/entrypoint.sh
 
-RUN useradd -ms /bin/bash worker
-
 RUN set -eux \
-    && ln -sf /usr/local/tomcat tomcat \
+    && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
     && chown -RL worker:worker . \
     && chown -RL worker:worker /tmp
 
@@ -49,7 +51,7 @@ RUN set -eux \
         's|^[#]*\s*shared\.loader=.*|shared.loader=${catalina.base}/shared/classes,${catalina.base}/shared/lib/*.jar|' \
         tomcat/conf/catalina.properties
 
-COPY artifacts/postgresql-${repository.postgres.client.version}.jar tomcat/lib/
+COPY artifacts/postgresql-${repository.postgresql.client.version}.jar tomcat/lib/
 COPY artifacts/redisson-all-${repository.redis.client.version}.jar tomcat/lib/
 COPY artifacts/redisson-tomcat-7-${repository.redis.client.version}.jar tomcat/lib/
 
@@ -145,7 +147,6 @@ RUN set -eux \
 
 COPY artifacts/edu_sharing-community-repository-backend-tomcat-${community.repository.version}.jar tomcat/lib/
 
-
 COPY artifacts/edu_sharing-community-repository-config-${community.repository.version}.jar tomcat/shared/lib/
 
 RUN set -eux \
@@ -183,7 +184,6 @@ ENTRYPOINT ["entrypoint.sh"]
 CMD ["catalina.sh", "run"]
 
 
-LABEL community.version=${community.repository.version}
 LABEL git.branch=${git.branch}
 LABEL git.closest.tag.name=${git.closest.tag.name}
 LABEL git.commit.id=${git.commit.id}

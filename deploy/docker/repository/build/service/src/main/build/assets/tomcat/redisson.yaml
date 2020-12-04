@@ -1,3 +1,2 @@
 singleServerConfig:
   address: "redis://${REPOSITORY_CACHE_HOST:-repository-cache}:${REPOSITORY_CACHE_PORT:-6379}"
-

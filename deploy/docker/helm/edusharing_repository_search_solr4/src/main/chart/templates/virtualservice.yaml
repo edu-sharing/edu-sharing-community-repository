@@ -1,0 +1,16 @@
+{{- if .Values.global.istio.enabled }}
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1beta1" }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "edusharing_repository_search_solr4.fullname" . }}
+  labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 4 }}
+spec:
+  hosts:
+  - {{ include "edusharing_repository_search_solr4.fullname" . }}
+  http:
+  - route:
+    - destination:
+        host: {{ include "edusharing_repository_search_solr4.fullname" . }}
+{{- end }}
+{{- end }}

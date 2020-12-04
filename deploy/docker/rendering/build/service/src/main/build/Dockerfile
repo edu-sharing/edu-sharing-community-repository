@@ -1,4 +1,4 @@
-FROM docker.io/php:${rendering.apache.php.version}-apache
+FROM docker.io/php:${rendering.php.version}-apache
 
 ########################################################################################################################
 
@@ -7,6 +7,7 @@ RUN set -eux \
 	&& apt-get update -y \
 	&& apt-get install -y --no-install-recommends -t buster-backports \
         ca-certificates \
+        curl \
         exiftool \
         ffmpeg \
         jq \
@@ -64,8 +65,8 @@ COPY assets/apache2/sites/* /etc/apache2/sites-available/
 
 RUN set -eux \
 	&& a2dissite 000-default \
-	&& a2ensite extern \
-	&& a2ensite intern
+	&& a2ensite external \
+	&& a2ensite internal
 
 COPY assets/rendering/de.metaventis.esrender.log4php.properties conf/
 COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties install/_tmpl/conf/
@@ -77,9 +78,11 @@ RUN set -eux \
 ########################################################################################################################
 
 COPY assets/entrypoint.sh /usr/local/bin/
+COPY assets/init.sh /usr/local/bin/
 
 RUN set -eux \
-    && chmod +x /usr/local/bin/entrypoint.sh
+    && chmod +x /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/init.sh
 
 ########################################################################################################################
 
@@ -90,7 +93,6 @@ CMD ["apache2-foreground"]
 
 ########################################################################################################################
 
-LABEL community.version=${community.rendering.version}
 LABEL git.branch=${git.branch}
 LABEL git.closest.tag.name=${git.closest.tag.name}
 LABEL git.commit.id=${git.commit.id}

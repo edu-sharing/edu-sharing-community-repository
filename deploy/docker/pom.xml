@@ -17,6 +17,8 @@
 
   <properties>
 
+    <docker.image>community/edusharing</docker.image>
+    <docker.tag>${project.version}</docker.tag>
     <docker.registry>community.docker.edu-sharing.com</docker.registry>
     <docker.verbose>true</docker.verbose>
 
@@ -34,7 +36,6 @@
           <configuration>
             <images>
               <image>
-                <name>%a:%v</name>
                 <registry>${docker.registry}</registry>
                 <build>
                   <contextDir>${project.build.directory}/build</contextDir>
@@ -51,7 +52,33 @@
 
   </build>
 
-<modules>  <module>deploy</module>
+  <profiles>
+
+    <profile>
+
+      <id>docker-build-timestamp</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.DOCKER_BUILD_TIMESTAMP</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <properties>
+
+        <docker.tag>${project.version}-${build.timestamp}</docker.tag>
+
+      </properties>
+
+    </profile>
+
+  </profiles>
+
+<modules>  <module>build</module>
+    <module>compose</module>
+    <module>helm</module>
     <module>rendering</module>
     <module>repository</module>
   </modules>

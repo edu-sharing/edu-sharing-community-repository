@@ -12,7 +12,7 @@ MINGW*)
 esac
 export COMPOSE_EXEC
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-deploy}"
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-compose}"
 
 export CLI_CMD="$0"
 export CLI_OPT1="$1"
@@ -25,6 +25,10 @@ if [ -z "${M2_HOME}" ]; then
 else
 	export MVN_EXEC="${M2_HOME}/bin/mvn"
 fi
+
+[[ -z "${MVN_EXEC_OPTS}" ]] && {
+	export MVN_EXEC_OPTS="-q -ff"
+}
 
 ROOT_PATH="$(
 	cd "$(dirname ".")"
@@ -40,12 +44,12 @@ BUILD_PATH="$(
 )"
 export BUILD_PATH
 
-COMPOSE_DIR="deploy/target/deploy"
+COMPOSE_DIR="compose/target/compose"
 
 [[ ! -d "${COMPOSE_DIR}" || -z "${CLI_OPT1}" ]] && {
 	echo "Building ..."
-	pushd "deploy" >/dev/null || exit
-	$MVN_EXEC -q -ff -Dmaven.test.skip=true compile || exit
+	pushd "compose" >/dev/null || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
 }
 
@@ -60,58 +64,12 @@ info() {
 	echo ""
 	echo "#########################################################################"
 	echo ""
-	echo "repository-mailrelay:"
+	echo "repository-cache:"
 	echo ""
-	echo "  Mail-Name:         ${REPOSITORY_MAILRELAY_MAILNAME:-127.0.0.1.xip.io}"
-	echo "  Relay-Host:        ${REPOSITORY_MAILRELAY_RELAYHOST:-}"
+	echo "  Services:"
 	echo ""
-	echo "#########################################################################"
+	echo "    REDIS:          127.0.0.1:${REPOSITORY_CACHE_PORT_REDIS:-8001}"
 	echo ""
-	echo "repository-search-elastic:"
-	echo ""
-	echo "  JVM:"
-	echo ""
-	echo "    XMS:            ${REPOSITORY_SEARCH_ELASTIC_JAVA_XMS:-1g}"
-	echo "    XMX:            ${REPOSITORY_SEARCH_ELASTIC_JAVA_XMX:-1g}"
-	echo ""
-	echo "#########################################################################"
-	echo ""
-	echo "repository-search-solr4:"
-	echo ""
-	echo "  JVM:"
-	echo ""
-	echo "    XMS:            ${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-1g}"
-	echo "    XMX:            ${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-1g}"
-	echo ""
-	echo "#########################################################################"
-	echo ""
-	echo "repository-service:"
-	echo ""
-	echo "  Credentials:"
-	echo ""
-	echo "    Name:           admin"
-	echo "    Password:       ${REPOSITORY_SERVICE_ROOT_PASS:-admin}"
-	echo ""
-	echo "  HTTP:             http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.xip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
-	echo "                    (accessible from: ${COMMON_BIND_HOST:-127.0.0.1})"
-	echo ""
-	echo "  JVM:"
-	echo ""
-	echo "    XMS:            ${REPOSITORY_SERVICE_JAVA_XMS:-1g}"
-	echo "    XMX:            ${REPOSITORY_SERVICE_JAVA_XMX:-1g}"
-	echo ""
-	echo "  SMTP:"
-	echo ""
-	echo "    From:           ${REPOSITORY_SERVICE_SMTP_FROM:-noreply@127.0.0.1.xip.io}"
-	echo "    Add-Reply-To:   ${REPOSITORY_SERVICE_SMTP_REPL:-false}"
-	echo "    Host:           ${REPOSITORY_SERVICE_SMTP_HOST:-repository-mailrelay}"
-	echo "    Port:           ${REPOSITORY_SERVICE_SMTP_PORT:-25}"
-	echo "    Auth:           ${REPOSITORY_SERVICE_SMTP_AUTH:-}"
-	echo "    Username:       ${REPOSITORY_SERVICE_SMTP_USER:-}"
-	echo "    Password:       ${REPOSITORY_SERVICE_SMTP_USER:-}"
-	echo ""
-	echo "#########################################################################"
-	echo "### ONLY FOR DEBUGGING"
 	echo "#########################################################################"
 	echo ""
 	echo "repository-database:"
@@ -123,27 +81,71 @@ info() {
 	echo ""
 	echo "  Database:         ${REPOSITORY_DATABASE_NAME:-repository}"
 	echo ""
-	echo "  SQL:              127.0.0.1:${REPOSITORY_DATABASE_PORT_SQL:-8000}"
+	echo "  Services:"
+	echo ""
+	echo "    SQL:            127.0.0.1:${REPOSITORY_DATABASE_PORT_SQL:-8000}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
 	echo "repository-search-elastic:"
 	echo ""
-	echo "  HTTP:             http://127.0.0.1:${REPOSITORY_SEARCH_ELASTIC_PORT_HTTP:-8300}/"
+	echo "  JVM:"
+	echo ""
+	echo "    XMS:            ${REPOSITORY_SEARCH_ELASTIC_JAVA_XMS:-1g}"
+	echo "    XMX:            ${REPOSITORY_SEARCH_ELASTIC_JAVA_XMX:-1g}"
+	echo ""
+	echo "  Services:"
+	echo ""
+	echo "    HTTP:           http://127.0.0.1:${REPOSITORY_SEARCH_ELASTIC_PORT_HTTP:-8300}/"
+	echo "    JPDA:           127.0.0.1:${REPOSITORY_SEARCH_ELASTIC_PORT_JPDA:-8301}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
 	echo "repository-search-solr4:"
 	echo ""
-	echo "  HTTP:             http://127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_HTTP:-8200}/solr4/"
+	echo "  JVM:"
 	echo ""
-	echo "  JPDA:             127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_JPDA:-8201}"
+	echo "    XMS:            ${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-1g}"
+	echo "    XMX:            ${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-1g}"
+	echo ""
+	echo "  Services:"
+	echo ""
+	echo "    HTTP:           http://127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_HTTP:-8200}/solr4/"
+	echo "    JPDA:           127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_JPDA:-8201}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
 	echo "repository-service:"
 	echo ""
-	echo "  JPDA:             127.0.0.1:${REPOSITORY_SERVICE_PORT_JPDA:-8101}"
+	echo "  Credentials:"
+	echo ""
+	echo "    Admin:"
+	echo "      Name:         admin"
+	echo "      Password:     ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+	echo ""
+	echo "    Guest:"
+	echo "      Name:         ${REPOSITORY_SERVICE_GUEST_USER:-}"
+	echo "      Password:     ${REPOSITORY_SERVICE_GUEST_PASS:-}"
+	echo ""
+	echo "  JVM:"
+	echo ""
+	echo "    XMS:            ${REPOSITORY_SERVICE_JAVA_XMS:-1g}"
+	echo "    XMX:            ${REPOSITORY_SERVICE_JAVA_XMX:-1g}"
+	echo ""
+	echo "  SMTP:"
+	echo ""
+	echo "    From:           ${REPOSITORY_SMTP_FROM:-noreply@repository.127.0.0.1.xip.io}"
+	echo "    Add-Reply-To:   ${REPOSITORY_SMTP_REPL:-false}"
+	echo "    Host:           ${REPOSITORY_SMTP_HOST:-}"
+	echo "    Port:           ${REPOSITORY_SMTP_PORT:-25}"
+	echo "    Auth:           ${REPOSITORY_SMTP_AUTH:-}"
+	echo "    Username:       ${REPOSITORY_SMTP_USER:-}"
+	echo "    Password:       ${REPOSITORY_SMTP_USER:-}"
+	echo ""
+	echo "  Services:"
+	echo ""
+	echo "    HTTP:           http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.xip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo "    JPDA:           127.0.0.1:${REPOSITORY_SERVICE_PORT_JPDA:-8101}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -152,7 +154,6 @@ info() {
 
 init() {
 	docker volume create "${COMPOSE_NAME}_repository-database-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-mailrelay-volume" || exit
 	docker volume create "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
 	docker volume create "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
 	docker volume create "${COMPOSE_NAME}_repository-service-volume-data" || exit
@@ -161,7 +162,6 @@ init() {
 
 purge() {
 	docker volume rm -f "${COMPOSE_NAME}_repository-database-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-mailrelay-volume" || exit
 	docker volume rm -f "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
 	docker volume rm -f "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
 	docker volume rm -f "${COMPOSE_NAME}_repository-service-volume-data" || exit
@@ -196,7 +196,6 @@ down() {
 it() {
 	docker-compose \
 		-f "repository.yml" \
-		-f "repository-image-local.yml" \
 		-f "repository-network-dev.yml" \
 		up -d || exit
 }
@@ -233,12 +232,12 @@ build() {
 
 	echo "- repository"
 	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -Dmaven.test.skip=true clean install || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 
 	echo "- docker"
 	pushd "${BUILD_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -Dmaven.test.skip=true clean install || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 	
 	echo "export COMMUNITY_PATH=${COMMUNITY_PATH}" > .ctx
@@ -255,7 +254,6 @@ debug() {
 
 	docker-compose \
 		-f "repository.yml" \
-		-f "repository-image-local.yml" \
 		-f "repository-network-dev.yml" \
 		-f "repository-debug.yml" \
 		up -d || exit
@@ -276,7 +274,7 @@ package-alfresco() {
 
 	echo "- repository         [ ${SUBMODULE_PATH} ]"
 	pushd "${COMMUNITY_PATH}/${SUBMODULE_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -nsu -Dmaven.test.skip=true package || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -nsu -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
 }
 
@@ -296,7 +294,7 @@ package-config() {
 	echo "- repository         [ ${SUBMODULE_PATH} ]"
 	pushd "${COMMUNITY_PATH}/${SUBMODULE_PATH}" >/dev/null || exit
 	pushd "src/main/resources/org" >/dev/null || exit
-	find . -type d | xargs -I {} mkdir -p "../../../../target/classes/org/{}"
+	find . -type d -exec mkdir -p "../../../../target/classes/org/{}" \;
 	popd >/dev/null || exit
 	diff -qr "src/main/resources/org" "target/classes/org" |
 		grep "Files src/main/resources/org" |
@@ -327,7 +325,7 @@ package-services() {
 
 	echo "- repository         [ ${SUBMODULE_PATH} ]"
 	pushd "${COMMUNITY_PATH}/${SUBMODULE_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -nsu -Dmaven.test.skip=true package || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -nsu -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
 }
 

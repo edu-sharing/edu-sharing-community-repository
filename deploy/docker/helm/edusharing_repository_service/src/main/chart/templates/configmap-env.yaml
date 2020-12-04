@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_repository_service.fullname" . }}-env
+  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+data:
+  CATALINA_OPTS: >-
+    -XX:MinRAMPercentage={{ .Values.config.jvm.ram.minPercentage }}
+    -XX:MaxRAMPercentage={{ .Values.config.jvm.ram.maxPercentage }}
+    -Dcaches.join=kubernetes
+    -Dcaches.join.kubernetes.dns={{ printf "%s-headless.%s.svc.%s" (include "edusharing_repository_service.fullname" .) .Release.Namespace .Values.global.cluster.domain }}
+    -Dcaches.backupCount={{ .Values.config.cluster.backupCount }}
+    -Dcaches.readBackupData={{ .Values.config.cluster.readBackupData }}
+    -Dhazelcast.graceful.shutdown.max.wait={{ .Values.terminationGracePeriod }}
+  REPOSITORY_CACHE_HOST: {{ if .Values.edusharing_rediscluster.enabled }}{{ include "edusharing_repository_service.edusharing_rediscluster" . | quote }}{{ else }}{{ .Values.config.cache.host | quote }}{{ end }}
+  REPOSITORY_CACHE_PORT: {{ if .Values.edusharing_rediscluster.enabled }}{{ .Values.edusharing_rediscluster.service.port.api | quote }}{{ else }}{{ .Values.config.cache.port | quote }}{{ end }}
+  REPOSITORY_DATABASE_DRIV: {{ if .Values.edusharing_repository_postgresql.enabled }}"org.postgresql.Driver"{{ else }}{{ .Values.config.database.driver | quote }}{{ end }}
+  REPOSITORY_DATABASE_HOST: {{ if .Values.edusharing_repository_postgresql.enabled }}{{ include "edusharing_repository_service.edusharing_repository_postgresql" . | quote }}{{ else }}{{ .Values.config.database.host | quote }}{{ end }}
+  REPOSITORY_DATABASE_NAME: {{ .Values.config.database.database | quote }}
+  REPOSITORY_DATABASE_OPTS: {{ .Values.config.database.extra | quote }}
+  REPOSITORY_DATABASE_POOL_MAX: {{ .Values.config.database.pool.max | quote }}
+  REPOSITORY_DATABASE_POOL_SQL: {{ .Values.config.database.pool.sql | quote }}
+  REPOSITORY_DATABASE_PORT: {{ if .Values.edusharing_repository_postgresql.enabled }}{{ .Values.edusharing_repository_postgresql.service.port.api | quote }}{{ else }}{{ .Values.config.database.port | quote }}{{ end }}
+  REPOSITORY_DATABASE_PROT: {{ if .Values.edusharing_repository_postgresql.enabled }}"postgresql"{{ else }}{{ .Values.config.database.protocol | quote }}{{ end }}
+  REPOSITORY_SEARCH_ELASTIC_HOST: {{ if .Values.edusharing_repository_search_elastic.enabled }}{{ include "edusharing_repository_service.edusharing_repository_search_elastic" . | quote }}{{ else }}{{ .Values.config.search.elastic.host | quote }}{{ end }}
+  REPOSITORY_SEARCH_ELASTIC_PORT: {{ if .Values.edusharing_repository_search_elastic.enabled }}{{ .Values.edusharing_repository_search_elastic.service.port.api | quote }}{{ else }}{{ .Values.config.search.elastic.port | quote }}{{ end }}
+  REPOSITORY_SEARCH_SOLR4_HOST: {{ if .Values.edusharing_repository_search_solr4.enabled }}{{ include "edusharing_repository_service.edusharing_repository_search_solr4" . | quote }}{{ else }}{{ .Values.config.search.solr4.host | quote }}{{ end }}
+  REPOSITORY_SEARCH_SOLR4_PORT: {{ if .Values.edusharing_repository_search_solr4.enabled }}{{ .Values.edusharing_repository_search_solr4.service.port.api | quote }}{{ else }}{{ .Values.config.search.solr4.port | quote }}{{ end }}
+  REPOSITORY_SERVICE_BIND: {{ if .Values.global.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
+  REPOSITORY_SERVICE_HOME_APPID: {{ .Release.Name | quote }}
+  REPOSITORY_SERVICE_HOME_AUTH: {{ if .Values.config.saml.enabled }}"shibboleth"{{ else }}""{{ end }}
+  REPOSITORY_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
+  REPOSITORY_SERVICE_HOST_INTERNAL: {{ include "edusharing_repository_service.fullname" . | quote }}
+  REPOSITORY_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}
+  REPOSITORY_SERVICE_PORT_EXTERNAL: {{ if .Values.ingress.tls }}"443"{{ else }}"80"{{ end }}
+  REPOSITORY_SERVICE_PORT_INTERNAL: {{ .Values.service.port.api.internal | quote }}
+  REPOSITORY_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}
+  REPOSITORY_SMTP_AUTH: {{ .Values.config.smtp.auth | quote }}
+  REPOSITORY_SMTP_FROM: {{ .Values.config.smtp.from | quote }}
+  REPOSITORY_SMTP_HOST: {{ .Values.config.smtp.host | quote }}
+  REPOSITORY_SMTP_PASS: {{ .Values.config.smtp.password | quote }}
+  REPOSITORY_SMTP_PORT: {{ .Values.config.smtp.port | quote }}
+  REPOSITORY_SMTP_REPL: {{ .Values.config.smtp.addReplyTo | quote }}
+  REPOSITORY_SMTP_USER: {{ .Values.config.smtp.username | quote }}
+  REPOSITORY_TRANSFORM_HOST: {{ include "edusharing_repository_service.edusharing_repository_transform" . | quote }}
+  REPOSITORY_TRANSFORM_PORT: {{ .Values.edusharing_repository_transform.service.port.api | quote }}

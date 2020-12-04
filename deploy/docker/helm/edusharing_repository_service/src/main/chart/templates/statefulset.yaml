@@ -1,0 +1,168 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "edusharing_repository_service.fullname" . }}
+  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ if .Values.config.cluster.enabled }}{{ .Values.replicaCount }}{{ else }}1{{ end }}
+  selector:
+    matchLabels: {{ include "edusharing_repository_service.labels.instance" . | nindent 6 }}
+  serviceName: {{ include "edusharing_repository_service.fullname" . }}-headless
+  template:
+    metadata:
+      name: {{ include "edusharing_repository_service.fullname" . }}
+      labels: {{ include "edusharing_repository_service.labels" . | nindent 8 }}
+      annotations:
+        checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
+        checksum/configmap-redis: {{ include (print .Template.BasePath "/configmap-redis.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.config.saml.enabled }}
+        checksum/configmap-saml: {{ include (print .Template.BasePath "/configmap-saml.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.config.saml.extra }}
+        checksum/configmap-saml-extra: {{ include (print .Template.BasePath "/configmap-saml-extra.yaml") . | sha256sum | trunc 63 }}
+        {{- end }}
+        {{- end }}
+        checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.global.istio.enabled }}
+        sidecar.istio.io/inject: "true"
+        {{- end }}
+    spec:
+      initContainers:
+      - name: {{ include "edusharing_repository_service.name" . }}-init-permission
+        image: bitnami/minideb:buster
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        command:
+        - "/bin/bash"
+        - "-ec"
+        - |
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/alfresco/alf_data
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/alfresco/tomcat/shared
+        volumeMounts:
+        - name: share
+          mountPath: /usr/local/alfresco/alf_data
+          subPath: data/
+        - name: share
+          mountPath: /usr/local/alfresco/tomcat/shared
+          subPath: config/
+        securityContext:
+          runAsUser: 0
+      containers:
+      - name: {{ include "edusharing_repository_service.name" . }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "edusharing_repository_service.fullname" . }}-env
+        - secretRef:
+            name: {{ include "edusharing_repository_service.fullname" . }}-env
+        ports:
+        - name: api-external
+          containerPort: 8080
+        - name: api-internal
+          containerPort: 8081
+        - name: gossip
+          containerPort: 5701
+        volumeMounts:
+        - name: share
+          mountPath: /opt/alfresco/alf_data
+          subPath: data/
+        - name: share
+          mountPath: /usr/local/tomcat/shared
+          subPath: config/
+        - name: conf-redis
+          mountPath: /usr/local/tomcat/conf/redisson.yaml
+          subPath: redisson.yaml
+        {{- if .Values.config.saml.enabled }}
+        - name: conf-saml
+          mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/securityContext.xml
+          subPath: securityContext.xml
+        - name: conf-saml
+          mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/classes/org/edu_sharing/spring/edu-sharing-sso-context.xml
+          subPath: edu-sharing-sso-context.xml
+        {{- if .Values.config.saml.extra }}
+        - name: conf-saml-extra
+          mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/classes/saml
+        {{- end }}
+        {{- end }}
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          tcpSocket:
+            port: api-internal
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          httpGet:
+            path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ add1 .timeoutSeconds }}
+            httpHeaders:
+            - name: Accept
+              value: application/json
+            - name: Content-Type
+              value: application/json
+            port: api-internal
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.global.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{ with .Values.terminationGracePeriod }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      {{- if or .Values.nodeAffinity .Values.podAntiAffinity }}
+      affinity:
+        {{- with .Values.nodeAffinity }}
+        nodeAffinity: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.podAntiAffinity }}
+        podAntiAffinity:
+          {{- if eq .Values.podAntiAffinity "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels: {{ include "edusharing_repository_service.labels.instance" . | nindent 16 }}
+          {{- else if eq .Values.podAntiAffinity "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels: {{ include "edusharing_repository_service.labels.instance" . | nindent 18 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      volumes:
+      - name: share
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_repository_service.pvc.share" . }}
+      - name: conf-redis
+        configMap:
+          name: {{ include "edusharing_repository_service.fullname" . }}-redis
+      {{- if .Values.config.saml.enabled }}
+      - name: conf-saml
+        configMap:
+          name: {{ include "edusharing_repository_service.fullname" . }}-saml
+      {{- if .Values.config.saml.extra }}
+      - name: conf-saml-extra
+        configMap:
+          name: {{ include "edusharing_repository_service.fullname" . }}-saml-extra
+      {{- end }}
+      {{- end }}
+

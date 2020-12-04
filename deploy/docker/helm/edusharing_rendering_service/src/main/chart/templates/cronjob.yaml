@@ -1,0 +1,62 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "edusharing_rendering_service.fullname" . }}-cachecleaner
+  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cachecleaner
+  {{- if .Values.global.istio.enabled }}
+  annotations:
+    sidecar.istio.io/inject: "true"
+    traffic.sidecar.istio.io/excludeOutboundPorts: "3306"
+  {{- end }}
+spec:
+  concurrencyPolicy: Forbid
+  schedule: {{ .Values.job.cachecleaner.schedule | quote }}
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: {{ include "edusharing_rendering_service.name" . }}
+            image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+            imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+            args: ["php", "func/classes.new/Helper/cacheCleaner.php"]
+            envFrom:
+            - configMapRef:
+                name: {{ include "edusharing_rendering_service.fullname" . }}-env
+            - secretRef:
+                name: {{ include "edusharing_rendering_service.fullname" . }}-env
+            volumeMounts:
+            - name: share
+              mountPath: /var/cache/esrender
+              subPath: data/
+            {{- with .Values.resources }}
+            resources: {{ toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.securityContext }}
+            securityContext: {{ toYaml . | nindent 14 }}
+            {{- end }}
+          {{- with .Values.global.image.pullSecrets }}
+          imagePullSecrets: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.podSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.terminationGracePeriod }}
+          terminationGracePeriodSeconds: {{ . }}
+          {{- end }}
+          {{- with .Values.nodeAffinity }}
+          affinity:
+            nodeAffinity: {{ toYaml . | nindent 14 }}
+          {{- end }}
+          volumes:
+          - name: share
+            persistentVolumeClaim:
+              claimName: share-{{ include "edusharing_rendering_service.fullname" . }}

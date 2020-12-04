@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,29 +17,21 @@
   <packaging>jar</packaging>
 
   <name>edu_sharing-community-deploy-docker-repository-build-transform</name>
-  
-  <build>
 
-    <resources>
-      <resource>
-        <directory>src/main/build</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
+  <build>
 
     <plugins>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <configuration>
-          <outputDirectory>${project.build.directory}/build</outputDirectory>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
+        <configuration>
+          <images>
+            <image>
+              <name>${docker.image}-repository-transform:${docker.tag}</name>
+            </image>
+          </images>
+        </configuration>
         <executions>
           <execution>
             <id>build</id>

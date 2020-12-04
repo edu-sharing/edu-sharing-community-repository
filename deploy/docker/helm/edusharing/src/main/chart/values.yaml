@@ -1,0 +1,86 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  cluster:
+    domain: cluster.local
+
+  image:
+    registry: ${docker.registry}
+    pullPolicy: Always
+    pullSecrets: []
+#     - registry
+
+  ingress:
+    annotations:
+      kubernetes.io/ingress.class: nginx
+#     cert-manager.io/cluster-issuer:
+
+  istio:
+    enabled: false
+    gateway:
+      selector:
+        app: istio-ingressgateway
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing
+fullnameOverride: ""
+
+image:
+  pullSecrets: []
+
+#   - name: registry
+#     registry: registry.docker.edu-sharing.com
+#     username: someone
+#     password: secret
+#     email: someone@edu-sharing.net
+
+########################################################################################################################
+# DEPENDENCY
+########################################################################################################################
+
+edusharing_rediscluster:
+
+  enabled: &redisEnabled true
+
+  nameOverride: &redisNameOverride edusharing-rediscluster
+  fullnameOverride: &redisFullnameOverride ""
+
+  service:
+    port:
+      api: &redisServicePortApi 6379
+
+########################################################################################################################
+
+edusharing_repository_service:
+
+  edusharing_rediscluster:
+
+    enabled: *redisEnabled
+
+    nameOverride: *redisNameOverride
+    fullnameOverride: *redisFullnameOverride
+
+    service:
+      port:
+        api: *redisServicePortApi
+
+  edusharing_rendering_service:
+
+    edusharing_rediscluster:
+
+      enabled: *redisEnabled
+
+      nameOverride: *redisNameOverride
+      fullnameOverride: *redisFullnameOverride
+
+      service:
+        port:
+          api: *redisServicePortApi
+
+########################################################################################################################

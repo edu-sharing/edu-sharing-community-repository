@@ -1,0 +1,9 @@
+apiVersion: v2
+
+name: edusharing_postgresql
+description: edusharing_postgresql
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}

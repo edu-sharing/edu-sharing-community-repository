@@ -12,7 +12,7 @@ MINGW*)
 esac
 export COMPOSE_EXEC
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-deploy}"
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-compose}"
 
 export CLI_CMD="$0"
 export CLI_OPT1="$1"
@@ -25,6 +25,10 @@ if [ -z "${M2_HOME}" ]; then
 else
 	export MVN_EXEC="${M2_HOME}/bin/mvn"
 fi
+
+[[ -z "${MVN_EXEC_OPTS}" ]] && {
+	export MVN_EXEC_OPTS="-q -ff"
+}
 
 ROOT_PATH="$(
 	cd "$(dirname ".")"
@@ -40,12 +44,12 @@ BUILD_PATH="$(
 )"
 export BUILD_PATH
 
-COMPOSE_DIR="deploy/target/deploy"
+COMPOSE_DIR="compose/target/compose"
 
 [[ ! -d "${COMPOSE_DIR}" || -z "${CLI_OPT1}" ]] && {
 	echo "Building ..."
-	pushd "deploy" >/dev/null || exit
-	$MVN_EXEC -q -ff -Dmaven.test.skip=true compile || exit
+	pushd "compose" >/dev/null || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
 }
 
@@ -60,18 +64,12 @@ info() {
 	echo ""
 	echo "#########################################################################"
 	echo ""
-	echo "rendering-service:"
+	echo "rendering-cache:"
 	echo ""
-	echo "  Credentials:"
+	echo "  Services:"
 	echo ""
-	echo "    Name:           ${RENDERING_DATABASE_USER:-rendering}"
-	echo "    Password:       ${RENDERING_DATABASE_PASS:-rendering}"
+	echo "    REDIS:          127.0.0.1:${RENDERING_CACHE_PORT_REDIS:-9001}"
 	echo ""
-	echo "  HTTP:             http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.xip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
-	echo "                    (accessible from: ${COMMON_BIND_HOST:-127.0.0.1})"
-	echo ""
-	echo "#########################################################################"
-	echo "### ONLY FOR DEBUGGING"
 	echo "#########################################################################"
 	echo ""
 	echo "rendering-database:"
@@ -83,7 +81,22 @@ info() {
 	echo ""
 	echo "  Database:         ${RENDERING_DATABASE_NAME:-rendering}"
 	echo ""
-	echo "  SQL:              127.0.0.1:${RENDERING_DATABASE_PORT_SQL:-9000}"
+	echo "  Services:"
+	echo ""
+	echo "    SQL:            127.0.0.1:${RENDERING_DATABASE_PORT_SQL:-9000}"
+	echo ""
+	echo "#########################################################################"
+	echo ""
+	echo "rendering-service:"
+	echo ""
+	echo "  Credentials:"
+	echo ""
+	echo "    Name:           ${RENDERING_DATABASE_USER:-rendering}"
+	echo "    Password:       ${RENDERING_DATABASE_PASS:-rendering}"
+	echo ""
+	echo "  Services:"
+	echo ""
+	echo "    HTTP:           http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.xip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -128,7 +141,6 @@ down() {
 it() {
 	docker-compose \
 		-f "rendering.yml" \
-		-f "rendering-image-local.yml" \
 		-f "rendering-network-dev.yml" \
 		up -d || exit
 }
@@ -165,12 +177,12 @@ build() {
 
 	echo "- rendering"
 	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -Dmaven.test.skip=true clean install || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 
 	echo "- docker"
 	pushd "${BUILD_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -Dmaven.test.skip=true clean install || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 
 	echo "export COMMUNITY_PATH=${COMMUNITY_PATH}" > .ctx
@@ -187,7 +199,6 @@ debug() {
 
 	docker-compose \
 		-f "rendering.yml" \
-		-f "rendering-image-local.yml" \
 		-f "rendering-network-dev.yml" \
 		-f "rendering-debug.yml" \
 		up -d || exit
@@ -206,7 +217,7 @@ package() {
 
 	echo "- rendering"
 	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -nsu -Dmaven.test.skip=true compile || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -nsu -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
 }
 

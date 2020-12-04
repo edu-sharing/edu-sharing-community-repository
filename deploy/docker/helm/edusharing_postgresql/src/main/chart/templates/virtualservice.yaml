@@ -1,0 +1,16 @@
+{{- if .Values.global.istio.enabled }}
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1beta1" }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "edusharing_postgresql.fullname" . }}
+  labels: {{ include "edusharing_postgresql.labels" . | nindent 4 }}
+spec:
+  hosts:
+  - {{ include "edusharing_postgresql.fullname" . }}
+  tcp:
+  - route:
+    - destination:
+        host: {{ include "edusharing_postgresql.fullname" . }}
+{{- end }}
+{{- end }}

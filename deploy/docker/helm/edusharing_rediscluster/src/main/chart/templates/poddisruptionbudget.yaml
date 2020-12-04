@@ -1,0 +1,9 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "edusharing_rediscluster.fullname" . }}
+  labels: {{ include "edusharing_rediscluster.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: {{ .Values.config.cluster.replicas }}
+  selector:
+    matchLabels: {{ include "edusharing_rediscluster.labels.instance" . | nindent 6 }}

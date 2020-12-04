@@ -6,6 +6,7 @@ services:
     command: [ "dockerd-entrypoint.sh" ]
 
 variables:
+  DOCKER_BUILD_TIMESTAMP: "false"
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_TLS_CERTDIR: ""
@@ -19,9 +20,9 @@ cache:
 
 before_script:
   - if [ -n "$CI_COMMIT_TAG" ]; then
-    export VERSIONING_GIT_TAG=$CI_COMMIT_TAG;
+      export VERSIONING_GIT_TAG=$CI_COMMIT_TAG;
     else
-    export VERSIONING_GIT_BRANCH=$CI_COMMIT_REF_NAME;
+      export VERSIONING_GIT_BRANCH=$CI_COMMIT_REF_NAME;
     fi
 
 deploy:

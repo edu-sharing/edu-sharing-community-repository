@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -21,8 +18,7 @@
 
   <scm>
     <connection>scm:git:https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git</connection>
-    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git
-    </developerConnection>
+    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git</developerConnection>
     <url>https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git</url>
   </scm>
 
@@ -33,23 +29,67 @@
 
   </properties>
 
-  <modules>
-    <module>deploy</module>
-  </modules>
-
   <dependencyManagement>
 
     <dependencies>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-rendering-deploy</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_elasticsearch</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-repository-deploy</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_mariadb</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_postgresql</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rediscluster</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering_service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_solr4</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_transform</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-rendering-compose</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-repository-compose</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -90,15 +130,12 @@
     </dependencies>
 
   </dependencyManagement>
-
+  
   <repositories>
 
     <repository>
       <id>edu-sharing.public.releases</id>
       <url>https://artifacts.edu-sharing.com/repository/public-releases/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -111,7 +148,6 @@
         <enabled>false</enabled>
       </releases>
       <snapshots>
-        <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
       </snapshots>
     </repository>
@@ -132,4 +168,6 @@
 
   </distributionManagement>
 
+<modules>  <module>deploy</module>
+  </modules>
 </project>

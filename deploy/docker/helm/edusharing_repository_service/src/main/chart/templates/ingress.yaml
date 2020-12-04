@@ -1,0 +1,26 @@
+{{- if not .Values.global.istio.enabled }}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "edusharing_repository_service.fullname" . }}
+  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+  {{- with mergeOverwrite .Values.global.ingress.annotations .Values.ingress.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.tls }}
+  tls: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      {{- range $.Values.ingress.paths }}
+      - path: {{ . }}
+        backend:
+          serviceName: {{ include "edusharing_repository_service.fullname" $ }}
+          servicePort: {{ $.Values.service.port.api.external }}
+      {{- end }}
+  {{- end }}
+{{- end }}

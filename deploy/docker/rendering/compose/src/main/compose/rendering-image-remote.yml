@@ -1,0 +1,10 @@
+services:
+
+  rendering-database:
+    image: "${docker.registry}/${docker.image}-mariadb:${docker.tag}"
+
+  rendering-service:
+    image: "${docker.registry}/${docker.image}-rendering-service:${docker.tag}"
+
+  rendering-service-init:
+    image: "${docker.registry}/${docker.image}-rendering-service:${docker.tag}"

@@ -1,0 +1,9 @@
+apiVersion: v2
+
+name: edusharing_rediscluster
+description: edusharing_rediscluster
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}

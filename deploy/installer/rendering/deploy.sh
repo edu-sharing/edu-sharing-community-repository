@@ -14,6 +14,10 @@ else
 	export MVN_EXEC="${M2_HOME}/bin/mvn"
 fi
 
+[[ -z "${MVN_EXEC_OPTS}" ]] && {
+	export MVN_EXEC_OPTS="-q -ff"
+}
+
 ROOT_PATH="$(
 	cd "$(dirname ".")"
 	pwd -P
@@ -60,12 +64,12 @@ build() {
 
 	echo "- rendering"
 	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -Dmaven.test.skip=true clean install || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 
 	echo "- installer"
 	pushd "${BUILD_PATH}" >/dev/null || exit
-	$MVN_EXEC -q -ff -Dmaven.test.skip=true clean install || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 }
 

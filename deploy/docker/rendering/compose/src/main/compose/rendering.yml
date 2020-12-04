@@ -1,0 +1,65 @@
+version: '3.4'
+
+services:
+
+  rendering-cache:
+    image: "${docker.image}-redis:${docker.tag}"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      REDIS_NODES: rendering-cache_1
+
+  rendering-database:
+    image: "${docker.image}-mariadb:${docker.tag}"
+    environment:
+      MARIADB_DATABASE: "${RENDERING_DATABASE_NAME:-rendering}"
+      MARIADB_ROOT_PASSWORD: "${RENDERING_DATABASE_PASS:-rendering}"
+      MARIADB_PASSWORD: "${RENDERING_DATABASE_PASS:-rendering}"
+      MARIADB_USER: "${RENDERING_DATABASE_USER:-rendering}"
+    volumes:
+      - "rendering-database-volume:/var/lib/mysql"
+
+  rendering-service:
+    image: "${docker.image}-rendering-service:${docker.tag}"
+    environment:
+      RENDERING_CACHE_HOST: rendering-cache
+      RENDERING_CACHE_PORT: "6379"
+      RENDERING_DATABASE_HOST: rendering-database
+      RENDERING_DATABASE_NAME: "${RENDERING_DATABASE_NAME:-rendering}"
+      RENDERING_DATABASE_PASS: "${RENDERING_DATABASE_PASS:-rendering}"
+      RENDERING_DATABASE_PORT: "3306"
+      RENDERING_DATABASE_USER: "${RENDERING_DATABASE_USER:-rendering}"
+      RENDERING_SERVICE_HOST_EXTERNAL: "${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.xip.io}"
+      RENDERING_SERVICE_HOST_INTERNAL: rendering-service
+      RENDERING_SERVICE_PORT_EXTERNAL: "${RENDERING_SERVICE_PORT_HTTP:-9100}"
+      RENDERING_SERVICE_PORT_INTERNAL: "8080"
+      REPOSITORY_SERVICE_HOST: repository-service
+      REPOSITORY_SERVICE_PORT: "8080"
+    expose:
+      - "8080"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_SERVICE_PORT_HTTP:-9100}:8081"
+    volumes:
+      - "rendering-service-volume:/var/cache/esrender"
+    depends_on:
+      - rendering-cache
+      - rendering-database
+
+  rendering-service-init:
+    image: "${docker.image}-rendering-service:${docker.tag}"
+    command: ["init.sh"]
+    environment:
+      RENDERING_SERVICE_HOST_INTERNAL: rendering-service
+      RENDERING_SERVICE_PORT_INTERNAL: "8080"
+      REPOSITORY_SERVICE_HOST: repository-service
+      REPOSITORY_SERVICE_PORT: "8080"
+      REPOSITORY_SERVICE_ADMIN_PASS: "${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+    depends_on:
+      - rendering-service
+
+volumes:
+  rendering-database-volume:
+    name: "${COMPOSE_PROJECT_NAME:-compose}_rendering-database-volume"
+    external: true
+  rendering-service-volume:
+    name: "${COMPOSE_PROJECT_NAME:-compose}_rendering-service-volume"
+    external: true
