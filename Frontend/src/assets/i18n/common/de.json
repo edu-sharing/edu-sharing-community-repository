@@ -634,6 +634,7 @@
         "PASSWORD_CORRECT": "Passwort korrekt"
     },
     "VIDEO_CONTROLS": {
+        "HEADING": "Einen Ausschnitt zum Speichern in einer Sammlung festlegen",
         "SAVED": "Änderungen wurden gespeichert"
     },
     "TOAST": {
