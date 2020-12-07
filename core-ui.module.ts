@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRippleModule } from '@angular/material/core';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -15,7 +16,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule } from '@angular/router';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { Ng5SliderModule } from 'ng5-slider';
 import { ToastyModule } from 'ngx-toasty';
 import { RestLocatorService } from '../core-module/rest/services/rest-locator.service';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
@@ -29,11 +32,13 @@ import { InputPasswordComponent } from './components/input-password/input-passwo
 import { LinkComponent } from './components/link/link.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 import { ListTableComponent } from './components/list-table/list-table.component';
+import { NodeUrlComponent } from './components/node-url/node-url.component';
 import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.component';
 import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.component';
 import { SpinnerComponent } from './components/spinner/spinner.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { UserTileComponent } from './components/user-tile/user-tile.component';
+import { DurationPipe } from './components/video-controls/duration.pipe';
 import { VideoControlsComponent } from './components/video-controls/video-controls.component';
 import { DistinctClickDirective } from './directives/distinct-click.directive';
 import { NodesDragSourceDirective } from './directives/drag-nodes/nodes-drag-source.directive';
@@ -51,10 +56,6 @@ import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { TranslationLoader } from './translation-loader';
-import { Ng5SliderModule } from 'ng5-slider';
-import {RouterLink, RouterModule} from "@angular/router";
-import {NodeUrlComponent} from "./components/node-url/node-url.component";
-import { DurationPipe } from './components/video-controls/duration.pipe';
 
 @NgModule({
     declarations: [
@@ -108,6 +109,7 @@ import { DurationPipe } from './components/video-controls/duration.pipe';
         MatCheckboxModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
+        MatExpansionModule,
         Ng5SliderModule,
         RouterModule,
         ToastyModule.forRoot(),
