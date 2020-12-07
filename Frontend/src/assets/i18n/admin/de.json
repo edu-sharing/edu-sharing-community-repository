@@ -489,6 +489,7 @@
         },
         "FRONTPAGE": {
             "GENERAL": "Allgemeine Einstellungen",
+            "DISABLED": "Die Startseite wurde über die client.config.xml deaktiviert. Die Startseite kann aktiviert werden, indem frontpage.enabled auf true gesetzt wird.",
             "MODE_LABEL": "Modus",
             "MODE_HINT": "Nach welchem Schema sollen die Elemente der Startseite ausgewählt werden",
             "MODE": {

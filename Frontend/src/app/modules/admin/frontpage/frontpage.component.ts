@@ -59,6 +59,7 @@ export class AdminFrontpageComponent {
       private translate: TranslateService,
       private nodeService: RestNodeService,
       private collectionService: RestCollectionService,
+      private configService: ConfigurationService,
       private toast: Toast,
       private mdsService: RestMdsService
   ){

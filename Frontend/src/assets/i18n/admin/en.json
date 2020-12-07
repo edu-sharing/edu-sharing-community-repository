@@ -486,6 +486,7 @@
         },
         "FRONTPAGE": {
             "GENERAL": "General settings",
+            "DISABLED": "Frontpage mode is disabled via client.config.xml. You can enable the frontpage by setting frontpage.enabled to true.",
             "MODE_LABEL": "Mode",
             "MODE_HINT": "According to which scheme should the elements of the homepage be selected",
             "MODE": {

@@ -1052,7 +1052,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,
                 mdsId,
             );
-            const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed && this.isHomeRepository();
+            const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed &&
+                this.isHomeRepository() && this.config.instant('frontpage.enabled', true);
             console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);

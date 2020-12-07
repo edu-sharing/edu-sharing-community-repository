@@ -1,4 +1,9 @@
 @import "../../../core-ui-module/styles/variables";
+info-message{
+  display: flex;
+  justify-content: center;
+  margin-top: 20%;
+}
 .frontpage {
   width: 100%;
   max-width: 1300px;
