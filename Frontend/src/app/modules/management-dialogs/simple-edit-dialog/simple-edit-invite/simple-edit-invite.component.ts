@@ -206,7 +206,7 @@ export class SimpleEditInviteComponent {
       this.nodesPermissions = permissions.map((p) => p.permissions);
       this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
       // The amount of orgs is still limited to the maximum amount returned by default!
-      this.organizationApi.getOrganizations().subscribe((orgs) => {
+      this.organizationApi.getOrganizations('', true).subscribe((orgs) => {
         const filter = this.configService.instant('simpleEdit.organizationFilter');
         if(filter) {
           const reg = new RegExp(filter);

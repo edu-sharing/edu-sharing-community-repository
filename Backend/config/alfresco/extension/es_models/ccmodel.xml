@@ -1515,6 +1515,11 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
+				<!-- time an item was originally created, e.g. recorded or written -->
+				<property name="ccm:originally_created">
+					<type>d:date</type>
+					<multiple>false</multiple>
+				</property>
 			</properties>
 		</aspect>
 

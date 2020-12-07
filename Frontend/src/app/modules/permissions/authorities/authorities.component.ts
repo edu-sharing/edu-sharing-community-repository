@@ -91,6 +91,7 @@ export class PermissionsAuthoritiesComponent {
   editStatus: UserSimple;
   editStatusNotify = true;
   editStatusButtons: DialogButton[];
+  hasMore: boolean;
   groupSignup: Organization;
   groupSignupList: UserSimple[];
   groupSignupDetails: GroupSignupDetails;
@@ -603,19 +604,23 @@ export class PermissionsAuthoritiesComponent {
   public loadAuthorities() {
     this.loading = true;
     let sort = RestConstants.AUTHORITY_NAME;
-    if (this._mode == 'ORG')
-      sort = RestConstants.CM_PROP_AUTHORITY_AUTHORITYNAME;
+    if (this._mode == 'ORG') {
+        sort = RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME;
+    }
     if (this._mode == 'GROUP' && !this.org) {
       sort = this.sortBy;
       if (sort == RestConstants.AUTHORITY_DISPLAYNAME){
-        sort = RestConstants.AUTHORITY_NAME;
+        sort = RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME;
       }
       if (sort == RestConstants.AUTHORITY_GROUPTYPE) {
         sort = RestConstants.CCM_PROP_AUTHORITY_GROUPTYPE;
       }
+    } else  if (this._mode == 'USER' && !this.org) {
+        sort = this.sortBy;
+        if(sort === RestConstants.AUTHORITY_STATUS){
+            sort = RestConstants.CM_ESPERSONSTATUS;
+        }
     }
-    if (this._mode == 'USER' && !this.org)
-      sort = this.sortBy;
 
     const request = {sortBy: [sort], sortAscending: this.sortAscending, offset: this.offset};
     const query = this._searchQuery ? this._searchQuery : '';
@@ -630,6 +635,8 @@ export class PermissionsAuthoritiesComponent {
           if (org.administrationAccess) {
             this.list.push(org);
           }
+          // org endpoint does not support proper pagination, so check if result was empty
+          this.hasMore = orgs.organizations.length > 0;
         }
         this.loading = false;
         this.updateOptions();
@@ -655,24 +662,31 @@ export class PermissionsAuthoritiesComponent {
       if (this.org) {
         this.offset += this.connector.numberPerRequest;
         this.iam.getGroupMembers(this.org.authorityName, query, this._mode, request).subscribe((data: IamAuthorities) => {
-          for (const auth of data.authorities)
-            this.list.push(auth);
+          for (const auth of data.authorities) {
+              this.list.push(auth);
+          }
+          // org endpoint does not support proper
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }
       else if (this._mode == 'GROUP'){
         this.offset += this.connector.numberPerRequest;
         this.iam.searchGroups(query, true, '', '', request).subscribe((data: IamGroups) => {
-          for (const auth of data.groups)
-            this.list.push(auth);
+          for (const auth of data.groups) {
+              this.list.push(auth);
+          }
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }
       else if (this._mode == 'USER'){
         this.offset += this.connector.numberPerRequest;
         this.iam.searchUsers(query, true, '', request).subscribe((data: IamUsers) => {
-          for (const auth of data.users)
-            this.list.push(auth);
+          for (const auth of data.users) {
+              this.list.push(auth);
+          }
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }

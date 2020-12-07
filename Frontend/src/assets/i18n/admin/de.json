@@ -243,6 +243,7 @@
             "OAI_SAVE": "Werte für nächsten Import speichern",
             "OAI_FROM": "von",
             "OAI_UNTIL": "bis",
+            "OAI_PERIOD_IN_DAYS":"Zeitraum in Tagen (kein von/bis verwenden)",
             "REMOVE_IMPORTS": "Gelöschte Importe entfernen",
             "IMPORTS_REMOVED": "Gelöschte OAI-Elemente werden entfernt.\nÜberprüfen Sie die Aufgabenliste, um den Status einzusehen",
             "EXCEL_IMPORTED": "Excel-Datei importiert ({{ rows }} Zeilen importiert)",
@@ -430,7 +431,7 @@
             "DELETED": "Medienzentrum \"{{name}}\" wurde gelöscht",
             "DATA": {
                 "TITLE": "Basisdaten",
-                "EDIT_NOT_ALLOWED": "Um weitere Änderungen an den Daten durchzuführen, kontaktieren Sie bitte den zuständigen Administrator des Systems",
+                "EDIT_NOT_ALLOWED": "Ihrem aktuellen Nutzer fehlen Berechtigungen, Medienzentren zu bearbeiten. Um weitere Änderungen an den Daten durchzuführen, kontaktieren Sie bitte den zuständigen Administrator des Systems",
                 "id": "Interne ID",
                 "location": "Standort",
                 "districtAbbreviation": "Kreiskürzel",
@@ -492,6 +493,7 @@
         },
         "FRONTPAGE": {
             "GENERAL": "Allgemeine Einstellungen",
+            "DISABLED": "Die Startseite wurde über die client.config.xml deaktiviert. Die Startseite kann aktiviert werden, indem frontpage.enabled auf true gesetzt wird.",
             "MODE_LABEL": "Modus",
             "MODE_HINT": "Nach welchem Schema sollen die Elemente der Startseite ausgewählt werden",
             "MODE": {

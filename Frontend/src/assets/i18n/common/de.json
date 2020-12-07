@@ -613,8 +613,8 @@
             "UNSET": "Keine hinzufügen",
             "PUBLISH": "Alle (Veröffentlichen)",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Administratoren von\n\"{{school}}\"",
-                "TEACHER": "Lehrkräfte von\n\"{{school}}\""
+                "ORG_ADMINISTRATORS": "Administratoren von\n{{school}}",
+                "TEACHER": "Lehrkräfte von\n{{school}}"
             }
         },
         "LICENSE": {

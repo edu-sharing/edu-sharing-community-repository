@@ -263,6 +263,7 @@
 </div>
 <listTable class="list" infinite-scroll (scrolled)="loadAuthorities()" [scrollWindow]="false" [class.listEmbedded]="embedded"
   #listRef
+  (loadMore)="loadAuthorities()"
   [columns]="columns"
   [nodes]="list"
   [hasCheckbox]="_mode!='ORG'"
@@ -271,6 +272,7 @@
   [isLoading]="loading"
   [isClickable]="true"
   [selectedNodes]="selected"
+  [hasMore]="hasMore"
   (selectionChanged)="selection($event)"
   [sortAscending]="sortAscending"
   [hasHeading]="true"

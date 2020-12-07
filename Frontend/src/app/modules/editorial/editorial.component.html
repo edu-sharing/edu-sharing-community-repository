@@ -1,0 +1,16 @@
+<main-nav #mainNav
+></main-nav>
+<div class="editorial-container">
+    <actionbar #actionbar></actionbar>
+    <listTable #list
+               [nodes]="nodes"
+               [viewType]="0"
+               [scope]="SCOPES.Search"
+               [createLink]="true"
+               [mainNav]="mainNav"
+               [actionbar]="actionbar"
+               [columns]="columns"
+               [hasCheckbox]="true"
+               [hasIcon]="true"
+    ></listTable>
+</div>

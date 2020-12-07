@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -18,6 +19,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.PersistentHandlerInterface;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
+import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -67,17 +69,21 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 	}
 	
 	public ListIdentifiersHandler(String oaiBaseUrl, String set, String metadataPrefix) {
-		this(null, null, null, oaiBaseUrl, set, metadataPrefix, null, false);
+		this(null, null, null, oaiBaseUrl, set, metadataPrefix, null, false, null, null);
 	}
 
-	public ListIdentifiersHandler(RecordHandlerInterfaceBase recordHandler, 
-			PersistentHandlerInterface persistentHandler, 
-			BinaryHandler binaryHandler, 
-			String oaiBaseUrl, 
-			String set, 
-			String metadataPrefix,
-			String esMetadataSetId,
-			boolean addSetToGetRecordUrl) {
+	public ListIdentifiersHandler(String oaiBaseUrl, String set, String metadataPrefix, Date from, Date until) {
+		this(null, null, null, oaiBaseUrl, set, metadataPrefix, null, false, from, until);
+	}
+
+	public ListIdentifiersHandler(RecordHandlerInterfaceBase recordHandler,
+								  PersistentHandlerInterface persistentHandler,
+								  BinaryHandler binaryHandler,
+								  String oaiBaseUrl,
+								  String set,
+								  String metadataPrefix,
+								  String esMetadataSetId,
+								  boolean addSetToGetRecordUrl, Date from, Date until) {
 
 		this.oaiBaseUrl = oaiBaseUrl;
 		this.metadataPrefix = metadataPrefix;
@@ -89,6 +95,10 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		this.addSetToGetRecordUrl = addSetToGetRecordUrl;
 
 		String url = this.oaiBaseUrl + "?verb=ListIdentifiers&metadataPrefix=" + metadataPrefix + "&set=" + set;
+		if(from != null && until != null){
+			url += "&from=" + OAIConst.DATE_FORMAT.format(from);
+			url += "&until=" + OAIConst.DATE_FORMAT.format(until);
+		}
 		handleIdentifiersList(url);
 
 	}

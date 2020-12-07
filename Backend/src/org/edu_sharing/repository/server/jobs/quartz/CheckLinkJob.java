@@ -25,7 +25,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
-import sun.awt.image.ImageWatched;
 
 import java.io.IOException;
 import java.util.Collections;

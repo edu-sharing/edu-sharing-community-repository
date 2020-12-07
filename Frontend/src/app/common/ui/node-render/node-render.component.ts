@@ -8,7 +8,7 @@ import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {Title} from '@angular/platform-browser';
 import {trigger} from '@angular/animations';
-import {Location} from '@angular/common';
+import {Location, PlatformLocation} from '@angular/common';
 import {NodeHelper} from '../../../core-ui-module/node-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {SearchService} from '../../../modules/search/search.service';
@@ -99,6 +99,7 @@ export class NodeRenderComponent implements EventListener {
       private networkService : RestNetworkService,
       private _ngZone: NgZone,
       private router : Router,
+      private platformLocation : PlatformLocation,
       private optionsHelper : OptionsHelperService,
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).nodeRenderComponentRef = {component: this, zone: _ngZone};
@@ -238,7 +239,7 @@ export class NodeRenderComponent implements EventListener {
         }
         else {
           if(this.fromLogin) {
-            this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace']);
+            UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, false);
           }
           else {
             if(window.history.state?.scope === 'search') {

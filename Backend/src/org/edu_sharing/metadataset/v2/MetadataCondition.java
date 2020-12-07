@@ -1,6 +1,7 @@
 package org.edu_sharing.metadataset.v2;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class MetadataCondition implements Serializable {
     public MetadataCondition(String value, CONDITION_TYPE type, boolean negate) {
@@ -34,4 +35,13 @@ public class MetadataCondition implements Serializable {
         this.negate = negate;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MetadataCondition that = (MetadataCondition) o;
+        return negate == that.negate &&
+                Objects.equals(value, that.value) &&
+                type == that.type;
+    }
 }

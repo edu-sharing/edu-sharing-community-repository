@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.alfresco.service.AuthorityService;
@@ -164,9 +165,12 @@ public class MediacenterDao extends AbstractDao{
 		boolean active = (profile.getMediacenter().getContentStatus()==null
 				|| profile.getMediacenter().getContentStatus().equals(Mediacenter.MediacenterProfileExtension.ContentStatus.Deactivated)) ? false : true;
 		try {
-			mediacenterService.updateMediacenter(authorityName,profile.getDisplayName(), null,
-					profile.getMediacenter().getLocation(),profile.getMediacenter().getDistrictAbbreviation(),
-					profile.getMediacenter().getMainUrl(),new Gson().toJson(profile.getMediacenter().getCatalogs()), active );
+			AuthenticationUtil.runAsSystem(() -> {
+						mediacenterService.updateMediacenter(authorityName, profile.getDisplayName(), null,
+								profile.getMediacenter().getLocation(), profile.getMediacenter().getDistrictAbbreviation(),
+								profile.getMediacenter().getMainUrl(), new Gson().toJson(profile.getMediacenter().getCatalogs()), active);
+						return null;
+			});
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
