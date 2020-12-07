@@ -1,24 +1,26 @@
-import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Router } from '@angular/router';
-import { Options } from 'ng5-slider';
-import { of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import {trigger} from '@angular/animations';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Router} from '@angular/router';
+import {Options} from 'ng5-slider';
+import {of} from 'rxjs';
+import {catchError, map, tap} from 'rxjs/operators';
+import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {
+    NodesRightMode,
     RestCollectionService,
     RestConnectorService,
     RestHelper,
     TemporaryStorageService,
     UIConstants,
 } from '../../../core-module/core.module';
-import { Node } from '../../../core-module/rest/data-object';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { Toast } from '../../toast';
-import { UIHelper } from '../../ui-helper';
-import { DurationPipe } from './duration.pipe';
+import {Node} from '../../../core-module/rest/data-object';
+import {RestConstants} from '../../../core-module/rest/rest-constants';
+import {RestNodeService} from '../../../core-module/rest/services/rest-node.service';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
+import {Toast} from '../../toast';
+import {UIHelper} from '../../ui-helper';
+import {DurationPipe} from './duration.pipe';
+import {NodeHelper} from "../../node-helper";
 
 interface VideoControlsValues {
     startTime: number;
@@ -79,7 +81,7 @@ export class VideoControlsComponent implements OnInit {
     }
 
     async save(): Promise<void> {
-        if (this.isCollectionRef(this.node)) {
+        if (this.isCollectionRef(this.node) && this.isOwner(this.node)) {
             const node = await this.writeVideoControlsValues(this.node, this.values);
             if (node) {
                 this.updateCurrentNode.emit(node);
@@ -146,9 +148,13 @@ export class VideoControlsComponent implements OnInit {
             return false;
         } else {
             if (this.isCollectionRef(node)) {
-                return RestHelper.hasAccessPermission(node, RestConstants.ACCESS_WRITE);
+                if(this.isOwner(node)) {
+                    return NodeHelper.getNodesRight([node], RestConstants.ACCESS_WRITE);
+                } else{
+                    return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH, NodesRightMode.Original);
+                }
             } else {
-                return RestHelper.hasAccessPermission(node, RestConstants.ACCESS_CC_PUBLISH);
+                return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH);
             }
         }
     }
@@ -248,5 +254,9 @@ export class VideoControlsComponent implements OnInit {
 
     private isCollectionRef(node: Node) {
         return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
+    }
+
+    private isOwner(node: Node) {
+        return node.properties[RestConstants.CM_CREATOR][0] === this.connector.getCurrentLogin().authorityName;
     }
 }

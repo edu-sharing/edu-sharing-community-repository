@@ -45,7 +45,7 @@ export class DateHelper{
     }
     let dateObject = new Date((date as number) * 1);
     format=format.replace("y",""+dateObject.getFullYear());
-    format=format.replace("M",""+DateHelper.fillDate(dateObject.getMonth()));
+    format=format.replace("M",""+DateHelper.fillDate(dateObject.getMonth() + 1));
     format=format.replace("d",""+DateHelper.fillDate(dateObject.getDate()));
     return format;
   }

@@ -214,6 +214,9 @@ $badgeWidth: 250px;
         .node_ccm_wf_status {
             min-width: 100px;
         }
+        .node_ccm_editorial_state {
+            min-width: 130px;
+        }
 
         .node_cm_name {
             min-width: 80px;
@@ -514,6 +517,8 @@ $badgeWidth: 250px;
     }
 }
 .nodeCollection {
+    // enable overflow to show "go into button" above element
+    overflow: visible;
     .selected {
         background-color: transparent;
     }

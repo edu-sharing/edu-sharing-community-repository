@@ -228,11 +228,11 @@ export class NodeHelper {
       icon='language';
       scopeName='PUBLIC';
     }
-    if(node.type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
+    if(node.collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
       icon='star';
       scopeName='TYPE_EDITORIAL';
     }
-    if(node.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+    if(node.collection.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
       icon='business';
       scopeName='TYPE_MEDIA_CENTER';
     }

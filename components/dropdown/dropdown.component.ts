@@ -1,5 +1,5 @@
 import { Component, Input, ViewChild } from '@angular/core';
-import { MatMenu } from '@angular/material/menu';
+import {MatMenu, MatMenuContent, MatMenuTrigger} from '@angular/material/menu';
 import { UIService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../option-item';
@@ -16,6 +16,7 @@ import { UIHelper } from '../../ui-helper';
 })
 export class DropdownComponent {
     @ViewChild('dropdown', { static: true }) menu: MatMenu;
+    @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
 
     @Input() position: 'left' | 'right' = 'left';
 

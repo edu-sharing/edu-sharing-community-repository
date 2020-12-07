@@ -336,6 +336,8 @@ export class UIHelper {
             scope = 'PUBLIC';
         } else if (type == RestConstants.COLLECTIONTYPE_EDITORIAL) {
             scope = 'PUBLIC';
+        } else if (type == RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+            scope = 'MEDIA_CENTER';
         }
         bridge.showTemporaryMessage(MessageType.info,
             'WORKSPACE.TOAST.ADDED_TO_COLLECTION_' + scope,
