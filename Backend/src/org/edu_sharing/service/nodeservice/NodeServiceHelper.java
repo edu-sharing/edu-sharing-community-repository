@@ -131,6 +131,21 @@ public class NodeServiceHelper {
     public static HashMap<String, Object> getProperties(NodeRef nodeRef) throws Throwable {
         return NodeServiceFactory.getLocalService().getProperties(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
     }
+	public static HashMap<String, Object> getPropertiesVersion(NodeRef nodeRef, String version) throws Throwable {
+    	if(version == null){
+    		return getProperties(nodeRef);
+		}
+		HashMap<String, HashMap<String, Object>> versionHistory = NodeServiceFactory.getLocalService().getVersionHistory(nodeRef.getId());
+
+		if (versionHistory != null) {
+			for (HashMap<String, Object> versionData : versionHistory.values()) {
+				if(version.equals(versionData.get(CCConstants.CM_PROP_VERSIONABLELABEL))){
+					return versionData;
+				}
+			}
+		}
+		throw new IllegalArgumentException("No version " + version +" found for node " + nodeRef);
+	}
 
 	/**
 	 * return the native properties
