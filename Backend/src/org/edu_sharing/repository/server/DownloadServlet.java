@@ -23,6 +23,7 @@ import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
@@ -64,7 +65,11 @@ public class DownloadServlet extends HttpServlet{
 
 	private void downloadNode(String nodeId, HttpServletRequest req, HttpServletResponse resp, String fileName, Mode mode) throws IOException {
 		try {
-			if (!NodeServiceHelper.downloadAllowed(nodeId)) {
+			// allow signature based auth from connector to bypass the download/content access
+			logger.debug("Access tool: " + ContextManagementFilter.accessToolType.get());
+			if (!NodeServiceHelper.downloadAllowed(nodeId) &&
+					!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())) {
+				logger.info("Download forbidden for node " + nodeId);
 				resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_FORBIDDEN));
 				return;
 			}
