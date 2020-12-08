@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.repository.server.NodeRefVersion;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -34,18 +35,18 @@ public class LRMITool {
     private static final String OR_SEPERATOR = ",";
     private static final String AND_SEPERATOR = "+";
 
-    public static JSONObject getLRMIJson(String nodeId) throws Throwable {
+    public static JSONObject getLRMIJson(NodeRefVersion node) throws Throwable {
         JSONObject lrmi=new JSONObject();
         // TODO: This probably has to work for remote repos in future
-        HashMap<String, Object> props = NodeServiceFactory.getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+        HashMap<String, Object> props = NodeServiceHelper.getPropertiesVersion(node.getNodeRef(), node.getVersion());
         Properties lrmiProps = getMappingFile();
         lrmi.put("@context","http://schema.org/");
         lrmi.put("@type",new String[]{"CreativeWork","MediaObject"});
         for(Map.Entry<String,String> vcard : VCARD_MAPPING.entrySet()){
             lrmi.put(vcard.getKey(),getFromVCard(vcard.getValue(),props));
         }
-        lrmi.put("url",URLTool.getNgRenderNodeUrl(nodeId,null));
-        lrmi.put("thumbnailUrl",NodeServiceHelper.getPreview(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).getUrl());
+        lrmi.put("url",URLTool.getNgRenderNodeUrl(node.getNodeRef().getId(),node.getVersion()));
+        lrmi.put("thumbnailUrl",NodeServiceHelper.getPreview(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node.getNodeRef().getId())).getUrl());
         lrmi.put("dateCreated",getDate(getProperty(props, Collections.singletonList(CCConstants.CM_PROP_C_CREATED+CCConstants.LONG_DATE_SUFFIX))));
         lrmi.put("dateModified",getDate(getProperty(props, Collections.singletonList(CCConstants.CM_PROP_C_MODIFIED+CCConstants.LONG_DATE_SUFFIX))));
         lrmi.put("datePublished",getDate(getProperty(props, Collections.singletonList(CCConstants.CCM_PROP_PUBLISHED_DATE+CCConstants.LONG_DATE_SUFFIX))));
