@@ -99,9 +99,11 @@ public class BulkEditNodesJob extends AbstractJob{
 			throw new IllegalArgumentException("Only one of parameters 'value' and 'copy' may be set");
 		}
 
+		String lucene = (String) context.getJobDetail().getJobDataMap().get("lucene");
+
 		String startFolder = (String) context.getJobDetail().getJobDataMap().get("startFolder");
-		if(startFolder==null){
-			throw new IllegalArgumentException("Missing required parameter 'startFolder'");
+		if(startFolder==null && (lucene == null || lucene.trim().equals(""))){
+			throw new IllegalArgumentException("Missing required parameter 'startFolder' or 'lucene'");
 		}
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
@@ -123,7 +125,8 @@ public class BulkEditNodesJob extends AbstractJob{
 				recurseMode = RecurseMode.valueOf((String) context.getJobDetail().getJobDataMap().get("recurseMode"));
 			}
 		}catch(Throwable t){
-			throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
+			if(lucene == null || lucene.trim().equals(""))
+				throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
 		}
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
@@ -147,6 +150,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setThreaded(false);
 		runner.setRecurseMode(recurseMode);
 		runner.setStartFolder(startFolder);
+		runner.setLucene(lucene);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		int count=runner.run();
