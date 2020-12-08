@@ -39,6 +39,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     chipsControl: FormControl;
     filteredValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
+    showDropdownArrow: boolean;
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
@@ -77,6 +78,8 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         ) {
             this.filteredValues = this.subscribeForSuggestionUpdates();
         }
+        this.showDropdownArrow = this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges;
+
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
