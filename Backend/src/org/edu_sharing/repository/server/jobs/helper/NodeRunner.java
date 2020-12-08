@@ -89,6 +89,7 @@ public class NodeRunner {
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
     private BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
+    private String lucene = null;
 
     public NodeRunner() {
 		// TODO Auto-generated constructor stub
@@ -148,6 +149,10 @@ public class NodeRunner {
         this.runAsSystem = runAsSystem;
     }
 
+    public void setLucene(String lucene) {
+        this.lucene = lucene;
+    }
+
     /**
      * runs the job for each node
      * @return the number of nodes that have been processed (also if they may have been filtered in the filter expression)
@@ -167,11 +172,20 @@ public class NodeRunner {
         }
         try {
             List<NodeRef> nodes;
-            if (runAsSystem)
-                nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode));
-            else
-                nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode);
 
+
+            if(lucene == null || lucene.trim().equals("")) {
+                if (runAsSystem)
+                    nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode));
+                else
+                    nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode);
+            }else{
+                logger.info("collection nodes by lucene:"+lucene);
+                if (runAsSystem)
+                    nodes = AuthenticationUtil.runAsSystem(() -> new NodeCollectorLucene(lucene,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE).getNodes());
+                else
+                    nodes = new NodeCollectorLucene(lucene, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE).getNodes();
+            }
             Predicate<? super NodeRef> callFilter = (ref) -> {
                 if (filter == null)
                     return true;
