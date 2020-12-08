@@ -177,6 +177,11 @@ mat-button-toggle-group{
   // white background, primary as content color
   color: $primary;
 }
+.mat-form-field .mat-icon-button {
+  width: 25px;
+  height: 25px;
+  margin-right: 2px;
+}
 // align prefix in input fields
 .mat-form-field-appearance-outline .mat-form-field-prefix {
   top: 0.4em !important;
