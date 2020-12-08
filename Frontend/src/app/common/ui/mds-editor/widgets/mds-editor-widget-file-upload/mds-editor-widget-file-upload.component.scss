@@ -9,6 +9,12 @@
   color: $textLight;
   .filename{
     padding-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    mat-icon{
+      padding-right: 5px;
+    }
   }
   a {
     font-weight: bold;

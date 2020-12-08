@@ -2,16 +2,21 @@
 <app-mds-editor-widget-container [label]="false">
   <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
        (onFileDrop)="setFilesByFileList($event)"
-       (click)="fileSelect.click()"
+       (click)="link ? null : fileSelect.click()"
        (fileOver)="isFileOver=$event">
     <div *ngIf="selectedFiles">
-      <div class="filename">{{selectedFiles[0].name}}</div>
+      <div class="filename"><mat-icon>description</mat-icon> {{selectedFiles[0].name}}</div>
       <mat-link (click)="selectedFiles = null">{{ 'WORKSPACE.ADD_OBJECT_RESET' | translate}}</mat-link>
     </div>
-    <div *ngIf="!selectedFiles">
+    <div *ngIf="!selectedFiles && !link">
       <div><i icon iconId="cloud_upload"></i></div>
       <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}
         <mat-link (click)="fileSelect.click()">{{ 'WORKSPACE.ADD_OBJECT_BROWSE' | translate}}</mat-link>
+      </div>
+    </div>
+    <div *ngIf="link">
+      <div><i icon iconId="cloud_off"></i></div>
+      <div>{{ 'WORKSPACE.ADD_OBJECT_LINK_SELECTED' | translate}}
       </div>
     </div>
   </div>

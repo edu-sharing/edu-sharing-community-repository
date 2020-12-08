@@ -17,7 +17,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { BulkMode, InputStatus, RequiredMode } from '../../types';
+import {BulkMode, InputStatus, RequiredMode, Values} from '../../types';
 import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
 import {UIAnimation} from '../../../../../core-module/ui/ui-animation';
 import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
@@ -55,6 +55,9 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
         this.onSetLink.emit(this.link);
     }
     setFilesByFileList(fileList: FileList) {
+        if(this.link) {
+            return;
+        }
         this.selectedFiles = [];
         for(let i = 0;i < fileList.length; i++) {
             this.selectedFiles.push(fileList.item(i));
@@ -62,5 +65,21 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
     }
     filesSelected(files: Event) {
         this.setFilesByFileList((files.target as HTMLInputElement).files);
+    }
+    async getValues(values: Values) {
+        if (this.selectedFiles?.length) {
+            const file = this.selectedFiles[0];
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+            });
+            values['fileupload-filename'] = [file.name];
+            values['fileupload-filetype'] = [file.type];
+            values['fileupload-filedata'] = [(base64 as string)];
+        } else {
+            values['fileupload-link'] = [this.link];
+        }
+        return values;
     }
 }

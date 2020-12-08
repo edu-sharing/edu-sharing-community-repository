@@ -21,6 +21,7 @@
         "ADD_OBJECT_SUBTITLE": "Neue Datei oder Link anlegen",
         "ADD_OBJECT_MESSAGE": "Materialien per Drag & Drop ablegen oder ",
         "ADD_OBJECT_BROWSE": "Durchsuchen",
+        "ADD_OBJECT_LINK_SELECTED": "Es wurde eine Link-Adresse eingegeben",
         "ADD_OBJECT_RESET": "Dateiauswahl zurücksetzen",
         "SELECT_COLLECTION": "Sammlung wählen",
         "SELECT_ORG": "oder",

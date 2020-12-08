@@ -271,7 +271,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             let criterias: any[] = [];
             if (this.mdsEditorInstanceService.editorMode === 'search') {
-                const values = this.mdsEditorInstanceService.getValues();
+                const values = (await this.mdsEditorInstanceService.getValues());
                 delete values[this.definition.id];
                 values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
                     this.mdsEditorInstanceService.searchService.searchTerm,
@@ -526,7 +526,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     async save(): Promise<Node[]> {
-        const newValues = this.getNodeValuePairs();
+        const newValues = await this.getNodeValuePairs();
         let updatedNodes: Node[];
         const versionWidget: MdsEditorWidgetVersionComponent = this.nativeWidgets.find(
             (w) => w instanceof MdsEditorWidgetVersionComponent,
@@ -554,7 +554,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         return updatedNodes;
     }
 
-    getValues(node?: Node): Values {
+    async getValues(node?: Node): Promise<Values> {
         let values = this.widgets
             .filter((widget) => widget.relation === null)
             .reduce((acc, widget) => {
@@ -579,9 +579,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         // Native widgets don't necessarily match their ID and relevant property or even affect
         // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
         // `getValues()`.
-        this.nativeWidgets.forEach(
-            (widget) => (values = widget.getValues ? widget.getValues(values) : values),
-        );
+        for (const widget of this.nativeWidgets) {
+            values = widget.getValues ? (await widget.getValues(values)) : values;
+        }
+
         return values;
     }
 
@@ -744,11 +745,11 @@ export class MdsEditorInstanceService implements OnDestroy {
         throw new Error(`Unsupported condition type: ${widget.condition.type}`);
     }
 
-    private getNodeValuePairs(): Array<{ node: Node; values: Values }> {
-        return this.nodes$.value.map((node) => ({
+    private async getNodeValuePairs(): Promise<{ node: Node; values: Values }[]> {
+        return Promise.all(this.nodes$.value.map(async (node) => ({
             node,
-            values: this.getValues(node),
-        }));
+            values: await this.getValues(node),
+        })));
     }
 
     private getNewPropertyValue(widget: Widget, oldPropertyValue?: string[]): string[] {

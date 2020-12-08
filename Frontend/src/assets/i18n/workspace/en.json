@@ -21,6 +21,7 @@
         "ADD_OBJECT_SUBTITLE": "Add a new file or link",
         "ADD_OBJECT_MESSAGE": "Drag & Drop to upload or",
         "ADD_OBJECT_BROWSE": "Browse",
+        "ADD_OBJECT_LINK_SELECTED": "You've entered a link address",
         "ADD_OBJECT_RESET": "Reset selected file",
         "SELECT_COLLECTION": "Select collection",
         "SELECT_ORG": "or",
