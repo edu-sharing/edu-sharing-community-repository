@@ -873,6 +873,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public void writeContent(StoreRef store, String nodeID, InputStream content, String mimetype, String _encoding,
 			String property) throws Exception {
+		// if trying to write to an io ref -> switch to original (this can cause permission denied!)
+		if(hasAspect(store.getProtocol(), store.getIdentifier(), nodeID, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+			nodeID = getProperty(store.getProtocol(), store.getIdentifier(), nodeID, CCConstants.CCM_PROP_IO_ORIGINAL);
+		}
 		apiClient.writeContent(store, nodeID, content, mimetype, _encoding, property);
 		RenderingTool.buildRenderingCache(nodeID);
 	}

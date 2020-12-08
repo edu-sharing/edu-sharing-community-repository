@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -23,11 +24,12 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.NodeTool;
-import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.PermissionException;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -327,5 +329,34 @@ public class NodeServiceHelper {
 			rootId = search.keySet().iterator().next();
 		}
 		return rootId;
+	}
+
+	/** fetches the properties from the original node
+	 * if the node is a collection ref, the permissions will be handled accordingly
+	 * @param nodeRef
+	 * @return
+	 */
+	public static HashMap<String, Object> getPropertiesOriginal(NodeRef nodeRef) throws Throwable{
+		if(NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+			if(!PermissionServiceHelper.hasPermission(nodeRef, CCConstants.PERMISSION_READ)){
+				throw new PermissionException(nodeRef.toString(), CCConstants.PERMISSION_READ);
+			}
+			// @TODO: Additional permissions check might later required for licensed content
+			NodeRef original;
+			Serializable originalProp = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+			if(originalProp instanceof String){
+				original = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String) originalProp);
+			} else {
+				original = (NodeRef) originalProp;
+			}
+			return AuthenticationUtil.runAsSystem(() -> {
+				try {
+					return NodeServiceHelper.getProperties(original);
+				} catch (Throwable throwable) {
+					throw new RuntimeException(throwable);
+				}
+			});
+		}
+		return NodeServiceHelper.getProperties(nodeRef);
 	}
 }

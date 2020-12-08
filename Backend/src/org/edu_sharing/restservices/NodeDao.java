@@ -873,7 +873,7 @@ public class NodeDao {
 	}
 
 	private void fillNodeReference(CollectionReference reference) throws DAOException {
-		final String originalId = (String) getNativeProperties().get(CCConstants.CCM_PROP_IO_ORIGINAL);
+		final String originalId = getReferenceOriginalId();
 		reference.setOriginalId(originalId);
 		try {
 			reference.setAccessOriginal(NodeDao.getNode(repoDao, originalId).asNode(false).getAccess());
@@ -897,6 +897,11 @@ public class NodeDao {
 		});
 	}
 
+	private String getReferenceOriginalId() throws DAOException {
+		final String originalId = (String) getNativeProperties().get(CCConstants.CCM_PROP_IO_ORIGINAL);
+		return originalId;
+	}
+
 	private void fillNodeObject(Node data) throws DAOException {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
@@ -916,7 +921,7 @@ public class NodeDao {
 		data.setModifiedAt(getModifiedAt());
 		data.setModifiedBy(getModifiedBy());
 
-		data.setContent(getContent());
+		data.setContent(getContent(data));
 
 		data.setDownloadUrl(getDownloadUrl());
 		data.setMetadataset(getMetadataSet());
@@ -930,7 +935,7 @@ public class NodeDao {
 		data.setIconURL(getIconURL());
 		data.setCommentCount(getCommentCount());
 		data.setLicense(getLicense());
-		data.setSize(getSize());
+		data.setSize(getSize(data));
 
 		data.setRating(getRating());
 		try {
@@ -976,12 +981,19 @@ public class NodeDao {
 		return license;
 	}
 
-	private Content getContent() {
+	private Content getContent(Node data) throws DAOException {
 		Content content=new Content();
-		content.setVersion(getContentVersion());
+		content.setVersion(getContentVersion(data));
 		content.setUrl(getContentUrl());
 
-		content.setHash(nodeService.getContentHash(storeProtocol,storeId,nodeId,this.version,org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+			content.setHash(AuthenticationUtil.runAsSystem(() ->
+					nodeService.getContentHash(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							((CollectionReference) data).getOriginalId(),this.version,org.alfresco.model.ContentModel.PROP_CONTENT.toString())
+			));
+		} else {
+			content.setHash(nodeService.getContentHash(storeProtocol, storeId, nodeId, this.version, org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+		}
 		return content;
 	}
 
@@ -1290,8 +1302,14 @@ public class NodeDao {
 		return ref;
 	}
 
-	private String getContentVersion() {
-		return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+	private String getContentVersion(Node data) throws DAOException {
+		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+			return AuthenticationUtil.runAsSystem(() ->
+					nodeService.getProperty(storeProtocol, storeId, ((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
+			);
+		} else {
+			return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+		}
 	}
 
 	private String getContentUrl() {
@@ -1538,7 +1556,12 @@ public class NodeDao {
 		return MimeTypesV2.getNodeType(type,nodeProps,aspects);
 	}
 
-	private String getSize() {
+	private String getSize(Node data) {
+		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+			return AuthenticationUtil.runAsSystem(() ->
+					nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+					((CollectionReference) data).getOriginalId(), CCConstants.LOM_PROP_TECHNICAL_SIZE));
+		}
 		return nodeProps.containsKey(CCConstants.LOM_PROP_TECHNICAL_SIZE) ? (String) nodeProps
 						.get(CCConstants.LOM_PROP_TECHNICAL_SIZE) : null;
 	}
