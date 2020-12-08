@@ -20,6 +20,7 @@ import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.serv
 import { BulkMode, InputStatus, RequiredMode } from '../../types';
 import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
 import {UIAnimation} from '../../../../../core-module/ui/ui-animation';
+import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
 // its `FormFieldControl`.
@@ -92,7 +93,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     readonly ValueType = ValueType;
 
     @Input() widget: Widget;
-    @Input() injectedView: MdsEditorWidgetBase;
+    @Input() injectedView: MdsEditorWidgetBase|NativeWidget;
     @Input() valueType: ValueType;
     @Input() label: string | boolean;
     @Input() control: AbstractControl;

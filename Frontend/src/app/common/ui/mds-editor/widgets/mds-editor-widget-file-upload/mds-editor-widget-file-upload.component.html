@@ -1,5 +1,8 @@
 <input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="false" (change)="filesSelected($event)" />
-<app-mds-editor-widget-container [label]="false">
+<app-mds-editor-widget-container
+        [label]="false"
+        [injectedView]="this"
+>
   <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
        (onFileDrop)="setFilesByFileList($event)"
        (click)="link ? null : fileSelect.click()"

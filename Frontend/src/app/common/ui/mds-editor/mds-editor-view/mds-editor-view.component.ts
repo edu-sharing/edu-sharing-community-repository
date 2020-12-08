@@ -15,7 +15,7 @@ import { Node } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import {
-    Constraints,
+    Constraints, InputStatus,
     MdsEditorWidgetComponent,
     MdsView,
     MdsWidgetType,
@@ -45,6 +45,8 @@ export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
     onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
     getValues?: (values: Values) => Promise<Values>;
+    getStatus?: () => InputStatus;
+    focus?: () => void;
 }
 type NativeWidgetClass = {
     constraints: Constraints;

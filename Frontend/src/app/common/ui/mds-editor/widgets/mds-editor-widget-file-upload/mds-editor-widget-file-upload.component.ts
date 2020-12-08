@@ -11,7 +11,7 @@ import {
     Input,
     OnInit, Output,
 } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import {AbstractControl, FormControl} from '@angular/forms';
 import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject } from 'rxjs';
@@ -65,6 +65,9 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
     }
     filesSelected(files: Event) {
         this.setFilesByFileList((files.target as HTMLInputElement).files);
+    }
+    getStatus() {
+        return this.selectedFiles?.length || this.link ? 'VALID' : 'INVALID';
     }
     async getValues(values: Values) {
         if (this.selectedFiles?.length) {

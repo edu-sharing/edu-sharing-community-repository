@@ -555,6 +555,13 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     async getValues(node?: Node): Promise<Values> {
+        this.updateIsValid();
+        // same behaviour as old mds, do not return values until it is valid
+        if(!this.isValid$.value) {
+            this.showMissingRequiredWidgets(true);
+            return null;
+        }
+
         let values = this.widgets
             .filter((widget) => widget.relation === null)
             .reduce((acc, widget) => {
@@ -664,7 +671,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private updateIsValid(): void {
-        const allAreValid = this.widgets.every((state) => state.getStatus() !== 'INVALID');
+        const allAreValid = this.widgets.every((state) => state.getStatus() !== 'INVALID') && this.nativeWidgets.every((state) => !state.getStatus || state.getStatus() !== 'INVALID');
         this.isValid$.next(allAreValid);
     }
 
