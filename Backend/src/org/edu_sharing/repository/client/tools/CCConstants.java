@@ -861,6 +861,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE = "TOOLPERMISSION_MEDIACENTER_MANAGE";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS = "TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS";
+
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_STUDENT = "student";
@@ -1116,6 +1118,12 @@ public class CCConstants {
 	public final static String CM_PROP_METADATASET_EDU_METADATASET = "{http://www.alfresco.org/model/content/1.0}edu_metadataset";
 
 	public final static String CM_PROP_METADATASET_EDU_FORCEMETADATASET = "{http://www.alfresco.org/model/content/1.0}edu_forcemetadataset";
+
+	/**
+	 * Marks an original object as a licensed object
+	 * This means that access to content is denied even if there should be access via a collection ref, only the original node permissions are working
+	 */
+	public final static String CCM_PROP_RESTRICTED_ACCESS ="{http://www.campuscontent.de/model/1.0}restricted_access";
 
 
 	/**

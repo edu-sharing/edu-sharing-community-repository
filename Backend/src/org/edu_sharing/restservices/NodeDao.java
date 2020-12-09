@@ -16,10 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
@@ -47,6 +44,7 @@ import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
 import org.edu_sharing.service.Constants;
@@ -54,6 +52,7 @@ import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.*;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -887,9 +886,17 @@ public class NodeDao {
 				try {
 					NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao, originalId);
 					reference.setCreatedBy(nodeDaoOriginal.asNode(false).getCreatedBy());
-				} catch (Throwable t) {
+					reference.setOriginalRestrictedAccess(
+							(Boolean) NodeServiceHelper.getPropertyNative(
+									new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId)
+									, CCConstants.CCM_PROP_RESTRICTED_ACCESS)
+					);
+				} catch (InvalidNodeRefException t) {
 					reference.setOriginalId(null);
 					// original maybe deleted
+				} catch (Throwable t){
+					logger.warn("Could not fetch original node for id " + nodeId, t);
+					reference.setOriginalId(null);
 				}
 				return null;
 			}

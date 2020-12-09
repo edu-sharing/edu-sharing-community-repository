@@ -30,6 +30,7 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.permission.RestrictedAccessException;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -164,6 +165,16 @@ public class NodeServiceHelper {
 	}
 	public static InputStream getContent(NodeRef nodeRef) throws Throwable {
 		return NodeServiceFactory.getLocalService().getContent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),null, ContentModel.PROP_CONTENT.toString());
+	}
+
+	public static void validatePermissionRestrictedAccess(NodeRef nodeRef, String permission) throws RestrictedAccessException {
+		if(NodeServiceHelper.hasAspect(nodeRef,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+			String refNodeId = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+			Boolean restricted = (Boolean) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS));
+			if (restricted && !PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), permission)) {
+				throw new RestrictedAccessException(refNodeId);
+			}
+		}
 	}
 	public static void writeContent(NodeRef nodeRef,InputStream content,String mimetype) throws Throwable {
 		NodeServiceFactory.getLocalService().writeContent(

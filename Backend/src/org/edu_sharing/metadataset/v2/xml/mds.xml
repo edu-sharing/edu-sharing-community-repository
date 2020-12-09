@@ -78,6 +78,13 @@
 				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
 				<searchable>true</searchable>
 			</widget>
+			<widget>
+				<id>ccm:restricted_access</id>
+				<type>checkbox</type>
+				<caption>cb_restricted_access</caption>
+				<bottomCaption>cb_restricted_access_info</bottomCaption>
+				<condition type="TOOLPERMISSION">TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS</condition>
+			</widget>
 
 			<widget>
 				<id>ccm:tool_category</id>
@@ -398,6 +405,7 @@
               <cclom:general_description>
               <author>
               <license>
+              <ccm:restricted_access>
               <version>
               <childobjects>
 				]]></html>

@@ -125,6 +125,7 @@
         "TOOLPERMISSION_UNCHECKEDCONTENT": "Show sources like YouTube in your search",
         "TOOLPERMISSION_WORKSPACE": "Access to the workspace",
         "TOOLPERMISSION_HANDLESERVICE": "Resolve unique ids from a handle service for materials",
+        "TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS": "Define materials as licensed, which means they can not gain permissions via redistribution (e.g. collections)",
         "TOOLPERMISSION_USAGE_STATISTIC": "Fetch information about the usage of all nodes of the repository",
         "TOOLPERMISSION_COMMENT_WRITE":"Creating comments on objects",
         "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "View stats of material access of the repository",
