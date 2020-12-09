@@ -254,8 +254,11 @@ mds .mdsGroup{
     }
   }
   .widget_checkbox{
+    .inputTable{
+      align-items: flex-start;
+    }
     .input-hint-bottom{
-      margin-top: 0;
+      margin-top: 5px;
     }
   }
   > label,
