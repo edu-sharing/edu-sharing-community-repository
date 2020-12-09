@@ -24,8 +24,11 @@
             "CLIENT_CONFIG_HINT": "You can enter values here to overwrite labels, configure contexts, set up authentication methods and more. After saving, you may need to reload the entire page in your browser",
             "BASE_CONFIG_TITLE": "Global configuration file (default values)",
             "BASE_CONFIG_HINT": "This file serves only as a template and must not be changed. Please enter changed values in the specific configuration",
-            "CONFIG_TITLE": "Specific configuration file (Override)",
-            "CONFIG_HINT": "You can overwrite values of the standard configuration here.",
+            "EXTENSION_CONFIG_TITLE": "Extension configuration file (Override)",
+            "EXTENSION_CONFIG_HINT": "You can overwrite values of the standard configuration here. Please note that this file will be replaced on rollout. Changes made to this file must be provided to the edu-sharing dev team",
+            "SERVER_CONFIG_TITLE": "Server configuration file (Override)",
+            "SERVER_CONFIG_HINT": "You can overwrite values of the standard configuration here. The changes are for the current server and will not get overriden. This file has the highest priority",
+
             "SIZE": "Editor-size",
             "SIZE_MEDIUM": "normal",
             "SIZE_LARGE": "big",

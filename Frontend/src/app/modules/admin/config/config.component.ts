@@ -3,6 +3,7 @@ import {Component} from "@angular/core";
 import {DialogButton, RestLocatorService} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {ModalMessageType} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import {Observable} from 'rxjs';
 
 // Charts.js
 declare var Chart:any;
@@ -14,7 +15,8 @@ declare var Chart:any;
 })
 export class AdminConfigComponent {
   public static CONFIG_FILE_BASE="edu-sharing.base.conf";
-  public static CONFIG_FILE="edu-sharing.conf";
+  public static EXTENSION_CONFIG_FILE="edu-sharing.conf";
+  public static SERVER_CONFIG_FILE="edu-sharing.server.conf";
   public static CONFIG_DEPLOYMENT_FILE="edu-sharing.deployment.conf";
   public static CLIENT_CONFIG_FILE="client.config.xml";
   codeOptionsGlobal = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};
@@ -23,7 +25,8 @@ export class AdminConfigComponent {
   configClient = '';
   configGlobal = '';
   configDeployment = '';
-  config = '';
+  serverConfig = '';
+  extensionConfig = '';
   size = 'medium';
 
   constructor(
@@ -38,8 +41,11 @@ export class AdminConfigComponent {
         this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE).subscribe((data) => {
             this.configDeployment = data;
         });
-        this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE).subscribe((data) => {
-          this.config = data;
+        this.adminService.getConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE).subscribe((data) => {
+          this.extensionConfig = data;
+        });
+        this.adminService.getConfigFile(AdminConfigComponent.SERVER_CONFIG_FILE).subscribe((data) => {
+          this.serverConfig = data;
         });
       });
     });
@@ -59,22 +65,22 @@ export class AdminConfigComponent {
   }
   save() {
     this.toast.showProgressDialog();
-    this.adminService.updateConfigFile(AdminConfigComponent.CONFIG_FILE,this.config).subscribe(()=> {
-      this.adminService.updateConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, this.configClient).subscribe(() => {
-        this.adminService.refreshAppInfo().subscribe(() => {
-          this.toast.closeModalDialog();
-          this.locator.getConfig().subscribe(() => {
-                this.toast.closeModalDialog();
-                this.toast.toast('ADMIN.GLOBAL_CONFIG.SAVED');
-              },error =>
-              this.displayError(error)
-          );
-        }, error => {
-          this.displayError(error);
-        })
-        }, error => {
+    Observable.forkJoin(
+        this.adminService.updateConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE,this.extensionConfig),
+        this.adminService.updateConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, this.configClient),
+        this.adminService.updateConfigFile(AdminConfigComponent.SERVER_CONFIG_FILE, this.serverConfig),
+    ).subscribe(() => {
+      this.adminService.refreshAppInfo().subscribe(() => {
+        this.toast.closeModalDialog();
+        this.locator.getConfig().subscribe(() => {
+              this.toast.closeModalDialog();
+              this.toast.toast('ADMIN.GLOBAL_CONFIG.SAVED');
+            },error =>
+                this.displayError(error)
+        );
+      }, error => {
         this.displayError(error);
-      });
+      })
     });
   }
 }

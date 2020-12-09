@@ -26,8 +26,11 @@
             "BASE_CONFIG_HINT": "Diese Datei dient lediglich als Vorlage und darf nicht verändert werden. Geänderte Werte bitte in die spezifische Konfiguration eintragen",
             "DEPLOYMENT_CONFIG_TITLE": "Deployment Konfigurationsdatei",
             "DEPLOYMENT_CONFIG_HINT": "Diese Datei wurde durch das Deployment festgelegt und ändert ggf. Daten abweichend der Vorlage. Diese Datei kann nur durch das Deployment verändert werden.",
-            "CONFIG_TITLE": "Spezifische Konfigurationsdatei (Überschreiben)",
-            "CONFIG_HINT": "Sie können hier Werte der Standard-Konfiguration überschreiben.",
+            "EXTENSION_CONFIG_TITLE": "Extension-Konfigurationsdatei (Überschreiben)",
+            "EXTENSION_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Beachten Sie, dass diese Konfiguration beim Rollout überschrieben wird. Die hier erfolgten Änderungen müssen an das edu-sharing Entwicklerteam gegeben werden",
+            "SERVER_CONFIG_TITLE": "Server-Konfigurationsdatei (Überschreiben)",
+            "SERVER_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Diese Änderungen gelten für den aktuellen Server und werden bei Updates nicht überschrieben. Sie haben die höchste Priorität",
+
             "SIZE": "Editor-Größe",
             "SIZE_MEDIUM": "Normal",
             "SIZE_LARGE": "Groß",

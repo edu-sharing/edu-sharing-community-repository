@@ -747,6 +747,7 @@ public class AdminServiceImpl implements AdminService  {
 	public void throwIfInvalidConfigFile(String filename){
 		if(		!LightbendConfigLoader.BASE_FILE.equals(filename) &&
 				!LightbendConfigLoader.CUSTOM_FILE.equals(filename) &&
+				!LightbendConfigLoader.SERVER_FILE.equals(filename) &&
 				!LightbendConfigLoader.DEPLOYMENT_FILE.equals(filename) &&
 				!ConfigServiceFactory.CONFIG_FILENAME.equals(filename)
 		)
