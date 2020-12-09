@@ -1,9 +1,7 @@
 package org.edu_sharing.restservices.search.v1;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.io.Serializable;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -27,6 +25,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.CombineMode;
+import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 
@@ -406,6 +405,38 @@ public class SearchApi {
 	public Response options02() {
 
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
+
+
+	@GET
+	@Path("/queriesV2/{repository}/contributer")
+	@Consumes({ "application/json" })
+
+	@ApiOperation(value = "Search for contributers", notes = "")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = List.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response searchContributer(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "search word", required = true) @QueryParam("searchWord") String searchWord,
+			@ApiParam(value = "define which contributer props should be searched)", defaultValue = "-all-") @QueryParam("contributerProperties") List<String> contributerProps,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			Set<Map<String, Serializable>> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributers(searchWord, contributerProps);
+			return Response.status(Response.Status.OK).entity(result).build();
+
+		}  catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
 	}
 
 }

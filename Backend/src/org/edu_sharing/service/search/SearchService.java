@@ -1,8 +1,11 @@
 package org.edu_sharing.service.search;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -83,5 +86,6 @@ public interface SearchService {
 	}
 
 	SearchResultNodeRef searchFingerPrint(String nodeId);
-		
+
+	public Set<Map<String, Serializable>> searchContributers(String suggest, List<String> fields) throws IOException;
 }

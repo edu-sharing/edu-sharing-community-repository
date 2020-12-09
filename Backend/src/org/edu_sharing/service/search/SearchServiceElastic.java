@@ -1,13 +1,8 @@
 package org.edu_sharing.service.search;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
-import org.alfresco.repo.security.permissions.impl.RequiredPermission;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
-import org.alfresco.repo.security.permissions.impl.model.PermissionSet;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.namespace.QName;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -22,7 +17,6 @@ import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
-import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -38,7 +32,6 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.collapse.CollapseBuilder;
-import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.context.ApplicationContext;
@@ -47,6 +40,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SearchServiceElastic extends SearchServiceImpl {
     static RestHighLevelClient client;
@@ -78,9 +72,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     @Override
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
-        if(client == null || !client.ping(RequestOptions.DEFAULT)){
-             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
-        }
+        checkClient();
         MetadataQuery queryData;
         try{
             queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
@@ -284,7 +276,69 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
+    enum CONTRIBUTER_PROP {firstname,lastname,email,url,uid};
 
+    @Override
+    public Set<Map<String, Serializable>> searchContributers(String suggest, List<String> fields) throws IOException{
+        checkClient();
+        SearchRequest searchRequest = new SearchRequest("workspace");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        List<String> searchFields = new ArrayList<>();
+        if(fields == null || fields.contains("-all-")){
+            for(CONTRIBUTER_PROP att : CONTRIBUTER_PROP.values()){
+                searchFields.add("contributer." + att.name());
+            }
+        }else{
+            for(String f : fields){
+                if(Stream.of(CONTRIBUTER_PROP.values()).anyMatch(v -> v.name().equals(f))){
+                    searchFields.add("contributer." + f);
+                }
+            }
+        }
+        BoolQueryBuilder qb = QueryBuilders.boolQuery();
+        for(String searchField : searchFields){
+            String search = new String(suggest);
+            if(!search.contains("*")) search = "*"+search+"*";
+            qb.should(QueryBuilders.wildcardQuery(searchField,search));
+        }
+
+        searchSourceBuilder.query(qb);
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.size(1000);
+        searchSourceBuilder.trackTotalHits(true);
+        searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits hits = searchResponse.getHits();
+        Set<Map<String,Serializable>> result = new HashSet<>();
+        for (SearchHit hit : hits) {
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            ArrayList<Map<String,Serializable>> contributer = (ArrayList<Map<String,Serializable>>) sourceAsMap.get("contributer");
+
+            List<Map<String,Serializable>> remove = new ArrayList<>();
+            for(Map<String,Serializable> map:contributer){
+                boolean inResult = false;
+                for(Map.Entry<String,Serializable> entry : map.entrySet()){
+                    if(entry.getKey().equals("property")) continue;
+                   if(((String)entry.getValue()).toLowerCase().contains(suggest.toLowerCase())){
+                       inResult = true;
+                   }
+                }
+                if(!inResult)remove.add(map);
+            }
+            for(Map<String,Serializable> map : remove) contributer.remove(map);
+            if(contributer.size() > 0) result.addAll(contributer);
+        }
+        return result;
+    }
+
+    public void checkClient() throws IOException {
+        if(client == null || !client.ping(RequestOptions.DEFAULT)){
+             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+        }
+    }
 
 
 }

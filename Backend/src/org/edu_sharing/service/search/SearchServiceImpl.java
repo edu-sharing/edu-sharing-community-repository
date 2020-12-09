@@ -39,18 +39,17 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLEncoder;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
@@ -1035,5 +1034,10 @@ public class SearchServiceImpl implements SearchService {
 			return result;
 
 
+	}
+
+	@Override
+	public Set<Map<String, Serializable>> searchContributers(String suggest, List<String> fields) throws IOException {
+		return new HashSet<>();
 	}
 }

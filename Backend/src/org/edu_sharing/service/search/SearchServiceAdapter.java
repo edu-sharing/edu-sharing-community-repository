@@ -10,9 +10,9 @@ import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
 
 public class SearchServiceAdapter implements SearchService {
 
@@ -104,5 +104,10 @@ public class SearchServiceAdapter implements SearchService {
 	public SearchResultNodeRef searchFingerPrint(String nodeId) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Set<Map<String, Serializable>> searchContributers(String suggest, List<String> fields) throws IOException {
+		return new HashSet<>();
 	}
 }
