@@ -424,13 +424,15 @@ public class SearchApi {
 	public Response searchContributer(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "search word", required = true) @QueryParam("searchWord") String searchWord,
-			@ApiParam(value = "define which contributer props should be searched)", defaultValue = "-all-") @QueryParam("contributerProperties") List<String> contributerProps,
+			@ApiParam(value = "define which authority fields should be searched: ['firstname', 'lastname', 'email', 'uuid', 'url']") @QueryParam("fields") List<String> fields,
+			@ApiParam(value = "define which contributer props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']") @QueryParam("contributerProperties") List<String> contributerProperties
+			,
 			@Context HttpServletRequest req) {
 
 		try {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			Set<Map<String, Serializable>> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributers(searchWord, contributerProps);
+			Set<Map<String, Serializable>> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributers(searchWord, fields,contributerProperties);
 			return Response.status(Response.Status.OK).entity(result).build();
 
 		}  catch (Throwable t) {
