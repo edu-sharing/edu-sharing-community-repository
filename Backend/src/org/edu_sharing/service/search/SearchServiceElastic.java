@@ -279,13 +279,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
     enum CONTRIBUTER_PROP {firstname,lastname,email,url,uid};
 
     @Override
-    public Set<Map<String, Serializable>> searchContributers(String suggest, List<String> fields) throws IOException{
+    public Set<Map<String, Serializable>> searchContributers(String suggest, List<String> fields, List<String> contributerProperties) throws IOException{
         checkClient();
         SearchRequest searchRequest = new SearchRequest("workspace");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         List<String> searchFields = new ArrayList<>();
-        if(fields == null || fields.contains("-all-")){
+        if(fields == null || fields.size() == 0){
             for(CONTRIBUTER_PROP att : CONTRIBUTER_PROP.values()){
                 searchFields.add("contributer." + att.name());
             }
@@ -301,6 +301,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
             String search = new String(suggest);
             if(!search.contains("*")) search = "*"+search+"*";
             qb.should(QueryBuilders.wildcardQuery(searchField,search));
+        }
+
+        if(contributerProperties.size() > 0) {
+            BoolQueryBuilder bqb = QueryBuilders.boolQuery().minimumShouldMatch(1);
+            for (String contributerProp : contributerProperties) {
+                bqb.should(QueryBuilders.termQuery("contributer.property", contributerProp));
+            }
+            qb.must(bqb);
         }
 
         searchSourceBuilder.query(qb);
@@ -320,13 +328,24 @@ public class SearchServiceElastic extends SearchServiceImpl {
             List<Map<String,Serializable>> remove = new ArrayList<>();
             for(Map<String,Serializable> map:contributer){
                 boolean inResult = false;
+                boolean propertyIsInFilter = true;
                 for(Map.Entry<String,Serializable> entry : map.entrySet()){
-                    if(entry.getKey().equals("property")) continue;
-                   if(((String)entry.getValue()).toLowerCase().contains(suggest.toLowerCase())){
+                    if(entry.getKey().equals("property")){
+                        if(contributerProperties.size() > 0){
+                            if(!contributerProperties.contains(entry.getValue())){
+                                propertyIsInFilter = false;
+                            }
+                        }
+                        continue;
+                    }
+                    if(fields.size() > 0 && !fields.contains(entry.getKey())){
+                        continue;
+                    }
+                    if(((String)entry.getValue()).toLowerCase().contains(suggest.toLowerCase())){
                        inResult = true;
-                   }
+                    }
                 }
-                if(!inResult)remove.add(map);
+                if(!inResult || !propertyIsInFilter)remove.add(map);
             }
             for(Map<String,Serializable> map : remove) contributer.remove(map);
             if(contributer.size() > 0) result.addAll(contributer);
