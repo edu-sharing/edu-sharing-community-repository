@@ -153,8 +153,11 @@ export class MdsEditorWidgetTreeComponent
 
     remove(toBeRemoved: DisplayValue): void {
         const treeNode = this.tree.findById(toBeRemoved.key);
-        treeNode.isChecked = false;
-        treeNode.isIndeterminate = false;
+        // old values are may not available in tree, so check for null
+        if(treeNode) {
+            treeNode.isChecked = false;
+            treeNode.isIndeterminate = false;
+        }
         const values: DisplayValue[] = this.chipsControl.value;
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));

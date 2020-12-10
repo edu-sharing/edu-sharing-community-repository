@@ -104,6 +104,12 @@ export class Tree {
 
     idToDisplayValue(id: string): DisplayValue {
         const node = this.nodesMap[id];
+        if(node == null) {
+            return {
+                key: id,
+                label: id
+            }
+        }
         return this.nodeToDisplayValue(node);
     }
 
