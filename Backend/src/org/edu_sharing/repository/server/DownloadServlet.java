@@ -1,9 +1,6 @@
 package org.edu_sharing.repository.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +20,8 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.TempFileProvider;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -119,7 +118,10 @@ public class DownloadServlet extends HttpServlet{
 		NodeService nodeService = NodeServiceFactory.getLocalService();
 		PermissionService permissionService = PermissionServiceFactory.getLocalService();
 
-		ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
+
+		File file = TempFileProvider.createTempFile("edu.",".zip");
+		FileOutputStream bufferOut = new FileOutputStream(file);
+
 		ZipOutputStream zos = new ZipOutputStream(bufferOut);
 		zos.setMethod( ZipOutputStream.DEFLATED );
 
@@ -210,8 +212,8 @@ public class DownloadServlet extends HttpServlet{
 				resp.setHeader("Content-type","application/octet-stream");
 				resp.setHeader("Content-Transfer-Encoding","binary");
 				resp.setHeader("Content-Disposition","attachment; filename=\""+cleanName(zipName)+"\"");
-				resp.setHeader("Content-Length",""+bufferOut.size());
-				resp.getOutputStream().write(bufferOut.toByteArray());
+				resp.setHeader("Content-Length",""+file.length());
+				IOUtils.copy(new FileInputStream(file),resp.getOutputStream());
 			}
 		}
 		catch(Throwable t){
