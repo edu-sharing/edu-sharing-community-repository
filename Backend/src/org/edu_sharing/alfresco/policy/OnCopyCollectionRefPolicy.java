@@ -43,6 +43,9 @@ public class OnCopyCollectionRefPolicy implements OnCopyNodePolicy,CopyServicePo
 			nodeService.addAspect(targetNodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE),null);
 			logger.info("will add property link to original io");
 			nodeService.setProperty(targetNodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),sourceNodeRef.getId());
+		}else{
+			logger.info("setting ccm:original for copied node to itself:"+targetNodeRef.getId());
+			nodeService.setProperty(targetNodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),targetNodeRef.getId());
 		}
 	}
 

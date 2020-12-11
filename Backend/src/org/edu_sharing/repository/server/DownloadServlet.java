@@ -15,7 +15,9 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.util.TempFileProvider;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -216,7 +218,8 @@ public class DownloadServlet extends HttpServlet{
 		NodeService nodeService = NodeServiceFactory.getLocalService();
 		PermissionService permissionService = PermissionServiceFactory.getLocalService();
 
-		ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
+		File file = TempFileProvider.createTempFile("edu.",".zip");
+		FileOutputStream bufferOut = new FileOutputStream(file);
 		ZipOutputStream zos = new ZipOutputStream(bufferOut);
 		zos.setMethod( ZipOutputStream.DEFLATED );
 
@@ -304,7 +307,7 @@ public class DownloadServlet extends HttpServlet{
 				result=runAll.doWork();
 			}
 			if(result) {
-				outputData(resp, zipName, bufferOut);
+				outputData(resp, zipName, file);
 			}
 		}
 		catch(Throwable t){
@@ -340,6 +343,13 @@ public class DownloadServlet extends HttpServlet{
 		resp.setHeader("Content-Length",""+bufferOut.size());
 		resp.getOutputStream().write(bufferOut.toByteArray());
 	}
+
+	private static void outputData(HttpServletResponse resp, String filename, File file) throws IOException {
+		setHeaders(resp, filename);
+		resp.setHeader("Content-Length",""+file.length());
+		IOUtils.copy(new FileInputStream(file),resp.getOutputStream());
+	}
+
 
 	private static void setHeaders(HttpServletResponse resp, String filename) {
 		resp.setHeader("Content-type","application/octet-stream");
