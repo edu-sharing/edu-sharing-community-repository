@@ -144,7 +144,8 @@
         </div>
 
         <div class="collection-new-preview-infoline">
-            <i class="material-icons icon-bottom">person</i>
+            <i icon iconId="person" class="icon-bottom"></i>
+            &nbsp;
             <span *ngIf="!collectionContent.node.collection.authorFreetext">{{
                 collectionContent.node.owner | authorityName
             }}</span>
@@ -154,8 +155,8 @@
         </div>
 
         <div class="collection-new-preview-infoline">
-            <i class="material-icons icon-bottom">{{ getScopeInfo().icon }}</i
-            >&nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
+            <i icon [iconId]="getScopeInfo().icon" class="icon-bottom"></i>
+            &nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
         </div>
         <div class="collection-permissions collection-label"></div>
         <div class="collections-metadata">
