@@ -13,7 +13,13 @@ export class UserPresentableError extends Error {
     }
 }
 
-export type EditorMode = 'nodes' | 'search';
+/**
+ * editor mode
+ * nodes: Supports bulk, only returns changed values
+ * search: No bulk, all values returned, Trees sub-children are auto-selected if root is selected
+ * form: No bulk, all values returned
+ */
+export type EditorMode = 'nodes' | 'search' | 'form';
 
 export type ViewRelation = 'suggestions';
 

@@ -16,7 +16,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
     selector: 'mds-embed',
     encapsulation: ViewEncapsulation.None,
     template: `
-        <app-mds-editor-wrapper #mdsRef [embedded]="true" [currentValues]="data" [setId]="setId" [groupId]="groupId" *ngIf="component==='mds'"></app-mds-editor-wrapper>
+        <app-mds-editor-wrapper #mdsRef [embedded]="true" editorMode="form" [currentValues]="data" [setId]="setId" [groupId]="groupId" *ngIf="component==='mds'"></app-mds-editor-wrapper>
         <workspace-license #licenseRef [properties]="data" [embedded]="true" *ngIf="component==='license'"></workspace-license>
     `,
     styleUrls: ['embed.component.scss']
@@ -54,7 +54,6 @@ export class EmbedComponent implements EventListener {
                     if(this.component === 'mds') {
                         UIHelper.waitForComponent(this.ngZone,this, 'mdsRef').subscribe(async () => {
                             await this.mdsRef.reInit();
-                            this.mdsRef.mdsEditorInstance.editorMode = 'nodes';
                             this.toast.closeModalDialog();
                         });
                     } else {

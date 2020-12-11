@@ -74,7 +74,7 @@ export class SharePublishComponent implements OnChanges {
           total: (completion.mandatory.total || 0) + (completion.mandatoryForPublish.total || 0),
         };
       });
-      this.mdsService.initForNodes([this.node]);
+      this.mdsService.initWithNodes([this.node]);
       this.onInitCompleted.emit();
       this.onInitCompleted.complete();
     }

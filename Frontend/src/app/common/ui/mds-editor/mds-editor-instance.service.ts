@@ -407,7 +407,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * @throws UserPresentableError
      */
-    async initForNodes(nodes: Node[], groupIdIn: string = null, refetch = true): Promise<EditorType> {
+    async initWithNodes(nodes: Node[], groupIdIn: string = null, refetch = true): Promise<EditorType> {
         this.editorMode = 'nodes';
         if (refetch) {
             this.nodes$.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
@@ -430,13 +430,14 @@ export class MdsEditorInstanceService implements OnDestroy {
         return this.getGroup(this.mdsDefinition$.value, groupId).rendering;
     }
 
-    async initForSearch(
+    async initWithoutNodes(
         groupId: string,
         mdsId: string = '-default-',
         repository: string = '-home-',
+        editorMode: EditorMode = 'search',
         initialValues?: Values,
     ): Promise<EditorType> {
-        this.editorMode = 'search';
+        this.editorMode = editorMode;
         this.isBulk = false;
         await this.initMds(groupId, mdsId, repository);
         for (const widget of this.widgets) {

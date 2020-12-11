@@ -13,7 +13,7 @@ import {Node, RestConstants} from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehaviour, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import { EditorType, MdsWidget, Suggestions, UserPresentableError, Values } from '../types';
+import {EditorMode, EditorType, MdsWidget, Suggestions, UserPresentableError, Values} from '../types';
 
 /**
  * Wrapper component to select between the legacy `<mds>` component and the Angular-native
@@ -52,6 +52,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() parentNode: Node;
     @Input() priority = 1;
     @Input() repository = RestConstants.HOME_REPOSITORY;
+    @Input() editorMode: EditorMode;
     @Input() setId: string;
     @Input() suggestions: Suggestions;
 
@@ -196,12 +197,13 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         this.isLoading = true;
         try {
             if (this.nodes) {
-                this.editorType = await this.mdsEditorInstance.initForNodes(this.nodes, this.groupId);
+                this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, this.groupId);
             } else {
-                this.editorType = await this.mdsEditorInstance.initForSearch(
+                this.editorType = await this.mdsEditorInstance.initWithoutNodes(
                     this.groupId,
                     this.setId,
                     this.repository,
+                    this.editorMode ?? 'search',
                     this.currentValues,
                 );
             }
