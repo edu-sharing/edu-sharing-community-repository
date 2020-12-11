@@ -32,8 +32,9 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
             session.setAttribute(CCConstants.AUTH_USERNAME, username);
             TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,TrackingService.EventType.LOGIN_USER_SESSION);
         }
-		// prewarm tp cache
+		// prewarm tp session cache
 		ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions();
+
 		session.setAttribute(CCConstants.AUTH_TICKET, ticket);
 		session.setAttribute(CCConstants.AUTH_TYPE, authType);
 	}
