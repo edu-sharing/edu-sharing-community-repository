@@ -22,9 +22,10 @@
     <input
       #input
       autocomplete="off"
-      [placeholder]="widget.definition.placeholder"
+      [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
       [matChipInputFor]="chipList"
     />
+    <button matSuffix mat-icon-button><span class="mat-select-arrow"></span></button>
   </mat-chip-list>
 </app-mds-editor-widget-container>
 

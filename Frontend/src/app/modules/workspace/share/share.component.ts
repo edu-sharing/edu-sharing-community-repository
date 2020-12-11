@@ -89,7 +89,6 @@ export class WorkspaceShareComponent {
         'Contributor',
         'Collaborator',
         'Coordinator',
-        'Publisher',
         'ReadPermissions',
         'ChangePermissions',
         'CCPublish',

@@ -70,6 +70,10 @@ public class AuthorityService {
 	public static String getGroupName(String groupName, String parentGroup) {
 		String prefix = "";
 		if (parentGroup != null) {
+			// strip group prefix if existing
+			if(parentGroup.startsWith(PermissionService.GROUP_PREFIX)){
+				parentGroup = parentGroup.substring(PermissionService.GROUP_PREFIX.length());
+			}
 			prefix = MD5.Digest(parentGroup.getBytes()) + "_";
 		}
 		String name = prefix + groupName;

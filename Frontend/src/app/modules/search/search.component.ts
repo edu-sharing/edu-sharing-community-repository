@@ -25,7 +25,7 @@ import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchService } from './search.service';
 import { WindowRefService } from './window-ref.service';
-import {Values} from '../../common/ui/mds-editor/types';
+import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
 
 @Component({
     selector: 'app-search',
@@ -95,7 +95,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private renderedNode: Node;
     private viewToggle: OptionItem;
     // Max items to fetch at all (afterwards no more infinite scroll)
-    private static MAX_ITEMS_COUNT = 500;
+    private static MAX_ITEMS_COUNT = 2000;
     private repositoryIds: any[] = [];
     private mdsSets: MdsInfo[];
     private _mdsId: string;
@@ -105,7 +105,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     // we only initalize the banner once to prevent flickering
     private bannerInitalized = false;
     currentValues: Values;
-    private currentMdsSet: any;
+    private currentMdsSet: MdsDefinition;
     private mdsActions: OptionItem[];
     private mdsButtons: DialogButton[];
     private currentSavedSearch: Node;
@@ -469,6 +469,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             SearchComponent.MAX_ITEMS_COUNT
         ) {
             this.searchService.showspinner = false;
+            this.searchService.complete = true;
             this.isSearching = false;
             return;
         }
@@ -1049,7 +1050,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,
                 mdsId,
             );
-            const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed && this.isHomeRepository();
+            const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed &&
+                this.isHomeRepository() && this.config.instant('frontpage.enabled', true);
             // console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
@@ -1465,9 +1467,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                                         this.mdsSets,
                                         'id',
                                         param.mds,
-                                    ) != -1
-                                )
+                                    ) !== -1
+                                ) {
                                     this.mdsId = param.mds;
+                                }
                             } catch (e) {
                                 console.warn(
                                     'got invalid mds list from repository:',

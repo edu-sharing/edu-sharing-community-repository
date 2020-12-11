@@ -110,6 +110,12 @@ export class AdminComponent {
       'invited_safe',
       'invited_collection',
       'nodeIssue',
+      'userStatusChanged',
+      'groupSignupList',
+      'groupSignupUser',
+      'groupSignupConfirmed',
+      'groupSignupRejected',
+      'groupSignupAdmin',
       'userRegister',
       'passwordRequest',
       'userRegisterInformation'
@@ -495,7 +501,7 @@ export class AdminComponent {
     else {
         this.admin.importOAI(this.oai.url, this.oai.set, this.oai.prefix, this.oai.className, this.oai.importerClassName,
             this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName, this.oai.metadata,
-            this.oai.file, this.oai.ids, this.oai.forceUpdate,this.oai.from,this.oai.until).subscribe(() => {
+            this.oai.file, this.oai.ids, this.oai.forceUpdate,this.oai.from,this.oai.until,this.oai.periodInDays).subscribe(() => {
             this.globalProgress = false;
             const additional: any = {
                 link: {

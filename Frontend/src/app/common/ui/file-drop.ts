@@ -14,7 +14,7 @@ export interface Options {
 @Directive({ selector: '[fileDrop]' })
 export class FileDropDirective {
   @Output() public fileOver: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Output() public onFileDrop: EventEmitter<File> = new EventEmitter<File>();
+  @Output() public onFileDrop: EventEmitter<FileList> = new EventEmitter<FileList>();
   @Input() public options: Options;
   /**
    * catch drag/drop of whole window
@@ -191,7 +191,7 @@ export class FileDropDirective {
     this.fileOver.emit(isOver);
   }
 
-  private emitFileDrop(file: any): void {
+  private emitFileDrop(file: FileList): void {
     this.onFileDrop.emit(file);
   }
 

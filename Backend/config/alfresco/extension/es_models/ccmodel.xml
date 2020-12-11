@@ -960,6 +960,76 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
+				<!-- Access permissions rights required to access a source, e.g. logins etc. -->
+				<property name="ccm:conditionsOfAccess">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- Info about advertisment of a source -->
+				<property name="ccm:containsAdvertisement">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- price/cost of a source/material -->
+				<property name="ccm:price">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- details about accessibility conformity of a material -->
+				<property name="ccm:accessibilitySummary">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- details about data protection conformity (e.g. DSGVO) of a material -->
+				<property name="ccm:dataProtectionConformity">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- details about fsk rating -->
+				<property name="ccm:fskRating">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- any custom notes attached to a content as text -->
+				<property name="ccm:notes">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 		</aspect>
 
@@ -1450,6 +1520,11 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
+				<!-- time an item was originally created, e.g. recorded or written -->
+				<property name="ccm:originally_created">
+					<type>d:date</type>
+					<multiple>false</multiple>
+				</property>
 			</properties>
 		</aspect>
 
@@ -1568,6 +1643,16 @@
 	         			<tokenised>false</tokenised>
 	         		</index>
 				</property>
+				<!-- info about the oer validity of this source, e.g. all are oer or just some -->
+				<property name="ccm:license_oer">
+					<type>d:text</type>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 		</aspect>
 
@@ -1586,6 +1671,28 @@
 					<title>unique name within system</title>
 					<type>d:text</type>
 					<mandatory>true</mandatory>
+				</property>
+			</properties>
+		</aspect>
+		<!-- campuscontent aspect for alfresco groups extending them and making it,
+			possible to signup to  -->
+		<aspect name="ccm:group_signup">
+			<title>EduGroup - for schools, universities, etc</title>
+			<properties>
+				<property name="ccm:group_signup_method">
+					<title>Method to signup, check @OrganizationSignupMethod enum</title>
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
+				<property name="ccm:group_signup_password">
+					<title>password (sha hash) required for signup, only if group_signup_method == password</title>
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+				</property>
+				<property name="ccm:group_signup_list">
+					<title>List of users waiting for being accepted, only if group_signup_method == list</title>
+					<type>d:noderef</type>
+					<multiple>true</multiple>
 				</property>
 			</properties>
 		</aspect>
@@ -1696,6 +1803,14 @@
 				</property>
 				<property name="ccm:collectionviewtype">
 					<type>d:text</type>
+				</property>
+				<property name="ccm:collectionshorttitle">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>both</tokenised>
+					</index>
 				</property>
 				<property name="ccm:collectioncolor">
 					<type>d:text</type>

@@ -154,7 +154,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 			if(groupName.startsWith(PermissionService.GROUP_PREFIX)){
 				groupName = groupName.substring(PermissionService.GROUP_PREFIX.length());
 			}
-
+			if(AuthenticationUtil.isRunAsUserTheSystemUser()){
+				return true;
+			}
 			Set<String> admins = serviceRegistry.getAuthorityService().getContainedAuthorities(AuthorityType.USER, CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS,false);
 			if(admins.contains(AuthenticationUtil.getRunAsUser())){
 				return true;

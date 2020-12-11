@@ -23,6 +23,7 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
+import javax.swing.text.NumberFormatter;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.*;
@@ -252,7 +253,8 @@ public class MetadataTemplateRenderer {
 						continue;
 					value=renderWidgetValue(widget,value);
 					boolean isLink=false;
-					if(widget.getLink()!=null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)){
+					// do not use global link for vcard, they handle links seperately
+					if(!widget.getType().equals("vcard") && widget.getLink()!=null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)){
 						widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 						isLink=true;
 					}
@@ -260,14 +262,18 @@ public class MetadataTemplateRenderer {
 						try {
 							HashMap<String, Object> data = VCardConverter.vcardToHashMap(value).get(0);
 							value = VCardConverter.getNameForVCard("",data);
-							if (data.get(CCConstants.VCARD_URL) != null) {
-								String url = data.get(CCConstants.VCARD_URL).toString();
-								if(!url.isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
-									if (!url.contains("://"))
-										url = "http://" + url;
-									widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
-									isLink = true;
+							Object linkUrl = data.get(widget.getLink() == null ? CCConstants.VCARD_URL :
+									widget.getLink().equals("email") ? CCConstants.VCARD_EMAIL
+											: null);
+							String url=linkUrl != null ? linkUrl.toString() : "";
+							if(!url.isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
+								if(widget.getLink().equals("email")) {
+									url = "mailto:" + url;
+								} else if (!url.contains("://")) {
+									url = "http://" + url;
 								}
+								widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
+								isLink = true;
 							}
 						}catch(Throwable t){
 							// empty or invalid value
@@ -459,6 +465,21 @@ public class MetadataTemplateRenderer {
 					}
 				}catch(Throwable t){
 					// wrong data or text
+				}
+			} else if (widget.getType().equals("duration")){
+				try {
+					NumberFormat nf = NumberFormat.getInstance();
+					nf.setMaximumFractionDigits(0);
+					nf.setMinimumIntegerDigits(1);
+					long time = Long.parseLong(value) / 1000 / 60;
+					long mins = time % 60;
+					long hours = time / 60;
+					value = nf.format(hours) + "h ";
+					nf.setMinimumIntegerDigits(2);
+					value += nf.format(mins) + "m";
+
+				}catch(Throwable ignored) {
+
 				}
 			}
 			if(widget.getType().equals("filesize")){

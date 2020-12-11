@@ -15,7 +15,7 @@ import { Node } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import {
-    Constraints,
+    Constraints, InputStatus,
     MdsEditorWidgetComponent,
     MdsView,
     MdsWidgetType,
@@ -39,11 +39,14 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {MdsEditorWidgetFileUploadComponent} from '../widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
     onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
-    getValues?: (values: Values) => Values;
+    getValues?: (values: Values) => Promise<Values>;
+    getStatus?: () => InputStatus;
+    focus?: () => void;
 }
 type NativeWidgetClass = {
     constraints: Constraints;
@@ -64,6 +67,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         childobjects: MdsEditorWidgetChildobjectsComponent,
         maptemplate: MdsEditorWidgetLinkComponent,
         license: MdsEditorWidgetLicenseComponent,
+        fileupload: MdsEditorWidgetFileUploadComponent,
         workflow: null as null,
     };
     private static readonly widgetComponents: {
@@ -105,6 +109,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     html: SafeHtml;
     isEmbedded: boolean;
 
+    private knownWidgetTags: string[];
+
     constructor(
         private sanitizer: DomSanitizer,
         private factoryResolver: ComponentFactoryResolver,
@@ -112,6 +118,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         private mdsEditorInstance: MdsEditorInstanceService,
     ) {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
+        this.knownWidgetTags = [
+            ...Object.values(NativeWidgetType),
+            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
+        ];
     }
 
     ngOnInit(): void {
@@ -124,10 +134,13 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     }
 
     private getHtml(): SafeHtml {
-        const html = closeTags(this.view.html, [
-            ...Object.values(NativeWidgetType),
-            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
-        ]);
+        // Close any known tags and additionally any tags that include a colon (which indicates the
+        // user probably meant to define the respective widget) as these would mess up the HTML
+        // structure if left unclosed.
+        const html = closeTags(
+            this.view.html,
+            (tagName) => this.knownWidgetTags.includes(tagName) || tagName.includes(':'),
+        );
         return this.sanitizer.bypassSecurityTrustHtml(html);
     }
 
@@ -135,16 +148,34 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         const elements = this.container.nativeElement.getElementsByTagName('*');
         for (const element of Array.from(elements)) {
             const tagName = element.localName;
-            const widget = this.mdsEditorInstance.getWidget(tagName, this.view.id);
+            const widget = this.mdsEditorInstance.getWidgetByTagName(tagName, this.view.id);
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
                 this.injectNativeWidget(widget, widgetName, element);
             } else {
                 if (widget) {
                     this.injectWidget(widget, element);
+                } else if (this.knownWidgetTags.includes(tagName)) {
+                    // The widget is defined, but was disabled due to unmet conditions.
+                    continue;
+                } else if (tagName.includes(':')) {
+                    this.injectMissingWidgetWarning(tagName, element);
                 }
             }
         }
+    }
+
+    private injectMissingWidgetWarning(widgetName: string, element: Element): void {
+        UIHelper.injectAngularComponent(
+            this.factoryResolver,
+            this.containerRef,
+            MdsEditorWidgetErrorComponent,
+            element,
+            {
+                widgetName,
+                reason: 'Widget definition missing in MDS',
+            },
+        );
     }
 
     private injectNativeWidget(
@@ -263,14 +294,34 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     }
 }
 
-function closeTags(html: string, tags: string[]): string {
-    for (const tag of tags) {
-        const start = html.indexOf('<' + tag);
-        if (start === -1) {
-            continue;
+/**
+ * Closes any tags satisfying `predicate` and returns the resulting HTML.
+ */
+function closeTags(html: string, predicate: (tag: string) => boolean): string {
+    let index = 0;
+    while (true) {
+        index = html.indexOf('<', index);
+        if (index === -1) {
+            break;
         }
-        const end = html.indexOf('>', start) + 1;
-        html = html.substring(0, end) + '</' + tag + '>' + html.substring(end);
+        const endIndex = html.indexOf('>', index + 1);
+        if (endIndex === -1) {
+            throw new Error('Invalid template html: ' + html);
+        }
+        let tagNameEndIndex = endIndex;
+        const tag = html.substring(index, endIndex + 1); // The complete tag, e.g. '<foo bar="baz">'
+        const whiteSpaceIndex = tag.search(/\s/);
+        if (whiteSpaceIndex !== -1) {
+            tagNameEndIndex = index + whiteSpaceIndex;
+        }
+        const tagName = html.substring(index + 1, tagNameEndIndex); // The tag name, e.g. 'foo'
+        if (predicate(tagName)) {
+            const htmlProcessed = html.substring(0, endIndex + 1) + '</' + tagName + '>';
+            html = htmlProcessed + html.substring(endIndex + 1);
+            index = htmlProcessed.length;
+        } else {
+            index = endIndex + 1;
+        }
     }
     return html;
 }

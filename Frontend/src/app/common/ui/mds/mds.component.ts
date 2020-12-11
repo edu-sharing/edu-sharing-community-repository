@@ -43,6 +43,7 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { Observable } from 'rxjs';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
+import {DateHelper} from '../../../core-ui-module/DateHelper';
 declare var noUiSlider: any;
 
 @Component({
@@ -103,7 +104,7 @@ export class MdsComponent {
      * mode, currently "search" or "default"
      * @type {string}
      */
-    @Input() mode: string = 'default';
+  @Input() mode : 'search' | 'default'='default';
 
     @Output() extendedChange = new EventEmitter();
     private static AUTHOR_TYPE_FREETEXT = 0;
@@ -910,6 +911,8 @@ export class MdsComponent {
                         }
                     } else if (widget.type == 'singleoption') {
                         element.value = props[0] ? props[0] : '';
+                    } else if(widget.type == 'date') {
+                        element.value=props[0] ? DateHelper.formatDateByPattern(props[0],'y-M-d') : '';
                     } else {
                         let caption = props[0];
                         if (widget.values) {
@@ -1432,17 +1435,13 @@ export class MdsComponent {
                         property: id,
                         pattern: element.value,
                     },
-                    criterias: RestSearchService.convertCritierias(
-                        Helper.arrayJoin(this._currentValues, this.getValues()),
-                        this.mds.widgets,
-                    ),
-                },
-                this._setId,
-                this._repository,
-            )
-            .subscribe(
-                (data: MdsValueList) => {
-                    if (this.lastMdsQuery != element.value) return;
+                    criterias:this.mode==='search' ?
+                        RestSearchService.convertCritierias(
+                            Helper.arrayJoin(this._currentValues,this.getValues()),this.mds.widgets
+                        ) : null,
+                },this._setId,this._repository).subscribe((data:MdsValueList)=>{
+                  if(this.lastMdsQuery!=element.value)
+                    return;
 
                     for (let i = 1; i < elements.length; ) {
                         list.removeChild(elements.item(i));
@@ -1766,20 +1765,9 @@ export class MdsComponent {
                 widget.valuesTree[value.parent].push(value);
             }
         }
-        let html =
-            this.autoSuggestField(
-                widget,
-                '',
-                false,
-                this.getWindowComponent() + `.openTree('` + widget.id + `')`,
-                'arrow_forward',
-                widget.type == 'singlevalueTree',
-            ) +
-            `     <div class="dialog darken" style="display:none;z-index:` +
-            (122 + this.priority) +
-            `;" id="` +
-            domId +
-            `_tree">
+    let html=this.autoSuggestField(widget,'',false,
+                this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
+        +`     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('` +
@@ -1942,7 +1930,7 @@ export class MdsComponent {
                     `_minutes').value=Math.floor(unencoded%60);
                   };
                   slider.noUiSlider.on('slide', sliderUpdate);
-                  slider.noUiSlider.on('update', sliderUpdate);                 
+                  slider.noUiSlider.on('update', sliderUpdate);
             `,
             );
         }, 5);
@@ -2389,14 +2377,14 @@ export class MdsComponent {
         if (this.connector.getApiVersion() >= RestConstants.API_VERSION_4_0) {
             preview +=
                 `<div class="changePreview">
-                      <a tabindex="0" 
+                      <a tabindex="0"
                       onclick="document.getElementById('` +
                 this.getDomId('preview-select') +
                 `').click()" 
                       onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="` +
                 this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') +
                 `">file_upload</i></a>
-                          <a tabindex="0" 
+                          <a tabindex="0"
                           id="` +
                 this.getDomId('preview-delete') +
                 `"
@@ -2406,7 +2394,7 @@ export class MdsComponent {
                           onclick="` +
                 this.getWindowComponent() +
                 `.deletePreview()" 
-                          onkeydown="if(event.keyCode==13) this.click();" 
+                          onkeydown="if(event.keyCode==13) this.click();"
                           class="btn-circle"><i class="material-icons" aria-label="` +
                 this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW') +
                 `">delete</i></a>
@@ -2449,8 +2437,8 @@ export class MdsComponent {
         let list = document.getElementById(this.getDomId('mdsChildobjects'));
         list.innerHTML +=
             `
-        <div class="childobject" 
-        draggable="true" 
+        <div class="childobject"
+        draggable="true"
         ondragstart="` +
             this.getWindowComponent() +
             `.startChildobjectDrag(event,` +

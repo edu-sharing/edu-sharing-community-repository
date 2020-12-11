@@ -64,12 +64,13 @@ export class EmbedComponent implements EventListener {
             });
         });
     }
-    onEvent(event: string, data: any): void {
-        if(event==FrameEventsService.EVENT_PARENT_FETCH_DATA) {
-            if(this.component=='mds')
-                this.event.broadcastEvent(FrameEventsService.EVENT_POST_DATA,this.mdsRef.getValues());
-            if(this.component=='license')
-                this.event.broadcastEvent(FrameEventsService.EVENT_POST_DATA,this.licenseRef.getProperties());
+    async onEvent(event: string, data: any) {
+        if (event === FrameEventsService.EVENT_PARENT_FETCH_DATA) {
+            if (this.component === 'mds') {
+                this.event.broadcastEvent(FrameEventsService.EVENT_POST_DATA, await this.mdsRef.getValues());
+            } else if (this.component === 'license') {
+                this.event.broadcastEvent(FrameEventsService.EVENT_POST_DATA, this.licenseRef.getProperties());
+            }
         }
     }
 }

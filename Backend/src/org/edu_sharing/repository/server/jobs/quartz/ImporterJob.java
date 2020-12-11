@@ -133,7 +133,22 @@ public class ImporterJob extends AbstractJob {
 		} catch (ParseException e) {
 			logger.error(e.getMessage());
 		}catch (NullPointerException e){
-			logger.error(e.getMessage());
+			logger.debug("from/until not set");
+		}
+
+		if(from == null && until == null){
+			String periodInDaysStr = (String)jobDataMap.get(OAIConst.PARAM_PERIOD_IN_DAYS);
+			if(periodInDaysStr != null && !periodInDaysStr.trim().equals("")) {
+				try {
+					Long periodInDays = new Long(periodInDaysStr);
+					Long periodInMs = periodInDays * 24 * 60 * 60 * 1000;
+					until = new Date();
+					from = new Date((until.getTime() - periodInMs));
+					logger.info("using from:" + from + " until:" + until);
+				}catch (NumberFormatException e){
+					logger.error(e.getMessage());
+				}
+			}
 		}
 
 

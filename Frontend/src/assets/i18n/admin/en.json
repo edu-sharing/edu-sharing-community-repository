@@ -241,6 +241,7 @@
             "OAI_SAVE": "Save values for next import",
             "OAI_FROM": "from",
             "OAI_UNTIL": "until",
+            "OAI_PERIOD_IN_DAYS":"period in days (leave from/until empty)",
             "REMOVE_IMPORTS": "Remove deleted imports",
             "IMPORTS_REMOVED": "Deleted OAI items will be removed.\n Check the task list to see the status",
             "EXCEL_IMPORTED": "Excel file imported ({{{ rows }} rows imported)",
@@ -425,7 +426,7 @@
             "DELETED": "Media Center \"{{name}}\"was deleted",
             "DATA": {
                 "TITLE": "Basic data",
-                "EDIT_NOT_ALLOWED": "To make further changes to the data, please contact the responsible administrator of the system",
+                "EDIT_NOT_ALLOWED": "The current user is missing the editing mediacenter permission. To make further changes to the data, please contact the responsible administrator of the system",
                 "id": "Internal ID",
                 "location": "Location",
                 "districtAbbreviation": "District abbreviation",
@@ -487,6 +488,7 @@
         },
         "FRONTPAGE": {
             "GENERAL": "General settings",
+            "DISABLED": "Frontpage mode is disabled via client.config.xml. You can enable the frontpage by setting frontpage.enabled to true.",
             "MODE_LABEL": "Mode",
             "MODE_HINT": "According to which scheme should the elements of the homepage be selected",
             "MODE": {

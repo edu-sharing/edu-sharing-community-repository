@@ -52,5 +52,7 @@ public class OAIConst {
 	public static final String PARAM_FROM = "from";
 	public static final String PARAM_UNTIL = "until";
 
+	public static final String PARAM_PERIOD_IN_DAYS = "period_in_days";
+
 	public static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 }

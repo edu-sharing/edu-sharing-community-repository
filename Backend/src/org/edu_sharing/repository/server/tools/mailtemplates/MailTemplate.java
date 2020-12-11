@@ -2,8 +2,11 @@ package org.edu_sharing.repository.server.tools.mailtemplates;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -14,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,6 +46,17 @@ public class MailTemplate {
 	    		"<div class='content'>"+getChildContent(locale,template,"message") + "</div>" + 
 	    		(addFooter ? ("<div class='footer'>"+getChildContent(locale,"footer","message")+"</div>") : "");
 	    return data;
+	}
+	public static void sendMail(String receiver, String templateId, Map<String, String> replace) throws Exception {
+		Mail mail = new Mail();
+		ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+		mail.sendMailHtml(
+				context,
+				receiver,
+				MailTemplate.getSubject(templateId,currentLocale),
+				MailTemplate.getContent(templateId,currentLocale, true),
+				replace);
 	}
 	public static String generateContentLink(ApplicationInfo appInfo,String nodeId) throws Throwable{
 		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());

@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -225,7 +227,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				continue;
 			}
 			id=CCConstants.getValidGlobalName(id);
-			String [] values = props.get(id);
+			String[] propsValue = props.get(id);
+			List<Serializable> values = propsValue != null ? Arrays.asList(propsValue) : null;
 			if("range".equals(widget.getType())){
 				String [] valuesFrom = props.get(id+"_from");
 				String [] valuesTo = props.get(id+"_to");
@@ -238,18 +241,33 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				logger.info("will save property "+widget.getId()+" with predefined defaultvalue "+widget.getDefaultvalue());
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
+			} else if("date".equals(widget.getType())){
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					values = Arrays.stream(props.get(id)).map((p) -> {
+						try {
+							return sdf.parse(p);
+						} catch (ParseException e) {
+							throw new RuntimeException(e);
+						}
+					}).collect(Collectors.toList());
+
+				}catch(Throwable t){
+					logger.warn("Could not parse date for widget id " + widget.getId(), t);
+					values = new ArrayList<>();
+				}
 			}
 			// changed: otherwise reset values for multivalue fields is not possible
 			// if(values==null || values.length==0)
 			if(values==null)
 				continue;
-			if(!widget.isMultivalue() && values.length>1)
+			if(!widget.isMultivalue() && values.size()>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
 			if(widget.isMultivalue()){
-				toSafe.put(id,values.length==0 ? null : new ArrayList<String>(Arrays.asList(values)));
+				toSafe.put(id,values.size()==0 ? null : new ArrayList<>(values));
 			}
 			else{
-				toSafe.put(id,values.length==0 ? null : values[0]);
+				toSafe.put(id,values.size()==0 ? null : values.get(0));
 			}
 		}
 
@@ -919,7 +937,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		/*	return null;
 		});*/
 	}
-	
+
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable{
 		return apiClient.getProperties(storeProtocol, storeId, nodeId);
@@ -1063,17 +1081,26 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	private ContentReader getContentReader(String storeProtocol, String storeId, String nodeId,String version,String contentProp){
 		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if(version==null) {
-			return contentService.getReader(nodeRef, QName.createQName(contentProp)).getReader();
+			ContentReader cr = contentService.getReader(nodeRef, QName.createQName(contentProp));
+			if(cr != null) {
+				return cr.getReader();
+			}else return null;
 		}
 		else{
 			VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
 			Version versionObj = versionHistory.getVersion(version);
-			return contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
+			ContentReader cr = contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
+			if(cr != null) {
+				return cr.getReader();
+			}else return null;
 		}
 	}
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String version,String contentProp) throws Throwable{
-		return getContentReader(storeProtocol,storeId,nodeId,version,contentProp).getContentInputStream();
+		ContentReader cr = getContentReader(storeProtocol,storeId,nodeId,version,contentProp);
+		if(cr != null) {
+			return cr.getContentInputStream();
+		}else return null;
 	}
 
 	@Override

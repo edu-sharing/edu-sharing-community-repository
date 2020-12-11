@@ -55,7 +55,11 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         });
         this.checked = this.widget.getInitialValues().jointValues ?? [];
     }
-    getValues(values: Values) {
+    async getValues(values: Values) {
+        // nodes mode is read-only, so do not change anything
+        if(this.mdsEditorValues.editorMode === 'nodes') {
+            return values;
+        }
         if(this.checked.length) {
             values[this.widget.definition.id] = this.checked;
         }

@@ -205,7 +205,8 @@ export class SimpleEditInviteComponent {
     subscribe((permissions) => {
       this.nodesPermissions = permissions.map((p) => p.permissions);
       this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
-      this.organizationApi.getOrganizations().subscribe((orgs) => {
+      // The amount of orgs is still limited to the maximum amount returned by default!
+      this.organizationApi.getOrganizations('', true).subscribe((orgs) => {
         const filter = this.configService.instant('simpleEdit.organizationFilter');
         if(filter) {
           const reg = new RegExp(filter);
@@ -228,6 +229,10 @@ export class SimpleEditInviteComponent {
                     groups.forEach((g) => {
                       o.groups[g.group.profile.groupType] = g.group;
                     });
+                    observer.next(o);
+                    observer.complete();
+                  }, error => {
+                    console.warn('Some group roles could not be found', error)
                     observer.next(o);
                     observer.complete();
                   });

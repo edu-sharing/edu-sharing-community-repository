@@ -1,6 +1,7 @@
 {
     "SEARCH": {
         "TITLE": "Suchumgebung",
+        "SEARCH_OPTIONS_LABEL": "Such-Optionen",
         "TUTORIAL_HEADING": "Suchen und finden",
         "TUTORIAL_DESCRIPTION": "Über das Suchfeld findest du sehr schnell interessante Materialien. Benutze Filter, um deine Suchergebnisse einzuschränken.",
         "COLLECTIONS": "Sammlungen",

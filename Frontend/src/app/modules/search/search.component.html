@@ -51,11 +51,18 @@
           </div>
       </div>
   </div>
-    <div class="top scrollWithBanner" [class.topNoRepositories]="!(repositories && repositories.length>2)" [class.no-mainnav]="!mainnav" [hidden]="!initalized">
+  <div
+    role="navigation"
+    [attr.aria-label]="'SEARCH.SEARCH_OPTIONS_LABEL' | translate"
+    class="top scrollWithBanner"
+    [class.topNoRepositories]="!(repositories && repositories.length > 2)"
+    [class.no-mainnav]="!mainnav"
+    [hidden]="!initalized"
+  >
         <div class="mobile-move-top">
             <div class="extendedSearch" #extendedSearch>
                 <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
-                    <span>{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
+                    <span id="extended-search-label">{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
                     <span class="mobile" *ngIf="!selection || !selection.length">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
                     <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
             </div>
@@ -95,8 +102,19 @@
         </app-mds-editor-wrapper>
     </card>
   <div class="sidenav-container sidenav-container-tab-{{sidenavTab}}">
-  <div class="apply" *ngIf="searchService.sidenavOpened && !isMdsLoading()"><actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar></div>
-  <div #sidenav class="sidenav scrollWithBanner" [class.no-mainnav]="!mainnav" [class.sidenavNoRepositories]="!repositories || repositories.length<=2" [class.sidenavHidden]="!searchService.sidenavOpened" [@fromLeft]="searchService.sidenavOpened">
+    <div
+      #sidenav
+      role="region"
+      aria-labelledby="extended-search-label"
+      class="sidenav scrollWithBanner"
+      [class.no-mainnav]="!mainnav"
+      [class.sidenavNoRepositories]="!repositories || repositories.length <= 2"
+      [class.sidenavHidden]="!searchService.sidenavOpened"
+      [@fromLeft]="searchService.sidenavOpened"
+    >
+     <div class="apply" *ngIf="searchService.sidenavOpened && !isMdsLoading()">
+        <actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar>
+     </div>
      <div class="row tab-group" *ngIf="!isGuest">
        <div class="col s12">
          <ul class="tabs">
@@ -210,7 +228,13 @@
 
    </div>
     <div class="content-with-footer">
-        <div class="content_wrapper" [class.content_wrapper_grouped]="currentRepository=='-all-' && groupResults" [class.contentSidenav]="searchService.sidenavOpened">
+        <div
+            role="main"
+            appSkipTarget="MAIN_CONTENT"
+            class="content_wrapper"
+            [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
+            [class.contentSidenav]="searchService.sidenavOpened"
+        >
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
                 <div *ngIf="searchService.searchResultCollections.length>0 && !addToCollection">
                     <div class="collectionsHeading">
@@ -242,12 +266,18 @@
                         <div>
                             {{ 'SEARCH.MATERIALS' | translate}}
                             <span *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</span>
-                            <div *ngIf="searchService.sort.materialsColumns" class="sorting" [class.clickable]="searchService.sort.materialsColumns" (click)="searchService.sort.materialsColumns ? searchService.sort.materials=true : null">
+                            <!-- TODO: make popup menu usable with keyboard -->
+                            <button
+                                *ngIf="searchService.sort.materialsColumns"
+                                class="sorting clickable"
+                                (click)="searchService.sort.materials = true"
+                                aria-haspopup="true"
+                            >
                                 <div class="sorting-info">
                                     <div>{{'NODE.'+searchService.sort.materialsSortBy | translate}}</div>
                                     <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
                                 </div>
-                            </div>
+                            </button>
                             <sort-dropdown [(open)]="searchService.sort.materials"
                                            [columns]="searchService.sort.materialsColumns"
                                            [sortAscending]="searchService.sort.materialsSortAscending"

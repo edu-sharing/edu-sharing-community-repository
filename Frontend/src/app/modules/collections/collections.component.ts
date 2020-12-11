@@ -49,6 +49,7 @@ import { GlobalContainerComponent } from '../../common/ui/global-container/globa
 import { Observable } from 'rxjs';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-helper';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 // component class
 @Component({
@@ -544,37 +545,43 @@ export class CollectionsMainComponent {
         );
     }
 
-    canDropOnCollection = (event: any) => {
-        if (event.source[0].ref.id === event.target.ref.id) {
+    canDropOnCollection = (event: DropData) => {
+        if (event.nodes[0].ref.id === event.target.ref.id) {
             return false;
         }
         if (event.target.ref.id === this.collectionContent.node.ref.id) {
             return false;
         }
-        // in case it's via breadcrums, unmarshall the collection item
-        if (event.target.collection) {
-            event.target = event.target.collection;
+        console.log(event.nodes[0], event.dropAction);
+        if(event.nodes[0].collection && event.dropAction === 'copy') {
+            return false;
         }
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
-        if (event.source[0].hasOwnProperty('childCollectionsCount')) {
+        if (event.nodes[0].collection?.hasOwnProperty('childCollectionsCount')) {
             if (
-                (event.source[0].type ===
+                (event.nodes[0].collection.type ===
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type !==
+                    event.target.collection.type !==
                         RestConstants.COLLECTIONTYPE_EDITORIAL) ||
-                (event.source[0].type !==
+                (event.nodes[0].collection.type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type ===
+                    event.target.collection.type ===
                         RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }
         }
-
         if (
+            event.dropAction === 'copy' &&
             !NodeHelper.getNodesRight(
-                event.source[0],
+                event.nodes,
                 RestConstants.ACCESS_CC_PUBLISH,
+                NodesRightMode.Original,
+            )
+            || event.dropAction === 'move' &&
+            !NodeHelper.getNodesRight(
+                event.nodes,
+                RestConstants.ACCESS_WRITE,
                 NodesRightMode.Original,
             )
         ) {
@@ -583,7 +590,7 @@ export class CollectionsMainComponent {
 
         if (
             !NodeHelper.getNodesRight(
-                event.target,
+                [event.target],
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Local,
             )
@@ -594,7 +601,7 @@ export class CollectionsMainComponent {
         return true;
     };
 
-    canDropOnRef() {
+    canDropOnRef(event: DropData) {
         // do not allow to drop here
         return false;
     }

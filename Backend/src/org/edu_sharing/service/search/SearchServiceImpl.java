@@ -39,16 +39,19 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLEncoder;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -243,12 +246,8 @@ public class SearchServiceImpl implements SearchService {
 						String param = QueryParser.escape(pattern == null ? "" : pattern);
 						
 						//only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
-						StringBuilder qbMemberShips=null;
-						if(onlyMemberShips == true || 
-								(onlyMemberShips == false && !isAdmin)) {
-							
-						
-							
+						StringBuilder additionalQuery=null;
+						if(onlyMemberShips) {
 							List<String> memberShibsOrg = new ArrayList<String>(); 
 							if(memberships != null && memberships.size() > 0) {
 								for(String membershib : memberships) {
@@ -261,22 +260,25 @@ public class SearchServiceImpl implements SearchService {
 									}
 								}
 								if(memberShibsOrg.size() > 0) {
-									qbMemberShips = new StringBuilder();
-									qbMemberShips.append(" AND (");
+									additionalQuery = new StringBuilder();
+									additionalQuery.append(" AND (");
 									int i = 0;
 									for(String membershibOrg : memberShibsOrg) {
 										if(i > 0) {
-											qbMemberShips.append(" OR ");
+											additionalQuery.append(" OR ");
 										}
-										qbMemberShips.append("@cm\\:authorityName:\"" + QueryParser.escape(membershibOrg) + "\"");
+										additionalQuery.append("@cm\\:authorityName:\"" + QueryParser.escape(membershibOrg) + "\"");
 										i++;
 									}
-									qbMemberShips.append(")");
+									additionalQuery.append(")");
 								}else {
 									return new SearchResult<EduGroup>();
 								}
 								
 							}
+						} else if(!isAdmin) {
+							additionalQuery = new StringBuilder();
+							additionalQuery.append(" AND NOT ISNULL:\"ccm:group_signup_method\"");
 						}
 						
 						parameters
@@ -284,7 +286,7 @@ public class SearchServiceImpl implements SearchService {
 										"(@cm\\:authorityName:\"*" + param + "*\"" + 
 										" OR @cm\\:authorityDisplayName:\"*" + param + "*\"" + 
 										") AND @ccm\\:edu_homedir:\"workspace://*\"" + 
-										((qbMemberShips != null) ? " " + qbMemberShips.toString() : "") );
+										((additionalQuery != null) ? " " + additionalQuery.toString() : "") );
 						logger.info("query:" +parameters.getQuery());
 						
 						ResultSet edugroups = searchService.query(parameters);
@@ -845,8 +847,14 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws Exception {
-		if(globalContext)
+		String signupMethod = customProperties == null ? null : customProperties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD));
+		boolean searchingSignupGroups = ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP) &&
+										AuthorityType.GROUP.equals(type) &&
+										signupMethod != null &&
+										!signupMethod.isEmpty();
+		if(globalContext && !searchingSignupGroups) {
 			checkGlobalSearchPermission();
+		}
 		List<String> searchFields = new ArrayList<>();
 
 		// fields to search in - not using username
@@ -857,10 +865,11 @@ public class SearchServiceImpl implements SearchService {
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
 		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,searchFields, globalContext);
-		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
+		// we're skipping TP checks when the search requested signup groups -> it's possible to see them even without GLOBAL_AUTHORITY_SEARCH permissions
+		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext, searchingSignupGroups);
 		
 
-		if(findUsersQuery == null || findGroupsQuery == null) {
+		if(findUsersQuery == null && findGroupsQuery == null) {
 			return new SearchResult<String>(new ArrayList<String>(), 0, 0);
 		}
 		
@@ -883,7 +892,10 @@ public class SearchServiceImpl implements SearchService {
 			if(findUsersQuery!=null)
 				finalQuery += "("+findUsersQuery+")";
 			if(findGroupsQuery!=null) {
-				finalQuery += " OR (" + findGroupsQuery + ")";
+				if(findUsersQuery != null){
+					finalQuery += " OR ";
+				}
+				finalQuery += "(" + findGroupsQuery + ")";
 			}
 		}
 		else if(type.equals(AuthorityType.USER)) {

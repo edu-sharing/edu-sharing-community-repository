@@ -150,7 +150,11 @@
                             </div>
                         </span>
                         <span *ngIf="key=='node'">{{element[key]}}</span>
-                        <span *ngIf="!(key=='action' || key=='date' || key=='authority' || key=='nod')">{{getGroupKey(element,key)}}</span>
+                        <span *ngIf="!(key=='action' || key=='date' || key=='authority'
+                                        || key=='node' || key=='authority_organization'
+                                        || key=='authority_mediacenter')">
+                            {{'ADMIN.STATISTICS.CUSTOM.'+key+'.'+getGroupKey(element, key) | translate}}
+                        </span>
                     </mat-cell>
                 </ng-container>
                 <mat-header-row *matHeaderRowDef="singleDataRows; sticky: true"></mat-header-row>

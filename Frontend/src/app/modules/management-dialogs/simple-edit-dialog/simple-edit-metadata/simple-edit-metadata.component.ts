@@ -56,8 +56,8 @@ export class SimpleEditMetadataComponent  {
         observer.complete();
         return;
       }
-      Observable.forkJoin(this.nodes.map((n) => {
-        const props = this.mds.getValues(n);
+      Observable.forkJoin(this.nodes.map(async (n) => {
+        const props = await this.mds.getValues(n);
         delete props[RestConstants.CM_NAME];
         return this.nodeApi.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_METADATA_UPDATE, props);
       })).subscribe(() => {

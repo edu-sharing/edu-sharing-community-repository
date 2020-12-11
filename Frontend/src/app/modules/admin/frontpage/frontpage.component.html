@@ -1,4 +1,7 @@
 <global-progress *ngIf="loading"></global-progress>
+<info-message *ngIf="!(configService.get('frontpage.enabled', true) | async)">
+    {{'ADMIN.FRONTPAGE.DISABLED' | translate }}
+</info-message>
 <collection-chooser
         class="dialog-right scrollWithBanner"
         *ngIf="chooseCollection"
@@ -7,7 +10,7 @@
         (onCancel)="chooseCollection=false"
         (onChoose)="setCollection($event)"
 ></collection-chooser>
-<div class="frontpage">
+<div class="frontpage" *ngIf="configService.get('frontpage.enabled', true) | async">
     <form *ngIf="config" [formGroup]="form">
         <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="settings"></i>{{'ADMIN.FRONTPAGE.GENERAL' | translate}}</h4>
         <div class="group">

@@ -124,6 +124,7 @@
                 "SHARING": "Freigaben",
                 "LICENSING": "Lizenzierung & Veröffentlichung",
                 "DATA_MANAGEMENT": "Dateimanagement",
+                "ACCOUNT_MANAGEMENT": "Account-Verwaltung",
                 "SAFE": "Gesicherter Bereich (Safe)",
                 "COLLECTIONS": "Sammlungen",
                 "CONNECTORS": "Konnektoren & Editoren",
@@ -204,6 +205,28 @@
                 "assign": "Neuem Nutzer zuweisen",
                 "delete": "Unwiderruflich löschen"
             }
+        },
+        "ORG_SIGNUP_SAVED": "Einschreibungseinstellungen aktualisiert",
+        "ORG_SIGNUP": "Einschreibung konfigurieren",
+        "ORG_SIGNUP_LIST": "Warteliste anzeigen",
+        "ORG_SIGNUP_METHOD": "Methode der Einschreibung",
+        "ORG_SIGNUP_PASSWORD": "Passwort für Einschreibung",
+        "ORG_SIGNUP_PASSWORD_HINT": "Wenn bereits ein Passwort gesetzt ist und dieses Feld leer gelassen wird, bleibt das ursprünglich bestehende Passwort",
+        "ORG_SIGNUP_NO_EMAIL": "Die aktuelle Organisation/Gruppe besitzt keine E-Mail-Adresse. Bitte legen Sie eine E-Mail-Adresse fest, damit Informationen zu neuen Mitgliedern empfangen werden können.",
+        "ORG_SIGNUP_ADD": "Mitgliedschaft bestätigen",
+        "ORG_SIGNUP_REJECT": "Mitgliedschaft ablehnen",
+        "ORG_SIGNUP_LIST_EMPTY": "Keine Nutzer auf der Warteliste",
+        "ORG_SIGNUP_ADD_CONFIRM": "Nutzer wurde(n) der Gruppe hinzugefügt",
+        "ORG_SIGNUP_REJECT_CONFIRM": "Nutzer wurde(n) von der Warteliste entfernt und nicht in die Gruppe hinzugefügt",
+        "ORG_SIGNUP_METHODS":{
+            "disabled": "Keine Einschreibung erlaubt",
+            "simple": "Einschreibung ohne Einschränkung",
+            "password": "Einschreibung mit Passwort",
+            "list": "Einschreibung mit Warteliste",
+            "disabled_DETAILS": "Nutzer können sich nicht selbstständig in die Organisation/Gruppe einschreiben, sondern müssen manuell von einem Administrator hinzugefügt werden.",
+            "simple_DETAILS": "Nutzer können sich selbstständig in die Organisation/Gruppe einschreiben und werden sofort Mitglied.",
+            "password_DETAILS": "Nutzer können sich selbstständig in die Organisation/Gruppe einschreiben und werden sofort Mitglied, sofern sie das korrekte Passwort kennen.",
+            "list_DETAILS": "Nutzer können sich selbstständig in die Organisation/Gruppe einschreiben und werden auf eine Warteliste gesetzt. Ein Administrator muss die Einschreibung anschließend bestätigen."
         }
     }
 }

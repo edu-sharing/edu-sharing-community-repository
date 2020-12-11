@@ -6,7 +6,7 @@ import {ListItem} from '../../../core-module/ui/list-item';
 import {RestConstants} from '../../../core-module/rest/rest-constants';
 import {RestHelper} from '../../../core-module/rest/rest-helper';
 import {
-    DialogButton,
+    DialogButton, RequestObject,
     RestConnectorService,
     RestIamService,
     RestMdsService,
@@ -45,7 +45,10 @@ export class AdminMediacenterComponent {
     mediacenterNodesSearchWord='';
     hasMoreMediacenterNodes = true;
     isLoadingMediacenterNodes=false;
-
+    mediacenterNodesSort = {
+        sortBy: RestConstants.LOM_PROP_TITLE,
+        sortAscending: true
+    };
 
     groupColumns: ListItem[];
     nodeColumns: ListItem[];
@@ -54,8 +57,8 @@ export class AdminMediacenterComponent {
     };
     currentTab = 0;
     mediacenterMdsReload = new Boolean(true);
-    private isAdmin: boolean;
-    private hasManagePermissions: boolean;
+    isAdmin: boolean;
+    hasManagePermissions: boolean;
     public mediacentersFile: File;
     public organisationsFile: File;
     public orgMcFile: File;
@@ -99,10 +102,7 @@ export class AdminMediacenterComponent {
         this.currentMediacenterCopy = Helper.deepCopy(mediacenter);
         this.mediacenterGroups = null;
 
-        this.mediacenterNodes = null;
-        this.mediacenterNodesTotal = 0;
-        this.mediacenterNodesOffset = 0;
-        this.hasMoreMediacenterNodes = true
+        this.resetMediacenterNodes();
 
         if (mediacenter) {
             this.mediacenterService.getManagedGroups(mediacenter.authorityName).subscribe((groups) => {
@@ -124,10 +124,12 @@ export class AdminMediacenterComponent {
             return;
         }
         if (this.currentMediacenter) {
-            const licensedNodeReq = {
+            const licensedNodeReq: RequestObject = {
                 offset: this.mediacenterNodesOffset,
                 count: this.mediacenterNodesMax,
-                propertyFilter: [RestConstants.ALL]
+                propertyFilter: [RestConstants.ALL],
+                sortBy: [this.mediacenterNodesSort.sortBy],
+                sortAscending: [this.mediacenterNodesSort.sortAscending]
             };
             this.isLoadingMediacenterNodes = true;
 
@@ -147,7 +149,7 @@ export class AdminMediacenterComponent {
             console.log(this.mediacenterMds.getValues())
 
             this.mediacenterService.getLicensedNodes(this.currentMediacenter.authorityName, criterias,
-                RestConstants.HOME_REPOSITORY, null, licensedNodeReq).subscribe((data) => {
+                RestConstants.HOME_REPOSITORY, licensedNodeReq).subscribe((data) => {
                 this.mediacenterNodesTotal = data.pagination.total;
                 if (this.mediacenterNodesTotal < (this.mediacenterNodesOffset + this.mediacenterNodesMax)) {
                     this.hasMoreMediacenterNodes = false;
@@ -333,5 +335,18 @@ export class AdminMediacenterComponent {
             this.toast.error(error);
             this.globalProgress = false;
         });
+    }
+
+    setMediacenterNodesSort(sort: { sortBy: string; sortAscending: boolean }) {
+        this.mediacenterNodesSort = sort;
+        this.resetMediacenterNodes();
+        this.loadMediacenterNodes();
+    }
+
+    private resetMediacenterNodes() {
+        this.mediacenterNodes = null;
+        this.mediacenterNodesTotal = 0;
+        this.mediacenterNodesOffset = 0;
+        this.hasMoreMediacenterNodes = true
     }
 }

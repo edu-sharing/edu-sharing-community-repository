@@ -64,12 +64,14 @@ export enum MdsWidgetType {
     DefaultValue = 'defaultvalue',
 }
 
+// Entries must be lowercase only.
 export enum NativeWidgetType {
     Preview = 'preview',
     Version = 'version',
     ChildObjects = 'childobjects',
     Maptemplate = 'maptemplate',
     License = 'license',
+    FileUpload = 'fileupload',
     Workflow = 'workflow',
     Author = 'author',
 }

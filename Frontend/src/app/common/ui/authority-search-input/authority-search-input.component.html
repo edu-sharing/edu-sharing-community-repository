@@ -28,26 +28,10 @@
     <mat-autocomplete #autoGroup="matAutocomplete" class="mat-autocomplete-high" (optionSelected)="setOption($event)">
       <mat-optgroup *ngFor="let group of suggestionGroups$ | async" label="{{ group.label | translate }}">
         <mat-option class="authority-search-input-option" *ngFor="let suggestion of group.values" [value]="suggestion">
-          <div class="suggestion-content">
-            <user-avatar [user]="suggestion.originalObject" size="small"></user-avatar>
-            <div class="text-content">
-              <div class="data">
-                <div class="primary">{{ suggestion.title }}</div>
-                <div class="secondary" *ngIf="suggestion.secondaryTitle">{{ suggestion.secondaryTitle }}</div>
-              </div>
-              <div class="secondary-data">
-                <div class="parent-orgs" *ngIf="suggestion.originalObject.organizations">
-                  <span *ngFor="let org of suggestion.originalObject.organizations">{{ org | authorityName }}</span>
-                </div>
-                <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">
-                  {{ suggestion.originalObject | authorityAffiliation }}
-                </div>
-                <div class="affiliation affiliation-group" *ngIf="affiliation && suggestion.originalObject.profile.displayName">
-                  {{ 'AUTHORITY_TYPE_GROUP' | translate }}
-                </div>
-              </div>
-            </div>
-          </div>
+          <app-authority-row
+                  [authority]="suggestion.originalObject"
+                  [secondaryTitle]="suggestion.secondaryTitle"
+          ></app-authority-row>
         </mat-option>
       </mat-optgroup>
     </mat-autocomplete>

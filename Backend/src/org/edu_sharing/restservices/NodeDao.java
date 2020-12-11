@@ -74,6 +74,7 @@ public class NodeDao {
 	private static Logger logger = Logger.getLogger(NodeDao.class);
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 	private static final String[] DAO_PERMISSIONS = new String[]{
+			org.alfresco.service.cmr.security.PermissionService.READ,
 			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
 			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
@@ -524,7 +525,12 @@ public class NodeDao {
         NodeEntries result=new NodeEntries();
         List<Node> nodes=new ArrayList<>();
         for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
-            nodes.add(NodeDao.getNode(repoDao,children.get(i).getId(),propFilter).asNode());
+        	try {
+				nodes.add(NodeDao.getNode(repoDao, children.get(i).getId(), propFilter).asNode());
+			}
+        	catch(DAOMissingException daoException){
+        		logger.warn("Missing node " + children.get(i).getId()+" tryed to fetch, skipping fetch", daoException);
+			}
         }
 
         Pagination pagination=new Pagination();
@@ -948,9 +954,10 @@ public class NodeDao {
 		if(!isFromRemoteRepository())
 			return null;
 		Remote remote=new Remote();
-		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
+		String remoteObjectRepositoryId = (String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
+		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY) && remoteObjectRepositoryId != null){
 			remote.setId((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-			remote.setRepository(RepositoryDao.getRepository((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)).asRepo());
+			remote.setRepository(RepositoryDao.getRepository(remoteObjectRepositoryId).asRepo());
 		} else if(remoteId!=null){
 			remote.setId(remoteId);
 			remote.setRepository(remoteRepository.asRepo());

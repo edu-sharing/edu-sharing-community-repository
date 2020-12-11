@@ -57,7 +57,7 @@
                         </mat-form-field>
                         <mat-form-field>
                             <mat-label>{{'ADMIN.MEDIACENTER.DATA.mainUrl' | translate}}</mat-label>
-                            <input matInput [(ngModel)]="currentMediacenterCopy.profile.mediacenter.mainUrl">
+                            <input matInput [disabled]="!hasManagePermissions" [(ngModel)]="currentMediacenterCopy.profile.mediacenter.mainUrl">
                         </mat-form-field>
                     </div>
                     <div class="data-catalogs">
@@ -128,6 +128,9 @@
                                [hasCheckbox]="true"
                                icon="node"
                                [columns]="nodeColumns"
+                               [sortBy]="mediacenterNodesSort.sortBy"
+                               [sortAscending]="mediacenterNodesSort.sortAscending"
+                               (sortListener)="setMediacenterNodesSort($event)"
                                (loadMore)="loadMediacenterNodes()"
                                [isLoading]="isLoadingMediacenterNodes"
                                [hasMore]="hasMoreMediacenterNodes"
@@ -143,7 +146,7 @@
             </mat-tab>
         </mat-tab-group>
     </div>
-    <div *ngIf="!currentMediacenter">
+    <div *ngIf="!currentMediacenter && isAdmin">
         <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="business"></i>{{'ADMIN.MEDIACENTER.IMPORT.TITLE' | translate}}</h4>
         <div class="import">
             <input #importMediacentersSelect type="file" style="display:none" id="importMediacentersSelect" accept=".csv" (change)="updateMediacentersFile($event)">

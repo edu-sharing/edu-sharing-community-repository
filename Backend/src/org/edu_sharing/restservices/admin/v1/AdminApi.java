@@ -593,8 +593,8 @@ public class AdminApi {
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
 	public Response removeCacheEntry(
-            @ApiParam(value="cacheIndex", defaultValue="false") @QueryParam("cacheIndex") Integer cacheIndex,
-            @ApiParam(value="bean", defaultValue="false") @QueryParam("bean") String bean,
+            @ApiParam(value="cacheIndex") @QueryParam("cacheIndex") Integer cacheIndex,
+            @ApiParam(value="bean") @QueryParam("bean") String bean,
             @Context HttpServletRequest req){
 		try {
             AdminServiceFactory.getInstance().removeCacheEntry(cacheIndex, bean);
@@ -790,10 +790,11 @@ public class AdminApi {
 			@ApiParam(value = "force Update of all entries", required = false, defaultValue = "false") @QueryParam("forceUpdate") Boolean forceUpdate,
 			@ApiParam(value = "from: datestring yyyy-MM-dd)", required = false, defaultValue = "") @QueryParam("from") String from,
 			@ApiParam(value = "until: datestring yyyy-MM-dd)", required = false, defaultValue = "") @QueryParam("until") String until,
-			@Context HttpServletRequest req) {
+		  	@ApiParam(value = "periodInDays: internal sets from and until. only effective if from/until not set)", required = false, defaultValue = "") @QueryParam("periodInDays") String periodInDays,
+		    @Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().importOai(set, fileUrl, baseUrl, metadataset, metadataPrefix, className,
-					importerClassName, recordHandlerClassName, binaryHandlerClassName, oaiIds, forceUpdate != null ? forceUpdate.booleanValue() : false, from, until);
+					importerClassName, recordHandlerClassName, binaryHandlerClassName, oaiIds, forceUpdate != null ? forceUpdate.booleanValue() : false, from, until, periodInDays);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

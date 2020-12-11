@@ -11,9 +11,11 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -559,6 +561,23 @@ public class MediacenterServiceImpl implements MediacenterService {
         return result;
     }
 
+    boolean hasPermissionSet(NodeRef nodeRef, String authority, String permission) {
+        boolean hasPermission = false;
+        Set<AccessPermission> permissionsSet = permissionService.getAllSetPermissions(nodeRef);
+
+        for(AccessPermission ap : permissionsSet){
+            if(authority.equals(ap.getAuthority())
+                    && permission.equals(ap.getPermission())
+                    && AccessStatus.ALLOWED.equals(ap.getAccessStatus())){
+                if(!ap.isInherited()) {
+                    hasPermission = true;
+                }else{
+                    logger.warn(nodeRef + " permission"+ ap.getPermission() + " is inherited");
+                }
+            }
+        }
+        return hasPermission;
+    }
 
     boolean hasPermission(NodeRef nodeRef, String authority, String permission) {
         AuthenticationUtil.RunAsWork<Boolean> runAs = () -> {
@@ -592,7 +611,7 @@ public class MediacenterServiceImpl implements MediacenterService {
 
         HashMap<String, List<String>> sodisMediacenterIdNodes = new HashMap<>();
         for (String mediacenterId : allMediacenterIds) {
-            logger.info("cache sodis mediacenter nodes mediacenterId:" + mediacenterId + " already cached:" + sodisMediacenterIdNodes.size());
+            logger.info("cache provider mediacenter nodes mediacenterId:" + mediacenterId + " already cached:" + sodisMediacenterIdNodes.size());
             List<String> nodes = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodes(mediacenterId);
             sodisMediacenterIdNodes.put(mediacenterId, nodes);
         }
@@ -618,9 +637,9 @@ public class MediacenterServiceImpl implements MediacenterService {
 
             for (Map.Entry<String, NodeRef> entry : importedNodes.entrySet()) {
 
-                boolean hasPublishPermission = hasPermission(entry.getValue(), mediacenterName,
+                boolean hasPublishPermission = hasPermissionSet(entry.getValue(), mediacenterName,
                         CCConstants.PERMISSION_CC_PUBLISH);
-                boolean hasConsumerPermission = hasPermission(entry.getValue(), mediacenterName,
+                boolean hasConsumerPermission = hasPermissionSet(entry.getValue(), mediacenterName,
                         CCConstants.PERMISSION_CONSUMER);
 
                 if (sodisLicensedNodes.contains(entry.getKey()) && (!hasConsumerPermission || !hasPublishPermission)) {
@@ -667,7 +686,90 @@ public class MediacenterServiceImpl implements MediacenterService {
             }
             return null;
         });
+    }
 
+    @Override
+    public void manageNodeLicenses(Date from, Date until) {
+        logger.info("cache mediacenterids for period: " + from + " - " + until);
+        List<String> allMediacenterIds = getAllMediacenterIds();
+
+        for (String mediacenterId : allMediacenterIds) {
+            String mediacenterName = "GROUP_" + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mediacenterId;
+            List<String> nodesAdd = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodes(mediacenterId, from, until);
+            logger.info(mediacenterId + " found new nodes: " + nodesAdd.size() + " for period: " + from + " - " + until);
+
+            for (String replicationsourceId : nodesAdd) {
+                NodeRef nodeRef  = getNodeRefByReplicationSourceId(replicationsourceId);
+                if(nodeRef == null){
+                    logger.warn("no node found in repo for:" + replicationsourceId);
+                    continue;
+                }
+                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterName,
+                        CCConstants.PERMISSION_CC_PUBLISH);
+                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterName,
+                        CCConstants.PERMISSION_CONSUMER);
+
+                if(!hasPublishPermission || !hasConsumerPermission){
+                    serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                        policyBehaviourFilter.disableBehaviour(nodeRef);
+                        logger.info(mediacenterName + " add consumer and publish permission for " + nodeRef);
+                        permissionService.setPermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CONSUMER, true);
+                        permissionService.setPermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CC_PUBLISH, true);
+                        policyBehaviourFilter.enableBehaviour(nodeRef);
+                        return null;
+                    });
+                }
+            }
+
+
+            List<String> nodesRemove = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodesLicenseRemoved(mediacenterId, from, until);
+            logger.info(mediacenterId + " found nodes where to remove license: " + nodesRemove.size() + " for period: " + from + " - " + until);
+            for (String replicationsourceId : nodesRemove) {
+                NodeRef nodeRef = getNodeRefByReplicationSourceId(replicationsourceId);
+                if (nodeRef == null) {
+                    logger.warn("no node found in repo for:" + replicationsourceId);
+                    continue;
+                }
+                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterName,
+                        CCConstants.PERMISSION_CC_PUBLISH);
+                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterName,
+                        CCConstants.PERMISSION_CONSUMER);
+
+                if(hasPublishPermission){
+                    serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                        policyBehaviourFilter.disableBehaviour(nodeRef);
+                        logger.info(mediacenterName + " remove publish permission for " + nodeRef);
+                        permissionService.deletePermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CC_PUBLISH);
+                        policyBehaviourFilter.enableBehaviour(nodeRef);
+                        return null;
+                    });
+                }
+                if(hasConsumerPermission){
+                    serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                        policyBehaviourFilter.disableBehaviour(nodeRef);
+                        logger.info(mediacenterName + " remove consumer permission for " + nodeRef);
+                        permissionService.deletePermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CONSUMER);
+                        policyBehaviourFilter.enableBehaviour(nodeRef);
+                        return null;
+                    });
+                }
+            }
+        }
+    }
+
+    private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
+
+        SearchParameters sp = new SearchParameters();
+        sp.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
+        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        sp.setPermissionEvaluation(PermissionEvaluationMode.NONE);
+        sp.setMaxItems(10);
+
+        sp.setQuery("SELECT * FROM ccm:iometadata WHERE ccm:replicationsourceid = '"+replicationSourceId+"'");
+        ResultSet resultSet = searchService.query(sp);
+        logger.info("found "+ resultSet.getNodeRefs().size() +" for:" + replicationSourceId);
+        if(resultSet.getNodeRefs().size() == 0) return null;
+        return resultSet.getNodeRefs().get(0);
     }
 
     @Override

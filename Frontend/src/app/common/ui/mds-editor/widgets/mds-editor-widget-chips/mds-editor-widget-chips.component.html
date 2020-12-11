@@ -1,11 +1,17 @@
 <app-mds-editor-widget-container
+  #container
   [injectedView]="this"
   [widget]="widget"
   [label]="false"
   [valueType]="valueType"
   [control]="chipsControl"
 >
-  <mat-chip-list #chipList [formControl]="chipsControl" *ngIf="chipsControl">
+  <mat-chip-list
+    #chipList
+    [formControl]="chipsControl"
+    *ngIf="chipsControl"
+    [attr.aria-labelledby]="container.labelId"
+  >
     <mat-chip
       *ngFor="let value of chipsControl.value"
       [selectable]="false"
@@ -29,13 +35,14 @@
       autocomplete="off"
       [formControl]="inputControl"
       [matAutocomplete]="auto"
-      [placeholder]="widget.definition.placeholder"
+      [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
       [matChipInputFor]="chipList"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
       [matChipInputAddOnBlur]="false"
       (matChipInputTokenEnd)="onInputTokenEnd($event)"
       (blur)="inputControl.setValue(null)"
     />
+    <button matSuffix mat-icon-button *ngIf="showDropdownArrow" (click)="trigger.openPanel();$event.stopPropagation()"><span class="mat-select-arrow"></span></button>
   </mat-chip-list>
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
     <mat-option *ngFor="let value of filteredValues | async" [value]="value">

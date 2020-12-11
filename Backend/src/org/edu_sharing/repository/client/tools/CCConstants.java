@@ -881,6 +881,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK = "TOOLPERMISSION_CREATE_MAP_LINK";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP = "TOOLPERMISSION_SIGNUP_GROUP";
+
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_STUDENT = "student";
@@ -1180,6 +1182,8 @@ public class CCConstants {
 
 	public final static String LOM_PROP_TECHNICAL_SIZE = "{http://www.campuscontent.de/model/lom/1.0}size";
 
+	public final static String LOM_PROP_TECHNICAL_OTHERPLATFORMREQUIREMENTS = "{http://www.campuscontent.de/model/lom/1.0}otherplatformrequirements";
+
 	public final static String LOM_PROP_RELATION_KIND = "{http://www.campuscontent.de/model/lom/1.0}kind";
 
 	public final static String LOM_PROP_RESOURCE_DESCRIPTION = "{http://www.campuscontent.de/model/lom/1.0}resource_description";
@@ -1260,6 +1264,15 @@ public class CCConstants {
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS = "EDUSYSTEM_TOOLPERMISSIONS";
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE = "EDUSYSTEM_VALUESPACE";
+
+
+	public final static String CCM_ASPECT_GROUP_SIGNUP = "{http://www.campuscontent.de/model/1.0}group_signup";
+
+	public final static String CCM_PROP_GROUP_SIGNUP_METHOD = "{http://www.campuscontent.de/model/1.0}group_signup_method";
+
+	public final static String CCM_PROP_GROUP_SIGNUP_PASSWORD = "{http://www.campuscontent.de/model/1.0}group_signup_password";
+
+	public final static String CCM_PROP_GROUP_SIGNUP_LIST = "{http://www.campuscontent.de/model/1.0}group_signup_list";
 
 
 	public final static String CCM_VALUE_IO_NAME_CONFIG_NODE_NAME = "RepositoryConfig";

@@ -74,6 +74,7 @@
     "DEFAULT_METADATASET": "Standard-Metadatenset ({{name}})",
     "NO_MATCHES": "Keine übereinstimmenden Einträge",
     "NO_CC_PUBLISH": "Kein Recht zum Veröffentlichen",
+    "SELECT": "{{ element }} auswählen",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
         "SEARCH_COLLECTIONS": "Sammlung suchen...",
@@ -139,7 +140,8 @@
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
-        "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken"
+        "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
+        "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)"
     },
     "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
     "NODE_SEARCH": "Elemente suchen...",
@@ -430,6 +432,7 @@
         "SOURCE": "Quelle"
     },
     "AUTHORITY_TYPE_GROUP": "Gruppe",
+    "AUTHORITY_TYPE_ORG": "Organisation",
     "GROUP": {
         "displayName": "Gruppenname",
         "groupEmail": "E-Mail",
@@ -617,8 +620,8 @@
             "UNSET": "Keine hinzufügen",
             "PUBLISH": "Alle (Veröffentlichen)",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Administratoren von\n\"{{school}}\"",
-                "TEACHER": "Lehrkräfte von\n\"{{school}}\""
+                "ORG_ADMINISTRATORS": "Administratoren von\n{{school}}",
+                "TEACHER": "Lehrkräfte von\n{{school}}"
             }
         },
         "LICENSE": {
@@ -728,6 +731,32 @@
         "REQUIRED": "erforderliche Felder",
         "REQUIREDPUBLISH": "für Veröffentlichung erforderliche Felder",
         "SHOW": "zeigen"
+    },
+    "SIGNUP_GROUP" : {
+        "TITLE": "In Gruppe einschreiben",
+        "SUBTITLE": "Einer neuen Gruppe beitreten",
+        "SELECT_GROUP": "Wählen Sie eine Gruppe aus der untenstehenden Liste, in welche Sie beitreten möchten",
+        "NO_GROUPS": "Derzeit sind keine Gruppen verfügbar, denen beigetreten werden kann.",
+        "CONFIRM_GROUP": "Sie werden der folgenden Gruppe beitreten:",
+        "GROUP_PASSWORD": "Gruppen-Passwort eingeben",
+        "SIGNUP": "Beitreten",
+        "SIGNUP_TYPE": {
+            "simple": "Zutritt ohne Beschränkung möglich",
+            "password": "Zutritt nur mit Passwort möglich",
+            "list": "Zutritt über Warteliste"
+        },
+        "DESCRIPTION": {
+            "simple": "Der Zutritt zur gewählten Gruppe ist ohne Beschränkung möglich. Nach Bestätigung werden Sie automatisch Mitglied der Gruppe",
+            "password": "Der gewählten Gruppe darf nur mit einem gültigen Passwort beigetreten werden. Geben Sie das Passwort unten ein, um Mitglied der Gruppe zu werden",
+            "list": "Der Gruppen-Administrator wird über Ihre Beitrittsanfrage informiert. Sie erhalten eine E-Mail, sobald der Administrator Ihnen den Zugang genehmigt hat"
+        },
+        "TOAST": {
+            "InvalidPassword": "Das angegebene Passwort ist ungültig",
+            "AlreadyInList": "Sie sind bereits auf der Warteliste dieser Gruppe. Sie erhalten eine E-Mail-Benachrichtigung, sobald Sie freigeschaltet wurden",
+            "AlreadyMember": "Sie sind bereits Mitglied der gewählten Gruppe",
+            "ADDED_TO_LIST": "Sie wurden auf die Warteliste gesetzt und der Gruppen-Administrator wird benachrichtigt. Sie erhalten eine E-Mail-Benachrichtung, sobald Sie freigeschaltet wurden",
+            "ADDED_TO_GROUP": "Sie sind nun Mitglied der Gruppe {{group}}"
+        }
     },
     "LANGUAGE": {
         "INTERNATIONAL": "International",
@@ -984,5 +1013,13 @@
       },
     "ROCKETCHAT": {
         "TITLE": "Chat"
+    },
+    "NAV": {
+        "MAIN": "Hauptmenü",
+        "SKIP": "Sprungmarken",
+        "COLLECTIONS": "Sammlungen"
+    },
+    "SKIP_LINKS": {
+        "MAIN_CONTENT": "Springe zum Hauptinhalt"
     }
 }
