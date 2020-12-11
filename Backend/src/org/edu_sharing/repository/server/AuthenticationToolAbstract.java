@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
@@ -31,6 +32,8 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
             session.setAttribute(CCConstants.AUTH_USERNAME, username);
             TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,TrackingService.EventType.LOGIN_USER_SESSION);
         }
+		// prewarm tp cache
+		ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions();
 		session.setAttribute(CCConstants.AUTH_TICKET, ticket);
 		session.setAttribute(CCConstants.AUTH_TYPE, authType);
 	}
