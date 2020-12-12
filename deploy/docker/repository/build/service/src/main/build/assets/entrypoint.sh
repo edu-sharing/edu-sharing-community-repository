@@ -56,27 +56,26 @@ repository_smtp_user="${REPOSITORY_SMTP_USER:-}"
 repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-repository-transform}"
 repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
 
-if [[ -n "${KUBERNETES_PORT:-}" ]]
-then
-  my_hostname=$(hostname -s)
-	export my_transform_host="${repository_transform_host}-${my_hostname##*-}.${repository_transform_host}-headless"
-else
-	export my_transform_host="${repository_transform_host}"
-fi
-
 ### Wait ###############################################################################################################
 
 until wait-for-it "${repository_cache_host}:${repository_cache_port}" -t 3; do sleep 1; done
+
+grep -Fq 'clusterServersConfig' tomcat/conf/redisson.yaml && {
+	until [[ $(redis-cli --cluster info "${repository_cache_host}" "${repository_cache_port}" | grep '[OK]' | cut -d ' ' -f5) -gt 1 ]]; do
+		echo >&2 "Waiting for ${repository_cache_host} ..."
+		sleep 3
+	done
+}
 
 until wait-for-it "${repository_database_host}:${repository_database_port}" -t 3; do sleep 1; done
 
 until PGPASSWORD="${repository_database_pass}" \
 	psql -h "${repository_database_host}" -p "${repository_database_port}" -U "${repository_database_user}" -d "${repository_database_name}" -c '\q'; do
-	echo >&2 "Waiting for repository-database  ..."
+	echo >&2 "Waiting for ${repository_database_host} ..."
 	sleep 3
 done
 
-until wait-for-it "${my_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
+until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
 
 ### Tomcat #############################################################################################################
 
@@ -88,14 +87,40 @@ export CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.pa
 export CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS"
 export CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS"
 
-export CATALINA_OPTS="-Dooo.enabled=true $CATALINA_OPTS"
-export CATALINA_OPTS="-Dooo.host=${my_transform_host} $CATALINA_OPTS"
-export CATALINA_OPTS="-Dooo.port=${repository_transform_port} $CATALINA_OPTS"
-
 export CATALINA_OPTS="-Dcaches.backupCount=1 $CATALINA_OPTS"
 export CATALINA_OPTS="-Dcaches.readBackupData=false $CATALINA_OPTS"
 
 export CATALINA_OPTS="-Dhazelcast.shutdownhook.policy=GRACEFUL $CATALINA_OPTS"
+
+xmlstarlet ed -L \
+	-i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n 'className' -v 'org.edu_sharing.catalina.core.OrderedHost' \
+  -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Context' \
+	-s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Context' -v '' \
+	--var ctx1 '$prev' \
+	-i '$ctx1' -t attr -n 'docBase' -v 'alfresco' \
+	-i '$ctx1' -t attr -n 'crossContext' -v 'true' \
+	-s '$ctx1' -t elem -n 'Loader' -v '' \
+	--var ldr1 '$prev' \
+	-i '$ldr1' -t attr -n 'className' -v 'org.apache.catalina.loader.VirtualWebappLoader' \
+	-i '$ldr1' -t attr -n 'virtualClasspath' -v '${catalina.base}/../modules/platform/*.jar' \
+	-s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Context' -v '' \
+	--var ctx2 '$prev' \
+	-i '$ctx2' -t attr -n 'docBase' -v 'edu-sharing' \
+	-i '$ctx2' -t attr -n 'useHttpOnly' -v 'false' \
+	-i '$ctx2' -t attr -n 'antiJARLocking' -v 'true' \
+	-i '$ctx2' -t attr -n 'antiResourceLocking' -v 'true' \
+	-s '$ctx2' -t elem -n 'Loader' -v '' \
+	--var ldr2 '$prev' \
+	-i '$ldr2' -t attr -n 'loaderClass' -v 'org.edu_sharing.alfrescocontext.loader.AlfrescoContextClassLoader' \
+	-s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Context' -v '' \
+	--var ctx3 '$prev' \
+	-i '$ctx3' -t attr -n 'docBase' -v 'share' \
+	-i '$ctx3' -t attr -n 'crossContext' -v 'true' \
+	-s '$ctx3' -t elem -n 'Loader' -v '' \
+	--var ldr3 '$prev' \
+	-i '$ldr3' -t attr -n 'className' -v 'org.apache.catalina.loader.VirtualWebappLoader' \
+	-i '$ldr3' -t attr -n 'virtualClasspath' -v '${catalina.base}/../modules/share/*.jar' \
+	tomcat/conf/server.xml
 
 xmlstarlet ed -L \
 	-d '/Server/Service[@name="Catalina"]/Connector' \
@@ -167,6 +192,15 @@ grep -q '^[#]*\s*alfresco\.host=' "${global}" || echo "alfresco.host=${my_host_e
 
 sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${my_port_external}"'|' "${global}"
 grep -q '^[#]*\s*alfresco\.port=' "${global}" || echo "alfresco.port=${my_port_external}" >>"${global}"
+
+sed -i -r 's|^[#]*\s*ooo\.enabled=.*|ooo.enabled=true|' "${global}"
+grep -q '^[#]*\s*ooo\.enabled=' "${global}" || echo "ooo.enabled=true" >>"${global}"
+
+sed -i -r 's|^[#]*\s*ooo\.host=.*|ooo.host='"${repository_transform_host}"'|' "${global}"
+grep -q '^[#]*\s*ooo\.host=' "${global}" || echo "ooo.host=${repository_transform_host}" >>"${global}"
+
+sed -i -r 's|^[#]*\s*ooo\.port=.*|ooo.port='"${repository_transform_port}"'|' "${global}"
+grep -q '^[#]*\s*ooo\.port=' "${global}" || echo "ooo.port=${repository_transform_port}" >>"${global}"
 
 sed -i -r 's|^[#]*\s*share\.protocol=.*|share.protocol='"${my_prot_external}"'|' "${global}"
 grep -q '^[#]*\s*share\.protocol=' "${global}" || echo "share.protocol=${my_prot_external}" >>"${global}"

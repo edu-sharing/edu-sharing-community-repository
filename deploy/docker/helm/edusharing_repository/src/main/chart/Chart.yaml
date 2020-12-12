@@ -1,0 +1,40 @@
+apiVersion: v2
+
+name: edusharing_repository
+description: edusharing_repository
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}
+kubeVersion: ">= 1.16.0"
+
+dependencies:
+
+  - name: edusharing_postgresql
+    version: ${chart.version}
+    repository: "file://../../../edusharing_postgresql/target/chart"
+    alias: edusharing_repository_postgresql
+    condition: edusharing_repository_postgresql.enabled
+
+  - name: edusharing_rediscluster
+    version: ${chart.version}
+    repository: "file://../../../edusharing_rediscluster/target/chart"
+    alias: edusharing_repository_rediscluster
+    condition: edusharing_repository_rediscluster.enabled
+
+  - name: edusharing_elasticsearch
+    version: ${chart.version}
+    repository: "file://../../../edusharing_elasticsearch/target/chart"
+    alias: edusharing_repository_search_elastic
+    condition: edusharing_repository_search_elastic.enabled
+
+  - name: edusharing_repository_search_solr4
+    repository: "file://../../../edusharing_repository_search_solr4/target/chart"
+    version: ${chart.version}
+    condition: edusharing_repository_search_solr4.enabled
+
+  - name: edusharing_repository_service
+    repository: "file://../../../edusharing_repository_service/target/chart"
+    version: ${chart.version}
+    condition: edusharing_repository_service.enabled

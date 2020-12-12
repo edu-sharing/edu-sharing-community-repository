@@ -4,27 +4,28 @@
 
 global:
 
+  cluster:
+
+    istio:
+      enabled: false
+
+    storage:
+      data:
+        spec: {}
+#          storageClassName:
+
   image:
     registry: ${docker.registry}
+    repository: ${docker.image}
+    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
-
-  istio:
-    enabled: false
 
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
 nameOverride: edusharing-elasticsearch
-fullnameOverride: ""
-
-########################################################################################################################
-
-image:
-
-  repository: ${docker.image}-elasticsearch
-  tag: ${docker.tag}
 
 ########################################################################################################################
 
@@ -47,6 +48,9 @@ config:
       minPercentage: "50"
       maxPercentage: "50"
 
+  store:
+    mmap: false
+
 ########################################################################################################################
 
 nodeAffinity: {}
@@ -61,7 +65,6 @@ persistence:
   data:
     spec:
       accessModes: [ "ReadWriteOnce" ]
-#     storageClassName:
       resources:
         requests:
           storage: 5Gi
@@ -77,7 +80,7 @@ securityContext:
 
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 ########################################################################################################################
 

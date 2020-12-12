@@ -1,7 +1,7 @@
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "edusharing_postgresql.fullname" . }}
+  name: {{ include "edusharing_postgresql.name" . }}
   labels: {{ include "edusharing_postgresql.labels" . | nindent 4 }}
 spec:
   minAvailable: 1

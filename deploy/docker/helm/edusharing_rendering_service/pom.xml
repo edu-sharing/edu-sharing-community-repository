@@ -81,13 +81,4 @@
 
   </build>
 
-  <dependencies>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_mariadb</artifactId>
-    </dependency>
-
-  </dependencies>
-
 </project>

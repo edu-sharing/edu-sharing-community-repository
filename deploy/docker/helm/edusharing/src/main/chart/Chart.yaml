@@ -7,6 +7,7 @@ icon: ${chart.icon}
 
 version: ${chart.version}
 appVersion: ${docker.tag}
+kubeVersion: ">= 1.16.0"
 
 dependencies:
 
@@ -15,7 +16,12 @@ dependencies:
     version: ${chart.version}
     condition: edusharing_rediscluster.enabled
 
-  - name: edusharing_repository_service
-    repository: "file://../../../edusharing_repository_service/target/chart"
+  - name: edusharing_rendering
+    repository: "file://../../../edusharing_rendering/target/chart"
     version: ${chart.version}
-    condition: edusharing_repository_service.enabled
+    condition: edusharing_rendering.enabled
+
+  - name: edusharing_repository
+    repository: "file://../../../edusharing_repository/target/chart"
+    version: ${chart.version}
+    condition: edusharing_repository.enabled

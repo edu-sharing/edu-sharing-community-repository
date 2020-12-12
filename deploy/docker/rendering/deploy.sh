@@ -114,18 +114,18 @@ purge() {
 }
 
 logs() {
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		logs -f || exit
 }
 
 up() {
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-image-remote.yml" \
 		pull || exit
 
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-image-remote.yml" \
 		-f "rendering-network-prd.yml" \
@@ -133,13 +133,13 @@ up() {
 }
 
 down() {
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		down || exit
 }
 
 it() {
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-network-dev.yml" \
 		up -d || exit
@@ -156,6 +156,20 @@ build() {
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
+
+	echo "Checking artifact-id ..."
+
+	EXPECTED_ARTIFACTID="edu_sharing-community-rendering"
+
+	pushd "${COMMUNITY_PATH}" >/dev/null || exit
+	PROJECT_ARTIFACTID=$($MVN_EXEC -q -ff -nsu -N help:evaluate -Dexpression=project.artifactId -DforceStdout)
+	echo "- rendering          [ ${PROJECT_ARTIFACTID} ]"
+	popd >/dev/null || exit
+
+	[[ "${EXPECTED_ARTIFACTID}" != "${PROJECT_ARTIFACTID}" ]] && {
+		echo "Error: expected artifact-id [ ${EXPECTED_ARTIFACTID} ] is different."
+		exit
+	}
 
 	echo "Checking version ..."
 
@@ -181,6 +195,9 @@ build() {
 	popd >/dev/null || exit
 
 	echo "- docker"
+	pushd "${BUILD_PATH}/../build" >/dev/null || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
+	popd >/dev/null || exit
 	pushd "${BUILD_PATH}" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
@@ -197,7 +214,7 @@ debug() {
 		exit
 	}
 
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-network-dev.yml" \
 		-f "rendering-debug.yml" \

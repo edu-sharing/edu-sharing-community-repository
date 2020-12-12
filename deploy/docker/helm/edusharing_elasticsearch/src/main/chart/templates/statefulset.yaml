@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "edusharing_elasticsearch.fullname" . }}
+  name: {{ include "edusharing_elasticsearch.name" . }}
   labels: {{ include "edusharing_elasticsearch.labels" . | nindent 4 }}
 spec:
   podManagementPolicy: Parallel
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels: {{ include "edusharing_elasticsearch.labels.instance" . | nindent 6 }}
-  serviceName: {{ include "edusharing_elasticsearch.fullname" . }}-headless
+  serviceName: {{ include "edusharing_elasticsearch.name" . }}-headless
   template:
     metadata:
-      name: {{ include "edusharing_elasticsearch.fullname" . }}
+      name: {{ include "edusharing_elasticsearch.name" . }}
       labels: {{ include "edusharing_elasticsearch.labels" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.global.istio.enabled }}
+        {{- if .Values.global.cluster.istio.enabled }}
         sidecar.istio.io/inject: "true"
         {{- end }}
     spec:
       initContainers:
       - name: {{ include "edusharing_elasticsearch.name" . }}-init-permission
-        image: bitnami/minideb:buster
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -34,20 +34,22 @@ spec:
           subPath: data/
         securityContext:
           runAsUser: 0
+      {{- if .Values.config.store.mmap }}
       - name: {{ include "edusharing_elasticsearch.name" . }}-init-sysctl
-        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-elasticsearch:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
-          - "/bin/bash"
-          - "-ec"
-          - |
-            sysctl -w vm.max_map_count=262144
+        - "/bin/bash"
+        - "-ec"
+        - |
+          sysctl -w vm.max_map_count=262144
         securityContext:
           privileged: true
           runAsUser: 0
+      {{- end }}
       containers:
       - name: {{ include "edusharing_elasticsearch.name" . }}
-        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-elasticsearch:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         env:
         - name: node.name
@@ -60,7 +62,7 @@ spec:
               fieldPath: status.podIP
         envFrom:
         - configMapRef:
-            name: {{ include "edusharing_elasticsearch.fullname" . }}-env
+            name: {{ include "edusharing_elasticsearch.name" . }}-env
         ports:
         - name: api
           containerPort: 9200
@@ -135,4 +137,4 @@ spec:
   - metadata:
       name: data
       labels: {{ include "edusharing_elasticsearch.labels" . | nindent 8 }}
-    spec: {{ toYaml .Values.persistence.data.spec | nindent 6 }}
+    spec: {{ merge .Values.persistence.data.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}

@@ -22,7 +22,7 @@ until wait-for-it "${my_host_internal}:${my_port_internal}" -t 3; do sleep 1; do
 
 until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null "${my_base_internal}/admin/" ) -eq 200 ]]
 do
-	echo >&2 "Waiting for rendering-service  ..."
+	echo >&2 "Waiting for ${my_host_internal} ..."
 	sleep 3
 done
 

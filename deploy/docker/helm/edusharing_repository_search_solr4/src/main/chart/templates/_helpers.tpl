@@ -6,19 +6,6 @@
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "edusharing_repository_search_solr4.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "edusharing_repository_search_solr4.labels" -}}
 {{ include "edusharing_repository_search_solr4.labels.instance" . }}
 helm.sh/chart: {{ include "edusharing_repository_search_solr4.chart" . }}
@@ -37,19 +24,6 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 
 {{- define "edusharing_repository_search_solr4.labels.app" -}}
-app: {{ include "edusharing_repository_search_solr4.fullname" . }}
-app.kubernetes.io/name: {{ include "edusharing_repository_search_solr4.fullname" . }}
-{{- end -}}
-
-{{- define "edusharing_repository_search_solr4.edusharing_repository_service" -}}
-{{- if .Values.edusharing_repository_service.fullnameOverride -}}
-{{- .Values.edusharing_repository_service.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default "edusharing-repository-service" .Values.edusharing_repository_service.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
+app: {{ include "edusharing_repository_search_solr4.name" . }}
+app.kubernetes.io/name: {{ include "edusharing_repository_search_solr4.name" . }}
 {{- end -}}

@@ -1,3 +1,4 @@
+{{- if .Values.persistence.share.create }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -5,4 +6,5 @@ metadata:
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
   annotations:
     "helm.sh/resource-policy": keep
-spec: {{ toYaml .Values.persistence.share.spec | nindent 2 }}
+spec: {{ merge .Values.persistence.share.spec .Values.global.cluster.storage.share.spec | toYaml | nindent 2 }}
+{{- end }}

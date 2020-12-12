@@ -4,27 +4,28 @@
 
 global:
 
+  cluster:
+
+    istio:
+      enabled: false
+
+    storage:
+      data:
+        spec: {}
+#          storageClassName:
+
   image:
     registry: ${docker.registry}
+    repository: ${docker.image}
+    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
-
-  istio:
-    enabled: false
 
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
 nameOverride: edusharing-repository-search-solr4
-fullnameOverride: ""
-
-########################################################################################################################
-
-image:
-
-  repository: ${docker.image}-repository-search-solr4
-  tag: ${docker.tag}
 
 ########################################################################################################################
 
@@ -46,6 +47,10 @@ config:
       minPercentage: "75.0"
       maxPercentage: "75.0"
 
+  repository:
+    host: edusharing-repository-service
+    port: 8080
+
 ########################################################################################################################
 
 nodeAffinity: {}
@@ -60,7 +65,6 @@ persistence:
   data:
     spec:
       accessModes: [ "ReadWriteOnce" ]
-#     storageClassName:
       resources:
         requests:
           storage: 5Gi
@@ -76,7 +80,7 @@ securityContext:
 
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 ########################################################################################################################
 
@@ -107,19 +111,5 @@ resources:
   requests:
     cpu: 500m
     memory: 2Gi
-
-########################################################################################################################
-# IMPORT
-########################################################################################################################
-
-edusharing_repository_service:
-
-  nameOverride: edusharing-repository-service
-  fullnameOverride: ""
-
-  service:
-    port:
-      api:
-        internal: 8081
 
 ########################################################################################################################

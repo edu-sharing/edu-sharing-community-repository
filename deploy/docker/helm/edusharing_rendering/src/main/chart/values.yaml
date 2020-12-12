@@ -1,0 +1,62 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-rendering
+
+########################################################################################################################
+# DEPENDENCY
+########################################################################################################################
+
+edusharing_rendering_mariadb:
+
+  enabled: true
+
+  nameOverride: &mariadbNameOverride edusharing-rendering-mariadb
+
+  service:
+    port:
+      api: &mariadbServicePortApi 3306
+
+  config:
+
+    database: &mariadbConfigDatabase rendering
+    username: &mariadbConfigUsername rendering
+    password: &mariadbConfigPassword rendering
+
+########################################################################################################################
+
+edusharing_rendering_rediscluster:
+
+  enabled: true
+
+  nameOverride: &redisclusterNameOverride edusharing-rendering-rediscluster
+
+  service:
+    port:
+      api: &redisclusterServicePortApi 6379
+
+########################################################################################################################
+
+edusharing_rendering_service:
+
+  enabled: true
+
+  config:
+
+    cache:
+      host: *redisclusterNameOverride
+      port: *redisclusterServicePortApi
+
+    database:
+      host: *mariadbNameOverride
+      port: *mariadbServicePortApi
+      database: *mariadbConfigDatabase
+      username: *mariadbConfigUsername
+      password: *mariadbConfigPassword
+
+########################################################################################################################

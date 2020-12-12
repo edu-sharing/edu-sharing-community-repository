@@ -19,7 +19,7 @@ until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; 
 
 until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3" ) -eq 200 ]]
 do
-  >&2 echo "Waiting for repository-service  ..."
+  >&2 echo "Waiting for ${repository_service_host} ..."
   sleep 3
 done
 

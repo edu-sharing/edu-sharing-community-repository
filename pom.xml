@@ -24,8 +24,8 @@
 
   <properties>
 
-    <community.rendering.version>feature-maven-${project.parent.version}</community.rendering.version>
-    <community.repository.version>feature-maven-${project.parent.version}</community.repository.version>
+    <community.rendering.version>feature-maven-${project.version}</community.rendering.version>
+    <community.repository.version>feature-maven-${project.version}</community.repository.version>
 
   </properties>
 
@@ -59,7 +59,19 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering_service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -72,12 +84,6 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_service</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_transform</artifactId>
         <version>${project.version}</version>
       </dependency>
 

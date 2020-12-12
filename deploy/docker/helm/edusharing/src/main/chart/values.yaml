@@ -5,40 +5,22 @@
 global:
 
   cluster:
-    domain: cluster.local
 
-  image:
-    registry: ${docker.registry}
-    pullPolicy: Always
-    pullSecrets: []
-#     - registry
-
-  ingress:
-    annotations:
-      kubernetes.io/ingress.class: nginx
-#     cert-manager.io/cluster-issuer:
-
-  istio:
-    enabled: false
-    gateway:
-      selector:
-        app: istio-ingressgateway
+    istio:
+      enabled: false
 
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
 nameOverride: edusharing
-fullnameOverride: ""
 
 image:
   pullSecrets: []
-
-#   - name: registry
-#     registry: registry.docker.edu-sharing.com
-#     username: someone
-#     password: secret
-#     email: someone@edu-sharing.net
+#  - name: registry
+#    server: registry.docker.edu-sharing.com
+#    username: someone
+#    password: secret
 
 ########################################################################################################################
 # DEPENDENCY
@@ -46,41 +28,63 @@ image:
 
 edusharing_rediscluster:
 
-  enabled: &redisEnabled true
+  enabled: true
 
-  nameOverride: &redisNameOverride edusharing-rediscluster
-  fullnameOverride: &redisFullnameOverride ""
+  nameOverride: &redisclusterNameOverride edusharing-rediscluster
 
   service:
     port:
-      api: &redisServicePortApi 6379
+      api: &redisclusterServicePortApi 6379
 
 ########################################################################################################################
 
-edusharing_repository_service:
+edusharing_repository:
 
-  edusharing_rediscluster:
+  enabled: true
 
-    enabled: *redisEnabled
+  edusharing_repository_rediscluster:
 
-    nameOverride: *redisNameOverride
-    fullnameOverride: *redisFullnameOverride
+    enabled: false
+
+  edusharing_repository_service:
+
+    nameOverride: &repositoryNameOverride edusharing-repository-service
 
     service:
       port:
-        api: *redisServicePortApi
+        api:
+          internal: &repositoryServicePostApiInternal 8080
+
+    config:
+
+      admin:
+        password: &repositoryConfigAdminPassword admin
+
+      cache:
+        host: *redisclusterNameOverride
+        port: *redisclusterServicePortApi
+
+########################################################################################################################
+
+edusharing_rendering:
+
+  enabled: true
+
+  edusharing_rendering_rediscluster:
+
+    enabled: false
 
   edusharing_rendering_service:
 
-    edusharing_rediscluster:
+    config:
 
-      enabled: *redisEnabled
+      cache:
+        host: *redisclusterNameOverride
+        port: *redisclusterServicePortApi
 
-      nameOverride: *redisNameOverride
-      fullnameOverride: *redisFullnameOverride
-
-      service:
-        port:
-          api: *redisServicePortApi
+      repository:
+        host: *repositoryNameOverride
+        port: *repositoryServicePostApiInternal
+        password: *repositoryConfigAdminPassword
 
 ########################################################################################################################

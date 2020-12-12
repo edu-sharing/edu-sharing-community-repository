@@ -20,7 +20,6 @@ rendering_cache_port="${RENDERING_CACHE_PORT:-6379}"
 rendering_cache_prot="${RENDERING_CACHE_PROT:-tcp://}"
 rendering_cache_opts="${RENDERING_CACHE_OPTS:-}"
 rendering_cache_type="${RENDERING_CACHE_TYPE:-redis}"
-#rendering_cache_addr="$(getent hosts "${rendering_cache_host}" | awk '{ print $1 }')"
 
 rendering_database_driv="${RENDERING_DATABASE_DRIV:-"mysql"}"
 rendering_database_host="${RENDERING_DATABASE_HOST:-rendering-database}"
@@ -38,24 +37,31 @@ repository_service_base="http://${repository_service_host}:${repository_service_
 
 until wait-for-it "${rendering_cache_host}:${rendering_cache_port}" -t 3; do sleep 1; done
 
+[[ "${rendering_cache_type}" == "rediscluster" ]] && {
+	until [[ $(redis-cli --cluster info "${rendering_cache_host}" "${rendering_cache_port}" | grep '[OK]' | cut -d ' ' -f5) -gt 1 ]]; do
+		echo "."
+		sleep 2
+	done
+}
+
 until wait-for-it "${rendering_database_host}:${rendering_database_port}" -t 3; do sleep 1; done
 
 until mysql -h"${rendering_database_host}" -P"${rendering_database_port}" \
 	-u"${rendering_database_user}" -p"${rendering_database_pass}" \
 	"${rendering_database_name}" <<<'SELECT 1' &>/dev/null; do
-	echo >&2 "Waiting for rendering-database  ..."
+	echo >&2 "Waiting for ${rendering_database_host} ..."
 	sleep 3
 done
 
 until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
 
 until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
-	echo >&2 "Waiting for repository-service  ..."
+	echo >&2 "Waiting for ${repository_service_host} service ..."
 	sleep 3
 done
 
 until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null "${repository_service_base}/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
-	echo >&2 "Waiting for repository-search  ..."
+	echo >&2 "Waiting for ${repository_service_host} search ..."
 	sleep 3
 done
 

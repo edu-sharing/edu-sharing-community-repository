@@ -4,27 +4,28 @@
 
 global:
 
+  cluster:
+
+    istio:
+      enabled: false
+
+    storage:
+      data:
+        spec: {}
+#          storageClassName:
+
   image:
     registry: ${docker.registry}
+    repository: ${docker.image}
+    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
-
-  istio:
-    enabled: false
 
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
 nameOverride: edusharing-postgresql
-fullnameOverride: ""
-
-########################################################################################################################
-
-image:
-
-  repository: ${docker.image}-postgresql
-  tag: ${docker.tag}
 
 ########################################################################################################################
 
@@ -57,7 +58,6 @@ persistence:
   data:
     spec:
       accessModes: [ "ReadWriteOnce" ]
-#     storageClassName:
       resources:
         requests:
           storage: 5Gi
@@ -73,7 +73,7 @@ securityContext:
 
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 ########################################################################################################################
 

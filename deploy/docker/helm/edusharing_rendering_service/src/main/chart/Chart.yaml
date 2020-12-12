@@ -7,11 +7,4 @@ icon: ${chart.icon}
 
 version: ${chart.version}
 appVersion: ${docker.tag}
-
-dependencies:
-
-  - name: edusharing_mariadb
-    version: ${chart.version}
-    repository: "file://../../../edusharing_mariadb/target/chart"
-    alias: edusharing_rendering_mariadb
-    condition: edusharing_rendering_mariadb.enabled
+kubeVersion: ">= 1.16.0"

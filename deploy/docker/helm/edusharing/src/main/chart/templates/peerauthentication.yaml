@@ -1,9 +1,9 @@
-{{- if .Values.global.istio.enabled }}
+{{- if .Values.global.cluster.istio.enabled }}
 {{- if .Capabilities.APIVersions.Has "security.istio.io/v1beta1" -}}
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
-  name: {{ include "edusharing.fullname" . }}
+  name: {{ include "edusharing.name" . }}
   labels: {{ include "edusharing.labels" . | nindent 4 }}
 spec:
   mtls:

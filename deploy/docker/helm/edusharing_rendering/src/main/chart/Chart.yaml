@@ -1,0 +1,29 @@
+apiVersion: v2
+
+name: edusharing_rendering
+description: edusharing_rendering
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}
+kubeVersion: ">= 1.16.0"
+
+dependencies:
+
+  - name: edusharing_mariadb
+    version: ${chart.version}
+    repository: "file://../../../edusharing_mariadb/target/chart"
+    alias: edusharing_rendering_mariadb
+    condition: edusharing_rendering_mariadb.enabled
+
+  - name: edusharing_rediscluster
+    version: ${chart.version}
+    repository: "file://../../../edusharing_rediscluster/target/chart"
+    alias: edusharing_rendering_rediscluster
+    condition: edusharing_rendering_rediscluster.enabled
+
+  - name: edusharing_rendering_service
+    version: ${chart.version}
+    repository: "file://../../../edusharing_rendering_service/target/chart"
+    condition: edusharing_rendering_service.enabled

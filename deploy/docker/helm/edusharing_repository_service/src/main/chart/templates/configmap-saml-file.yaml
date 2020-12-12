@@ -1,0 +1,11 @@
+{{- if .Values.config.saml.enabled }}
+{{- if .Values.config.saml.config }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_repository_service.name" . }}-saml-file
+  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+data:
+  securityContext.xml: {{ .Values.config.saml.config | quote }}
+{{- end }}
+{{- end }}

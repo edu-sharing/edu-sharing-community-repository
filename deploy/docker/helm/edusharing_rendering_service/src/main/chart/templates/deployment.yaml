@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "edusharing_rendering_service.fullname" . }}
+  name: {{ include "edusharing_rendering_service.name" . }}
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -13,14 +13,14 @@ spec:
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.global.istio.enabled }}
+        {{- if .Values.global.cluster.istio.enabled }}
         sidecar.istio.io/inject: "true"
         traffic.sidecar.istio.io/excludeOutboundPorts: "3306"
         {{- end }}
     spec:
       initContainers:
       - name: {{ include "edusharing_rendering_service.name" . }}-init-permission
-        image: bitnami/minideb:buster
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -35,13 +35,13 @@ spec:
           runAsUser: 0
       containers:
       - name: {{ include "edusharing_rendering_service.name" . }}
-        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-rendering-service:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         envFrom:
         - configMapRef:
-            name: {{ include "edusharing_rendering_service.fullname" . }}-env
+            name: {{ include "edusharing_rendering_service.name" . }}-env
         - secretRef:
-            name: {{ include "edusharing_rendering_service.fullname" . }}-env
+            name: {{ include "edusharing_rendering_service.name" . }}-env
         ports:
         - name: api-internal
           containerPort: 8080

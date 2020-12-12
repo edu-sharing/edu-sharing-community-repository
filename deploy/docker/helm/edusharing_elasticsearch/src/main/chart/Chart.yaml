@@ -7,4 +7,4 @@ icon: ${chart.icon}
 
 version: ${chart.version}
 appVersion: ${docker.tag}
-
+kubeVersion: ">= 1.16.0"

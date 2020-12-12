@@ -1,5 +1,8 @@
 services:
 
+  rendering-cache:
+    image: "${docker.registry}/${docker.image}-redis:${docker.tag}"
+
   rendering-database:
     image: "${docker.registry}/${docker.image}-mariadb:${docker.tag}"
 

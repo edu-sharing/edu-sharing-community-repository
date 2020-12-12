@@ -1,10 +1,10 @@
-{{- if not .Values.global.istio.enabled }}
+{{- if not .Values.global.cluster.istio.enabled }}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: {{ include "edusharing_rendering_service.fullname" . }}
+  name: {{ include "edusharing_rendering_service.name" . }}
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
-  {{- with mergeOverwrite .Values.global.ingress.annotations .Values.ingress.annotations }}
+  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
@@ -19,7 +19,7 @@ spec:
       {{- range $.Values.ingress.paths }}
       - path: {{ . }}
         backend:
-          serviceName: {{ include "edusharing_rendering_service.fullname" $ }}
+          serviceName: {{ include "edusharing_rendering_service.name" $ }}
           servicePort: {{ $.Values.service.port.api.external }}
       {{- end }}
   {{- end }}

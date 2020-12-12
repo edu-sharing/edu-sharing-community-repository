@@ -90,7 +90,12 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_service</artifactId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository</artifactId>
     </dependency>
 
   </dependencies>

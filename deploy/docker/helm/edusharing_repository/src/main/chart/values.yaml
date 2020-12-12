@@ -1,0 +1,114 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-repository
+
+########################################################################################################################
+# DEPENDENCY
+########################################################################################################################
+
+edusharing_repository_postgresql:
+
+  enabled: true
+
+  nameOverride: &postgresqlNameOverride edusharing-repository-postgresql
+
+  service:
+
+    port:
+      api: &postgresqlServicePortApi 5432
+
+  config:
+
+    database: &postgresqlConfigDatabase repository
+    username: &postgresqlConfigUsername repository
+    password: &postgresqlConfigPassword repository
+
+########################################################################################################################
+
+edusharing_repository_rediscluster:
+
+  enabled: true
+
+  nameOverride: &redisclusterNameOverride edusharing-rediscluster
+
+  service:
+
+    port:
+      api: &redisclusterServicePortApi 6379
+
+########################################################################################################################
+
+edusharing_repository_search_elastic:
+
+  enabled: true
+
+  nameOverride: &searchElasticNameOverride edusharing-repository-search-elastic
+
+  service:
+
+    port:
+      api: &searchElasticServicePortApi 9200
+
+########################################################################################################################
+
+edusharing_repository_search_solr4:
+
+  enabled: true
+
+  nameOverride: &searchSolr4NameOverride edusharing-repository-search-solr4
+
+  service:
+
+    port:
+      api: &searchSolr4ServicePortApi 9200
+
+  config:
+
+    repository:
+      host: &serviceNameOverride edusharing-repository-service
+      port: &serviceServicePortApiInternal 8080
+
+########################################################################################################################
+
+edusharing_repository_service:
+
+  enabled: true
+
+  nameOverride: *serviceNameOverride
+
+  service:
+
+    port:
+      api:
+        internal: *serviceServicePortApiInternal
+
+  config:
+
+    cache:
+      host: *redisclusterNameOverride
+      port: *redisclusterServicePortApi
+
+    database:
+      host: *postgresqlNameOverride
+      port: *postgresqlServicePortApi
+      database: *postgresqlConfigDatabase
+      username: *postgresqlConfigUsername
+      password: *postgresqlConfigPassword
+
+    search:
+
+      elastic:
+        host: *searchElasticNameOverride
+        port: *searchElasticServicePortApi
+
+      solr4:
+        host: *searchSolr4NameOverride
+        port: *searchSolr4ServicePortApi
+
+########################################################################################################################

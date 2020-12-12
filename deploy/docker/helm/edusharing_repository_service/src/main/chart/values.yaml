@@ -5,38 +5,41 @@
 global:
 
   cluster:
+
+    cert:
+      annotations: {}
+#        cert-manager.io/cluster-issuer:
+#        cert-manager.io/issuer:
+
     domain: cluster.local
+
+    istio:
+      enabled: false
+      gateway:
+        selector:
+          app: istio-ingressgateway
+
+    storage:
+      share:
+        spec: {}
+#          storageClassName:
 
   image:
     registry: ${docker.registry}
+    repository: ${docker.image}
+    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
-
-  ingress:
-    annotations:
-      kubernetes.io/ingress.class: nginx
-#     cert-manager.io/cluster-issuer:
-
-  istio:
-    enabled: false
 
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
-nameOverride: &nameOverride edusharing-repository-service
-fullnameOverride: &fullnameOverride ""
+nameOverride: edusharing-repository-service
 
 ########################################################################################################################
 
-image:
-
-  repository: ${docker.image}-repository-service
-  tag: ${docker.tag}
-
-########################################################################################################################
-
-replicaCount: &replicaCount 1
+replicaCount: 1
 
 ########################################################################################################################
 
@@ -44,8 +47,8 @@ service:
 
   port:
     api:
-      external: 8080
-      internal: &servicePortApiInternal 8081
+      internal: 8080
+      external: 8081
     gossip: 5701
 
 ########################################################################################################################
@@ -53,6 +56,7 @@ service:
 ingress:
 
   annotations:
+    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/session-cookie-name: edusharing-repository
     nginx.ingress.kubernetes.io/session-cookie-path: "*"
@@ -66,17 +70,17 @@ ingress:
 #      location /share/-default-/proxy/alfresco/api/ {return 403;}
 
   hosts:
-    - repository.127.0.0.1.xip.io
+  - repository.127.0.0.1.xip.io
 
   tls: []
-#   - secretName: edusharing-repository-tls
-#     hosts:
-#       - repository.127.0.0.1.xip.io
+#  - secretName: edusharing-repository-tls
+#    hosts:
+#    - repository.127.0.0.1.xip.io
 
   paths:
-    - /edu-sharing
-    - /alfresco
-    - /share
+  - /edu-sharing
+  - /alfresco
+  - /share
 
 ########################################################################################################################
 
@@ -86,27 +90,34 @@ config:
     password: admin
 
   cache:
-    extra: ""  # https://github.com/redisson/redisson/wiki/2.-Configuration#23-common-settings
-
-    # ONLY FOR EXTERNAL REDIS (edusharing_redis.enabled == false):
-    # host: localhost
-    # port: 6379
+    host: edusharing-repository-rediscluster
+    port: 6379
+    type: rediscluster
+    # https://github.com/redisson/redisson/wiki/2.-Configuration#242-cluster-yaml-config-format
+    options: |
+      readMode: "MASTER"
+      subscriptionMode: "MASTER"
+    # https://github.com/redisson/redisson/wiki/2.-Configuration#23-common-settings
+    commons: |
+      threads: 16
+      nettyThreads: 32
+      codec: !<org.redisson.codec.FstCodec> {}
+      transportMode: "NIO"
 
   cluster:
+    enabled: false
     backupCount: 1
     readBackupData: true
 
   database:
-    database: &databaseDatabase repository
-    username: &databaseUsername repository
-    password: &databasePassword repository
-    extra: ""
-
-    # ONLY FOR EXTERNAL DATABASES (if postgresql.enabled == false):
-    # driver: org.postgresql.Driver
-    # host: localhost
-    # port: 5432
-    # protocol: postgresql
+    driver: org.postgresql.Driver
+    host: edusharing-repository-postgresql
+    port: 5432
+    database: repository
+    username: repository
+    password: repository
+    protocol: postgresql
+    options: ""
 
     pool:
       max: 80
@@ -116,6 +127,9 @@ config:
     username: ""
     password: ""
 
+  home:
+    appid: local
+
   jvm:
     ram:
       minPercentage: "75.0"
@@ -123,9 +137,8 @@ config:
 
   saml:
     enabled: false
-#   config: ""
-#   extra: {}
-#   mapping: ""
+#    config: ""
+#    files: {}
 
   smtp:
     addReplyTo: false
@@ -138,26 +151,22 @@ config:
 
   search:
 
-    elastic: {}
+    elastic:
+      host: edusharing-repository-search-elastic
+      port: 9200
 
-      # ONLY FOR EXTERNAL ELASTICSEARCH (if edusharing_repository_search_elastic.enabled == false):
-      # host: localhost
-      # port: 9200
-
-    solr4: {}
-
-      # ONLY FOR EXTERNAL SOLR4 (if edusharing_repository_search_solr4.enabled == false):
-      # host: localhost
-      # port: 8080
+    solr4:
+      host: edusharing-repository-search-solr4
+      port: 8080
 
 ########################################################################################################################
 
 persistence:
 
   share:
+    create: true
     spec:
       accessModes: [ "ReadWriteMany" ]
-#     storageClassName:
       resources:
         requests:
           storage: 5Gi
@@ -178,8 +187,16 @@ podSecurityContext:
 
 securityContext:
 
-  capabilities:
-    drop:
+  server:
+
+    capabilities:
+      drop:
+      - ALL
+
+  transform:
+
+    capabilities:
+      drop:
       - ALL
 
 ########################################################################################################################
@@ -188,129 +205,58 @@ terminationGracePeriod: 120
 
 livenessProbe:
 
-  failureThreshold: 3
-  initialDelaySeconds: 300
-  periodSeconds: 10
-  timeoutSeconds: 5
+  server:
+
+    failureThreshold: 3
+    initialDelaySeconds: 300
+    periodSeconds: 10
+    timeoutSeconds: 5
+
+  transform:
+
+    failureThreshold: 3
+    initialDelaySeconds: 300
+    periodSeconds: 10
+    timeoutSeconds: 5
 
 readinessProbe:
 
-  failureThreshold: 1
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  successThreshold: 1
-  timeoutSeconds: 5
+  server:
+
+    failureThreshold: 1
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  transform:
+
+    failureThreshold: 1
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
 
 ########################################################################################################################
 
 resources:
 
-  limits:
-    cpu: 1000m
-    memory: 4Gi
-  requests:
-    cpu: 1000m
-    memory: 4Gi
+  server:
 
-########################################################################################################################
-# DEPENDENCY
-########################################################################################################################
+    limits:
+      cpu: 1000m
+      memory: 4Gi
+    requests:
+      cpu: 1000m
+      memory: 4Gi
 
-edusharing_rendering_service:
+  transform:
 
-  enabled: true
-
-  nameOverride: edusharing-rendering-service
-  fullnameOverride: ""
-
-  edusharing_repository_service:
-    nameOverride: *nameOverride
-    fullnameOverride: *fullnameOverride
-    service:
-      port:
-        api:
-          internal: *servicePortApiInternal
-
-########################################################################################################################
-
-edusharing_repository_transform:
-
-  enabled: true
-
-  nameOverride: edusharing-repository-transform
-  fullnameOverride: ""
-
-  replicaCount: *replicaCount
-
-  service:
-    port:
-      api: 8100
-
-########################################################################################################################
-
-edusharing_repository_search_solr4:
-
-  enabled: true
-
-  nameOverride: edusharing-repository-search-solr4
-  fullnameOverride: ""
-
-  service:
-    port:
-      api: 8080
-
-  edusharing_repository_service:
-    nameOverride: *nameOverride
-    fullnameOverride: *fullnameOverride
-    service:
-      port:
-        api:
-          internal: *servicePortApiInternal
-
-########################################################################################################################
-
-edusharing_repository_search_elastic:
-
-  enabled: true
-
-  nameOverride: edusharing-repository-search-elastic
-  fullnameOverride: ""
-
-  service:
-    port:
-      api: 9200
-
-########################################################################################################################
-
-edusharing_repository_postgresql:
-
-  enabled: true
-
-  nameOverride: edusharing-repository-postgresql
-  fullnameOverride: ""
-
-  config:
-    database: *databaseDatabase
-    username: *databaseUsername
-    password: *databasePassword
-
-  service:
-    port:
-      api: 5432
-
-########################################################################################################################
-# IMPORT
-########################################################################################################################
-
-edusharing_rediscluster:
-
-  enabled: true
-
-  nameOverride: edusharing-rediscluster
-  fullnameOverride: ""
-
-  service:
-    port:
-      api: 6379
+    limits:
+      cpu: 100m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 1Gi
 
 ########################################################################################################################

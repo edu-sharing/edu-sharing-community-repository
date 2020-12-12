@@ -1,13 +1,13 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "edusharing_rediscluster.fullname" . }}-init
+  name: {{ include "edusharing_rediscluster.name" . }}-init
   labels: {{ include "edusharing_rediscluster.labels" . | nindent 4 }}
     app.kubernetes.io/component: init
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-delete-policy: hook-succeeded
-    {{- if .Values.global.istio.enabled }}
+    {{- if .Values.global.cluster.istio.enabled }}
     sidecar.istio.io/inject: "true"
     {{- end }}
 spec:
@@ -18,16 +18,16 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ include "edusharing_rediscluster.name" . }}
-        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-rediscluster:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
-          - "/bin/bash"
-          - "-ec"
-          - |
-            [[ -f /opt/bitnami/redis/etc/redis.conf ]] || {
-              cp /opt/bitnami/redis/etc/redis-default.conf /opt/bitnami/redis/etc/redis.conf
-            }
-            /opt/bitnami/scripts/redis-cluster/entrypoint.sh /opt/bitnami/scripts/redis-cluster/run.sh
+        - "/bin/bash"
+        - "-ec"
+        - |
+          [[ -f /opt/bitnami/redis/etc/redis.conf ]] || {
+            cp /opt/bitnami/redis/etc/redis-default.conf /opt/bitnami/redis/etc/redis.conf
+          }
+          /opt/bitnami/scripts/redis-cluster/entrypoint.sh /opt/bitnami/scripts/redis-cluster/run.sh
         env:
         - name: REDIS_CLUSTER_CREATOR
           value: "yes"
@@ -37,11 +37,11 @@ spec:
           value: {{ .Values.config.cluster.replicas | quote }}
         envFrom:
         - configMapRef:
-            name: {{ include "edusharing_rediscluster.fullname" . }}-env
+            name: {{ include "edusharing_rediscluster.name" . }}-env
         volumeMounts:
-          - name: conf
-            mountPath: /opt/bitnami/redis/etc/redis-default.conf
-            subPath: redis-default.conf
+        - name: file
+          mountPath: /opt/bitnami/redis/etc/redis-default.conf
+          subPath: redis-default.conf
         {{- with .Values.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -65,6 +65,6 @@ spec:
         nodeAffinity: {{ toYaml . | nindent 10 }}
       {{- end }}
       volumes:
-        - name: conf
-          configMap:
-            name: {{ include "edusharing_rediscluster.fullname" . }}-conf
+      - name: file
+        configMap:
+          name: {{ include "edusharing_rediscluster.name" . }}-file

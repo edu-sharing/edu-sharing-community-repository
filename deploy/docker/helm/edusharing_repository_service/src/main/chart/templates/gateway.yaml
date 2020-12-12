@@ -1,13 +1,12 @@
-{{- if and .Values.global.istio.enabled (.Capabilities.APIVersions.Has "networking.istio.io/v1beta1") }}
+{{- if .Values.global.cluster.istio.enabled }}
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1beta1" }}
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: {{ include "edusharing_repository_service.fullname" . }}
-  namespace: {{ .Values.global.istio.namespace }}
+  name: {{ include "edusharing_repository_service.name" . }}
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
 spec:
-  selector:
-    app: istio-ingressgateway
+  selector: {{ .Values.global.cluster.istio.gateway.selector | nindent 4 }}
   servers:
   - port:
       number: 80
@@ -22,6 +21,7 @@ spec:
     tls:
       mode: SIMPLE
       credentialName: {{ .secretName }}
-    hosts: {{ toYaml .hosts | nindent 8 }}
+    hosts: {{ toYaml .hosts | nindent 6 }}
   {{- end }}
+{{- end }}
 {{- end }}

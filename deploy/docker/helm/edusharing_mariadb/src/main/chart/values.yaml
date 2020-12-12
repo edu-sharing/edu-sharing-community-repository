@@ -4,27 +4,28 @@
 
 global:
 
+  cluster:
+
+    istio:
+      enabled: false
+
+    storage:
+      data:
+        spec: {}
+#          storageClassName:
+
   image:
     registry: ${docker.registry}
+    repository: ${docker.image}
+    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
-
-  istio:
-    enabled: false
 
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
 nameOverride: edusharing-mariadb
-fullnameOverride: ""
-
-########################################################################################################################
-
-image:
-
-  repository: ${docker.image}-mariadb
-  tag: ${docker.tag}
 
 ########################################################################################################################
 
@@ -37,9 +38,9 @@ service:
 
 config:
 
-  database: mydb
-  username: mydb
-  password: mydb
+  database: mariadb
+  username: mariadb
+  password: mariadb
 
   extra:
     mysqld:
@@ -58,7 +59,6 @@ persistence:
   data:
     spec:
       accessModes: [ "ReadWriteOnce" ]
-#     storageClassName:
       resources:
         requests:
           storage: 5Gi
@@ -74,7 +74,7 @@ securityContext:
 
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 ########################################################################################################################
 

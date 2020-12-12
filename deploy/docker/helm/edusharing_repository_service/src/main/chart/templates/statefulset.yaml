@@ -1,34 +1,36 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "edusharing_repository_service.fullname" . }}
+  name: {{ include "edusharing_repository_service.name" . }}
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
 spec:
   replicas: {{ if .Values.config.cluster.enabled }}{{ .Values.replicaCount }}{{ else }}1{{ end }}
   selector:
     matchLabels: {{ include "edusharing_repository_service.labels.instance" . | nindent 6 }}
-  serviceName: {{ include "edusharing_repository_service.fullname" . }}-headless
+  serviceName: {{ include "edusharing_repository_service.name" . }}-headless
   template:
     metadata:
-      name: {{ include "edusharing_repository_service.fullname" . }}
+      name: {{ include "edusharing_repository_service.name" . }}
       labels: {{ include "edusharing_repository_service.labels" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
-        checksum/configmap-redis: {{ include (print .Template.BasePath "/configmap-redis.yaml") . | sha256sum | trunc 63 }}
+        checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
         {{- if .Values.config.saml.enabled }}
-        checksum/configmap-saml: {{ include (print .Template.BasePath "/configmap-saml.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.config.saml.extra }}
-        checksum/configmap-saml-extra: {{ include (print .Template.BasePath "/configmap-saml-extra.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.config.saml.config }}
+        checksum/configmap-saml-file: {{ include (print .Template.BasePath "/configmap-saml-file.yaml") . | sha256sum | trunc 63 }}
+        {{- end }}
+        {{- if .Values.config.saml.files }}
+        checksum/configmap-saml-files: {{ include (print .Template.BasePath "/configmap-saml-files.yaml") . | sha256sum | trunc 63 }}
         {{- end }}
         {{- end }}
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.global.istio.enabled }}
+        {{- if .Values.global.cluster.istio.enabled }}
         sidecar.istio.io/inject: "true"
         {{- end }}
     spec:
       initContainers:
       - name: {{ include "edusharing_repository_service.name" . }}-init-permission
-        image: bitnami/minideb:buster
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -46,18 +48,18 @@ spec:
         securityContext:
           runAsUser: 0
       containers:
-      - name: {{ include "edusharing_repository_service.name" . }}
-        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+      - name: {{ include "edusharing_repository_service.name" . }}-server
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-repository-service:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         envFrom:
         - configMapRef:
-            name: {{ include "edusharing_repository_service.fullname" . }}-env
+            name: {{ include "edusharing_repository_service.name" . }}-env
         - secretRef:
-            name: {{ include "edusharing_repository_service.fullname" . }}-env
+            name: {{ include "edusharing_repository_service.name" . }}-env
         ports:
-        - name: api-external
-          containerPort: 8080
         - name: api-internal
+          containerPort: 8080
+        - name: api-external
           containerPort: 8081
         - name: gossip
           containerPort: 5701
@@ -68,22 +70,21 @@ spec:
         - name: share
           mountPath: /usr/local/tomcat/shared
           subPath: config/
-        - name: conf-redis
+        - name: file
           mountPath: /usr/local/tomcat/conf/redisson.yaml
           subPath: redisson.yaml
         {{- if .Values.config.saml.enabled }}
-        - name: conf-saml
+        {{- if .Values.config.saml.config }}
+        - name: saml-file
           mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/securityContext.xml
           subPath: securityContext.xml
-        - name: conf-saml
-          mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/classes/org/edu_sharing/spring/edu-sharing-sso-context.xml
-          subPath: edu-sharing-sso-context.xml
-        {{- if .Values.config.saml.extra }}
-        - name: conf-saml-extra
+        {{- end }}
+        {{- if .Values.config.saml.files }}
+        - name: saml-files
           mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/classes/saml
         {{- end }}
         {{- end }}
-        {{- with .Values.livenessProbe }}
+        {{- with .Values.livenessProbe.server }}
         livenessProbe:
           tcpSocket:
             port: api-internal
@@ -92,7 +93,7 @@ spec:
           periodSeconds: {{ .periodSeconds }}
           timeoutSeconds: {{ .timeoutSeconds }}
         {{- end }}
-        {{- with .Values.readinessProbe }}
+        {{- with .Values.readinessProbe.server }}
         readinessProbe:
           httpGet:
             path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ add1 .timeoutSeconds }}
@@ -108,10 +109,49 @@ spec:
           successThreshold: {{ .successThreshold }}
           timeoutSeconds: {{ .timeoutSeconds }}
         {{- end }}
-        {{- with .Values.resources }}
+        {{- with .Values.resources.server }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.securityContext }}
+        {{- with .Values.securityContext.server }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      - name: {{ include "edusharing_repository_service.name" . }}-transform
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-repository-transform:{{ .Values.global.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "edusharing_repository_service.name" . }}-env
+        ports:
+        - name: api
+          containerPort: 8100
+        {{- with .Values.livenessProbe.transform }}
+        livenessProbe:
+          exec:
+            command:
+            - "/bin/bash"
+            - "-ec"
+            - |
+              unoconv -n -c 'socket,host=127.0.0.1,port=8100,tcpNoDelay=1;urp;StarOffice.ComponentContext' --stdout -f html /etc/hostname >/dev/null
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: 1
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.readinessProbe.transforme }}
+        readinessProbe:
+          tcpSocket:
+            port: api
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.resources.transform }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.securityContext.transform }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
       {{- with .Values.global.image.pullSecrets }}
@@ -152,17 +192,19 @@ spec:
       - name: share
         persistentVolumeClaim:
           claimName: {{ include "edusharing_repository_service.pvc.share" . }}
-      - name: conf-redis
+      - name: file
         configMap:
-          name: {{ include "edusharing_repository_service.fullname" . }}-redis
+          name: {{ include "edusharing_repository_service.name" . }}-file
       {{- if .Values.config.saml.enabled }}
-      - name: conf-saml
+      {{- if .Values.config.saml.config }}
+      - name: saml-file
         configMap:
-          name: {{ include "edusharing_repository_service.fullname" . }}-saml
-      {{- if .Values.config.saml.extra }}
-      - name: conf-saml-extra
+          name: {{ include "edusharing_repository_service.name" . }}-saml-file
+      {{- end }}
+      {{- if .Values.config.saml.files }}
+      - name: saml-files
         configMap:
-          name: {{ include "edusharing_repository_service.fullname" . }}-saml-extra
+          name: {{ include "edusharing_repository_service.name" . }}-saml-files
       {{- end }}
       {{- end }}
 

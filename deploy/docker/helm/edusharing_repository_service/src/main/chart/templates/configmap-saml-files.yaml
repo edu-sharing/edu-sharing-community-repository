@@ -1,11 +1,10 @@
 {{- if .Values.config.saml.enabled }}
-{{- with .Values.config.saml.extra }}
+{{- if .Values.config.saml.files }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "edusharing_repository_service.fullname" . }}-saml-extra
+  name: {{ include "edusharing_repository_service.name" . }}-saml-files
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
-binaryData:
-  {{- toYaml . | indent 2 }}
+binaryData: {{ toYaml .Values.config.saml.files | nindent 2 }}
 {{- end }}
 {{- end }}

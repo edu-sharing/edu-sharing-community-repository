@@ -6,19 +6,6 @@
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "edusharing_mariadb.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "edusharing_mariadb.labels" -}}
 {{ include "edusharing_mariadb.labels.instance" . }}
 helm.sh/chart: {{ include "edusharing_mariadb.chart" . }}
@@ -32,8 +19,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{- define "edusharing_mariadb.labels.app" -}}
-app: {{ include "edusharing_mariadb.fullname" . }}
-app.kubernetes.io/name: {{ include "edusharing_mariadb.fullname" . }}
+app: {{ include "edusharing_mariadb.name" . }}
+app.kubernetes.io/name: {{ include "edusharing_mariadb.name" . }}
 {{- end -}}
 
 {{- define "edusharing_mariadb.labels.version" -}}

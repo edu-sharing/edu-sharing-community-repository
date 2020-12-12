@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "edusharing_rediscluster.fullname" . }}
+  name: {{ include "edusharing_rediscluster.name" . }}
   labels: {{ include "edusharing_rediscluster.labels" . | nindent 4 }}
 spec:
   podManagementPolicy: Parallel
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ include "edusharing_rediscluster.replicas" . }}
   selector:
     matchLabels: {{ include "edusharing_rediscluster.labels.instance" . | nindent 6 }}
-  serviceName: {{ include "edusharing_rediscluster.fullname" . }}-headless
+  serviceName: {{ include "edusharing_rediscluster.name" . }}-headless
   template:
     metadata:
-      name: {{ include "edusharing_rediscluster.fullname" . }}
+      name: {{ include "edusharing_rediscluster.name" . }}
       labels: {{ include "edusharing_rediscluster.labels" . | nindent 8 }}
       annotations:
-        checksum/configmap-conf: {{ include (print .Template.BasePath "/configmap-conf.yaml") . | sha256sum | trunc 63 }}
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.global.istio.enabled }}
+        checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.global.cluster.istio.enabled }}
         sidecar.istio.io/inject: "true"
         {{- end }}
     spec:
       initContainers:
       - name: {{ include "edusharing_rediscluster.name" . }}-init-permission
-        image: bitnami/minideb:buster
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -37,7 +37,7 @@ spec:
           runAsUser: 0
       containers:
       - name: {{ include "edusharing_rediscluster.name" . }}
-        image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-rediscluster:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
           - "/bin/bash"
@@ -49,19 +49,19 @@ spec:
             /opt/bitnami/scripts/redis-cluster/entrypoint.sh /opt/bitnami/scripts/redis-cluster/run.sh
         envFrom:
         - configMapRef:
-            name: {{ include "edusharing_rediscluster.fullname" . }}-env
+            name: {{ include "edusharing_rediscluster.name" . }}-env
         ports:
         - name: api
           containerPort: 6379
         - name: gossip
           containerPort: 16379
         volumeMounts:
-        - name: conf
-          mountPath: /opt/bitnami/redis/etc/redis-default.conf
-          subPath: redis-default.conf
         - name: data
           mountPath: /bitnami/redis
           subPath: data/
+        - name: file
+          mountPath: /opt/bitnami/redis/etc/redis-default.conf
+          subPath: redis-default.conf
         {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:
@@ -126,11 +126,11 @@ spec:
         {{- end }}
       {{- end }}
       volumes:
-      - name: conf
+      - name: file
         configMap:
-          name: {{ include "edusharing_rediscluster.fullname" . }}-conf
+          name: {{ include "edusharing_rediscluster.name" . }}-file
   volumeClaimTemplates:
   - metadata:
       name: data
       labels: {{ include "edusharing_rediscluster.labels" . | nindent 8 }}
-    spec: {{ toYaml .Values.persistence.data.spec | nindent 6 }}
+    spec: {{ merge .Values.persistence.data.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}

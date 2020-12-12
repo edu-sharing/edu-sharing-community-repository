@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "edusharing_postgresql.fullname" . }}
+  name: {{ include "edusharing_postgresql.name" . }}
   labels: {{ include "edusharing_postgresql.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "edusharing_postgresql.fullname" . }}-headless
+  name: {{ include "edusharing_postgresql.name" . }}-headless
   labels: {{ include "edusharing_postgresql.labels" . | nindent 4 }}
 spec:
   type: ClusterIP

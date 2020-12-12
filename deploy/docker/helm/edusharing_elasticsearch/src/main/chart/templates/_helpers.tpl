@@ -6,19 +6,6 @@
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "edusharing_elasticsearch.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "edusharing_elasticsearch.labels" -}}
 {{ include "edusharing_elasticsearch.labels.instance" . }}
 helm.sh/chart: {{ include "edusharing_elasticsearch.chart" . }}
@@ -32,8 +19,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{- define "edusharing_elasticsearch.labels.app" -}}
-app: {{ include "edusharing_elasticsearch.fullname" . }}
-app.kubernetes.io/name: {{ include "edusharing_elasticsearch.fullname" . }}
+app: {{ include "edusharing_elasticsearch.name" . }}
+app.kubernetes.io/name: {{ include "edusharing_elasticsearch.name" . }}
 {{- end -}}
 
 {{- define "edusharing_elasticsearch.labels.version" -}}

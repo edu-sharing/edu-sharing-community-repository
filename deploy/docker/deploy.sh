@@ -89,7 +89,7 @@ init() {
 }
 
 logs() {
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "repository.yml" \
 		logs -f || exit
@@ -106,14 +106,14 @@ purge() {
 }
 
 up() {
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-image-remote.yml" \
 		-f "repository.yml" \
 		-f "repository-image-remote.yml" \
 		pull || exit
 
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-image-remote.yml" \
 		-f "rendering-network-prd.yml" \
@@ -124,7 +124,7 @@ up() {
 }
 
 down() {
-	docker-compose \
+	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-image-remote.yml" \
 		-f "rendering-network-prd.yml" \

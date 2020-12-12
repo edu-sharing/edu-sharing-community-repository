@@ -5,6 +5,8 @@ FROM docker.io/php:${rendering.php.version}-apache
 RUN set -eux \
     && echo 'deb http://deb.debian.org/debian buster-backports main' >> /etc/apt/sources.list \
 	&& apt-get update -y \
+	&& apt-get install -y --no-install-recommends \
+        redis-tools \
 	&& apt-get install -y --no-install-recommends -t buster-backports \
         ca-certificates \
         curl \

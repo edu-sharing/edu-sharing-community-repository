@@ -1,7 +1,7 @@
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "edusharing_elasticsearch.fullname" . }}
+  name: {{ include "edusharing_elasticsearch.name" . }}
   labels: {{ include "edusharing_elasticsearch.labels" . | nindent 4 }}
 spec:
   maxUnavailable: 1

@@ -1,12 +1,12 @@
-{{- if .Values.global.istio.enabled }}
+{{- if .Values.global.cluster.istio.enabled }}
 {{- if .Capabilities.APIVersions.Has "networking.istio.io/v1beta1" }}
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: {{ include "edusharing_rendering_service.fullname" . }}
+  name: {{ include "edusharing_rendering_service.name" . }}
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
 spec:
-  selector: {{ .Values.global.istio.gateway.selector | nindent 4 }}
+  selector: {{ .Values.global.cluster.istio.gateway.selector | nindent 4 }}
   servers:
   - port:
       number: 80

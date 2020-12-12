@@ -6,19 +6,6 @@
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "edusharing_rediscluster.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "edusharing_rediscluster.labels" -}}
 {{ include "edusharing_rediscluster.labels.instance" . }}
 helm.sh/chart: {{ include "edusharing_rediscluster.chart" . }}
@@ -37,6 +24,10 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 
 {{- define "edusharing_rediscluster.labels.app" -}}
-app: {{ include "edusharing_rediscluster.fullname" . }}
-app.kubernetes.io/name: {{ include "edusharing_rediscluster.fullname" . }}
+app: {{ include "edusharing_rediscluster.name" . }}
+app.kubernetes.io/name: {{ include "edusharing_rediscluster.name" . }}
+{{- end -}}
+
+{{- define "edusharing_rediscluster.replicas" -}}
+{{ mul .Values.config.cluster.master (add1 .Values.config.cluster.replicas) }}
 {{- end -}}

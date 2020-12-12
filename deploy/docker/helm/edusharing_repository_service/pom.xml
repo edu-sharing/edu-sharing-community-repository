@@ -81,35 +81,4 @@
 
   </build>
 
-  <dependencies>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_elasticsearch</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_postgresql</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering_service</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_solr4
-      </artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_transform
-      </artifactId>
-    </dependency>
-
-  </dependencies>
-
 </project>

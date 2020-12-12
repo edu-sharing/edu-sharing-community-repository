@@ -1,17 +1,17 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ include "edusharing_rendering_service.fullname" . }}-cachecleaner
+  name: {{ include "edusharing_rendering_service.name" . }}-cachecleaner
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
     app.kubernetes.io/component: cachecleaner
-  {{- if .Values.global.istio.enabled }}
+  {{- if .Values.global.cluster.istio.enabled }}
   annotations:
     sidecar.istio.io/inject: "true"
     traffic.sidecar.istio.io/excludeOutboundPorts: "3306"
   {{- end }}
 spec:
   concurrencyPolicy: Forbid
-  schedule: {{ .Values.job.cachecleaner.schedule | quote }}
+  schedule: {{ .Values.config.cachecleaner.schedule | quote }}
   successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:
@@ -21,15 +21,15 @@ spec:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: {{ include "edusharing_rendering_service.name" . }}
-            image: {{ .Values.global.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+          - name: {{ include "edusharing_rendering_service.name" . }}-job-cachecleaner
+            image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-rendering-service:{{ .Values.global.image.tag }}
             imagePullPolicy: {{ .Values.global.image.pullPolicy }}
             args: ["php", "func/classes.new/Helper/cacheCleaner.php"]
             envFrom:
             - configMapRef:
-                name: {{ include "edusharing_rendering_service.fullname" . }}-env
+                name: {{ include "edusharing_rendering_service.name" . }}-env
             - secretRef:
-                name: {{ include "edusharing_rendering_service.fullname" . }}-env
+                name: {{ include "edusharing_rendering_service.name" . }}-env
             volumeMounts:
             - name: share
               mountPath: /var/cache/esrender
@@ -59,4 +59,4 @@ spec:
           volumes:
           - name: share
             persistentVolumeClaim:
-              claimName: share-{{ include "edusharing_rendering_service.fullname" . }}
+              claimName: {{ include "edusharing_rendering_service.pvc.share" . }}

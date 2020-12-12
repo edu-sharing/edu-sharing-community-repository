@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "edusharing_repository_transform.fullname" . }}-env
-  labels: {{ include "edusharing_repository_transform.labels" . | nindent 4 }}
-data:
-  REPOSITORY_TRANSFORM_BIND: {{ if .Values.global.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}

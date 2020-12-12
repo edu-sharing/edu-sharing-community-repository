@@ -4,31 +4,28 @@
 
 global:
 
+  cluster:
+
+    istio:
+      enabled: false
+
+    storage:
+      data:
+        spec: {}
+#          storageClassName:
+
   image:
     registry: ${docker.registry}
+    repository: ${docker.image}
+    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
-
-  istio:
-    enabled: false
 
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
 nameOverride: edusharing-rediscluster
-fullnameOverride: ""
-
-########################################################################################################################
-
-image:
-
-  repository: ${docker.image}-rediscluster
-  tag: ${docker.tag}
-
-########################################################################################################################
-
-replicaCount: 6
 
 ########################################################################################################################
 
@@ -43,6 +40,7 @@ service:
 config:
 
   cluster:
+    master: 3
     replicas: 1
     wait: 30
 
@@ -62,7 +60,6 @@ persistence:
   data:
     spec:
       accessModes: [ "ReadWriteOnce" ]
-#     storageClassName:
       resources:
         requests:
           storage: 5Gi
@@ -73,12 +70,15 @@ podSecurityContext:
 
   runAsUser: 1001
   fsGroup: 1001
+#  sysctls:
+#  - name: net.core.somaxconn
+#    value: "10000"
 
 securityContext:
 
   capabilities:
     drop:
-      - ALL
+    - ALL
 
 ########################################################################################################################
 

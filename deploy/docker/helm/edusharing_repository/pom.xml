@@ -13,10 +13,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_transform</artifactId>
+  <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository</artifactId>
   <packaging>jar</packaging>
 
-  <name>edu_sharing-community-deploy-docker-helm-edusharing_repository_transform</name>
+  <name>edu_sharing-community-deploy-docker-helm-edusharing_repository</name>
 
   <build>
 
@@ -80,5 +80,35 @@
     </plugins>
 
   </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_elasticsearch</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_postgresql</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rediscluster</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_solr4
+      </artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_service</artifactId>
+    </dependency>
+
+  </dependencies>
 
 </project>
