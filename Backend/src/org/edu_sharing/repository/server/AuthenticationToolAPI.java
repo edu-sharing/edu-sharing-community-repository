@@ -213,6 +213,9 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		//i.e jession with ticket + basic auth in ApiAuthenticationFilter
 		authenticationService.validate(ticket);
 		
+		// prewarm tp session cache
+		ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions();
+
 		try {
 			HashMap<String, String> userInfo = getUserInfo(authenticationService.getCurrentUserName(), ticket);
 			session.setAttribute(CCConstants.AUTH_USERNAME_CAPTION, userInfo.get(CCConstants.AUTH_USERNAME_CAPTION));
