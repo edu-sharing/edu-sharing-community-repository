@@ -177,9 +177,10 @@ mat-button-toggle-group{
   // white background, primary as content color
   color: $primary;
 }
-.mat-form-field .mat-icon-button {
+.mat-form-field .mat-button-select-arrow{
   width: 25px;
   height: 25px;
+  margin-right: 2px;
   position: absolute;
   background-color: #fff;
   right: 0;
