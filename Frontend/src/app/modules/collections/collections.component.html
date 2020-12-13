@@ -64,6 +64,7 @@
 </mat-tab-group>
 
 <div class="alignWithBanner">
+    <ng-container *ngTemplateOutlet="beforeCollectionHeaderRef; context: { $implicit: collectionContent }"></ng-container>
     <!-- collection header -->
     <div
         *ngIf="!isRootLevelCollection() && !isLoading && isReady && tabSelected.length >= -1"
@@ -73,7 +74,9 @@
         [class.dark-color]="isBrightColor()"
         [style.background-color]="collectionContent.node.collection.color"
     >
-        <div class="card-collection-image-container" style="width:100%;">
+        <div class="card-collection-image-container"
+             [class.card-collection-icon-container]="collectionContent.node.preview.isIcon"
+             style="width:100%;">
             <div
                 *ngIf="collectionContent.node.preview.isIcon"
                 style="width: 250px; height: 200px; margin-left: auto; margin-right: auto;"
