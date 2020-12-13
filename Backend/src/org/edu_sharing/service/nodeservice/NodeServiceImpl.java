@@ -218,7 +218,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 			id=CCConstants.getValidGlobalName(id);
 			String[] propsValue = props.get(id);
-			List<Serializable> values = propsValue != null ? Arrays.asList(propsValue) : null;
+			List<Serializable> values = propsValue != null ? Arrays.asList((Serializable[])propsValue) : null;
 			if("range".equals(widget.getType())){
 				String [] valuesFrom = props.get(id+"_from");
 				String [] valuesTo = props.get(id+"_to");
