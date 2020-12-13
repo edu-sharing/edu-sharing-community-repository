@@ -42,7 +42,7 @@
       (matChipInputTokenEnd)="onInputTokenEnd($event)"
       (blur)="inputControl.setValue(null)"
     />
-    <button matSuffix mat-icon-button *ngIf="showDropdownArrow" (click)="trigger.openPanel();$event.stopPropagation()"><span class="mat-select-arrow"></span></button>
+    <button matSuffix mat-icon-button class="mat-button-select-arrow" *ngIf="showDropdownArrow" (click)="trigger.openPanel();$event.stopPropagation()"><span class="mat-select-arrow"></span></button>
   </mat-chip-list>
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
     <mat-option *ngFor="let value of filteredValues | async" [value]="value">
