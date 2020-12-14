@@ -430,9 +430,6 @@ $badgeWidth: 250px;
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    position: relative;
-    left: 65px;
-    top: 50px;
     opacity: 1 !important;
 }
 .previewCollection i {
@@ -983,6 +980,9 @@ a.rowInner {
     z-index: 0;
     object-fit: cover;
     object-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .cardList {
     .more {
@@ -1183,7 +1183,7 @@ a.rowInner {
             margin-bottom: unset;
             margin-right: 10px;
         }
-        
+
     }
     .cardList .row {
         padding: 0 10px;
