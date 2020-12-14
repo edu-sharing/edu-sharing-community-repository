@@ -518,7 +518,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             : this.currentRepository,
                         this.mdsId,
                         [],
-                        'collections',
+                        RestConstants.QUERY_NAME_COLLECTIONS,
                     )
                     .subscribe(
                         (data: NodeList) => {
