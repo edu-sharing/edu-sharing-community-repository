@@ -182,6 +182,15 @@ export class VideoControlsComponent implements OnInit {
         }
         return values;
     }
+    convertStringToTime(str: string){
+        const splitted = str.split(':');
+        if(splitted.length === 3){
+            return parseInt(splitted[0], 10)*3600 +
+                parseInt(splitted[1], 10)*60 +
+                parseInt(splitted[2], 10);
+        }
+        return 0;
+    }
 
     private writeVideoControlsValues(
         node: Node,
