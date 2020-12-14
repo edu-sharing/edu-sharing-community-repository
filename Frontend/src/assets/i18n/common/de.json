@@ -357,7 +357,7 @@
     },
     "COLLECTION": {
         "INFO_REFERENCES": "Sammlung",
-        "INFO_REFERENCES_MULTI": "Sammlungen",
+        "INFO_REFERENCES_MULTI": "Untersammlungen",
         "INFO_CHILDS": "Material",
         "INFO_CHILDS_MULTI": "Materialien",
         "INFO_NO_CONTENT": "Leere Sammlung",
