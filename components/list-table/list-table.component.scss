@@ -357,6 +357,9 @@ $badgeWidth: 250px;
         left: 56px;
         top: 6px + 6px;
         color: $textLight;
+        width: 66px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .sortMenu {
         position: absolute;
