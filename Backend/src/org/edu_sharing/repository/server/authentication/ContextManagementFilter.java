@@ -145,10 +145,11 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 		String appId = httpReq.getHeader("X-Edu-App-Id");
 		if(appId != null) {
-			ApplicationInfo appInfo = new SignatureVerifier().verifyAppSignature(httpReq);
-			if(appInfo == null){
-				logger.debug("application request could not be verified:" + appId);
+			SignatureVerifier.Result result = new SignatureVerifier().verifyAppSignature(httpReq);
+			if(result.getStatuscode() != 200){
+				logger.debug("application request could not be verified:" + appId + " "+result.getMessage());
 			}else{
+				ApplicationInfo appInfo = result.getAppInfo();
 				accessToolType.set(appInfo.getType());
 			}
 		}

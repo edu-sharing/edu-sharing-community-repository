@@ -53,16 +53,22 @@ public class LoginApiTestAppAuth {
 
             System.out.println(e.toString());
 
+            String signatureString = new String(signature);
             Response response = currentWebTarget
                     .request(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .header("X-Edu-App-Id", appId)
-                    .header("X-Edu-App-Sig",new String(signature))
+                    .header("X-Edu-App-Sig",signatureString)
                     .header("X-Edu-App-Signed",signData)
                     .header("X-Edu-App-Ts",timestamp)
                     .post(e);
 
             System.out.println(response.getStatus()+" "+response.getStatusInfo());
+            if(response.getStatus() != 200) {
+                System.out.println("ERROR:" + response.getStatus() +" "+ response.readEntity( String.class ));
+                return;
+            }
+
             AuthenticationToken token = response.readEntity(AuthenticationToken.class);
             System.out.println(token.getUserId() + " " + token.getTicket());
 

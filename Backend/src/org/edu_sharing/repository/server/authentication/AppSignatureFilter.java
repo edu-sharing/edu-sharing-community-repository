@@ -23,12 +23,11 @@ public class AppSignatureFilter implements javax.servlet.Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         try {
-            ApplicationInfo appInfo = new SignatureVerifier().verifyAppSignature((HttpServletRequest) servletRequest);
+            SignatureVerifier.Result result = new SignatureVerifier().verifyAppSignature((HttpServletRequest) servletRequest);
+            ApplicationInfo appInfo = result.getAppInfo();
             HttpServletResponse resp = (HttpServletResponse) servletResponse;
-            if (appInfo == null) {
-                String message = "application request could not be verified";
-                logger.error(message);
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN, message);
+            if (result.getStatuscode() != 200) {
+                resp.sendError(result.getStatuscode(), result.getMessage());
                 return;
             } else {
                 appInfoThreadLocal.set(appInfo);
