@@ -487,7 +487,8 @@
     },
     "LIST": {
         "REORDER_TITLE": "Listenelemente anpassen",
-        "REORDER_DRAG_DROP": "Sie können die Reihenfolge der Elemente durch Drag & Drop verändern"
+        "REORDER_DRAG_DROP": "Sie können die Reihenfolge der Elemente durch Drag & Drop verändern",
+        "TOTAL_COUNT_TOOLTIP": "{{selected}} Elemente ausgewählt von insgesamt {{total}}"
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Material zur Sammlung hinzufügen?",

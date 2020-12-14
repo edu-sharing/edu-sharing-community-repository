@@ -454,7 +454,8 @@
     },
     "LIST": {
         "REORDER_TITLE": "Change columns",
-        "REORDER_DRAG_DROP": "You can change the order of the elements via drag & drop"
+        "REORDER_DRAG_DROP": "You can change the order of the elements via drag & drop",
+        "TOTAL_COUNT_TOOLTIP": "{{selected}} items selected from a total of {{total}}"
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Add material to collection?",
