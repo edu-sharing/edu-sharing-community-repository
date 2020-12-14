@@ -184,7 +184,10 @@ export class VideoControlsComponent implements OnInit {
     }
     convertStringToTime(str: string){
         const splitted = str.split(':');
-        if(splitted.length === 3){
+        if(splitted.length === 2){
+            return parseInt(splitted[0], 10)*60 +
+                parseInt(splitted[1], 10);
+        } else if(splitted.length === 3){
             return parseInt(splitted[0], 10)*3600 +
                 parseInt(splitted[1], 10)*60 +
                 parseInt(splitted[2], 10);

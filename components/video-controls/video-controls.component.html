@@ -42,7 +42,7 @@
                 id="startTime"
                 pattern="\d\d:\d\d:\d\d"
                 [ngModel]="values.startTime | duration: video.duration"
-                (ngModelChange)="values.startTime = $event.length === 8 && convertStringToTime($event) !== 0 ? convertStringToTime($event) : values.startTime"
+                (ngModelChange)="values.startTime = ($event.length === 8 || $event.length === 5) && convertStringToTime($event) !== 0 ? convertStringToTime($event) : values.startTime"
               />
             </mat-form-field>
           </div>
@@ -58,7 +58,7 @@
                 id="endTime"
                 pattern="\d\d:\d\d:\d\d"
                 [ngModel]="values.endTime | duration: video.duration"
-                (ngModelChange)="values.endTime = $event.length === 8 && convertStringToTime($event) !== 0 ? convertStringToTime($event) : values.endTime"
+                (ngModelChange)="values.endTime = ($event.length === 8 || $event.length === 5) && convertStringToTime($event) !== 0 ? convertStringToTime($event) : values.endTime"
               />
             </mat-form-field>
           </div>
