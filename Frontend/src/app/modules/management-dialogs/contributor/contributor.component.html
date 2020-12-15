@@ -63,6 +63,38 @@
           </mat-form-field>
         </div>
       </div>
+      <button mat-button color="primary" class="more clickable" (click)="persistentIds=!persistentIds">
+        <i icon iconId="keyboard_arrow_down" *ngIf="persistentIds"></i>
+        <i icon iconId="keyboard_arrow_right" *ngIf="!persistentIds"></i>
+        <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
+      </button>
+      <div *ngIf="persistentIds" [@overlay]="more" class="persistent-id">
+      <div class="table">
+          <mat-form-field floatLabel="always">
+            <mat-label>{{'VCARD.X-ORCID' | translate}}</mat-label>
+            <input matInput
+                   id="orcid"
+                   [(ngModel)]="edit.orcid"
+                   pattern="https?:\/\/orcid.org\/\d{4}(-\d{4}){3}"
+                   placeholder="http://orcid.org/0000-0000-0000-0000"
+            >
+            <mat-hint innerHTML="{{'VCARD_HINT.X-ORCID' | translate}}"></mat-hint>
+          </mat-form-field>
+      </div>
+      <div class="table">
+        <mat-form-field floatLabel="always">
+            <mat-label>{{'VCARD.X-GND-URI' | translate}}</mat-label>
+            <input matInput
+                   id="gnduri"
+                   [(ngModel)]="edit.gnduri"
+                   pattern="https?://d-nb.info\/gnd\/\d+"
+                   placeholder="http://d-nb.info/gnd/0000000000"
+            >
+            <mat-hint innerHTML="{{'VCARD_HINT.X-GND-URI' | translate}}"></mat-hint>
+          </mat-form-field>
+      </div>
+        <info-message *ngIf="edit.orcid || edit.gnduri">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</info-message>
+      </div>
     </mat-tab>
 
     <mat-tab label="{{'WORKSPACE.CONTRIBUTOR.MODE_ORG' | translate}}">
@@ -76,12 +108,10 @@
   </mat-tab-group>
   <div class="contributor-content">
     <div class="table">
-      <div>
-        <mat-form-field>
-          <mat-label>{{'VCARD.Email' | translate}}</mat-label>
-          <input matInput id="email" [(ngModel)]="edit.email">
-        </mat-form-field>
-      </div>
+      <mat-form-field>
+        <mat-label>{{'VCARD.Email' | translate}}</mat-label>
+        <input matInput id="email" [(ngModel)]="edit.email">
+      </mat-form-field>
     </div>
     <div class="table">
       <div>

@@ -705,7 +705,13 @@
         "Zip": "PLZ",
         "City": "Ort",
         "Region": "Bundesland",
-        "Country": "Land"
+        "Country": "Land",
+        "X-ORCID": "ORCID",
+        "X-GND-URI": "GND-URI"
+    },
+    "VCARD_HINT": {
+        "X-ORCID": "Verweis auf einen persistenten ORCID-Identifier. <a target='blank' href='https://orcid.org/'>Registrierung & Infos</a>",
+        "X-GND-URI": "Verweis auf einen persistente GND-URI. <a target='blank' href='https://d-nb.info/'>Registrierung & Infos</a>"
     },
     "ICON_LABELS": {
         "more_vert": "Optionen",

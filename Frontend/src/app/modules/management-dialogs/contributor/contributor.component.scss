@@ -33,6 +33,12 @@ h2{
 .metadataHeading{
   padding-top:30px;
 }
+.persistent-id {
+  padding-top: 15px;
+  mat-form-field {
+    padding-bottom: 10px;
+  }
+}
 .table{
   display: flex;
   width: 100%;

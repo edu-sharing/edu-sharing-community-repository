@@ -32,9 +32,10 @@ export class WorkspaceContributorComponent  {
   public editMode: string;
   public editType: number;
   public more = false;
+  public persistentIds = false;
   public editScopeNew: string;
   private editScopeOld: string;
-  private editOriginal: VCard;
+  editOriginal: VCard;
   public dialogTitle: string;
   public dialogMessage: string;
   public dialogButtons: DialogButton[];
