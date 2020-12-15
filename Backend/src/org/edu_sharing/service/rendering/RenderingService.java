@@ -13,7 +13,7 @@ public interface RenderingService {
 
     String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException;
 
-    RenderingServiceData getData(ApplicationInfo appInfo, String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Exception;
+    RenderingServiceData getData(ApplicationInfo appInfo, String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Throwable;
 
     /**
      * should return true if there is rendering available for this instance, or false if otherwise
