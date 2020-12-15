@@ -36,6 +36,7 @@
     "EXTENSION_NOT_MATCH_INFO_NEW": "Are you sure you want to add the file extension '{{extensionNew}}'?\n\n{{warning}}",
     "EXTENSION_NOT_MATCH_WARNING": "The file may become unusable when it gets downloaded or openend.",
     "EXTENSION_CHANGE": "Yes, change",
+    "EXTENSION_KEEP": "Keep extension",
     "INPUT_HOURS": "Hrs.",
     "INPUT_MINUTES": "Min.",
     "HOUR": "Hour",
