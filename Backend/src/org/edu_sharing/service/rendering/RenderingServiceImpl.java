@@ -2,6 +2,7 @@ package org.edu_sharing.service.rendering;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.GsonBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -32,6 +34,7 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
@@ -143,12 +146,31 @@ public class RenderingServiceImpl implements RenderingService{
 		}
 	}
 	@Override
-	public RenderingServiceData getData(ApplicationInfo appInfo, String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Exception {
+	public RenderingServiceData getData(ApplicationInfo appInfo, String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Throwable {
 		long time=System.currentTimeMillis();
 		NodeService nodeService = NodeServiceFactory.getNodeService(appInfo.getAppId());
 		RenderingServiceData data=new RenderingServiceData();
 		RepositoryDao repoDao = RepositoryDao.getRepository(this.appInfo.getAppId());
 		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
+
+		// child object: inherit all props from parent
+		if(nodeDao.getAspectsNative().contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
+			Map<String, Object> props = nodeDao.getNativeProperties();
+			String parentRef = nodeService.getPrimaryParent(nodeId);
+			HashMap<String,Object> propsParent =
+					nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,
+							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							parentRef);
+			// ignore some technical properties, like mimetypes etc.
+			for(String prop : CCConstants.CHILDOBJECT_IGNORED_PARENT_PROPERTIES)
+				propsParent.remove(prop);
+			// override it with the props from the child
+			for(Map.Entry<String,Object> entry : props.entrySet()){
+				propsParent.put(entry.getKey(),entry.getValue());
+			}
+			nodeDao.setNativeProperties(propsParent);
+		}
+
 		Node node = nodeDao.asNode();
 
 		if(appInfo.ishomeNode()) {

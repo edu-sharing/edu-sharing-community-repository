@@ -1376,10 +1376,13 @@ public class NodeDao {
 		return version;
 	}
 
-	public HashMap<String,Object> getNativeProperties() throws DAOException {
+	public HashMap<String,Object> getNativeProperties() {
 		return nodeProps;
 	}
-	
+	public void setNativeProperties(HashMap<String,Object> nodeProps) {
+		this.nodeProps = nodeProps;
+	}
+
 	public HashMap<String,String[]> getAllProperties() throws DAOException {
 		return getProperties(null,Filter.createShowAllFilter());
 	}
