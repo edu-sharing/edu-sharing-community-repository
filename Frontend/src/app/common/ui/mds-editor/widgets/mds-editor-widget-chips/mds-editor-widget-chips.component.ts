@@ -78,7 +78,8 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         ) {
             this.filteredValues = this.subscribeForSuggestionUpdates();
         }
-        this.showDropdownArrow = this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges;
+        this.showDropdownArrow =
+            this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges;
 
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
