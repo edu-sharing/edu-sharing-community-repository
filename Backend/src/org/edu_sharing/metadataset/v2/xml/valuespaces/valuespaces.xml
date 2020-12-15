@@ -19,7 +19,7 @@
 		<key>selfassessment</key>
 		<key>lecture</key>
 		<key>selfstudy</key>
-		<key cap="Weiteres">other</key>
+		<key>other</key>
 	</valuespace>
 	<valuespace
 		property="cclom:general_language">
