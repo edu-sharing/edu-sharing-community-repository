@@ -35,7 +35,7 @@
               | translate: { selected: selectedNodes?.length || 0, total: totalCount }
           "
         >
-          ({{ selectedNodes?.length || 0 + '/' + totalCount }})
+          ({{ (selectedNodes?.length || 0) + '/' + totalCount }})
         </div>
         <sort-dropdown class="sortMenu" [(open)]="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
 
