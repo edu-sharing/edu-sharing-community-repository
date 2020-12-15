@@ -1,6 +1,5 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import com.ibm.icu.text.SimpleDateFormat;
 import jersey.repackaged.com.google.common.collect.Lists;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -26,6 +25,7 @@ import org.owasp.html.Sanitizers;
 import javax.swing.text.NumberFormatter;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -453,7 +453,7 @@ public class MetadataTemplateRenderer {
 			if(widget.getType().equals("date")){
 				try{
 					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-						value=new SimpleDateFormat(widget.getFormat()).format(Long.parseLong(value));
+						value=new SimpleDateFormat(widget.getFormat()).format(new Date(Long.parseLong(value)));
 					}
 					else{
 						value=new DateTool().formatDate(Long.parseLong(value));

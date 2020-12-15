@@ -127,7 +127,7 @@
 			Your access rights are:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
-			Please go to the safe area in edu-sharing to access the invited material.
+			After logging into the safe area you will find the element at "shared with me".
 			<br><br>
 			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
 				{{message}}
