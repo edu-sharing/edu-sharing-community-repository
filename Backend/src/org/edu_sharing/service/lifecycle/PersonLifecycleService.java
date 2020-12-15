@@ -517,6 +517,10 @@ public class PersonLifecycleService {
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		if(scope==null){
 			homeFolder = getHomeFolder(personNodeRef);
+			if(homeFolder==null){
+				logger.info("Person "+userName+" does not have a home folder, skipping it");
+				return new PersonDeleteResult.Counts(new ArrayList<>());
+			}
 		}
 		else{
 			ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
