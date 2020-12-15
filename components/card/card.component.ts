@@ -119,7 +119,6 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         this._buttons = buttons?.filter((b) => (b.type & DialogButton.TYPE_SECONDARY) === 0);
         // tslint:disable-next-line:no-bitwise
         this._buttonsLeft = buttons?.filter((b) => (b.type & DialogButton.TYPE_SECONDARY) === DialogButton.TYPE_SECONDARY);
-        console.log(this._buttons, this._buttonsLeft);
     }
 
     /**
