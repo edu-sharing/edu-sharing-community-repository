@@ -1,7 +1,20 @@
 @import '../../styles/variables';
 
+// ng5-slider sets `visibility: visible` on some elements. This reintroduces interactive elements to
+// the tab order although the parent container sets `visibility: hidden`. We fix this be hiding
+// everything inside ng5-slider explicitly as long as the expansion panel is collapsed.
+:host
+    .mat-expansion-panel:not(.mat-expanded)
+    ::ng-deep
+    .mat-expansion-panel-content:not(.ng-animating)
+    ng5-slider
+    * {
+    display: none !important;
+}
+
 .time {
-    .mat-form-field, input {
+    .mat-form-field,
+    input {
         cursor: pointer;
     }
 }

@@ -7,78 +7,81 @@
   (onChoose)="addToCollection($event)"
   (onCreateCollection)="createCollectionAndAdd($event)"
 ></collection-chooser>
+
 <div
   *ngIf="sliderOptions && hasRequiredPermissions"
   class="selection"
   [class.small]="size === 'small'"
 >
-  <div class="selectionSlider">
-    <ng5-slider
-      [(value)]="values.startTime"
-      [(highValue)]="values.endTime"
-      [options]="sliderOptions"
-      (valueChange)="onValueChange()"
-    ></ng5-slider>
-  </div>
-
-  <div>
-    <form class="addChapter">
-      <div class="time">
-        <mat-form-field
-          class="startTime"
-          (click)="values.startTime = video.currentTime"
-          title="Aktuelle Abspiel-Position als Start-Zeit auswählen"
-        >
-          <mat-label>{{ 'START' | translate }}</mat-label>
-          <input
-            matInput
-            type="text"
-            name="startTime"
-            id="startTime"
-            [ngModel]="values.startTime | duration: video.duration"
-            readonly
-            (keydown.enter)="values.startTime = video.currentTime; $event.preventDefault()"
-            aria-label="Aktuelle Abspiel-Position als Start-Zeit auswählen"
-          />
-        </mat-form-field>
+  <mat-expansion-panel class="mat-elevation-z0">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{ 'VIDEO_CONTROLS.HEADING' | translate }}
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <ng-template matExpansionPanelContent>
+      <div class="selectionSlider">
+        <ng5-slider
+          [(value)]="values.startTime"
+          [(highValue)]="values.endTime"
+          [options]="sliderOptions"
+          (valueChange)="onValueChange()"
+        ></ng5-slider>
       </div>
-      <div class="time">
-        <mat-form-field
-          class="endTime"
-          title="Aktuelle Abspiel-Position als Stopp-Zeit auswählen"
-          (click)="values.endTime = video.currentTime"
-        >
-          <mat-label>{{ 'STOP' | translate }}</mat-label>
-          <input
-            matInput
-            type="text"
-            name="endTime"
-            id="endTime"
-            [ngModel]="values.endTime | duration: video.duration"
-            readonly
-            (keydown.enter)="values.endTime = video.currentTime; $event.preventDefault()"
-            aria-label="Aktuelle Abspiel-Position als Stopp-Zeit auswählen"
-          />
-        </mat-form-field>
+      <div>
+        <form class="addChapter">
+          <div class="time">
+            <mat-form-field
+              class="startTime"
+            >
+              <mat-label>{{ 'START' | translate }}</mat-label>
+              <input
+                matInput
+                type="text"
+                name="startTime"
+                id="startTime"
+                pattern="\d\d:\d\d:\d\d"
+                [ngModel]="values.startTime | duration: video.duration"
+                (ngModelChange)="values.startTime = ($event.length === 8 || $event.length === 5) && convertStringToTime($event) !== 0 ? convertStringToTime($event) : values.startTime"
+              />
+            </mat-form-field>
+          </div>
+          <div class="time">
+            <mat-form-field
+              class="endTime"
+            >
+              <mat-label>{{ 'STOP' | translate }}</mat-label>
+              <input
+                matInput
+                type="text"
+                name="endTime"
+                id="endTime"
+                pattern="\d\d:\d\d:\d\d"
+                [ngModel]="values.endTime | duration: video.duration"
+                (ngModelChange)="values.endTime = ($event.length === 8 || $event.length === 5) && convertStringToTime($event) !== 0 ? convertStringToTime($event) : values.endTime"
+              />
+            </mat-form-field>
+          </div>
+          <div class="title">
+            <mat-form-field>
+              <mat-label>{{ 'NODE.cm:title' | translate }}</mat-label>
+              <input
+                matInput
+                type="text"
+                name="chapterName"
+                id="chapterName"
+                [(ngModel)]="values.title"
+              />
+            </mat-form-field>
+          </div>
+          <div class="save">
+            <button mat-raised-button color="primary" (click)="save()" *ngIf="!isLoading">
+              {{ 'SAVE' | translate }}
+            </button>
+            <spinner-small *ngIf="isLoading">{{ 'SAVE' | translate }}</spinner-small>
+          </div>
+        </form>
       </div>
-      <div class="title">
-        <mat-form-field>
-          <mat-label>{{ 'NODE.cm:title' | translate }}</mat-label>
-          <input
-            matInput
-            type="text"
-            name="chapterName"
-            id="chapterName"
-            [(ngModel)]="values.title"
-          />
-        </mat-form-field>
-      </div>
-      <div class="save">
-        <button mat-raised-button color="primary" (click)="save()" *ngIf="!isLoading">
-          {{ 'SAVE' | translate }}
-        </button>
-        <spinner-small *ngIf="isLoading">{{ 'SAVE' | translate }}</spinner-small>
-      </div>
-    </form>
-  </div>
+    </ng-template>
+  </mat-expansion-panel>
 </div>

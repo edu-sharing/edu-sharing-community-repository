@@ -21,7 +21,7 @@
                    [hasIcon]="true"
                    [hasCheckbox]="false"
                    [hasHeading]="false"
-                   [hasMore]="!showMore"
+                   [hasMore]="listLatest.length > 5 && !showMore"
                    (loadMore)="showMore = true"
                    [isClickable]="true"
                    [viewType]="2"

@@ -36,8 +36,16 @@
 <div [className]="listClass + ' list list-type-'+(viewType == 0 ? 'table' : 'card')"
      infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)">
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
-        <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
-
+        <div
+          class="totalCount"
+          *ngIf="totalCount && hasCheckbox && !isLoading"
+          [title]="
+            'LIST.TOTAL_COUNT_TOOLTIP'
+              | translate: { selected: selectedNodes?.length || 0, total: totalCount }
+          "
+        >
+          ({{ (selectedNodes?.length || 0) + '/' + totalCount }})
+        </div>
         <sort-dropdown class="sortMenu" [(open)]="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
 
         <div class="heading">
