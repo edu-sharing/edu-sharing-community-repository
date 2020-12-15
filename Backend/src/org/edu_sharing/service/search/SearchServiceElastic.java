@@ -341,6 +341,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     if(fields.size() > 0 && !fields.contains(entry.getKey())){
                         continue;
                     }
+                    if(entry.getValue() == null){
+                        continue;
+                    }
                     if(((String)entry.getValue()).toLowerCase().contains(suggest.toLowerCase())){
                        inResult = true;
                     }
