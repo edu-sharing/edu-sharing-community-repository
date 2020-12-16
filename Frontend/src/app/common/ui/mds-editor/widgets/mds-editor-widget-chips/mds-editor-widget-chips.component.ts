@@ -111,8 +111,9 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         this.removeFromIndeterminateValues(toBeRemoved.key);
     }
 
-    async selected(event: MatAutocompleteSelectedEvent) {
+    selected(event: MatAutocompleteSelectedEvent) {
         this.add(event.option.value);
+        this.input.nativeElement.value = '';
         this.inputControl.setValue(null);
         setTimeout(() => this.trigger.openPanel());
     }
