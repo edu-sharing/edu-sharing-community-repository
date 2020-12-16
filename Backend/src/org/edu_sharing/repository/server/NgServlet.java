@@ -13,6 +13,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.shared.NodeVersion;
 import org.edu_sharing.service.config.ConfigService;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.license.LicenseService;
@@ -100,8 +101,8 @@ public class NgServlet extends HttpServlet {
 
 	private static String addSEO(String html, URL url) {
 		try {
-			String nodeId = getNodeFromURL(url);
-			HashMap<String, Object> props = NodeServiceFactory.getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+			NodeRefVersion node = getNodeFromURL(url);
+			HashMap<String, Object> props = NodeServiceHelper.getPropertiesVersion(node.getNodeRef(), node.getVersion());
 
 			Document doc = Jsoup.parse(html);
 			String title = (String) (props.get(CCConstants.LOM_PROP_GENERAL_TITLE));
@@ -148,8 +149,8 @@ public class NgServlet extends HttpServlet {
 
 	private static String addLicenseMetadata(String html, URL url) {
 		try {
-			String nodeId = getNodeFromURL(url);
-			NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+			NodeRefVersion node = getNodeFromURL(url);
+			NodeRef ref = node.getNodeRef();
 			String licenseUrl=new LicenseService().getLicenseUrl(
 					NodeServiceHelper.getProperty(ref,CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),
 					NodeServiceHelper.getProperty(ref,CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE),
@@ -172,8 +173,8 @@ public class NgServlet extends HttpServlet {
 
 	private static String addLRMI(String html, URL url) {
 		try {
-			String nodeId = getNodeFromURL(url);
-			JSONObject lrmi = LRMITool.getLRMIJson(nodeId);
+			NodeRefVersion node = getNodeFromURL(url);
+			JSONObject lrmi = LRMITool.getLRMIJson(node);
 			String data = "<script type=\"application/ld+json\">";
 			data += lrmi.toString(2);
 			data += "</script>";
@@ -184,10 +185,21 @@ public class NgServlet extends HttpServlet {
 		return html;
 	}
 
-	private static String getNodeFromURL(URL url) {
+	private static NodeRefVersion getNodeFromURL(URL url) {
 		if(url.toString().contains(COMPONENTS_RENDER)) {
 			String[] path = url.getPath().split("/");
-			return path[path.length - 1];
+			int i = 0;
+			for(String p: path){
+				if(p.equals("render")){
+					if(path.length> i + 2){
+						return new NodeRefVersion(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, path[i + 1]), path[i + 2]);
+					}else if(path.length > i + 1) {
+						return new NodeRefVersion(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, path[i + 1]), null);
+					}
+				}
+				i++;
+			}
+			return null;
 		}
 		if(url.toString().contains(COMPONENTS_COLLECTIONS)){
 			if(!url.getQuery().contains("id="))
@@ -195,7 +207,7 @@ public class NgServlet extends HttpServlet {
 			String param=url.getQuery().substring(url.getQuery().indexOf("id=")+3);
 			if(param.contains("&"))
 				param=param.substring(0,param.indexOf("&"));
-			return param;
+			return new NodeRefVersion(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, param), null);
 		}
 		return null;
 	}

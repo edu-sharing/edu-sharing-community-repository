@@ -263,6 +263,7 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
 		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
 		return toInit;
@@ -308,6 +309,8 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP);
+
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;

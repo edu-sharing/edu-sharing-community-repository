@@ -326,9 +326,9 @@ public class RenderingProxy extends HttpServlet {
 			}
 		} catch (HttpException e) {
 			throw new RenderingException(e);
-		} catch (Exception e) {
-			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage(),
-					RenderingException.I18N.unknown, e);
+		} catch (Throwable t) {
+			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(),
+					RenderingException.I18N.unknown, t);
 		}
 	}
 

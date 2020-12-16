@@ -131,6 +131,7 @@
         "TOOLPERMISSION_CREATE_ELEMENTS_FILES": "Dateien anlegen/hochladen",
         "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS": "Sammlungen anlegen",
         "TOOLPERMISSION_HANDLESERVICE": "Eindeutige Ids für Materialien beim Handleservice anfordern",
+        "TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS": "Explizite Rechteprüfung steuern. D.h. Materialien als lizenziert markieren, d.h. einen Zugriff ohne Rechte am Originalobjekt verbieten und eine  (z.B. innerhalb von Sammlungen)",
         "TOOLPERMISSION_USAGE_STATISTIC": "Informationen über die Verwendung aller Objekte dieses Repositories abfragen",
         "TOOLPERMISSION_COMMENT_WRITE":"Kommentare an Objekten verfassen",
         "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "Statistiken zur Verwendung von Materialien dieses Repositories anzeigen",
@@ -378,7 +379,7 @@
     },
     "COLLECTION": {
         "INFO_REFERENCES": "Sammlung",
-        "INFO_REFERENCES_MULTI": "Sammlungen",
+        "INFO_REFERENCES_MULTI": "Untersammlungen",
         "INFO_CHILDS": "Material",
         "INFO_CHILDS_MULTI": "Materialien",
         "INFO_NO_CONTENT": "Leere Sammlung",
@@ -509,7 +510,8 @@
     },
     "LIST": {
         "REORDER_TITLE": "Listenelemente anpassen",
-        "REORDER_DRAG_DROP": "Sie können die Reihenfolge der Elemente durch Drag & Drop verändern"
+        "REORDER_DRAG_DROP": "Sie können die Reihenfolge der Elemente durch Drag & Drop verändern",
+        "TOTAL_COUNT_TOOLTIP": "{{selected}} Elemente ausgewählt von insgesamt {{total}}"
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Material zur Sammlung hinzufügen?",
@@ -668,6 +670,7 @@
         "PASSWORD_CORRECT": "Passwort korrekt"
     },
     "VIDEO_CONTROLS": {
+        "HEADING": "Einen Ausschnitt zum Speichern in einer Sammlung festlegen",
         "SAVED": "Änderungen wurden gespeichert"
     },
     "TOAST": {

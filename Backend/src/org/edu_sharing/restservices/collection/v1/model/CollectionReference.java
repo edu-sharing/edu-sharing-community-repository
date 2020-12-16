@@ -18,6 +18,7 @@ public class CollectionReference extends Node {
 	private String originalId;
 
 	private List<String> accessOriginal;
+	private boolean originalRestrictedAccess;
 
 	public CollectionReference(){
 
@@ -44,4 +45,12 @@ public class CollectionReference extends Node {
 	public List<String> getAccessOriginal() {
 		return accessOriginal;
 	}
+
+    public void setOriginalRestrictedAccess(boolean originalRestrictedAccess) {
+        this.originalRestrictedAccess = originalRestrictedAccess;
+    }
+
+    public boolean getOriginalRestrictedAccess() {
+        return originalRestrictedAccess;
+    }
 }

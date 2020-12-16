@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ContentChild, ElementRef, TemplateRef, ViewChild} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
 import * as EduData from '../../core-module/core.module';
@@ -86,6 +86,8 @@ export class CollectionsMainComponent {
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections')
     listCollections: ListTableComponent;
+    @ContentChild('beforeCollectionHeader') beforeCollectionHeaderRef: TemplateRef<any>;
+
 
     viewTypeNodes = ListTableComponent.VIEW_TYPE_GRID;
 
@@ -1192,7 +1194,7 @@ export class CollectionsMainComponent {
         if (this.mainNavRef) {
             this.mainNavRef.refreshBanner();
         }
-        
+
         // Cannot trivially reference the add button for the tutorial with
         // current implementation of generic options.
         //

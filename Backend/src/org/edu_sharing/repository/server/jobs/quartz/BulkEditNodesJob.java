@@ -136,6 +136,8 @@ public class BulkEditNodesJob extends AbstractJob{
 			replaceToken = prepareParam(context, "replaceToken", true);
 		}
 
+		String lucene = (String) context.getJobDetail().getJobDataMap().get("lucene");
+
 		startFolder =prepareParam(context, "startFolder", true);
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
@@ -151,7 +153,8 @@ public class BulkEditNodesJob extends AbstractJob{
 				recurseMode = RecurseMode.valueOf((String) context.getJobDetail().getJobDataMap().get("recurseMode"));
 			}
 		}catch(Throwable t){
-			throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
+			if(lucene == null || lucene.trim().equals(""))
+				throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
 		}
 		data = (String) context.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA);
 		if(mode.equals(Mode.ReplaceMapping)){
@@ -205,6 +208,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setThreaded(false);
 		runner.setRecurseMode(recurseMode);
 		runner.setStartFolder(startFolder);
+		runner.setLucene(lucene);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		int count=runner.run();
@@ -247,10 +251,9 @@ public class BulkEditNodesJob extends AbstractJob{
 	public void run() {
 
 	}
-	
+
 	@Override
 	public Class[] getJobClasses() {
-		// TODO Auto-generated method stub
 		return allJobs;
 	}
 }

@@ -133,6 +133,7 @@
         "TOOLPERMISSION_CREATE_ELEMENTS_FILES": "Create/upload files",
         "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS": "Create collections",
         "TOOLPERMISSION_HANDLESERVICE": "Resolve unique ids from a handle service for materials",
+        "TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS": "Define materials as licensed, which means they can not gain permissions via redistribution (e.g. collections)",
         "TOOLPERMISSION_USAGE_STATISTIC": "Fetch information about the usage of all nodes of the repository",
         "TOOLPERMISSION_COMMENT_WRITE":"Creating comments on objects",
         "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "View stats of material access of the repository",
@@ -313,7 +314,7 @@
     },
     "COLLECTION": {
         "INFO_REFERENCES": "collection",
-        "INFO_REFERENCES_MULTI": "collections",
+        "INFO_REFERENCES_MULTI": "subcollections",
         "INFO_CHILDS": "material",
         "INFO_CHILDS_MULTI": "materials",
         "INFO_NO_CONTENT": "empty collection",
@@ -475,7 +476,8 @@
     },
     "LIST": {
         "REORDER_TITLE": "Change columns",
-        "REORDER_DRAG_DROP": "You can change the order of the elements via drag & drop"
+        "REORDER_DRAG_DROP": "You can change the order of the elements via drag & drop",
+        "TOTAL_COUNT_TOOLTIP": "{{selected}} items selected from a total of {{total}}"
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Add material to collection?",
@@ -637,6 +639,7 @@
         "PASSWORD_CORRECT": "Password correct"
     },
     "VIDEO_CONTROLS": {
+        "HEADING": "Select a clip for saving to a collection",
         "SAVED": "Saved changes"
     },
     "TOAST": {

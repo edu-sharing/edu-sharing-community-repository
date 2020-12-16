@@ -145,7 +145,7 @@
             "RECEIVER_CAPTION": "The selected user will be displayed as the creator of the data & collections in the future",
             "RECEIVER": "Search user...",
             "RECEIVER_GROUP_CAPTION": "The following organisation will be given administrative rights to the data",
-            "RECEIVER_GROUP_HINT": "The organization will be the coordinator of all folders, materials & collections. Exceptions are collection references in third-party collections",
+            "RECEIVER_GROUP_HINT": "The admins of the organization will be the coordinator of all folders, materials & collections. Exceptions are collection references in third-party collections",
             "RECEIVER_GROUP": "Search organization...",
             "START": "Start process",
             "RESULTS": "Deletion results",

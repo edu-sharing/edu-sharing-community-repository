@@ -46,6 +46,7 @@ export class ToolpermissionManagerComponent {
             RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
             RestConstants.TOOLPERMISSION_PUBLISH_COPY,
             RestConstants.TOOLPERMISSION_HANDLESERVICE,
+        RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS,
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
