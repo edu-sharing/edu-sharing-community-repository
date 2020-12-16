@@ -392,6 +392,8 @@ mat-label.mat-label-standalone{
     height: unset; // Override height: 1px
     background-color: $primaryLight;
     .mat-chip-remove{
+      // align somewhat townwards for better centering
+      line-height: 1.05;
       color: $primary;
       opacity: 1;
     }
