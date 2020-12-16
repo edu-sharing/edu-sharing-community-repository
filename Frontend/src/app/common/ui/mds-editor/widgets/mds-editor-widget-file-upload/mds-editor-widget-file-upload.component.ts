@@ -1,28 +1,7 @@
-import { animate, group, keyframes, state, style, transition, trigger } from '@angular/animations';
-import {
-    AfterContentInit,
-    ChangeDetectorRef,
-    Component,
-    ContentChild,
-    Directive,
-    ElementRef, EventEmitter,
-    HostBinding,
-    Injectable,
-    Input,
-    OnInit, Output,
-} from '@angular/core';
-import {AbstractControl, FormControl} from '@angular/forms';
-import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, startWith } from 'rxjs/operators';
-import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import {BulkMode, InputStatus, RequiredMode, Values} from '../../types';
-import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
-import {UIAnimation} from '../../../../../core-module/ui/ui-animation';
-import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
-import {Node} from '../../../../../core-module/rest/data-object';
-
+import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
+import { Values } from '../../types';
 
 @Component({
     selector: 'app-mds-editor-widget-file-upload',
@@ -42,33 +21,32 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
 
     @Output() onSetLink = new EventEmitter<string>();
 
-    constructor(
-        private mdsEditorInstance: MdsEditorInstanceService,
-    ) {
+    constructor() {}
 
-    }
-
-    ngOnInit(): void {
-    }
+    ngOnInit(): void {}
 
     setLink() {
         this.onSetLink.emit(this.link);
     }
+
     setFilesByFileList(fileList: FileList) {
-        if(this.link) {
+        if (this.link) {
             return;
         }
         this.selectedFiles = [];
-        for(let i = 0;i < fileList.length; i++) {
+        for (let i = 0; i < fileList.length; i++) {
             this.selectedFiles.push(fileList.item(i));
         }
     }
+
     filesSelected(files: Event) {
         this.setFilesByFileList((files.target as HTMLInputElement).files);
     }
+
     getStatus() {
         return this.selectedFiles?.length || this.link ? 'VALID' : 'INVALID';
     }
+
     async getValues(values: Values) {
         if (this.selectedFiles?.length) {
             const file = this.selectedFiles[0];
@@ -79,7 +57,7 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
             });
             values['fileupload-filename'] = [file.name];
             values['fileupload-filetype'] = [file.type];
-            values['fileupload-filedata'] = [(base64 as string)];
+            values['fileupload-filedata'] = [base64 as string];
         } else {
             values['fileupload-link'] = [this.link];
         }

@@ -10,9 +10,11 @@ import {
     RestSearchService,
 } from '../../../core-module/core.module';
 import { SearchService } from '../../../modules/search/search.service';
+import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
 import {
+    EditorBulkMode,
     BulkMode,
     EditorMode,
     EditorType,
@@ -52,17 +54,19 @@ export interface InitialValues {
 
 export abstract class MdsEditorWidgetCore {
     @Input() widget: Widget;
-    readonly isBulk: boolean;
     readonly editorMode: EditorMode;
+    readonly editorBulkMode: EditorBulkMode;
 
     constructor(
         private mdsEditorInstance: MdsEditorInstanceService,
         protected translate: TranslateService,
     ) {
-        this.isBulk = this.mdsEditorInstance.isBulk;
         this.editorMode = this.mdsEditorInstance.editorMode;
+        this.editorBulkMode = this.mdsEditorInstance.editorBulkMode;
     }
 }
+
+
 
 /**
  * Manages state for an MDS editor instance.
@@ -337,7 +341,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     /** MDS Views of the relevant group (in order). */
     views: MdsView[];
     /** Whether the editor is in bulk mode to edit multiple nodes at once. */
-    isBulk: boolean;
+    editorBulkMode: EditorBulkMode;
     editorMode: EditorMode;
     isEmbedded: boolean;
 
@@ -409,8 +413,11 @@ export class MdsEditorInstanceService implements OnDestroy {
      */
     async initWithNodes(
         nodes: Node[],
-        groupIdIn: string = null,
-        refetch = true,
+        {
+            groupId = null,
+            refetch = true,
+            bulkBehavior = BulkBehavior.Default,
+        }: { groupId?: string; refetch?: boolean; bulkBehavior?: BulkBehavior } = {},
     ): Promise<EditorType> {
         this.editorMode = 'nodes';
         if (refetch) {
@@ -418,11 +425,12 @@ export class MdsEditorInstanceService implements OnDestroy {
         } else {
             this.nodes$.next(nodes);
         }
-        this.isBulk = this.getIsBulk(this.nodes$.value);
-        let groupId;
-        if (groupIdIn) {
-            groupId = groupIdIn;
+        if (this.getIsBulk(this.nodes$.value)) {
+            this.editorBulkMode = { isBulk: true, bulkBehavior };
         } else {
+            this.editorBulkMode = { isBulk: false };
+        }
+        if (!groupId) {
             groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
         }
         const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
@@ -442,7 +450,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         initialValues?: Values,
     ): Promise<EditorType> {
         this.editorMode = editorMode;
-        this.isBulk = false;
+        this.editorBulkMode = { isBulk: false };
         await this.initMds(groupId, mdsId, repository);
         for (const widget of this.widgets) {
             widget.initWithValues(initialValues);
@@ -777,7 +785,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             !widget.getHasUnsavedDefault()
         ) {
             return null;
-        } else if (!this.isBulk) {
+        } else if (!this.editorBulkMode.isBulk) {
             return widget.getValue();
         } else {
             switch (widget.getBulkMode()) {

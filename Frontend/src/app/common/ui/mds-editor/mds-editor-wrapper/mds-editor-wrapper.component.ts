@@ -11,7 +11,7 @@ import {
 import { first } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
-import { BulkBehaviour, MdsComponent } from '../../mds/mds.component';
+import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import {
     EditorMode,
@@ -44,7 +44,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
 
     @Input() addWidget = false;
     @Input() allowReplacing = true;
-    @Input() bulkBehaviour = BulkBehaviour.Default;
+    @Input() bulkBehaviour = BulkBehavior.Default;
     @Input() create: string;
     @Input() currentValues: Values;
     @Input() customTitle: string;
@@ -204,10 +204,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         this.isLoading = true;
         try {
             if (this.nodes) {
-                this.editorType = await this.mdsEditorInstance.initWithNodes(
-                    this.nodes,
-                    this.groupId,
-                );
+                this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, {
+                    groupId: this.groupId,
+                    bulkBehavior: this.bulkBehaviour,
+                });
             } else {
                 this.editorType = await this.mdsEditorInstance.initWithoutNodes(
                     this.groupId,

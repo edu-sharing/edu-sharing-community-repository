@@ -286,7 +286,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
             }
         }
         if (constraints.supportsBulk === false) {
-            if (this.mdsEditorInstance.isBulk) {
+            if (this.mdsEditorInstance.editorBulkMode.isBulk) {
                 return 'Not supported in bulk mode';
             }
         }

@@ -17,7 +17,7 @@ import {FrameEventsService} from "../../../../core-module/core.module";
 import {NodeHelper} from "../../../../core-ui-module/node-helper";
 import {OPEN_URL_MODE} from "../../../../core-module/ui/ui-constants";
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
-import {BulkBehaviour, MdsComponent} from '../../../../common/ui/mds/mds.component';
+import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
 import {BehaviorSubject, Observable, Observer} from 'rxjs';
 import {MdsEditorWrapperComponent} from '../../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
@@ -31,7 +31,7 @@ import {MdsEditorWrapperComponent} from '../../../../common/ui/mds-editor/mds-ed
   ]
 })
 export class SimpleEditMetadataComponent  {
-  readonly BulkBehaviour = BulkBehaviour;
+  readonly BulkBehaviour = BulkBehavior;
   @ViewChild('mds') mds : MdsEditorWrapperComponent;
   @Input() nodes : Node[];
   @Input() fromUpload : boolean;
