@@ -271,7 +271,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
             let criterias: any[] = [];
             if (this.mdsEditorInstanceService.editorMode === 'search') {
-                const values = (await this.mdsEditorInstanceService.getValues());
+                const values = await this.mdsEditorInstanceService.getValues();
                 delete values[this.definition.id];
                 values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
                     this.mdsEditorInstanceService.searchService.searchTerm,
@@ -407,7 +407,11 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * @throws UserPresentableError
      */
-    async initWithNodes(nodes: Node[], groupIdIn: string = null, refetch = true): Promise<EditorType> {
+    async initWithNodes(
+        nodes: Node[],
+        groupIdIn: string = null,
+        refetch = true,
+    ): Promise<EditorType> {
         this.editorMode = 'nodes';
         if (refetch) {
             this.nodes$.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
@@ -416,7 +420,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         this.isBulk = this.getIsBulk(this.nodes$.value);
         let groupId;
-        if(groupIdIn) {
+        if (groupIdIn) {
             groupId = groupIdIn;
         } else {
             groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
@@ -558,7 +562,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     async getValues(node?: Node): Promise<Values> {
         this.updateIsValid();
         // same behaviour as old mds, do not return values until it is valid
-        if(!this.isValid$.value) {
+        if (!this.isValid$.value) {
             this.showMissingRequiredWidgets(true);
             return null;
         }
@@ -588,7 +592,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
         // `getValues()`.
         for (const widget of this.nativeWidgets) {
-            values = widget.getValues ? (await widget.getValues(values)) : values;
+            values = widget.getValues ? await widget.getValues(values) : values;
         }
 
         return values;
@@ -672,7 +676,11 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private updateIsValid(): void {
-        const allAreValid = this.widgets.every((state) => state.getStatus() !== 'INVALID') && this.nativeWidgets.every((state) => !state.getStatus || state.getStatus() !== 'INVALID');
+        const allAreValid =
+            this.widgets.every((state) => state.getStatus() !== 'INVALID') &&
+            this.nativeWidgets.every(
+                (state) => !state.getStatus || state.getStatus() !== 'INVALID',
+            );
         this.isValid$.next(allAreValid);
     }
 
@@ -754,10 +762,12 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private async getNodeValuePairs(): Promise<{ node: Node; values: Values }[]> {
-        return Promise.all(this.nodes$.value.map(async (node) => ({
-            node,
-            values: await this.getValues(node),
-        })));
+        return Promise.all(
+            this.nodes$.value.map(async (node) => ({
+                node,
+                values: await this.getValues(node),
+            })),
+        );
     }
 
     private getNewPropertyValue(widget: Widget, oldPropertyValue?: string[]): string[] {
