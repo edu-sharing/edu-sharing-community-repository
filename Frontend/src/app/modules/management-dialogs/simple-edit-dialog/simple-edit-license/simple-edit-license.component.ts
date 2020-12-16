@@ -115,7 +115,6 @@ export class SimpleEditLicenseComponent {
           this.ccProfileUrl = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_PROFILE_URL, '');
           this.ccSourceUrl = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_SOURCE_URL, '');
           const vcard = new VCard(NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, '', '',false));
-          console.log(license);
           let isValid = true;
           if(license) {
             if (license.startsWith('CC_BY')) {

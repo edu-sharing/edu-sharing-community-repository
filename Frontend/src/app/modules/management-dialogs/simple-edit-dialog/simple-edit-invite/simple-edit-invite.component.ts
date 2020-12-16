@@ -158,7 +158,6 @@ export class SimpleEditInviteComponent {
     let authority: string = null;
     if (this.orgGroup.value) {
       if (this.orgGroup.value === 'unset') {
-        console.log('unset');
         // do nothing
       } else {
         authority = this.orgGroup.value;
@@ -306,7 +305,6 @@ export class SimpleEditInviteComponent {
       }
     }
     this.stablePermissionState = !invalid;
-    console.log(activeToggle, unset, invalid);
     if (unset || invalid) {
       this.orgGroup.value = 'unset';
     } else {
