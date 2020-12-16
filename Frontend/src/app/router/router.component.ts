@@ -28,6 +28,7 @@ import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
 import {Routes} from '@angular/router';
+import {CookieInfoComponent} from '../common/ui/cookie-info/cookie-info.component';
 
 @Component({
     selector: 'router',
@@ -39,6 +40,7 @@ export class RouterComponent implements DoCheck, AfterViewInit {
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
 
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
+    @ViewChild('cookie') cookie: CookieInfoComponent;
 
     private numberOfChecks = 0;
     private consecutiveTransgression = 0;
@@ -75,6 +77,7 @@ export class RouterComponent implements DoCheck, AfterViewInit {
 
     ngAfterViewInit(): void {
         this.mainNavService.registerDialogs(this.management);
+        this.mainNavService.registerCookieInfo(this.cookie);
     }
 
     private monitorChecks(): void {
