@@ -710,11 +710,15 @@
         "Region": "Bundesland",
         "Country": "Land",
         "X-ORCID": "ORCID",
-        "X-GND-URI": "GND-URI"
+        "X-GND-URI": "GND-URI",
+        "X-ROR": "ROR (Research Organization Registry)",
+        "X-Wikidata": "Wikidata-Eintrag"
     },
     "VCARD_HINT": {
         "X-ORCID": "Verweis auf einen persistenten ORCID-Identifier. <a target='blank' href='https://orcid.org/'>Registrierung & Infos</a>",
-        "X-GND-URI": "Verweis auf eine persistente GND-URI der Deutschen Nationalbibliothek. <a target='blank' href='https://portal.dnb.de/opac.htm'>Personen suchen</a>"
+        "X-GND-URI": "Verweis auf eine persistente GND-URI der Deutschen Nationalbibliothek. <a target='blank' href='https://portal.dnb.de/opac.htm'>Personen suchen</a>",
+        "X-ROR": "Verweis auf einen Eintrag bei Research Organization Registry. <a target='blank' href='https://ror.org/'>Infos</a>",
+        "X-Wikidata": "Verweis auf einen Eintag bei Wikidata. <a target='blank' href='https://www.wikidata.org/wiki/Wikidata:Main_Page'>Infos</a>"
     },
     "ICON_LABELS": {
         "more_vert": "Optionen",

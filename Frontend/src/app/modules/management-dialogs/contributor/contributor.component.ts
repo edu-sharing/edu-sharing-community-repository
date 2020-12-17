@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {DialogButton, RestNodeService} from "../../../core-module/core.module";
+import {DialogButton, RestNodeService, RestSearchService, VCardResult} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
@@ -9,6 +9,10 @@ import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {debounceTime, filter, startWith, switchMap} from 'rxjs/operators';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {FormControl} from '@angular/forms';
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 
 @Component({
   selector: 'workspace-contributor',
@@ -46,6 +50,8 @@ export class WorkspaceContributorComponent  {
   private editButtons: DialogButton[];
   private static TYPE_PERSON = 0;
   private static TYPE_ORG = 1;
+  private fullName = new BehaviorSubject('');
+  suggestionPersons$: Observable<VCardResult[]>;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
@@ -77,6 +83,7 @@ export class WorkspaceContributorComponent  {
   }
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
+  givenname = new FormControl('');
   public remove(data:any[],pos:number){
     this.dialogTitle='WORKSPACE.CONTRIBUTOR.DELETE_TITLE';
     this.dialogMessage='WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE';
@@ -190,9 +197,16 @@ export class WorkspaceContributorComponent  {
   }
   public constructor(
     private nodeService:RestNodeService,
+    private searchService:RestSearchService,
     private translate:TranslateService,
     private toast:Toast,
-  ){
+  ) {
+    this.suggestionPersons$ = this.fullName.pipe(
+        startWith(''),
+        filter((v) => v !== ''),
+        debounceTime(200),
+        switchMap((v) => this.searchService.searchContributors(v.trim())),
+    );
     this.buttons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
         new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveContributor())
@@ -203,4 +217,15 @@ export class WorkspaceContributorComponent  {
     ];
   }
 
+    updatePersonSuggestions() {
+
+    }
+
+  setFullName() {
+    this.fullName.next(this.edit.givenname + ' ' + this.edit.surname);
+  }
+
+  useVCardSuggestion(event: MatAutocompleteSelectedEvent) {
+    this.edit = event.option.value;
+  }
 }

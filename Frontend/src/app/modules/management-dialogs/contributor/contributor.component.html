@@ -58,17 +58,34 @@
         <div class="givenname">
           <mat-form-field>
             <mat-label>{{'VCARD.Givenname' | translate}}</mat-label>
-            <input matInput id="givenname" [(ngModel)]="edit.givenname">
+            <input matInput id="givenname"
+                   [(ngModel)]="edit.givenname"
+                   (ngModelChange)="setFullName()"
+                   [matAutocomplete]="autoPerson">
           </mat-form-field>
         </div>
         <div class="surname">
           <mat-form-field>
             <mat-label>{{'VCARD.Surname' | translate}}</mat-label>
-            <input matInput id="surname" [(ngModel)]="edit.surname">
+            <input matInput id="surname"
+                   [(ngModel)]="edit.surname"
+                   (ngModelChange)="setFullName()"
+                   [matAutocomplete]="autoPerson">
           </mat-form-field>
         </div>
+
+        <mat-autocomplete
+                #autoPerson="matAutocomplete"
+                class="mat-autocomplete-person"
+                (optionSelected)="useVCardSuggestion($event)"
+        >
+          <mat-option *ngFor="let person of suggestionPersons$ | async" [value]="person.vcard">
+              TEST {{ person.vcard?.givenname }} {{ person.vcard?.surname }}
+          </mat-option>
+        </mat-autocomplete>
+
       </div>
-      <button mat-button color="primary" class="more clickable" (click)="persistentIds=!persistentIds">
+      <button mat-button color="primary" class="more" (click)="persistentIds=!persistentIds">
         <i icon iconId="keyboard_arrow_down" *ngIf="persistentIds"></i>
         <i icon iconId="keyboard_arrow_right" *ngIf="!persistentIds"></i>
         <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
@@ -108,6 +125,38 @@
           <mat-label>{{'VCARD.Org' | translate}}</mat-label>
           <input matInput id="org" [(ngModel)]="edit.org">
         </mat-form-field>
+      </div>
+      <button mat-button color="primary" class="more" (click)="persistentIds=!persistentIds">
+        <i icon iconId="keyboard_arrow_down" *ngIf="persistentIds"></i>
+        <i icon iconId="keyboard_arrow_right" *ngIf="!persistentIds"></i>
+        <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
+      </button>
+      <div *ngIf="persistentIds" [@overlay]="more" class="persistent-id">
+        <div class="table">
+          <mat-form-field floatLabel="always">
+            <mat-label>{{'VCARD.X-ROR' | translate}}</mat-label>
+            <input matInput
+                   id="ror"
+                   [(ngModel)]="edit.ror"
+                   pattern="https?:\/\/ror.org\/.+"
+                   placeholder="https://ror.org/abcdef000"
+            >
+            <mat-hint innerHTML="{{'VCARD_HINT.X-ROR' | translate}}"></mat-hint>
+          </mat-form-field>
+        </div>
+        <div class="table">
+          <mat-form-field floatLabel="always">
+            <mat-label>{{'VCARD.X-Wikidata' | translate}}</mat-label>
+            <input matInput
+                   id="wikidata"
+                   [(ngModel)]="edit.wikidata"
+                   pattern="https?://www.wikidata.org/wiki/.+"
+                   placeholder="https://www.wikidata.org/wiki/Q000000"
+            >
+            <mat-hint innerHTML="{{'VCARD_HINT.X-Wikidata' | translate}}"></mat-hint>
+          </mat-form-field>
+        </div>
+        <info-message *ngIf="edit.orcid || edit.gnduri">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</info-message>
       </div>
     </mat-tab>
   </mat-tab-group>
