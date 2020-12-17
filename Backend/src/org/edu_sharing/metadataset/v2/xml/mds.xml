@@ -337,6 +337,15 @@
 				<type>text</type>
 				<hideIfEmpty>true</hideIfEmpty>
 			</widget>
+			<!-- ipn fields, because 5.0 does not support contexts for collection editorial metadata -->
+			<widget>
+				<id>ccm:ipn_didactics_concept</id>
+				<caption>Fachdidaktisches Konzept</caption>
+				<placeholder>z.B. Forschendes Lernen</placeholder>
+				<type>multivalueFixedBadges</type>
+				<valuespace>ipn_didactics_concept.xml</valuespace>
+				<valuespace_i18n>ipn_didactics_concept_i18n</valuespace_i18n>
+			</widget>
 		</widgets>
 		<templates>
 			<template>
@@ -540,6 +549,7 @@
 					<ccm:taxonid>
 					<ccm:educationalcontext>
 					<cclom:general_keyword>
+					<ccm:ipn_didactics_concept>
 				]]></html>
 			</template>
 		</templates>
