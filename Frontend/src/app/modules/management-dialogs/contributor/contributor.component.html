@@ -41,6 +41,7 @@
 ></modal-dialog>
 <card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
       subtitle="{{'WORKSPACE.CONTRIBUTOR.TYPE.'+editScopeNew.toUpperCase() | translate}}"
+      priority="3"
       (onCancel)="cancel()"
       [buttons]="editButtons"
       *ngIf="edit"
