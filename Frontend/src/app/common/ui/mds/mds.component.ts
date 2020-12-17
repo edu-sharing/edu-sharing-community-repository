@@ -68,7 +68,7 @@ export class MdsComponent {
     /**
      * bulk behaviour: this controls how the bulk feature shall behave
      */
-    @Input() bulkBehaviour = BulkBehaviour.Default;
+    @Input() bulkBehaviour = BulkBehavior.Default;
 
     private activeAuthorType: number;
     private static VCARD_FIELDS = ['Surname', 'Givenname'];
@@ -1032,7 +1032,7 @@ export class MdsComponent {
         const id = this.getDomId(widget.id + '_bulk');
         return (
             `<div class="bulk-enable switch" ` +
-            (this.bulkBehaviour === BulkBehaviour.Replace ? 'style="display:none"' : '') +
+            (this.bulkBehaviour === BulkBehavior.Replace ? 'style="display:none"' : '') +
             `>
                 <label>
                   ` +
@@ -1047,7 +1047,7 @@ export class MdsComponent {
             widget.id +
             `', event)"
                     ` +
-            (this.bulkBehaviour === BulkBehaviour.Replace ? 'checked' : '') +
+            (this.bulkBehaviour === BulkBehavior.Replace ? 'checked' : '') +
             `>
                   <span class="lever"></span>
                  </label>
@@ -1061,7 +1061,7 @@ export class MdsComponent {
         const id = this.getDomId(widget.id + '_bulk');
         return (
             `<div class="bulk-enable" ` +
-            (this.bulkBehaviour === BulkBehaviour.Replace ? 'style="display:none"' : '') +
+            (this.bulkBehaviour === BulkBehavior.Replace ? 'style="display:none"' : '') +
             `>
                 <input type="radio" name="` +
             id +
@@ -1072,7 +1072,7 @@ export class MdsComponent {
             `.setBulkMode('` +
             widget.id +
             `', event)"` +
-            (this.bulkBehaviour === BulkBehaviour.Default ? 'checked' : '') +
+            (this.bulkBehaviour === BulkBehavior.Default ? 'checked' : '') +
             `>
                 <label for="` +
             id +
@@ -1088,7 +1088,7 @@ export class MdsComponent {
             `.setBulkMode('` +
             widget.id +
             `', event)"` +
-            (this.bulkBehaviour === BulkBehaviour.Replace ? 'checked' : '') +
+            (this.bulkBehaviour === BulkBehavior.Replace ? 'checked' : '') +
             `>
                 <label for="` +
             id +
@@ -1139,7 +1139,7 @@ export class MdsComponent {
             'class="' +
             css +
             '"';
-        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehavior.Replace) {
             html += ' disabled';
         }
         html += '>';
@@ -1830,7 +1830,7 @@ export class MdsComponent {
         let html = '';
         html += this.addBulkCheckbox(widget);
         html += '<textarea class="materialize-textarea" id="' + this.getWidgetDomId(widget) + '"';
-        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehavior.Replace) {
             html += ' disabled';
         }
         if (widget.placeholder) {
@@ -1975,7 +1975,7 @@ export class MdsComponent {
                     max: widget.max,
                 },
             });
-            if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+            if (this.isBulkMode() && this.bulkBehaviour !== BulkBehavior.Replace) {
                 slider.setAttribute('disabled', 'true');
             }
         }, 5);
@@ -1991,7 +1991,7 @@ export class MdsComponent {
             );
         }
         html += '<select id="' + this.getWidgetDomId(widget) + '"';
-        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehavior.Replace) {
             html += ' disabled';
         }
         html += '>';
@@ -3266,7 +3266,7 @@ export class MdsComponent {
         return properties;
     }
 }
-export enum BulkBehaviour {
+export enum BulkBehavior {
     Default, // default equals no replace on choose, but show options
     Replace, // Don't display settings, simply replace for all (usefull after uploads)
 }

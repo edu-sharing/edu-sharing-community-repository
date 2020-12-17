@@ -17,7 +17,7 @@ import {FrameEventsService} from '../../../../core-module/core.module';
 import {NodeHelper} from '../../../../core-ui-module/node-helper';
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
-import {BulkBehaviour, MdsComponent} from '../../../../common/ui/mds/mds.component';
+import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
 import {Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {WorkspaceShareComponent} from '../../../workspace/share/share.component';
@@ -115,7 +115,6 @@ export class SimpleEditLicenseComponent {
           this.ccProfileUrl = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_PROFILE_URL, '');
           this.ccSourceUrl = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_SOURCE_URL, '');
           const vcard = new VCard(NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, '', '',false));
-          console.log(license);
           let isValid = true;
           if(license) {
             if (license.startsWith('CC_BY')) {

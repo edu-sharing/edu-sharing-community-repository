@@ -17,10 +17,11 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { BulkMode, InputStatus, RequiredMode } from '../../types';
+import { BulkMode, EditorBulkMode, InputStatus, RequiredMode } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
+import { BulkBehavior } from '../../../mds/mds.component';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
 // its `FormFieldControl`.
@@ -106,7 +107,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         return this.isHidden ? 'hidden' : 'shown';
     }
 
-    readonly isBulk: boolean;
+    readonly editorBulkMode: EditorBulkMode;
     readonly labelId: string;
     readonly descriptionId: string;
     bulkMode: BehaviorSubject<BulkMode>;
@@ -119,7 +120,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         private cdr: ChangeDetectorRef,
         private formFieldRegistration: FormFieldRegistrationService,
     ) {
-        this.isBulk = this.mdsEditorInstance.isBulk;
+        this.editorBulkMode = this.mdsEditorInstance.editorBulkMode;
         const id = Math.random().toString(36).substr(2);
         this.labelId = id + '_label';
         this.descriptionId = id + '_description';
@@ -142,8 +143,10 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         if (this.label === true) {
             this.label = this.widget.definition.caption;
         }
-        if (this.widget && this.isBulk) {
-            this.bulkMode = new BehaviorSubject('no-change');
+        if (this.widget && this.editorBulkMode.isBulk) {
+            this.bulkMode = new BehaviorSubject(
+                this.editorBulkMode.bulkBehavior === BulkBehavior.Replace ? 'replace' : 'no-change',
+            );
             this.bulkMode.subscribe((bulkMode) => this.widget.setBulkMode(bulkMode));
         }
         if (this.control) {
@@ -163,6 +166,14 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
 
     shouldShowError(): boolean {
         return !!this.control?.invalid && (this.control.touched || this.control.dirty);
+    }
+
+    shouldShowBulkEditToggle(): boolean {
+        return (
+            this.editorBulkMode.isBulk &&
+            this.editorBulkMode.bulkBehavior === BulkBehavior.Default &&
+            !!this.widget
+        );
     }
 
     private initFormControl(formControl: AbstractControl): void {

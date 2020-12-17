@@ -17,7 +17,7 @@ import {FrameEventsService} from '../../../../core-module/core.module';
 import {NodeHelper} from '../../../../core-ui-module/node-helper';
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
-import {BulkBehaviour, MdsComponent} from '../../../../common/ui/mds/mds.component';
+import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
 import {Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {Helper} from '../../../../core-module/rest/helper';
@@ -158,7 +158,6 @@ export class SimpleEditInviteComponent {
     let authority: string = null;
     if (this.orgGroup.value) {
       if (this.orgGroup.value === 'unset') {
-        console.log('unset');
         // do nothing
       } else {
         authority = this.orgGroup.value;
@@ -306,7 +305,6 @@ export class SimpleEditInviteComponent {
       }
     }
     this.stablePermissionState = !invalid;
-    console.log(activeToggle, unset, invalid);
     if (unset || invalid) {
       this.orgGroup.value = 'unset';
     } else {

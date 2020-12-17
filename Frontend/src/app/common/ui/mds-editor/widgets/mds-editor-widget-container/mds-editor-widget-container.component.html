@@ -6,7 +6,7 @@
   <!-- <span *ngIf="widget?.getHasChanged()" class="changes-notice">{{
     'MDS.HAS_CHANGES' | translate
   }}</span> -->
-  <mat-slide-toggle *ngIf="isBulk && widget" (change)="onBulkEditToggleChange($event)">{{
+  <mat-slide-toggle *ngIf="shouldShowBulkEditToggle()" (change)="onBulkEditToggleChange($event)">{{
     'MDS.BULK_EDIT' | translate
   }}</mat-slide-toggle>
 </div>

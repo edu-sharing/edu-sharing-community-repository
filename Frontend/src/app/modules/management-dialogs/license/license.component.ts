@@ -142,7 +142,7 @@ export class WorkspaceLicenseComponent  {
     this.readLicense();
     this.mdsEditorInstanceService.initWithNodes([({
         properties
-    } as any)], null, false);
+    } as any)], { refetch: false });
     this.loading=false;
     this.updateButtons();
   }

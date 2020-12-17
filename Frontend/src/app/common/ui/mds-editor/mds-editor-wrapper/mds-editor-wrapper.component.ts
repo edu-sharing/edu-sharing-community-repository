@@ -9,11 +9,18 @@ import {
     ViewChild,
 } from '@angular/core';
 import { first } from 'rxjs/operators';
-import {Node, RestConstants} from '../../../../core-module/core.module';
+import { Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
-import { BulkBehaviour, MdsComponent } from '../../mds/mds.component';
+import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import {EditorMode, EditorType, MdsWidget, Suggestions, UserPresentableError, Values} from '../types';
+import {
+    EditorMode,
+    EditorType,
+    MdsWidget,
+    Suggestions,
+    UserPresentableError,
+    Values,
+} from '../types';
 
 /**
  * Wrapper component to select between the legacy `<mds>` component and the Angular-native
@@ -37,7 +44,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
 
     @Input() addWidget = false;
     @Input() allowReplacing = true;
-    @Input() bulkBehaviour = BulkBehaviour.Default;
+    @Input() bulkBehaviour = BulkBehavior.Default;
     @Input() create: string;
     @Input() currentValues: Values;
     @Input() customTitle: string;
@@ -175,7 +182,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     async onSave(): Promise<void> {
         this.isLoading = true;
         try {
-            if(!this.mdsEditorInstance.getCanSave()) {
+            if (!this.mdsEditorInstance.getCanSave()) {
                 this.mdsEditorInstance.showMissingRequiredWidgets();
                 return;
             }
@@ -197,7 +204,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         this.isLoading = true;
         try {
             if (this.nodes) {
-                this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, this.groupId);
+                this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, {
+                    groupId: this.groupId,
+                    bulkBehavior: this.bulkBehaviour,
+                });
             } else {
                 this.editorType = await this.mdsEditorInstance.initWithoutNodes(
                     this.groupId,
@@ -207,8 +217,14 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                     this.currentValues,
                 );
             }
-            if(!this.editorType){
-                console.warn('mds ' + this.setId + ' at ' + this.repository + ' did not specify any rendering type');
+            if (!this.editorType) {
+                console.warn(
+                    'mds ' +
+                        this.setId +
+                        ' at ' +
+                        this.repository +
+                        ' did not specify any rendering type',
+                );
                 this.editorType = 'legacy';
             }
         } catch (error) {
