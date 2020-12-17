@@ -87,5 +87,5 @@ public interface SearchService {
 
 	SearchResultNodeRef searchFingerPrint(String nodeId);
 
-	public Set<Map<String, Serializable>> searchContributers(String suggest, List<String> fields, List<String> contributerProperties) throws IOException;
+	public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties) throws IOException;
 }

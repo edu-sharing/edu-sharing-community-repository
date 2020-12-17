@@ -276,23 +276,23 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    enum CONTRIBUTER_PROP {firstname,lastname,email,url,uid};
+    enum CONTRIBUTOR_PROP {firstname,lastname,email,url,uid};
 
     @Override
-    public Set<Map<String, Serializable>> searchContributers(String suggest, List<String> fields, List<String> contributerProperties) throws IOException{
+    public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties) throws IOException{
         checkClient();
         SearchRequest searchRequest = new SearchRequest("workspace");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         List<String> searchFields = new ArrayList<>();
         if(fields == null || fields.size() == 0){
-            for(CONTRIBUTER_PROP att : CONTRIBUTER_PROP.values()){
-                searchFields.add("contributer." + att.name());
+            for(CONTRIBUTOR_PROP att : CONTRIBUTOR_PROP.values()){
+                searchFields.add("contributor." + att.name());
             }
         }else{
             for(String f : fields){
-                if(Stream.of(CONTRIBUTER_PROP.values()).anyMatch(v -> v.name().equals(f))){
-                    searchFields.add("contributer." + f);
+                if(Stream.of(CONTRIBUTOR_PROP.values()).anyMatch(v -> v.name().equals(f))){
+                    searchFields.add("contributor." + f);
                 }
             }
         }
@@ -303,10 +303,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             qb.should(QueryBuilders.wildcardQuery(searchField,search));
         }
 
-        if(contributerProperties.size() > 0) {
+        if(contributorProperties.size() > 0) {
             BoolQueryBuilder bqb = QueryBuilders.boolQuery().minimumShouldMatch(1);
-            for (String contributerProp : contributerProperties) {
-                bqb.should(QueryBuilders.termQuery("contributer.property", contributerProp));
+            for (String contributorProp : contributorProperties) {
+                bqb.should(QueryBuilders.termQuery("contributor.property", contributorProp));
             }
             qb.must(bqb);
         }
@@ -323,16 +323,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
         Set<Map<String,Serializable>> result = new HashSet<>();
         for (SearchHit hit : hits) {
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-            ArrayList<Map<String,Serializable>> contributer = (ArrayList<Map<String,Serializable>>) sourceAsMap.get("contributer");
+            ArrayList<Map<String,Serializable>> contributor = (ArrayList<Map<String,Serializable>>) sourceAsMap.get("contributor");
 
             List<Map<String,Serializable>> remove = new ArrayList<>();
-            for(Map<String,Serializable> map:contributer){
+            for(Map<String,Serializable> map:contributor){
                 boolean inResult = false;
                 boolean propertyIsInFilter = true;
                 for(Map.Entry<String,Serializable> entry : map.entrySet()){
                     if(entry.getKey().equals("property")){
-                        if(contributerProperties.size() > 0){
-                            if(!contributerProperties.contains(entry.getValue())){
+                        if(contributorProperties.size() > 0){
+                            if(!contributorProperties.contains(entry.getValue())){
                                 propertyIsInFilter = false;
                             }
                         }
@@ -350,8 +350,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
                 if(!inResult || !propertyIsInFilter)remove.add(map);
             }
-            for(Map<String,Serializable> map : remove) contributer.remove(map);
-            if(contributer.size() > 0) result.addAll(contributer);
+            for(Map<String,Serializable> map : remove) contributor.remove(map);
+            if(contributor.size() > 0) result.addAll(contributor);
         }
         return result;
     }

@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
@@ -28,8 +27,6 @@ import org.edu_sharing.service.search.SearchService.CombineMode;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -409,10 +406,10 @@ public class SearchApi {
 
 
 	@GET
-	@Path("/queriesV2/{repository}/contributer")
+	@Path("/queriesV2/{repository}/contributor")
 	@Consumes({ "application/json" })
 
-	@ApiOperation(value = "Search for contributers", notes = "")
+	@ApiOperation(value = "Search for contributors", notes = "")
 
 	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = List.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
@@ -421,18 +418,18 @@ public class SearchApi {
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 
-	public Response searchContributer(
+	public Response searchContributor(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "search word", required = true) @QueryParam("searchWord") String searchWord,
 			@ApiParam(value = "define which authority fields should be searched: ['firstname', 'lastname', 'email', 'uuid', 'url']") @QueryParam("fields") List<String> fields,
-			@ApiParam(value = "define which contributer props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']") @QueryParam("contributerProperties") List<String> contributerProperties
+			@ApiParam(value = "define which contributor props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']") @QueryParam("contributorProperties") List<String> contributorProperties
 			,
 			@Context HttpServletRequest req) {
 
 		try {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			Set<Map<String, Serializable>> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributers(searchWord, fields,contributerProperties);
+			Set<Map<String, Serializable>> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributors(searchWord, fields,contributorProperties);
 			return Response.status(Response.Status.OK).entity(result).build();
 
 		}  catch (Throwable t) {
