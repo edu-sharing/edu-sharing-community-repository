@@ -279,7 +279,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     enum CONTRIBUTOR_PROP {firstname,lastname,email,url,uid};
 
     @Override
-    public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties) throws IOException{
+    public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException{
         checkClient();
         SearchRequest searchRequest = new SearchRequest("workspace");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -311,6 +311,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
             qb.must(bqb);
         }
 
+        if(contributorKind == null){
+            contributorKind = ContributorKind.PERSON;
+        }
+        if(contributorKind == ContributorKind.ORGANIZATION){
+            qb.must(QueryBuilders.existsQuery("contributor.X-ROR"));
+        }else{
+            qb.must(QueryBuilders.existsQuery("contributor.X-ORCID"));
+        }
+
+
         searchSourceBuilder.query(qb);
         searchSourceBuilder.from(0);
         searchSourceBuilder.size(1000);
@@ -329,6 +339,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
             for(Map<String,Serializable> map:contributor){
                 boolean inResult = false;
                 boolean propertyIsInFilter = true;
+
+                if(contributorKind == ContributorKind.ORGANIZATION){
+                    if(!map.containsKey("X-ROR")){
+                        remove.add(map);
+                        continue;
+                    }
+                }else{
+                    if(!map.containsKey("X-ORCID")){
+                        remove.add(map);
+                        continue;
+                    }
+                }
+
                 for(Map.Entry<String,Serializable> entry : map.entrySet()){
                     if(entry.getKey().equals("property")){
                         if(contributorProperties.size() > 0){

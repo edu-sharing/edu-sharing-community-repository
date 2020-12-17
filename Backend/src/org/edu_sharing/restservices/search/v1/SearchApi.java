@@ -421,15 +421,15 @@ public class SearchApi {
 	public Response searchContributor(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "search word", required = true) @QueryParam("searchWord") String searchWord,
+			@ApiParam(value = "contributor kind", required = true, defaultValue = "PERSON") @QueryParam("contributorKind") SearchService.ContributorKind contributorKind,
 			@ApiParam(value = "define which authority fields should be searched: ['firstname', 'lastname', 'email', 'uuid', 'url']") @QueryParam("fields") List<String> fields,
-			@ApiParam(value = "define which contributor props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']") @QueryParam("contributorProperties") List<String> contributorProperties
-			,
+			@ApiParam(value = "define which contributor props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']") @QueryParam("contributorProperties") List<String> contributorProperties,
 			@Context HttpServletRequest req) {
 
 		try {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			Set<Map<String, Serializable>> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributors(searchWord, fields,contributorProperties);
+			Set<Map<String, Serializable>> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributors(searchWord, fields, contributorProperties, contributorKind);
 			return Response.status(Response.Status.OK).entity(result).build();
 
 		}  catch (Throwable t) {

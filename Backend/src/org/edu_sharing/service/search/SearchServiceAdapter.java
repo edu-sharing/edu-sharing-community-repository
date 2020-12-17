@@ -107,7 +107,7 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties) throws IOException {
+	public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
 		return new HashSet<>();
 	}
 }

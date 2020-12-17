@@ -32,6 +32,11 @@ public interface SearchService {
 		OR
 	};
 
+	public static enum ContributorKind {
+		PERSON,
+		ORGANIZATION
+	}
+
 	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped,boolean onlyMemberShips) throws Throwable;
 
     List<String> getAllMediacenters() throws Exception;
@@ -87,5 +92,5 @@ public interface SearchService {
 
 	SearchResultNodeRef searchFingerPrint(String nodeId);
 
-	public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties) throws IOException;
+	public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind kind) throws IOException;
 }
