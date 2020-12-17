@@ -15,7 +15,8 @@ import { Node } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import {
-    Constraints, InputStatus,
+    Constraints,
+    InputStatus,
     MdsEditorWidgetComponent,
     MdsView,
     MdsWidgetType,
@@ -39,7 +40,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {MdsEditorWidgetFileUploadComponent} from '../widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
+import { MdsEditorWidgetFileUploadComponent } from '../widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -225,6 +226,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     }
 
     private injectWidget(widget: Widget, element: Element): void {
+        this.updateWidgetWithHTMLAttributes(widget);
+        this.mdsEditorInstance.updateWidgetDefinition();
         const WidgetComponent = this.getWidgetComponent(widget);
         if (WidgetComponent === undefined) {
             UIHelper.injectAngularComponent(
@@ -241,8 +244,6 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         } else if (WidgetComponent === null) {
             return;
         }
-        this.updateWidgetWithHTMLAttributes(widget);
-        this.mdsEditorInstance.updateWidgetDefinition(widget);
         UIHelper.injectAngularComponent(
             this.factoryResolver,
             this.containerRef,
@@ -269,14 +270,16 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         const htmlRef = this.container.nativeElement.querySelector(
             widget.definition.id.replace(':', '\\:'),
         );
-        htmlRef?.getAttributeNames().forEach((attribute) => {
-            // map the extended attribute
-            const value = htmlRef.getAttribute(attribute);
-            if (attribute === 'isextended' || attribute === 'extended') {
-                attribute = 'isExtended';
+        if (htmlRef) {
+            for (let attribute of htmlRef.getAttributeNames()) {
+                // map the extended attribute
+                const value = htmlRef.getAttribute(attribute);
+                if (attribute === 'isextended' || attribute === 'extended') {
+                    attribute = 'isExtended';
+                }
+                (widget.definition as any)[attribute] = value;
             }
-            (widget.definition as any)[attribute] = value;
-        });
+        }
     }
 
     private violatesConstraints(constraints: Constraints): string | null {

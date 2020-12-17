@@ -123,7 +123,6 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     }
 
     add(value: DisplayValue): void {
-        console.log(`add value: ${value}`);
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
             this.chipsControl.setValue([...this.chipsControl.value, value]);
         }

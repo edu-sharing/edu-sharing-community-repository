@@ -387,7 +387,6 @@ export class MdsEditorInstanceService implements OnDestroy {
     mdsInitDone = new ReplaySubject<void>(1);
     /** Fires when all widgets have been injected. */
     mdsInflated = new ReplaySubject<void>(1);
-    widgetsChanged = new ReplaySubject<void>(1);
     suggestions$ = new BehaviorSubject<Suggestions>(null);
 
     /**
@@ -395,7 +394,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * Widgets are not added or removed after initialization, but hold mutable state.
      */
-    widgets: Widget[];
+    widgets: BehaviorSubject<Widget[]> = new BehaviorSubject(null);
     /**
      * Active, "native" widgets (which are not defined via mds properties directly).
      *
@@ -469,7 +468,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
         await this.initMds(groupId, mdsId, undefined, this.nodes$.value);
-        for (const widget of this.widgets) {
+        for (const widget of this.widgets.value) {
             widget.initWithNodes(this.nodes$.value);
         }
         this.updateCompletionState();
@@ -486,7 +485,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         await this.initMds(groupId, mdsId, repository);
-        for (const widget of this.widgets) {
+        for (const widget of this.widgets.value) {
             widget.initWithValues(initialValues);
         }
         for (const widget of this.nativeWidgets) {
@@ -504,20 +503,20 @@ export class MdsEditorInstanceService implements OnDestroy {
         //
         // TODO: Handle values in a way that allows dynamic updates.
         await this.initMds(this.groupId, this.mdsId, this.repository, this.nodes$.value);
-        for (const widget of this.widgets) {
+        for (const widget of this.widgets.value) {
             widget.initWithValues();
         }
     }
 
     getWidgetByTagName(tagName: string, viewId: string): Widget {
         tagName = tagName.toLowerCase();
-        return this.widgets.find(
+        return this.widgets.value.find(
             (widget) => widget.definition.id.toLowerCase() === tagName && widget.viewId === viewId,
         );
     }
 
     getPrimaryWidget(propertyName: string): Widget {
-        return this.widgets.find(
+        return this.widgets.value.find(
             (widget) => widget.definition.id === propertyName && widget.relation === null,
         );
     }
@@ -548,7 +547,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             // display the required hint and tell them to scroll into view until we found a missing
             // one.
             let hasBeenScrolledIntoView = false;
-            for (const [index, widget] of this.widgets.entries()) {
+            for (const [index, widget] of this.widgets.value.entries()) {
                 const hasJustBeenScrolledIntoView = widget.showMissingRequired(
                     shouldScrollIntoView && !hasBeenScrolledIntoView,
                 );
@@ -561,9 +560,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             // We already touched all widgets and scrolled one into view. Just iterate the widgets
             // starting from the one that was last scrolled into view until we find the next missing
             // one.
-            for (let i = 0; i < this.widgets.length; i++) {
-                const index = (i + this.lastScrolledIntoViewIndex + 1) % this.widgets.length;
-                const hasJustBeenScrolledIntoView = this.widgets[index].showMissingRequired(true);
+            for (let i = 0; i < this.widgets.value.length; i++) {
+                const index = (i + this.lastScrolledIntoViewIndex + 1) % this.widgets.value.length;
+                const hasJustBeenScrolledIntoView = this.widgets.value[index].showMissingRequired(true);
                 if (hasJustBeenScrolledIntoView) {
                     this.lastScrolledIntoViewIndex = index;
                     break;
@@ -609,7 +608,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             return null;
         }
 
-        let values = this.widgets
+        let values = this.widgets.value
             .filter((widget) => widget.relation === null)
             .reduce((acc, widget) => {
                 const property = widget.definition.id;
@@ -655,24 +654,9 @@ export class MdsEditorInstanceService implements OnDestroy {
         });
     }
 
-    /**
-     * Lazy widget update (e.g. widget was inflated and attributes have been parsed and now change
-     * the widget data)
-     */
-    updateWidgetDefinition(widget: Widget): void {
-        const index = this.widgets.findIndex(
-            (w) =>
-                w.definition.id === widget.definition.id &&
-                w.definition.template === widget.definition.template,
-        );
-        if (index === -1) {
-            console.warn('widget not found', widget);
-        } else {
-            this.widgets.splice(index, 1, widget);
-            this.widgetsChanged.next();
-        }
+    updateWidgetDefinition(): void {
+        this.widgets.next(this.widgets.value);
     }
-
     private async initMds(
         groupId: string,
         mdsId: string,
@@ -690,7 +674,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         const mdsDefinition = this.mdsDefinition$.value;
         const group = this.getGroup(mdsDefinition, groupId);
         this.views = this.getViews(mdsDefinition, group);
-        this.widgets = await this.generateWidgets(mdsDefinition, this.views, nodes);
+        this.widgets.next(await this.generateWidgets(mdsDefinition, this.views, nodes));
         this.mdsInitDone.next();
     }
 
@@ -699,11 +683,11 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private updateHasChanges(): void {
-        const someWidgetsHaveUserChanges = this.widgets.some(
+        const someWidgetsHaveUserChanges = this.widgets.value.some(
             (widget) =>
                 widget.getHasChanged() && widget.getIsDirty() && widget.getStatus() !== 'DISABLED',
         );
-        const someWidgetsHaveProgrammaticChanges = this.widgets.some(
+        const someWidgetsHaveProgrammaticChanges = this.widgets.value.some(
             (widget) =>
                 // Explicit default values, defined in MDS.
                 (widget.getHasUnsavedDefault() ||
@@ -719,7 +703,7 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     private updateIsValid(): void {
         const allAreValid =
-            this.widgets.every((state) => state.getStatus() !== 'INVALID') &&
+            this.widgets.value.every((state) => state.getStatus() !== 'INVALID') &&
             this.nativeWidgets.every(
                 (state) => !state.getStatus || state.getStatus() !== 'INVALID',
             );
@@ -852,7 +836,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private getCompletionStatusEntry(requiredMode: RequiredMode): CompletionStatusEntry {
-        const total = this.widgets
+        const total = this.widgets.value
             // Filter out widgets that are not shown to the user.
             .filter((widget) => widget.definition.type !== MdsWidgetType.DefaultValue)
             // Filter out native widgets since we cannot tell whether they set a value for now.

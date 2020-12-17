@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../types';
 
@@ -19,10 +20,9 @@ export class MdsEditorCoreComponent {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
-        this.hasExtendedWidgets$ = this.mdsEditorInstance.widgetsChanged.map(
-            () => this.mdsEditorInstance.widgets.some(
-                (widget) => widget.definition.isExtended,
-            ))
+        this.hasExtendedWidgets$ = this.mdsEditorInstance.widgets.pipe(map((widgets) =>
+            widgets.some((widget) => widget.definition.isExtended),
+        ));
     }
 
     clear(): void {
