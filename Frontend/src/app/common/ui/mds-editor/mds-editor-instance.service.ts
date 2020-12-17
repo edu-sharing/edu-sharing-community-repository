@@ -3,9 +3,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
+    ConfigurationService,
     Node,
     RestConnectorService,
-    RestConstants,
+    RestConstants, RestLocatorService,
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
@@ -92,7 +93,39 @@ export class MdsEditorInstanceService implements OnDestroy {
             public readonly definition: MdsWidget,
             public readonly viewId: string,
             public readonly relation: ViewRelation = null,
-        ) {}
+            public readonly variables: string[] = null,
+        ) {
+            this.replaceVariables();
+        }
+        /**
+         * replace variables from client.config inside parameters of the widget
+         */
+        private async replaceVariables() {
+            if(this.variables != null) {
+                for (const field of ['caption', 'placeholder', 'icon', 'defaultvalue']) {
+                    (this.definition as any)[field] =
+                        this.replaceVariableString((this.definition as any)[field],
+                        this.variables);
+                }
+            }
+        }
+        private replaceVariableString(string: string, variables: string[]) {
+            if (!string || !string.match('\\${.+}')) {
+                return string;
+            }
+            for (let key in variables) {
+                if ('${' + key + '}' == string) {
+                    return variables[key];
+                }
+            }
+            console.warn(
+                'mds declared variable ' +
+                string +
+                ', but it was not found in the config variables. List of known variables below',
+            );
+            console.warn(variables);
+            return string;
+        }
 
         initWithNodes(nodes: Node[]): void {
             const nodeValues = nodes.map((node) => this.readNodeValue(node, this.definition));
@@ -384,6 +417,7 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
+        private restLocator: RestLocatorService,
         private restMdsService: RestMdsService,
         private restConnector: RestConnectorService,
         private searchService: SearchService,
@@ -648,7 +682,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         const mdsDefinition = this.mdsDefinition$.value;
         const group = this.getGroup(mdsDefinition, groupId);
         this.views = this.getViews(mdsDefinition, group);
-        this.widgets = this.generateWidgets(mdsDefinition, this.views, nodes);
+        this.widgets = await this.generateWidgets(mdsDefinition, this.views, nodes);
         this.mdsInitDone.next();
     }
 
@@ -692,11 +726,11 @@ export class MdsEditorInstanceService implements OnDestroy {
         return group.views.map((viewId) => mdsDefinition.views.find((v) => v.id === viewId));
     }
 
-    private generateWidgets(
+    private async generateWidgets(
         mdsDefinition: MdsDefinition,
         views: MdsView[],
         nodes?: Node[],
-    ): Widget[] {
+    ): Promise<Widget[]> {
         const result: Widget[] = [];
         const availableWidgets = mdsDefinition.widgets
             // nope, we also need Native Widgets e.g. for loading the allowed values for license in search
@@ -706,6 +740,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             )*/
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
             .filter((widget) => this.meetsCondition(widget, nodes));
+        const variables = await this.restLocator.getConfigVariables().toPromise();
         for (const view of views) {
             for (const widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 const widget = new MdsEditorInstanceService.Widget(
@@ -713,6 +748,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     widgetDefinition,
                     view.id,
                     view.rel,
+                    variables
                 );
                 result.push(widget);
             }
