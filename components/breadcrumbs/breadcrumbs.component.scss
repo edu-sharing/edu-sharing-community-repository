@@ -26,6 +26,12 @@
     }
 }
 
+.mobile-only {
+    @media screen and (min-width: $mobileTabSwitchWidth) {
+        display: none !important;
+    }
+}
+
 .breadcrumb::before {
     content: '' !important;
 }
@@ -93,10 +99,7 @@
 }
 
 .dropdown-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 4px;
+    margin-top: -2px;
 }
 
 .breadcrumb-arrow {

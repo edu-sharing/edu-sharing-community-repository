@@ -86,9 +86,12 @@ Short version works only with `short="always"`.
   <ng-container *ngIf="!home">
     <i icon iconId="home" class="home-icon"></i>
   </ng-container>
-  <!-- (Christopher 2020-12-04) The condition for this seems kind of arbitrary. Is this still used
-  somewhere? -->
-  <i *ngIf="home && nodes.length < 1" icon iconId="keyboard_arrow_down" class="dropdown-icon"></i>
+  <i
+    *ngIf="nodes.length < 1"
+    icon
+    iconId="keyboard_arrow_down"
+    class="dropdown-icon mobile-only"
+  ></i>
 </ng-template>
 
 <ng-template #backInner>
