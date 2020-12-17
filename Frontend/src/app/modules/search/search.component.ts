@@ -294,7 +294,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         //this.getSearch(null,true);
     }
 
-    applyParameters(props: any = null) {
+    applyParameters(props: { [property: string]: string[] } = null) {
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
         this.currentValues = props;
@@ -381,7 +381,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         return true;
     }
 
-    routeSearchParameters(parameters: any) {
+    routeSearchParameters(parameters: { [property: string]: string[] }) {
         this.routeSearch(
             this.searchService.searchTerm,
             this.currentRepository,
@@ -390,18 +390,18 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    getMdsValues() {
+    async getMdsValues(): Promise<{ [property: string]: string[] }> {
         if (this.currentRepository === RestConstants.ALL) {
             return {};
         }
-        return this.mdsMobileRef ? this.mdsMobileRef.getValues() : this.mdsDesktopRef.getValues();
+        if (this.mdsMobileRef) {
+            return this.mdsMobileRef.getValues()
+        } else {
+            return this.mdsDesktopRef.getValues();
+        }
     }
 
     routeAndClearSearch(query: any) {
-        let parameters: any = null;
-        if (this.mdsDesktopRef) {
-            parameters = this.getMdsValues();
-        }
         if (!query.cleared) {
             this.uiService.hideKeyboardIfMobile();
         }
@@ -409,16 +409,18 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             query.query,
             this.currentRepository,
             this.mdsId,
-            parameters,
         );
     }
 
-    routeSearch(
+    async routeSearch(
         query = this.searchService.searchTerm,
         repository = this.currentRepository,
         mds = this.mdsId,
-        parameters: any = this.getMdsValues(),
+        parameters?: { [property: string]: string[] },
     ) {
+        if (!parameters) {
+            parameters = await this.getMdsValues();
+        }
         this.scrollTo();
         this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
             queryParams: {
@@ -887,14 +889,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    onMdsReady(mds: any = null) {
+    async onMdsReady(mds: any = null) {
         this.currentMdsSet = mds;
         this.updateColumns();
         this.updateSort();
         if (this.searchService.searchResult.length < 1) {
             this.initalized = true;
             if (!this.currentValues && this.getActiveMds()) {
-                this.currentValues = this.getMdsValues();
+                this.currentValues = await this.getMdsValues();
             }
             if (this.searchService.reinit)
                 this.getSearch(
@@ -908,7 +910,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.reinit = true;
     }
 
-    private prepare(param: Params) {
+    private prepare(param: Params): void {
         if (this.setSidenavSettings()) {
             // auto, never, always
             let sidenavMode = this.config.instant('searchSidenavMode', 'never');
@@ -1131,13 +1133,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private getActiveMds() {
         return this.hasMobileMds() ? this.mdsMobileRef : this.mdsDesktopRef;
     }
-    private updateMdsActions() {
+    private updateMdsActions(): void {
         this.savedSearchOptions.addOptions = [];
 
         this.mdsActions = [];
         this.mdsActions.push(
-            new OptionItem('SEARCH.APPLY_FILTER', 'search', () => {
-                this.applyParameters(this.getActiveMds().getValues());
+            new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
+                this.applyParameters(await this.getActiveMds().getValues());
             }),
         );
         if (this.applyMode) {
