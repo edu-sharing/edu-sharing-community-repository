@@ -21,6 +21,7 @@
         ? null
         : (optionsAlways[0].name | translate)
     }}"
+    [attr.aria-label]="optionsAlways[0].name | translate"
     (click)="click(optionsAlways[0])"
   >
     <i icon [iconId]="optionsAlways[0].icon"></i>
@@ -35,6 +36,7 @@
     [disabled]="!option.isEnabled"
     [class.display-none]="!option.isEnabled && !showDisabled"
     matTooltip="{{ option.showName ? null : (option.name | translate) }}"
+    [attr.aria-label]="option.name | translate"
     (click)="click(option)"
   >
     <i icon [iconId]="option.icon"></i>
