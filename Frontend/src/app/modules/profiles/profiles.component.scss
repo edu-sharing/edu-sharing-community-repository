@@ -92,6 +92,9 @@ $path:'../../../assets/images/';
         .mat-flat-button, .mat-button {
           background-color: transparent;
           color: #fff;
+          &:disabled{
+            opacity: 0.25;
+          }
           transition: all $transitionNormal;
           &:hover{
             background-color: rgba(0,0,0,.1);

@@ -41,13 +41,14 @@ export class ProfilesComponent {
   public oldPassword="";
   public password="";
   private static PASSWORD_MIN_LENGTH = 5;
-  private editProfile: boolean;
+  editProfile: boolean;
   private editProfileUrl: string;
   private avatarImage: any;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
   private userEditProfile: boolean;
   actions: OptionItem[];
+  private editAction: OptionItem;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private title: Title,
@@ -65,11 +66,11 @@ export class ProfilesComponent {
           this.loadUser(params['authority']);
         });
       });
-      const editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
-      editAction.group = DefaultGroups.Edit;
-      editAction.showAsAction = true;
+      this.editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
+      this.editAction.group = DefaultGroups.Edit;
+      this.editAction.showAsAction = true;
         this.actions = [
-            editAction,
+          this.editAction,
         ];
   }
   public loadUser(authority:string){
@@ -88,6 +89,7 @@ export class ProfilesComponent {
                 if(this.isMe && login.isGuest){
                     RestHelper.goToLogin(this.router,this.config);
                 }
+                this.editAction.isEnabled = this.editProfile && !!(this.userEditProfile || this.editProfileUrl);
             });
         }, (error: any) => {
             this.toast.closeModalDialog();
