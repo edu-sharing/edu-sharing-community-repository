@@ -93,7 +93,7 @@
                 (optionSelected)="useVCardSuggestion($event)"
         >
           <mat-option *ngFor="let person of suggestionPersons$ | async" [value]="person.vcard">
-            <div class="mat-option-primary">{{ person.vcard?.givenname }} {{ person.vcard?.surname }}</div>
+            <div class="mat-option-primary">{{ person.vcard?.title }} {{ person.vcard?.givenname }} {{ person.vcard?.surname }}</div>
             <div class="mat-option-secondary">{{ person.vcard?.email }}</div>
           </mat-option>
         </mat-autocomplete>

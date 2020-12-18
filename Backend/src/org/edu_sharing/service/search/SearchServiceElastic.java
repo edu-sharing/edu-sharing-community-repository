@@ -1,5 +1,10 @@
 package org.edu_sharing.service.search;
 
+import com.google.gson.Gson;
+import net.sourceforge.cardme.engine.VCardEngine;
+import net.sourceforge.cardme.vcard.VCard;
+import net.sourceforge.cardme.vcard.exceptions.VCardParseException;
+import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
@@ -13,20 +18,28 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
+import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SearchVCard;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.LoggingDeprecationHandler;
+import org.elasticsearch.common.xcontent.NamedXContentRegistry;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
@@ -34,6 +47,8 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.collapse.CollapseBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -279,7 +294,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     enum CONTRIBUTOR_PROP {firstname,lastname,email,url,uid};
 
     @Override
-    public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException{
+    public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException{
         checkClient();
         SearchRequest searchRequest = new SearchRequest("workspace");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -311,9 +326,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
             qb.must(bqb);
         }
 
-        if(contributorKind == null){
-            contributorKind = ContributorKind.PERSON;
-        }
         if(contributorKind == ContributorKind.ORGANIZATION){
             qb.must(QueryBuilders.boolQuery().should(
                     QueryBuilders.existsQuery("contributor.X-ROR")
@@ -333,17 +345,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         searchSourceBuilder.query(qb);
         searchSourceBuilder.from(0);
-        searchSourceBuilder.size(1000);
+        searchSourceBuilder.size(0);
         searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+        searchSourceBuilder.aggregation(AggregationBuilders.terms("vcard").field("contributor.vcard.keyword").size(10000));
         searchRequest.source(searchSourceBuilder);
-        System.out.println(qb.toString());
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-
-        SearchHits hits = searchResponse.getHits();
-        Set<Map<String,Serializable>> result = new HashSet<>();
-        for (SearchHit hit : hits) {
-            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+        ParsedStringTerms aggregation = searchResponse.getAggregations().get("vcard");
+        /*
+        for (Terms.Bucket bucket : aggregation.getBuckets()) {
             ArrayList<Map<String,Serializable>> contributor = (ArrayList<Map<String,Serializable>>) sourceAsMap.get("contributor");
 
             List<Map<String,Serializable>> remove = new ArrayList<>();
@@ -386,8 +396,37 @@ public class SearchServiceElastic extends SearchServiceImpl {
             }
             for(Map<String,Serializable> map : remove) contributor.remove(map);
             if(contributor.size() > 0) result.addAll(contributor);
-        }
-        return result;
+
+
+        }*/
+        VCardEngine engine = new VCardEngine();
+        return aggregation.getBuckets().stream().
+                map(Terms.Bucket::getKey).
+                // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
+                filter(
+                    (k) -> Arrays.stream(
+                        suggest.toLowerCase().split(" ")).allMatch(
+                                (t) -> k.toString().toLowerCase().contains(t)
+                        )
+                ).
+                filter((k) -> {
+                    try {
+                        VCard vcard = engine.parse(k.toString());
+                        if(contributorKind == ContributorKind.ORGANIZATION){
+                            return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
+                                    (e) -> e.equals("X-ROR") || e.equals("X-Wikidata")
+                            );
+                        } else {
+                            return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
+                                    (e) -> e.equals("X-ORCID") || e.equals("X-GND-URI")
+                            );
+                        }
+                    } catch (Exception ignored) {
+                        return false;
+                    }
+                }).
+                map((k) -> new SearchVCard(k.toString())).
+                collect(Collectors.toCollection(HashSet::new));
     }
 
     public void checkClient() throws IOException {
