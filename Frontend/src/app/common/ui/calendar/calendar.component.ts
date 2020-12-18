@@ -25,6 +25,7 @@ export class CalendarComponent{
     @Output() dateChange = new EventEmitter();
     @Input() minDate : Date;
     @Input() maxDate : Date;
+    @Input() disabled = false;
 
     setDate(date:Date){
       this.date=date;

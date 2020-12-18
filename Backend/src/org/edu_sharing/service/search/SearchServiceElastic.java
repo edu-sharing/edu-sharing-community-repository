@@ -315,16 +315,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
             contributorKind = ContributorKind.PERSON;
         }
         if(contributorKind == ContributorKind.ORGANIZATION){
-            qb.must(QueryBuilders.boolQuery().must(
+            qb.must(QueryBuilders.boolQuery().should(
                     QueryBuilders.existsQuery("contributor.X-ROR")
-                ).must(
+                ).should(
                     QueryBuilders.existsQuery("contributor.X-Wikidata")
                 ).minimumShouldMatch(1)
             );
         }else{
-            qb.must(QueryBuilders.boolQuery().must(
+            qb.must(QueryBuilders.boolQuery().should(
                     QueryBuilders.existsQuery("contributor.X-ORCID")
-                    ).must(
+                    ).should(
                     QueryBuilders.existsQuery("contributor.X-GND-URI")
                     ).minimumShouldMatch(1)
             );
@@ -337,6 +337,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
         searchRequest.source(searchSourceBuilder);
+        System.out.println(qb.toString());
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
 
         SearchHits hits = searchResponse.getHits();

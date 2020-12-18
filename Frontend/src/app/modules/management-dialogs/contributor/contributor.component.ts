@@ -51,7 +51,10 @@ export class WorkspaceContributorComponent  {
   private static TYPE_PERSON = 0;
   private static TYPE_ORG = 1;
   private fullName = new BehaviorSubject('');
+  private orgName = new BehaviorSubject('');
   suggestionPersons$: Observable<VCardResult[]>;
+  suggestionOrgs$: Observable<VCardResult[]>;
+  editDisabled = false;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
@@ -96,11 +99,12 @@ export class WorkspaceContributorComponent  {
     });
 
   }
-  public addVCard(mode:string) {
+  public addVCard(mode = this.editMode) {
     this.date=null;
     this.editType=WorkspaceContributorComponent.TYPE_PERSON;
     this.editMode=mode;
     this.edit=new VCard();
+    this.editDisabled = false;
     this.editOriginal=null;
     this.editScopeOld=null;
     this.editScopeNew=this.editMode=='lifecycle' ? this.rolesLifecycle[0] : this.rolesMetadata[0];
@@ -114,6 +118,7 @@ export class WorkspaceContributorComponent  {
     this.editMode=mode;
     this.editOriginal=vcard;
     this.edit=vcard.copy();
+    this.editDisabled = !!(vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata);
     this.editScopeOld=scope;
     this.editScopeNew=scope;
     this.editType=vcard.givenname||vcard.surname ? WorkspaceContributorComponent.TYPE_PERSON : WorkspaceContributorComponent.TYPE_ORG;
@@ -205,7 +210,13 @@ export class WorkspaceContributorComponent  {
         startWith(''),
         filter((v) => v !== ''),
         debounceTime(200),
-        switchMap((v) => this.searchService.searchContributors(v.trim())),
+        switchMap((v) => this.searchService.searchContributors(v.trim(), 'PERSON')),
+    );
+    this.suggestionOrgs$ = this.orgName.pipe(
+        startWith(''),
+        filter((v) => v !== ''),
+        debounceTime(200),
+        switchMap((v) => this.searchService.searchContributors(v.trim(), 'ORGANIZATION')),
     );
     this.buttons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
@@ -224,8 +235,13 @@ export class WorkspaceContributorComponent  {
   setFullName() {
     this.fullName.next(this.edit.givenname + ' ' + this.edit.surname);
   }
+  setOrgName() {
+    this.orgName.next(this.edit.org);
+  }
 
   useVCardSuggestion(event: MatAutocompleteSelectedEvent) {
-    this.edit = event.option.value;
+    console.log(event);
+    this.edit = event.option.value.copy();
+    this.editDisabled = true;
   }
 }

@@ -328,6 +328,8 @@
             "PERSISTENT_ID_SET": "Eine persistente ID wurde festgelegt. Dadurch wird der Datensatz anderen Nutzern zur erneuten Verwendung zugänglich gemacht.",
             "ORG_INFO": "Organisation des Beteiligten (Optional)",
             "ADDRESS_INFO": "Adresse des Beteiligten (Optional)",
+            "RESET": "Eingaben zurücksetzen",
+            "EDIT_DISABLED": "Bearbeitung des Eintrags ist deaktiviert, da dieser über ein oder mehrere Persistent Identifier verfügt. Wählen Sie \"Eingaben zurücksetzen\", um alle Daten erneut einzugeben.",
             "MODE_PERSON": "Person",
             "MODE_ORG": "Organisation",
             "ERROR_PERSON_NAME": "Bitte geben Sie den Namen der beteiligten Person an",
