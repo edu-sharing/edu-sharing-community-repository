@@ -19,6 +19,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.Helper;
@@ -1038,6 +1039,6 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
-		return new HashSet<>();
+		throw new NotImplementedException("searchContributors not supported via Solr");
 	}
 }
