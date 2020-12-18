@@ -1,3 +1,5 @@
+<app-banner *ngIf="visible" [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
+
 <div *ngIf="visible" role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
   <div class="preload" *ngIf="getPreloading()">
     <img src="assets/images/edu-sharing-loading-animation.svg" image-config alt="" />
@@ -18,7 +20,6 @@
     </div>
   </card>
 
-  <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
   <global-progress *ngIf="globalProgress"></global-progress>
   <tutorial
     [element]="tutorialElement"
