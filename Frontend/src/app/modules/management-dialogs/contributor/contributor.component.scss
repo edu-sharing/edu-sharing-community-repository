@@ -17,6 +17,11 @@ input[type=number]::-webkit-outer-spin-button {
     padding: 0 $cardPadding;
   }
 }
+.author-checkbox{
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
 h2{
   font-size:110%;
   margin-top: 5px;

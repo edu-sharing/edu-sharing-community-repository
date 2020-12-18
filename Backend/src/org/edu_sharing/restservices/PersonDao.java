@@ -213,6 +213,7 @@ public class PersonDao {
         newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills());
+        newUserInfo.put(CCConstants.CM_PROP_PERSON_VCARD, profile.getVCard());
 		if(profile.getSizeQuota()>0)
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, ""+profile.getSizeQuota());
 		else
@@ -351,9 +352,15 @@ public class PersonDao {
     	profile.setAvatar(getAvatar());
     	profile.setAbout(getAbout());
     	profile.setSkills(getSkills());
+    	profile.setVCard(getVCard());
     	profile.setType(getType());
     	return profile;
 	}
+
+	private String getVCard() {
+		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_VCARD);
+	}
+
 	private UserStatus getStatus() {
 		UserStatus status = new UserStatus();
 		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null)

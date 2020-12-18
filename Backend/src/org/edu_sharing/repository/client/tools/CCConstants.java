@@ -1314,6 +1314,7 @@ public class CCConstants {
 	public static final String CM_PROP_PERSON_ALLOW_NOTIFICATIONS = "{http://www.alfresco.org/model/content/1.0}personallownotifications";
 	public static final String CM_PROP_PERSON_ABOUT = "{http://www.alfresco.org/model/content/1.0}personabout";
 	public static final String CM_PROP_PERSON_SKILLS = "{http://www.alfresco.org/model/content/1.0}personskills";
+	public static final String CM_PROP_PERSON_VCARD = "{http://www.alfresco.org/model/content/1.0}personvcard";
 
 	/**
 	 * tempory, non persistent properties

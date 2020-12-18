@@ -46,7 +46,7 @@
       [buttons]="editButtons"
       *ngIf="edit"
       width="small" height="xlarge">
-  <div *ngIf="editDisabled">
+  <div *ngIf="editDisabled && !userAuthor">
     <info-message message="{{'WORKSPACE.CONTRIBUTOR.EDIT_DISABLED' | translate}}"></info-message>
     <div class="edit-reset">
       <button mat-button color="primary" (click)="addVCard()"><i icon iconId="delete"></i>
@@ -56,6 +56,13 @@
   </div>
   <mat-tab-group mat-stretch-tabs [(selectedIndex)]="editType">
     <mat-tab label="{{'WORKSPACE.CONTRIBUTOR.MODE_PERSON' | translate}}">
+      <div class="table">
+        <div class="author-checkbox">
+          <mat-checkbox [(ngModel)]="userAuthor" (ngModelChange)="setVCardAuthor($event)">{{
+            'WORKSPACE.CONTRIBUTOR.CHECKBOX_ME' | translate
+            }}</mat-checkbox>
+        </div>
+      </div>
       <div class="table">
         <div class="title">
           <mat-form-field>
@@ -99,12 +106,13 @@
         </mat-autocomplete>
 
       </div>
-      <button mat-button color="primary" class="more" (click)="persistentIds=!persistentIds">
-        <i icon iconId="keyboard_arrow_down" *ngIf="persistentIds"></i>
-        <i icon iconId="keyboard_arrow_right" *ngIf="!persistentIds"></i>
+      <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
+        <i icon iconId="fingerprint"></i>
         <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
+        <i icon iconId="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+        <i icon iconId="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
       </button>
-      <div *ngIf="persistentIds" [@overlay]="more" class="persistent-id">
+      <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
         <div class="table">
           <mat-form-field floatLabel="always">
             <mat-label>{{'VCARD.X-ORCID' | translate}}</mat-label>
@@ -156,12 +164,13 @@
           </mat-autocomplete>
         </mat-form-field>
       </div>
-      <button mat-button color="primary" class="more" (click)="persistentIds=!persistentIds">
-        <i icon iconId="keyboard_arrow_down" *ngIf="persistentIds"></i>
-        <i icon iconId="keyboard_arrow_right" *ngIf="!persistentIds"></i>
+      <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
+        <i icon iconId="fingerprint"></i>
         <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
+        <i icon iconId="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+        <i icon iconId="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
       </button>
-      <div *ngIf="persistentIds" [@overlay]="more" class="persistent-id">
+      <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
         <div class="table">
           <mat-form-field floatLabel="always">
             <mat-label>{{'VCARD.X-ROR' | translate}}</mat-label>

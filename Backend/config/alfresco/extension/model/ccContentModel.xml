@@ -405,6 +405,15 @@
                 	<tokenised>both</tokenised>
                </index>
          	 </property>
+            <property name="cm:personvcard">
+               <type>d:text</type>
+               <multiple>false</multiple>
+               <index enabled="true">
+                  <atomic>true</atomic>
+                  <stored>false</stored>
+                  <tokenised>false</tokenised>
+               </index>
+            </property>
          </properties>
          
          <associations>

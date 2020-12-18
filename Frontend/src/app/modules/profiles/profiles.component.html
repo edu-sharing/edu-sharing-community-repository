@@ -126,15 +126,51 @@
           <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
         </div>
       </div>
-  <div *ngIf="isMe && editProfile && userEditProfile" class="changePassword">
+      <div *ngIf="isMe && editProfile" class="persistent-id">
         <div class="toggle">
-          <div tabindex="0" class="clickable" (click)="editPassword()" (keyup.enter)="changePassword=!changePassword">
+          <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
+            <i icon iconId="fingerprint"></i>
+            <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
+            <i icon iconId="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+            <i icon iconId="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+          </button>
+        </div>
+        <div *ngIf="showPersistentIds" [@overlay]="showPersistentIds" class="persistent-id-inputs">
+          <info-message message="{{'PROFILES.PERSISTENT_ID_INFO' | translate}}"></info-message>
+          <mat-form-field floatLabel="always">
+            <mat-label>{{'VCARD.X-ORCID' | translate}}</mat-label>
+            <input matInput
+                   id="orcid"
+                   [(ngModel)]="userEdit.profile.vcard.orcid"
+                   pattern="https?:\/\/orcid.org\/\d{4}(-\d{4}){3}"
+                   placeholder="http://orcid.org/0000-0000-0000-0000"
+            >
+            <mat-hint innerHTML="{{'VCARD_HINT.X-ORCID' | translate}}"></mat-hint>
+          </mat-form-field>
+          <mat-form-field floatLabel="always">
+            <mat-label>{{'VCARD.X-GND-URI' | translate}}</mat-label>
+            <input matInput
+                   id="gnduri"
+                   [(ngModel)]="userEdit.profile.vcard.gnduri"
+                   pattern="https?://d-nb.info\/gnd\/\d+"
+                   placeholder="http://d-nb.info/gnd/0000000000"
+            >
+            <mat-hint innerHTML="{{'VCARD_HINT.X-GND-URI' | translate}}"></mat-hint>
+          </mat-form-field>
+          <div class="change-buttons">
+            <button mat-raised-button color="primary"  (click)="savePersistentIds()">{{'SAVE' | translate}}</button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="isMe && editProfile && userEditProfile" class="changePassword">
+        <div class="toggle">
+          <button mat-button color="primary" tabindex="0" class="clickable" (click)="editPassword()">
             <i *ngIf="!changePassword" class="material-icons">lock</i>
             <i *ngIf="changePassword" class="material-icons">lock_open</i>
             {{'CHANGE_PASSWORD' | translate}}
             <i aria-hidden="true" class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
             <i aria-hidden="true" class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
-          </div>
+          </button>
         </div>
         <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
           <input-password label="{{'OLD_PASSWORD' | translate }}" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>

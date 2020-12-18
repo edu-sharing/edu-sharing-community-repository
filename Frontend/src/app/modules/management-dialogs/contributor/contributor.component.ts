@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {DialogButton, RestNodeService, RestSearchService, VCardResult} from "../../../core-module/core.module";
+import {DialogButton, RestIamService, RestNodeService, RestSearchService, VCardResult} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
@@ -36,7 +36,7 @@ export class WorkspaceContributorComponent  {
   public editMode: string;
   public editType: number;
   public more = false;
-  public persistentIds = false;
+  public showPersistentIds = false;
   public editScopeNew: string;
   private editScopeOld: string;
   editOriginal: VCard;
@@ -87,6 +87,7 @@ export class WorkspaceContributorComponent  {
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
   givenname = new FormControl('');
+  userAuthor = false;
   public remove(data:any[],pos:number){
     this.dialogTitle='WORKSPACE.CONTRIBUTOR.DELETE_TITLE';
     this.dialogMessage='WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE';
@@ -122,6 +123,10 @@ export class WorkspaceContributorComponent  {
     this.editScopeOld=scope;
     this.editScopeNew=scope;
     this.editType=vcard.givenname||vcard.surname ? WorkspaceContributorComponent.TYPE_PERSON : WorkspaceContributorComponent.TYPE_ORG;
+    if(vcard.uid === this.iamService.getCurrentUserVCard().uid) {
+      this.userAuthor = true;
+      this.editDisabled = true;
+    }
     this.date=null;
     let contributeDate=vcard.contributeDate;
     if(contributeDate) {
@@ -203,6 +208,7 @@ export class WorkspaceContributorComponent  {
   public constructor(
     private nodeService:RestNodeService,
     private searchService:RestSearchService,
+    private iamService:RestIamService,
     private translate:TranslateService,
     private toast:Toast,
   ) {
@@ -243,5 +249,16 @@ export class WorkspaceContributorComponent  {
     console.log(event);
     this.edit = event.option.value.copy();
     this.editDisabled = true;
+  }
+
+  setVCardAuthor(set: boolean) {
+    if(set) {
+      this.edit = this.iamService.getCurrentUserVCard();
+      this.userAuthor = true;
+      this.editDisabled = true;
+    } else {
+      this.addVCard();
+    }
+
   }
 }

@@ -324,6 +324,7 @@
             "SCOPE": "tätig als",
             "DATE": "tätig am (Optional)",
             "MORE": "weitere Daten angeben",
+            "CHECKBOX_ME": "Ich bin Beteiligter",
             "PERSISTENT_IDS": "Persistente Ids festlegen",
             "PERSISTENT_ID_SET": "Eine persistente ID wurde festgelegt. Dadurch wird der Datensatz anderen Nutzern zur erneuten Verwendung zugänglich gemacht.",
             "ORG_INFO": "Organisation des Beteiligten (Optional)",

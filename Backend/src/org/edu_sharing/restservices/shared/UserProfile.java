@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.shared;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.edu_sharing.repository.client.rpc.User;
@@ -21,8 +22,9 @@ public class UserProfile  {
   private String about = null;
   private String[] skills = null;
   private String[] types = null;
+  private String VCard;
 
-  public UserProfile(){
+    public UserProfile(){
 	  
   }
   public UserProfile(String firstName,String lastName,String email){
@@ -106,4 +108,12 @@ public void setAvatar(String avatar) {
 	public void setType(String[] types) {
 		this.types = types;
 	}
+
+    public String getVCard() {
+        return VCard;
+    }
+
+    public void setVCard(String vCard) {
+        this.VCard = vCard;
+    }
 }

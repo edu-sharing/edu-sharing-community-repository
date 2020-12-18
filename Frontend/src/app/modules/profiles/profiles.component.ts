@@ -1,25 +1,25 @@
 
 import {Component, ElementRef, ViewChild} from '@angular/core';
-import {Translation} from "../../core-ui-module/translation";
-import {UIHelper} from "../../core-ui-module/ui-helper";
-import {SessionStorageService} from "../../core-module/core.module";
-import {TranslateService} from "@ngx-translate/core";
-import {DomSanitizer, Title} from "@angular/platform-browser";
+import {Translation} from '../../core-ui-module/translation';
+import {UIHelper} from '../../core-ui-module/ui-helper';
+import {SessionStorageService} from '../../core-module/core.module';
+import {TranslateService} from '@ngx-translate/core';
+import {DomSanitizer, Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Toast} from "../../core-ui-module/toast";
-import {RestConnectorService} from "../../core-module/core.module";
-import {ConfigurationService} from "../../core-module/core.module";
-import {RestIamService} from "../../core-module/core.module";
-import {IamUser, User} from "../../core-module/core.module";
-import {AuthorityNamePipe} from "../../core-ui-module/pipes/authority-name.pipe";
-import {trigger} from "@angular/animations";
-import {UIAnimation} from "../../core-module/ui/ui-animation";
-import {UserProfileComponent} from "../../common/ui/user-profile/user-profile.component";
-import {RestConstants} from "../../core-module/core.module";
-import {RestHelper} from "../../core-module/core.module";
+import {Toast} from '../../core-ui-module/toast';
+import {RestConnectorService} from '../../core-module/core.module';
+import {ConfigurationService} from '../../core-module/core.module';
+import {RestIamService} from '../../core-module/core.module';
+import {IamUser, User} from '../../core-module/core.module';
+import {AuthorityNamePipe} from '../../core-ui-module/pipes/authority-name.pipe';
+import {trigger} from '@angular/animations';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
+import {UserProfileComponent} from '../../common/ui/user-profile/user-profile.component';
+import {RestConstants} from '../../core-module/core.module';
+import {RestHelper} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {Helper} from "../../core-module/rest/helper";
-import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import {Helper} from '../../core-module/rest/helper';
+import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 
 @Component({
@@ -31,24 +31,6 @@ import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/optio
   ]
 })
 export class ProfilesComponent {
-  public user: User;
-  public userEdit: User;
-  public isMe: boolean;
-  public edit: boolean;
-  public avatarFile: any;
-  public changePassword: boolean;
-  public editAbout = false;
-  public oldPassword="";
-  public password="";
-  private static PASSWORD_MIN_LENGTH = 5;
-  editProfile: boolean;
-  private editProfileUrl: string;
-  private avatarImage: any;
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
-  @ViewChild('avatar') avatarElement : ElementRef;
-  private userEditProfile: boolean;
-  actions: OptionItem[];
-  private editAction: OptionItem;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private title: Title,
@@ -59,47 +41,70 @@ export class ProfilesComponent {
               private sanitizer: DomSanitizer,
               private storage : SessionStorageService,
               private iamService: RestIamService) {
-      Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-        route.params.subscribe((params)=>{
-          this.editProfileUrl=this.config.instant("editProfileUrl");
-          this.editProfile=this.config.instant("editProfile",true);
-          this.loadUser(params['authority']);
-        });
+    Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
+      route.params.subscribe((params)=> {
+        this.editProfileUrl=this.config.instant('editProfileUrl');
+        this.editProfile=this.config.instant('editProfile',true);
+        this.loadUser(params.authority);
       });
-      this.editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
-      this.editAction.group = DefaultGroups.Edit;
-      this.editAction.showAsAction = true;
-        this.actions = [
-          this.editAction,
-        ];
+    });
+    this.editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
+    this.editAction.group = DefaultGroups.Edit;
+    this.editAction.showAsAction = true;
+    this.actions = [
+      this.editAction,
+    ];
   }
-  public loadUser(authority:string){
+  private static PASSWORD_MIN_LENGTH = 5;
+  public user: User;
+  public userEdit: User;
+  public isMe: boolean;
+  public edit: boolean;
+  public avatarFile: any;
+  public changePassword: boolean;
+  public editAbout = false;
+  public oldPassword='';
+  public password='';
+  // is editing allowed at all (via global config)
+  editProfile: boolean;
+  private editProfileUrl: string;
+  private avatarImage: any;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+  @ViewChild('avatar') avatarElement : ElementRef;
+  // can the particular user profile (based on the source) be edited?
+  userEditProfile: boolean;
+  actions: OptionItem[];
+  private editAction: OptionItem;
+  showPersistentIds = false;
+  public loadUser(authority:string) {
     this.toast.showProgressDialog();
     this.connector.isLoggedIn().subscribe((login)=> {
-        this.iamService.getUser(authority).subscribe((profile: IamUser) => {
-            this.user = profile.person;
-            this.userEditProfile = profile.editProfile;
-            let name = new AuthorityNamePipe(this.translate).transform(this.user, null);
-            UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name: name});
-            this.toast.closeModalDialog();
-            this.userEdit=Helper.deepCopy(this.user);
-            GlobalContainerComponent.finishPreloading();
-            this.iamService.getUser().subscribe((me)=>{
-                this.isMe = profile.person.authorityName == me.person.authorityName;
-                if(this.isMe && login.isGuest){
-                    RestHelper.goToLogin(this.router,this.config);
-                }
-                this.editAction.isEnabled = this.editProfile && !!(this.userEditProfile || this.editProfileUrl);
-            });
-        }, (error: any) => {
-            this.toast.closeModalDialog();
-            GlobalContainerComponent.finishPreloading();
-            this.toast.error(null, 'PROFILES.LOAD_ERROR');
+      this.iamService.getUser(authority).subscribe((profile: IamUser) => {
+        this.user = profile.person;
+        this.userEditProfile = profile.editProfile;
+        const name = new AuthorityNamePipe(this.translate).transform(this.user, null);
+        UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name});
+        console.log(this.user);
+        this.toast.closeModalDialog();
+        this.userEdit=Helper.deepCopy(this.user);
+        this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
+        GlobalContainerComponent.finishPreloading();
+        this.iamService.getUser().subscribe((me)=> {
+          this.isMe = profile.person.authorityName == me.person.authorityName;
+          if(this.isMe && login.isGuest) {
+            RestHelper.goToLogin(this.router,this.config);
+          }
+          this.editAction.isEnabled = this.editProfile && !!(this.userEditProfile || this.editProfileUrl);
         });
+      }, (error: any) => {
+        this.toast.closeModalDialog();
+        GlobalContainerComponent.finishPreloading();
+        this.toast.error(null, 'PROFILES.LOAD_ERROR');
+      });
     });
   }
-  public updateAvatar(event:any){
-    if(this.avatarElement.nativeElement.files && this.avatarElement.nativeElement.files.length){
+  public updateAvatar(event:any) {
+    if(this.avatarElement.nativeElement.files && this.avatarElement.nativeElement.files.length) {
       this.avatarFile=this.avatarElement.nativeElement.files[0];
       this.avatarImage=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(this.avatarFile));
     }
@@ -113,27 +118,27 @@ export class ProfilesComponent {
     this.edit=true;
     this.avatarFile=null;
   }
-  public clearAvatar(){
+  public clearAvatar() {
     this.avatarFile=null;
     this.userEdit.profile.avatar=null;
   }
-  public hasAvatar(){
+  public hasAvatar() {
     return this.userEdit.profile.avatar || this.avatarFile;
   }
-  public savePassword(){
-    if(this.changePassword){
+  public savePassword() {
+    if(this.changePassword) {
       this.toast.showProgressDialog();
-      if(this.password.length<ProfilesComponent.PASSWORD_MIN_LENGTH){
+      if(this.password.length<ProfilesComponent.PASSWORD_MIN_LENGTH) {
         this.toast.error(null,'PASSWORD_MIN_LENGTH',{length:ProfilesComponent.PASSWORD_MIN_LENGTH});
         this.toast.closeModalDialog();
         return;
       }
-      let credentials={oldPassword:this.oldPassword,newPassword:this.password};
-      this.iamService.editUserCredentials(this.user.authorityName,credentials).subscribe(()=>{
+      const credentials= {oldPassword:this.oldPassword,newPassword:this.password};
+      this.iamService.editUserCredentials(this.user.authorityName,credentials).subscribe(()=> {
         this.saveAvatar();
-      },(error:any)=>{
-        if(RestHelper.errorMessageContains(error,"BadCredentialsException")){
-          this.toast.error(null,"WRONG_PASSWORD");
+      },(error:any)=> {
+        if(RestHelper.errorMessageContains(error,'BadCredentialsException')) {
+          this.toast.error(null,'WRONG_PASSWORD');
           this.toast.closeModalDialog();
         }
         else {
@@ -142,27 +147,27 @@ export class ProfilesComponent {
         }
       });
     }
-    else{
+    else {
       this.saveAvatar();
     }
   }
-  public saveEdits(){
-    if(!this.userEdit.profile.firstName.trim()){
+  public saveEdits() {
+    if(!this.userEdit.profile.firstName.trim()) {
       this.toast.error(null,'PROFILES.ERROR.FIRST_NAME');
       return;
     }
-    if(!this.userEdit.profile.lastName.trim()){
+    if(!this.userEdit.profile.lastName.trim()) {
       this.toast.error(null,'PROFILES.ERROR.LAST_NAME');
       return;
     }
-    if(!this.userEdit.profile.email.trim()){
+    if(!this.userEdit.profile.email.trim()) {
       this.toast.error(null,'PROFILES.ERROR.EMAIL');
       return;
     }
     this.toast.showProgressDialog();
-    this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
+    this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=> {
       this.saveAvatar();
-    },(error:any)=>{
+    },(error:any)=> {
       this.toast.closeModalDialog();
       this.toast.error(error);
     });
@@ -170,8 +175,8 @@ export class ProfilesComponent {
 
   private saveAvatar() {
     this.user=null;
-    if(!this.userEdit.profile.avatar && !this.avatarFile){
-      this.iamService.removeUserAvatar(this.userEdit.authorityName).subscribe(()=>{
+    if(!this.userEdit.profile.avatar && !this.avatarFile) {
+      this.iamService.removeUserAvatar(this.userEdit.authorityName).subscribe(()=> {
         this.edit=false;
         this.editAbout=false;
         this.oldPassword='';
@@ -179,21 +184,21 @@ export class ProfilesComponent {
         this.changePassword=false;
         this.toast.toast('PROFILE_UPDATED');
         this.loadUser(this.userEdit.authorityName);
-      },(error)=>{
+      },(error)=> {
         this.toast.error(error);
       });
     }
-    else if(this.avatarFile){
-      this.iamService.setUserAvatar(this.avatarFile,this.userEdit.authorityName).subscribe(()=>{
+    else if(this.avatarFile) {
+      this.iamService.setUserAvatar(this.avatarFile,this.userEdit.authorityName).subscribe(()=> {
         this.edit=false;
         this.editAbout=false;
         this.toast.toast('PROFILE_UPDATED');
         this.loadUser(this.userEdit.authorityName);
-      },(error)=>{
+      },(error)=> {
         this.toast.error(error);
       });
     }
-    else{
+    else {
       this.toast.closeModalDialog();
       this.edit=false;
       this.editAbout=false;
@@ -209,8 +214,12 @@ export class ProfilesComponent {
 
   public editPassword() {
     this.changePassword =! this.changePassword;
-    this.password = "";
-    this.oldPassword = "";
+    this.password = '';
+    this.oldPassword = '';
+  }
+
+  savePersistentIds() {
+    this.saveEdits();
   }
 }
 

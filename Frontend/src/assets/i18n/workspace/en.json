@@ -279,6 +279,7 @@
             "SCOPE": "role",
             "DATE": "date  (optional)",
             "MORE": "Add more data",
+            "CHECKBOX_ME": "I am contributor",
             "PERSISTENT_IDS": "Set persistent ids",
             "PERSISTENT_ID_SET": "A persistent id has been set. This entry will be available to other users for reusage.",
             "ORG_INFO": "Organization of contributor (optional)",

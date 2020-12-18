@@ -138,13 +138,15 @@ $path:'../../../assets/images/';
       }
     }
 
-    .about, .stats, .authorityName, .changePassword {
+    .about, .stats, .authorityName, .changePassword, .persistent-id {
       max-width: 500px;
       margin: auto;
       padding: 0 25px;
     }
 
-    .changePassword {
+    .changePassword, .persistent-id {
+      display: flex;
+      flex-direction: column;
       padding-top: 40px;
 
       .toggle {
@@ -170,7 +172,20 @@ $path:'../../../assets/images/';
       width: 100%;
       text-align: right;
     }
-
+    .persistent-id{
+      >.persistent-id-inputs {
+        display: flex;
+        flex-direction: column;
+        mat-form-field {
+          padding-bottom: 20px;
+        }
+        info-message {
+          display: flex;
+          width: 100%;
+          margin-bottom: 20px;
+        }
+      }
+    }
     .about {
       position: relative;
 
