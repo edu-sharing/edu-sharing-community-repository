@@ -815,12 +815,13 @@ export class NodeHelper {
   }
 
   /**
-   * returns true if this node is a copy of an other node, just used as a publish target
+   * Returns true if this node is a copy of another node, just used as a publish target.
    */
-  static isNodePublishedCopy(o: Node) {
-    return o.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0] != null;
+  static isNodePublishedCopy(o: Node): boolean {
+    return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
   }
 }
+
 export class LinkData {
   constructor(public link: string) {}
   lti: boolean;
