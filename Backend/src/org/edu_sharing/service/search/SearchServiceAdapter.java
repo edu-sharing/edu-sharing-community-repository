@@ -8,6 +8,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SearchVCard;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 import java.io.IOException;
@@ -107,7 +108,7 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public Set<Map<String, Serializable>> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
+	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
 		return new HashSet<>();
 	}
 }
