@@ -361,7 +361,7 @@ export class OptionsHelperService {
             } else {
                 if(NodeHelper.isNodePublishedCopy(object)) {
                     return ElementType.NodePublishedCopy;
-                } else if (object.properties[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true') {
+                } else if (object.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true') {
                     return ElementType.NodeBlockedImport;
                 }
                 return ElementType.Node;
