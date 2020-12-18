@@ -315,9 +315,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
             contributorKind = ContributorKind.PERSON;
         }
         if(contributorKind == ContributorKind.ORGANIZATION){
-            qb.must(QueryBuilders.existsQuery("contributor.X-ROR"));
+            qb.must(QueryBuilders.boolQuery().must(
+                    QueryBuilders.existsQuery("contributor.X-ROR")
+                ).must(
+                    QueryBuilders.existsQuery("contributor.X-Wikidata")
+                ).minimumShouldMatch(1)
+            );
         }else{
-            qb.must(QueryBuilders.existsQuery("contributor.X-ORCID"));
+            qb.must(QueryBuilders.boolQuery().must(
+                    QueryBuilders.existsQuery("contributor.X-ORCID")
+                    ).must(
+                    QueryBuilders.existsQuery("contributor.X-GND-URI")
+                    ).minimumShouldMatch(1)
+            );
         }
 
 
@@ -341,12 +351,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 boolean propertyIsInFilter = true;
 
                 if(contributorKind == ContributorKind.ORGANIZATION){
-                    if(!map.containsKey("X-ROR")){
+                    if(!map.containsKey("X-ROR") && !map.containsKey("X-Wikidata")){
                         remove.add(map);
                         continue;
                     }
                 }else{
-                    if(!map.containsKey("X-ORCID")){
+                    if(!map.containsKey("X-ORCID") && !map.containsKey("X-GND-URI")){
                         remove.add(map);
                         continue;
                     }
