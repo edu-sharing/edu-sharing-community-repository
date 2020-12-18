@@ -166,7 +166,6 @@
                         <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
                              src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&maxWidth=300&maxHeight=300' : '') : null}}"
                              [title]="viewType==0 ? '' : getTitle(node)"
-                             [attr.role]="'presentation'"
                              (mouseenter)="animateIcon(node,true)"
                              (mouseleave)="animateIcon(node,false)"
                              [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
