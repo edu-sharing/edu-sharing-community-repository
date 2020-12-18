@@ -157,8 +157,8 @@
               type="search"
               [(ngModel)]="searchQuery"
               (change)="searchQueryChange.emit(searchQuery)"
-              title="{{ searchPlaceholder | translate }}"
               placeholder="{{ searchPlaceholder | translate }}"
+              [attr.aria-label]="searchPlaceholder | translate"
             />
             <i class="material-icons searchIcon">search</i>
             <i class="material-icons searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()"
