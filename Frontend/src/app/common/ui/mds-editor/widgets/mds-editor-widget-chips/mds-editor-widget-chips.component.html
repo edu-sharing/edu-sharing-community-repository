@@ -48,6 +48,7 @@
       class="mat-button-select-arrow"
       *ngIf="showDropdownArrow"
       (click)="trigger.openPanel(); $event.stopPropagation()"
+      [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
     >
       <span class="mat-select-arrow"></span>
     </button>
