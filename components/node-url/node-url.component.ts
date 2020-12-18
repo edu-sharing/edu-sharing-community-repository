@@ -17,6 +17,7 @@ import { NodeHelper } from '../../node-helper';
             [routerLink]="get('routerLink')"
             [state]="getState()"
             [queryParams]="get('queryParams')"
+            [attr.aria-label]="node.name"
         >
             <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
@@ -24,14 +25,10 @@ import { NodeHelper } from '../../node-helper';
     styleUrls: ['node-url.component.scss'],
 })
 export class NodeUrlComponent {
-    @Input() set node(node: Node) {
-        this._node = node;
-    }
+    @Input() node: Node;
     @Input() nodes: Node[];
     @Input() scope: string;
     @Input() unclickable: boolean;
-
-    private _node: Node;
 
     static getInfo(mode: 'routerLink' | 'queryParams', node: Node) {
         if (!node) {
@@ -78,6 +75,6 @@ export class NodeUrlComponent {
     }
 
     get(mode: 'routerLink' | 'queryParams'): any {
-        return NodeUrlComponent.getInfo(mode, this._node);
+        return NodeUrlComponent.getInfo(mode, this.node);
     }
 }

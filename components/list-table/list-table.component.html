@@ -115,8 +115,9 @@
                  (nodesDragEnter)="onNodesDragEnter(node)"
                  (nodesHoveringChange)="onNodesHoveringChange($event, node)"
                  (nodesDrop)="onNodesDrop($event, node)"
-                 [tabindex]="createLink ? -1 : 0"
+                 [attr.tabindex]="createLink ? null : 0"
                  (keyup.enter)="doubleClick(node)"
+                 [attr.aria-label]="node.name"
             >
                 <!-- custom data binding from outside -->
                 <app-node-url matRipple matRippleColor="primary" [node]="node" [nodes]="_nodes" [scope]="scope" [unclickable]="!createLink">
