@@ -134,6 +134,7 @@
           #dropdownTrigger="matMenuTrigger"
           (menuOpened)="createMenu.updateOptions()"
           [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+          [attr.aria-label]="'WORKSPACE.ADD' | translate"
         >
           <i icon iconId="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
         </button>
