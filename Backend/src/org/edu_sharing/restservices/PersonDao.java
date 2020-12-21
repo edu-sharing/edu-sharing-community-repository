@@ -332,7 +332,7 @@ public class PersonDao {
 	private UserQuota getQuota() {
 		UserQuota quota=new UserQuota();
 		Long sizeQuota = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
-		if(sizeQuota==null || sizeQuota.equals("-1")){
+		if(sizeQuota==null || sizeQuota.equals(-1L)){
 			quota.setEnabled(false);
 			return quota;
 		}
