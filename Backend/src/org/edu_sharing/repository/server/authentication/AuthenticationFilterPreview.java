@@ -31,6 +31,7 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.restservices.ApiAuthenticationFilter;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -80,6 +81,9 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 		String repoId = req.getParameter("repoId");
 		
 		String accessToken = req.getParameter(CCConstants.REQUEST_PARAM_ACCESSTOKEN);
+
+		String authHdr = httpServletRequest.getHeader("Authorization");
+
 		if(req.getParameter("sig")!=null &&
 				req.getParameter("courseId")!=null &&
 				req.getParameter("resourceId")!=null){
@@ -196,6 +200,9 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				return;
 			}				
 			
+		} else if (authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
+			ApiAuthenticationFilter.httpBasicAuth(httpServletRequest.getSession(), authHdr);
+
 		} else if(ticket != null && !ticket.trim().equals("")){
 		
 			try {

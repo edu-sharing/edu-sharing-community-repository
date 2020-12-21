@@ -69,41 +69,9 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		if (authHdr != null) {			
 				
 				if (authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
+					logger.debug("auth is BASIC");
+					validatedAuth = httpBasicAuth(session, authHdr);
 
-					logger.info("auth is BASIC");
-					// Basic authentication details present
-	
-					String basicAuth = new String(java.util.Base64.getDecoder().decode(authHdr.substring(6)), StandardCharsets.ISO_8859_1);
-	
-					// Split the username and password
-	
-					String username = null;
-					String password = null;
-	
-					int pos = basicAuth.indexOf(":");
-					if (pos != -1) {
-						username = basicAuth.substring(0, pos);
-						password = basicAuth.substring(pos + 1);
-					} else {
-						username = basicAuth;
-						password = "";
-					}
-
-					try {
-						
-						// Authenticate the user
-						validatedAuth = authTool.createNewSession(username, password);
-						logger.info("AuthChain SuccsessFullAuthMethod:" + SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod());
-						
-						String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
-						String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
-						authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET),authMethod, session);										
-					} catch (Exception ex) {
-						
-						logger.error(ex.getMessage(), ex);
-						
-					} 
-					
 				} else if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")) {
 					
 					logger.info("auth is OAuth");
@@ -197,6 +165,42 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		
 		// Chain other filters
 		chain.doFilter(req, resp);
+	}
+
+	public static HashMap<String, String> httpBasicAuth(HttpSession session, String authHdr) {
+		HashMap<String, String> validatedAuth = null;
+		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+
+		// Basic authentication details present
+
+		String basicAuth = new String(java.util.Base64.getDecoder().decode(authHdr.substring(6)), StandardCharsets.ISO_8859_1);
+
+		// Split the username and password
+
+		String username = null;
+		String password = null;
+
+		int pos = basicAuth.indexOf(":");
+		if (pos != -1) {
+			username = basicAuth.substring(0, pos);
+			password = basicAuth.substring(pos + 1);
+		} else {
+			username = basicAuth;
+			password = "";
+		}
+
+		try {
+
+			// Authenticate the user
+			validatedAuth = authTool.createNewSession(username, password);
+
+			String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
+			String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
+			authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET),authMethod, session);
+		} catch (Exception ex) {
+			Logger.getLogger(ApiAuthenticationFilter.class).error(ex.getMessage(), ex);
+		}
+		return validatedAuth;
 	}
 
 	@Override
