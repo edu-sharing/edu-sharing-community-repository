@@ -300,7 +300,6 @@ public class PersonDao {
 
 
 		data.setProfile(getProfile());
-    	data.setStats(getStats());
     	data.setStatus(getStatus());
     	data.setProperties(getProperties());
 
@@ -372,7 +371,7 @@ public class PersonDao {
 		}
 		return status;
 	}
-	private UserStats getStats() {
+	public UserStats getStats() {
 		UserStats stats = new UserStats();
 		// run as admin so solr counts all materials and collections
 		return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {

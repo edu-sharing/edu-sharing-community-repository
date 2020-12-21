@@ -2,7 +2,7 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from '../../core-ui-module/translation';
 import {UIHelper} from '../../core-ui-module/ui-helper';
-import {SessionStorageService} from '../../core-module/core.module';
+import {SessionStorageService, UserStats} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {DomSanitizer, Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -21,6 +21,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {Helper} from '../../core-module/rest/helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-profiles',
@@ -57,6 +58,7 @@ export class ProfilesComponent {
   }
   private static PASSWORD_MIN_LENGTH = 5;
   public user: User;
+  public userStats: UserStats;
   public userEdit: User;
   public isMe: boolean;
   public edit: boolean;
@@ -79,8 +81,12 @@ export class ProfilesComponent {
   public loadUser(authority:string) {
     this.toast.showProgressDialog();
     this.connector.isLoggedIn().subscribe((login)=> {
-      this.iamService.getUser(authority).subscribe((profile: IamUser) => {
+      Observable.forkJoin(
+          this.iamService.getUser(authority),
+          this.iamService.getUserStats(authority),
+      ).subscribe(([profile, stats]) => {
         this.user = profile.person;
+        this.userStats = stats;
         this.userEditProfile = profile.editProfile;
         const name = new AuthorityNamePipe(this.translate).transform(this.user, null);
         UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name});

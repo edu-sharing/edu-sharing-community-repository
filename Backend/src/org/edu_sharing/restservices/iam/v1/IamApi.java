@@ -124,23 +124,19 @@ public class IamApi  {
     }
     
     @GET
-
-    @Path("/people/{repository}/{person}")    
-    
+    @Path("/people/{repository}/{person}")
     @ApiOperation(
     	value = "Get the user.", 
     	notes = "Get the user. (Not all information are feteched for foreign profiles if current user is not an admin)")
-
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = UserEntry.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserEntry.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
-
     public Response getUser(
     		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
@@ -172,6 +168,33 @@ public class IamApi  {
     		return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
     	}
     }
+
+	@GET
+	@Path("/people/{repository}/{person}/stats")
+	@ApiOperation(
+			value = "Get the user stats.",
+			notes = "Get the user stats (e.g. publicly created material count)")
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserStats.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+	public Response getUserStats(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+			@Context HttpServletRequest req) {
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			PersonDao personDao = PersonDao.getPerson(repoDao, person);
+			return Response.status(Response.Status.OK).entity(personDao.getStats()).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
+		}
+	}
     @GET       
     @Path("/people/{repository}/{person}/nodeList/{list}")    
     @ApiOperation(
