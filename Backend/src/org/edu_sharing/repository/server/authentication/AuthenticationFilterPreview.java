@@ -200,9 +200,16 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				return;
 			}				
 			
-		} else if (authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
-			ApiAuthenticationFilter.httpBasicAuth(httpServletRequest.getSession(), authHdr);
-
+		} else if (authHdr!=null && authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
+			try {
+				HashMap<String, String> authResult = ApiAuthenticationFilter.httpBasicAuth(authHdr);
+				if(authResult == null) {
+					throw new Exception("Auth failed");
+				}
+			} catch (Exception e) {
+				httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+				return;
+			}
 		} else if(ticket != null && !ticket.trim().equals("")){
 		
 			try {

@@ -70,8 +70,11 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 				
 				if (authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
 					logger.debug("auth is BASIC");
-					validatedAuth = httpBasicAuth(session, authHdr);
-
+					validatedAuth = httpBasicAuth(authHdr);
+					String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
+					String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
+					String username = validatedAuth.get(CCConstants.AUTH_USERNAME);
+					authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET),authMethod, session);
 				} else if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")) {
 					
 					logger.info("auth is OAuth");
@@ -167,7 +170,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		chain.doFilter(req, resp);
 	}
 
-	public static HashMap<String, String> httpBasicAuth(HttpSession session, String authHdr) {
+	public static HashMap<String, String> httpBasicAuth(String authHdr) {
 		HashMap<String, String> validatedAuth = null;
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 
@@ -193,10 +196,6 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 
 			// Authenticate the user
 			validatedAuth = authTool.createNewSession(username, password);
-
-			String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
-			String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
-			authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET),authMethod, session);
 		} catch (Exception ex) {
 			Logger.getLogger(ApiAuthenticationFilter.class).error(ex.getMessage(), ex);
 		}
