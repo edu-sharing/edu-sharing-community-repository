@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -885,12 +886,11 @@ public class NodeDao {
 			public Void doWork() throws Exception {
 				try {
 					NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao, originalId);
+					Serializable originalAccess = NodeServiceHelper.getPropertyNative(
+							new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId)
+							, CCConstants.CCM_PROP_RESTRICTED_ACCESS);
 					reference.setCreatedBy(nodeDaoOriginal.asNode(false).getCreatedBy());
-					reference.setOriginalRestrictedAccess(
-							(Boolean) NodeServiceHelper.getPropertyNative(
-									new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId)
-									, CCConstants.CCM_PROP_RESTRICTED_ACCESS)
-					);
+					reference.setOriginalRestrictedAccess(originalAccess != null && (Boolean) originalAccess);
 				} catch (InvalidNodeRefException t) {
 					reference.setOriginalId(null);
 					// original maybe deleted
