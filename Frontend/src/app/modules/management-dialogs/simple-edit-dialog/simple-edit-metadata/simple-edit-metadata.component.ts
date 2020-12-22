@@ -39,7 +39,8 @@ export class SimpleEditMetadataComponent {
 
     save(): Observable<void> {
         if (!this.isDirty()) {
-            return of();
+            // emit null so that next and complete get's called
+            return of(null);
         }
         return Observable.forkJoin(
             this.nodes.map((n) =>
