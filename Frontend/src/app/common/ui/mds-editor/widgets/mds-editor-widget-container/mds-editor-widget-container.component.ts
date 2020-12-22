@@ -143,7 +143,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         if (this.label === true) {
             this.label = this.widget.definition.caption;
         }
-        if (this.widget && this.editorBulkMode.isBulk) {
+        if (this.widget && this.editorBulkMode?.isBulk) {
             this.bulkMode = new BehaviorSubject(
                 this.editorBulkMode.bulkBehavior === BulkBehavior.Replace ? 'replace' : 'no-change',
             );
@@ -170,8 +170,8 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
 
     shouldShowBulkEditToggle(): boolean {
         return (
-            this.editorBulkMode.isBulk &&
-            this.editorBulkMode.bulkBehavior === BulkBehavior.Default &&
+            this.editorBulkMode?.isBulk &&
+            this.editorBulkMode?.bulkBehavior === BulkBehavior.Default &&
             !!this.widget
         );
     }

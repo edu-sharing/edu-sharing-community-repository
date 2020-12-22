@@ -239,40 +239,40 @@ export class WorkspaceLicenseComponent  {
     this.onCancel.emit();
   }
 
-  public saveLicense(callback:Function=null){
-    if(this._properties){
-        this.onDone.emit(this.getProperties(this._properties));
-        return;
-    }
-    if(!this.getLicenseProperty() && this.release){
-      //this.toast.error(null,'WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE');
-      //return;
-    }
-    let prop: Values = {};
+  public async saveLicense(callback: Function = null) {
+      if (this._properties) {
+          this.onDone.emit(await this.getProperties(this._properties));
+          return;
+      }
+      if (!this.getLicenseProperty() && this.release) {
+          //this.toast.error(null,'WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE');
+          //return;
+      }
+      let prop: Values = {};
 
-    prop=this.getProperties(prop);
-    let i=0;
-    this.onLoading.emit(true);
-    const updatedNodes: Node[] = [];
-    for(let node of this._nodes) {
-      node.properties=prop;
-      i++;
-      this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
-        updatedNodes.push(result.node);
-        this.savePermissions(node);
-        if(updatedNodes.length === this._nodes.length) {
-          this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
-          this.onLoading.emit(false);
-          this.onDone.emit(updatedNodes);
-          if (callback) {
-              callback();
-          }
-        }
-      }, (error: any) => {
-        this.onLoading.emit(false);
-        this.toast.error(error);
-      });
-    }
+      prop = await this.getProperties(prop);
+      let i = 0;
+      this.onLoading.emit(true);
+      const updatedNodes: Node[] = [];
+      for (let node of this._nodes) {
+          node.properties = prop;
+          i++;
+          this.nodeApi.editNodeMetadataNewVersion(node.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
+              updatedNodes.push(result.node);
+              this.savePermissions(node);
+              if (updatedNodes.length === this._nodes.length) {
+                  this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
+                  this.onLoading.emit(false);
+                  this.onDone.emit(updatedNodes);
+                  if (callback) {
+                      callback();
+                  }
+              }
+          }, (error: any) => {
+              this.onLoading.emit(false);
+              this.toast.error(error);
+          });
+      }
   }
   private getValueForAll(prop:string,fallbackNotIdentical:any="",fallbackIsEmpty=fallbackNotIdentical,asArray=false){
     let found=null;
@@ -473,40 +473,40 @@ export class WorkspaceLicenseComponent  {
     this.cc0Type='CC_0';
   }
 
-  getProperties(prop = this._properties) {
-        prop[RestConstants.CCM_PROP_LICENSE]=[this.getLicenseProperty()];
-        if(!this.contactIndeterminate)
-            prop[RestConstants.CCM_PROP_QUESTIONSALLOWED]=[this.contact];
-        if(this.isCCAttributableLicense()){
-            prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = null;
-            if (this.ccTitleOfWork) {
-                prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
-            }
-            if (this.ccSourceUrl) {
-                prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [this.ccSourceUrl];
-            }
-            if (this.ccProfileUrl) {
-                prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
-            }
-            if (this.ccVersion) {
-                prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
-            }
-            if (this.ccCountry) {
-                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
-            }
-        }
-          prop = this.author.getValues(prop);
+  async getProperties(prop = this._properties) {
+      prop[RestConstants.CCM_PROP_LICENSE] = [this.getLicenseProperty()];
+      if (!this.contactIndeterminate)
+          prop[RestConstants.CCM_PROP_QUESTIONSALLOWED] = [this.contact];
+      if (this.isCCAttributableLicense()) {
+          prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
+          prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
+          prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
+          prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = null;
+          prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = null;
+          if (this.ccTitleOfWork) {
+              prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
+          }
+          if (this.ccSourceUrl) {
+              prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [this.ccSourceUrl];
+          }
+          if (this.ccProfileUrl) {
+              prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
+          }
+          if (this.ccVersion) {
+              prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
+          }
+          if (this.ccCountry) {
+              prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
+          }
+      }
+      prop = await this.author.getValues(prop);
 
 
-          if(this.type=='CUSTOM') {
-            prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
-        }
-        return prop;
-    }
+      if (this.type == 'CUSTOM') {
+          prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
+      }
+      return prop;
+  }
 
     openContributorDialog() {
         let nodes=this._nodes;
