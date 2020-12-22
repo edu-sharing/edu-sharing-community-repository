@@ -55,7 +55,7 @@ public interface CollectionService {
 	
 	public List<NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition,List<String> filter);
 
-	public Collection get(String storeId, String storeProtocol, String collectionId);
+	public Collection get(String storeId, String storeProtocol, String collectionId, boolean fetchCounts);
 
 	void removePreviewImage(String collectionId) throws Exception;
 

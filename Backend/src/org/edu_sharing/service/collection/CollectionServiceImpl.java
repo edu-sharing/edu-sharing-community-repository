@@ -527,7 +527,7 @@ public class CollectionServiceImpl implements CollectionService{
         collection.setChildCollectionsCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
     }
 	@Override
-	public Collection get(String storeId,String storeProtocol,String collectionId) {
+	public Collection get(String storeId, String storeProtocol, String collectionId, boolean fetchCounts) {
 		try{
 			HashMap<String,Object> props = client.getProperties(storeProtocol,storeId,collectionId);
 			throwIfNotACollection(storeProtocol,storeId,collectionId);
@@ -535,7 +535,9 @@ public class CollectionServiceImpl implements CollectionService{
 			Collection collection = asCollection(props);
 
 			// using solr to count all underlying refs recursive
-            addCollectionCountProperties(new NodeRef(new StoreRef(storeProtocol,storeId),collectionId),collection);
+			if(fetchCounts) {
+				addCollectionCountProperties(new NodeRef(new StoreRef(storeProtocol, storeId), collectionId), collection);
+			}
 			//collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
 			//collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
 						

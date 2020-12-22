@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,6 +84,10 @@ public class NodeDao {
 			CCConstants.PERMISSION_READ_ALL
 	};
 	final List<String> access;
+	/*
+	whether this node dao is supposed to fetch collection counts (more expensive when true)
+	 */
+	boolean fetchCounts = true;
 	// id of the object by the remote repository (null if not a remote object)
 	private String remoteId;
 	private RepositoryDao remoteRepository;
@@ -519,12 +524,31 @@ public class NodeDao {
 			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
 		}
 	}
-    public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
+	public static NodeEntries convertToRest(RepositoryDao repoDao,
+											Filter propFilter,
+											List<NodeRef> children,
+											Integer skipCount,
+											Integer maxItems) throws DAOException {
+		return convertToRest(repoDao, propFilter, children, skipCount, maxItems, null);
+	}
+    public static NodeEntries convertToRest(RepositoryDao repoDao,
+											Filter propFilter,
+											List<NodeRef> children,
+											Integer skipCount,
+											Integer maxItems,
+											Function<NodeDao, NodeDao> transform
+
+	) throws DAOException {
+
         NodeEntries result=new NodeEntries();
         List<Node> nodes=new ArrayList<>();
         for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
         	try {
-				nodes.add(NodeDao.getNode(repoDao, children.get(i).getId(), propFilter).asNode());
+				NodeDao nodeDao = NodeDao.getNode(repoDao, children.get(i).getId(), propFilter);
+				if(transform != null){
+					nodeDao = transform.apply(nodeDao);
+				}
+				nodes.add(nodeDao.asNode());
 			}
         	catch(DAOMissingException daoException){
         		logger.warn("Missing node " + children.get(i).getId()+" tryed to fetch, skipping fetch", daoException);
