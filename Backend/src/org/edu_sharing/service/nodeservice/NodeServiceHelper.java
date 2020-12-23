@@ -171,7 +171,7 @@ public class NodeServiceHelper {
 		if(NodeServiceHelper.hasAspect(nodeRef,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
 			String refNodeId = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
 			Boolean restricted = (Boolean) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS));
-			if (restricted && !PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), permission)) {
+			if (restricted != null && restricted && !PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), permission)) {
 				throw new RestrictedAccessException(refNodeId);
 			}
 		}
