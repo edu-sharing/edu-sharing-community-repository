@@ -1931,6 +1931,11 @@ public class CCConstants {
 
 	public final static String VCARD_T_X_ES_LOM_CONTRIBUTE_DATE = "X-ES-LOM-CONTRIBUTE-DATE";
 
+	public final static String VCARD_T_X_ORCID = "X-ORCID";
+	public final static String VCARD_T_X_GND_URI = "X-GND-URI";
+	public final static String VCARD_T_X_ROR = "X-ROR";
+	public final static String VCARD_T_X_WIKIDATA = "X-Wikidata";
+
 	public final static String CCM_PROPS_IO_OBJECTTYPE_IO = "0";
 
 	public final static String CCM_PROPS_IO_OBJECTTYPE_LS = "1";

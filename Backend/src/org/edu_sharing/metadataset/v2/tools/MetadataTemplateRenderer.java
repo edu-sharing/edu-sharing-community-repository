@@ -1,6 +1,9 @@
 package org.edu_sharing.metadataset.v2.tools;
 
 import jersey.repackaged.com.google.common.collect.Lists;
+import net.sourceforge.cardme.engine.VCardEngine;
+import net.sourceforge.cardme.vcard.VCard;
+import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -14,6 +17,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -108,7 +112,14 @@ public class MetadataTemplateRenderer {
 		}
 		return html;
 	}
-
+	public static <T> T firstNonNull(T ...items) {
+		for(T i : items) {
+			if (i != null) {
+				return i;
+			}
+		}
+		return null;
+	}
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
 		if(renderingMode.equals(RenderingMode.HTML)) {
@@ -133,7 +144,7 @@ public class MetadataTemplateRenderer {
 			}
 			StringBuffer widgetHtml=new StringBuffer();
 			if(renderingMode.equals(RenderingMode.HTML)) {
-				widgetHtml.append("<div data-widget-id='").append(widget.getId()).append("' class='mdsWidget'");
+				widgetHtml.append("<div data-widget-id='").append(widget.getId()).append("' class='mdsWidget");
 				if (widget.getType() != null) {
 					widgetHtml.append(" mdsWidget_").append(widget.getType());
 				}
@@ -260,8 +271,26 @@ public class MetadataTemplateRenderer {
 					}
 					else if("vcard".equals(widget.getType())){
 						try {
+							VCardEngine vCardEngine = new VCardEngine();
+							VCard vcard = vCardEngine.parse(value);
 							HashMap<String, Object> data = VCardConverter.vcardToHashMap(value).get(0);
 							value = VCardConverter.getNameForVCard("",data);
+							if(renderingMode.equals(RenderingMode.HTML)){
+								String persistentIdUrl = null;
+								for(ExtendedType type : vcard.getExtendedTypes()){
+									if(type.getExtendedName().equals(CCConstants.VCARD_T_X_ORCID) ||
+											type.getExtendedName().equals(CCConstants.VCARD_T_X_GND_URI) ||
+											type.getExtendedName().equals(CCConstants.VCARD_T_X_ROR) ||
+											type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)){
+										 persistentIdUrl = type.getExtendedValue();
+										 break;
+									}
+								}
+								if(persistentIdUrl != null){
+									value += "<br><a href=\"" + persistentIdUrl + "\" target=\"blank\">" + 
+											MetadataHelper.getTranslation("vcard_link_persistent_id") + "</a>";
+								}
+							}
 							Object linkUrl = data.get(widget.getLink() == null ? CCConstants.VCARD_URL :
 									widget.getLink().equals("email") ? CCConstants.VCARD_EMAIL
 											: null);
@@ -292,11 +321,11 @@ public class MetadataTemplateRenderer {
 						empty = false;
 					}
 					if (renderingMode.equals(RenderingMode.HTML)) {
-						widgetHtml.append("<span>");
+						widgetHtml.append("<div>");
 					}
 					widgetHtml.append(value);
 					if (renderingMode.equals(RenderingMode.HTML)) {
-						widgetHtml.append("</span>");
+						widgetHtml.append("</div>");
 					}
 					if(renderingMode.equals(RenderingMode.HTML)) {
 						widgetHtml.append("</div>");
