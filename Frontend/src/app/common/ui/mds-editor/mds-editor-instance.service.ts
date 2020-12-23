@@ -315,7 +315,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 ];
                 criterias = RestSearchService.convertCritierias(
                     values,
-                    this.mdsEditorInstanceService.widgets,
+                    this.mdsEditorInstanceService.widgets.value.map((w) => w.definition),
                 );
             }
             return this.mdsEditorInstanceService.restMdsService
