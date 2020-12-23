@@ -100,10 +100,13 @@ public class CollectionDao {
 	private static CollectionBaseEntries getCollectionsChildren(RepositoryDao repoDao, String parentId, SearchScope scope, boolean fetchCounts, Filter propFilter, List<String> filter, SortDefinition sortDefinition, int skipCount, int maxItems) throws DAOException {
 		try {
 			List<Node> result = new ArrayList<>();
-			NodeDao parentNode = NodeDao.getNode(repoDao, parentId);
-			parentNode.fetchCounts = false;
+			NodeDao parentNode = null;
+			if(!ROOT.equals(parentId)) {
+				parentNode = NodeDao.getNode(repoDao, parentId);
+				parentNode.fetchCounts = false;
+			}
 			// if this collection is ordered by user, use the position of the elements as primary order criteria
-			if (!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(parentNode.asNode().getCollection().getOrderMode())) {
+			if (parentNode != null && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(parentNode.asNode().getCollection().getOrderMode())) {
 				sortDefinition.addSortDefinitionEntry(
 						new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION), true), 0);
 			}
