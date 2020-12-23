@@ -346,8 +346,13 @@ public class PersonDao {
 	}
 	private UserStatus getStatus() {
 		UserStatus status = new UserStatus();
-		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null)
-			status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
+		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null) {
+			try {
+				status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
+			} catch(IllegalArgumentException e) {
+				logger.warn("Person " + getAuthorityName() +" has invalid lifecycle status: " + this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
+			}
+		}
 		// cast to long for rest api
 		Date date = (Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE);
 		if(date != null) {

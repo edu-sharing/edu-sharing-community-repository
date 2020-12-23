@@ -205,19 +205,19 @@ export class LoginComponent implements OnInit {
             (data) => {
                 if (data.statusCode === RestConstants.STATUS_CODE_OK) {
                     this.goToNext(data);
-                }
-                else if (data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED
-                    || data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG
-                ) {
-                    this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
-                    this.password = '';
-                    this.isLoading = false;
-                }
-                else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
-                    this.toast.error(null, 'LOGIN.PASSWORD_EXPIRED');
-                }
-                else {
-                    this.toast.error(null, 'LOGIN.ERROR');
+                } else {
+                    if (data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED
+                        || data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG
+                    ) {
+                        this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
+                    } else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
+                        this.toast.error(null, 'LOGIN.PASSWORD_EXPIRED');
+                    } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
+                        this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
+                    }
+                    else {
+                        this.toast.error(null, 'LOGIN.ERROR');
+                    }
                     this.password = '';
                     this.isLoading = false;
                 }

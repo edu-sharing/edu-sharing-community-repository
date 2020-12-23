@@ -9,6 +9,7 @@
         "LOGIN": "Anmelden",
         "RECOVER_PASSWORD": "Passwort vergessen?",
         "ERROR": "Zugangsdaten fehlerhaft",
+        "PERSON_BLOCKED": "Ihr Zugang wurde gesperrt. Wenden Sie sich an einen Administrator des Systems",
         "PASSWORD_EXPIRED": "Das Passwort ist abgelaufen und muss zuerst geändert werden",
         "REGISTER_TEXT": "Registrieren",
         "REGISTER_LINK": "Zur Registrierung",

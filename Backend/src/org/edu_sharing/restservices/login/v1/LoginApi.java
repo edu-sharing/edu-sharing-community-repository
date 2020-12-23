@@ -69,7 +69,9 @@ public class LoginApi  {
 			String personStatus = NodeServiceFactory.getLocalService().getProperty(authorityNodeRef.getStoreRef().getProtocol(), 
 					authorityNodeRef.getStoreRef().getIdentifier(), 
 					authorityNodeRef.getId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
-			if(!personActiveStatus.equals(personStatus)) {
+			// ignore the active status for admins to prevent a "lock out" from the system
+			boolean allowAdminAccess = AuthorityServiceFactory.getLocalService().isGlobalAdmin() && personStatus == null;
+			if(!personActiveStatus.equals(personStatus) && !allowAdminAccess) {
 				authenticated = false;
 				authTool.logoutWithoutSecurityContext(authTool.getTicketFromSession(req.getSession()));
 				status = Login.STATUS_CODE_PERSON_BLOCKED;
