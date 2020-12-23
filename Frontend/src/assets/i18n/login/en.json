@@ -9,6 +9,7 @@
         "LOGIN": "Login",
         "RECOVER_PASSWORD": "Forgot password?",
         "ERROR": "Invalid credentials",
+        "PERSON_BLOCKED": "Your account is disabled. Please get in touch with a system administrator",
         "PASSWORD_EXPIRED": "The password expired. Please set a new password first",
         "REGISTER_TEXT": "Sign up",
         "REGISTER_LINK": "Sign up here",
