@@ -10,7 +10,7 @@
     tabindex="-1"
     aria-hidden="true"
 ></button>
-<dropdown #dropdown [options]="dropdownOptions" [callbackObject]="selectedNodes ? selectedNodes[0] : null"></dropdown>
+<dropdown #dropdown [options]="dropdownOptions"></dropdown>
 
 <card
     *ngIf="reorderDialog"
@@ -214,7 +214,7 @@
                         <i icon iconId="{{option.icon}}"></i>
                     </button>
                 </div>
-                <div class="more column" *ngIf="_options && _options.length>1" ><button mat-icon-button (click)="showDropdown(node,true,$event);$event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
+                <div class="more column" *ngIf="_options && _options.length>1" ><button mat-icon-button (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
                 <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
                     <button mat-icon-button
                             [class.disabled]="!optionIsValid(_options[0],node)"

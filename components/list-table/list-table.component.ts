@@ -996,7 +996,7 @@ export class ListTableComponent implements EventListener {
         this.loadMore.emit();
     }
 
-    private contextMenu(event: any, node: Node): void {
+    contextMenu(event: any, node: Node): void {
         event.preventDefault();
         event.stopPropagation();
 
@@ -1005,19 +1005,23 @@ export class ListTableComponent implements EventListener {
         }
         this.dropdownLeft = event.clientX + 'px';
         this.dropdownTop = event.clientY + 'px';
-        this.showDropdown(node, true);
+        let nodes = [node];
+        if(this.getSelectedPos(node) !== -1) {
+            nodes = this.selectedNodes;
+        } else {
+            this.setSelectionToSingleNode(node);
+        }
+        this.showDropdown(true);
     }
 
-    private getReference(node: any) {
+    getReference(node: any) {
         return node.reference ? node.reference : node;
     }
 
-    private showDropdown(
-        node: Node,
+    showDropdown(
         openMenu = false,
         event: any = null,
     ): void {
-        this.setSelectionToSingleNode(node);
         if (openMenu) {
             if (event) {
                 if (event.clientX + event.clientY) {
@@ -1034,7 +1038,7 @@ export class ListTableComponent implements EventListener {
         setTimeout(() => this.menuTrigger.openMenu());
     }
 
-    private doubleClick(node: Node): void {
+    doubleClick(node: Node): void {
         // click events are not supported if createLink = true
         if(this.createLink) {
             return;
@@ -1065,7 +1069,7 @@ export class ListTableComponent implements EventListener {
         this.onSelectionChanged(node);
     }
 
-    private setSelectionToSingleNode(node: Node) {
+    setSelectionToSingleNode(node: Node) {
         this.selectedNodes = [node];
         this.onSelectionChanged(node);
     }
@@ -1138,7 +1142,7 @@ export class ListTableComponent implements EventListener {
     public refreshAvailableOptions(node: Node = null) {
         this.optionsHelper.setData({
             scope: this.scope,
-            activeObject: node,
+            activeObjects: this.selectedNodes,
             selectedObjects: this.selectedNodes,
             allObjects: this._nodes,
             parent: this.parent,
