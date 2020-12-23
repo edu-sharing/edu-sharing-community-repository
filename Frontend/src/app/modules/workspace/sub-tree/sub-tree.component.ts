@@ -148,7 +148,7 @@ export class WorkspaceSubTreeComponent {
         this.dropdownLeft = event.clientX + 'px';
         this.dropdownTop = event.clientY + 'px';
         this.optionsService.setData({
-            activeObject: node,
+            activeObjects: [node],
             scope: Scope.WorkspaceTree
         });
         this.optionsService.initComponents(this.mainNav, null, null, this.dropdown);

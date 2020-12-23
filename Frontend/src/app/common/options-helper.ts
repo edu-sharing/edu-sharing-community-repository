@@ -258,10 +258,10 @@ export class OptionsHelperService {
         if (target === Target.List) {
             objects = this.data.allObjects && this.data.allObjects.length ? [this.data.allObjects[0]] : null;
         } else if (target === Target.Actionbar) {
-            objects = this.data.selectedObjects || (this.data.activeObject ? [this.data.activeObject] : null);
+            objects = this.data.selectedObjects || (this.data.activeObjects);
         } else if (target === Target.ListDropdown) {
-            if (this.data.activeObject) {
-                objects = [this.data.activeObject];
+            if (this.data.activeObjects) {
+                objects = this.data.activeObjects;
             } else {
                 return null;
             }
@@ -1048,7 +1048,7 @@ export class OptionsHelperService {
     }
 
     private getObjects(object: Node | any) {
-        return NodeHelper.getActionbarNodes(this.data.selectedObjects || [this.data.activeObject], object);
+        return NodeHelper.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
     }
 
     applyExternalOptions(options: OptionItem[]) {
@@ -1218,7 +1218,7 @@ export interface OptionsListener {
 }
 export interface OptionData {
     scope: Scope;
-    activeObject?: Node|any;
+    activeObjects?: Node[]|any[];
     selectedObjects?: Node[] | any[];
     allObjects?: Node[] | any[];
     parent?: Node|any;

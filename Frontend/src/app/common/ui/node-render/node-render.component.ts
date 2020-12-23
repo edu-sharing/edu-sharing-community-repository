@@ -498,7 +498,7 @@ export class NodeRenderComponent implements EventListener {
     private initOptions(options:OptionItem[]) {
         this.optionsHelper.setData({
             scope: Scope.Render,
-            activeObject: this._node,
+            activeObjects: [this._node],
             parent: new Node(this._node.parent.id),
             allObjects: this.list,
             customOptions: {

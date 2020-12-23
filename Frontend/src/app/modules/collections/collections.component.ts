@@ -1160,7 +1160,7 @@ export class CollectionsMainComponent {
     private setOptionsCollection() {
         this.optionsService.setData({
             scope: Scope.CollectionsCollection,
-            activeObject: this.collectionContent.node,
+            activeObjects: [this.collectionContent.node],
         });
         this.optionsService.initComponents(
             this.mainNavRef,
