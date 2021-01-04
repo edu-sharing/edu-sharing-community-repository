@@ -16,7 +16,7 @@ import {
     Input,
     Output,
     TemplateRef,
-    ViewChild,
+    ViewChild, ViewContainerRef,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -498,10 +498,12 @@ export class ListTableComponent implements EventListener {
         private route: ActivatedRoute,
         private router: Router,
         private toast: Toast,
+        private viewContainerRef: ViewContainerRef,
         private optionsHelper: OptionsHelperService,
         private bridge: BridgeService,
         private frame: FrameEventsService,
     ) {
+        this.nodeHelper.setViewContainerRef(this.viewContainerRef);
         this.reorderButtons = DialogButton.getSaveCancel(
             () => this.closeReorder(false),
             () => this.closeReorder(true),

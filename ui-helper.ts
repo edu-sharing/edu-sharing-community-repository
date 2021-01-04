@@ -19,12 +19,13 @@ import {BridgeService} from '../core-bridge-module/bridge.service';
 import {OptionItem} from './option-item';
 import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
 import {Observable, Observer} from 'rxjs';
-import {DialogButton, RestIamService, RestNetworkService,} from '../core-module/core.module';
 import {RouterHelper} from './router.helper';
 import {PlatformLocation} from '@angular/common';
 import {MessageType} from '../core-module/ui/message-type';
 import {Helper} from '../core-module/rest/helper';
 import {NodeHelperService} from './node-helper.service';
+import { RestIamService } from '../core-module/rest/services/rest-iam.service';
+import { DialogButton } from '../core-module/ui/dialog-button';
 
 export class UIHelper {
     public static evaluateMediaQuery(type: string, value: number) {

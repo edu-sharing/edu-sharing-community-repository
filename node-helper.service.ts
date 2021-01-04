@@ -12,7 +12,7 @@ import {ConfigurationHelper} from '../core-module/rest/configuration-helper';
 import {MessageType} from '../core-module/ui/message-type';
 import {Toast} from './toast';
 import {UIHelper} from './ui-helper';
-import {Injectable} from '@angular/core';
+import {ComponentFactoryResolver, Injectable, ViewContainerRef} from '@angular/core';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {AuthorityProfile, CollectionReference, NodesRightMode, Node, Permission, User, WorkflowDefinition, Repository} from '../core-module/rest/data-object';
 import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
@@ -22,6 +22,7 @@ import {RestHelper} from '../core-module/rest/rest-helper';
 import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
 import {ListItem} from '../core-module/ui/list-item';
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
+import {SpinnerSmallComponent} from './components/spinner-small/spinner-small.component';
 
 export type WorkflowDefinitionStatus = {
   current: WorkflowDefinition
@@ -54,8 +55,10 @@ export interface ConfigOptionItem extends ConfigEntry {
 
 @Injectable()
 export class NodeHelperService {
+  private viewContainerRef: ViewContainerRef;
   constructor(
       private translate: TranslateService,
+      private componentFactoryResolver: ComponentFactoryResolver,
       private config: ConfigurationService,
       private rest: RestConnectorService,
       private bridge: BridgeService,
@@ -65,6 +68,9 @@ export class NodeHelperService {
       private router:Router,
       private storage:TemporaryStorageService,
   ) {
+  }
+  setViewContainerRef(viewContainerRef: ViewContainerRef){
+    this.viewContainerRef = viewContainerRef;
   }
   /**
    * Gets and formats an attribute from the node
@@ -830,8 +836,17 @@ export class NodeHelperService {
   }
 
   private buildNativeComponent(data: any, item: ListItem, htmlElement: HTMLElement) {
-    // UIHelper.injectAngularComponent()
-    return false;
+    console.log(htmlElement);
+    if(!htmlElement) {
+      return false;
+    }
+    UIHelper.injectAngularComponent(
+        this.componentFactoryResolver,
+        this.viewContainerRef,
+        SpinnerSmallComponent,
+        htmlElement
+    )
+    return true;
   }
 
   getNodeLink(mode: "routerLink" | "queryParams", node: Node) {
