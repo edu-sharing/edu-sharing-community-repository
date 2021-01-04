@@ -52,6 +52,7 @@ public class Values implements Serializable {
 	@XmlElement	public Services services;
 	@XmlElement	public HelpMenuOptions[] helpMenuOptions;
 	@XmlElement	public Image[] images;
+	@XmlElement	public FontIcon[] icons;
 	@XmlElement	public Stream stream;
 	@XmlElement	public Admin admin;
 	@XmlElement	public SimpleEdit simpleEdit;
