@@ -21,7 +21,6 @@ export class IconComponent {
     @Input() set iconId(id: string) {
         this.element.nativeElement.classList.add('edu-icon-base');
         const mapping = this.iconsConfig?.filter((i) => i.original === id);
-        console.log(this.iconsConfig, this.iconsConfig[0].original, mapping, id);
         if(mapping?.length === 1) {
             id = mapping[0].replace;
         }
