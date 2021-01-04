@@ -4,23 +4,30 @@
 
 import {AfterViewInit, Component, ContentChildren, Directive, ElementRef, Input, Type, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
+import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
 
 @Directive({
-  selector: '[icon]',
+    selector: '[icon]',
 })
 export class IconComponent {
     private element: ElementRef;
     private _id: string;
     private _aria: boolean;
+    private iconsConfig: {original: string, replace: string}[];
     @Input() set aria(aria:boolean) {
         this._aria=aria;
         this.updateAria();
     }
     @Input() set iconId(id: string) {
-      this.element.nativeElement.classList.add('edu-icon-base');
-      this._id=id;
-      let css:string;
-      this.updateAria();
+        this.element.nativeElement.classList.add('edu-icon-base');
+        const mapping = this.iconsConfig?.filter((i) => i.original === id);
+        console.log(this.iconsConfig, this.iconsConfig[0].original, mapping, id);
+        if(mapping?.length === 1) {
+            id = mapping[0].replace;
+        }
+        this._id=id;
+        let css:string;
+        this.updateAria();
         if(id.startsWith('edu-')) {
             css='edu-icons';
             id=id.substr(4);
@@ -36,7 +43,13 @@ export class IconComponent {
     @Input() set id(id:string) {
 
     }
-    constructor(element:ElementRef,private translate:TranslateService) {
+    constructor(element:ElementRef,
+                private translate:TranslateService,
+                private config: ConfigurationService,
+    ) {
+        this.config.get('icons', null).subscribe((icons) =>
+            this.iconsConfig = icons
+        );
         // console.log(element);
         this.element=element;
     }
