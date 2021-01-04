@@ -1,5 +1,4 @@
 import {PipeTransform, Pipe} from '@angular/core';
-import {NodeHelper} from "../node-helper";
 import {TranslateService} from "@ngx-translate/core";
 
 @Pipe({name: 'replaceChars'})

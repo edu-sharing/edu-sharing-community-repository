@@ -52,10 +52,10 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { DistinctClickEvent } from '../../directives/distinct-click.directive';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
-import { NodeHelper } from '../../node-helper';
 import { CustomOptions, OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
+import {NodeHelperService} from '../../node-helper.service';
 
 @Component({
     selector: 'listTable',
@@ -487,6 +487,7 @@ export class ListTableComponent implements EventListener {
         private ui: UIService,
         private translate: TranslateService,
         private cd: ChangeDetectorRef,
+        private nodeHelper: NodeHelperService,
         private config: ConfigurationService,
         private changes: ChangeDetectorRef,
         private storage: TemporaryStorageService,
@@ -609,7 +610,7 @@ export class ListTableComponent implements EventListener {
     }
 
     isCollection(node: any): boolean {
-        return NodeHelper.isNodeCollection(node);
+        return this.nodeHelper.isNodeCollection(node);
     }
 
     isReference(node: Node): boolean {
@@ -624,7 +625,7 @@ export class ListTableComponent implements EventListener {
     }
 
     askCCPublish(event: any, node: Node): void {
-        NodeHelper.askCCPublish(this.translate, node);
+        this.nodeHelper.askCCPublish(node);
         event.stopPropagation();
     }
 
@@ -740,8 +741,8 @@ export class ListTableComponent implements EventListener {
         this.onDrop.emit({ target, source: nodes, event, type: dropAction });
     }
 
-    getAttribute(data: any, item: ListItem): string {
-        return NodeHelper.getAttribute(this.translate, this.config, data, item);
+    getAttribute(data: any, item: ListItem, htmlElement: HTMLElement): string {
+        return this.nodeHelper.getAttribute(data, item, htmlElement);
     }
 
     onDistinctClick(event: DistinctClickEvent, node: Node, region?: string) {
@@ -901,7 +902,7 @@ export class ListTableComponent implements EventListener {
 
     private animateIcon(node: Node, animate: boolean): void {
         if (animate) {
-            if (NodeHelper.hasAnimatedPreview(node)) {
+            if (this.nodeHelper.hasAnimatedPreview(node)) {
                 this.animateNode = node;
             }
         } else {
@@ -1103,16 +1104,14 @@ export class ListTableComponent implements EventListener {
     }
 
     private getLRMIAttribute(data: any, item: ListItem): string {
-        return NodeHelper.getLRMIAttribute(
-            this.translate,
-            this.config,
+        return this.nodeHelper.getLRMIAttribute(
             data,
             item,
         );
     }
 
     private getLRMIProperty(data: any, item: ListItem): string {
-        return NodeHelper.getLRMIProperty(data, item);
+        return this.nodeHelper.getLRMIProperty(data, item);
     }
 
     private getSelectedPos(selected: Node): number {

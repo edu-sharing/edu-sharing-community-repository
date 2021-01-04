@@ -58,6 +58,7 @@ import { Toast } from './toast';
 import { TranslationLoader } from './translation-loader';
 import {BitwisePipe} from './pipes/bitwise.pipe';
 import { ElementRefDirective } from './directives/element-ref.directive';
+import {NodeHelperService} from './node-helper.service';
 
 @NgModule({
     declarations: [
@@ -125,7 +126,10 @@ import { ElementRefDirective } from './directives/element-ref.directive';
             },
         }),
     ],
-    providers: [Toast],
+    providers: [
+        Toast,
+        NodeHelperService
+    ],
     exports: [
         TranslateModule,
         ListTableComponent,

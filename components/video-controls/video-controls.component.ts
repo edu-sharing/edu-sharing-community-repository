@@ -20,8 +20,7 @@ import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {Toast} from '../../toast';
 import {UIHelper} from '../../ui-helper';
 import {DurationPipe} from './duration.pipe';
-import {NodeHelper} from "../../node-helper";
-
+import {NodeHelperService} from '../../node-helper.service';
 interface VideoControlsValues {
     startTime: number;
     endTime: number;
@@ -55,6 +54,7 @@ export class VideoControlsComponent implements OnInit {
         private collectionService: RestCollectionService,
         private connector: RestConnectorService,
         private nodeService: RestNodeService,
+        private nodeHelper: NodeHelperService,
         private router: Router,
         private temporaryStorage: TemporaryStorageService,
         private toast: Toast,
@@ -96,6 +96,7 @@ export class VideoControlsComponent implements OnInit {
         this.isCollectionChooserVisible = false;
         this.isLoading = true;
         UIHelper.addToCollection(
+            this.nodeHelper,
             this.collectionService,
             this.router,
             this.bridge,
@@ -149,12 +150,12 @@ export class VideoControlsComponent implements OnInit {
         } else {
             if (this.isCollectionRef(node)) {
                 if(this.isOwner(node)) {
-                    return NodeHelper.getNodesRight([node], RestConstants.ACCESS_WRITE);
+                    return this.nodeHelper.getNodesRight([node], RestConstants.ACCESS_WRITE);
                 } else{
-                    return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH, NodesRightMode.Original);
+                    return this.nodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH, NodesRightMode.Original);
                 }
             } else {
-                return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH);
+                return this.nodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH);
             }
         }
     }

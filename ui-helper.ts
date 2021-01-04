@@ -12,7 +12,6 @@ import {TemporaryStorageService} from '../core-module/rest/services/temporary-st
 import {UIService} from '../core-module/rest/services/ui.service';
 import {ComponentFactoryResolver, ComponentRef, ElementRef, EmbeddedViewRef, EventEmitter, NgZone, Type, ViewContainerRef,} from '@angular/core';
 import {RestCollectionService} from '../core-module/rest/services/rest-collection.service';
-import {NodeHelper} from './node-helper';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {FrameEventsService} from '../core-module/rest/services/frame-events.service';
 import {ListItem} from '../core-module/ui/list-item';
@@ -25,6 +24,7 @@ import {RouterHelper} from './router.helper';
 import {PlatformLocation} from '@angular/common';
 import {MessageType} from '../core-module/ui/message-type';
 import {Helper} from '../core-module/rest/helper';
+import {NodeHelperService} from './node-helper.service';
 
 export class UIHelper {
     public static evaluateMediaQuery(type: string, value: number) {
@@ -363,6 +363,7 @@ export class UIHelper {
         }
     }
     static addToCollection(
+        nodeHelper: NodeHelperService,
         collectionService: RestCollectionService,
         router: Router,
         bridge: BridgeService,
@@ -395,6 +396,7 @@ export class UIHelper {
                 result => {
                     results.push(result.node);
                     UIHelper.addToCollection(
+                        nodeHelper,
                         collectionService,
                         router,
                         bridge,
@@ -413,12 +415,12 @@ export class UIHelper {
                             { name: RestHelper.getTitle(nodes[position]) },
                         );
                     } else
-                        NodeHelper.handleNodeError(
-                            bridge,
+                        nodeHelper.handleNodeError(
                             RestHelper.getTitle(nodes[position]),
                             error,
                         );
                     UIHelper.addToCollection(
+                        nodeHelper,
                         collectionService,
                         router,
                         bridge,
