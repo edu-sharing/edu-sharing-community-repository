@@ -20,7 +20,6 @@ import {SessionStorageService} from "../../core-module/core.module";
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {RestMdsService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
-import {NodeHelper} from "../../core-ui-module/node-helper"; //
 import {Observable} from 'rxjs/Rx';
 import {RestStreamService} from "../../core-module/core.module";
 import {RestConnectorsService} from '../../core-module/core.module';
@@ -39,6 +38,7 @@ import {RestIamService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 
 @Component({
@@ -114,6 +114,7 @@ export class StreamComponent {
     private title : Title,
     private toast : Toast,
     private bridge : BridgeService,
+    private nodeHelper: NodeHelperService,
     private actionbar: ActionbarHelperService,
     private collectionService : RestCollectionService,
     private config : ConfigurationService,
@@ -193,7 +194,7 @@ export class StreamComponent {
   }
 
   checkIfEnable(nodes: Node[]) {
-    this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
+    this.collectionOption.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
   }
 
   scrollToDown() {
@@ -342,7 +343,7 @@ export class StreamComponent {
     }
     private createConnector(event : any){
         this.createConnectorName=null;
-        let prop=NodeHelper.propertiesFromConnector(event);
+        let prop=this.nodeHelper.propertiesFromConnector(event);
         let win:any;
         if(!this.cordova.isRunningCordova())
             win=window.open("");
@@ -353,7 +354,7 @@ export class StreamComponent {
             },
             (error : any)=>{
                 win.close();
-                if(NodeHelper.handleNodeError(this.bridge,event.name,error)==RestConstants.DUPLICATE_NODE_RESPONSE){
+                if(this.nodeHelper.handleNodeError(event.name,error)==RestConstants.DUPLICATE_NODE_RESPONSE){
                     this.createConnectorName=event.name;
                 }
             }

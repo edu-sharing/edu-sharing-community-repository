@@ -5,7 +5,7 @@ import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {NodeHelperService} from "../../../core-ui-module/node-helper.service";
 import {ConfigurationService} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
@@ -177,7 +177,7 @@ export class WorkspaceLicenseComponent  {
                   this.permissions = permissions.permissions.localPermissions;
                   this.readPermissions(i==this._nodes.length);
                   if(this._nodes.length==1) {
-                      this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions.localPermissions.permissions);
+                      this.doiActive = this.nodeHelper.isDOIActive(node, permissions.permissions.localPermissions.permissions);
                       this.doiDisabled = this.doiActive;
                   }
               });
@@ -225,6 +225,7 @@ export class WorkspaceLicenseComponent  {
     private connector : RestConnectorService,
     private translate : TranslateService,
     private config : ConfigurationService,
+    private nodeHelper: NodeHelperService,
     private mdsEditorInstanceService : MdsEditorInstanceService,
     private ui : UIService,
     private iamApi : RestIamService,
@@ -280,7 +281,7 @@ export class WorkspaceLicenseComponent  {
     if(this._properties){
       return this._properties[prop] ? this._properties[prop][0] : fallbackIsEmpty;
     }
-    return NodeHelper.getValueForAll(this._nodes, prop, fallbackNotIdentical, fallbackIsEmpty, asArray);
+    return this.nodeHelper.getValueForAll(this._nodes, prop, fallbackNotIdentical, fallbackIsEmpty, asArray);
   }
   private readLicense() {
     let license=this.getValueForAll(RestConstants.CCM_PROP_LICENSE,"MULTI","NONE");
@@ -361,16 +362,16 @@ export class WorkspaceLicenseComponent  {
     return name;
   }
   private getLicenseName(){
-    return NodeHelper.getLicenseNameByString(this.getLicenseProperty(),this.translate);
+    return this.nodeHelper.getLicenseNameByString(this.getLicenseProperty());
   }
   private getLicenseUrl(){
-    return NodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
+    return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
   }
   private getLicenseUrlVersion(type:string){
-      return NodeHelper.getLicenseUrlByString(type,this.ccVersion);
+      return this.nodeHelper.getLicenseUrlByString(type,this.ccVersion);
   }
   private getLicenseIcon(){
-    return NodeHelper.getLicenseIconByString(this.getLicenseProperty(),this.connector);
+    return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());
   }
   private savePermissions(node:Node){
     if(this.releaseIndeterminate){

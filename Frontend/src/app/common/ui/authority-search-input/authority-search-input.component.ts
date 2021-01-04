@@ -11,7 +11,7 @@ import {
     RestIamService,
     RestOrganizationService,
 } from '../../../core-module/core.module';
-import { NodeHelper } from '../../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import { PermissionNamePipe } from '../../../core-ui-module/pipes/permission-name.pipe';
 import { SuggestItem } from '../autocomplete/autocomplete.component';
 
@@ -59,6 +59,7 @@ export class AuthoritySearchInputComponent {
         private iam: RestIamService,
         private organization: RestOrganizationService,
         private namePipe: PermissionNamePipe,
+        private nodeHelper: NodeHelperService,
     ) {
         this.suggestionGroups$ = this.input.valueChanges.pipe(
             startWith(''),
@@ -174,7 +175,7 @@ export class AuthoritySearchInputComponent {
                 user.authorityName,
                 group
                     ? user.profile.displayName
-                    : NodeHelper.getUserDisplayName(user as AuthorityProfile),
+                    : this.nodeHelper.getUserDisplayName(user as AuthorityProfile),
                 group ? 'group' : 'person',
                 '',
             );

@@ -23,7 +23,6 @@ import {SessionStorageService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ColorHelper} from '../../../core-module/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../core-module/core.module";
@@ -36,6 +35,7 @@ import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 import {MdsMetadatasets} from '../../../core-module/core.module';
 import {ConfigurationHelper} from '../../../core-module/core.module';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 // component class
 @Component({
@@ -114,6 +114,7 @@ export class CollectionNewComponent {
       private collectionService : RestCollectionService,
       private nodeService : RestNodeService,
       private connector : RestConnectorService,
+      private nodeHelper: NodeHelperService,
       private uiService : UIService,
       private iamService : RestIamService,
       private mediacenterService : RestMediacenterService,
@@ -231,7 +232,7 @@ export class CollectionNewComponent {
        this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
         this.navigateToCollectionId(this.currentCollection.ref.id);
       },(error:any)=> {
-         NodeHelper.handleNodeError(this.bridge, this.currentCollection.title, error);
+         this.nodeHelper.handleNodeError(this.currentCollection.title, error);
          //this.toast.error(error)
        });
     }
@@ -608,7 +609,7 @@ export class CollectionNewComponent {
         this.saveImage(collection);
         return;
     }
-    UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,nodes,()=>{
+    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,nodes,()=>{
         this.saveImage(collection);
         return;
     });

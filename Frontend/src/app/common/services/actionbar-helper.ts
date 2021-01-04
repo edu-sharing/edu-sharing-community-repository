@@ -1,4 +1,4 @@
-import {NodeHelper} from "../../core-ui-module/node-helper";
+import {NodeHelperService} from "../../core-ui-module/node-helper.service";
 import {Injectable} from "@angular/core";
 import {
     Node, NodesRightMode,
@@ -15,12 +15,13 @@ import {MessageType} from "../../core-module/ui/message-type";
 export class ActionbarHelperService{
   private repositories: Repository[];
   public static getNodes(nodes:Node[],node:Node):Node[] {
-      return NodeHelper.getActionbarNodes(nodes,node);
+      return NodeHelperService.getActionbarNodes(nodes,node);
   }
   constructor(
     private connector : RestConnectorService,
     private networkService : RestNetworkService,
-    private connectors : RestConnectorsService
+    private connectors : RestConnectorsService,
+    private nodeHelper: NodeHelperService,
   ){
       this.networkService.getRepositories().subscribe((repositories)=>this.repositories=repositories.repositories);
   }
@@ -35,7 +36,7 @@ export class ActionbarHelperService{
   public createOptionIfPossible(type: string, nodes: Node[], callback: (node: Node|any) => void){
     let option:OptionItem=null;
     if(type=='DOWNLOAD') {
-      if (NodeHelper.allFiles(nodes)) {
+      if (this.nodeHelper.allFiles(nodes)) {
         option = new OptionItem("OPTIONS.DOWNLOAD", "cloud_download", callback);
         option.customEnabledCallback = (list: Node[]|any[]) => {
           if(!list || !list.length)
@@ -51,7 +52,7 @@ export class ActionbarHelperService{
             return isAllowed;
         }
         option.showCallback=(node: Node) => {
-            return NodeHelper.referenceOriginalExists(node);
+            return this.nodeHelper.referenceOriginalExists(node);
         }
         // option.isEnabled=option.customEnabledCallback(null);
       }
@@ -66,9 +67,9 @@ export class ActionbarHelperService{
         };
     }
     if(type=='NODE_TEMPLATE') {
-      if (nodes && nodes.length==1 && NodeHelper.allFolders(nodes)) {
+      if (nodes && nodes.length==1 && this.nodeHelper.allFolders(nodes)) {
           option = new OptionItem("WORKSPACE.OPTION.TEMPLATE", "assignment_turned_in", callback);
-          option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
+          option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
           option.onlyDesktop = true;
       }
     }
@@ -79,7 +80,7 @@ export class ActionbarHelperService{
             if(n==null)
                 return false;
             option.name="WORKSPACE.OPTION.VARIANT" + (this.connectors.connectorSupportsEdit(n[0]) ? "_OPEN" : "");
-            return NodeHelper.allFiles(n) && n && n.length==1  && n[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
+            return this.nodeHelper.allFiles(n) && n && n.length==1  && n[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
         };
         option.enabledCallback = (node: Node) => {
             return node.size > 0 && node.downloadUrl !== null;
@@ -91,17 +92,17 @@ export class ActionbarHelperService{
     if(type=='ADD_TO_COLLECTION') {
       if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
+        option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         option.showAsAction = true;
         option.showCallback = (node: Node) => {
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
-            return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0;
+            return this.nodeHelper.referenceOriginalExists(node) && this.nodeHelper.allFiles(nodes) && n.length>0;
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
+          return this.nodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         }
         option.disabledCallback = () =>{
           this.connectors.getRestConnector().getBridgeService().showTemporaryMessage(MessageType.error, null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
@@ -111,19 +112,19 @@ export class ActionbarHelperService{
     if(type=='DELETE'){
       if(nodes && nodes.length){
           option=new OptionItem("WORKSPACE.OPTION.DELETE","delete", callback);
-          option.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+          option.isEnabled=this.nodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
           option.isSeparate=true;
 
       }
     }
     if(type=='ADD_TO_STREAM') {
-      if (NodeHelper.allFiles(nodes) && this.connector.getConfigurationService().instant('stream.enabled',false)) {
+      if (this.nodeHelper.allFiles(nodes) && this.connector.getConfigurationService().instant('stream.enabled',false)) {
         option = new OptionItem("WORKSPACE.OPTION.STREAM", "event", callback);
         option.enabledCallback = (node: Node) => {
           let n = ActionbarHelperService.getNodes(nodes, node);
           if(n==null)
               return false;
-          return NodeHelper.getNodesRight(n,RestConstants.ACCESS_CC_PUBLISH) &&
+          return this.nodeHelper.getNodesRight(n,RestConstants.ACCESS_CC_PUBLISH) &&
               this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_STREAM) &&
               RestNetworkService.allFromHomeRepo(n,this.repositories);
         };
@@ -131,7 +132,7 @@ export class ActionbarHelperService{
               let n=ActionbarHelperService.getNodes(nodes,node);
               if(n==null)
                   return false;
-              return NodeHelper.allFiles(nodes) && RestNetworkService.allFromHomeRepo(n,this.repositories) && n.length==1;
+              return this.nodeHelper.allFiles(nodes) && RestNetworkService.allFromHomeRepo(n,this.repositories) && n.length==1;
           }
         option.isEnabled = option.enabledCallback(null);
       }
@@ -139,21 +140,21 @@ export class ActionbarHelperService{
     if(type=='INVITE'){
       if(nodes && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
         option = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", callback);
-        option.isSeparate = NodeHelper.allFiles(nodes);
+        option.isSeparate = this.nodeHelper.allFiles(nodes);
         option.showAsAction = true;
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
+        option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
       }
     }
     if(type=='WORKFLOW'){
         if (nodes && nodes.length==1 && !nodes[0].isDirectory  && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
             option = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", callback);
-            option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
+            option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
         }
     }
     if(type=='SHARE_LINK'){
       if(nodes && !nodes[0].isDirectory && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH) {
         option = new OptionItem("WORKSPACE.OPTION.SHARE_LINK", "link", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS) && this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
+        option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS) && this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
       }
     }
     // when there are already nodes (action bar), and the option has a show callback, check if it is valid

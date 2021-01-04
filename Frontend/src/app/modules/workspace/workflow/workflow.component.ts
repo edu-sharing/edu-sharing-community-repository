@@ -19,9 +19,9 @@ import {
     WorkflowEntry,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { NodeHelper } from '../../../core-ui-module/node-helper';
 import { AuthorityNamePipe } from '../../../core-ui-module/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 type WorkflowReceiver = UserSimple | Group;
 
@@ -63,6 +63,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         private nodeService: RestNodeService,
         private translate: TranslateService,
         private iam: RestIamService,
+        private nodeHelper: NodeHelperService,
         private config: ConfigurationService,
         private connector: RestConnectorService,
         private toast: Toast,
@@ -72,7 +73,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             .hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH)
             .subscribe((has: boolean) => (this.globalAllowed = has));
         this.config.getAll().subscribe(async () => {
-            this.validStatus = NodeHelper.getWorkflows(this.config);
+            this.validStatus = this.nodeHelper.getWorkflows();
             const receiver = this.config.instant('workflow.defaultReceiver');
             if (receiver) {
                 try {
@@ -115,7 +116,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     }
 
     getWorkflowForId(id: string) {
-        return NodeHelper.getWorkflowStatusById(this.config, id);
+        return this.nodeHelper.getWorkflowStatusById(id);
     }
 
     removeReceiver(data: WorkflowReceiver) {
@@ -184,7 +185,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
                 ({
                     current: this.status,
                     initial: this.initialStatus,
-                } = NodeHelper.getDefaultWorkflowStatus(this.config));
+                } = this.nodeHelper.getDefaultWorkflowStatus());
             }
         } else {
             this.history = histories[0];
@@ -194,8 +195,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             if (!this.receivers || (this.receivers.length === 1 && !this.receivers[0])) {
                 this.receivers = [];
             }
-            ({ current: this.status, initial: this.initialStatus } = NodeHelper.getWorkflowStatus(
-                this.config,
+            ({ current: this.status, initial: this.initialStatus } = this.nodeHelper.getWorkflowStatus(
                 this.nodes[0],
             ));
         }

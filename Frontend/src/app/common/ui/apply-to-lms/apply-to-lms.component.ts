@@ -10,7 +10,7 @@ import {
 } from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {SearchService} from "../../../modules/search/search.service";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {NodeHelperService} from "../../../core-ui-module/node-helper.service";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
@@ -35,6 +35,7 @@ export class ApplyToLmsComponent{
     private translate : TranslateService,
     private config : ConfigurationService,
     private temporaryStorage : TemporaryStorageService,
+    private nodeHelper: NodeHelperService,
     private storage : SessionStorageService,
     private route : ActivatedRoute,
     private searchService:SearchService) {
@@ -95,7 +96,7 @@ export class ApplyToLmsComponent{
         let ccrepUrl = 'ccrep://' + encodeURIComponent(wrapper.remote.ref.repo) + '/' + encodeURIComponent(wrapper.remote.ref.id);
         if (reurl == "IFRAME" || reurl=="WINDOW") {
             (node as any).objectUrl = ccrepUrl;
-            NodeHelper.appendImageData(this.connector, node).subscribe((data: Node) => {
+            this.nodeHelper.appendImageData(node).subscribe((data: Node) => {
                 this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE, data);
                 window.history.back();
             },(error)=>{

@@ -13,8 +13,8 @@ import {Title} from '@angular/platform-browser';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestNodeService} from '../../core-module/core.module';
-import {NodeHelper} from '../../core-ui-module/node-helper';
 import {TemporaryStorageService} from '../../core-module/core.module';
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 @Component({
   selector: 'app-file-upload',
@@ -40,6 +40,7 @@ export class FileUploadComponent{
     private reurl: string;
    constructor(
        private translate : TranslateService,
+       private nodeHelper: NodeHelperService,
        private configService : ConfigurationService,
        private storage : SessionStorageService,
        private temporaryStorage : TemporaryStorageService,
@@ -71,6 +72,6 @@ export class FileUploadComponent{
            this._showUploadSelect=true;
            return;
        }
-       NodeHelper.addNodeToLms(this.router,this.temporaryStorage,node,this.reurl);
+       this.nodeHelper.addNodeToLms(node,this.reurl);
     }
 }

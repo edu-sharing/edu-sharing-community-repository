@@ -14,9 +14,9 @@ import {Router} from '@angular/router';
 import {RestHelper} from '../../../core-module/core.module';
 import {RestConnectorsService} from "../../../core-module/core.module";
 import {FrameEventsService} from "../../../core-module/core.module";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {OPEN_URL_MODE} from "../../../core-module/ui/ui-constants";
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
   selector: 'node-variant',
@@ -60,6 +60,7 @@ export class NodeVariantComponent  {
     private translate : TranslateService,
     private connectors : RestConnectorsService,
     private config : ConfigurationService,
+    private nodeHelper: NodeHelperService,
     private toast : Toast,
     private bridge : BridgeService,
     private events : FrameEventsService,
@@ -101,13 +102,13 @@ export class NodeVariantComponent  {
               this.onDone.emit();
           },(error)=>{
               this.onLoading.emit(false);
-              NodeHelper.handleNodeError(this.bridge,this.variantName,error);
+              this.nodeHelper.handleNodeError(this.variantName,error);
               if(win)
                   win.close();
           });
       },(error)=>{
           this.onLoading.emit(false);
-          NodeHelper.handleNodeError(this.bridge,this.variantName,error);
+          this.nodeHelper.handleNodeError(this.variantName,error);
           if(win)
               win.close();
       });
@@ -128,7 +129,7 @@ export class NodeVariantComponent  {
     }
 
     getLicenseUrl(): string {
-        return NodeHelper.getLicenseUrlByString(this._node.properties[RestConstants.CCM_PROP_LICENSE],this._node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION])
+        return this.nodeHelper.getLicenseUrlByString(this._node.properties[RestConstants.CCM_PROP_LICENSE],this._node.properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION])
   }
     updateButtons(): any {
         this.buttons=[

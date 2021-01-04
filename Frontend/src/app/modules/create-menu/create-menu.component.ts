@@ -36,7 +36,7 @@ import { CardService } from '../../core-ui-module/card.service';
 import { CardComponent } from '../../core-ui-module/components/card/card.component';
 import { DropdownComponent } from '../../core-ui-module/components/dropdown/dropdown.component';
 import { DateHelper } from '../../core-ui-module/DateHelper';
-import { LinkData, NodeHelper } from '../../core-ui-module/node-helper';
+import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {
     Constrain,
     DefaultGroups,
@@ -91,7 +91,7 @@ export class CreateMenuComponent {
      */
     @Input() set parent(parent: Node) {
         this._parent = parent;
-        this.showPicker = parent == null || NodeHelper.isNodeCollection(parent);
+        this.showPicker = parent == null || this.nodeHelper.isNodeCollection(parent);
         this.updateOptions();
     }
     /**
@@ -134,6 +134,7 @@ export class CreateMenuComponent {
         private route: ActivatedRoute,
         private optionsService: OptionsHelperService,
         private iam: RestIamService,
+        private nodeHelper: NodeHelperService,
         private event: FrameEventsService,
         private cardService: CardService,
     ) {
@@ -212,7 +213,7 @@ export class CreateMenuComponent {
             pasteNodes.group = DefaultGroups.Primary;
             this.options.push(pasteNodes);
         }
-        if (this._parent && NodeHelper.isNodeCollection(this._parent)) {
+        if (this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
             const newCollection = new OptionItem(
                 'OPTIONS.NEW_COLLECTION',
                 'layers',
@@ -227,7 +228,7 @@ export class CreateMenuComponent {
             this.options.push(newCollection);
         }
         if (this.allowBinary) {
-            if(this._parent && NodeHelper.isNodeCollection(this._parent)) {
+            if(this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
                 const search = new OptionItem(
                     'OPTIONS.SEARCH_OBJECT',
                     'redo',
@@ -307,7 +308,7 @@ export class CreateMenuComponent {
     }
 
     getParent() {
-        return this._parent && !NodeHelper.isNodeCollection(this._parent)
+        return this._parent && !this.nodeHelper.isNodeCollection(this._parent)
             ? this._parent
             : this.inbox;
     }
@@ -340,8 +341,7 @@ export class CreateMenuComponent {
                 (error: any) => {
                     this.toast.closeModalDialog();
                     if (
-                        NodeHelper.handleNodeError(
-                            this.bridge,
+                        this.nodeHelper.handleNodeError(
                             folder.name,
                             error,
                         ) === RestConstants.DUPLICATE_NODE_RESPONSE
@@ -379,9 +379,7 @@ export class CreateMenuComponent {
 
     afterUpload(nodes: Node[]) {
         if (this.params.reurl) {
-            NodeHelper.addNodeToLms(
-                this.router,
-                this.temporaryStorage,
+            this.nodeHelper.addNodeToLms(
                 nodes[0],
                 this.params.reurl,
             );
@@ -466,7 +464,7 @@ export class CreateMenuComponent {
     private createConnector(event: any) {
         const name = event.name + '.' + event.type.filetype;
         this.createConnectorName = null;
-        const prop = NodeHelper.propertiesFromConnector(event);
+        const prop = this.nodeHelper.propertiesFromConnector(event);
         let win: any;
         if (!this.bridge.isRunningCordova()) {
             win = window.open('');
@@ -492,8 +490,7 @@ export class CreateMenuComponent {
                 (error: any) => {
                     win.close();
                     if (
-                        NodeHelper.handleNodeError(
-                            this.bridge,
+                        this.nodeHelper.handleNodeError(
                             event.name,
                             error,
                         ) === RestConstants.DUPLICATE_NODE_RESPONSE

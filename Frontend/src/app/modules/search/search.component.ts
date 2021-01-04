@@ -18,7 +18,6 @@ import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import {OPEN_URL_MODE, UIConstants} from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import { NodeHelper } from '../../core-ui-module/node-helper';
 import {CustomOptions, OptionItem, Scope} from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
 import { Translation } from '../../core-ui-module/translation';
@@ -26,6 +25,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchService } from './search.service';
 import { WindowRefService } from './window-ref.service';
 import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 @Component({
     selector: 'app-search',
@@ -135,6 +135,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private winRef: WindowRefService,
         public searchService: SearchService,
         private title: Title,
+        private nodeHelper: NodeHelperService,
         private config: ConfigurationService,
         private uiService: UIService,
         private storage: SessionStorageService,
@@ -699,7 +700,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     icon: 'message',
                     caption: 'ASK_CC_PUBLISH',
                     click: () => {
-                        NodeHelper.askCCPublish(this.translate, node);
+                        this.nodeHelper.askCCPublish(node);
                     },
                 };
             }
@@ -962,7 +963,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private getSourceIcon(repo: Repository) {
-        return NodeHelper.getSourceIconRepoPath(repo);
+        return this.nodeHelper.getSourceIconRepoPath(repo);
     }
 
     private getCurrentNode(node: Node) {
@@ -1100,7 +1101,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private getSourceIconPath(path: string) {
-        return NodeHelper.getSourceIconPath(path);
+        return this.nodeHelper.getSourceIconPath(path);
     }
 
     private updateRepositoryOrder() {
@@ -1144,9 +1145,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         );
         if (this.applyMode) {
             let apply = new OptionItem('APPLY', 'redo', (node: Node) => {
-                NodeHelper.addNodeToLms(
-                    this.router,
-                    this.temporaryStorageService,
+                this.nodeHelper.addNodeToLms(
                     node,
                     this.searchService.reurl,
                 );
@@ -1192,9 +1191,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.toast.toast('SEARCH.SAVE_SEARCH.TOAST_SAVED');
                     this.loadSavedSearch();
                     if (this.applyMode) {
-                        NodeHelper.addNodeToLms(
-                            this.router,
-                            this.temporaryStorageService,
+                        this.nodeHelper.addNodeToLms(
                             data.node,
                             this.searchService.reurl,
                         );

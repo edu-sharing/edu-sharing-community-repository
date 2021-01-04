@@ -9,7 +9,6 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {Title} from '@angular/platform-browser';
 import {trigger} from '@angular/animations';
 import {Location, PlatformLocation} from '@angular/common';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {SearchService} from '../../../modules/search/search.service';
 import {ActionbarHelperService} from '../../services/actionbar-helper';
@@ -48,6 +47,7 @@ import {VideoControlsComponent} from '../../../core-ui-module/components/video-c
 import {ActionbarComponent} from '../actionbar/actionbar.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper';
 import {RestTrackingService} from "../../../core-module/rest/services/rest-tracking.service";
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 declare var jQuery:any;
 declare var window: any;
@@ -75,6 +75,7 @@ export class NodeRenderComponent implements EventListener {
     constructor(
       private translate : TranslateService,
       private tracking : RestTrackingService,
+      private nodeHelper: NodeHelperService,
       private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
@@ -475,14 +476,14 @@ export class NodeRenderComponent implements EventListener {
   }
   private downloadSequence() {
       const nodes = [this.sequenceParent].concat(this.sequence.nodes);
-      NodeHelper.downloadNodes(this.connector,nodes, this.sequenceParent.name+'.zip');
+      this.nodeHelper.downloadNodes(nodes, this.sequenceParent.name+'.zip');
   }
 
   private downloadCurrentNode() {
       if(this.downloadUrl) {
-          NodeHelper.downloadUrl(this.connector.getBridgeService(), this.downloadUrl);
+          this.nodeHelper.downloadUrl(this.downloadUrl);
       } else {
-          NodeHelper.downloadNode(this.connector.getBridgeService(), this._node, this.isChildobject ? null : this.version);
+          this.nodeHelper.downloadNode(this._node, this.isChildobject ? null : this.version);
       }
   }
 

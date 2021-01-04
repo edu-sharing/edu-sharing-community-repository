@@ -11,7 +11,6 @@ import {SimpleEditInviteComponent} from './simple-edit-invite/simple-edit-invite
 import {SimpleEditLicenseComponent} from './simple-edit-license/simple-edit-license.component';
 import {Observable} from 'rxjs';
 import {CardType} from '../../../core-ui-module/components/card/card.component';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 @Component({

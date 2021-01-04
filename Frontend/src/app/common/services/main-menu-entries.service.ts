@@ -17,7 +17,7 @@ import {
 } from '../../core-module/core.module';
 import { OPEN_URL_MODE } from '../../core-module/ui/ui-constants';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import {ConfigEntry} from '../../core-ui-module/node-helper';
+import {ConfigEntry} from '../../core-ui-module/node-helper.service';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
 

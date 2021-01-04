@@ -26,7 +26,6 @@ import {TranslateService} from '@ngx-translate/core';
 import {Constrain, CustomOptions, DefaultGroups, ElementType, OptionGroup, OptionItem} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {SuggestItem} from '../../../common/ui/autocomplete/autocomplete.component';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
 import {Helper} from '../../../core-module/rest/helper';
 import {trigger} from '@angular/animations';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
@@ -34,6 +33,8 @@ import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-di
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
 import {Observable} from 'rxjs';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
 
 @Component({
   selector: 'permissions-authorities',
@@ -194,14 +195,14 @@ export class PermissionsAuthoritiesComponent {
   private getMemberOptions(): OptionItem[] {
     const options: OptionItem[] = [];
     const removeMembership = new OptionItem('PERMISSIONS.MENU_REMOVE_MEMBERSHIP', 'delete', (data) =>
-        this.deleteMembership(NodeHelper.getActionbarNodes(this.selectedMembers, data))
+        this.deleteMembership(NodeHelperService.getActionbarNodes(this.selectedMembers, data))
     );
     removeMembership.constrains = [Constrain.User];
     removeMembership.group = DefaultGroups.Delete;
     removeMembership.elementType = [ElementType.Group];
     options.push(removeMembership);
     const removeFromGroup = new OptionItem('PERMISSIONS.MENU_REMOVE_MEMBER', 'delete', (data) =>
-        this.deleteMember(NodeHelper.getActionbarNodes(this.selectedMembers, data))
+        this.deleteMember(NodeHelperService.getActionbarNodes(this.selectedMembers, data))
     );
     removeFromGroup.constrains = [Constrain.User];
     removeFromGroup.group = DefaultGroups.Delete;
@@ -234,6 +235,7 @@ export class PermissionsAuthoritiesComponent {
   constructor(private toast: Toast,
               private node: RestNodeService,
               private config: ConfigurationService,
+              private nodeHelper: NodeHelperService,
               private uiService: UIService,
               private router: Router,
               private translate: TranslateService,
@@ -266,7 +268,7 @@ export class PermissionsAuthoritiesComponent {
     this.onSelection.emit(data);
   }
   private getList<T>(data: T): T[] {
-    return NodeHelper.getActionbarNodes((this.selected as any), data);
+    return NodeHelperService.getActionbarNodes((this.selected as any), data);
   }
   private updateOptions() {
     if (this.embedded) {
@@ -451,7 +453,7 @@ export class PermissionsAuthoritiesComponent {
 
     const signupAdd = new OptionItem('PERMISSIONS.ORG_SIGNUP_ADD', 'person_add', (node: UserSimple) => {
       this.toast.showProgressDialog();
-      const users = NodeHelper.getActionbarNodes(this.groupSignupSelected, node);
+      const users = NodeHelperService.getActionbarNodes(this.groupSignupSelected, node);
       Observable.forkJoin(users.map((u) =>
           this.iam.confirmSignup(this.groupSignup.authorityName, u.authorityName)
       )).subscribe(() => {
@@ -467,7 +469,7 @@ export class PermissionsAuthoritiesComponent {
     signupAdd.group = DefaultGroups.Primary;
     const signupRemove = new OptionItem('PERMISSIONS.ORG_SIGNUP_REJECT', 'close', (node: UserSimple) => {
         this.toast.showProgressDialog();
-        const users = NodeHelper.getActionbarNodes(this.groupSignupSelected, node);
+        const users = NodeHelperService.getActionbarNodes(this.groupSignupSelected, node);
         Observable.forkJoin(users.map((u) =>
             this.iam.rejectSignup(this.groupSignup.authorityName, u.authorityName)
         )).subscribe(() => {
@@ -1050,7 +1052,7 @@ export class PermissionsAuthoritiesComponent {
       for (const column of this.columns) {
         if (i)
           data += ';';
-        data += NodeHelper.getAttribute(this.translate, this.config, entry, column);
+        data += this.nodeHelper.getAttribute( entry, column);
         i++;
       }
     }

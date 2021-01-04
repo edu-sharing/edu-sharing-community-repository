@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import {
     MainMenuEntriesService,
 } from '../../services/main-menu-entries.service';
-import {ConfigEntry} from '../../../core-ui-module/node-helper';
+import {ConfigEntry} from '../../../core-ui-module/node-helper.service';
 
 @Component({
     selector: 'app-main-menu-bottom',

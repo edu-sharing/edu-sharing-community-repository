@@ -34,7 +34,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Title } from '@angular/platform-browser';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import { NodeHelper } from '../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
@@ -234,6 +234,7 @@ export class CollectionsMainComponent {
         private temporaryStorageService: TemporaryStorageService,
         private location: Location,
         private collectionService: RestCollectionService,
+        private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
         private networkService: RestNetworkService,
         private organizationService: RestOrganizationService,
@@ -473,7 +474,7 @@ export class CollectionsMainComponent {
     }
 
     getScopeInfo() {
-        return NodeHelper.getCollectionScopeInfo(this.collectionContent.node);
+        return this.nodeHelper.getCollectionScopeInfo(this.collectionContent.node);
     }
     dropOnCollection(event: any) {
         const target = event.target;
@@ -497,6 +498,7 @@ export class CollectionsMainComponent {
             );
         } else {
             UIHelper.addToCollection(
+                this.nodeHelper,
                 this.collectionService,
                 this.router,
                 this.bridge,
@@ -535,6 +537,7 @@ export class CollectionsMainComponent {
     addNodesToCollection(nodes: Node[]) {
         this.toast.showProgressDialog();
         UIHelper.addToCollection(
+            this.nodeHelper,
             this.collectionService,
             this.router,
             this.bridge,
@@ -575,13 +578,13 @@ export class CollectionsMainComponent {
         }
         if (
             event.dropAction === 'copy' &&
-            !NodeHelper.getNodesRight(
+            !this.nodeHelper.getNodesRight(
                 event.nodes,
                 RestConstants.ACCESS_CC_PUBLISH,
                 NodesRightMode.Original,
             )
             || event.dropAction === 'move' &&
-            !NodeHelper.getNodesRight(
+            !this.nodeHelper.getNodesRight(
                 event.nodes,
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Original,
@@ -591,7 +594,7 @@ export class CollectionsMainComponent {
         }
 
         if (
-            !NodeHelper.getNodesRight(
+            !this.nodeHelper.getNodesRight(
                 [event.target],
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Local,
@@ -1149,7 +1152,7 @@ export class CollectionsMainComponent {
     private isAllowedToDeleteNodes(nodes: Node[]) {
         return (
             this.isAllowedToDeleteCollection() ||
-            NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)
+            this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)
         );
     }
 

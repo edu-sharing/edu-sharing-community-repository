@@ -34,7 +34,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { OptionItem } from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { NodeHelper } from '../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { KeyEvents } from '../../core-module/ui/key-events';
 import { Title } from '@angular/platform-browser';
 import { UIHelper } from '../../core-ui-module/ui-helper';
@@ -178,6 +178,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         private route: ActivatedRoute,
         private router: Router,
         private http: HttpClient,
+        private nodeHelper: NodeHelperService,
         private translate: TranslateService,
         private storage: TemporaryStorageService,
         private config: ConfigurationService,
@@ -268,7 +269,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.moveNode(target, source, position + 1);
         },
             (error: any) => {
-                NodeHelper.handleNodeError(this.bridge, source[position].name, error);
+                this.nodeHelper.handleNodeError(source[position].name, error);
                 source.splice(position, 1);
                 this.moveNode(target, source, position + 1);
             });
@@ -284,7 +285,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.copyNode(target, source, position + 1);
         },
             (error: any) => {
-                NodeHelper.handleNodeError(this.bridge, source[position].name, error);
+                this.nodeHelper.handleNodeError(source[position].name, error);
                 source.splice(position, 1);
                 this.copyNode(target, source, position + 1);
             });
@@ -556,7 +557,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     }
                 });
                 this.updateNodeByParams(params, data.node);
-                this.createAllowed = !this.searchQuery && NodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
+                this.createAllowed = !this.searchQuery && this.nodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
                 this.recoverScrollposition();
             }, (error: any) => {
                 this.updateNodeByParams(params, { ref: { id } });
@@ -581,7 +582,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     }
     private openNode(node: Node, useConnector = true) {
-        if (NodeHelper.isSavedSearchObject(node)) {
+        if (this.nodeHelper.isSavedSearchObject(node)) {
             UIHelper.routeToSearchNode(this.router, null, node);
         }
         else if (RestToolService.isLtiObject(node)) {
@@ -740,7 +741,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             });
             return;
         }*/
-        NodeHelper.addNodeToLms(this.router, this.storage, node, this.reurl);
+        this.nodeHelper.addNodeToLms(node, this.reurl);
     }
 
     private updateNodeByParams(params: any, node: Node | any) {

@@ -16,7 +16,7 @@ import { Toast } from '../../../core-ui-module/toast';
 import { VCard } from '../../../core-module/ui/VCard';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { NodeHelper } from '../../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {
@@ -293,6 +293,7 @@ export class MdsComponent {
         private sanitizer: DomSanitizer,
         private config: ConfigurationService,
         private mdsEditorCommon: MdsEditorCommonService,
+        private nodeHelper: NodeHelperService,
         private _ngZone: NgZone,
     ) {
         //Translation.initialize(this.translate,this.config,this.storage,this.route);
@@ -1255,7 +1256,7 @@ export class MdsComponent {
             widget.id +
             `').childNodes;
         for(var i=0;i<elements.length;i++){
-            if(elements[i].getAttribute('data-value')==this.value){
+            if(elements[i].getAttribute('data-value',undefined,undefined,undefined,htmlElement)==this.value){
                 return;
             }
         }
@@ -2016,7 +2017,7 @@ export class MdsComponent {
             this.getWidgetDomId(widget) +
             `').childNodes;
         for(var i=0;i<elements.length;i++){
-            if(elements[i].getAttribute('data-value')==this.value){
+            if(elements[i].getAttribute('data-value',undefined,undefined,undefined,htmlElement)==this.value){
                 return;
             }
         }
@@ -2495,7 +2496,7 @@ export class MdsComponent {
         this.refreshChildobjects();
     }
     private addChildobjectLink(event: any) {
-        let link = NodeHelper.addHttpIfRequired(event.link);
+        let link = this.nodeHelper.addHttpIfRequired(event.link);
         this.addChildobject = false;
         let properties = RestHelper.createNameProperty(link);
         properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];
@@ -2733,7 +2734,7 @@ export class MdsComponent {
                 return "widget 'license' does not have values connected, can't render it.";
             }
             for (let value of widget.values) {
-                let image = NodeHelper.getLicenseIconByString(value.id, this.connector, false);
+                let image = this.nodeHelper.getLicenseIconByString(value.id, false);
                 if (image) value.imageSrc = image;
             }
             widget.type = 'checkboxVertical';
@@ -2781,7 +2782,7 @@ export class MdsComponent {
     }
     private renderWorkflow(widget: any) {
         if (this.mode == 'search') {
-            let workflows = NodeHelper.getWorkflows(this.config);
+            let workflows = this.nodeHelper.getWorkflows();
             widget.values = [];
             for (let w of workflows) {
                 let value: any = {};

@@ -15096,8 +15096,8 @@ function initCanvas(canvas, config) {
 
 	// NOTE(SB) canvas.getAttribute('width') !== canvas.width: in the first case it
 	// returns null or '' if no explicit value has been set to the canvas attribute.
-	var renderHeight = canvas.getAttribute('height');
-	var renderWidth = canvas.getAttribute('width');
+	var renderHeight = canvas.getAttribute('height', undefined, undefined, undefined, htmlElement);
+	var renderWidth = canvas.getAttribute('width', undefined, undefined, undefined, htmlElement);
 
 	// Chart.js modifies some canvas values that we want to restore on destroy
 	canvas[EXPANDO_KEY] = {

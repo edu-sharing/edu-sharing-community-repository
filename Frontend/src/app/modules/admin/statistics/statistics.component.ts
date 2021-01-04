@@ -5,7 +5,6 @@ import {NodeStatistics, Node, Statistics} from '../../../core-module/rest/data-o
 import {ListItem} from '../../../core-module/ui/list-item';
 import {RestConstants} from '../../../core-module/rest/rest-constants';
 import {RestHelper} from '../../../core-module/rest/rest-helper';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
 import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {RestStatisticsService} from '../../../core-module/rest/services/rest-statistics.service';

@@ -19,7 +19,7 @@ import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.m
 import {RestUsageService} from "../../core-module/core.module";
 import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
-import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
+import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 @Component({
@@ -74,7 +74,7 @@ export class WorkspaceManagementDialogsComponent  {
           if (nodeDelete[0].collection) {
               this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_COLLECTION';
               this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_COLLECTION';
-          } else if (NodeHelper.isNodePublishedCopy(nodeDelete[0])) {
+          } else if (this.nodeHelper.isNodePublishedCopy(nodeDelete[0])) {
               this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_PUBLISHED_COPY';
               this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_PUBLISHED_COPY';
           } else if (nodeDelete[0].mediatype === 'folder-link') {
@@ -250,6 +250,7 @@ export class WorkspaceManagementDialogsComponent  {
     private connector:RestConnectorService,
     private searchService:RestSearchService,
     private toast:Toast,
+    private nodeHelper: NodeHelperService,
     private bridge:BridgeService,
     private router:Router,
   ){
@@ -363,7 +364,7 @@ export class WorkspaceManagementDialogsComponent  {
    this.onUploadFileSelected.emit(event);
  }
   createUrlLink(link : LinkData) {
-    const urlData = NodeHelper.createUrlLink(link);
+    const urlData = this.nodeHelper.createUrlLink(link);
     this.closeUploadSelect();
     this.toast.showProgressDialog();
     this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
@@ -515,7 +516,7 @@ export class WorkspaceManagementDialogsComponent  {
       this.dialogTitle=null;
     }
     this.toast.showProgressDialog();
-    UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,list,()=>{
+    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list,()=>{
         this.toast.closeModalDialog();
        this.onStoredAddToCollection.emit(collection);
       if(callback)

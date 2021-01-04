@@ -33,10 +33,10 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { NodeHelper } from '../../../core-ui-module/node-helper';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import {SharePublishComponent} from './share-publish/share-publish.component';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
     selector: 'workspace-share',
@@ -181,6 +181,7 @@ export class WorkspaceShareComponent {
         private collectionService: RestCollectionService,
         private applicationRef: ApplicationRef,
         private config: ConfigurationService,
+        private nodeHelper: NodeHelperService,
         private toast: Toast,
         private usageApi: RestUsageService,
         private iam: RestIamService,

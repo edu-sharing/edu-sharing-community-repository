@@ -14,7 +14,7 @@ import {Router} from '@angular/router';
 import {RestHelper} from '../../../../core-module/core.module';
 import {RestConnectorsService} from '../../../../core-module/core.module';
 import {FrameEventsService} from '../../../../core-module/core.module';
-import {NodeHelper} from '../../../../core-ui-module/node-helper';
+
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';

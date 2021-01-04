@@ -5,7 +5,7 @@ import {RestNodeService} from '../../../../core-module/core.module';
 import {
   Node
 } from '../../../../core-module/core.module';
-import {NodeHelper} from '../../../../core-ui-module/node-helper';
+
 import {TranslateService} from '@ngx-translate/core';
 import {RestConstants} from '../../../../core-module/core.module';
 import {Helper} from '../../../../core-module/rest/helper';
@@ -14,6 +14,7 @@ import {DateHelper} from '../../../../core-ui-module/DateHelper';
 import {UIAnimation} from '../../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {CollectionChooserComponent} from '../../../../core-ui-module/components/collection-chooser/collection-chooser.component';
+import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
 
 @Component({
   selector: 'workspace-share-history',
@@ -47,6 +48,7 @@ export class WorkspaceHistoryComponent {
 
   constructor(private nodeApi: RestNodeService,
               private toast: Toast,
+              private nodeHelper: NodeHelperService,
               private translation: TranslateService) {
     this.buttons = DialogButton.getSingleButton('CLOSE', () => this.close(), DialogButton.TYPE_CANCEL);
   }
@@ -69,7 +71,7 @@ export class WorkspaceHistoryComponent {
       }
 
       info.date = DateHelper.formatDate(this.translation, entry.date);
-      info.user = NodeHelper.getUserDisplayName(entry.user);
+      info.user = this.nodeHelper.getUserDisplayName(entry.user);
       for (const permission of entry.permissions.permissions){
         if (i < history.length - 1){
           const result = this.getPermissionStatus(permission, history[i + 1]);

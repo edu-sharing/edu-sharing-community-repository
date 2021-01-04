@@ -3,7 +3,7 @@ import {UIHelper} from "../../../../core-ui-module/ui-helper";
 import {Node, Permission} from '../../../../core-module/rest/data-object';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
 import {RestConnectorService} from '../../../../core-module/rest/services/rest-connector.service';
-import {NodeHelper} from '../../../../core-ui-module/node-helper';
+
 import {RestHelper} from '../../../../core-module/rest/rest-helper';
 import {MainNavService} from '../../../../common/services/main-nav.service';
 import {RestNodeService} from '../../../../core-module/rest/services/rest-node.service';
@@ -16,6 +16,7 @@ import {Helper} from '../../../../core-module/rest/helper';
 import {Toast} from '../../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
 import {MdsEditorInstanceService, CompletionStatusEntry} from '../../../../common/ui/mds-editor/mds-editor-instance.service';
+import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
 
 @Component({
   selector: 'app-share-publish',
@@ -48,6 +49,7 @@ export class SharePublishComponent implements OnChanges {
   constructor(
       private connector: RestConnectorService,
       private translate: TranslateService,
+      private nodeHelper: NodeHelperService,
       private nodeService: RestNodeService,
       private config: ConfigurationService,
       private mdsService: MdsEditorInstanceService,
@@ -107,7 +109,7 @@ export class SharePublishComponent implements OnChanges {
   }
 
   private refresh() {
-    this.doiActive = NodeHelper.isDOIActive(this.node, this.permissions);
+    this.doiActive = this.nodeHelper.isDOIActive(this.node, this.permissions);
     this.doiDisabled = this.doiActive;
     const prop = this.node.properties[RestConstants.CCM_PROP_PUBLISHED_MODE]?.[0];
     if(prop === ShareMode.Copy) {

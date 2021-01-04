@@ -5,7 +5,6 @@ import {NodeStatistics, Node, Statistics, IamGroup, Group, Collection} from "../
 import {ListItem} from "../../../core-module/ui/list-item";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {RestHelper} from "../../../core-module/rest/rest-helper";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ConfigurationService} from "../../../core-module/rest/services/configuration.service";
 import {DialogButton, RestCollectionService, RestConnectorService, RestIamService, RestMdsService, RestMediacenterService, RestNodeService} from "../../../core-module/core.module";
 import {Helper} from "../../../core-module/rest/helper";

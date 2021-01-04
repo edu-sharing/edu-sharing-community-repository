@@ -23,6 +23,7 @@ import {MdsHelper} from '../../core-module/rest/mds-helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {Helper} from '../../core-module/rest/helper';
 import {NodeUrlComponent} from "../../core-ui-module/components/node-url/node-url.component";
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 
 
@@ -55,6 +56,7 @@ export class OerComponent {
     private route : ActivatedRoute,
     private connector:RestConnectorService,
     private nodeService: RestNodeService,
+    private nodeHelper: NodeHelperService,
     private searchService: RestSearchService,
     private mdsService:RestMdsService,
     private storage : TemporaryStorageService,
@@ -213,9 +215,8 @@ export class OerComponent {
 
    }
    private openNode(node: Node){
-      NodeUrlComponent.getInfo('routerLink', node)
-      this.router.navigate([NodeUrlComponent.getInfo('routerLink', node)],
-          {queryParams: (NodeUrlComponent.getInfo('queryParams', node) as any)}
+      this.router.navigate([this.nodeHelper.getNodeLink('routerLink', node)],
+          {queryParams: (this.nodeHelper.getNodeLink('queryParams', node) as any)}
       );
    }
    private updateOptions(mode:number,node:Node=null) {

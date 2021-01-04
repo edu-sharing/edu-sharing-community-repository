@@ -4,7 +4,7 @@ import {UIAnimation} from '../../../../core-module/ui/ui-animation';
 import {Values} from '../../../../common/ui/mds-editor/types';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
 import {UIHelper} from '../../../../core-ui-module/ui-helper';
-import {NodeHelper} from '../../../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {RestConnectorService} from '../../../../core-module/rest/services/rest-connector.service';
 import {TranslateService} from '@ngx-translate/core';
@@ -30,7 +30,8 @@ export class LicenseDetailsComponent implements OnChanges {
 
     constructor(
         private connector:RestConnectorService,
-        private translate:TranslateService
+        private translate:TranslateService,
+        private nodeHelper: NodeHelperService,
     ) {
     }
     ngOnChanges(changes: SimpleChanges) {
@@ -88,10 +89,10 @@ export class LicenseDetailsComponent implements OnChanges {
         if(this.properties) {
             return this.properties[prop] ? this.properties[prop][0] : fallbackIsEmpty;
         }
-        return NodeHelper.getValueForAll(this.nodes, prop, fallbackNotIdentical, fallbackIsEmpty, false);
+        return this.nodeHelper.getValueForAll(this.nodes, prop, fallbackNotIdentical, fallbackIsEmpty, false);
     }
     getLicenseIcon() {
-        return NodeHelper.getLicenseIconByString(this.getLicenseProperty(),this.connector);
+        return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());
     }
     isOerLicense() {
         return this.getLicenseProperty()==='CC_0' || this.getLicenseProperty()==='PDM'
@@ -102,9 +103,9 @@ export class LicenseDetailsComponent implements OnChanges {
         return this.getValueForAll(RestConstants.CCM_PROP_LICENSE, 'MULTI', 'NONE');
     }
     getLicenseName() {
-        return NodeHelper.getLicenseNameByString(this.getLicenseProperty(),this.translate);
+        return this.nodeHelper.getLicenseNameByString(this.getLicenseProperty());
     }
     getLicenseUrl() {
-        return NodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
+        return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
     }
 }
