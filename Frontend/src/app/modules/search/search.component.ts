@@ -200,7 +200,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
                 this.searchService.collectionsColumns = [];
                 this.searchService.collectionsColumns.push(
-                    new ListItem('NODE', RestConstants.CM_NAME),
+                    new ListItem('COLLECTION', 'title'),
                 );
                 this.searchService.collectionsColumns.push(
                     new ListItem('COLLECTION', 'info'),
