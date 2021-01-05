@@ -15,7 +15,7 @@
   <h2 class="mat-heading-2 mat-heading-underline">{{'PERMISSIONS.DELETE.MAIN_HEADING' | translate}}</h2>
   <div class="group">
     <spinner *ngIf="loading"></spinner>
-    <h3 class="mat-heading-3 mat-heading-underline" *ngIf="!loading" ><span>{{'PERMISSIONS.DELETE.USER_LIST' | translate}}</span><button mat-icon-button (click)="refresh()"><i icon iconId="refresh" ></i></button></h3>
+    <h3 class="mat-heading-3 mat-heading-underline" *ngIf="!loading" ><span>{{'PERMISSIONS.DELETE.USER_LIST' | translate}}</span><button mat-icon-button (click)="refresh()"><i icon="refresh" ></i></button></h3>
     <div class="user-list" *ngIf="users && users.length">
       <listTable
               [nodes]="users"
@@ -119,7 +119,7 @@
         <mat-chip-list>
           <mat-chip *ngIf="receiver" (removed)="receiver=null">
             <span>{{receiver | authorityName}}</span>
-            <i matChipRemove icon iconId="cancel"></i>
+            <i matChipRemove icon="cancel"></i>
           </mat-chip>
         </mat-chip-list>
         <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.RECEIVER_GROUP_CAPTION' | translate}}</h4>
@@ -133,7 +133,7 @@
         <mat-chip-list>
           <mat-chip *ngIf="receiverGroup" (removed)="receiverGroup=null">
             <span>{{receiverGroup | authorityName}}</span>
-            <i matChipRemove icon iconId="cancel"></i>
+            <i matChipRemove icon="cancel"></i>
           </mat-chip>
         </mat-chip-list>
       </div>

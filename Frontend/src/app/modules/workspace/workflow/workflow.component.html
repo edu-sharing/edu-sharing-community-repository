@@ -40,7 +40,7 @@
                     <span class="primary">{{receiver | authorityName}}</span>
                     <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
                 </div>
-                <i matChipRemove icon iconId="cancel"></i>
+                <i matChipRemove icon="cancel"></i>
             </mat-chip>
           </mat-chip-list>
         </div>
@@ -74,7 +74,7 @@
                   <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
                   <mat-chip-list>
                     <mat-chip *ngFor="let receiver of entry.receiver">
-                      <i class="badgeIconLeft" icon [iconId]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+                      <i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
                         <div class="mat-chip-group">
                             <span class="primary">{{receiver | authorityName}}</span>
                             <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
@@ -88,7 +88,7 @@
                 <div class="receivers" *ngIf="i<history.length-1">
                   <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
                   <mat-chip-list>
-                    <mat-chip *ngFor="let receiver of entry.receiver"><i class="badgeIconLeft" icon [iconId]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+                    <mat-chip *ngFor="let receiver of entry.receiver"><i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
                       <div class="mat-chip-group">
                             <span class="primary">{{receiver | authorityName}}</span>
                             <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>

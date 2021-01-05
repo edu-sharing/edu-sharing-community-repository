@@ -1,16 +1,16 @@
 <div class="dialog" (click)="cancel()"></div>
 <div class="more-open" #dropdown>
   <button mat-button class="mat-button-no-uppercase" (click)="setType('Consumer')">
-    <div><i icon iconId="remove_red_eye"></i> {{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</div>
-    <i icon iconId="check" class="selected" *ngIf="contains('Consumer')"></i>
+    <div><i icon="remove_red_eye"></i> {{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</div>
+    <i icon="check" class="selected" *ngIf="contains('Consumer')"></i>
     <p>{{'WORKSPACE.SHARE.TYPE_VIEWER_DESCRIPTION' | translate}}</p></button>
   <button mat-button class="mat-button-no-uppercase" (click)="setType('Collaborator')">
-    <div><i icon iconId="edit"></i> {{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</div>
-    <i icon iconId="check" class="selected" *ngIf="contains('Collaborator')"></i>
+    <div><i icon="edit"></i> {{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</div>
+    <i icon="check" class="selected" *ngIf="contains('Collaborator')"></i>
     <p>{{'WORKSPACE.SHARE.TYPE_COWORKER_DESCRIPTION' | translate}}</p></button>
   <button mat-button class="mat-button-no-uppercase" (click)="setType('Coordinator')">
-    <div><i icon iconId="work"></i> {{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</div>
-    <i icon iconId="check" class="selected" *ngIf="contains('Coordinator')"></i>
+    <div><i icon="work"></i> {{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</div>
+    <i icon="check" class="selected" *ngIf="contains('Coordinator')"></i>
     <p>{{'WORKSPACE.SHARE.TYPE_COORDINATOR_DESCRIPTION' | translate}}</p></button>
   <div class="publish-toggle" *ngIf="!isDirectory && canPublish">
       <mat-slide-toggle  [ngModel]="publish" [disabled]="publishDisabled" (change)="setPublish($event)" class="collection-item" title="{{'WORKSPACE.SHARE.PUBLISHER_TOOLTIP' | translate}}">

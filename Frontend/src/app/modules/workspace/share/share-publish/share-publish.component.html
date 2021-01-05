@@ -1,6 +1,6 @@
 <div class="group-padding">
   <h4 class="mat-heading-4">
-    <!--<i icon iconId="public"></i>-->
+    <!--<i icon="public"></i>-->
     {{ 'WORKSPACE.SHARE.PUBLISH_' + getType() | translate }}
   </h4>
   <ng-container *ngIf="!node?.isDirectory">
@@ -16,7 +16,7 @@
                 (click)="openLicense()"
                 appToolpermissionCheck
                 toolpermission="TOOLPERMISSION_LICENSE">
-          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
+          <i icon="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
         </button>
       </div>
     </info-message>
@@ -26,7 +26,7 @@
       <div>
         <button mat-button color="primary"
                 (click)="openMetadata()">
-          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.OPEN_METADATA' | translate}}
+          <i icon="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.OPEN_METADATA' | translate}}
         </button>
       </div>
     </info-message>
@@ -37,7 +37,7 @@
                 (click)="openLicense()"
                 appToolpermissionCheck
                 toolpermission="TOOLPERMISSION_LICENSE">
-          <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
+          <i icon="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
         </button>
       </div>
     </info-message>
@@ -46,7 +46,7 @@
     {{'WORKSPACE.SHARE.PUBLISH.INHERITED' | translate}}
     <div>
       <button mat-button color="primary" (click)="onDisableInherit.emit()">
-        <i icon iconId="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.DISABLE_INHERIT' | translate}}
+        <i icon="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.DISABLE_INHERIT' | translate}}
       </button>
     </div>
   </info-message>
@@ -108,7 +108,7 @@
                 id="doi">
     <div class="strong label">
       {{'WORKSPACE.SHARE.DOI' | translate}}
-      <i icon iconId="vpn_key"></i>
+      <i icon="vpn_key"></i>
     </div>
     <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
   </mat-checkbox>
@@ -139,7 +139,7 @@
         </div>
       </div>
       <div class="version-handle">
-        <i icon iconId="vpn_key"
+        <i icon="vpn_key"
            matTooltip="{{'WORKSPACE.SHARE.DOI' | translate}}"
            *ngIf="v.properties['ccm:published_handle_id']"></i>
       </div>
@@ -148,7 +148,7 @@
                 [disabled]="v.virtual"
                 matTooltip="{{'WORKSPACE.SHARE.PUBLISH.OPEN_VERSION' | translate}}"
                 (click)="openVersion(v)"
-        ><i icon iconId="open_in_new"></i></button>
+        ><i icon="open_in_new"></i></button>
       </div>
     </div>
   </div>

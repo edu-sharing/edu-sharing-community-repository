@@ -22,7 +22,7 @@
       </div>
       <div class="vcard authorPerson">
         <div class="vcardGroup">
-          <!-- <i icon iconId="person"></i> -->
+          <!-- <i icon="person"></i> -->
           <mat-form-field class="mat-form-field-no-padding">
             <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
             <input
@@ -54,7 +54,7 @@
           (click)="openContributorDialog()"
           *ngIf="_nodes && _nodes.length == 1 && !ui.isMobile()"
         >
-          {{ 'MDS.CONTRIBUTOR_LINK' | translate }} <i icon iconId="arrow_forward"></i>
+          {{ 'MDS.CONTRIBUTOR_LINK' | translate }} <i icon="arrow_forward"></i>
         </button>
       </div>
     </mat-tab>
