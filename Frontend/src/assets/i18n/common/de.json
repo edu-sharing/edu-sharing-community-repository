@@ -220,6 +220,9 @@
         "300_hasflaws": "Hat Mängel",
         "400_checked": "Geprüft"
     },
+    "LIST_TABLE": {
+        "DUMMY_ICON_LABEL": "Dateityp"
+    },
     "NODE": {
         "cm:name": "Dateiname",
         "cm:title": "Titel",

@@ -204,6 +204,9 @@
         "300_hasflaws": "Has flaws",
         "400_checked": "Checked"
     },
+    "LIST_TABLE": {
+        "DUMMY_ICON_LABEL": "File type"
+    },
     "NODE": {
         "cm:name": "filename",
         "score": "relevance",
