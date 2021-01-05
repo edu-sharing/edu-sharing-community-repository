@@ -68,15 +68,15 @@
                 <ng-container *ngIf="item.label">{{item.label}}</ng-container>
             </a>
             <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,j==0)" aria-hidden="true">
-                <a class="" *ngIf="sortBy==item.name && sortAscending"><i icon iconId="arrow_drop_up"></i></a>
-                <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon iconId="arrow_drop_down"></i></a>
+                <a class="" *ngIf="sortBy==item.name && sortAscending"><i icon="arrow_drop_up"></i></a>
+                <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon="arrow_drop_down"></i></a>
             </div>
         </div>
         <div *ngFor="let option of optionsAlways"  class="more moreAlways" > </div>
         <div class="more-header" *ngIf="_options && _options.length">&nbsp;</div>
         <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
              (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
-        ><i icon iconId="delete"></i></div>
+        ><i icon="delete"></i></div>
         </div>
     </div>
     <div
@@ -132,33 +132,33 @@
                 <app-node-url matRipple matRippleColor="primary" [node]="node" [nodes]="_nodes" [scope]="scope" [unclickable]="!createLink">
                     <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
                     <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
-                        <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
+                        <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
                     </div>
                     <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
                         <img src="{{getIconUrl(node)}}" alt="{{ (node.mediatype ? 'NODE.mediatype' : '') | translate}} {{ (node.mediatype ? 'MEDIATYPE.' + node.mediatype : '') | translate}}"/>
                     </div>
                     <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                         <div class="nodeRating"></div>
-                        <div class="nodeComments" *ngIf="!isSavedSearch(node)" (appDistinctClick)="onDistinctClick($event, node, 'comments')"><i icon iconId="comment"></i> <div>{{node.commentCount}}</div></div>
+                        <div class="nodeComments" *ngIf="!isSavedSearch(node)" (appDistinctClick)="onDistinctClick($event, node, 'comments')"><i icon="comment"></i> <div>{{node.commentCount}}</div></div>
                     </div>
                     <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
-                    <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
+                    <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon="edu-pin"></i></div>
                     <div class="checkbox column" *ngIf="hasCheckbox">
                         <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation()" aria-label="{{ 'SELECT' | translate:{element: node.name} }}"></mat-checkbox>
                     </div>
                     <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
                     <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
                         <div>
-                            <i icon iconId="security"></i>
+                            <i icon="security"></i>
                             <div>{{'NO_CC_PUBLISH' | translate }}</div>
                             <a *ngIf="node.properties['ccm:questionsallowed'] && node.properties['ccm:questionsallowed'][0]=='true'"
                                (click)="askCCPublish($event,node)"
-                            ><i icon iconId="message"></i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
+                            ><i icon="message"></i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
                         </div>
                     </div>
                     <div class="permissionsMissing" *ngIf="noPermissions(node)">
                         <div>
-                            <i icon iconId="security"></i>
+                            <i icon="security"></i>
                             <div>{{validatePermissions(node).message | translate }}</div>
                             <button mat-button color="primary"
                                     *ngIf="validatePermissions(node).button"
@@ -181,14 +181,14 @@
                              alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title || node.name}}"/>
                         <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
                             <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
-                                <i icon iconId="layers"></i>
+                                <i icon="layers"></i>
                             </div>
                         </div>
                     </div>
 
                     <div class="nodeDeleted clickable" *ngIf="isDeleted(node)">
                         <div>
-                            <i icon iconId="delete"></i>
+                            <i icon="delete"></i>
                             <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
                             <div class="subline">{{'ORIGINAL_DELETED_INFO' | translate }}</div>
                             <button mat-button color="primary"
@@ -203,7 +203,7 @@
                          [class.clickable]="isClickable">
                         <div class="icon-bg">
                             <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" alt="{{ (node.mediatype ? 'NODE.mediatype' : '') | translate}} {{ (node.mediatype ? 'MEDIATYPE.' + node.mediatype : '') | translate}}"/>
-                            <i *ngIf="!isCollection(node) && icon" icon iconId="{{icon}}"></i>
+                            <i *ngIf="!isCollection(node) && icon" icon="{{icon}}"></i>
                             <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
                         </div>
                     </div>
@@ -220,7 +220,7 @@
                                 <app-list-base [node]="node" [item]="item"></app-list-base>
                             </div>
                             <div *ngIf="i==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
-                                <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
+                                <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
                             </div>
                         </div>
                     </div>
@@ -231,14 +231,14 @@
                     <button mat-icon-button
                             [disabled]="!optionIsValid(option, node)"
                             (click)="optionIsShown(option, node) ? callOption(option,node) : null">
-                        <i icon iconId="{{option.icon}}" aria="true"></i>
+                        <i icon="{{option.icon}}" aria="true"></i>
                     </button>
                 </div>
                 <div class="more column" *ngIf="_options && _options.length>1" >
                     <button mat-icon-button
                             (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
                             text="test">
-                        <i icon iconId="more_vert" [aria]="false"></i>
+                        <i icon="more_vert" [aria]="false"></i>
                     </button>
                 </div>
                 <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
@@ -247,12 +247,12 @@
                             matTooltip="{{_options[0].name | translate}}"
                             (click)="callOption(_options[0],node);$event.stopPropagation();"
                     >
-                        <i icon iconId="{{_options[0].icon}}"></i>
+                        <i icon="{{_options[0].icon}}"></i>
                     </button></div>
             </div>
         </div>
         <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">
-            <i icon iconId="refresh"></i>
+            <i icon="refresh"></i>
             <div>{{'LOAD_MORE' | translate}}</div>
         </div>
         <spinner *ngIf="isLoading"></spinner>

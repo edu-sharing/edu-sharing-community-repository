@@ -5,7 +5,7 @@
       *ngTemplateOutlet="simpleBreadcrumbElement; context: { index: 0, inner: homeInner }"
     ></ng-container>
     <ng-container *ngFor="let node of nodes; let index = index">
-      <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+      <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
       <ng-container
         *ngTemplateOutlet="nodeBreadcrumbElement; context: { node: node, index: index }"
       ></ng-container>
@@ -32,8 +32,7 @@
       <i
         *ngIf="nodes.length === 1"
         aria-hidden="true"
-        icon
-        iconId="keyboard_arrow_right"
+        icon="keyboard_arrow_right"
         class="breadcrumb-arrow"
       ></i>
     </ng-container>
@@ -65,16 +64,16 @@ Short version works only with `short="always"`.
 <div *ngIf="!clickable" class="breadcrumb breadcrumb-readonly">
   <span *ngIf="home" class="home mat-button-no-uppercase">{{ home | translate }}</span>
   <span *ngIf="!home" class="home home-icon mat-button-no-uppercase"
-    ><i icon iconId="home"></i
+    ><i icon="home"></i
   ></span>
   <ng-container *ngIf="short === 'always' && nodes.length > 1">
-    <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="folder">...</span>
   </ng-container>
   <ng-container
     *ngFor="let node of short === 'always' && nodes.length > 1 ? [nodes[nodes.length - 1]] : nodes"
   >
-    <i aria-hidden="true" icon iconId="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="folder">{{ node ? node.name : '' }}</span>
   </ng-container>
 </div>
@@ -84,18 +83,17 @@ Short version works only with `short="always"`.
     {{ home | translate }}
   </ng-container>
   <ng-container *ngIf="!home">
-    <i icon iconId="home" class="home-icon"></i>
+    <i icon="home" class="home-icon"></i>
   </ng-container>
   <i
     *ngIf="nodes.length < 1"
-    icon
-    iconId="keyboard_arrow_down"
+    icon="keyboard_arrow_down"
     class="dropdown-icon mobile-only"
   ></i>
 </ng-template>
 
 <ng-template #backInner>
-  <i icon iconId="keyboard_arrow_left" class="breadcrumb-arrow"></i>
+  <i icon="keyboard_arrow_left" class="breadcrumb-arrow"></i>
 </ng-template>
 
 <ng-template #simpleBreadcrumbElement let-index="index" let-inner="inner" let-classes="classes">

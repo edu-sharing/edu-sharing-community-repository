@@ -17,7 +17,7 @@
     [class.display-none]="!option.isEnabled && !showDisabled"
     (click)="click(option)"
   >
-    <i icon [iconId]="option.icon"></i> {{ option.name | translate }}
+    <i [icon]="option.icon"></i> {{ option.name | translate }}
   </button>
 </mat-menu>
 <div #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="menu" class="display-none"></div>
