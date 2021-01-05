@@ -3,7 +3,7 @@ import {Translation} from "../translation";
 
 @Pipe({name: 'formatSize'})
 export class FormatSizePipe implements PipeTransform {
-  transform(value : any,args:string[]): string {
+  transform(value : any,args:string[] = null): string {
     let names=["bytes","KB","MB","GB","TB"];
     let i=0;
     if(isNaN(value))

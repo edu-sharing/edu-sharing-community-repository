@@ -59,11 +59,23 @@ import { TranslationLoader } from './translation-loader';
 import {BitwisePipe} from './pipes/bitwise.pipe';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import {NodeHelperService} from './node-helper.service';
+import {ListCollectionInfoComponent} from './components/list-table/widgets/list-collection-info/list-collection-info.component';
+import {ListTextComponent} from './components/list-table/widgets/list-text/list-text.component';
+import {ListBaseComponent} from './components/list-table/widgets/list-base/list-base.component';
+import {ListNodeLicenseComponent} from './components/list-table/widgets/list-node-license/list-node-license.component';
+import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
+import {ListNodeWorkflowComponent} from './components/list-table/widgets/list-node-workflow/list-node-workflow.component';
+import {NodeImageSizePipe} from './pipes/node-image-size.pipe';
 
 @NgModule({
     declarations: [
         CollectionChooserComponent,
         ListTableComponent,
+        ListBaseComponent,
+        ListCollectionInfoComponent,
+        ListNodeLicenseComponent,
+        ListNodeWorkflowComponent,
+        ListTextComponent,
         DropdownComponent,
         SortDropdownComponent,
         IconComponent,
@@ -80,6 +92,7 @@ import {NodeHelperService} from './node-helper.service';
         InputPasswordComponent,
         InfiniteScrollDirective,
         AuthorityNamePipe,
+        NodePersonNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
         NodeUrlComponent,
@@ -87,6 +100,7 @@ import {NodeHelperService} from './node-helper.service';
         KeysPipe,
         ReplaceCharsPipe,
         PermissionNamePipe,
+        NodeImageSizePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
         NodesDragSourceDirective,
@@ -163,6 +177,8 @@ import {NodeHelperService} from './node-helper.service';
         AuthorityAffiliationPipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
+        ListCollectionInfoComponent,
+        ListBaseComponent,
     ],
 })
 export class CoreUiModule {}

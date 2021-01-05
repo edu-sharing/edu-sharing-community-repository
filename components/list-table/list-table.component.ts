@@ -6,6 +6,7 @@ import {
     trigger,
 } from '@angular/animations';
 import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -14,9 +15,9 @@ import {
     EventEmitter,
     HostListener,
     Input,
-    Output,
+    Output, QueryList,
     TemplateRef,
-    ViewChild, ViewContainerRef,
+    ViewChild, ViewChildren, ViewContainerRef,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -56,6 +57,7 @@ import { CustomOptions, OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
 import { UIHelper } from '../../ui-helper';
 import {NodeHelperService} from '../../node-helper.service';
+
 
 @Component({
     selector: 'listTable',
@@ -743,10 +745,6 @@ export class ListTableComponent implements EventListener {
         this.onDrop.emit({ target, source: nodes, event, type: dropAction });
     }
 
-    getAttribute(data: any, item: ListItem, htmlElement: HTMLElement): string {
-        return this.nodeHelper.getAttribute(data, item, htmlElement);
-    }
-
     onDistinctClick(event: DistinctClickEvent, node: Node, region?: string) {
         // in link mode, we will not emit any events
         if(this.createLink) {
@@ -1105,14 +1103,14 @@ export class ListTableComponent implements EventListener {
         // this.changes.detectChanges();
     }
 
-    private getLRMIAttribute(data: any, item: ListItem): string {
+    getLRMIAttribute(data: any, item: ListItem): string {
         return this.nodeHelper.getLRMIAttribute(
             data,
             item,
         );
     }
 
-    private getLRMIProperty(data: any, item: ListItem): string {
+    getLRMIProperty(data: any, item: ListItem): string {
         return this.nodeHelper.getLRMIProperty(data, item);
     }
 

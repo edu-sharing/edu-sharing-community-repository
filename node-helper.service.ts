@@ -23,6 +23,8 @@ import {RestConnectorService} from '../core-module/rest/services/rest-connector.
 import {ListItem} from '../core-module/ui/list-item';
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
 import {SpinnerSmallComponent} from './components/spinner-small/spinner-small.component';
+import {AVAILABLE_LIST_WIDGETS} from './components/list-table/widgets/available-widgets';
+import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
 
 export type WorkflowDefinitionStatus = {
   current: WorkflowDefinition
@@ -72,105 +74,6 @@ export class NodeHelperService {
   setViewContainerRef(viewContainerRef: ViewContainerRef){
     this.viewContainerRef = viewContainerRef;
   }
-  /**
-   * Gets and formats an attribute from the node
-   * @param node
-   * @param item
-   * @returns {any}
-   */
-  public getNodeAttribute(node : Node,item : ListItem,fallbackValue='-') : string {
-    const name=item.name;
-    if(name==RestConstants.CM_NAME)
-      return node.name==null ? node.ref.id : node.name;
-    if(name==RestConstants.CM_PROP_TITLE || name==RestConstants.LOM_PROP_TITLE) {
-      return RestHelper.getTitle(node);
-    }
-    if(name==RestConstants.SIZE) {
-      return node.size ? (new FormatSizePipe().transform(node.size,null) as string) : this.translate.instant('NO_SIZE');
-    }
-    if(name==RestConstants.MEDIATYPE) {
-      return this.translate.instant('MEDIATYPE.'+node.mediatype);
-    }
-    if(name==RestConstants.CM_CREATOR) {
-      const value=ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy, this.config);
-      if(value)
-        return value;
-    }
-    if(name==RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE) {
-      let range:string[];
-      if(node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE]) {
-        try {
-          range = node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE][0].split('-');
-        } catch(e) {
-          range=[null];
-        }
-      }
-      else {
-        try {
-          range = [node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE + '_from'][0], node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE + '_to'][0]];
-        } catch(e) {
-          range=[null];
-        }
-      }
-      if(range[0]) {
-        if (range[0] == range[1] || !range[1]) {
-          return range[0].trim()+' '+this.translate.instant('LEARNINGAGE_YEAR');
-        }
-        else {
-          return range[0].trim()+'-'+range[1].trim()+' '+this.translate.instant('LEARNINGAGE_YEAR');
-        }
-      }
-    }
-    if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory) {
-      const workflow=this.getWorkflowStatus(node).current;
-      return '<div class="workflowStatus" style="background-color: '+workflow.color+'">'+this.translate.instant('WORKFLOW.'+workflow.id)+'</div>';
-    }
-    if(name==RestConstants.DIMENSIONS) {
-      const width=node.properties[RestConstants.CCM_PROP_WIDTH];
-      const height=node.properties[RestConstants.CCM_PROP_HEIGHT];
-      const megapixel=Math.round((width*height)/1000000.);
-      if(width && height) {
-        if(megapixel>1) {
-          return megapixel+' Megapixel';
-        }
-        return Math.round(width) + 'x' + Math.round(height);
-      }
-    }
-    if(name.startsWith('counts.')) {
-      const count=(node as any).counts[name.split('.')[1]];
-      if(count)
-        return ''+count;
-      else
-        return fallbackValue;
-    }
-    let value : string;
-    if(node.properties[name])
-      value=node.properties[name].join(', ');
-    if((node as any)[name])
-      value=(node as any)[name];
-    if(value && RestConstants.getAllVCardFields().indexOf(name)!=-1) {
-      return new VCard(value).getDisplayName();
-    }
-    if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1) {
-      if(item.format) {
-        value=DateHelper.formatDateByPattern(value,item.format).trim();
-      }
-      else {
-        value = DateHelper.formatDate(this.translate, value);
-      }
-      if(node.properties[name])
-        node.properties[name][0]=value;
-    }
-    if(node.properties[name+RestConstants.DISPLAYNAME_SUFFIX]) {
-      value=node.properties[name+RestConstants.DISPLAYNAME_SUFFIX].join(', ');
-    }
-    if(value)
-      return value;
-    return fallbackValue;
-    // return "MISSING "+item;
-
-  }
-
   /**
    * returns true if all nodes have the requested right
    * mode (only works for collection refs):
@@ -222,7 +125,7 @@ export class NodeHelperService {
     return error.status;
   }
 
-  public getCollectionScopeInfo(node : Node) : any {
+  public getCollectionScopeInfo(node : Node) : { icon: string, scopeName: string } {
     const scope=node.collection ? node.collection.scope : null;
     let icon='help';
     let scopeName='UNKNOWN';
@@ -247,42 +150,6 @@ export class NodeHelperService {
       scopeName='TYPE_MEDIA_CENTER';
     }
     return {icon,scopeName};
-  }
-  /**
-   * Get a formatted attribute from a collection
-   * @param translate
-   * @param node
-   * @param item
-   * @returns {any}
-   */
-  public getCollectionAttribute(node : Node,item : string) : string {
-    if(item === 'info') {
-      const childs=node.collection.childReferencesCount;
-      const coll=node.collection.childCollectionsCount;
-
-      return '<i class="material-icons">layers</i> '+coll+' <i class="material-icons">insert_drive_file</i> '+childs;
-      /*
-      let result="";
-      if(coll>0){
-        result=coll+" "+translate.instant("COLLECTION.INFO_REFERENCES"+(coll>1 ? "_MULTI" : ""));
-      }
-      if(childs>0){
-        if(coll>0)
-          result+=", ";
-        result+=childs+" "+translate.instant("COLLECTION.INFO_CHILDS"+(childs>1 ? "_MULTI" : ""));
-      }
-      if(coll+childs==0){
-        return translate.instant("COLLECTION.INFO_NO_CONTENT");
-      }
-      return result;
-          */
-    }
-    if(item=='scope') {
-      const info=this.getCollectionScopeInfo(node);
-      return '<i class="material-icons collectionScope">'+info.icon+'</i> <span>'+
-          this.translate.instant('COLLECTION.SCOPE.'+info.scopeName)+'</span>';
-    }
-    return (node.collection as any)[item];
   }
 
   public downloadUrl(url:string,fileName='download') {
@@ -319,7 +186,6 @@ export class NodeHelperService {
 
   /**
    * fetches the preview of the node and appends it at preview.data
-   * @param node
    */
   public appendImageData(node: Node, quality = 70) : Observable<Node> {
     return new Observable<Node>((observer : Observer<Node>)=> {
@@ -327,7 +193,6 @@ export class NodeHelperService {
       options.responseType='blob';
 
       this.rest.get(node.preview.url+'&quality='+quality,options,false).subscribe((data:HttpResponse<Blob>)=> {
-        // thisrest.get("http://localhost:8081/edu-sharing/rest/authentication/v1/validateSession",options,false).subscribe((data:Response)=>{
         node.preview.data=data.body;
         observer.next(node);
         observer.complete();
@@ -419,79 +284,6 @@ export class NodeHelperService {
   }
   isSavedSearchObject(node: Node) {
     return node.mediatype=='saved_search';
-  }
-  /**
-   * Get an attribute (property) from a node
-   * The attribute will be cached add the object
-   * @param translate
-   * @param config
-   * @param data The node or other object to use
-   * @param item The ListItem info for which the value should be resolved
-   * @param htmlElement the html element attached. This may be used if a native angular component will be injected
-   * @returns {any}
-   */
-  public getAttribute(data: any, item: ListItem, htmlElement: HTMLElement = null) : string {
-    if(!item){
-      return '';
-    }
-    if((data as any).propertiesConverted && (data as any).propertiesConverted[item.name]) {
-      return (data as any).propertiesConverted[item.name];
-    }
-    if(this.buildNativeComponent(data, item, htmlElement)){
-      return null;
-    }
-    const value=this.getAttributeWithoutCache(data,item);
-    // Store already converted data inside node/object
-    if(!(data as any).propertiesConverted) {
-      (data as any).propertiesConverted=[];
-    }
-    (data as any).propertiesConverted[item.name]=value;
-    return value;
-  }
-  public getAttributeWithoutCache(data : any,item : ListItem) : string {
-    if(item.type=='NODE') {
-      if(data.reference) // collection ref, use original for properties
-        data=data.reference;
-      if (item.name == RestConstants.CM_MODIFIED_DATE)
-        return '<span property="dateModified" title="' + this.translate.instant('ACCESSIBILITY.LASTMODIFIED') + '">' + this.getNodeAttribute(data, item) + '</span>';
-
-      if (item.name == RestConstants.CCM_PROP_LICENSE) {
-        if (data.license && data.license.icon) {
-          return this.getLicenseHtml(data);
-        }
-        return '';
-      }
-      if (item.name == RestConstants.CCM_PROP_REPLICATIONSOURCE || item.name == RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN) {
-        if (typeof data.properties[item.name] !== 'undefined' && data.properties[item.name] != '') {
-          const rawSrc = data.properties[item.name].toString().trim();
-          let src = rawSrc.substring(rawSrc.lastIndexOf(':') + 1).toLowerCase();
-          src = src.replace(/\s/g,'_');
-          src = src.replace(/\./g,'_');
-          src = src.replace(/\//g,'_');
-          return '<img alt="'+rawSrc+'" title="'+rawSrc+'" src="'+this.getSourceIconPath(src)+'">';
-        }
-        return '<img alt="repository" src="'+this.getSourceIconPath('home')+'">';
-      }
-
-      return this.getNodeAttribute(data, item);
-    }
-    if(item.type=='COLLECTION') {
-      return this.getCollectionAttribute(data, item.name);
-    }
-    if(item.type=='GROUP' || item.type=='ORG') {
-      if(item.name=='displayName')
-        return data.profile.displayName;
-      if(item.name=='groupType')
-        return this.translate.instant('PERMISSIONS.GROUP_TYPE.'+data.profile.groupType);
-    }
-    if(item.type=='USER') {
-      if([RestConstants.AUTHORITY_FIRSTNAME,RestConstants.AUTHORITY_LASTNAME,RestConstants.AUTHORITY_EMAIL].indexOf(item.name)!=-1)
-        return data.profile[item.name];
-      if(item.name==RestConstants.AUTHORITY_STATUS) {
-        return this.translate.instant('PERMISSIONS.USER_STATUS.'+data.status.status);
-      }
-    }
-    return data[item.name];
   }
 
   /**
@@ -637,23 +429,30 @@ export class NodeHelperService {
         return 'dateCreated';
       }
     }
-    return '';
+    return null;
   }
   getLRMIAttribute(data: any, item: ListItem) {
     // http://dublincore.org/dcx/lrmi-terms/2014-10-24/
-    if(item.type=='NODE') {
-      if(data.reference)
-        data=data.reference;
-      if(item.name==RestConstants.CM_PROP_C_CREATED || item.name==RestConstants.CM_MODIFIED_DATE) {
+    if(item.type === 'NODE') {
+      if(data.reference) {
+        data = data.reference;
+      }
+      if(item.name === RestConstants.CM_CREATOR) {
+        return new NodePersonNamePipe(this.config).transform(data);
+      }
+      if(item.name === RestConstants.CM_NAME) {
+        return data.name
+      }
+      if(item.name === RestConstants.CM_PROP_TITLE){
+        return data.title;
+      }
+      if(item.name === RestConstants.CM_PROP_C_CREATED || item.name === RestConstants.CM_MODIFIED_DATE) {
         return data.properties[item.name+'ISO8601'];
       }
     }
-    return this.getAttribute(data, item);
+    return null;
   }
 
-  public getLicenseHtml(data:Node) {
-    return '<span title="'+this.getLicenseName(data)+'"><img alt="'+this.getLicenseName(data)+'" src="'+this.getLicenseIcon(data)+'"></span>';
-  }
   public getSourceIconRepoPath(repo: Repository) {
     if(repo.icon)
       return repo.icon;
@@ -833,20 +632,6 @@ export class NodeHelperService {
    */
   isNodePublishedCopy(o: Node): boolean {
     return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
-  }
-
-  private buildNativeComponent(data: any, item: ListItem, htmlElement: HTMLElement) {
-    console.log(htmlElement);
-    if(!htmlElement) {
-      return false;
-    }
-    UIHelper.injectAngularComponent(
-        this.componentFactoryResolver,
-        this.viewContainerRef,
-        SpinnerSmallComponent,
-        htmlElement
-    )
-    return true;
   }
 
   getNodeLink(mode: "routerLink" | "queryParams", node: Node) {

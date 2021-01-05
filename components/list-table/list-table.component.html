@@ -54,8 +54,8 @@
         </div>
         <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
         <div class="icon" *ngIf="hasIcon">&nbsp;</div>
-            <div *ngFor="let item of columnsVisible;let i = index"
-             class="{{getItemCssClass(item)}} row_{{i+1}}">
+            <div *ngFor="let item of columnsVisible;let j = index"
+             class="{{getItemCssClass(item)}} row_{{j+1}}">
             <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item,i==0)">
                 <ng-container *ngIf="!item.label">{{item.type+"."+item.name | translate}}</ng-container>
                 <ng-container *ngIf="item.label">{{item.label}}</ng-container>
@@ -169,7 +169,7 @@
                              (mouseenter)="animateIcon(node,true)"
                              (mouseleave)="animateIcon(node,false)"
                              [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-                             alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{getAttribute(node,columnsVisible[0])}}"/>
+                             alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title || node.name}}"/>
                         <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
                             <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
                                 <i icon iconId="layers"></i>
@@ -195,10 +195,14 @@
                             <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
                         </div>
                     </div>
-                    <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable">
-                        <div class="display-none" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
+                    <div *ngFor="let item of columnsVisible;let j = index" class="column {{getItemCssClass(item)}} row_{{j+1}}" [class.clickable]="isClickable">
+                        <div *ngIf="getLRMIProperty(node, item)"
+                             class="display-none"
+                             [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
                         <div class="row-group">
-                            <div class="rowInner" [innerHTML]="getAttribute(node, item, this) | safeHtml"></div>
+                            <div class="rowInner">
+                                <app-list-base [node]="node" [item]="item"></app-list-base>
+                            </div>
                             <div *ngIf="i==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                                 <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon iconId="filter_none"></i>
                             </div>
