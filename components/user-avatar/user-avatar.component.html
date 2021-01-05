@@ -14,7 +14,7 @@
              aria-hidden="true"
              style.background-color="{{ _user | authorityColor}}"
              *ngIf="!icon && _user && !(_user.profile && _user.profile.avatar)">{{getLetter(_user)}}</div>
-        <i class="user-icon" icon [iconId]="icon" style.background-color="{{ _user | authorityColor}}" *ngIf="icon"></i>
+        <i class="user-icon" [icon]="icon" style.background-color="{{ _user | authorityColor}}" *ngIf="icon"></i>
       </div>
     </div>
   </div>

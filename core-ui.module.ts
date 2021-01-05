@@ -26,7 +26,7 @@ import { CardComponent } from './components/card/card.component';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { DropdownComponent } from './components/dropdown/dropdown.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
-import { IconComponent } from './components/icon/icon.component';
+import { IconDirective } from './components/icon/icon.directive';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
 import { InputPasswordComponent } from './components/input-password/input-password.component';
 import { LinkComponent } from './components/link/link.component';
@@ -78,7 +78,7 @@ import {NodeImageSizePipe} from './pipes/node-image-size.pipe';
         ListTextComponent,
         DropdownComponent,
         SortDropdownComponent,
-        IconComponent,
+        IconDirective,
         CardComponent,
         UserAvatarComponent,
         UserTileComponent,
@@ -154,7 +154,7 @@ import {NodeImageSizePipe} from './pipes/node-image-size.pipe';
         InputPasswordComponent,
         GlobalProgressComponent,
         VideoControlsComponent,
-        IconComponent,
+        IconDirective,
         CardComponent,
         UserAvatarComponent,
         UserTileComponent,
