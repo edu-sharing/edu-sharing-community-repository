@@ -595,7 +595,7 @@
             "SOURCE_OWN": "Eigenes Material",
             "SOURCE_FOREIGN": "Fremdes Material",
             "SET_LICENSE": "Lizenz des Materials",
-            "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen der Lizenz möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
+            "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen der Lizenz ist nicht möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
             "INVALID_STATE": "Für die gewählten Elemente kann keine passenden Lizenz in diesem Dialog gefunden werden. Wählen Sie \"Lizenz ersetzen\", wenn Sie die Lizenz neu festlegen wollen.",
             "LICENSES": {
                 "NONE": "Unlizenziert",
