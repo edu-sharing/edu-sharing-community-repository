@@ -24,7 +24,7 @@
         <mat-chip-list class="toInvite">
           <mat-chip *ngFor="let auth of invite" (removed)="removeInvite(auth)">
             <span>{{auth | authorityName}}</span>
-            <i matChipRemove icon iconId="cancel"></i>
+            <i matChipRemove icon="cancel"></i>
           </mat-chip>
         </mat-chip-list>
       </div>

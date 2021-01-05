@@ -4,12 +4,12 @@
       (onCancel)="cancel()"
 >
   <div *ngIf="!isCollection() && !isBulk()" class="share-link">
-    <button mat-button color="primary" *ngIf="showShareLink()" (click)="openLink()">{{'OPTIONS.SHARE_LINK' | translate}} <i icon iconId="link"></i></button>
+    <button mat-button color="primary" *ngIf="showShareLink()" (click)="openLink()">{{'OPTIONS.SHARE_LINK' | translate}} <i icon="link"></i></button>
   </div>
   <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab">
     <mat-tab class="tabContent tabContentInvite">
       <ng-template mat-tab-label>
-        <i icon iconId="group_add" class="tab-icon"></i>
+        <i icon="group_add" class="tab-icon"></i>
         <span class="tab-label">{{'WORKSPACE.TAB_INVITE' | translate}}</span>
       </ng-template>
       <div class="invite-group">
@@ -30,18 +30,18 @@
                 <span class="primary">{{permission | permissionName}}</span>
                 <span class="secondary">{{permission | permissionName:{field:'secondary'} }}</span>
               </div>
-              <i matChipRemove icon iconId="cancel"></i>
+              <i matChipRemove icon="cancel"></i>
             </mat-chip>
           </mat-chip-list>
           <div class="typeButton" *ngIf="getNewInvitedAuthorities().length">
-            <button mat-raised-button *ngIf="currentType.length==0" (click)="chooseType()"><i icon iconId="help_outline"></i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
-              <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
-            <button mat-raised-button *ngIf="currentType.indexOf('Consumer')>-1" (click)="chooseType()"><i icon iconId="remove_red_eye"></i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
-              <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
-            <button mat-raised-button *ngIf="currentType.indexOf('Collaborator')>-1" (click)="chooseType()"><i icon iconId="edit"></i> <span>{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</span>
-              <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
-            <button mat-raised-button *ngIf="currentType.indexOf('Coordinator')>-1" (click)="chooseType()"><i icon iconId="work"></i> <span>{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</span>
-              <i aria-hidden="true" icon iconId="keyboard_arrow_down"></i></button>
+            <button mat-raised-button *ngIf="currentType.length==0" (click)="chooseType()"><i icon="help_outline"></i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
+              <i aria-hidden="true" icon="keyboard_arrow_down"></i></button>
+            <button mat-raised-button *ngIf="currentType.indexOf('Consumer')>-1" (click)="chooseType()"><i icon="remove_red_eye"></i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
+              <i aria-hidden="true" icon="keyboard_arrow_down"></i></button>
+            <button mat-raised-button *ngIf="currentType.indexOf('Collaborator')>-1" (click)="chooseType()"><i icon="edit"></i> <span>{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</span>
+              <i aria-hidden="true" icon="keyboard_arrow_down"></i></button>
+            <button mat-raised-button *ngIf="currentType.indexOf('Coordinator')>-1" (click)="chooseType()"><i icon="work"></i> <span>{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</span>
+              <i aria-hidden="true" icon="keyboard_arrow_down"></i></button>
             <!--<div class="share-type-mobile">-->
             <!--<p *ngIf="currentType.length==0">{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</p>-->
             <!--<p *ngIf="currentType.indexOf('Consumer')>-1">{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</p>-->
@@ -105,11 +105,11 @@
     </mat-tab>
     <mat-tab *ngIf="_nodes && _nodes.length === 1" class="tabContent">
       <ng-template mat-tab-label>
-        <i icon iconId="group" class="tab-icon"></i>
+        <i icon="group" class="tab-icon"></i>
         <span class="tab-label">{{'WORKSPACE.TAB_INVITED' | translate}}</span>
       </ng-template>
       <div class="invited">
-        <mat-link *ngIf="_nodes && _nodes[0].ref.id" class="history uppercase" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}} <i icon iconId="arrow_forward"></i></mat-link>
+        <mat-link *ngIf="_nodes && _nodes[0].ref.id" class="history uppercase" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}} <i icon="arrow_forward"></i></mat-link>
         <div class="groupName" *ngIf="owner">{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</div>
         <workspace-share-permission class="groupEntry owner" *ngIf="owner"
                                     [permission]="owner"
@@ -239,7 +239,7 @@
     <mat-tab *ngIf="publishPermission && !isBulk() && !isSafe"
              class="tabContent">
       <ng-template mat-tab-label>
-        <i icon iconId="public" class="tab-icon"></i>
+        <i icon="public" class="tab-icon"></i>
         <span class="tab-label">{{'WORKSPACE.TAB_PUBLISH' | translate}}</span>
       </ng-template>
       <div class="publish-tab">
@@ -254,7 +254,7 @@
     </mat-tab>
     <mat-tab *ngIf="isAdmin && permissionsUser && permissionsGroup" class="tabContent">
       <ng-template mat-tab-label>
-        <i icon iconId="settings" class="tab-icon"></i>
+        <i icon="settings" class="tab-icon"></i>
         <span class="tab-label">{{'WORKSPACE.TAB_ADVANCED' | translate}}</span>
       </ng-template>
       <div class="advanced">
@@ -276,8 +276,8 @@
     </mat-tab>
   </mat-tab-group>
   <div class="state" *ngIf="initialState && buttons">
-    <div *ngIf="getState()=='PRIVATE'" [class.state-changed]="isStateModified()" class="show-state"><i icon iconId="lock"></i><span> {{'WORKSPACE.SHARE.STATE.PRIVATE' | translate}}</span></div>
-    <div *ngIf="getState()=='SHARED'" [class.state-changed]="isStateModified()" class="show-state"><i icon iconId="group"></i><span> {{'WORKSPACE.SHARE.STATE.SHARED' | translate}}</span></div>
+    <div *ngIf="getState()=='PRIVATE'" [class.state-changed]="isStateModified()" class="show-state"><i icon="lock"></i><span> {{'WORKSPACE.SHARE.STATE.PRIVATE' | translate}}</span></div>
+    <div *ngIf="getState()=='SHARED'" [class.state-changed]="isStateModified()" class="show-state"><i icon="group"></i><span> {{'WORKSPACE.SHARE.STATE.SHARED' | translate}}</span></div>
     <div *ngIf="getState()=='PUBLIC'" [class.state-changed]="isStateModified()" class="show-state"><i class="material-icons" style="color: #42CA8D">public</i><span> {{'WORKSPACE.SHARE.STATE.PUBLIC' | translate}}</span></div>
   </div>
 </card>
@@ -294,7 +294,7 @@
 <div class="dialog darken dialog-collections" [@fade]="showCollections" *ngIf="showCollections"></div>
 <div class="card center-card card-action card-high card-collections" [@cardAnimation]="showCollections" *ngIf="showCollections">
   <div class="card-content">
-    <div class="card-cancel" (click)="showCollections=false" tabindex="0" (keyup.enter)="showCollections=false"><i icon iconId="close" aria="true"></i></div>
+    <div class="card-cancel" (click)="showCollections=false" tabindex="0" (keyup.enter)="showCollections=false"><i icon="close" aria="true"></i></div>
     <span class="card-title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</span>
     <listTable
             (clickRow)="openCollection($event.node)"

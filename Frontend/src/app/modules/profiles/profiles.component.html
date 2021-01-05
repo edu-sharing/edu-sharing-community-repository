@@ -28,7 +28,7 @@
                    [numberOfAlwaysVisibleOptions]="1"
                    [numberOfAlwaysVisibleOptionsMobile]="1"
                    [options]="actions"></actionbar>
-        <button mat-button class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></button>
+        <button mat-button class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></button>
         <user-avatar *ngIf="!edit"
                      [user]="user"
         ></user-avatar>
@@ -42,7 +42,7 @@
           <div class="new-avatar-button" (click)="avatar.click()">
             <span>{{'PROFILES.IMG_CHANGE' | translate}}</span>
           </div>
-          <button mat-button *ngIf="hasAvatar()" (click)="clearAvatar()"><i icon iconId="delete"></i></button>
+          <button mat-button *ngIf="hasAvatar()" (click)="clearAvatar()"><i icon="delete"></i></button>
         </div>
 
         <div *ngIf="!edit">
@@ -101,7 +101,7 @@
         </div>
       </div>
       <div class="about">
-        <i icon iconId="edu-quotes" class="quotes"></i>
+        <i icon="edu-quotes" class="quotes"></i>
         <div class="about-buttons" *ngIf="isMe && editProfile">
           <button mat-button color="primary" class="edit" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</button>
           <button mat-button color="primary" class="edit" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</button>
@@ -129,10 +129,10 @@
       <div *ngIf="isMe && editProfile" class="persistent-id">
         <div class="toggle">
           <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
-            <i icon iconId="fingerprint"></i>
+            <i icon="fingerprint"></i>
             <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
-            <i icon iconId="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-            <i icon iconId="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+            <i icon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+            <i icon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
           </button>
         </div>
         <div *ngIf="showPersistentIds" [@overlay]="showPersistentIds" class="persistent-id-inputs">

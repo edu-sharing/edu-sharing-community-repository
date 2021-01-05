@@ -14,7 +14,7 @@
 -->
 <form (ngSubmit)="onSubmit()">
   <mat-form-field class="authority-search-input" floatLabel="always">
-    <i matPrefix icon [iconId]="inputIcon" *ngIf="inputIcon"></i>
+    <i matPrefix [icon]="inputIcon" *ngIf="inputIcon"></i>
     <mat-label>{{ placeholder | translate }}</mat-label>
     <input
       type="text"

@@ -12,7 +12,7 @@
 ></collection-chooser>
 <div class="frontpage" *ngIf="configService.get('frontpage.enabled', true) | async">
     <form *ngIf="config" [formGroup]="form">
-        <h4 class="mat-heading-4 mat-heading-underline"><i icon iconId="settings"></i>{{'ADMIN.FRONTPAGE.GENERAL' | translate}}</h4>
+        <h4 class="mat-heading-4 mat-heading-underline"><i icon="settings"></i>{{'ADMIN.FRONTPAGE.GENERAL' | translate}}</h4>
         <div class="group">
             <mat-form-field>
                 <mat-label>{{'ADMIN.FRONTPAGE.MODE_LABEL' | translate}}</mat-label>
@@ -106,8 +106,8 @@
             </div>
         </div>
     </form>
-    <h4 class="mat-heading-4 mat-heading-underline preview-heading"><i icon iconId="apps"></i>{{'ADMIN.FRONTPAGE.PREVIEW' | translate}}
-        <div class="reload"><button mat-icon-button (click)="updatePreviews()"><i icon iconId="refresh"></i></button></div>
+    <h4 class="mat-heading-4 mat-heading-underline preview-heading"><i icon="apps"></i>{{'ADMIN.FRONTPAGE.PREVIEW' | translate}}
+        <div class="reload"><button mat-icon-button (click)="updatePreviews()"><i icon="refresh"></i></button></div>
     </h4>
     <div class="group preview">
         <h5 class="mat-heading-5 preview-error" *ngIf="previewError">{{'ADMIN.FRONTPAGE.PREVIEW_ERROR.'+previewError | translate}}</h5>

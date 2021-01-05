@@ -17,7 +17,7 @@
         </div>
       </div>
     </div>
-    <button mat-raised-button class="btnAdd" (click)="addVCard('lifecycle')"><i icon iconId="add"></i> {{'ADD' | translate}}</button>
+    <button mat-raised-button class="btnAdd" (click)="addVCard('lifecycle')"><i icon="add"></i> {{'ADD' | translate}}</button>
     <h4 class="mat-heading-4 metadataHeading">{{'WORKSPACE.CONTRIBUTOR.METADATACONTRIBUTOR' | translate}}</h4>
     <div *ngFor="let role of rolesMetadata">
       <div *ngIf="contributorMetadata[role] && contributorMetadata[role].length"  class="group">
@@ -27,7 +27,7 @@
         </div>
       </div>
     </div>
-    <button mat-raised-button class="btnAdd" (click)="addVCard('metadata')"><i icon iconId="add"></i> {{'ADD' | translate}}</button>
+    <button mat-raised-button class="btnAdd" (click)="addVCard('metadata')"><i icon="add"></i> {{'ADD' | translate}}</button>
   </div>
 </card>
 <modal-dialog
@@ -49,7 +49,7 @@
   <div *ngIf="editDisabled && !userAuthor">
     <info-message message="{{'WORKSPACE.CONTRIBUTOR.EDIT_DISABLED' | translate}}"></info-message>
     <div class="edit-reset">
-      <button mat-button color="primary" (click)="addVCard()"><i icon iconId="delete"></i>
+      <button mat-button color="primary" (click)="addVCard()"><i icon="delete"></i>
         {{'WORKSPACE.CONTRIBUTOR.RESET' | translate}}
       </button>
     </div>
@@ -107,10 +107,10 @@
 
       </div>
       <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
-        <i icon iconId="fingerprint"></i>
+        <i icon="fingerprint"></i>
         <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
-        <i icon iconId="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-        <i icon iconId="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+        <i icon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+        <i icon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
       </button>
       <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
         <div class="table">
@@ -165,10 +165,10 @@
         </mat-form-field>
       </div>
       <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
-        <i icon iconId="fingerprint"></i>
+        <i icon="fingerprint"></i>
         <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
-        <i icon iconId="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-        <i icon iconId="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+        <i icon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+        <i icon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
       </button>
       <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
         <div class="table">
@@ -229,8 +229,8 @@
       </div>
     </div>
     <button mat-button color="primary" class="more clickable" (click)="more=!more">
-      <i icon iconId="keyboard_arrow_down" *ngIf="more"></i>
-      <i icon iconId="keyboard_arrow_right" *ngIf="!more"></i>
+      <i icon="keyboard_arrow_down" *ngIf="more"></i>
+      <i icon="keyboard_arrow_right" *ngIf="!more"></i>
       <span>{{'WORKSPACE.CONTRIBUTOR.MORE' | translate}}</span>
     </button>
     <div *ngIf="more" [@overlay]="more" class="moreOpen">

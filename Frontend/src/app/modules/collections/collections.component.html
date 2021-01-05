@@ -35,32 +35,32 @@
 >
     <mat-tab *ngIf="!isGuest">
         <ng-template mat-tab-label>
-            <i icon iconId="person" class="tab-icon"></i>
+            <i icon="person" class="tab-icon"></i>
             <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
         </ng-template>
     </mat-tab>
     <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}">
         <ng-template mat-tab-label>
-            <i icon iconId="group" class="tab-icon"></i>
+            <i icon="group" class="tab-icon"></i>
             <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
         </ng-template>
     </mat-tab>
     <mat-tab
         *ngIf="hasEditorial">
         <ng-template mat-tab-label>
-            <i icon iconId="star" class="tab-icon"></i>
+            <i icon="star" class="tab-icon"></i>
             <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
         </ng-template>
     </mat-tab>
     <mat-tab *ngIf="hasMediacenter">
         <ng-template mat-tab-label>
-            <i icon iconId="business" class="tab-icon"></i>
+            <i icon="business" class="tab-icon"></i>
             <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
         </ng-template>
     </mat-tab>
     <mat-tab>
         <ng-template mat-tab-label>
-            <i icon iconId="language" class="tab-icon"></i>
+            <i icon="language" class="tab-icon"></i>
             <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
         </ng-template>
     </mat-tab>
@@ -90,7 +90,7 @@
                     [style.cursor]="isAllowedToEditCollection() ? 'pointer' : 'auto'"
                     (click)="collectionEdit()"
                 >
-                    <i icon iconId="layers"></i>
+                    <i icon="layers"></i>
                 </div>
             </div>
         </div>
@@ -147,7 +147,7 @@
         </div>
 
         <div class="collection-new-preview-infoline">
-            <i icon iconId="person" class="icon-bottom"></i>
+            <i icon="person" class="icon-bottom"></i>
             &nbsp;
             <span *ngIf="!collectionContent.node.collection.authorFreetext">{{
                 collectionContent.node.owner | authorityName
@@ -158,7 +158,7 @@
         </div>
 
         <div class="collection-new-preview-infoline">
-            <i icon [iconId]="getScopeInfo().icon" class="icon-bottom"></i>
+            <i [icon]="getScopeInfo().icon" class="icon-bottom"></i>
             &nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
         </div>
         <div class="collection-permissions collection-label"></div>

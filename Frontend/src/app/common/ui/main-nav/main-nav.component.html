@@ -122,7 +122,7 @@
         </ng-container>
       </div>
       <div class="timeout" *ngIf="isSafe() && timeout">
-        <i icon iconId="av_timer"></i>
+        <i icon="av_timer"></i>
         {{ timeout }}
       </div>
       <div class="add-material">
@@ -136,7 +136,7 @@
           [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
           [attr.aria-label]="'WORKSPACE.ADD' | translate"
         >
-          <i icon iconId="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+          <i icon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
         </button>
         <button
           class="create-dummy"
@@ -189,7 +189,7 @@
           >
         </div>
         <button mat-icon-button *ngIf="user && showChat()" class="rocketchat" (click)="openChat()">
-          <i icon iconId="message"></i>
+          <i icon="message"></i>
           <div class="mat-button-badge" [class.rocketchat-count-none]="getChatCount() == 0">
             {{ getChatCount() }}
           </div>
@@ -221,7 +221,7 @@
     tabindex="0"
     (click)="scrollToTop()"
   >
-    <i icon iconId="arrow_upward"></i> {{ 'GO_TO_TOP' | translate }}
+    <i icon="arrow_upward"></i> {{ 'GO_TO_TOP' | translate }}
   </button>
   <div *ngIf="canOpen && _currentScope != 'render'" #tabNav class="tab-nav">
     <app-main-menu-bottom
