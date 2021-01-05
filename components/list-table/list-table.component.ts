@@ -848,7 +848,7 @@ export class ListTableComponent implements EventListener {
         this.reorderDialogChange.emit(false);
         if (save) {
             this.columns = this.columnsAll;
-            this.sessionStorage.set('workspaceColumns',this.columns);
+            this.sessionStorage.set('workspaceColumns',this.columnsAll);
         } else {
             this.columns = this.columnsOriginal;
         }
