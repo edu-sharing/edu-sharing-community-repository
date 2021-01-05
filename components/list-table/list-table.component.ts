@@ -474,16 +474,16 @@ export class ListTableComponent implements EventListener {
     isNodesDragSource = false;
 
     private _hasCheckbox: boolean;
-    private _nodes: any[];
-    private animateNode: Node;
-    private columnsAll: ListItem[];
+    _nodes: any[];
+    animateNode: Node;
+    columnsAll: ListItem[];
     /** Set the columns to show, see @ListItem */
     private columnsOriginal: ListItem[];
-    private columnsVisible: ListItem[];
-    private currentDragColumn: ListItem;
-    private optionsAlways: OptionItem[] = [];
+    columnsVisible: ListItem[];
+    currentDragColumn: ListItem;
+    optionsAlways: OptionItem[] = [];
     private repositories: Repository[];
-    private sortMenu = false;
+    sortMenu = false;
 
     constructor(
         private ui: UIService,
@@ -836,14 +836,14 @@ export class ListTableComponent implements EventListener {
         this._nodes.splice(targetPos, 0, node);
     }
 
-    private noPermissions(node: Node): boolean {
+    noPermissions(node: Node): boolean {
         return (
             this.validatePermissions != null &&
             this.validatePermissions(node).status === false
         );
     }
 
-    private closeReorder(save: boolean): void {
+    closeReorder(save: boolean): void {
         this.reorderDialog = false;
         this.reorderDialogChange.emit(false);
         if (save) {
@@ -854,7 +854,7 @@ export class ListTableComponent implements EventListener {
         }
     }
 
-    private allowDragColumn(event: any, index: number, target: ListItem): void {
+    allowDragColumn(event: any, index: number, target: ListItem): void {
         if (!this.reorderColumns || index === 0 || !this.currentDragColumn) {
             return;
         }
@@ -870,7 +870,7 @@ export class ListTableComponent implements EventListener {
         this.columnsAll[posNew] = old;
     }
 
-    private dropColumn(event: any, index: number, target: ListItem): void {
+    dropColumn(event: any, index: number, target: ListItem): void {
         if (!this.reorderColumns || index === 0) {
             return;
         }
@@ -879,7 +879,7 @@ export class ListTableComponent implements EventListener {
         event.stopPropagation();
     }
 
-    private allowDeleteColumn(event: any): void {
+    allowDeleteColumn(event: any): void {
         if (!this.reorderColumns || !this.currentDragColumn) {
             return;
         }
@@ -887,7 +887,7 @@ export class ListTableComponent implements EventListener {
         event.stopPropagation();
     }
 
-    private deleteColumn(event: any): void {
+    deleteColumn(event: any): void {
         if (!this.currentDragColumn) {
             return;
         }
@@ -900,7 +900,7 @@ export class ListTableComponent implements EventListener {
         this.currentDragColumn = null;
     }
 
-    private animateIcon(node: Node, animate: boolean): void {
+    animateIcon(node: Node, animate: boolean): void {
         if (animate) {
             if (this.nodeHelper.hasAnimatedPreview(node)) {
                 this.animateNode = node;
@@ -910,7 +910,7 @@ export class ListTableComponent implements EventListener {
         }
     }
 
-    private dragStartColumn(event: any, index: number, column: ListItem): void {
+    dragStartColumn(event: any, index: number, column: ListItem): void {
         if (!this.allowDragColumn || index === 0) {
             return;
         }
@@ -923,7 +923,7 @@ export class ListTableComponent implements EventListener {
         this.clickRow.emit({ node, source });
     }
 
-    private canBeSorted(sortBy: any): boolean {
+    canBeSorted(sortBy: any): boolean {
         return (
             this.possibleSortByFields &&
             this.possibleSortByFields.filter(p => p.name === sortBy.name)
@@ -931,7 +931,7 @@ export class ListTableComponent implements EventListener {
         );
     }
 
-    private getSortableColumns(): ListItem[] {
+    getSortableColumns(): ListItem[] {
         const result: ListItem[] = [];
         if (!this.columnsAll) {
             return result;
@@ -944,7 +944,7 @@ export class ListTableComponent implements EventListener {
         return result;
     }
 
-    private setSortingIntern(
+    setSortingIntern(
         sortBy: ListItem,
         isPrimaryElement: boolean,
     ): void {
@@ -966,7 +966,7 @@ export class ListTableComponent implements EventListener {
         this.setSorting(sortBy);
     }
 
-    private setSorting(sortBy: any): void {
+    setSorting(sortBy: any): void {
         if (!this.canBeSorted(sortBy)) {
             return;
         }
@@ -976,7 +976,7 @@ export class ListTableComponent implements EventListener {
         });
     }
 
-    private callOption(option: OptionItem, node: Node): void {
+    callOption(option: OptionItem, node: Node): void {
         if (!this.optionIsValid(option, node)) {
             if (option.disabledCallback) {
                 option.disabledCallback(node);

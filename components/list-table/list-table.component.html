@@ -34,8 +34,12 @@
     </div>
 </card>
 <div [className]="listClass + ' list list-type-'+(viewType == 0 ? 'table' : 'card')"
-     infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)">
-    <div class="headingGroup" *ngIf="hasHeading && viewType==0">
+     infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)"
+     role="table">
+    <div class="rowgroup">
+    <div *ngIf="hasHeading && viewType==0"
+         class="headingGroup"
+         role="rowgroup">
         <div
           class="totalCount"
           *ngIf="totalCount && hasCheckbox && !isLoading"
@@ -48,19 +52,22 @@
         </div>
         <sort-dropdown class="sortMenu" [(open)]="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
 
-        <div class="heading">
-        <div class="checkbox" *ngIf="hasCheckbox">
+        <div class="heading" role="row">
+        <div *ngIf="hasCheckbox"
+             class="checkbox">
             <mat-checkbox *ngIf="_nodes && _nodes.length" (change)="toggleAll()" [ngModel]="selectedNodes.length==_nodes.length"></mat-checkbox>
         </div>
         <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
-        <div class="icon" *ngIf="hasIcon">&nbsp;</div>
+        <div class="icon" *ngIf="hasIcon" role="columnheader" aria-label="{{'LIST_TABLE.DUMMY_ICON_LABEL' | translate}}">&nbsp;</div>
             <div *ngFor="let item of columnsVisible;let j = index"
-             class="{{getItemCssClass(item)}} row_{{j+1}}">
-            <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item,i==0)">
+                 class="{{getItemCssClass(item)}} row_{{j+1}}"
+                 role="columnheader"
+            >
+            <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item,j==0)">
                 <ng-container *ngIf="!item.label">{{item.type+"."+item.name | translate}}</ng-container>
                 <ng-container *ngIf="item.label">{{item.label}}</ng-container>
             </a>
-            <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,i==0)">
+            <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,j==0)" aria-hidden="true">
                 <a class="" *ngIf="sortBy==item.name && sortAscending"><i icon iconId="arrow_drop_up"></i></a>
                 <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon iconId="arrow_drop_down"></i></a>
             </div>
@@ -75,6 +82,7 @@
     <div
         *ngIf="!reorderDialog"
         class="list-container"
+        role="rowgroup"
         [class.cardContainer]="viewType==1 || viewType==2"
         [class.tableList]="viewType == 0"
         [class.cardList]="viewType == 1"
@@ -97,6 +105,7 @@
             [class.hover]="dragHover==node"
         >
             <div class="row node-row"
+                 role="row"
                  [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
                  [class.noPermissions]="noPermissions(node)"
                  [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
@@ -188,16 +197,23 @@
                         </div>
                     </div>
 
-                    <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable">
+                    <div *ngIf="hasIcon && viewType==0"
+                         class="icon column"
+                         role="cell"
+                         [class.clickable]="isClickable">
                         <div class="icon-bg">
                             <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" alt="{{ (node.mediatype ? 'NODE.mediatype' : '') | translate}} {{ (node.mediatype ? 'MEDIATYPE.' + node.mediatype : '') | translate}}"/>
                             <i *ngIf="!isCollection(node) && icon" icon iconId="{{icon}}"></i>
                             <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
                         </div>
                     </div>
-                    <div *ngFor="let item of columnsVisible;let j = index" class="column {{getItemCssClass(item)}} row_{{j+1}}" [class.clickable]="isClickable">
+                    <div *ngFor="let item of columnsVisible;let j = index"
+                         class="column {{getItemCssClass(item)}} row_{{j+1}}"
+                         role="cell"
+                         [class.clickable]="isClickable">
                         <div *ngIf="getLRMIProperty(node, item)"
                              class="display-none"
+                             aria-hidden="true"
                              [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
                         <div class="row-group">
                             <div class="rowInner">
@@ -215,15 +231,22 @@
                     <button mat-icon-button
                             [disabled]="!optionIsValid(option, node)"
                             (click)="optionIsShown(option, node) ? callOption(option,node) : null">
-                        <i icon iconId="{{option.icon}}"></i>
+                        <i icon iconId="{{option.icon}}" aria="true"></i>
                     </button>
                 </div>
-                <div class="more column" *ngIf="_options && _options.length>1" ><button mat-icon-button (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"><i icon iconId="more_vert" aria="true"></i></button></div>
+                <div class="more column" *ngIf="_options && _options.length>1" >
+                    <button mat-icon-button
+                            (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
+                            text="test">
+                        <i icon iconId="more_vert" [aria]="false"></i>
+                    </button>
+                </div>
                 <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
                     <button mat-icon-button
                             [class.disabled]="!optionIsValid(_options[0],node)"
                             matTooltip="{{_options[0].name | translate}}"
-                            (click)="callOption(_options[0],node);$event.stopPropagation();">
+                            (click)="callOption(_options[0],node);$event.stopPropagation();"
+                    >
                         <i icon iconId="{{_options[0].icon}}"></i>
                     </button></div>
             </div>
