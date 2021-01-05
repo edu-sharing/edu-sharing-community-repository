@@ -54,7 +54,7 @@ export class WorkspaceShareLinkComponent  {
         this.password=data[0].password;
         if (this.password) {
             this.edit=true;
-        };
+        }
         this.currentDate=data[0].expiryDate;
         if(this.expiry) {
           this.expiryDate=new Date(data[0].expiryDate);
@@ -120,7 +120,7 @@ export class WorkspaceShareLinkComponent  {
   public setPassword(){
       if (!this.password) {
           this.edit=false;
-      };
+      }
       this.updateShare();
   }
   public constructor(

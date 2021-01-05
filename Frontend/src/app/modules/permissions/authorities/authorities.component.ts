@@ -18,7 +18,7 @@ import {
   RestOrganizationService,
   SharedFolder, UIService,
   User,
-  UserSimple
+  UserSimple, Person
 } from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {Router} from '@angular/router';
@@ -35,6 +35,8 @@ import {ListTableComponent} from '../../../core-ui-module/components/list-table/
 import {Observable} from 'rxjs';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
+import {CsvHelper} from '../../../core-module/csv.helper';
+import {ListItemType} from '../../../core-module/ui/list-item';
 
 @Component({
   selector: 'permissions-authorities',
@@ -107,7 +109,7 @@ export class PermissionsAuthoritiesComponent {
   }
   @Input() selected: Organization[]|Group[]|UserSimple[] = [];
 
-  public _mode: string;
+  public _mode: ListItemType;
   public addTo: any;
   private addToSelection: any;
   public globalProgress= false;
@@ -177,7 +179,7 @@ export class PermissionsAuthoritiesComponent {
       }, (error: any) => this.handleError(error));
     }
   }
-  @Input() set mode(mode: string){
+  @Input() set mode(mode: ListItemType){
    this._mode = mode;
    if (mode == 'USER'){
      this.sortBy = 'firstName';
@@ -211,7 +213,7 @@ export class PermissionsAuthoritiesComponent {
     return options;
   }
 
-  private getColumns(mode: string, fromDialog= false){
+  private getColumns(mode: ListItemType, fromDialog= false){
     const columns: ListItem[] = [];
     if (mode == 'USER'){
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_NAME));
@@ -1038,25 +1040,18 @@ export class PermissionsAuthoritiesComponent {
   }
 
   private downloadMembers() {
-    let data = '';
-    let i = 0;
-    for (const column of this.columns) {
-      if (i)
-        data += ';';
-      data += this.translate.instant(this._mode + '.' + column.name);
-      i++;
+    const headers = this.columns.map((c) => this.translate.instant(this._mode + '.' + c.name));
+    const data:string[][] = [];
+    for (const entry of (this.list as UserSimple[])){
+      data.push([
+          entry.authorityName,
+          entry.profile.firstName,
+          entry.profile.lastName,
+          entry.profile.email,
+          entry.status.status
+      ]);
     }
-    for (const entry of this.list){
-      data += '\n';
-      let i = 0;
-      for (const column of this.columns) {
-        if (i)
-          data += ';';
-        data += this.nodeHelper.getAttribute( entry, column);
-        i++;
-      }
-    }
-    Helper.downloadContent(this.translate.instant('PERMISSIONS.DOWNLOAD_MEMBER_FILENAME'), data);
+    CsvHelper.download(this.translate.instant('PERMISSIONS.DOWNLOAD_MEMBER_FILENAME'), headers, data);
   }
   openFolder(folder: SharedFolder) {
       UIHelper.goToWorkspaceFolder(this.node, this.router, this.connector.getCurrentLogin(), folder.id);

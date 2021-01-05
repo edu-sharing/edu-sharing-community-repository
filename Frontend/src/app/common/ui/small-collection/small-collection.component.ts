@@ -31,6 +31,7 @@ export class SmallCollectionComponent{
    * @type {string}
    */
   @Input() titleLabelShort:string;
+  scopeItem = new ListItem('COLLECTION', 'scope');
   @Input() set collectionId(collectionId : string){
     this.collectionService.getCollection(collectionId).subscribe((data:CollectionWrapper)=>{
       this._collection=data.collection;
@@ -45,7 +46,4 @@ export class SmallCollectionComponent{
     private nodeHelper: NodeHelperService,
     private config:ConfigurationService
   ) { }
-  public getAttribute(attribute:string){
-    return this.nodeHelper.getAttribute(this._collection, new ListItem('COLLECTION', attribute));
-  }
 }

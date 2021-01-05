@@ -67,6 +67,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from './common/ui/mds-editor/
 import { SkipTargetDirective } from './common/ui/skip-nav/skip-target.directive';
 import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
 import {MdsEditorWidgetFileUploadComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
+import {CommonModule} from '@angular/common';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -131,6 +132,7 @@ import {MdsEditorWidgetFileUploadComponent} from './common/ui/mds-editor/widgets
     ],
     imports: [
         IMPORTS,
+        CommonModule,
         Ng5SliderModule,
         DragDropModule
     ],

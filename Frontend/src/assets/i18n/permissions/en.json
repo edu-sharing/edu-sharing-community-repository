@@ -78,7 +78,7 @@
         "NO_ORG": "View all",
         "INTERNAL_NAME": "Internal name",
         "CURRENT_MEMBERS": "Current members of group {{group}}:",
-        "DOWNLOAD_MEMBER_FILENAME": "Users.csv",
+        "DOWNLOAD_MEMBER_FILENAME": "Users",
         "SET_STATUS": "Set user status",
         "STATUS_LABEL": "User status",
         "STATUS_NOTIFY": "Inform user via mail about status change",

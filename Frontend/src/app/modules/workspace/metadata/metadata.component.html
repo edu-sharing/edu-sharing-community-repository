@@ -68,7 +68,7 @@
 
     </div>
     <div class="description" *ngIf="data.license">{{'NODE.ccm:commonlicense_key' | translate}}</div>
-    <div class="value" *ngIf="data.license">
+    <div class="value license-value" *ngIf="data.license">
       <img class="license" [src]="data.license">
       <div class="licenseName">{{data.licenseName}}</div>
     </div>

@@ -152,8 +152,12 @@ listTable{
   position: relative;
   object-fit: cover;
 }
-.license{
+.license-value {
   padding-top: 4px;
-  height: 21px;
+  display: flex;
+  .license {
+    padding-right: 6px;
+    height: 21px;
+  }
 }
 
