@@ -247,15 +247,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             false,
         );
         this.setMenuStyle();
-        this.management.signupGroupChange.subscribe((value: boolean) => {
-            this.router.navigate(['./'], {
-                relativeTo: this.route,
-                queryParamsHandling: 'merge',
-                queryParams: {
-                    signupGroup : value || null
-                }
-            })
-        });
 
         this.connector.setRoute(this.route).subscribe(() => {
             this.connector.getAbout().subscribe(about => {
@@ -271,7 +262,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
-                        this.management.signupGroup = params.signupGroup;
                         this.showNodeStore = params.nodeStore === 'true';
                         this.isGuest = data.isGuest;
                         this._showUser =
