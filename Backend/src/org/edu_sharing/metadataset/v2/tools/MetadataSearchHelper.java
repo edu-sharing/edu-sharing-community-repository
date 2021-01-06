@@ -3,6 +3,7 @@ package org.edu_sharing.metadataset.v2.tools;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -220,6 +221,14 @@ public class MetadataSearchHelper {
 				String kwValue = resultSet.getString(1);
 				Suggestion sqlKw = new Suggestion();
 				sqlKw.setKey(kwValue.trim());
+
+				try {
+					String displayString = resultSet.getString(2);
+					sqlKw.setDisplayString(displayString);
+				}catch (SQLException e){
+					//no display string in result
+				}
+
 				result.add(sqlKw);
 			}	
 		}catch(Throwable e){
