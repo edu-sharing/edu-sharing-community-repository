@@ -85,7 +85,11 @@
         "FEEDBACK_VIEW_EMPTY": "No feedback was given for this collection yet",
         "FEEDBACK_CREATOR": "Author {{creator}}",
         "FEEDBACK_SAVE": "Send",
-        "FEEDBACK_TOAST": "Feedback sent. Thank you!"
+        "FEEDBACK_TOAST": "Feedback sent. Thank you!",
+        "ADD_TO": {
+            "DUPLICATE_TITLE": "Element(s) already existing",
+            "DUPLICATE_MESSAGE": "The collection already contains {{count}} of the element(s). Are you want to add them again?"
+        }
     },
 
     "collections_description": "Description:",
