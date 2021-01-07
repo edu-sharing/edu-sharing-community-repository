@@ -3,7 +3,18 @@ import {Title} from '@angular/platform-browser';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
-import {Collection, Connector, Filetype, LoginResult, MdsInfo, Node, NodeLock, ParentList, Permission,} from '../core-module/rest/data-object';
+import {
+    Collection,
+    Connector,
+    Filetype,
+    LoginResult,
+    MdsInfo,
+    Node,
+    NodeLock,
+    NodeWrapper,
+    ParentList,
+    Permission,
+} from '../core-module/rest/data-object';
 import {RestConstants} from '../core-module/rest/rest-constants';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {Toast} from './toast';
@@ -18,7 +29,7 @@ import {ListItem} from '../core-module/ui/list-item';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {OptionItem} from './option-item';
 import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
-import {Observable, Observer} from 'rxjs';
+import {Observable, Observer, of} from 'rxjs';
 import {RouterHelper} from './router.helper';
 import {PlatformLocation} from '@angular/common';
 import {MessageType} from '../core-module/ui/message-type';
@@ -26,6 +37,8 @@ import {Helper} from '../core-module/rest/helper';
 import {NodeHelperService} from './node-helper.service';
 import { RestIamService } from '../core-module/rest/services/rest-iam.service';
 import { DialogButton } from '../core-module/ui/dialog-button';
+import {catchError} from "rxjs/operators";
+import {ObservedValueOf} from "rxjs/internal/types";
 
 export class UIHelper {
     public static evaluateMediaQuery(type: string, value: number) {
@@ -371,69 +384,73 @@ export class UIHelper {
         collection: Node,
         nodes: Node[],
         callback: (nodes: Node[]) => void = null,
-        position = 0,
-        error = false,
-        results: Node[] = [],
+        allowDuplicate = false,
     ) {
-        if (position >= nodes.length) {
-            if (!error)
+        Observable.forkJoin(nodes.map(node =>
+            collectionService.addNodeToCollection(
+                collection.ref.id,
+                node.ref.id,
+                node.ref.repo,
+                allowDuplicate
+                ).pipe(
+                    catchError(error => of({error, node}),)
+                )
+        )).subscribe((results) => {
+            const success: NodeWrapper[] = results.filter((r) => !(r as any).error);
+            const failed: { node: Node, error: any }[] = (
+                results.filter((r) => !!(r as any).error) as {node: Node, error: any}[]
+            );
+            if(success.length > 0) {
                 UIHelper.showAddedToCollectionInfo(
                     bridge,
                     router,
                     collection,
-                    nodes.length,
+                    success.length,
                 );
-            if (callback) callback(results);
-            return;
-        }
+            }
+            if(failed.length > 0) {
+                const duplicated = failed.filter(({error}) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE);
+                if (duplicated.length > 0) {
+                    bridge.showModalDialog({
+                        title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
+                        message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
+                        messageParameters: {count: duplicated.length},
+                        isCancelable: true,
+                        buttons: DialogButton.getYesNo(
+                            () => {
+                                bridge.closeModalDialog();
+                                if (callback) {
+                                    callback(results.map(n => n.node));
+                                }
+                            },
+                            () => {
+                                bridge.closeModalDialog();
+                                UIHelper.addToCollection(
+                                    nodeHelper,
+                                    collectionService,
+                                    router,
+                                    bridge,
+                                    collection,
+                                    duplicated.map(d => d.node),
+                                    callback,
+                                    true
+                                )
+                            }
+                        )
+                    });
+                    return;
+                } else {
+                    nodeHelper.handleNodeError(
+                        RestHelper.getTitle(failed[0].node),
+                        failed[0].error,
+                    );
+                }
+            }
 
-        collectionService
-            .addNodeToCollection(
-                collection.ref.id,
-                nodes[position].ref.id,
-                nodes[position].ref.repo,
-            )
-            .subscribe(
-                result => {
-                    results.push(result.node);
-                    UIHelper.addToCollection(
-                        nodeHelper,
-                        collectionService,
-                        router,
-                        bridge,
-                        collection,
-                        nodes,
-                        callback,
-                        position + 1,
-                        error,
-                        results,
-                    );
-                },
-                (error: any) => {
-                    if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
-                        bridge.showTemporaryMessage(MessageType.error,
-                            'WORKSPACE.TOAST.NODE_EXISTS_IN_COLLECTION',
-                            { name: RestHelper.getTitle(nodes[position]) },
-                        );
-                    } else
-                        nodeHelper.handleNodeError(
-                            RestHelper.getTitle(nodes[position]),
-                            error,
-                        );
-                    UIHelper.addToCollection(
-                        nodeHelper,
-                        collectionService,
-                        router,
-                        bridge,
-                        collection,
-                        nodes,
-                        callback,
-                        position + 1,
-                        true,
-                        results,
-                    );
-                },
-            );
+            if (callback) {
+                callback(success.map(n => n.node));
+            }
+        });
     }
     static openConnector(
         connector: RestConnectorsService,
