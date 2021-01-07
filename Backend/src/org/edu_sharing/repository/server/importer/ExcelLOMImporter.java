@@ -31,7 +31,6 @@ import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 
 
 public class ExcelLOMImporter {
@@ -316,7 +315,7 @@ public class ExcelLOMImporter {
 				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef,ContentModel.PROP_NAME));
 				try {
 					if(addToCollection) {
-						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.getId(), newNode.getChildRef().getId());
+						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.getId(), newNode.getChildRef().getId(), null, false);
 					}
 				} catch (Throwable throwable) {
 

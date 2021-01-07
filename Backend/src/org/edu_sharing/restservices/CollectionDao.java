@@ -255,41 +255,17 @@ public class CollectionDao {
 		}
 			
 	}
-	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId) throws DAOException {
+	
+	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId, boolean allowDuplicate) throws DAOException {
 		try {
 
 			String resultId=CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
-					addToCollection(collectionId,nodeId);
+					addToCollection(collectionId,nodeId,sourceRepositoryId,allowDuplicate);
 			return NodeDao.getNode(repoDao,resultId,Filter.createShowAllFilter());
 		} catch (Throwable t) {
 
 			throw DAOException.mapping(t);
 		}
-	}
-	
-	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId) throws DAOException {
-		try {
-
-			String resultId=CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
-					addToCollection(collectionId,nodeId,sourceRepositoryId);
-			return NodeDao.getNode(repoDao,resultId,Filter.createShowAllFilter());
-		} catch (Throwable t) {
-
-			throw DAOException.mapping(t);
-		}
-	}
-	
-	public void addToCollection(NodeDao node) throws DAOException {
-		
-		try {
-		
-			collectionClient.addToCollection(nodeDao.getRef().getId(), node.getRef().getId());
-			
-		} catch (Throwable t) {
-
-			throw DAOException.mapping(t);
-		}
-			
 	}
 	
 	public void removeFromCollection(NodeDao node) throws DAOException {

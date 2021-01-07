@@ -476,6 +476,7 @@ public class CollectionApi {
 			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
 			@ApiParam(value = "ID of node", required = true) @PathParam("node") String nodeId,
 			@ApiParam(value = "ID of source repository", required=true ) @QueryParam("sourceRepo")  String sourceRepo,
+			@ApiParam(value = "Allow that a node that already is inside the collection can be added again", required=true, defaultValue = "false") @QueryParam("allowDuplicate")  Boolean allowDuplicate,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -491,9 +492,9 @@ public class CollectionApi {
             NodeEntry entry=new NodeEntry();
 
             if(sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId())){
-				entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo).asNode());
+				entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo, allowDuplicate != null && allowDuplicate).asNode());
             }else {
-                entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId).asNode());
+                entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId, null, allowDuplicate != null && allowDuplicate).asNode());
             }
 
 

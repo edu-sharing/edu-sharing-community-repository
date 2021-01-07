@@ -23,22 +23,17 @@ public interface CollectionService {
 	 * /**
 	 * creates an refObject
 	 * adds Usage to Original IO (lms=repo,course=sammlungsid,resourceId=refIoId, nodeId=originalIOId
-	 * @param repoDao 
-	 * 
-	 * 
-	 * @param collectionId
-	 * @param originalNodeId
-	 * @return nodeId of the refObject
+	 * @param repoDao
+	 *
+	 *
+     * @param collectionId
+     * @param allowDuplicate
+     * @param originalNodeId
+     * @return nodeId of the refObject
 	 * @throws DuplicateNodeException 
 	 * @throws Throwable 
 	 */
-	public String addToCollection(String collectionId, String originalNodeId) throws DuplicateNodeException, Throwable;
-	
-	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId) throws DuplicateNodeException, Throwable;
-	
-	
-	public String[] addToCollection(String collectionId, String[] originalNodeIds) throws DuplicateNodeException, Throwable;
-	
+	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate) throws DuplicateNodeException, Throwable;
 	
 	/**
 	 * removes refobject or collection
