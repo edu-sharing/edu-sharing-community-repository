@@ -11,8 +11,6 @@ import {RestConnectorService} from '../../core-module/core.module';
 import {Node, NodeList, LoginResult, SharingInfo, Person} from '../../core-module/core.module';
 import {CustomOptions, OptionItem} from '../../core-ui-module/option-item';
 import {TemporaryStorageService} from '../../core-module/core.module';
-import {UIHelper} from '../../core-ui-module/ui-helper';
-import {Title} from '@angular/platform-browser';
 import {ConfigurationService} from '../../core-module/core.module';
 import {SessionStorageService} from '../../core-module/core.module';
 import {UIConstants} from '../../core-module/ui/ui-constants';
@@ -57,7 +55,6 @@ export class SharingComponent {
     private sharingService:RestSharingService,
     private storage : TemporaryStorageService,
     private session : SessionStorageService,
-    private title : Title,
     private toast : Toast,
     private config : ConfigurationService,
     private translate : TranslateService) {
@@ -65,7 +62,6 @@ export class SharingComponent {
       this.columns.push(new ListItem('NODE',RestConstants.SIZE));
       this.options.addOptions.push(new OptionItem('SHARING.DOWNLOAD','cloud_download',(node:Node)=>this.download(node)));
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=> {
-          UIHelper.setTitle('SHARING.TITLE', title, translate, config);
           this.route.queryParams.subscribe((params)=> {
              this.params=params;
              this.sharingService.getInfo(params.nodeId,params.token).subscribe((result)=> {

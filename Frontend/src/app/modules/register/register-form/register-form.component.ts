@@ -6,7 +6,6 @@ import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../core-ui-module/translation';
 import {RestConnectorService} from '../../../core-module/core.module';
 import {ConfigurationService} from '../../../core-module/core.module';
-import {Title} from '@angular/platform-browser';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {SessionStorageService} from '../../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
@@ -75,12 +74,10 @@ export class RegisterFormComponent{
               private registerService:RestRegisterService,
               private translate:TranslateService,
               private configService:ConfigurationService,
-              private title:Title,
               private storage : SessionStorageService,
               private route : ActivatedRoute,
             ){
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
-        UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
         this.privacyUrl = this.configService.instant("privacyInformationUrl");
         this.requiredFields = this.configService.instant('register.requiredFields',['firstName']);
     });

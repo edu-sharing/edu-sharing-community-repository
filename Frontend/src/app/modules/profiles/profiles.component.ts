@@ -1,10 +1,9 @@
 
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from '../../core-ui-module/translation';
-import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SessionStorageService, UserStats} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
-import {DomSanitizer, Title} from '@angular/platform-browser';
+import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
 import {RestConnectorService} from '../../core-module/core.module';
@@ -34,7 +33,6 @@ import {Observable} from 'rxjs';
 export class ProfilesComponent {
   constructor(private toast: Toast,
               private route: ActivatedRoute,
-              private title: Title,
               private connector: RestConnectorService,
               private translate: TranslateService,
               private router: Router,
@@ -88,9 +86,6 @@ export class ProfilesComponent {
         this.user = profile.person;
         this.userStats = stats;
         this.userEditProfile = profile.editProfile;
-        const name = new AuthorityNamePipe(this.translate).transform(this.user, null);
-        UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name});
-        console.log(this.user);
         this.toast.closeModalDialog();
         this.userEdit=Helper.deepCopy(this.user);
         this.userEdit.profile.vcard = this.user.profile.vcard?.copy();

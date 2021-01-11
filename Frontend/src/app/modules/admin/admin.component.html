@@ -78,6 +78,7 @@
     appSkipTarget="MAIN_CONTENT"
     class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}"
 >
+<h1 appTitle class="invisible">{{ 'ADMIN.TITLE' | translate }}</h1>
 <!-- for dynamically added components from extensions -->
 <ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
 <div *ngIf="modeIsActive('INFO')" class="content info">

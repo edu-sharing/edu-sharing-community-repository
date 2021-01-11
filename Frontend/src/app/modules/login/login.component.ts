@@ -3,7 +3,6 @@ import { PlatformLocation } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { map, startWith } from 'rxjs/operators';
@@ -62,14 +61,12 @@ export class LoginComponent implements OnInit {
         private http: HttpClient,
         private translate: TranslateService,
         private configService: ConfigurationService,
-        private title: Title,
         private storage: SessionStorageService,
         private route: ActivatedRoute,
         private bridge: BridgeService
     ) {
         this.updateButtons();
         Translation.initialize(translate, this.configService, this.storage, this.route).subscribe(() => {
-            UIHelper.setTitle('LOGIN.TITLE', title, translate, configService);
             this.configService.getAll().subscribe((data: any) => {
                 this.config = data;
                 if (!this.config.register) {

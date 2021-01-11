@@ -11,8 +11,6 @@ import {RestConnectorService} from '../../core-module/core.module';
 import {Node, NodeList, LoginResult} from '../../core-module/core.module';
 import {OptionItem, Scope} from '../../core-ui-module/option-item';
 import {TemporaryStorageService} from '../../core-module/core.module';
-import {UIHelper} from '../../core-ui-module/ui-helper';
-import {Title} from '@angular/platform-browser';
 import {ConfigurationService} from '../../core-module/core.module';
 import {SessionStorageService} from '../../core-module/core.module';
 import {UIConstants} from '../../core-module/ui/ui-constants';
@@ -61,11 +59,9 @@ export class OerComponent {
     private mdsService:RestMdsService,
     private storage : TemporaryStorageService,
     private session : SessionStorageService,
-    private title : Title,
     private config : ConfigurationService,
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=> {
-        UIHelper.setTitle('SEARCH.TITLE',title,translate,config);
         GlobalContainerComponent.finishPreloading();
           for(let i=0;i<this.TYPE_COUNT;i++) {
               this.columns.push([]);

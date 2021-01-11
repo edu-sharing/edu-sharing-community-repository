@@ -4,8 +4,7 @@ import 'rxjs/add/operator/map';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../core-ui-module/translation";
-import {UIHelper} from "../../core-ui-module/ui-helper";
-import {DomSanitizer, SafeResourceUrl, Title} from "@angular/platform-browser";
+import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {ConfigurationService} from "../../core-module/core.module";
 import {SessionStorageService} from "../../core-module/core.module";
 import {RestNetworkService} from "../../core-module/core.module";
@@ -41,7 +40,6 @@ export class ServicesComponent {
         private router : Router,
         private toast: Toast,
         private route : ActivatedRoute,
-        private title : Title,
         private config : ConfigurationService,
         private session : SessionStorageService,
         private translate : TranslateService,
@@ -50,7 +48,6 @@ export class ServicesComponent {
         private configService:ConfigurationService,
         private network : RestNetworkService) {
         Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
-            UIHelper.setTitle('SERVICES.TITLE', title, translate, config);
             this.configService.getAll().subscribe((data: any) => {
                 this.refreshServiceList();
                 GlobalContainerComponent.finishPreloading();

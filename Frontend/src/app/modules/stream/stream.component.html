@@ -9,6 +9,7 @@
 <workspace-management
     [(addToCollection)]="collectionNodes"
 ></workspace-management>
+<h1 appTitle class="invisible">{{ 'STREAM.TITLE' | translate }}</h1>
 <div class="stream-container" infiniteScroll
 [scrollWindow]="true"
 (scrolled)="onScroll()"

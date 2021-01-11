@@ -1,7 +1,6 @@
 import { trigger } from '@angular/animations';
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import 'rxjs/add/operator/map';
@@ -134,7 +133,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private activatedRoute: ActivatedRoute,
         private winRef: WindowRefService,
         public searchService: SearchService,
-        private title: Title,
         private nodeHelper: NodeHelperService,
         private config: ConfigurationService,
         private uiService: UIService,
@@ -165,12 +163,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.storage,
                 this.activatedRoute,
             ).subscribe(() => {
-                UIHelper.setTitle(
-                    'SEARCH.TITLE',
-                    this.title,
-                    this.translate,
-                    this.config,
-                );
                 if (this.setSidenavSettings()) {
                     // auto, never, always
                     let sidenavMode = this.config.instant(

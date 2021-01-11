@@ -9,8 +9,6 @@ import {RestConnectorService} from '../../core-module/core.module';
 import {RestConstants} from '../../core-module/core.module';
 import {ConfigurationService} from '../../core-module/core.module';
 import {FrameEventsService} from '../../core-module/core.module';
-import {Title} from '@angular/platform-browser';
-import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestNodeService} from '../../core-module/core.module';
 import {TemporaryStorageService} from '../../core-module/core.module';
@@ -47,10 +45,8 @@ export class FileUploadComponent{
        private router : Router,
        private route : ActivatedRoute,
        private node : RestNodeService,
-       private title : Title
    ){
        Translation.initialize(this.translate,this.configService,this.storage,this.route).subscribe(()=> {
-           UIHelper.setTitle('WORKSPACE.ADD_OBJECT_TITLE', title, translate, configService);
            this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node)=>{
                this.parent=node.node;
                this.route.queryParams.subscribe((params)=>{

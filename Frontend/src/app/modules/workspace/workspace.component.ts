@@ -36,7 +36,6 @@ import { Toast } from '../../core-ui-module/toast';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { KeyEvents } from '../../core-module/ui/key-events';
-import { Title } from '@angular/platform-browser';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 import { UIConstants } from '../../core-module/ui/ui-constants';
@@ -191,7 +190,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         private mds: RestMdsService,
         private node: RestNodeService,
         private ui: UIService,
-        private title: Title,
         private event: FrameEventsService,
         private connector: RestConnectorService,
         private cordova: CordovaService,
@@ -199,7 +197,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     ) {
         this.event.addListener(this);
         Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
-            UIHelper.setTitle('WORKSPACE.TITLE', title, translate, config);
             this.initialize();
         });
         this.connector.setRoute(this.route);

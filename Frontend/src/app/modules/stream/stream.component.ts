@@ -14,7 +14,6 @@ import {Node, NodeList, LoginResult, STREAM_STATUS, ConnectorList} from '../../c
 import {OptionItem} from "../../core-ui-module/option-item";
 import {TemporaryStorageService} from "../../core-module/core.module";
 import {UIHelper} from "../../core-ui-module/ui-helper";
-import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../../core-module/core.module";
 import {SessionStorageService} from "../../core-module/core.module";
 import {UIConstants} from "../../core-module/ui/ui-constants";
@@ -111,7 +110,6 @@ export class StreamComponent {
     private iam:RestIamService,
     private storage : TemporaryStorageService,
     private session : SessionStorageService,
-    private title : Title,
     private toast : Toast,
     private bridge : BridgeService,
     private nodeHelper: NodeHelperService,
@@ -120,7 +118,6 @@ export class StreamComponent {
     private config : ConfigurationService,
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
-        UIHelper.setTitle('STREAM.TITLE',title,translate,config);
         this.connector.isLoggedIn().subscribe(data => {
             this.dateToDisplay = moment().locale(translate.currentLang).format('dddd, DD. MMMM YYYY');
             this.createAllowed=data.statusCode==RestConstants.STATUS_CODE_OK;

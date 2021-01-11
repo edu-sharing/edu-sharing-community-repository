@@ -9,7 +9,6 @@ import {
   RestIamService,
   RestMediacenterService
 } from '../../core-module/core.module';
-import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestConnectorService} from '../../core-module/core.module';
@@ -62,7 +61,6 @@ export class AdminComponent {
               private route: ActivatedRoute,
               private router: Router,
               private config: ConfigurationService,
-              private title: Title,
               private translate: TranslateService,
               private iamService: RestIamService,
               private storage : SessionStorageService,
@@ -81,7 +79,6 @@ export class AdminComponent {
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
           this.storage.refresh();
-      UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       GlobalContainerComponent.finishPreloading();
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),

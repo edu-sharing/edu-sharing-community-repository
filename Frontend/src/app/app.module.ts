@@ -15,7 +15,6 @@ import {DECLARATIONS_OER} from './modules/oer/declarations';
 import {DECLARATIONS_ADMIN} from './modules/admin/declarations';
 import {DECLARATIONS_MANAGEMENT_DIALOGS} from './modules/management-dialogs/declarations';
 import {DECLARATIONS_MESSAGES} from './modules/messages/declarations';
-import {DECLARATIONS_UPLOAD} from './modules/upload/declarations';
 import {DECLARATIONS_STREAM} from './modules/stream/declarations';
 import {DECLARATIONS_PROFILES} from './modules/profiles/declarations';
 import {DECLARATIONS_STARTUP} from './modules/startup/declarations';
@@ -91,7 +90,6 @@ import {CommonModule} from '@angular/common';
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         DECLARATIONS_ADMIN,
-        DECLARATIONS_UPLOAD,
         DECLARATIONS_PROFILES,
         DECLARATIONS_MESSAGES,
         DECLARATIONS_SHARING,
@@ -158,7 +156,6 @@ import {CommonModule} from '@angular/common';
         DECLARATIONS_STREAM,
         DECLARATIONS_MANAGEMENT_DIALOGS,
         DECLARATIONS_ADMIN,
-        DECLARATIONS_UPLOAD,
         DECLARATIONS_PROFILES,
         DECLARATIONS_MESSAGES,
         DECLARATIONS_SHARING,

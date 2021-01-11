@@ -1,4 +1,6 @@
 <global-progress *ngIf="loading"></global-progress>
+<!-- FIXME: Is this part of a page that already has a level 1 heading? -->
+<h1 appTitle class="invisible">{{ 'WORKSPACE.ADD_OBJECT_TITLE' | translate }}</h1>
 <workspace-management
     [parent]="parent"
     [(showUploadSelect)]="showUploadSelect"

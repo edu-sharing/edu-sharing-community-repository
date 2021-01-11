@@ -34,8 +34,6 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import {OptionItem, Scope} from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { Title } from '@angular/platform-browser';
-import { UIHelper } from '../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { CordovaService } from '../../common/services/cordova.service';
@@ -82,7 +80,6 @@ export class EditorialComponent {
         private mds: RestMdsService,
         private nodeService: RestNodeService,
         private ui: UIService,
-        private title: Title,
         private event: FrameEventsService,
         private connector: RestConnectorService,
         private cordova: CordovaService,
@@ -96,7 +93,6 @@ export class EditorialComponent {
             new ListItem('NODE', RestConstants.CM_CREATOR),
         ]
         Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
-            UIHelper.setTitle('WORKSPACE.TITLE', title, translate, config);
             this.initialize();
             GlobalContainerComponent.finishPreloading();
         });

@@ -6,7 +6,6 @@ import {Translation} from '../../../core-ui-module/translation';
 import {DefaultGroups, ElementType, OptionItem, Scope} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {Title} from '@angular/platform-browser';
 import {trigger} from '@angular/animations';
 import {Location, PlatformLocation} from '@angular/common';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
@@ -93,7 +92,6 @@ export class NodeRenderComponent implements EventListener {
       private actionbarService : ActionbarHelperService,
       private toast : Toast,
       private cd: ChangeDetectorRef,
-      private title : Title,
       private config : ConfigurationService,
       private storage : SessionStorageService,
       private route : ActivatedRoute,
@@ -536,7 +534,6 @@ export class NodeRenderComponent implements EventListener {
           }
           this.initOptions(options);
     });
-    UIHelper.setTitleNoTranslation(RestHelper.getName(this._node),this.title,this.config);
   }
   setDownloadUrl(url:string) {
       if(this.downloadButton!=null)
@@ -591,6 +588,13 @@ export class NodeRenderComponent implements EventListener {
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
+    }
+    getName(): string {
+      if (this._node) {
+        return this.getNodeName(this._node);
+      } else {
+        return '';
+      }
     }
     private getNodeTitle(node:Node) {
         return RestHelper.getTitle(node);

@@ -73,7 +73,6 @@ export class RegisterComponent {
         });
 
         Translation.initialize(this.translate, this.configService, this.storage, this.route).subscribe(() => {
-            UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
             this.isLoading = false;
             this.changes.detectChanges();
             if (!this.configService.instant('register.local', true)) {

@@ -1,4 +1,4 @@
-<div *ngIf="!disabled">
+<ng-container *ngIf="!disabled">
   <main-nav #mainNav
             [title]="'PERMISSIONS.TITLE'"
             [currentScope]="'permissions'"
@@ -7,48 +7,52 @@
             [searchPlaceholder]="'PERMISSIONS.SEARCH_'+TABS[tab]"
             (onSearch)="doSearch($event.query)"
   ></main-nav>
-  <mat-tab-group
+  <div
     role="main"
     appSkipTarget="MAIN_CONTENT"
-    mat-stretch-tabs
-    color="dark"
-    [selectedIndex]="tab"
-    (selectedIndexChange)="setTab($event)"
   >
-    <mat-tab label="{{'PERMISSIONS.TAB.ORG' | translate}}">
-      <ng-template matTabContent>
-        <permissions-authorities
-                [mode]="'ORG'"
-                [searchQuery]="searchQuery"
-                [selected]="selected"
-                (onSelection)="selected=$event"
-        ></permissions-authorities>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selected?.length ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
-      <ng-template matTabContent>
-        <permissions-authorities
-                [mode]="'GROUP'"
-                [searchQuery]="searchQuery"
-                [org]="selected ? selected[0] : null"
-                (onDeselectOrg)="selected=null"
-                (setTab)="setTab($event)"
-        ></permissions-authorities>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selected?.length ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
-      <ng-template matTabContent>
-        <permissions-authorities
-                [mode]="'USER'"
-                [searchQuery]="searchQuery"
-                [org]="selected ? selected[0] : null"
-                (onDeselectOrg)="selected=null"
-                (setTab)="setTab($event)"
-        ></permissions-authorities>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="{{'PERMISSIONS.TAB.DELETE' | translate}}" *ngIf="!selected?.length && isAdmin">
-      <permissions-delete></permissions-delete>
-    </mat-tab>
-  </mat-tab-group>
-</div>
+    <h1 appTitle class="invisible">{{ 'PERMISSIONS.TITLE' | translate }}</h1>
+    <mat-tab-group
+      mat-stretch-tabs
+      color="dark"
+      [selectedIndex]="tab"
+      (selectedIndexChange)="setTab($event)"
+    >
+      <mat-tab label="{{'PERMISSIONS.TAB.ORG' | translate}}">
+        <ng-template matTabContent>
+          <permissions-authorities
+                  [mode]="'ORG'"
+                  [searchQuery]="searchQuery"
+                  [selected]="selected"
+                  (onSelection)="selected=$event"
+          ></permissions-authorities>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selected?.length ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
+        <ng-template matTabContent>
+          <permissions-authorities
+                  [mode]="'GROUP'"
+                  [searchQuery]="searchQuery"
+                  [org]="selected ? selected[0] : null"
+                  (onDeselectOrg)="selected=null"
+                  (setTab)="setTab($event)"
+          ></permissions-authorities>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selected?.length ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
+        <ng-template matTabContent>
+          <permissions-authorities
+                  [mode]="'USER'"
+                  [searchQuery]="searchQuery"
+                  [org]="selected ? selected[0] : null"
+                  (onDeselectOrg)="selected=null"
+                  (setTab)="setTab($event)"
+          ></permissions-authorities>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="{{'PERMISSIONS.TAB.DELETE' | translate}}" *ngIf="!selected?.length && isAdmin">
+        <permissions-delete></permissions-delete>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</ng-container>

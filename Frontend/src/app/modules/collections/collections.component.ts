@@ -31,7 +31,6 @@ import { Toast } from '../../core-ui-module/toast';
 import {DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
 import { NodeRenderComponent } from '../../common/ui/node-render/node-render.component';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { Title } from '@angular/platform-browser';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
@@ -250,7 +249,6 @@ export class CollectionsMainComponent {
         private optionsService: OptionsHelperService,
         private toast: Toast,
         private bridge: BridgeService,
-        private title: Title,
         private config: ConfigurationService,
         private translationService: TranslateService,
     ) {
@@ -264,12 +262,6 @@ export class CollectionsMainComponent {
             this.storage,
             this.route,
         ).subscribe(() => {
-            UIHelper.setTitle(
-                'COLLECTIONS.TITLE',
-                title,
-                translationService,
-                config,
-            );
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
                     if (data.isValidLogin && data.currentScope == null) {
