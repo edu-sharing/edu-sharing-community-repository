@@ -66,6 +66,7 @@ import {ListNodeLicenseComponent} from './components/list-table/widgets/list-nod
 import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
 import {ListNodeWorkflowComponent} from './components/list-table/widgets/list-node-workflow/list-node-workflow.component';
 import {NodeImageSizePipe} from './pipes/node-image-size.pipe';
+import { TitleDirective } from './directives/title.directive';
 
 @NgModule({
     declarations: [
@@ -111,6 +112,7 @@ import {NodeImageSizePipe} from './pipes/node-image-size.pipe';
         DurationPipe,
         BitwisePipe,
         ElementRefDirective,
+        TitleDirective,
     ],
     imports: [
         A11yModule,
@@ -179,6 +181,7 @@ import {NodeImageSizePipe} from './pipes/node-image-size.pipe';
         NodesDropTargetDirective,
         ListCollectionInfoComponent,
         ListBaseComponent,
+        TitleDirective,
     ],
 })
 export class CoreUiModule {}

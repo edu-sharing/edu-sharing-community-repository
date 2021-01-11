@@ -1,11 +1,11 @@
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Observer } from 'rxjs';
+import { BehaviorSubject, Observer, ReplaySubject } from 'rxjs';
 import 'rxjs/add/observable/concat';
 import 'rxjs/add/observable/forkJoin';
 import 'rxjs/add/operator/first';
 import { Observable } from 'rxjs/Observable';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { first, map, switchMap, tap } from 'rxjs/operators';
 import 'rxjs/Rx';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
@@ -24,7 +24,7 @@ export class Translation {
         en: 'en_US',
     };
     private static language: string;
-    private static languageLoaded = false;
+    private static languageLoaded = new BehaviorSubject(false);
     // none means that only labels should be shown (for dev)
     private static DEFAULT_SUPPORTED_LANGUAGES = ['de', 'en', 'none'];
     private static source = TranslationSource.Auto;
@@ -153,7 +153,7 @@ export class Translation {
                     .map(() => selectedLanguage);
             }),
             tap(selectedLanguage => {
-                Translation.languageLoaded = true;
+                Translation.languageLoaded.next(true);
             }),
         );
     }
@@ -179,7 +179,7 @@ export class Translation {
                     translate.use(language);
                     Translation.setLanguage(language);
                     translate.getTranslation(language).subscribe(() => {
-                        Translation.languageLoaded = true;
+                        Translation.languageLoaded.next(true);
                         observer.next(language);
                         observer.complete();
                     });
@@ -188,7 +188,11 @@ export class Translation {
     }
 
     static isLanguageLoaded() {
-        return Translation.languageLoaded;
+        return Translation.languageLoaded.value;
+    }
+
+    static waitForInit() {
+        return Translation.languageLoaded.pipe(first(languageLoaded => languageLoaded));
     }
 
     static getLanguage(): string {

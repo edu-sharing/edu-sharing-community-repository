@@ -1,5 +1,4 @@
 import {OPEN_URL_MODE, UIConstants} from '../core-module/ui/ui-constants';
-import {Title} from '@angular/platform-browser';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
@@ -54,36 +53,6 @@ export class UIHelper {
         return true;
     }
 
-    public static setTitleNoTranslation(
-        name: string,
-        title: Title,
-        config: ConfigurationService,
-    ) {
-        config.get('branding').subscribe((branding: boolean) => {
-            let t = name;
-            if (branding == true) {
-                config
-                    .get('siteTitle', 'edu-sharing')
-                    .subscribe((name: string) => {
-                        t += ' - ' + name;
-                        title.setTitle(t);
-                    });
-            } else {
-                title.setTitle(t);
-            }
-        });
-    }
-    public static setTitle(
-        name: string,
-        title: Title,
-        translate: TranslateService,
-        config: ConfigurationService,
-        languageParams: any = null,
-    ) {
-        translate.get(name, languageParams).subscribe((name: string) => {
-            this.setTitleNoTranslation(name, title, config);
-        });
-    }
     public static getBlackWhiteContrast(color: string) {}
     static changeQueryParameter(
         router: Router,
