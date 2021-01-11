@@ -316,6 +316,9 @@ export class NodeHelperService {
             }
             let url = c.url.replace(':id', ids);
             url = url.replace(':api', this.connector.getAbsoluteEndpointUrl());
+            if(selectedNodes.length === 1){
+              url = url.replace(':node', encodeURIComponent((JSON.stringify(nodes[0]))))
+            }
             if(replaceUrl) {
               for(const key in replaceUrl) {
                 url = url.replace(key,encodeURIComponent(replaceUrl[key]));
