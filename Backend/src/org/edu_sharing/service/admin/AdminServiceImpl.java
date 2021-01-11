@@ -774,7 +774,7 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate, String from, String until, String periodInDays) throws Exception{
+	public void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String persistentHandlerClassName, String oaiIds, boolean forceUpdate, String from, String until, String periodInDays) throws Exception{
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));
 		
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
@@ -807,6 +807,9 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		if(binaryHandlerClassName != null && !binaryHandlerClassName.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_BINARYHANDLER,binaryHandlerClassName);
+		}
+		if(persistentHandlerClassName != null && !persistentHandlerClassName.trim().equals("")){
+			paramsMap.put(OAIConst.PARAM_PERSISTENTHANDLER,persistentHandlerClassName);
 		}
 		if(oaiIds != null && !oaiIds.trim().isEmpty()){
 			paramsMap.put(OAIConst.PARAM_OAI_IDS,oaiIds);

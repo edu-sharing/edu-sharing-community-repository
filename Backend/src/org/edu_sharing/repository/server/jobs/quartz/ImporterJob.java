@@ -37,12 +37,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.server.importer.BinaryHandler;
-import org.edu_sharing.repository.server.importer.Importer;
-import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
-import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
-import org.edu_sharing.repository.server.importer.RecordHandlerInterface;
-import org.edu_sharing.repository.server.importer.RecordHandlerLOM;
+import org.edu_sharing.repository.server.importer.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -114,6 +109,8 @@ public class ImporterJob extends AbstractJob {
 		String recordHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_RECORDHANDLER);
 		String binaryHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_BINARYHANDLER);
 
+		String persistentHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_PERSISTENTHANDLER);
+
 		String importerClass = (String) jobDataMap.get(OAIConst.PARAM_IMPORTERCLASS);
 		
 		String oaiIds = (String) jobDataMap.get(OAIConst.PARAM_OAI_IDS);
@@ -165,7 +162,7 @@ public class ImporterJob extends AbstractJob {
 		if (xmlData != null) {
 			return start(xmlData, recordHandlerClass, binaryHandlerClass);
 		}
-		start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr, from, until);
+		start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass,persistentHandlerClass, importerClass, idArr, from, until);
 		return null;
 	}
 
@@ -204,7 +201,7 @@ public class ImporterJob extends AbstractJob {
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-						 String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList, Date from, Date until) {
+						 String[] sets, String recordHandlerClass, String binaryHandlerClass, String persistentHandlerClass, String importerClass, String[] idList, Date from, Date until) {
 		try {
 			for(String set : sets) {
 				Importer importer = null;
@@ -222,6 +219,7 @@ public class ImporterJob extends AbstractJob {
 
 				Constructor<RecordHandlerInterface> recordHandler = null;
 				Constructor<BinaryHandler> binaryHandler = null;
+				Constructor<PersistentHandlerInterface> persistentHandler = null;
 
 				if (recordHandlerClass != null) {
 					Class tClass = Class.forName(recordHandlerClass);
@@ -236,6 +234,13 @@ public class ImporterJob extends AbstractJob {
 					binaryHandler = null;
 				}
 
+				if(persistentHandlerClass != null){
+					Class tClass = Class.forName(persistentHandlerClass);
+					persistentHandler = tClass.getConstructor();
+				}else{
+					persistentHandler = null;
+				}
+
 				logger.info("importer:" + importer.getClass().getName());
 
 				importer.setBaseUrl(oaiBaseUrl);
@@ -243,7 +248,12 @@ public class ImporterJob extends AbstractJob {
 				importer.setMetadataPrefix(metadataPrefix);
 				importer.setNrOfRecords(-1);
 				importer.setNrOfResumptions(-1);
-				importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,true));
+				if(persistentHandler != null){
+					importer.setPersistentHandler(persistentHandler.newInstance());
+				}else{
+					importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,true));
+				}
+
 				importer.setSet(set);
 				importer.setMetadataSetId(metadataSetId);
 				importer.setRecordHandler(recordHandler);

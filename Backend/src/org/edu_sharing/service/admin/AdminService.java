@@ -48,7 +48,8 @@ public interface AdminService {
 	List<GlobalGroup> getGlobalGroups() throws Throwable;
 
 	void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-                   String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate, String from, String until, String periodInDays) throws Exception;
+                   String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String persistentHandlerClassName,
+				   String oaiIds, boolean forceUpdate, String from, String until, String periodInDays) throws Exception;
 
 	List<Class> getImporterClasses() throws Exception;
 
