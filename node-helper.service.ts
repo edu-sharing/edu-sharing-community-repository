@@ -363,16 +363,15 @@ export class NodeHelperService {
         }
         item.showAsAction = c.showAsAction;
         item.isSeparate = c.isSeparate;
-        item.enabledCallback=(node:Node)=> {
+        item.customEnabledCallback=(nodes)=> {
           if (c.permission) {
-            return this.getNodesRight(NodeHelperService.getActionbarNodes(selectedNodes, node), c.permission);
+            return this.getNodesRight(nodes, c.permission);
           }
           return true;
         };
-        item.isEnabled=item.enabledCallback(null);
-        item.showCallback=(node:Node)=> {
-          const nodes=NodeHelperService.getActionbarNodes(selectedNodes,node);
-          if(c.mode=='nodes' && (!nodes || nodes.length))
+        item.isEnabled=item.customEnabledCallback(null);
+        item.customShowCallback = (nodes) => {
+          if(c.mode=='nodes' && !nodes?.length)
             return false;
           if(c.mode=='noNodes' && nodes && nodes.length)
             return false;
