@@ -666,7 +666,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	}
 
 
-	public PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId){
+	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId){
 		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
 		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
 		if(!nodeService.getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){

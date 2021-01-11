@@ -27,19 +27,20 @@ public class Preview  {
   private Integer height = null;
   private boolean isIcon;
   private boolean isGenerated;
+  private String type;
 
   public Preview(){
 	  
   }
   public Preview(NodeService nodeService,String storeProtocol,String storeIdentifier,String nodeId, String version, HashMap<String, Object> nodeProps) {
     GetPreviewResult preview = nodeService.getPreview(storeProtocol, storeIdentifier, nodeId ,nodeProps, version);
+    PreviewServlet.PreviewDetail detail = PreviewServlet.getPreview(nodeService, storeProtocol, storeIdentifier, nodeId);
     setUrl(preview.getUrl());
     setIsIcon(preview.isIcon());
+    setIsGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(detail.getType()));
+    setType(detail.getType());
 
     //if(repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO) || repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
-    //@TODO: Elastic data will not have CM_ASSOC_THUMBNAILS (dummy property). Transfer preview detail from elastic
-		  setIsIcon(!(nodeProps.containsKey(CCConstants.CCM_PROP_MAP_ICON) || nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS)));
-          setIsGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(nodeProps.get(CCConstants.KEY_PREVIEWTYPE)));
 	/*  }
 	  else{
 		  setUrl((String)nodeProps.get(CCConstants.CM_ASSOC_THUMBNAILS));
@@ -113,5 +114,14 @@ public class Preview  {
 
   public void setIsGenerated(boolean generated) {
     isGenerated = generated;
+  }
+
+  @JsonProperty
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public String getType() {
+    return type;
   }
 }
