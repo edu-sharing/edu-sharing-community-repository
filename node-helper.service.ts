@@ -472,24 +472,27 @@ export class NodeHelperService {
     const workflow=workflows[pos];
     return workflow;
   }
-  public getWorkflowStatus(node:Node) : WorkflowDefinitionStatus {
+  public getWorkflowStatus(node:Node, useFromConfig = false) : WorkflowDefinitionStatus {
     let value=node.properties[RestConstants.CCM_PROP_WF_STATUS];
     if(value) value=value[0];
     if(!value) {
-      return this.getDefaultWorkflowStatus();
+      return this.getDefaultWorkflowStatus(useFromConfig);
     }
     return {
       current: this.getWorkflowStatusById(value),
       initial: this.getWorkflowStatusById(value)
     };
   }
-  getDefaultWorkflowStatus(): WorkflowDefinitionStatus {
+  getDefaultWorkflowStatus(useFromConfig = false): WorkflowDefinitionStatus {
     const result = {
       current: (null as WorkflowDefinition),
       initial: (null as WorkflowDefinition)
     }
     result.initial = this.getWorkflows()[0];
-    const defaultStatus = this.config.instant('workflow.defaultStatus');
+    let defaultStatus: string = null;
+    if(useFromConfig) {
+      defaultStatus = this.config.instant('workflow.defaultStatus');
+    }
     if(defaultStatus) {
       result.current = this.getWorkflows().find((w) => w.id === defaultStatus);
     } else {
