@@ -25,7 +25,7 @@
 
         <div class="group groupToInvite" *ngIf="getNewInvitedAuthorities().length">
           <mat-chip-list class="toInvite">
-            <mat-chip *ngFor="let permission of getNewInvitedAuthorities()" (removed)="removePermission(permission)">
+            <mat-chip *ngFor="let permission of getNewInvitedAuthorities()" (removed)="removePermission(permission)" class="badge">
               <div class="mat-chip-group">
                 <span class="primary">{{permission | permissionName}}</span>
                 <span class="secondary">{{permission | permissionName:{field:'secondary'} }}</span>
