@@ -20,7 +20,6 @@ import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
@@ -88,8 +87,7 @@ public class TokenEndpoint extends HttpServlet {
 						// check
 						HashMap<String, String> authInfo = RepoFactory.getAuthenticationToolInstance(null)
 							.createNewSession(username, oauthRequest.getPassword());
-						// build up an context for the tracking tool
-						Context.newInstance(request, response, getServletContext());
+
 						tokenService.createToken(username, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
                         TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,TrackingService.EventType.LOGIN_USER_OAUTH_PASSWORD);
 						
@@ -115,8 +113,6 @@ public class TokenEndpoint extends HttpServlet {
 						}
 						
 						Token newToken=tokenService.refreshToken(oauthRequest.getRefreshToken(), accessToken, refreshToken, clientId, ticket);
-						// build up an context for the tracking tool
-						Context.newInstance(request, response, getServletContext());
                         TrackingServiceFactory.getTrackingService().trackActivityOnUser(newToken.getUsername(),TrackingService.EventType.LOGIN_USER_OAUTH_REFRESH_TOKEN);
 
                     } catch (Throwable e) {

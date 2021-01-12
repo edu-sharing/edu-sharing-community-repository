@@ -188,6 +188,10 @@
    </filter-mapping>
     
    <!-- Filter Mapping Edu Context Management Filter-->
+    <filter-mapping>
+        <filter-name>Edu Context Management Filter</filter-name>
+        <url-pattern>/oauth2/*</url-pattern>
+    </filter-mapping>
    <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
 	      <url-pattern>/index.html</url-pattern>
