@@ -385,6 +385,11 @@
         <input matInput type="text" [(ngModel)]="oai.binaryHandlerClassName">
         <mat-hint>{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</mat-hint>
     </mat-form-field>
+    <mat-form-field>
+        <mat-label>{{'ADMIN.IMPORT.OAI_PERSISTENT_HANDLER_CLASS_NAME' | translate}}</mat-label>
+        <input matInput type="text" [(ngModel)]="oai.persistentHandlerClassName">
+        <mat-hint>{{'ADMIN.IMPORT.OAI_PERSISTENT_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</mat-hint>
+    </mat-form-field>
         <!--
         <label for="OAI_URL">{{'ADMIN.IMPORT.OAI_URL' | translate}}</label>
     <input type="text" id="OAI_URL" [(ngModel)]="oai.url">

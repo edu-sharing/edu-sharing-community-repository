@@ -239,6 +239,8 @@
             "OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE": "org.edu_sharing.repository.server.importer.RecordHandlerLOM",
             "OAI_BINARY_HANDLER_CLASS_NAME": "Binary Handler class name (Optional)",
             "OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE": "org.edu_sharing.repository.server.importer.BinaryHandlerTechnicalLocation",
+            "OAI_PERSISTENT_HANDLER_CLASS_NAME":"Persistent Handler class name (Optional)",
+            "OAI_PERSISTENT_HANDLER_CLASS_NAME_EXAMPLE":"",
             "OAI_FORCE_UPDATE": "Re-import/overwrite all existing nodes",
             "OAI_START": "OAI Import",
             "OAI_SAVE": "Save values for next import",
