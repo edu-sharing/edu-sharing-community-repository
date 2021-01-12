@@ -6,6 +6,7 @@
         "EDIT": "edit",
         "CANCEL_EDIT": "cancel",
         "ABOUT_LABEL": "about me",
+        "PERSISTENT_ID_INFO": "With the help of this information, elements created by you can be attributed to your person even across system   boundaries.",
         "NO_ABOUT": "This user has not created a description yet.",
         "NO_ABOUT_ME": "Your profile description is empty\nEdit your profile to create a description.",
         "STATS": {
