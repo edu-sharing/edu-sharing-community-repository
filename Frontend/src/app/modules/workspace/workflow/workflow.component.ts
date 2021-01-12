@@ -166,6 +166,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             this.cancel();
         } finally {
             this.loading = false;
+            this.updateButtons();
         }
     }
 
@@ -185,7 +186,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
                 ({
                     current: this.status,
                     initial: this.initialStatus,
-                } = this.nodeHelper.getDefaultWorkflowStatus());
+                } = this.nodeHelper.getDefaultWorkflowStatus(true));
             }
         } else {
             this.history = histories[0];
@@ -197,9 +198,9 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             }
             ({ current: this.status, initial: this.initialStatus } = this.nodeHelper.getWorkflowStatus(
                 this.nodes[0],
+                true
             ));
         }
-        this.updateButtons();
     }
 
     private fetchCompleteNodes(nodes: Node[]): Observable<Node[]> {
@@ -266,6 +267,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     }
 
     private statusChanged() {
+        console.log(this.status, this.initialStatus);
         return this.status.id !== this.initialStatus.id;
     }
 
