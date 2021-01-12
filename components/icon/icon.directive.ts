@@ -50,6 +50,10 @@ export class IconDirective {
     }
 
     private setIcon(id: string) {
+        // compatibility fix: do not execute on other components than i
+        if(this.element?.nativeElement?.tagName !== 'I'){
+            return;
+        }
         if (this._id) {
             this.element.nativeElement.classList.remove(
                 'edu-icons',
