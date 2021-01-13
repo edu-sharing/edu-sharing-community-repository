@@ -36,10 +36,13 @@ public class Preview  {
     GetPreviewResult preview = nodeService.getPreview(storeProtocol, storeIdentifier, nodeId ,nodeProps, version);
     PreviewServlet.PreviewDetail detail = PreviewServlet.getPreview(nodeService, storeProtocol, storeIdentifier, nodeId);
     setUrl(preview.getUrl());
-    setIsIcon(preview.isIcon());
-    setIsGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(detail.getType()));
-    setType(detail.getType());
-
+    setIsIcon(!(nodeProps.containsKey(CCConstants.CCM_PROP_MAP_ICON) || nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS)));
+    // these values do not match up properly
+    //setIsIcon(preview.isIcon());
+    if(detail != null) {
+      setIsGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(detail.getType()));
+      setType(detail.getType());
+    }
     //if(repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO) || repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
 	/*  }
 	  else{
