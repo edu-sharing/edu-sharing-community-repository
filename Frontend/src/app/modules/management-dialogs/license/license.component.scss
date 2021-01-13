@@ -2,6 +2,8 @@
 
 .license-content{
   padding: $cardPadding;
+  display: flex;
+  flex-direction: column;
 }
 .card-content .cc label{
   width:100%;
@@ -89,11 +91,24 @@
     margin:5px 20px;
   }
 }
-mat-radio-button{
-  padding-left:20px;
-  padding-right:20px;
-  h4{
-    margin: 2rem 0 0.2rem 0;
+mat-radio-button {
+  margin-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.more-information-link {
+  margin-left: 48px;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  legend {
+    font-weight: bold;
+    margin-bottom: 1em;
+    color: $textLight;
   }
 }
 h4{

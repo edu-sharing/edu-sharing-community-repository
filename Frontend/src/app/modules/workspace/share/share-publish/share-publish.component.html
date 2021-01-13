@@ -54,19 +54,29 @@
     {{'WORKSPACE.SHARE.PUBLISH.COPY_ACTIVE' | translate}}
   </info-message>
   <div *ngIf="!inherited && mdsCompletion?.completed === mdsCompletion?.total" class="share-type">
-    <mat-checkbox class="mat-checkbox-multiline"
-                  [(ngModel)]="shareModeDirect"
+    <mat-checkbox [(ngModel)]="shareModeDirect"
                   (ngModelChange)="updateShareMode()"
                   value="direct">
-      <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate}}</h4>
-      <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO' | translate}}</h5>
+      <app-multi-line-label>
+        <ng-container slot="label">
+          {{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate}}
+        </ng-container>
+        <span class="description" slot="description">
+          {{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO' | translate}}
+        </span>
+      </app-multi-line-label>
     </mat-checkbox>
     <mat-checkbox [(ngModel)]="shareModeCopy"
-                  class="mat-checkbox-multiline"
                   (ngModelChange)="$event ? doiActive = true : null; updateShareMode()"
                   [disabled]="!copyAllowed() || isCopy">
-      <h4>{{'WORKSPACE.SHARE.PUBLISH.MODE_COPY' | translate}}</h4>
-      <h5>{{'WORKSPACE.SHARE.PUBLISH.MODE_COPY_INFO' | translate}}</h5>
+      <app-multi-line-label>
+        <ng-container slot="label">
+          {{'WORKSPACE.SHARE.PUBLISH.MODE_COPY' | translate}}
+        </ng-container>
+        <span class="description" slot="description">
+          {{'WORKSPACE.SHARE.PUBLISH.MODE_COPY_INFO' | translate}}
+        </span>
+      </app-multi-line-label>
     </mat-checkbox>
     <div class="published-versions-container" *ngIf="shareModeCopy">
       <div class="published-versions">
@@ -75,15 +85,22 @@
                            [disabled]="!copyAllowed()"
                            (ngModelChange)="setRepublish()">
             <mat-radio-button
-                    class="mat-radio-multiline"
                     [disabled]="!isCopy"
                     [value]="false">
-              <h4>{{'WORKSPACE.SHARE.PUBLISH.NO_REPUBLISH' | translate}}</h4>
+              <app-multi-line-label>
+                <ng-container slot="label">
+                  {{'WORKSPACE.SHARE.PUBLISH.NO_REPUBLISH' | translate}}
+                </ng-container>
+              </app-multi-line-label>
             </mat-radio-button>
-            <mat-radio-button class="mat-radio-multiline"
+            <mat-radio-button
                     [disabled]="currentVersionPublished()"
                     [value]="true">
-              <h4>{{'WORKSPACE.SHARE.PUBLISH.REPUBLISH' | translate}}</h4>
+              <app-multi-line-label>
+                <ng-container slot="label">
+                  {{'WORKSPACE.SHARE.PUBLISH.REPUBLISH' | translate}}
+                </ng-container>
+              </app-multi-line-label>
               <!--
               <h5>
                 <span class="version-comment">{{ node | versionComment }}</span>

@@ -92,13 +92,25 @@
       <div class="bulk-config" *ngIf="isBulk()">
         <mat-radio-group [(ngModel)]="bulkMode">
           <h4 class="mat-heading-4">{{'WORKSPACE.SHARE.BULK_MODE.TITLE' | translate}}</h4>
-          <mat-radio-button class="mat-radio-multiline" value="extend">
-            <div class="label-primary">{{'WORKSPACE.SHARE.BULK_MODE.EXTEND' | translate}}</div>
-            <div class="label-secondary">{{'WORKSPACE.SHARE.BULK_MODE.EXTEND_DESCRIPTION' | translate}}</div>
+          <mat-radio-button value="extend">
+            <app-multi-line-label>
+              <ng-container slot="label">
+                {{'WORKSPACE.SHARE.BULK_MODE.EXTEND' | translate}}
+              </ng-container>
+              <ng-container slot="description">
+                {{'WORKSPACE.SHARE.BULK_MODE.EXTEND_DESCRIPTION' | translate}}
+              </ng-container>
+            </app-multi-line-label>
           </mat-radio-button>
-          <mat-radio-button class="mat-radio-multiline" value="replace">
-            <div class="label-primary">{{'WORKSPACE.SHARE.BULK_MODE.REPLACE' | translate}}</div>
-            <div class="label-secondary">{{'WORKSPACE.SHARE.BULK_MODE.REPLACE_DESCRIPTION' | translate}}</div>
+          <mat-radio-button value="replace">
+            <app-multi-line-label>
+              <ng-container slot="label">
+                {{'WORKSPACE.SHARE.BULK_MODE.REPLACE' | translate}}
+              </ng-container>
+              <ng-container slot="description">
+                {{'WORKSPACE.SHARE.BULK_MODE.REPLACE_DESCRIPTION' | translate}}
+              </ng-container>
+            </app-multi-line-label>
           </mat-radio-button>
         </mat-radio-group>
       </div>

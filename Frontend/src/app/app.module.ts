@@ -67,6 +67,7 @@ import { SkipTargetDirective } from './common/ui/skip-nav/skip-target.directive'
 import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
 import {MdsEditorWidgetFileUploadComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 import {CommonModule} from '@angular/common';
+import { MultiLineLabelComponent } from './common/ui/multi-line-label/multi-line-label.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -127,6 +128,7 @@ import {CommonModule} from '@angular/common';
         MdsEditorWidgetSuggestionChipsComponent,
         SkipTargetDirective,
         SkipNavComponent,
+        MultiLineLabelComponent,
     ],
     imports: [
         IMPORTS,

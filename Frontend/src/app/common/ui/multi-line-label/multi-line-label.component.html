@@ -1,0 +1,6 @@
+<div #label class="label">
+  <ng-content select="[slot=label]"></ng-content>
+</div>
+<div #description class="description" *ngIf="hasDescription">
+  <ng-content select="[slot=description]"></ng-content>
+</div>
