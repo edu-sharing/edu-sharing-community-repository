@@ -25,7 +25,7 @@
       [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
       [matChipInputFor]="chipList"
     />
-    <button matSuffix mat-icon-button class="mat-button-select-arrow" (click)="input.focus()">
+    <button matSuffix mat-icon-button class="mat-button-select-arrow" (click)="input.focus()" #arrowButton>
       <span class="mat-select-arrow"></span>
     </button>
   </mat-chip-list>

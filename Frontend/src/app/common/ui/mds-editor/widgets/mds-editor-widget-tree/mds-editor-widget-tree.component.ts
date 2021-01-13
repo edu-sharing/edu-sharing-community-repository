@@ -10,6 +10,7 @@ import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/
 import { Tree } from './tree';
 import {TranslateService} from '@ngx-translate/core';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
+import {MatButton} from '@angular/material/button';
 @Component({
     selector: 'app-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
@@ -21,6 +22,7 @@ export class MdsEditorWidgetTreeComponent
     @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
     @ViewChild('input') input: ElementRef<HTMLElement>;
     @ViewChild('treeRef') treeRef: MdsEditorWidgetTreeCoreComponent;
+    @ViewChild('arrowButton') arrowButton: MatButton;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
 
@@ -132,6 +134,7 @@ export class MdsEditorWidgetTreeComponent
 
     closeOverlay(): void {
         this.overlayIsVisible = false;
+        this.arrowButton.focus();
     }
 
     onOverlayKeydown(event: KeyboardEvent) {
