@@ -495,6 +495,7 @@
         "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
     },
     "OPTIONS": {
+        "SHOW_ALL_OPTIONS": "Weitere Aktionen",
         "APPLY": "Übernehmen",
         "SHOW": "Vorschau & Infos",
         "SHOW_IN_FOLDER": "Zum Speicherort",
@@ -531,7 +532,11 @@
         "QR_CODE": "QR-Code Link",
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
-        "NEW_COLLECTION": "Neue Sammlung"
+        "NEW_COLLECTION": "Neue Sammlung",
+        "TOGGLE_SHARED_TO_ME": "Freigaben-Empfänger umschalten",
+        "TOGGLE_VIEWTYPE": "Ansicht umschalten",
+        "LIST_SETTINGS": "Liste konfigurieren",
+        "METADATA_SIDEBAR": "Materialinformationen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
