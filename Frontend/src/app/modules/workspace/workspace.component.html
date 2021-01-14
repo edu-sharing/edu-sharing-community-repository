@@ -27,8 +27,8 @@
     <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i icon iconId="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i icon iconId="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
-
   <div class="tree" *ngIf="isLoggedIn">
+      <workspace-tree
                   [class.tree-quota]="user.person.quota.enabled"
                   [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
