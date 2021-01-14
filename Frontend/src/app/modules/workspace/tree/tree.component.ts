@@ -9,6 +9,7 @@ import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {WorkspaceMainComponent} from '../workspace.component';
 
 @Component({
     selector: 'workspace-tree',
@@ -17,6 +18,7 @@ import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 })
 export class WorkspaceTreeComponent {
     @Input() root: string;
+    @Input() workspace: WorkspaceMainComponent;
     @Input() isSafe: boolean;
     @Input() mainNav: MainNavComponent;
     @Input() selectedNode: string;

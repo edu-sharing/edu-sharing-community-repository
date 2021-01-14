@@ -29,13 +29,13 @@
   </div>
 
   <div class="tree" *ngIf="isLoggedIn">
-  <workspace-tree
                   [class.tree-quota]="user.person.quota.enabled"
                   [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
                   [mainNav]="mainNavRef"
                   [selectedNode]="selectedNodeTree"
                   [root]="root"
+                  [workspace]="this"
                   [isSafe]="isSafe"
                   (onDrop)="handleDrop($event)"
                   (onSetRoot)="setRoot($event)"
@@ -72,6 +72,7 @@
                       [current]="currentFolder"
                       [selection]="selection"
                       [searchQuery]="searchQuery"
+                      [customOptions]="customOptions"
                       [viewType]="viewType"
                       [(reorderDialog)]="reorderDialog"
                       [preventKeyevents]="cardHasOpenModals$ | async"

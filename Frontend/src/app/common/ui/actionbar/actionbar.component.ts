@@ -38,6 +38,7 @@ export class ActionbarComponent {
      * Values 'left' or 'right'
      */
   @Input() dropdownPosition='left';
+  public optionsIn : OptionItem[] = [];
   public optionsAlways : OptionItem[] = [];
   public optionsMenu : OptionItem[] = [];
   public optionsToggle : OptionItem[] = [];
@@ -66,21 +67,26 @@ export class ActionbarComponent {
    * @param options
    */
   @Input() set options(options : OptionItem[]) {
-    options=UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
-    if(options==null) {
-      this.optionsAlways=[];
-      this.optionsMenu=[];
+    this.optionsIn = options;
+    this.prepareOptions(options);
+  }
+
+  private prepareOptions(options: OptionItem[]) {
+    options = UIHelper.filterValidOptions(this.ui, Helper.deepCopyArray(options));
+    if (options == null) {
+      this.optionsAlways = [];
+      this.optionsMenu = [];
       return;
     }
-    this.optionsToggle=UIHelper.filterToggleOptions(options,true);
-    this.optionsAlways=this.getActionOptions(UIHelper.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
-    if(!this.optionsAlways.length) {
-      this.optionsAlways=UIHelper.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
+    this.optionsToggle = UIHelper.filterToggleOptions(options, true);
+    this.optionsAlways = this.getActionOptions(UIHelper.filterToggleOptions(options, false)).slice(0, this.getNumberOptions());
+    if (!this.optionsAlways.length) {
+      this.optionsAlways = UIHelper.filterToggleOptions(options, false).slice(0, this.getNumberOptions());
     }
-    this.optionsMenu=this.hideActionOptions(UIHelper.filterToggleOptions(options,false),this.optionsAlways);
-    if(this.optionsMenu.length<2) {
-      this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
-      this.optionsMenu=[];
+    this.optionsMenu = this.hideActionOptions(UIHelper.filterToggleOptions(options, false), this.optionsAlways);
+    if (this.optionsMenu.length < 2) {
+      this.optionsAlways = this.optionsAlways.concat(this.optionsMenu);
+      this.optionsMenu = [];
     }
   }
 
@@ -119,8 +125,15 @@ export class ActionbarComponent {
     }
     return result;
   }
+  /*
+    invalidate / refreshes all options based on their current callbacks
+   */
+  public invalidate() {
+    this.prepareOptions(this.optionsIn);
+  }
 
-    private filterDisabled(options: OptionItem[]) {
+
+  private filterDisabled(options: OptionItem[]) {
       if(options==null)
           return null;
       const filtered=[];

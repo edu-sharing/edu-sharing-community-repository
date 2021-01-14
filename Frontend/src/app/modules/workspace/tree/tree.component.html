@@ -62,7 +62,7 @@
 </div>
 <div class="tree" *ngIf="root==TO_ME_SHARED_FILES">
   <workspace-sub-tree
-    [node]="'-to_me_shared_files-'"
+    [node]="workspace.getRootFolderInternalId()"
     [openPath]="_path"
     [reload]="reload"
     [selectedPath]="_selectedPath"

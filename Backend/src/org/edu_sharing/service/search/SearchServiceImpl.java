@@ -43,6 +43,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -98,7 +99,7 @@ public class SearchServiceImpl implements SearchService {
 
 
 	@Override
-	public SearchResultNodeRef getFilesSharedToMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
+	public SearchResultNodeRef getFilesSharedToMe(SharedToMeType type, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 
 		SearchToken token=new SearchToken();
@@ -119,10 +120,14 @@ public class SearchServiceImpl implements SearchService {
 				+ "NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
 				+ " AND (");
 		int i=0;
-		for(String m : memberships){
-			if(i++>0)
-				query.append(" OR ");
-			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
+		if(type.equals(SharedToMeType.All)) {
+			for (String m : memberships) {
+				if (i++ > 0)
+					query.append(" OR ");
+				query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
+			}
+		} else if (type.equals(SharedToMeType.Private)){
+			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(username)).append("\"");
 		}
 		query.append(")");
 		query.append(")");

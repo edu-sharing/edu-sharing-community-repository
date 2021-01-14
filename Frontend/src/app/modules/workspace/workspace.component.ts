@@ -31,7 +31,7 @@ import {
     Version
 } from '../../core-module/core.module';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { OptionItem } from '../../core-ui-module/option-item';
+import {CustomOptions, DefaultGroups, ElementType, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { NodeHelper } from '../../core-ui-module/node-helper';
@@ -68,6 +68,7 @@ import { Observable } from 'rxjs';
 })
 export class WorkspaceMainComponent implements EventListener, OnDestroy {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
+    @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
 
@@ -75,9 +76,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private isRootFolder: boolean;
     private homeDirectory: string;
     private sharedFolders: Node[] = [];
-    private path: Node[] = [];
+    path: Node[] = [];
     private parameterNode: Node;
-    private root = 'MY_FILES';
+    root = 'MY_FILES';
 
     private selection: Node[] = [];
 
@@ -109,6 +110,13 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private isAdmin = false;
     public isBlocked = false;
     private isGuest: boolean;
+
+    customOptions: CustomOptions = {
+        useDefaultOptions: true,
+    };
+
+    toMeSharedToggle: boolean;
+
     private currentNodes: Node[];
     private appleCmd = false;
     private reurl: string;
@@ -310,8 +318,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     RestHelper.goToLogin(this.router, this.config);
                     return;
                 }
-                this.iam.getUser().subscribe((user: IamUser) => {
+                this.iam.getUser().subscribe(async (user: IamUser) => {
                     this.user = user;
+                    await this.prepareActionbar();
                     this.loadFolders(user);
 
                     let valid = true;
@@ -486,10 +495,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.node.getNodeMetadata(folder.id).subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
         }
     }
-    private setRoot(root: string) {
+    setRoot(root: string) {
         this.root = root;
         this.searchQuery = null;
         this.routeTo(root, null, null);
+        this.actionbarRef.invalidate();
     }
     private updateList(nodes: Node[]) {
         this.currentNodes = nodes;
@@ -514,14 +524,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     searchGlobal(query: string) {
         this.routeTo(this.root, null, query);
     }
-    private openDirectoryFromRoute(params: any) {
-        let id = params.id;
+    private openDirectoryFromRoute(params: any = null) {
+        let id = params?.id;
         this.selection = [];
         this.closeMetadata();
         this.createAllowed = false;
         if (!id) {
             this.path = [];
-            id = this.getRootFolderId();
+            id = this.getRootFolderInternalId();
             if (this.root === 'RECYCLE') {
                 // GlobalContainerComponent.finishPreloading();
                 // return;
@@ -687,7 +697,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         RestHelper.goToLogin(this.router, this.config, this.isSafe ? RestConstants.SAFE_SCOPE : '');
     }
 
-    private getRootFolderId() {
+    getRootFolderId() {
         if (this.root === 'MY_FILES') {
             return RestConstants.USERHOME;
         }
@@ -704,6 +714,17 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             return RestConstants.WORKFLOW_RECEIVE;
         }
         return '';
+    }
+
+    getRootFolderInternalId(){
+        if(this.root === 'TO_ME_SHARED_FILES') {
+            if (this.toMeSharedToggle) {
+                return RestConstants.TO_ME_SHARED_FILES;
+            } else {
+                return RestConstants.TO_ME_SHARED_FILES_PERSONAL;
+            }
+        }
+        return this.getRootFolderId();
     }
 
     private toggleView() {
@@ -745,7 +766,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     private updateNodeByParams(params: any, node: Node | any) {
         GlobalContainerComponent.finishPreloading();
-        if (params.query) {
+        if (params?.query) {
             this.doSearchFromRoute(params, node);
         }
         else {
@@ -771,5 +792,27 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 Helper.copyObjectProperties(node, hit[0]);
             }
         }
+    }
+
+    async prepareActionbar() {
+        this.toMeSharedToggle = await this.session.get('toMeSharedGroup', false).toPromise();
+        const toggle = new OptionItem('OPTIONS.TOGGLE_SHARED_TO_ME',
+            this.toMeSharedToggle ? 'group' : 'person',
+            () => {
+                this.toMeSharedToggle = !this.toMeSharedToggle;
+                toggle.icon = this.toMeSharedToggle ? 'group' : 'person';
+                this.session.set('toMeSharedGroup', this.toMeSharedToggle);
+                this.openDirectoryFromRoute();
+                //this.treeComponent.reload = Boolean(true);
+                this.toast.toast('WORKSPACE.TOAST.TO_ME_SHARED_' + (this.toMeSharedToggle ? 'ALL' : 'PERSONAL'));
+            });
+        toggle.isToggle = true;
+        toggle.group = DefaultGroups.Toggles;
+        toggle.elementType = [ElementType.Unknown];
+        toggle.priority = 5;
+        toggle.customShowCallback = () => {
+            return this.root === 'TO_ME_SHARED_FILES';
+        }
+        this.customOptions.addOptions = [toggle];
     }
 }
