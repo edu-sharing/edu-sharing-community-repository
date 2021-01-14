@@ -797,10 +797,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     async prepareActionbar() {
         this.toMeSharedToggle = await this.session.get('toMeSharedGroup', false).toPromise();
         const toggle = new OptionItem('OPTIONS.TOGGLE_SHARED_TO_ME',
-            this.toMeSharedToggle ? 'group' : 'person',
+            this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
             () => {
                 this.toMeSharedToggle = !this.toMeSharedToggle;
-                toggle.icon = this.toMeSharedToggle ? 'group' : 'person';
+                toggle.icon = this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private';
                 this.session.set('toMeSharedGroup', this.toMeSharedToggle);
                 this.openDirectoryFromRoute();
                 //this.treeComponent.reload = Boolean(true);

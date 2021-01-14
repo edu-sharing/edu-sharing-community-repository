@@ -500,7 +500,7 @@
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
-        "TOGGLE_SHARED_TO_ME": "Toggle share-receiver",
+        "TOGGLE_SHARED_TO_ME": "Toggle share receiver",
         "TOGGLE_VIEWTYPE": "Toggle view type",
         "LIST_SETTINGS": "Configure List",
         "METADATA_SIDEBAR": "Material details"
