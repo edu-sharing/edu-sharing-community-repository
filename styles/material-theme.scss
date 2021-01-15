@@ -103,35 +103,6 @@ mat-button-toggle-group{
   color: $textMain !important;
   font-weight: bold;
 }
-.mat-radio-multiline, .mat-checkbox-multiline{
-  .mat-radio-label,.mat-checkbox-layout{
-    white-space: normal!important;
-    align-items: baseline !important;
-    h4 {
-      font-weight: bold;
-      font-size: 100%;
-      margin: 1.6rem 0 1rem 0;
-    }
-    h5 {
-      font-weight: normal;
-      font-size: 90%;
-      color: $textLight;
-      margin: 0;
-      line-height: 1.5;
-    }
-  }
-  .mat-radio-container{
-    position: relative;
-    top:6px;
-  }
-}
-.mat-checkbox-multiline{
-  .mat-checkbox-layout{
-    h4{
-      margin: 0.3rem 0 0.5rem 0;
-    }
-  }
-}
 .mat-tab-labels {
   background-color: $actionDialogBackground;
   .mat-tab-label {
