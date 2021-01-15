@@ -23,7 +23,7 @@ import {Toast} from '../core-ui-module/toast';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from '../core-ui-module/components/dropdown/dropdown.component';
-import {NodeHelperService} from '../core-ui-module/node-helper.service';
+import {ConfigOptionItem, NodeHelperService} from '../core-ui-module/node-helper.service';
 
 
 export class OptionsHelperConfig {
@@ -272,7 +272,7 @@ export class OptionsHelperService {
            options = this.prepareOptions(this.mainNav.management, objects);
         }
         options = this.applyExternalOptions(options);
-        const custom = this.configService.instant('customOptions');
+        const custom = this.configService.instant<ConfigOptionItem[]>('customOptions');
         this.nodeHelper.applyCustomNodeOptions(custom, this.data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
         options = this.filterOptions(options, target, objects);

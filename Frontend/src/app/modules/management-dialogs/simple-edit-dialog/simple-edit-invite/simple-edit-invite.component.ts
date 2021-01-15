@@ -83,7 +83,7 @@ export class SimpleEditInviteComponent {
     this.configService.get('simpleEdit.organization.groupTypes',
         [RestConstants.GROUP_TYPE_ADMINISTRATORS]).subscribe((data) => this.organizationGroups = data);
     this.configService.get('simpleEdit.globalGroups',
-        {groups: [RestConstants.AUTHORITY_EVERYONE]}).subscribe((data) => {
+        [{groups: [RestConstants.AUTHORITY_EVERYONE]}]).subscribe((data) => {
       this.loadGlobalGroups(data);
     });
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((tp) => this.tpInvite = tp);
