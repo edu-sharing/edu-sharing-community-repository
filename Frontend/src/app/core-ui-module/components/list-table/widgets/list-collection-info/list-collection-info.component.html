@@ -1,0 +1,9 @@
+<ng-container [ngSwitch]="item.name">
+    <ng-container *ngSwitchCase="'info'">
+        <i icon="layers"></i> {{ node.collection.childCollectionsCount}} <i icon="insert_drive_file"></i> {{ node.collection.childReferencesCount }}
+    </ng-container>
+    <ng-container *ngSwitchCase="'scope'">
+        <i class="collectionScope" [icon]="nodeHelper.getCollectionScopeInfo(node).icon"></i>
+          <span>{{('COLLECTION.SCOPE.'+nodeHelper.getCollectionScopeInfo(node).scopeName) | translate}}</span>
+    </ng-container>
+</ng-container>

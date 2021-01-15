@@ -1,0 +1,1314 @@
+@import '../../styles/variables';
+$borderRadius: 2px;
+$previewHeight: 160px;
+
+.reorder-dialog {
+    .checkbox {
+        padding: 3px 0;
+    }
+}
+.dropdown-dummy {
+    position: fixed;
+}
+.heading div {
+    padding: 0 0;
+}
+.sorting,
+.text {
+    float: left;
+    padding: 0 !important;
+}
+.sorting {
+    height: 24px;
+    display: flex;
+    align-items: center;
+}
+.sorting a i {
+    width: 12px;
+}
+.list {
+    display: flex;
+    flex-direction: column;
+}
+.loadMore {
+    width: 100%;
+    float: left;
+    text-align: center;
+    padding-top: 20px;
+    text-transform: uppercase;
+    color: $primary;
+    i {
+        font-size: 50px;
+    }
+}
+.heading {
+    color: $textLight;
+    border-bottom: 1px solid #aaa;
+    font-weight: normal;
+    padding: 0;
+    overflow: hidden;
+}
+.heading a {
+    color: $textLight;
+    cursor: default;
+}
+.moreAlways {
+    transition: $transitionNormal all;
+    opacity: 1;
+    color: $primary !important;
+}
+.disabled {
+    color: $textVeryLight !important;
+    cursor: default;
+}
+.import-blocked{
+    text-decoration: line-through;
+    opacity: 0.75;
+}
+.noCCPublish > div,
+.noPermissions > div {
+    /*opacity:0.5;*/
+}
+.blurred {
+    @include imageDisabledBlur();
+    margin: -3px;
+    left: 2px;
+    right: 2px;
+}
+.ccPublishMissing,
+.permissionsMissing {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.65);
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    text-align: center;
+    padding-top: 35px;
+    div {
+        color: $textPrimary !important;
+        opacity: 1;
+        padding-bottom: 7px;
+    }
+    a {
+        text-shadow: 0 0 15px #fff;
+        i {
+            position: relative;
+            top: 7px;
+        }
+    }
+}
+.cardSmallList {
+    .ccPublishMissing,
+    .permissionsMissing {
+        padding-top: 20px;
+    }
+}
+$badgeWidth: 250px;
+.dragBadge {
+    width: $badgeWidth;
+    height: 54px;
+    position: fixed;
+    left: -999px;
+    top: -999px;
+    .badge {
+        position: absolute;
+        width: 100%;
+        top: 7px;
+        border: 2px solid $primary;
+        color: $primaryDark;
+        background-color: $primaryLight;
+        padding: 10px;
+        border-radius: 4px;
+        @include shortenText();
+    }
+    .count {
+        position: absolute;
+        right: -10px;
+        top: 0;
+        text-align: center;
+        border-radius: 50%;
+        background-color: $primary;
+        color: $textOnPrimary;
+        width: 20px;
+        height: 20px;
+        font-weight: bold;
+    }
+}
+.editColumns {
+    position: absolute;
+    top: 0;
+    right: 30px;
+    max-width: 0;
+    padding: 0 !important;
+}
+.row:hover .moreAlways {
+    opacity: 1;
+}
+.results,
+.heading,
+.list {
+    width: 100%;
+}
+.row_1 {
+    width: 100%;
+    font-weight: normal;
+    word-break: break-all;
+}
+:host ::ng-deep {
+    .list .node-row{
+        app-node-url, app-node-url > a{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    }
+    .headingGroup .heading,
+    .tableList .node-row app-node-url > a{
+        /* fallback for unset/unknown fields */
+        > div {
+            min-width: 120px;
+        }
+
+        .more-header,
+        .more {
+            min-width: 50px;
+        }
+
+        .collectionEditorial,
+        .collectionPinned {
+            min-width: initial;
+        }
+
+        .editColumns {
+            min-width: initial;
+        }
+
+        .icon {
+            min-width: 50px;
+        }
+
+        .checkbox {
+            min-width: 70px;
+        }
+
+        .checkboxDummy {
+            min-width: 10px;
+        }
+
+        .node_mediatype {
+            min-width: 100px;
+        }
+
+        .node_cm_modified,
+        .node_sys_archivedDate,
+        .node_cm_created {
+            min-width: 160px;
+        }
+
+        .node_ccm_educationaltypicalagerange {
+            min-width: 50px;
+        }
+
+        .node_ccm_wf_status {
+            min-width: 100px;
+        }
+        .node_ccm_editorial_state {
+            min-width: 130px;
+        }
+
+        .node_cm_name {
+            min-width: 80px;
+        }
+
+        .node_size {
+            min-width: 110px;
+        }
+
+        .node_ccm_educationallearningresourcetype {
+            min-width: 150px;
+        }
+
+        .node_ccm_replicationsourceid {
+            min-width: 150px;
+        }
+
+        .node_ccm_eaf_productionyear {
+            min-width: 115px;
+        }
+
+        .node_ccm_eaf_sequence_title {
+            min-width: 130px;
+        }
+
+        .node_ccm_eaf_subtitle {
+            min-width: 130px;
+        }
+
+        .node_dimensions {
+            min-width: 110px;
+        }
+
+        .node_cclom_title {
+            min-width: 160px;
+            word-break: break-all;
+        }
+
+        .node_ccm_educationalcontext {
+            min-width: 180px;
+            word-break: break-all;
+        }
+
+        .node_cclom_general_keyword {
+            min-width: 160px;
+            word-break: break-all;
+        }
+
+        .node_cclom_version {
+            min-width: 60px;
+        }
+
+        .node_sys_node-uuid {
+            min-width: 150px;
+        }
+
+        .node_virtual_usagecount {
+            min-width: 150px;
+        }
+
+        .node_ccm_commonlicense_key {
+            min-width: 130px;
+        }
+
+        .node_cm_creator,
+        .node_ccm_lifecyclecontributer_authorFN,
+        .node_ccm_metadatacontributer_creatorFN {
+            min-width: 130px;
+            word-break: break-all;
+        }
+
+        .node_ccm_replicationsource {
+            min-width: 80px;
+        }
+
+        .node_ccm_lifecyclecontributer_publisherFN {
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .node_counts_view_material,
+        .node_counts_view_material_embedded,
+        .node_counts_download_material {
+            min-width: 80px;
+        }
+
+        .user_firstName,
+        .user_lastName {
+            min-width: 130px;
+            word-break: break-all;
+        }
+
+        .group_groupType {
+            min-width: 160px;
+            word-break: break-all;
+        }
+
+        .user_email {
+            min-width: 180px;
+            word-break: break-all;
+        }
+
+        .more {
+            align-items: center;
+        }
+    }
+}
+.more {
+    width: 50px;
+    height: 50px;
+    padding: 0 !important;
+}
+.moreOpen {
+    position: absolute;
+    right: 20px;
+    width: $contextMenuWidth;
+    padding: 0 !important;
+}
+.row .column,
+.heading > div {
+    padding: 0 5px;
+    vertical-align: middle;
+    color: $textLight;
+    &.more {
+        color: $primary;
+        > button {
+            color: unset;
+        }
+    }
+}
+.heading > div {
+    align-self: flex-end;
+}
+.heading .checkbox {
+    align-self: center;
+}
+.headingGroup {
+    position: relative;
+    display: flex;
+    background-color: $backgroundColor;
+    .totalCount {
+        position: absolute;
+        left: 56px;
+        top: 6px + 6px;
+        color: $textLight;
+        width: 66px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .sortMenu {
+        position: absolute;
+        left: 80px;
+    }
+}
+.row {
+    position: relative;
+    overflow: visible;
+    transition: none;
+}
+.list .row {
+    margin: 0 0 !important;
+}
+.tableList {
+    @for $i from 2 through 10 {
+        .row_#{$i} {
+            word-break: break-all;
+        }
+    }
+}
+.tableList .rowFrame.selected{
+    background: $workspaceSelectedBackgroundEffect;
+    background-color: $itemSelectedBackground;
+}
+
+.cardList .rowFrame.selected {
+    background: $backgroundColor;
+    background-color: $backgroundColor;
+    outline: 2px solid $primary;
+}
+.row:focus {
+    @include setGlobalInsetFocus();
+    outline: 1px $primary solid;
+    /* background-color:$workspaceSelectedBackground!important; */
+}
+.cardSmallList .row:focus {
+    box-shadow: none !important;
+}
+
+.row .column.row_1 {
+    color: $textMain;
+}
+.list .rowFrame:hover {
+    background-color: $itemSelectedBackground;
+}
+
+.list .filled-in:checked + label:after {
+    background-color: $primary;
+    border-color: $primary;
+}
+.list .filled-in:checked + label:before {
+    border-right-color: $textOnPrimary;
+    border-bottom-color: $textOnPrimary;
+}
+:host ::ng-deep .tableList .row > app-node-url > a {
+    width: 100%;
+    border-bottom: 1px solid $textOnPrimary;
+    height: $listItemHeight;
+    margin-bottom: 0;
+}
+
+.list .nodeCollection .row {
+    background-color: transparent;
+    &:focus {
+        @include setGlobalDashedFocus();
+    }
+}
+
+.previewCollection {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    opacity: 1 !important;
+}
+.previewCollection i {
+    font-size: 40pt;
+    position: relative;
+    top: 8px;
+    left: 8px;
+}
+.nodeCollection .previewCollectionContainer {
+    background-color: #fff;
+}
+
+.cardList .row {
+    display: flex;
+    flex-direction: column;
+    > a{
+        flex-grow: 1;
+    }
+}
+
+.heading {
+    display: flex;
+    flex-direction: row;
+    padding-top: 6px;
+    height: $listHeadingHeight;
+}
+:host ::ng-deep {
+    .list {
+        .row {
+            @include clickable();
+        }
+    }
+    .tableList {
+        .row {
+            position: relative;
+            app-node-url > a {
+                display: table;
+                // keep spacing for more options item
+                width: calc(100% - 50px);
+
+                .column {
+                    display: table-cell;
+                    flex-direction: column;
+                    justify-content: center;
+                }
+            }
+
+            .more {
+                position: absolute;
+                top: 15px;
+                right: 0;
+            }
+        }
+    }
+}
+:host ::ng-deep {
+    .list .nodeCollection .row {
+        app-node-url > a .column{
+            color: #fff !important;
+        }
+
+        &.dark-color app-node-url > a .column{
+            color: #000 !important;
+        }
+    }
+}
+.list .nodeCollection .row .column,
+.nodeCollection .more a {
+    opacity: 0.75;
+}
+.list .nodeCollection .row_1 {
+    opacity: 1 !important;
+}
+.node-virtual {
+    .row {
+        background-color: $workspaceNewBackground !important;
+    }
+}
+.nodeCollection {
+    // enable overflow to show "go into button" above element
+    overflow: visible;
+    .selected {
+        background-color: transparent;
+    }
+    .collectionEditorial {
+        position: absolute;
+        left: 10px;
+        top: 0;
+        padding: 0 3px;
+        padding-top: 2px;
+        color: #fff;
+        background-color: $editorialCollectionsBackground;
+        z-index: 1;
+        i {
+            font-size: 13px;
+        }
+    }
+    .collectionPinned {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        width: 17px;
+        height: 17px;
+        padding: 0 3px;
+        border-radius: 50%;
+        background-color: #444;
+        color: #fff;
+        z-index: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        > i {
+            font-size: 12px;
+        }
+    }
+}
+.checkboxDummy {
+    min-width: 10px;
+}
+.icon {
+    min-width: 50px;
+    opacity: 1 !important;
+}
+
+@keyframes OrderAnimationCards {
+    0% {
+        transform: rotate(-0.75deg);
+    }
+    50% {
+        transform: rotate(0.75deg);
+    }
+    100% {
+        transform: rotate(-0.75deg);
+    }
+}
+
+@keyframes OrderAnimationList {
+    0% {
+        transform: translate(0, -.1em);
+    }
+    50% {
+        transform: translate(0, .1em);
+    }
+    100% {
+        transform: translate(0, -.1em);
+    }
+}
+
+.order-animation {
+    $orderAnimationTime: $transitionNormal;
+    animation-iteration-count: infinite;
+    animation-duration: $orderAnimationTime;
+    .cardList & {
+        animation-name: OrderAnimationCards;
+    }
+    .tableList & {
+        animation-name: OrderAnimationList;
+    }
+    &:nth-of-type(2n) {
+        animation-delay: 0s;
+    }
+    &:nth-of-type(2n + 1) {
+        animation-delay: -$orderAnimationTime/2;
+    }
+    &:nth-of-type(3n) {
+        animation-delay: -$orderAnimationTime/4;
+    }
+    &:nth-of-type(5n) {
+        animation-delay: -$orderAnimationTime/8;
+    }
+}
+.rowFrame {
+    padding: 0px;
+}
+.hover {
+    background-color: rgba($primary, 0.2) !important;
+    outline: 2px dashed $primary;
+    border: none !important;
+    padding: 0;
+    position: relative;
+    z-index: 5;
+}
+
+.icon-bg {
+    background-color: $textOnPrimary;
+    border-radius: 50%;
+    width: $tableIconSize;
+    height: $tableIconSize !important;
+}
+.icon-bg img,
+.icon-bg i {
+    width: 50%;
+    position: relative;
+    top: 10px;
+    left: 9px;
+    z-index: 0;
+}
+.icon-bg i {
+    color: $textPrimary;
+    font-size: 20px;
+}
+
+.typeicon {
+    position: absolute;
+    top: 0;
+    left: 15px;
+    background-color: #fff;
+    height: 30px;
+    width: 25px;
+    padding: 3px !important;
+    z-index: 1;
+}
+.nodeRatingComments {
+    position: absolute;
+    z-index: 1;
+    top: $previewHeight - 60px;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 10px;
+    @include clickable();
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.001) 0,
+        rgba(0, 0, 0, 0.75) 100%
+    );
+    .nodeRating {
+        flex-grow: 1;
+    }
+    .nodeComments {
+        right: 0;
+        border-radius: 0;
+        border-top-left-radius: 3px;
+        color: #fff;
+        width: 60px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        > i {
+            margin-right: 4px;
+            font-size: 16pt;
+        }
+    }
+}
+
+.typeicon > img {
+    width: 60%;
+    position: absolute;
+    bottom: 5px;
+    z-index: 1;
+    left: 5px;
+}
+.rowInner {
+    max-height: 1.5em;
+    overflow: hidden;
+    flex-grow: 1;
+}
+a.rowInner {
+    color: $textMain;
+    &:focus {
+        box-shadow: none !important;
+    }
+}
+.row-group {
+    display: flex;
+    align-items: center;
+}
+.cardSmallList {
+    .rowInner {
+        word-break: normal;
+        overflow-wrap: break-word;
+    }
+  .row_1 {
+      top: 1.5em;
+      font-size: 110%;
+
+      .rowInner {
+          @include limitLineCount(2, 1.25);
+          justify-content: center;
+          /*display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 2.45em;*/
+      }
+  }
+}
+.row_1,
+.node_ccm_commonlicense_key,
+.node_ccm_replicationsource,
+.cardList {
+    .rowInner {
+        max-height: none;
+    }
+}
+.checkbox {
+    padding-left: 25px !important;
+}
+.actionText {
+    display: none;
+}
+#selectAll + label {
+    top: -2px;
+}
+
+.cardList .actionText {
+    display: inherit;
+}
+.cardList > .item-container {
+    width: $cardWidth;
+    height: $cardHeight;
+    float: left;
+    margin: 6px;
+    position: relative;
+    // safari height fix
+    app-list-option-item{
+        height: $cardHeight;
+    }
+
+}
+.tableList{
+    .nodeDeleted{
+        display: none;
+    }
+}
+.cardList .item {
+    @include materialShadow();
+    border-radius: $borderRadius;
+
+    .nodeDeleted {
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.85);
+        position: absolute;
+        z-index: 1;
+        border-radius: $borderRadius;
+        left: 0;
+        top: 0;
+        text-align: center;
+        padding-top: 20px;
+        div {
+            opacity: 1;
+            padding-bottom: 7px;
+        }
+        > div i {
+            font-size: 26pt;
+            color: $textPrimary;
+        }
+        .headline {
+            color: $textPrimary;
+            font-size: 120%;
+        }
+        .subline {
+            color: $textLight;
+            font-size: 90%;
+        }
+        a {
+            text-transform: uppercase;
+            font-weight: bold;
+            i {
+                position: relative;
+                top: 7px;
+            }
+        }
+    }
+}
+
+.cardList > .option-item-container,
+.cardSmallList > .option-item-container {
+    display: flex;
+    flex-direction: column;
+    .item {
+        width: 100%;
+        flex-grow: 1;
+        &:not(:last-child) {
+            margin-bottom: 10px;
+        }
+    }
+}
+
+.tableList > .option-item-container {
+    display: flex;
+    @media screen and (max-width: $mobileWidthPortrait) {
+        flex-direction: column;
+    }
+    margin: 5px -10px;
+    justify-content: center;
+    .item {
+        height: #{$listItemHeight - 20px};
+        flex-grow: 1;
+        margin: 5px 10px;
+        @media screen and (min-width: $mobileWidth) {
+            max-width: 300px;
+        }
+    }
+}
+
+.cardSmallList > .item-container {
+    width: $cardWidth;
+    height: $listCardSmallHeight;
+    float: left;
+    margin: 6px !important;
+    // safari height fix
+    app-list-option-item{
+        height: $listCardSmallHeight;
+    }
+}
+
+.cardSmallList .item {
+    @include materialShadow();
+    border-radius: 2pt;
+    &:not(.option-item) {
+        border-bottom: 5px solid $primary;
+        // Compensate border-bottom for focus highlight
+        overflow: visible;
+        app-node-url {
+            height: calc(100% + 5px);
+        }
+    }
+}
+
+.cardSmallList img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0.7;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.cardSmallList .row_1,
+.cardSmallList .row_2 {
+    position: absolute;
+    z-index: 10;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+.cardSmallList .row_1 {
+    top: 5px;
+    font-size: 110%;
+    height: 60px;
+    overflow: hidden;
+    > .row-group {
+        height: 100%; // center text when container is *not* filled
+        > a.rowInner {
+            max-height: 100%; // align top *when* container is filled
+        }
+    }
+}
+.cardSmallList .row_2 {
+    font-size: 80%;
+    bottom: 12px;
+    left: 5px;
+    opacity: 1 !important;
+}
+
+.cardList .row,
+.cardSmallList .row {
+    height: 100%;
+    border-bottom: none;
+}
+.cardList .row_2 .rowInner,
+.cardList .row_3 .rowInner {
+    max-height: 1.5em;
+}
+.cardList .row_2,
+.cardList .row_3,
+.cardList .row_4,
+.cardList .row_5 {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+    width: 100%;
+}
+.cardList .row_5,
+.cardList .row_6,
+.cardList .row_7,
+.cardList .row_8,
+.cardList .row_9,
+.cardList .row_10 {
+    display: none !important;
+}
+
+.cardList .row_1 {
+    width: 100%;
+    flex-shrink: 0;
+    padding-bottom: 5px !important;
+    font-size: 110% !important;
+    overflow: hidden;
+    word-break: normal;
+    overflow-wrap: break-word;
+    .rowInner {
+        @include limitLineCount(2, 1.5);
+    }
+}
+
+// In the workspace, the user can toggle between list and cards view. When list
+// view is selected, the list spans the entire container with no padding.
+// However, cards need some padding, so we add some padding when cards view is
+// selected here.
+//
+// In collections, however, both, list and cards view are padded. In this case,
+// we want to align the cards borders with other elements (same as the list
+// borders). To achieve this, we provide the option to set the class
+// `no-padding` for the `listtable` component, which will align cards' borders
+// with the component's borders.
+:host:not(.no-padding) .cardContainer {
+    padding: 0 10px;
+}
+@media all and (min-width: ($mobileWidth)) {
+    :host.no-padding .cardContainer {
+        margin: -6px; // Compensate cards margins
+    }
+}
+
+.cardList .row_2,
+.cardList .row_3,
+.cardList .row_4 {
+    float: left;
+}
+.childobjectCount {
+    background-color: #eee;
+    border-radius: 15px;
+    width: 45px;
+    min-width: 45px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    > i {
+        font-size: 8pt;
+        margin-left: 4px;
+    }
+}
+.row-group .childobjectCount {
+    margin-left: 5px;
+}
+.cardList .childobjectCount {
+    position: absolute;
+    z-index: 1;
+    top: 8px;
+    right: 45px;
+}
+.cardList .preview {
+    height: $previewHeight;
+    flex-shrink: 0;
+    padding: 0 !important;
+    margin-bottom: 15px;
+    opacity: 1 !important;
+    border-radius: $borderRadius $borderRadius 0 0;
+    @include clickable();
+}
+.cardList .preview img,
+.cardList .preview .previewCollectionContainer {
+    width: 100%;
+    height: 150px;
+    border-radius: $borderRadius $borderRadius 0 0;
+    position: absolute;
+    top: 0;
+    z-index: 0;
+    object-fit: cover;
+    object-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cardList {
+    .more {
+        position: absolute;
+        right: 0;
+        top: $cardHeight - 50px;
+    }
+    .moreAlways {
+        right: 40px;
+        z-index: 1;
+    }
+}
+.cardList .actionText {
+    position: relative;
+    top: -3px;
+}
+.cardList .moreOpen {
+    right: -15px;
+    top: 180px;
+}
+.cardList .row .checkbox {
+    position: absolute;
+    right: -15px;
+    top: 10px;
+    z-index: 1;
+    min-width: initial;
+    > div:focus {
+        @include focusShadow(false);
+    }
+}
+.row input[type='checkbox']:checked + label:after {
+    @include materialShadow();
+}
+:host ::ng-deep {
+    .material-icons.collectionScope {
+        font-size: 130%;
+        left: -1px;
+        position: relative;
+        top: 2px;
+    }
+    .nodeCollection {
+        .collection_info {
+            i {
+                position: relative;
+                top: 2px;
+                font-size: 9pt;
+            }
+            i:not(:first-child) {
+                margin-left: 5px;
+            }
+        }
+    }
+    .cardSmallList {
+        .collection_info {
+            width: auto !important;
+            position: absolute;
+            left: 5px;
+            bottom: 10px;
+        }
+        .collection_scope {
+            i {
+                margin-right: 1px;
+            }
+            position: absolute;
+            right: 6px;
+            bottom: 12px;
+            opacity: 1 !important;
+            font-size: 10px;
+        }
+    }
+    .cardList {
+        .collection_info,
+        .collection_scope {
+            margin-top: 15px;
+        }
+    }
+    .row .node_ccm_replicationsource img,
+    .row .node_ccm_lifecyclecontributer_publisherFN img {
+        height: 20px;
+        border-radius: 50%;
+    }
+    .row .node_ccm_commonlicense_key img {
+        height: 20px;
+    }
+    .cardList .node_ccm_lifecyclecontributer_publisherFN img,
+    .cardList .node_ccm_replicationsource img {
+        margin-top: 5px;
+    }
+
+    .cardList .node_ccm_commonlicense_key {
+        height: 20px;
+        img {
+            height: 16px;
+        }
+    }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+    .moreAlways {
+        display: none !important;
+    }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+    .row_2,
+    .editColumns {
+        display: none !important;
+    }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
+    .row_3 {
+        display: none !important;
+    }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
+    .row_4 {
+        display: none !important;
+    }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*7)) {
+    .row_5 {
+        display: none !important;
+    }
+}
+@media all and (max-width: ($mobileWidth+$mobileStage*8)) {
+    .row_6 {
+        display: none !important;
+    }
+}
+.row_7,
+.row_8,
+.row_9,
+.row_10,
+.row_11,
+.row_12,
+.row_13,
+.row_14,
+.row_15 {
+    display: none !important;
+}
+.cardList .row .column {
+    display: block;
+    padding: 0 10px;
+    font-size: 90%;
+}
+
+.cardList .row .column.node_ccm_commonlicense_key,
+.cardList .row > div.node_ccm_replicationsource,
+.cardList .row > div.node_ccm_lifecyclecontributer_publisherFN {
+    display: inline-block;
+}
+
+@media all {
+    .cardList .row .column.node_ccm_commonlicense_key {
+        /*text-align: right;
+    position: absolute;
+    bottom: 28px;
+    left: 30px;*/
+    }
+
+    .cardSmallList .row_2,
+    .cardSmallList .row_3,
+    .cardSmallList .row_4,
+    .cardList .row_2,
+    .cardList .row_3,
+    .cardList .row_4 {
+        display: block !important;
+    }
+    .cardList {
+        .collection_info,
+        .collection_scope {
+            float: initial;
+            display: flex !important;
+            margin: 5px 0;
+        }
+    }
+}
+@media all and (max-width: ($mobileWidth)) {
+    .cardList .nodeCollection .collectionEditorial {
+        top: 20px;
+    }
+    .cardList > .item-container {
+        width: 100%;
+        height: 160px;
+        box-shadow: none;
+        .typeicon {
+            display: none !important;
+        }
+        .more a {
+            left: 0;
+        }
+        &:not(.option-item-container):not(:last-child) {
+            border-bottom: 1px solid $cardSeperatorLineColor;
+        }
+    }
+    .cardList > .option-item-container {
+        padding: 10px 0px;
+        flex-direction: row;
+        .option-item:not(:last-child) {
+            margin-bottom: unset;
+            margin-right: 10px;
+        }
+
+    }
+    .cardList .row {
+        padding: 0 10px;
+        padding-top: 5px;
+        display: block;
+    }
+    .cardList .row:focus {
+        @include setGlobalInsetFocus();
+    }
+    .cardContainer {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .cardList > .item-container {
+        margin: 0;
+    }
+    .cardList .row .preview {
+        width: 170px;
+        height: 100%;
+        float: left;
+    }
+    .cardList .row .preview img,
+    .cardList .row .previewCollectionContainer {
+        top: calc(50% - 60px);
+        width: 160px;
+        height: 120px;
+    }
+    .cardList .childobjectCount {
+        right: auto;
+        left: 15px;
+        top: 23px;
+    }
+    .cardList .nodeRatingComments {
+        width: 160px;
+        height: 40px;
+    }
+    .cardList .previewCollection {
+        left: 46px;
+        top: 28px;
+    }
+    .cardList .moreOpen {
+        top: 35px;
+    }
+    .cardList .row .checkbox {
+        display: inherit !important;
+        position: absolute;
+        top: 25px;
+        left: 120px;
+        max-width: 50px;
+    }
+    .cardList .actionText {
+        display: none;
+    }
+    .cardList .row .more {
+        position: absolute;
+        top: 100px;
+        left: calc(100% - 50px);
+    }
+    .cardList .row_1 {
+        height: auto;
+        max-height: 54px;
+        padding-top: 12px !important;
+        padding-bottom: 0px !important;
+        width: auto;
+    }
+
+    .cardList .row_2,
+    .cardList .row_3 {
+        padding-top: 0 !important;
+    }
+
+    .cardList .row_2 {
+        margin-bottom: 10px;
+    }
+    /*
+  .cardList .row .column.node_ccm_replicationsource {
+    position: absolute;
+    top: 80px;
+    left: 178px;
+  }
+
+  .cardList .row .column.node_ccm_commonlicense_key {
+    position: absolute;
+    top: 114px;
+    left: 179px;
+    text-align: left;
+  }
+  */
+
+    .cardList .row_2,
+    .cardList .row_3,
+    .cardList .row_4,
+    .cardList .row_5,
+    .cardList .row_6,
+    .cardList .row_7,
+    .cardList .row_8,
+    .cardList .row_9,
+    .cardList .row_10 {
+        width: calc(100% - 180px);
+    }
+    .nodeCollection {
+        margin: 5px 0;
+    }
+}

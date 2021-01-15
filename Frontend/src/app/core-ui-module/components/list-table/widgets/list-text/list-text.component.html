@@ -1,0 +1,58 @@
+<ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
+    <ng-container [ngSwitch]="item.name">
+        <ng-container *ngSwitchCase="'displayName'">
+            {{ node.profile.displayName }}
+        </ng-container>
+        <ng-container *ngSwitchCase="'groupType'">
+            {{ 'PERMISSIONS.GROUP_TYPE.'+node.profile.groupType | translate }}
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+            {{node[item.name]}}
+        </ng-container>
+    </ng-container>
+</ng-container>
+<ng-container *ngIf="item.type === 'USER'">
+    <ng-container *ngIf="isUserProfileAttribute(item.name)">
+        {{node.profile[item.name]}}
+    </ng-container>
+    <ng-container *ngIf="item.name === 'status'">
+        {{ 'PERMISSIONS.USER_STATUS.'+node.status.status | translate }}
+    </ng-container>
+    <ng-container *ngIf="!isUserProfileAttribute(item.name) && item.name !== 'status'">
+        {{node[item.name]}}
+    </ng-container>
+</ng-container>
+<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'NODE' || item.type === 'COLLECTION'">
+    <ng-container *ngSwitchCase="'name'">
+        {{node.name}}
+    </ng-container>
+    <ng-container *ngSwitchCase="'title'">
+        {{node.title || node.name}}
+    </ng-container>
+    <ng-container *ngSwitchCase="'cclom:title'">
+        {{node.title || node.name}}
+    </ng-container>
+    <ng-container *ngSwitchCase="'mediatype'">
+        {{'MEDIATYPE.' + node.mediatype | translate}}
+    </ng-container>
+    <ng-container *ngSwitchCase="'size'">
+        {{node.size | formatSize}}
+    </ng-container>
+    <ng-container *ngSwitchCase="'dimensions'">
+        {{node | NodeImageSize}}
+    </ng-container>
+    <ng-container *ngSwitchCase="'cm:creator'">
+        {{node.createdBy | nodePersonName}}
+    </ng-container>
+    <ng-container *ngSwitchCase="'cm:modifier'">
+        {{node.modifiedBy | nodePersonName}}
+    </ng-container>
+    <ng-container *ngSwitchDefault>
+        <div *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
+            {{node.properties[item.name]?.join(', ')}}
+        </div>
+        <div *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
+            {{node.properties[item.name][0] | formatDate }}
+        </div>
+    </ng-container>
+</ng-container>
