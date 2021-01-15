@@ -599,7 +599,9 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
         return updatedNodes;
     }
-
+    getIsValid(){
+        return this.isValid$.value;
+    }
     async getValues(node?: Node): Promise<Values> {
         this.updateIsValid();
         // same behaviour as old mds, do not return values until it is valid
