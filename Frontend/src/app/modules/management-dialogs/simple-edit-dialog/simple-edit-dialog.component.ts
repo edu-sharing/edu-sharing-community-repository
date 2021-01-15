@@ -117,8 +117,8 @@ export class SimpleEditDialogComponent  {
       this.showDirtyDialog(() => this.openDialog(callback,true));
       return;
     }
-    callback();
     this.onClose.emit(this._nodes);
+    callback();
   }
   openMetadata(force = false) {
     this.openDialog(() => this.onOpenMetadata.emit(this._nodes));

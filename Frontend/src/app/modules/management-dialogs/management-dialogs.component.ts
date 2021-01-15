@@ -429,8 +429,6 @@ export class WorkspaceManagementDialogsComponent  {
       this.toast.showProgressDialog();
       Observable.forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
           .subscribe(() => {
-              this.nodeDeleteOnCancel = false;
-              this.nodeDeleteOnCancelChange.emit(false);
               this.toast.closeModalDialog();
               this.closeEditor(true);
           });
@@ -440,8 +438,7 @@ export class WorkspaceManagementDialogsComponent  {
           this.deleteNodes(this._nodeMetadata);
           return;
       }
-    this.nodeDeleteOnCancel=false;
-    this.nodeDeleteOnCancelChange.emit(false);
+    this.setNodeDeleteOnCancel(false);
     this._nodeMetadata=null;
     this.nodeMetadataChange.emit(null);
     this.createMetadata=null;
@@ -641,6 +638,7 @@ export class WorkspaceManagementDialogsComponent  {
     }
 
     closeSimpleEdit(saved: boolean, nodes: Node[] = null) {
+      console.log('close simple', saved);
         if (saved && this._nodeFromUpload) {
             this.onUploadFilesProcessed.emit(nodes);
         } else if(!saved && this.nodeDeleteOnCancel) {
@@ -649,6 +647,7 @@ export class WorkspaceManagementDialogsComponent  {
         if (nodes) {
             this.onRefresh.emit(nodes);
         }
+        this.setNodeDeleteOnCancel(false);
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);
     }
@@ -679,5 +678,10 @@ export class WorkspaceManagementDialogsComponent  {
     closeLinkMap(node: Node = null) {
       this.linkMap = null;
       this.linkMapChange.emit(null);
+    }
+
+    private setNodeDeleteOnCancel(nodeDeleteOnCancel: boolean) {
+        this.nodeDeleteOnCancel = nodeDeleteOnCancel;
+        this.nodeDeleteOnCancelChange.emit(nodeDeleteOnCancel);
     }
 }
