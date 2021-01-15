@@ -753,6 +753,10 @@ a.rowInner {
     float: left;
     margin: 6px;
     position: relative;
+    // safari height fix
+    app-list-option-item{
+        height: $cardHeight;
+    }
 
 }
 .tableList{
@@ -837,6 +841,10 @@ a.rowInner {
     height: $listCardSmallHeight;
     float: left;
     margin: 6px !important;
+    // safari height fix
+    app-list-option-item{
+        height: $listCardSmallHeight;
+    }
 }
 
 .cardSmallList .item {

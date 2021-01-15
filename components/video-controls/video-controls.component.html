@@ -25,7 +25,8 @@
           [(value)]="values.startTime"
           [(highValue)]="values.endTime"
           [options]="sliderOptions"
-          (valueChange)="onValueChange()"
+          (valueChange)="onValueChange($event, 'start')"
+          (highValueChange)="onValueChange($event, 'end')"
         ></ng5-slider>
       </div>
       <div>

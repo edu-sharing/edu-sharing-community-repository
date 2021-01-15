@@ -124,11 +124,10 @@ export class VideoControlsComponent implements OnInit {
         ]);
     }
 
-    onValueChange() {
-        if (this.values.startTime !== this.previousValues?.startTime) {
-            this.video.currentTime = this.values.startTime;
-        } else if (this.values.endTime !== this.previousValues?.endTime) {
-            this.video.currentTime = this.values.endTime;
+    onValueChange(value: number, type: 'start' | 'end') {
+        if(type === 'start' && value !== this.previousValues?.startTime ||
+            type === 'end' && value !== this.previousValues?.endTime) {
+            this.video.currentTime = value;
         }
         this.previousValues = { ...this.values };
     }
