@@ -1187,13 +1187,13 @@ export class ListTableComponent implements EventListener {
         });
         this.nodesChange.emit(this._nodes);
     }
-    addVirtualNodes(objects: Node[] | any) {
+    addVirtualNodes(objects: Node[]) {
         objects = objects.map((o: any) => {
             o.virtual = true;
             return o;
         });
         // remove the elements which will get added so they will replace the current state
-        this._nodes = this._nodes.filter((n) => objects.find((o: Node) => o.ref.id !== n.ref.id));
+        this._nodes = this._nodes.filter((n) => objects.find((o: Node) => o.ref.id === n.ref.id) == null);
         this._nodes = objects.concat(this._nodes);
         this.nodesChange.emit(this._nodes);
         this.selectedNodes = objects;
