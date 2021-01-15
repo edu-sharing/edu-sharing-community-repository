@@ -27,15 +27,15 @@
     <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i icon="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i icon="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
-
   <div class="tree" *ngIf="isLoggedIn">
-  <workspace-tree
+      <workspace-tree
                   [class.tree-quota]="user.person.quota.enabled"
                   [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
                   [mainNav]="mainNavRef"
                   [selectedNode]="selectedNodeTree"
                   [root]="root"
+                  [workspace]="this"
                   [isSafe]="isSafe"
                   (onDrop)="handleDrop($event)"
                   (onSetRoot)="setRoot($event)"
@@ -74,6 +74,7 @@
                       [current]="currentFolder"
                       [selection]="selection"
                       [searchQuery]="searchQuery"
+                      [customOptions]="customOptions"
                       [viewType]="viewType"
                       [(reorderDialog)]="reorderDialog"
                       [preventKeyevents]="cardHasOpenModals$ | async"

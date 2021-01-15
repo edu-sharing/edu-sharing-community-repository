@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 public class SimpleEdit implements Serializable {
     @XmlElement
-    public String[] globalGroups;
+    public SimpleEditGlobalGroups[] globalGroups;
     @XmlElement
     public SimpleEditOrganization organization;
     @XmlElement

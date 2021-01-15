@@ -487,6 +487,7 @@
         "COLLECTION_SHARE_PUBLIC_INFO": "By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it."
     },
     "OPTIONS": {
+        "SHOW_ALL_OPTIONS": "More actions",
         "APPLY": "Apply",
         "SHOW": "Preview & Info",
         "SHOW_IN_FOLDER": "Open storage location",
@@ -527,7 +528,11 @@
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
-        "LINK_MAP": "Create link"
+        "LINK_MAP": "Create link",
+        "TOGGLE_SHARED_TO_ME": "Toggle share receiver",
+        "TOGGLE_VIEWTYPE": "Toggle view type",
+        "LIST_SETTINGS": "Configure List",
+        "METADATA_SIDEBAR": "Material details"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",

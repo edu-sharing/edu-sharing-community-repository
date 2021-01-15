@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ConfigurationService, ListItem, Node, NodeList, RestConnectorService, RestConstants, RestNodeService, RestSearchService, SessionStorageService, Store, TemporaryStorageService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {Scope} from "../../../core-ui-module/option-item";
+import {CustomOptions, Scope} from "../../../core-ui-module/option-item";
 import {Toast} from "../../../core-ui-module/toast";
 import {Helper} from "../../../core-module/rest/helper";
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
@@ -18,6 +18,7 @@ export class WorkspaceExplorerComponent {
   public readonly SCOPES = Scope;
   @ViewChild('list') list: ListTableComponent;
   public _nodes: Node[] = [];
+  @Input() customOptions: CustomOptions;
   @Input() set nodes(nodes: Node[]) {
     this._nodes = nodes;
   }

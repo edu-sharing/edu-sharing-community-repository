@@ -48,6 +48,7 @@
     mat-button
     color="primary"
     class="more button-icon"
+    aria-label="{{'OPTIONS.SHOW_ALL_OPTIONS' | translate}}"
     [matMenuTriggerFor]="dropdownRef.menu"
     *ngIf="canShowDropdown()"
   >
@@ -62,10 +63,11 @@
       mat-flat-button
       *ngFor="let option of optionsToggle"
       class="button-icon"
+            matTooltip="{{option.name | translate}}"
       (click)="click(option)"
       [class.disabled]="!option.isEnabled"
     >
-      <i [icon]="option.icon" aria="true"></i>
+      <i [icon]="option.icon" [aria]="false"></i>
     </button>
   </div>
 </div>

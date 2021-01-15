@@ -94,7 +94,8 @@ public abstract class TrackingServiceDefault implements TrackingService{
         } else if (mode.equals(UserTrackingMode.full)) {
             return username;
         } else if (mode.equals(UserTrackingMode.session)) {
-            HttpSession session = Context.getCurrentInstance().getRequest().getSession(false);
+            HttpSession session = Context.getCurrentInstance() == null ? null :
+                    Context.getCurrentInstance().getRequest().getSession(false);
             if(session != null){
                 return DigestUtils.sha1Hex(session.getId() + username);
             }

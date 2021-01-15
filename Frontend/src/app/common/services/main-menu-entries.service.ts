@@ -104,7 +104,7 @@ export class MainMenuEntriesService {
             icon: 'lock',
             target: { type: 'path', path: 'workspace/safe' },
             scope: 'safe',
-            isVisible: () => !this.ui.isMobile() && this.safeScope.hasAccess,
+            isVisible: () => !this.bridge.isRunningCordova() && this.safeScope.hasAccess,
         },
         {
             name: 'SIDEBAR.PERMISSIONS',
@@ -158,15 +158,15 @@ export class MainMenuEntriesService {
                 .isLoggedIn()
                 .toPromise()
                 .then(loginInfo => (this.loginInfo = loginInfo)),
+            this.restConnector
+                .hasAccessToScope(RestConstants.SAFE_SCOPE)
+                .toPromise()
+                .then(safeScope => (this.safeScope = safeScope)),
         ]);
         // The backend will throw some errors when making unauthorized calls, so we only initialize
         // these variables when we will need them.
         if (this.loginInfo.isValidLogin && !this.ui.isMobile()) {
             await Promise.all([
-                this.restConnector
-                    .hasAccessToScope(RestConstants.SAFE_SCOPE)
-                    .toPromise()
-                    .then(safeScope => (this.safeScope = safeScope)),
                 this.restOrganization
                     .getOrganizations()
                     .toPromise()

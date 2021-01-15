@@ -233,13 +233,13 @@ public class DownloadServlet extends HttpServlet{
 						 */
 						boolean isCollectionRef=false;
 						String originalNodeId = checkAndGetCollectionRef(nodeId);
+						TrackingTool.trackActivityOnNode(nodeId,null,TrackingService.EventType.DOWNLOAD_MATERIAL);
 						if(originalNodeId != null){
 							nodeId = originalNodeId;
 							isCollectionRef = true;
 						}
 						String finalNodeId = nodeId;
 
-						TrackingTool.trackActivityOnNode(nodeId,null,TrackingService.EventType.DOWNLOAD_MATERIAL);
                         AuthenticationUtil.RunAsWork work= () ->{
 							try {
 								addMetadataFile(finalNodeId, zos);

@@ -400,7 +400,9 @@
             "WORKFLOW_UPDATED": "Workflow information have been updated",
             "METADATA_TEMPLATE_UPDATED": "Information of metadata template have been updated",
             "LTI_FIELDS_REQUIRED": "All required fields must be filled out in order to create a lti-resource",
-            "LTI_FIELDS_REQUIRED_LINK": "Create regular link"
+            "LTI_FIELDS_REQUIRED_LINK": "Create regular link",
+            "TO_ME_SHARED_PERSONAL": "Content shared with me is displayed",
+            "TO_ME_SHARED_ALL": "Content shared with me or my groups is displayed"
         }
     }
 }

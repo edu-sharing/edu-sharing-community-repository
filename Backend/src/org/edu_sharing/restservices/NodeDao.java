@@ -58,6 +58,7 @@ import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
@@ -1713,13 +1714,13 @@ public class NodeDao {
 		}
 	}
 	
-	public static SearchResult<NodeDao> getFilesSharedToMe(RepositoryDao repoDao, List<String> filter, Filter propertyFilter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
+	public static SearchResult<NodeDao> getFilesSharedToMe(RepositoryDao repoDao, SharedToMeType shareType, List<String> filter, Filter propertyFilter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
 			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 			try {
-				SearchResultNodeRef result = searchService.getFilesSharedToMe(sortDefinition,mapFilterToContentType(filter),skipCount.intValue(),maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
+				SearchResultNodeRef result = searchService.getFilesSharedToMe(shareType, sortDefinition,mapFilterToContentType(filter),skipCount.intValue(),maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
 				return NodeDao.convertResultSet(repoDao, propertyFilter, result);
 			} catch (Exception e) {
 				throw DAOException.mapping(e);

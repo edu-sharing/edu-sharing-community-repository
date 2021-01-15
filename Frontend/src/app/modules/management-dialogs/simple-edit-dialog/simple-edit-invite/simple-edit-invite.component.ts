@@ -24,6 +24,12 @@ import {Helper} from '../../../../core-module/rest/helper';
 import {ShareMode, SharePublishComponent} from '../../../workspace/share/share-publish/share-publish.component';
 
 type Org = {organization: Group, groups?: any};
+
+class SimpleEditGroupConfig {
+  toolpermission?: string;
+  groups: string[];
+}
+
 @Component({
   selector: 'app-simple-edit-invite',
   templateUrl: 'simple-edit-invite.component.html',
@@ -77,7 +83,7 @@ export class SimpleEditInviteComponent {
     this.configService.get('simpleEdit.organization.groupTypes',
         [RestConstants.GROUP_TYPE_ADMINISTRATORS]).subscribe((data) => this.organizationGroups = data);
     this.configService.get('simpleEdit.globalGroups',
-        [RestConstants.AUTHORITY_EVERYONE]).subscribe((data) => {
+        {groups: [RestConstants.AUTHORITY_EVERYONE]}).subscribe((data) => {
       this.loadGlobalGroups(data);
     });
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((tp) => this.tpInvite = tp);
@@ -249,17 +255,27 @@ export class SimpleEditInviteComponent {
     });
   }
 
-  private loadGlobalGroups(data: string[]) {
+  private loadGlobalGroups(config: SimpleEditGroupConfig[]) {
+    let groupConfigs = config.filter((g) =>
+      !g.toolpermission || this.connector.hasToolPermissionInstant(g.toolpermission)
+    );
+    let groups: string[];
+    if(groupConfigs.length === 0) {
+      console.warn('Invalid config for simple edit / global groups. No matching entry was found');
+      groups = [];
+    } else {
+      groups = groupConfigs[0].groups;
+    }
     this.globalGroups = [];
     // filter group everyone and handle it seperately
-    if(data.find((d) => d === RestConstants.AUTHORITY_EVERYONE)) {
-      data = data.filter((d) => d !== RestConstants.AUTHORITY_EVERYONE);
+    if(groups.find((d) => d === RestConstants.AUTHORITY_EVERYONE)) {
+      groups = groups.filter((d) => d !== RestConstants.AUTHORITY_EVERYONE);
       this.globalGroups.push({
         authorityName: RestConstants.AUTHORITY_EVERYONE,
         authorityType: RestConstants.AUTHORITY_TYPE_EVERYONE
       });
     }
-    Observable.forkJoin(data.map((d) => this.iamApi.getGroup(d))).
+    Observable.forkJoin(groups.map((d) => this.iamApi.getGroup(d))).
     subscribe((groups) =>
         this.globalGroups = groups.map((g) => g.group).concat(this.globalGroups)
     );

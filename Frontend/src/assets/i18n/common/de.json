@@ -521,6 +521,7 @@
         "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
     },
     "OPTIONS": {
+        "SHOW_ALL_OPTIONS": "Weitere Aktionen",
         "APPLY": "Übernehmen",
         "SHOW": "Vorschau & Infos",
         "SHOW_IN_FOLDER": "Zum Speicherort",
@@ -561,7 +562,11 @@
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
         "NEW_COLLECTION": "Neue Sammlung",
-        "LINK_MAP": "Verlinkung erstellen"
+        "LINK_MAP": "Verlinkung erstellen",
+        "TOGGLE_SHARED_TO_ME": "Freigaben-Empfänger umschalten",
+        "TOGGLE_VIEWTYPE": "Ansicht umschalten",
+        "LIST_SETTINGS": "Liste konfigurieren",
+        "METADATA_SIDEBAR": "Materialinformationen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
@@ -633,7 +638,7 @@
             "SOURCE_OWN": "Eigenes Material",
             "SOURCE_FOREIGN": "Fremdes Material",
             "SET_LICENSE": "Lizenz des Materials",
-            "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen der Lizenz möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
+            "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen der Lizenz ist nicht möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
             "INVALID_STATE": "Für die gewählten Elemente kann keine passenden Lizenz in diesem Dialog gefunden werden. Wählen Sie \"Lizenz ersetzen\", wenn Sie die Lizenz neu festlegen wollen.",
             "LICENSES": {
                 "NONE": "Unlizenziert",

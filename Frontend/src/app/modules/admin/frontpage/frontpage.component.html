@@ -1,5 +1,5 @@
 <global-progress *ngIf="loading"></global-progress>
-<info-message *ngIf="!(configService.get('frontpage.enabled', true) | async)">
+<info-message *ngIf="!(configService.get('frontpage.enabled', true) | async)" class="info-disabled">
     {{'ADMIN.FRONTPAGE.DISABLED' | translate }}
 </info-message>
 <collection-chooser
@@ -21,21 +21,25 @@
                     <mat-option *ngFor="let mode of modes" [value]="mode">{{'ADMIN.FRONTPAGE.MODE.'+mode | translate}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <div class="mode-collection" *ngIf="config.frontpage.mode=='collection'">
+            <div class="mode-collection" *ngIf="config.frontpage.mode === 'collection'">
                 <mat-form-field >
                     <mat-label>{{'ADMIN.FRONTPAGE.COLLECTION_LABEL' | translate}}</mat-label>
                     <mat-hint>{{'ADMIN.FRONTPAGE.COLLECTION_HINT' | translate}}</mat-hint>
                     <input matInput id="collection" [(ngModel)]="collectionName" [ngModelOptions]="{standalone: true}" type="text" readonly="true">
                 </mat-form-field>
-                <button mat-raised-button color="primary" (click)="chooseCollection=true">{{'ADMIN.FRONTPAGE.CHOOSE_COLLECTION' | translate}}</button>
             </div>
-            <mat-form-field *ngIf="config.frontpage.mode!='collection'">
+            <mat-form-field *ngIf="config.frontpage.mode !== 'collection'">
                 <mat-label>{{'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate}}</mat-label>
                 <mat-hint>{{'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate}}</mat-hint>
                 <mat-select id="timespan" [(ngModel)]="config.frontpage.timespan" [ngModelOptions]="{standalone: true}">
                     <mat-option *ngFor="let timespan of timespans" [value]="timespan">{{'ADMIN.FRONTPAGE.TIMESPAN.'+timespan | translate}}</mat-option>
                 </mat-select>
             </mat-form-field>
+        </div>
+        <div class="group" *ngIf="config.frontpage.mode === 'collection'">
+            <div class="select-collection"><button mat-raised-button color="primary"
+                    (click)="chooseCollection=true">{{'ADMIN.FRONTPAGE.CHOOSE_COLLECTION' | translate}}</button>
+            </div>
         </div>
         <div *ngIf="config.frontpage.mode!='collection'">
             <div class="group">
@@ -54,6 +58,11 @@
                     <mat-hint>{{'ADMIN.FRONTPAGE.DISPLAY_COUNT_HINT' | translate}}</mat-hint>
                     <input matInput id="displayCount" type="number" formControlName="displayCount" [(ngModel)]="config.frontpage.displayCount">
                 </mat-form-field>
+            </div>
+            <div class="group-info">
+                <info-message *ngIf="form.get('totalCount').value>form.get('displayCount').value">
+                    {{'ADMIN.FRONTPAGE.TOTAL_COUNT_LARGER_HINT' | translate }}
+                </info-message>
             </div>
             <div class="group queries" *ngFor="let query of config.frontpage.queries">
                 <div class="condition">
@@ -96,7 +105,7 @@
             </div>
             <div class="group">
                 <div>
-                    <button mat-button color="primary" (click)="addQueryCondition()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_ADD_CONDITION' | translate}}</button>
+                    <button mat-raised-button color="primary" (click)="addQueryCondition()">{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_ADD_CONDITION' | translate}}</button>
                 </div>
             </div>
         </div>
@@ -112,15 +121,15 @@
     <div class="group preview">
         <h5 class="mat-heading-5 preview-error" *ngIf="previewError">{{'ADMIN.FRONTPAGE.PREVIEW_ERROR.'+previewError | translate}}</h5>
         <listTable *ngIf="!previewError"
-            [isLoading]="previewLoading"
-            [nodes]="previewNodes"
-            [columns]="previewColumns"
-            [hasCheckbox]="false"
-            [hasIcon]="true"
-            [viewType]="1"
-            [isClickable]="true"
-            (clickRow)="openNode($event)"
-            ></listTable>
+                   [isLoading]="previewLoading"
+                   [nodes]="previewNodes"
+                   [columns]="previewColumns"
+                   [hasCheckbox]="false"
+                   [hasIcon]="true"
+                   [viewType]="1"
+                   [isClickable]="true"
+                   (clickRow)="openNode($event)"
+        ></listTable>
     </div>
     <h5 class="mat-heading-5 preview-hint" *ngIf="!previewLoading && !previewError" innerHTML="{{'ADMIN.FRONTPAGE.PREVIEW_HINT' | translate}}"></h5>
 </div>
