@@ -286,7 +286,7 @@ public class MetadataTemplateRenderer {
 										 break;
 									}
 								}
-								if(persistentIdUrl != null){
+								if(persistentIdUrl != null && !persistentIdUrl.isEmpty()){
 									value += "<br><a href=\"" + persistentIdUrl + "\" target=\"blank\">" + 
 											MetadataHelper.getTranslation("vcard_link_persistent_id") + "</a>";
 								}
