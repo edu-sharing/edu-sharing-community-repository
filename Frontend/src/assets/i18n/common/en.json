@@ -436,6 +436,7 @@
     "LICENSE": {
         "TITLE_OF_WORK": "Title",
         "LINK_AUTHOR": "Link to author",
+        "DESCRIPTION_REQUIRED": "Please add a license description",
         "NAMES": {
             "NONE": "No or unknown license",
             "MULTI": "Multiple licenses",

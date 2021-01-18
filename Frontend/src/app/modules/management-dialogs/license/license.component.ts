@@ -241,6 +241,10 @@ export class WorkspaceLicenseComponent  {
   }
 
   public async saveLicense(callback: Function = null) {
+      if(this.type === 'CUSTOM' && !this.rightsDescription.trim()){
+          this.toast.error(null, 'LICENSE.DESCRIPTION_REQUIRED');
+          return;
+      }
       if (this._properties) {
           this.onDone.emit(await this.getProperties(this._properties));
           return;

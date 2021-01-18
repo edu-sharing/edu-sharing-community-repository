@@ -266,6 +266,7 @@
     "LICENSE": {
         "TITLE_OF_WORK": "Titel",
         "LINK_AUTHOR": "Link zum Autor",
+        "DESCRIPTION_REQUIRED": "Die Lizenzbeschreibung muss ausgefüllt sein",
         "NAMES": {
             "NONE": "Keine oder unbekannte Lizenz",
             "MULTI": "Unterschiedliche Lizenzen",
