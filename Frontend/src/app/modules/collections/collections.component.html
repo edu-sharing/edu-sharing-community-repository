@@ -124,12 +124,13 @@
           [dropdownPosition]="'right'"
         ></actionbar>
       </div>
-      <div
+      <h1
+        appTitle
         class="collection-new-preview-headline collections-header-texttop"
         style="overflow:hidden;"
       >
         {{ collectionContent.node.title }}
-      </div>
+      </h1>
 
       <div
         *ngIf="collectionContent.node.collection.childCollectionsCount"
@@ -201,7 +202,11 @@
       class="collections-master-div"
       [class.collections-master-div-notabs]="!showTabs()"
     >
-      <h1 appTitle class="invisible">{{ 'COLLECTIONS.TITLE' | translate }}</h1>
+      <h1
+        *ngIf="isRootLevelCollection()"
+        appTitle
+        class="invisible"
+      >{{ 'COLLECTIONS.TITLE' | translate }}</h1>
       <!-- breadcrumbs -->
       <div
         role="navigation"
