@@ -235,7 +235,7 @@
             [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
             [class.contentSidenav]="searchService.sidenavOpened"
         >
-            <h1 appTitle class="invisible">{{ 'SEARCH.TITLE' | translate }}</h1>
+            <h1 appTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
                 <div *ngIf="searchService.searchResultCollections.length>0 && !addToCollection">
                     <div class="collectionsHeading">

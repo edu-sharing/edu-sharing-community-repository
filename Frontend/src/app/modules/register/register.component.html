@@ -11,7 +11,7 @@
       [isCancelable]="false"
 >
     <div class="register-content card-content-padding">
-        <h1 appTitle class="invisible">{{ 'REGISTER.TITLE' | translate }}</h1>
+        <h1 appTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
         <app-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
         <app-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
         <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" #request></app-register-request>

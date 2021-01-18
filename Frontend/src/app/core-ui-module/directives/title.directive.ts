@@ -10,7 +10,7 @@ import { Translation } from '../translation';
  * Use on the page's h1 heading. If the page doesn't have a visible h1 heading, add one at the
  * beginning of the main content and make it invisible.
  *
- * @example <h1 appTitle class="invisible">{{ 'WORKSPACE.TITLE' | translate }}</h1>
+ * @example <h1 appTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
  */
 @Directive({
     selector: '[appTitle]',

@@ -23,7 +23,7 @@
   >
     <spinner *ngIf="isLoading" class="center"></spinner>
     <div class="login-content" *ngIf="!isLoading">
-      <h1 appTitle class="invisible">{{ 'LOGIN.TITLE' | translate }}</h1>
+      <h1 appTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
       <div class="branding"><img src="assets/images/logo.svg" image-config alt="{{ 'LOGIN.APP_LOGO' | translate }}" /></div>
       <div class="groups">
         <div class="providers-select" *ngIf="showProviders">
