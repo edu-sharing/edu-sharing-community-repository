@@ -67,6 +67,8 @@ public class BulkEditNodesJob extends AbstractJob{
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
 	@JobFieldDescription(description = "folder id to start from")
 	private String startFolder;
+	@JobFieldDescription(description = "Lucene query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
+	private String lucene;
 	@JobFieldDescription(description = "Mode to use")
 	private Mode mode;
 	@JobFieldDescription(description = "property to modify, e.g. cm:name", sampleValue = "cm:name")
@@ -136,7 +138,7 @@ public class BulkEditNodesJob extends AbstractJob{
 			replaceToken = prepareParam(context, "replaceToken", true);
 		}
 
-		String lucene = (String) context.getJobDetail().getJobDataMap().get("lucene");
+		lucene =prepareParam(context, "lucene", false);
 
 		startFolder =prepareParam(context, "startFolder", true);
 		try {
@@ -153,8 +155,7 @@ public class BulkEditNodesJob extends AbstractJob{
 				recurseMode = RecurseMode.valueOf((String) context.getJobDetail().getJobDataMap().get("recurseMode"));
 			}
 		}catch(Throwable t){
-			if(lucene == null || lucene.trim().equals(""))
-				throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
+			throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
 		}
 		data = (String) context.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA);
 		if(mode.equals(Mode.ReplaceMapping)){

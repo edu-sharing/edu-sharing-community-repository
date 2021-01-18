@@ -75,6 +75,8 @@ public class BulkDeleteNodesJob extends AbstractJob{
 
 	@JobFieldDescription(description = "folder id to start from")
 	private String startFolder;
+	@JobFieldDescription(description = "Lucene query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
+	private String lucene;
 	@JobFieldDescription(description = "move to recycle (false will immediately remove)")
 	private boolean recycle;
 	@JobFieldDescription(description = "Force delete (for broken nodes)")
@@ -97,8 +99,9 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		nodeService = serviceRegistry.getNodeService();
 		nodeServiceEdu = NodeServiceFactory.getLocalService();
 
+		lucene = (String) context.getJobDetail().getJobDataMap().get("lucene");
 		startFolder = (String) context.getJobDetail().getJobDataMap().get("startFolder");
-		if(startFolder==null){
+		if(startFolder==null || startFolder.isEmpty()){
 			throw new IllegalArgumentException("Missing required parameter 'startFolder'");
 		}
 		Object recycleStr = context.getJobDetail().getJobDataMap().get("recycle");
@@ -114,6 +117,9 @@ public class BulkDeleteNodesJob extends AbstractJob{
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList());
 		}catch(Throwable t){}
+		if(types == null){
+			throw new IllegalArgumentException("Missing required boolean parameter 'types'");
+		}
 
 		List<String> collectionRefIds = new ArrayList<>();
 
@@ -152,11 +158,14 @@ public class BulkDeleteNodesJob extends AbstractJob{
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
 		runner.setStartFolder(startFolder);
+		runner.setLucene(lucene);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int count=runner.run();
 		AuthenticationUtil.runAsSystem(() -> {
-			nodeServiceEdu.removeNode(startFolder, null, recycle);
+			if(lucene == null || lucene.isEmpty()) {
+				nodeServiceEdu.removeNode(startFolder, null, recycle);
+			}
 
 			for(String collectionRefId : collectionRefIds){
 				logger.info("will delete collection_ref: " + collectionRefId);

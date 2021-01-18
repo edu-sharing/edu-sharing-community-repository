@@ -48,6 +48,7 @@ public class MetadataTemplateRenderer {
 	private RenderingMode renderingMode = RenderingMode.HTML;
 	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
 	private static final String TEXT_LICENSE_SEPERATOR = " / ";
+	private static final String TEXT_MULTIVALUE_SEPERATOR = "; ";
 	private String userName;
 	private NodeRef nodeRef;
 	private MetadataSetV2 mds;
@@ -316,7 +317,7 @@ public class MetadataTemplateRenderer {
 					}
 					if(!value.trim().isEmpty()) {
 						if(!empty && renderingMode.equals(RenderingMode.TEXT)){
-							widgetHtml.append(", ");
+							widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
 						}
 						empty = false;
 					}
@@ -443,6 +444,7 @@ public class MetadataTemplateRenderer {
 		String[] keys = properties.get(widget.getId());
 		boolean empty=true;
 		if(keys != null) {
+			int i = 0;
 			for (String value : keys) {
 				MetadataKey key = valuesMap.get(value);
 				if (key == null)
@@ -458,13 +460,17 @@ public class MetadataTemplateRenderer {
 					}
 				}
 				path = Lists.reverse(path);
-				int i = 0;
+				int j = 0;
 				if (renderingMode.equals(RenderingMode.HTML)) {
 					widgetHtml.append("<div class='mdsValue'>");
+				} else if (renderingMode.equals(RenderingMode.TEXT)) {
+					if(i > 0) {
+						widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
+					}
 				}
 				empty = path.size() == 0;
 				for (String p : path) {
-					if (i > 0) {
+					if (j > 0) {
 						if (renderingMode.equals(RenderingMode.HTML)) {
 							widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
 						} else if (renderingMode.equals(RenderingMode.TEXT)) {
@@ -472,11 +478,12 @@ public class MetadataTemplateRenderer {
 						}
 					}
 					widgetHtml.append(p);
-					i++;
+					j++;
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
 					widgetHtml.append("</div>");
 				}
+				i++;
 			}
 		}
 		return empty;
