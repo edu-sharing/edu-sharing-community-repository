@@ -207,7 +207,7 @@ public class MetadataTemplateRenderer {
 								value += name;
 							}
 						}
-						if(!group.equals(name)) {
+						if(group != null && !group.equals(name)) {
 							if(renderingMode.equals(RenderingMode.HTML)) {
 								value += "<div class='licenseGroup'>" + group + "</div>";
 							}else if(renderingMode.equals(RenderingMode.TEXT)){
@@ -217,16 +217,8 @@ public class MetadataTemplateRenderer {
 								value += group;
 							}
 						}
-						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
-							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
-							if(renderingMode.equals(RenderingMode.HTML)) {
-								value+="<div class='licenseDescription'>"+licenseDescription+"</div>";
-							}else if(renderingMode.equals(RenderingMode.TEXT)){
-								if(!value.isEmpty()){
-									value += TEXT_LICENSE_SEPERATOR;
-								}
-								value += licenseDescription;
-							}
+						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName)) {
+							// skipping description
 						}
 						else{
 							if(renderingMode.equals(RenderingMode.HTML)) {
@@ -579,7 +571,11 @@ public class MetadataTemplateRenderer {
 	private String getLicenseName(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())
 			return null;
-		List<String> supported=Arrays.asList(CCConstants.COMMON_LICENSE_CC_ZERO,CCConstants.COMMON_LICENSE_PDM);
+		String[] description = properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION));
+		if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && description != null) {
+			return description[0];
+		}
+			List<String> supported=Arrays.asList(CCConstants.COMMON_LICENSE_CC_ZERO,CCConstants.COMMON_LICENSE_PDM);
 		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY) || supported.contains(licenseName)) {
 			String name=I18nAngular.getTranslationAngular("common","LICENSE.NAMES."+licenseName);
 			if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
@@ -607,7 +603,9 @@ public class MetadataTemplateRenderer {
 	private String getLicenseGroup(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())
 			licenseName="NONE";
-
+		if(licenseName.equals(CCConstants.COMMON_LICENSE_CUSTOM)) {
+			return null;
+		}
 		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)) {
 			licenseName=CCConstants.COMMON_LICENSE_CC_BY;
 		}
