@@ -62,13 +62,19 @@ $sidenavTopBaseOffset:110px;
 }
 .collectionsHeading .toggle{
   text-transform: uppercase;
-  float:right;
   padding: 0 10px;
 }
 .heading{
-  color:$textLight;
-  padding-bottom: 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  color: $textLight;
+  // padding-bottom: 10px;
   margin-left: 15px;
+  h2 {
+    font-size: 150%;
+    margin: 1rem 0;
+  }
   >div{
     display: inline-flex;
     >span{
@@ -94,7 +100,6 @@ $sidenavTopBaseOffset:110px;
   padding: 5px;
 }
 .sorting{
-  position: absolute;
   right: 10px;
   border: unset;
   background: unset;

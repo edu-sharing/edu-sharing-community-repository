@@ -58,6 +58,10 @@
             <mat-checkbox *ngIf="_nodes && _nodes.length" (change)="toggleAll()" [ngModel]="selectedNodes.length==_nodes.length"></mat-checkbox>
         </div>
         <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
+        <!-- FIXME: Can't bind to 'aria-label' since it isn't a known property of 'div'. Aria-labels
+        of <div>s are not standard and thus are not picked up by all screen readers. If this is
+        meant to label an interactive element, put the label directly on that element.
+        -->
         <div class="icon" *ngIf="hasIcon" role="columnheader" aria-label="{{'LIST_TABLE.DUMMY_ICON_LABEL' | translate}}">&nbsp;</div>
             <div *ngFor="let item of columnsVisible;let j = index"
                  class="{{getItemCssClass(item)}} row_{{j+1}}"
@@ -143,6 +147,7 @@
                     </div>
                     <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                     <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon="edu-pin"></i></div>
+                    <!-- FIXME: Interactive elements should be outside of links (app-node-url). -->
                     <div class="checkbox column" *ngIf="hasCheckbox">
                         <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation()" aria-label="{{ 'SELECT' | translate:{element: node.name} }}"></mat-checkbox>
                     </div>

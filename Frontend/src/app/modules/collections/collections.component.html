@@ -233,7 +233,7 @@
       <!-- content (collection cards) if not error -->
 
       <section class="collections-cards-div" *ngIf="!isLoading">
-        <h3
+        <h2
           class="mat-heading-3"
           *ngIf="isAllowedToEditCollection() || collectionContent.collections.length"
         >
@@ -243,7 +243,7 @@
           <ng-container *ngIf="!isRootLevelCollection()">{{
             'COLLECTION.INFO_REFERENCES_MULTI' | translate
             }}</ng-container>
-        </h3>
+        </h2>
 
         <!-- COLLECTION CARDS -->
         <listTable
@@ -295,9 +295,9 @@
         *ngIf="!isLoading && isReady && !isRootLevelCollection()"
       >
         <div class="content-header">
-          <h3 class="mat-heading-3">
+          <h2 class="mat-heading-3">
             {{ 'collections_content' | translate }}
-          </h3>
+          </h2>
           <div
             class="custom-order"
             *ngIf="

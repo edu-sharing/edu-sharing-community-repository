@@ -239,7 +239,11 @@
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
                 <div *ngIf="searchService.searchResultCollections.length>0 && !addToCollection">
                     <div class="collectionsHeading">
-                        <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a tabindex="0" *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore" (keyup.enter)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
+                        <div class="heading">
+                          <h2>
+                            {{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})
+                          </h2>
+                          <a tabindex="0" *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore" (keyup.enter)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
                     </div>
                     <div class="collections" [class.collectionsMore]="collectionsMore" id="collections">
                         <listTable
@@ -264,27 +268,27 @@
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
                     <div class="heading" *ngIf="searchService.searchResult.length">
-                        <div>
-                            {{ 'SEARCH.MATERIALS' | translate}}
-                            <span *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</span>
-                            <!-- TODO: make popup menu usable with keyboard -->
-                            <button
-                                *ngIf="searchService.sort.materialsColumns"
-                                class="sorting clickable"
-                                (click)="searchService.sort.materials = true"
-                                aria-haspopup="true"
-                            >
-                                <div class="sorting-info">
-                                    <div>{{'NODE.'+searchService.sort.materialsSortBy | translate}}</div>
-                                    <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
-                                </div>
-                            </button>
-                            <sort-dropdown [(open)]="searchService.sort.materials"
-                                           [columns]="searchService.sort.materialsColumns"
-                                           [sortAscending]="searchService.sort.materialsSortAscending"
-                                           [sortBy]="searchService.sort.materialsSortBy"
-                                           (onSort)="sortMaterials($event)"></sort-dropdown>
-                        </div>
+                        <h2>
+                          {{ 'SEARCH.MATERIALS' | translate }}
+                          <ng-container *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</ng-container>
+                        </h2>
+                        <!-- TODO: make popup menu usable with keyboard -->
+                        <button
+                            *ngIf="searchService.sort.materialsColumns"
+                            class="sorting clickable"
+                            (click)="searchService.sort.materials = true"
+                            aria-haspopup="true"
+                        >
+                            <div class="sorting-info">
+                                <div>{{'NODE.'+searchService.sort.materialsSortBy | translate}}</div>
+                                <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
+                            </div>
+                        </button>
+                        <sort-dropdown [(open)]="searchService.sort.materials"
+                                        [columns]="searchService.sort.materialsColumns"
+                                        [sortAscending]="searchService.sort.materialsSortAscending"
+                                        [sortBy]="searchService.sort.materialsSortBy"
+                                        (onSort)="sortMaterials($event)"></sort-dropdown>
                     </div>
                     <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
                     <listTable
