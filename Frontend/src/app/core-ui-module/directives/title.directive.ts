@@ -1,6 +1,15 @@
-import { Directive, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import {
+    Directive,
+    ElementRef,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    SimpleChanges,
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { combineLatest, forkJoin, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ConfigurationService } from '../../core-module/core.module';
 import { Translation } from '../translation';
 
@@ -15,9 +24,28 @@ import { Translation } from '../translation';
 @Directive({
     selector: '[appTitle]',
 })
-export class TitleDirective implements OnInit, OnDestroy {
+export class TitleDirective implements OnInit, OnChanges, OnDestroy {
+    /**
+     * Use a title that differs from the h1 heading.
+     *
+     * Set to `null` to not use a page heading and use the site title as title.
+     *
+     * @example <h1 appTitle="Home">Trending items</h1>
+     * @example <h1 [appTitle]="null">Trending items</h1>
+     */
+    @Input() appTitle: string;
+
     private mutationObserver: MutationObserver;
+    /** The page heading as by the content of the directive's h1 element. */
     private pageHeading = new Subject<string>();
+    /**
+     * Overrides pageHeading with the `appTitle` input.
+     *
+     * Will be set to `null` if the input isn't used.
+     */
+    private titleOverride = new Subject<string>();
+    /** The combined result of pageHeading and titleOverride. */
+    private pageTitle = new Subject<string>();
 
     constructor(
         private elementRef: ElementRef,
@@ -29,14 +57,29 @@ export class TitleDirective implements OnInit, OnDestroy {
             characterData: true,
             subtree: true,
         });
+        combineLatest([this.pageHeading, this.titleOverride])
+            .pipe(map(([pageHeading, titleOverride]) => titleOverride ?? pageHeading))
+            .subscribe(this.pageTitle);
         combineLatest([
             forkJoin({
                 branding: configuration.get('branding'),
                 siteTitle: configuration.get('siteTitle', 'edu-sharing'),
             }),
-            this.pageHeading,
+            this.pageTitle,
             Translation.waitForInit(), // Prevent initial flicker of the untranslated heading
-        ]).subscribe(([config, pageHeading]) => this.updateTitle(config, pageHeading));
+        ]).subscribe(([config, pageTitle]) => this.updateTitle(config, pageTitle));
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.appTitle) {
+            const override = changes.appTitle.currentValue;
+            if (override === '') {
+                // Input not set
+                this.titleOverride.next(null);
+            } else {
+                this.titleOverride.next(override ?? '');
+            }
+        }
     }
 
     ngOnInit(): void {
@@ -51,16 +94,13 @@ export class TitleDirective implements OnInit, OnDestroy {
         this.pageHeading.next(this.elementRef.nativeElement.textContent);
     }
 
-    private updateTitle(
-        config: { branding: boolean; siteTitle: string },
-        pageHeading: string,
-    ): void {
-        if (!pageHeading) {
+    private updateTitle(config: { branding: boolean; siteTitle: string }, pageTitle: string): void {
+        if (!pageTitle) {
             this.documentTitle.setTitle(config.siteTitle);
         } else if (config.branding) {
-            this.documentTitle.setTitle(pageHeading + ' - ' + config.siteTitle);
+            this.documentTitle.setTitle(pageTitle + ' - ' + config.siteTitle);
         } else {
-            this.documentTitle.setTitle(pageHeading);
+            this.documentTitle.setTitle(pageTitle);
         }
     }
 }
