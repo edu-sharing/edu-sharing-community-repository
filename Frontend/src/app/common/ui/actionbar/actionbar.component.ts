@@ -47,7 +47,7 @@ export class ActionbarComponent {
    * backgroundType for color matching, either bright, dark or primary
    * @type {boolean}
    */
-  @Input() backgroundType = 'bright';
+  @Input() backgroundType : 'bright' | 'dark' | 'primary' = 'bright';
   /**
    * Set a node that will be returned by callbacks (optional, otherwise the return value is always null)
    * @type {null}

@@ -38,6 +38,11 @@ button{
 button{
   margin: 0 5px;
 }
+.actionbar-background-dark {
+  .mat-button {
+    color: $textOnPrimary;
+  }
+}
 .actionbar-background-primary{
   .mat-button{
     color: $textOnPrimary;
