@@ -48,7 +48,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Batch edit property for multiple nodes
@@ -159,16 +158,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		}
 		data = (String) context.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA);
 		if(mode.equals(Mode.ReplaceMapping)){
-			if(data==null) {
-				throw new IllegalArgumentException("Missing or invalid value for parameter 'data'");
-			}
-			csv = CSVTool.readCSV(new BufferedReader(new StringReader(data)), ',');
-			if(csv == null){
-				throw new IllegalArgumentException("Could not read csv");
-			}
-			if(!csv.getHeaders().contains("oldValue") || !csv.getHeaders().contains("newValue")){
-				throw new IllegalArgumentException("Provided csv must contain oldValue and newValue headers");
-			}
+			csv = readCSVMapping(data);
 		}
 
 		NodeRunner runner = new NodeRunner();
@@ -214,6 +204,20 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
+	}
+
+	public static CSVTool.CSVResult readCSVMapping(String data) {
+		if(data==null) {
+			throw new IllegalArgumentException("Missing or invalid value for parameter 'data'");
+		}
+		CSVTool.CSVResult csv = CSVTool.readCSV(new BufferedReader(new StringReader(data)), ',');
+		if(csv == null){
+			throw new IllegalArgumentException("Could not read csv");
+		}
+		if(!csv.getHeaders().contains("oldValue") || !csv.getHeaders().contains("newValue")){
+			throw new IllegalArgumentException("Provided csv must contain oldValue and newValue headers");
+		}
+		return csv;
 	}
 
 	private Serializable processPropertyValue(String value) {
