@@ -81,6 +81,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
 
   private searchStr: string;
   private inheritAllowed=false;
+  private isSharedScope=false;
   private globalSearch=false;
   private globalAllowed=false;
   private fuzzyAllowed=false;
@@ -173,13 +174,16 @@ export class WorkspaceShareComponent implements AfterViewInit{
       }, (error: any) => {
           this.inheritAccessDenied=true;
       });
-      this.nodeApi.getNodeParents(node.ref.id).subscribe((data: NodeList) => {
+      this.nodeApi.getNodeParents(node.ref.id).subscribe((data) => {
         //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
         // changed in 4.1 to keep inherit state of collections
         this.inheritAllowed = data.nodes.length > 1;
+        this.isSharedScope = data.scope === 'SHARED_FILES';
+        this.updateToolpermissions();
       },(error)=>{
           // this can be caused if the node is somewhere at a location not fully visible to the user
-          this.inheritAllowed=true;
+        this.updateToolpermissions();
+        this.inheritAllowed=true;
       });
     }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
@@ -368,11 +372,16 @@ export class WorkspaceShareComponent implements AfterViewInit{
 
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       this.isSafe=data.currentScope!=null;
-      this.connector.hasToolPermission(this.isSafe ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
-      this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY).subscribe((has:boolean)=>this.fuzzyAllowed=has);
-      this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
-      this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
     });
+  }
+  updateToolpermissions(){
+    this.connector.hasToolPermission(this.isSafe ?
+        this.isSharedScope ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE :
+        this.isSharedScope ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH
+    ).subscribe((has:boolean)=>this.globalAllowed=has);
+    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY).subscribe((has:boolean)=>this.fuzzyAllowed=has);
+    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
+    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
   }
   private updatePermissionInfo(){
     let type:string[];
