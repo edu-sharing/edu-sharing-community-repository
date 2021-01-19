@@ -50,7 +50,7 @@
             [indeterminate]="node.isIndeterminate"
             [disabled]="getIsDisabled(node)"
             (change)="toggleNode(node, $event.checked)"
-    ><span [innerHTML]="node.caption | highlight: filterString"></span
+    ><span [innerHTML]="node.caption | sanitizeHTML | highlight: filterString"></span
     ></mat-checkbox>
   </ng-template>
 
@@ -60,7 +60,7 @@
             [checked]="getIsChecked(node)"
             [disabled]="getIsDisabled(node)"
             (change)="toggleNode(node, true)"
-    ><span [innerHTML]="node.caption | highlight: filterString"></span
+    ><span [innerHTML]="node.caption | sanitizeHTML | highlight: filterString"></span
     ></mat-radio-button>
   </ng-template>
 </div>

@@ -55,7 +55,7 @@
   </mat-chip-list>
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
     <mat-option *ngFor="let value of filteredValues | async" [value]="value">
-      <span [innerHTML]="value.label | highlight: inputControl.value"></span>
+      <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
     </mat-option>
   </mat-autocomplete>
 </app-mds-editor-widget-container>

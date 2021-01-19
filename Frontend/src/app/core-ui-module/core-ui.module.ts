@@ -182,6 +182,7 @@ import { TitleDirective } from './directives/title.directive';
         ListCollectionInfoComponent,
         ListBaseComponent,
         TitleDirective,
+        SafeHtmlPipe,
     ],
 })
 export class CoreUiModule {}
