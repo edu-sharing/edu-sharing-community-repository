@@ -41,6 +41,7 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
 
@@ -301,8 +302,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			}
 			// if may just the content gets updated, the refs still need to get a new modified date
 			AuthenticationUtil.runAsSystem(()-> {
-				ResultSet result = fetchCollectionReferences(nodeRef);
-				for (NodeRef ref : result.getNodeRefs()) {
+				//ResultSet result = fetchCollectionReferences(nodeRef);
+				List<NodeRef> result = fetchCollectionReferencesByCmis(nodeRef);
+				for (NodeRef ref : result) {
 					transactionService.getRetryingTransactionHelper().doInTransaction(()-> {
 						policyBehaviourFilter.disableBehaviour(ref, ContentModel.ASPECT_AUDITABLE);
 						nodeService.setProperty(ref, QName.createQName(CCConstants.CM_PROP_C_MODIFIED), new Date());
@@ -574,6 +576,18 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	public ResultSet fetchCollectionReferences(NodeRef nodeRef) {
 		String query = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND @ccm\\:original:\"" + nodeRef.getId() + "\"";
 		return searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, query);
+	}
+
+	public List<NodeRef> fetchCollectionReferencesByCmis(NodeRef nodeRef){
+		Map<String,Object> map = new HashMap<>();
+		map.put(CCConstants.CCM_PROP_IO_ORIGINAL,nodeRef.getId());
+
+		List<String> aspects = new ArrayList<>();
+		aspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+		logger.debug("cmis helper start");
+		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000);
+		logger.debug("cmis helper finished");
+		return nodes;
 	}
 
 
