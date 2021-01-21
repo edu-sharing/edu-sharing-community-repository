@@ -681,12 +681,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		String defaultImageUrl = URLTool.getBaseUrl() + "/"
 				+ CCConstants.DEFAULT_PREVIEW_IMG;
 
-		InputStream crUserDefinedPreview = null;
-		try{
+		try (InputStream crUserDefinedPreview=nodeService.getContent(storeProtocol,storeIdentifier,nodeId,null,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW)) {
 			/**
 			 * userdefined
 			 */
-			crUserDefinedPreview=nodeService.getContent(storeProtocol,storeIdentifier,nodeId,null,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
 				String url = nodeService.getPreview(storeProtocol,storeIdentifier,nodeId, null, null).getUrl();
 				return new PreviewDetail(url, PreviewDetail.TYPE_USERDEFINED, false);

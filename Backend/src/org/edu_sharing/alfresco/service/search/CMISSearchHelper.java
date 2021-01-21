@@ -1,10 +1,9 @@
-package org.edu_sharing.service.search;
+package org.edu_sharing.alfresco.service.search;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -16,9 +15,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jdbc.core.SqlParameterValue;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +24,7 @@ public class CMISSearchHelper {
 
     private static Logger logger= Logger.getLogger(CMISSearchHelper.class);
 
-    public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data, int from, int pageSize, int maxPermissionChecks){
+    public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters,List<String> aspects, CMISSearchData data, int from, int pageSize, int maxPermissionChecks){
     	logger.info("from: "+from+ " pageSize:"+ pageSize);
     	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -44,8 +41,8 @@ public class CMISSearchHelper {
         String tableNameAlias=tableName.split(":")[1];
         StringBuilder join= new StringBuilder();
         StringBuilder where= new StringBuilder();
+        List<String> joinedTable = new ArrayList<>();
         if(filters!=null && filters.size()>0){
-            List<String> joinedTable = new ArrayList<>();
             for(Map.Entry<String,Object> filter : filters.entrySet()){
                 if(filter.getKey().startsWith("cmis")){
                     prepareWhere(where);
@@ -71,6 +68,21 @@ public class CMISSearchHelper {
                     }else{
                         where.append(" = ").append(escape(filter.getValue().toString()));
                     }
+                }
+            }
+            if(aspects != null && aspects.size() > 0){
+                for(String aspect : new HashSet<String>(aspects)){
+                   AspectDefinition ad = serviceRegistry.getDictionaryService().getAspect(QName.createQName(aspect));
+                   if(ad == null){
+                       throw new RuntimeException("aspect not found for:"+aspect);
+                   }
+                   String aspectTable = CCConstants.getValidLocalName(aspect);
+                   String aspectTableAlias = ad.getName().getLocalName();
+                   //check if aspect filter was already through property filter added
+                   if(!joinedTable.contains(aspectTable)) {
+                       join.append("JOIN ").append(aspectTable).append(" AS ").append(aspectTableAlias)
+                               .append(" ON ").append(aspectTableAlias).append(".cmis:objectId = ").append(tableNameAlias).append(".cmis:objectId ");
+                   }
                 }
             }
         }
@@ -99,7 +111,7 @@ public class CMISSearchHelper {
         }
     }
 
-    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data, int maxPermissionChecks){
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, List<String> aspects, CMISSearchData data, int maxPermissionChecks){
     	List<NodeRef> result = new ArrayList<NodeRef>();
 
         int from = 0;
@@ -108,7 +120,7 @@ public class CMISSearchHelper {
 
         ResultSet resultSet = null;
         do {
-     	   resultSet = fetchNodesByTypeAndFilters(nodeType, filters, data, from, pageSize, maxPermissionChecks);
+     	   resultSet = fetchNodesByTypeAndFilters(nodeType, filters,aspects, data, from, pageSize, maxPermissionChecks);
      	   result.addAll(resultSet.getNodeRefs());
      	   from += pageSize;
         }while(resultSet.length() > 0);
@@ -118,11 +130,11 @@ public class CMISSearchHelper {
     }
 
     public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data){
-       return fetchNodesByTypeAndFilters(nodeType,filters, data,1000);
+       return fetchNodesByTypeAndFilters(nodeType,filters,null, data,1000);
     }
 
     public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters){
-        return fetchNodesByTypeAndFilters(nodeType,filters, null,1000);
+        return fetchNodesByTypeAndFilters(nodeType,filters,null, null,1000);
     }
 
     /**
