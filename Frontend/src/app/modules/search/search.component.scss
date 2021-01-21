@@ -542,6 +542,10 @@ listtable {
   }
 }
 .sidenav-container{
+  app-mds-editor-wrapper {
+    display: block;
+    margin-top: 15px;
+  }
   .apply{
     position: fixed;
     background-color: $backgroundColor;
