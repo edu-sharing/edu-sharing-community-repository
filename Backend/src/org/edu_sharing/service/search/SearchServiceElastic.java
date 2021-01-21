@@ -147,7 +147,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.from(searchToken.getFrom());
             searchSourceBuilder.size(searchToken.getMaxResult());
             searchSourceBuilder.trackTotalHits(true);
-            searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+            searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
 
 
 

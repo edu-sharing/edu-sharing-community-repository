@@ -9,13 +9,16 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.search.model.SortDefinition.SortDefinitionEntry;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.ScoreSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 
 public class SortDefinition implements Serializable {
 	
 	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<SortDefinitionEntry>();
-	
-	public static class SortDefinitionEntry implements Serializable{
+
+    public static class SortDefinitionEntry implements Serializable{
 		String property;
 		boolean ascending;
 		
@@ -106,6 +109,19 @@ public class SortDefinition implements Serializable {
 		sortDefinitionEntries.add(0, new SortDefinitionEntry("TYPE",false));
 		for (SortDefinitionEntry sortDefintionEntry : getSortDefinitionEntries()) {
 			searchParameters.addSort(sortDefintionEntry.getProperty(), sortDefintionEntry.isAscending());
+		}
+	}
+
+	public void applyToSearchSourceBuilder(SearchSourceBuilder searchSourceBuilder) {
+		// Group by Folders & Files
+		searchSourceBuilder.sort("type", SortOrder.ASC);
+		for (SortDefinitionEntry sortDefintionEntry : getSortDefinitionEntries()) {
+			SortOrder sortOrder = sortDefintionEntry.ascending ? SortOrder.ASC : SortOrder.DESC;
+			if(sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {
+				searchSourceBuilder.sort(new ScoreSortBuilder().order(sortOrder));
+			} else {
+				searchSourceBuilder.sort("properties." + sortDefintionEntry.getProperty(), sortOrder);
+			}
 		}
 	}
 }
