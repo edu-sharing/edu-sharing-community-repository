@@ -168,6 +168,9 @@ export class CreateMenuComponent {
             if (CardComponent.getNumberOfOpenCards() > 0) {
                 return;
             }
+            if((event.target as HTMLElement)?.tagName === 'INPUT'){
+                return;
+            }
             if (event.clipboardData.items.length > 0) {
                 const item = event.clipboardData.items[0];
                 if (item.type === 'text/plain') {
