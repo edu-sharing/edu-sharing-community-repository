@@ -49,10 +49,10 @@
     </ng-container>
     <ng-container *ngSwitchDefault>
         <div *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
-            {{node.properties[item.name]?.join(', ')}}
+            {{ node.properties[item.name+'_DISPLAYNAME'] ? node.properties[item.name+'_DISPLAYNAME'].join(', ') : node.properties[item.name]?.join(', ') }}
         </div>
         <div *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
-            {{node.properties[item.name][0] | formatDate }}
+            {{ node.properties[item.name][0] | formatDate }}
         </div>
     </ng-container>
 </ng-container>
