@@ -93,36 +93,6 @@ export CATALINA_OPTS="-Dcaches.readBackupData=false $CATALINA_OPTS"
 export CATALINA_OPTS="-Dhazelcast.shutdownhook.policy=GRACEFUL $CATALINA_OPTS"
 
 xmlstarlet ed -L \
-	-i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n 'className' -v 'org.edu_sharing.catalina.core.OrderedHost' \
-  -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Context' \
-	-s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Context' -v '' \
-	--var ctx1 '$prev' \
-	-i '$ctx1' -t attr -n 'docBase' -v 'alfresco' \
-	-i '$ctx1' -t attr -n 'crossContext' -v 'true' \
-	-s '$ctx1' -t elem -n 'Loader' -v '' \
-	--var ldr1 '$prev' \
-	-i '$ldr1' -t attr -n 'className' -v 'org.apache.catalina.loader.VirtualWebappLoader' \
-	-i '$ldr1' -t attr -n 'virtualClasspath' -v '${catalina.base}/../modules/platform/*.jar' \
-	-s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Context' -v '' \
-	--var ctx2 '$prev' \
-	-i '$ctx2' -t attr -n 'docBase' -v 'edu-sharing' \
-	-i '$ctx2' -t attr -n 'useHttpOnly' -v 'false' \
-	-i '$ctx2' -t attr -n 'antiJARLocking' -v 'true' \
-	-i '$ctx2' -t attr -n 'antiResourceLocking' -v 'true' \
-	-s '$ctx2' -t elem -n 'Loader' -v '' \
-	--var ldr2 '$prev' \
-	-i '$ldr2' -t attr -n 'loaderClass' -v 'org.edu_sharing.alfrescocontext.loader.AlfrescoContextClassLoader' \
-	-s '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t elem -n 'Context' -v '' \
-	--var ctx3 '$prev' \
-	-i '$ctx3' -t attr -n 'docBase' -v 'share' \
-	-i '$ctx3' -t attr -n 'crossContext' -v 'true' \
-	-s '$ctx3' -t elem -n 'Loader' -v '' \
-	--var ldr3 '$prev' \
-	-i '$ldr3' -t attr -n 'className' -v 'org.apache.catalina.loader.VirtualWebappLoader' \
-	-i '$ldr3' -t attr -n 'virtualClasspath' -v '${catalina.base}/../modules/share/*.jar' \
-	tomcat/conf/server.xml
-
-xmlstarlet ed -L \
 	-d '/Server/Service[@name="Catalina"]/Connector' \
 	-s '/Server/Service[@name="Catalina"]' -t elem -n 'Connector' -v '' \
 	--var internal '$prev' \
@@ -143,17 +113,6 @@ xmlstarlet ed -L \
 	-i '$external' -t attr -n "protocol" -v "HTTP/1.1" \
 	-i '$external' -t attr -n "connectionTimeout" -v "20000" \
 	tomcat/conf/server.xml
-
-xmlstarlet ed -L \
-	-d '/Context/Manager[@className="org.redisson.tomcat.RedissonSessionManager"]' \
-	-s '/Context' -t elem -n "Manager" -v "" \
-	--var redis '$prev' \
-	-i '$redis' -t attr -n "className" -v "org.redisson.tomcat.RedissonSessionManager" \
-	-i '$redis' -t attr -n "configPath" -v "tomcat/conf/redisson.yaml" \
-	-i '$redis' -t attr -n "readMode" -v "REDIS" \
-	-i '$redis' -t attr -n "updateMode" -v "DEFAULT" \
-	-i '$redis' -t attr -n "broadcastSessionEvents" -v "false" \
-	tomcat/conf/context.xml
 
 ### Tomcat shared ######################################################################################################
 

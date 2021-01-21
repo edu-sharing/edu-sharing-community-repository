@@ -44,6 +44,20 @@ build() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
+	echo "Checking artifact-id ..."
+
+	EXPECTED_ARTIFACTID="edu_sharing-community-rendering"
+
+	pushd "${COMMUNITY_PATH}" >/dev/null || exit
+	PROJECT_ARTIFACTID=$($MVN_EXEC -q -ff -nsu -N help:evaluate -Dexpression=project.artifactId -DforceStdout)
+	echo "- rendering          [ ${PROJECT_ARTIFACTID} ]"
+	popd >/dev/null || exit
+
+	[[ "${EXPECTED_ARTIFACTID}" != "${PROJECT_ARTIFACTID}" ]] && {
+		echo "Error: expected artifact-id [ ${EXPECTED_ARTIFACTID} ] is different."
+		exit
+	}
+
 	echo "Checking version ..."
 
 	pushd "${BUILD_PATH}" >/dev/null || exit

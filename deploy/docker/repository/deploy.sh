@@ -200,6 +200,11 @@ it() {
 		up -d || exit
 }
 
+plugins() {
+	echo "Checking plugins ..."
+	echo "- remote             [ ${PLUGIN_REMOTE_ENABLED:-false} ]"
+}
+
 build() {
 	[[ -z "${CLI_OPT2}" ]] && {
 		echo ""
@@ -409,7 +414,7 @@ reload-services() {
 
 case "${CLI_OPT1}" in
 build)
-	build
+	plugins && build
 	;;
 info)
 	info
@@ -419,6 +424,9 @@ init)
 	;;
 logs)
 	logs
+	;;
+plugins)
+	plugins
 	;;
 purge)
 	purge
@@ -465,6 +473,7 @@ reload-services)
 	echo "  - rebuild-services"
 	echo "  - reload-alfresco"
 	echo "  - reload-services"
+	echo "  - plugins"
 	echo "  - purge"
 	echo "  - start"
 	echo "  - stop"

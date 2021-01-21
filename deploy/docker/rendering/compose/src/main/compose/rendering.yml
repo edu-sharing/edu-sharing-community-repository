@@ -16,7 +16,7 @@ services:
       MARIADB_PASSWORD: "${RENDERING_DATABASE_PASS:-rendering}"
       MARIADB_USER: "${RENDERING_DATABASE_USER:-rendering}"
     volumes:
-      - "rendering-database-volume:/var/lib/mysql"
+      - "rendering-database-volume:/bitnami/mariadb"
 
   rendering-service:
     image: "${docker.image}-rendering-service:${docker.tag}"

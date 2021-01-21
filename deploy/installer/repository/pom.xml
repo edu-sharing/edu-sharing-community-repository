@@ -27,24 +27,46 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>copy-alfresco</id>
+            <id>amps-1</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-backend-alfresco-module,
-                edu-sharing-community-repository-backend-alfresco-module,
-                edu_sharing-plugin-cluster-repository-backend-alfresco-module,
-                edu_sharing-plugin-logineo-idm-repository-backend-alfresco-module,
-                edu_sharing-plugin-remote-repository-backend-alfresco-module
+                edu_sharing-community-repository-backend-alfresco-module
               </includeArtifactIds>
-              <outputDirectory>${project.build.directory}/dist/amps</outputDirectory>
+              <outputDirectory>${project.build.directory}/dist/amps/1</outputDirectory>
             </configuration>
           </execution>
           <execution>
-            <id>copy-tomcat</id>
+            <id>amps-2</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-plugin-remote-repository-backend-alfresco-module
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/amps/2</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>amps-3</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-plugin-remote-repository-backend-services-module
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/amps/3</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>tomcat-lib</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
@@ -58,7 +80,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>copy-config</id>
+            <id>tomcat-shared-classes</id>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
@@ -69,7 +91,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>copy-services</id>
+            <id>tomcat-webapps-edusharing</id>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
@@ -134,5 +156,39 @@
     </dependency>
 
   </dependencies>
+
+  <profiles>
+
+    <profile>
+
+      <id>plugin-remote</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_REMOTE_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-plugin-remote-repository-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-plugin-remote-repository-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+  </profiles>
 
 </project>

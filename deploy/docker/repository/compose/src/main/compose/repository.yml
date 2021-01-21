@@ -16,7 +16,7 @@ services:
       POSTGRESQL_POSTGRES_PASSWORD: "${REPOSITORY_DATABASE_PASS:-repository}"
       POSTGRESQL_USERNAME: "${REPOSITORY_DATABASE_USER:-repository}"
     volumes:
-      - "repository-database-volume:/var/lib/postgresql/data"
+      - "repository-database-volume:/bitnami/postgresql"
 
   repository-search-elastic:
     image: "${docker.image}-elasticsearch:${docker.tag}"

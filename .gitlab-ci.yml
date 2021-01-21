@@ -13,6 +13,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   MAVEN_CLI_OPTS: "-s .mvn/settings.xml --batch-mode --errors --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  PLUGIN_REMOTE_ENABLED: "false"
 
 cache:
   paths:

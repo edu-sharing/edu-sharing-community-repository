@@ -136,7 +136,53 @@
     </dependencies>
 
   </dependencyManagement>
-  
+
+  <profiles>
+
+    <profile>
+
+      <id>plugin-remote</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_REMOTE_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <properties>
+
+        <plugin.remote.repository.version>${project.version}</plugin.remote.repository.version>
+
+      </properties>
+
+      <dependencyManagement>
+
+        <dependencies>
+
+          <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>edu_sharing-plugin-remote-repository-backend-alfresco-module</artifactId>
+            <type>amp</type>
+            <version>${plugin.remote.repository.version}</version>
+          </dependency>
+
+          <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>edu_sharing-plugin-remote-repository-backend-services-module</artifactId>
+            <type>amp</type>
+            <version>${plugin.remote.repository.version}</version>
+          </dependency>
+
+        </dependencies>
+
+      </dependencyManagement>
+
+    </profile>
+
+  </profiles>
+
   <repositories>
 
     <repository>
@@ -150,6 +196,25 @@
     <repository>
       <id>edu-sharing.public.snapshots</id>
       <url>https://artifacts.edu-sharing.com/repository/public-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
+
+    <repository>
+      <id>edu-sharing.plugin.remote.releases</id>
+      <url>https://artifacts.edu-sharing.com/repository/plugin-remote-releases/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <repository>
+      <id>edu-sharing.plugin.remote.snapshots</id>
+      <url>https://artifacts.edu-sharing.com/repository/plugin-remote-snapshots/</url>
       <releases>
         <enabled>false</enabled>
       </releases>

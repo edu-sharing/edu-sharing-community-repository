@@ -23,7 +23,35 @@ Build
 
 1. Check out the [repository-project](https://scm.edu-sharing.com/Repository/edu-sharing) outside of this project.
  
-2. Build installer artifact by calling:
+2. If you have switched on additional plugins (see below), 
+   then you have to add your credentials for each plugin in `$HOME/.m2/settings.xml` too:
+   
+   ```
+      <server>  
+        <id>edu-sharing.plugin.remote.releases</id>
+        <username> ... </username>
+        <password> ... </password>
+      </server>
+      <server>
+        <id>edu-sharing.plugin.remote.snapshots</id>
+        <username> ... </username>
+        <password> ... </password>
+      </server>  
+   ```      
+
+   Then setting following environment variables:
+                          
+   ```
+   export PLUGIN_REMOTE_ENABLED="true"
+   ```
+   
+   and check this by calling:
+   
+   ```
+   ./deploy.sh plugins
+   ```                         
+ 
+3. Build installer artifact by calling:
   
    ```
    ./deploy.sh build <repository-project>
@@ -58,7 +86,9 @@ Installation
 5. Deploy the Alfresco Module Packages (AMP) by calling:
 
    ```
-   ./bin/apply_amps.sh -force
+   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/1 $CATALINA_HOME/webapps/alfresco -directory -force
+   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/2 $CATALINA_HOME/webapps/alfresco -directory -force
+   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/3 $CATALINA_HOME/webapps/edu-sharing -directory -force
    ```
 
 6. Change the environment variables `CATALINA_OPTS` by calling:

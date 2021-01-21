@@ -44,6 +44,20 @@ build() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
+	echo "Checking artifact-id ..."
+
+	EXPECTED_ARTIFACTID="edu_sharing-community-repository"
+
+	pushd "${COMMUNITY_PATH}" >/dev/null || exit
+	PROJECT_ARTIFACTID=$($MVN_EXEC -q -ff -nsu -N help:evaluate -Dexpression=project.artifactId -DforceStdout)
+	echo "- repository         [ ${PROJECT_ARTIFACTID} ]"
+	popd >/dev/null || exit
+
+	[[ "${EXPECTED_ARTIFACTID}" != "${PROJECT_ARTIFACTID}" ]] && {
+		echo "Error: expected artifact-id [ ${EXPECTED_ARTIFACTID} ] is different."
+		exit
+	}
+
 	echo "Checking version ..."
 
 	pushd "${BUILD_PATH}" >/dev/null || exit
@@ -64,7 +78,7 @@ build() {
 
 	echo "- repository"
 	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dskip.npm=true -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 
 	echo "- installer"
@@ -73,9 +87,14 @@ build() {
 	popd >/dev/null || exit
 }
 
+plugins() {
+	echo "Checking plugins ..."
+	echo "- remote             [ ${PLUGIN_REMOTE_ENABLED:-false} ]"
+}
+
 case "${CLI_OPT1}" in
 build)
-	build
+	plugins && build
 	;;
 plugins)
 	plugins
@@ -86,6 +105,7 @@ plugins)
 	echo ""
 	echo "Option:"
 	echo "  - build <repository-project>"
+	echo "  - plugins"
 	echo ""
 	;;
 esac

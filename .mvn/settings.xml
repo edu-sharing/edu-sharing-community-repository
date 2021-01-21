@@ -31,9 +31,19 @@
       <username>${env.MAVEN_REPO_USER}</username>
       <password>${env.MAVEN_REPO_PASS}</password>
     </server>
-
     <server>
       <id>community.docker.edu-sharing.com</id>
+      <username>${env.MAVEN_REPO_USER}</username>
+      <password>${env.MAVEN_REPO_PASS}</password>
+    </server>
+
+    <server>
+      <id>edu-sharing.plugin.remote.releases</id>
+      <username>${env.MAVEN_REPO_USER}</username>
+      <password>${env.MAVEN_REPO_PASS}</password>
+    </server>
+    <server>
+      <id>edu-sharing.plugin.remote.snapshots</id>
       <username>${env.MAVEN_REPO_USER}</username>
       <password>${env.MAVEN_REPO_PASS}</password>
     </server>

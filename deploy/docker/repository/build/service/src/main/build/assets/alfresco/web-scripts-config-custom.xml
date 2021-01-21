@@ -1,0 +1,8 @@
+<alfresco-config>
+
+  <!-- Disable the CSRF Token Filter -->
+  <config evaluator="string-compare" condition="CSRFPolicy" replace="true">
+    <filter/>
+  </config>
+
+</alfresco-config>
