@@ -254,6 +254,7 @@
               <cclom:title>
               <cclom:general_keyword>
               <cclom:general_description type="textarea">
+              <ccm:objecttype>
 			  <ccm:taxonid>
 			  <ccm:educationalintendedenduserrole>
 			  <ccm:educationalcontext>
@@ -286,7 +287,7 @@
 		<template>
 			<id>node_wordpress</id>
 			<caption>dialog_upload_tab_basic</caption>
-			<icon>description</icon>ccm:usageressourceid
+			<icon>description</icon>
 			<html><![CDATA[
               <cclom:title>
               <cclom:general_keyword>
