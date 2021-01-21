@@ -139,7 +139,11 @@
                         <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
                     </div>
                     <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
-                        <img src="{{getIconUrl(node)}}" alt="{{ (node.mediatype ? 'NODE.mediatype' : '') | translate}} {{ (node.mediatype ? 'MEDIATYPE.' + node.mediatype : '') | translate}}"/>
+                        <img
+                            src="{{getIconUrl(node)}}"
+                            [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
+                            [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
+                        />
                     </div>
                     <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                         <div class="nodeRating"></div>
@@ -183,7 +187,8 @@
                              (mouseenter)="animateIcon(node,true)"
                              (mouseleave)="animateIcon(node,false)"
                              [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-                             alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title || node.name}}"/>
+                             alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title || node.name}}"
+                        />
                         <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
                             <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
                                 <i icon="layers"></i>
@@ -207,7 +212,12 @@
                          role="cell"
                          [class.clickable]="isClickable">
                         <div class="icon-bg">
-                            <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" alt="{{ (node.mediatype ? 'NODE.mediatype' : '') | translate}} {{ (node.mediatype ? 'MEDIATYPE.' + node.mediatype : '') | translate}}"/>
+                            <img
+                                *ngIf="getIconUrl(node) && !isCollection(node)"
+                                src="{{getIconUrl(node)}}"
+                                [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
+                                [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
+                            />
                             <i *ngIf="!isCollection(node) && icon" icon="{{icon}}"></i>
                             <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
                         </div>

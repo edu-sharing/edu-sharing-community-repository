@@ -1,3 +1,7 @@
 <ng-container *ngIf="getLicenseIcon()">
-    <span title="{{getLicenseName()}}"><img alt="{{getLicenseName()}}" src="{{getLicenseIcon()}}"></span>
+  <span matTooltip="{{ 'NODE.ccm:commonlicense_key' | translate }}: {{ getLicenseName() }}"
+    ><img
+      alt="{{ 'NODE.ccm:commonlicense_key' | translate }}: {{ getLicenseName() }}"
+      src="{{ getLicenseIcon() }}"
+  /></span>
 </ng-container>
