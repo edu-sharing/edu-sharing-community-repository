@@ -159,7 +159,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, RequestOptions.DEFAULT));
 
+
+            logger.info("query: "+searchSourceBuilder.toString());
             SearchHits hits = searchResponse.getHits();
+            logger.info("result count: "+hits.getTotalHits());
 
             long millisPerm = 0;
             for (SearchHit hit : hits) {
