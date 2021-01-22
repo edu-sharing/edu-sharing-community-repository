@@ -5,13 +5,13 @@
       [altText]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
       [matTooltip]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
     ></i>
-    {{ node.collection.childCollectionsCount }}
+    {{ node.collection?.childCollectionsCount }}
     <i
       icon="insert_drive_file"
       [altText]="'collections_content' | translate"
       [matTooltip]="'collections_content' | translate"
     ></i>
-    {{ node.collection.childReferencesCount }}
+    {{ node.collection?.childReferencesCount }}
   </ng-container>
   <ng-container *ngSwitchCase="'scope'">
     <i class="collectionScope" [icon]="nodeHelper.getCollectionScopeInfo(node).icon"></i>

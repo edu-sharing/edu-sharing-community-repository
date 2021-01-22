@@ -112,9 +112,9 @@
                  role="row"
                  [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
                  [class.noPermissions]="noPermissions(node)"
-                 [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
+                 [style.backgroundColor]="getBackgroundColor(node)"
                  [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-                 [class.dark-color]="isCollection(node) && (viewType == 2 ? node.preview.isIcon : true) && isBrightColorCollection(getCollectionColor(node))"
+                 [class.dark-color]="getIsDarkColor(node)"
                  [class.import-blocked]="node.properties && node.properties['ccm:importblocked'] ? node.properties['ccm:importblocked'][0] == 'true' : false"
                  (appDistinctClick)="onDistinctClick($event, node)"
                  (dblclick)="doubleClick(node)"
@@ -189,7 +189,7 @@
                             [class.clickable]="isClickable"
                             (appDistinctClick)="onDistinctClick($event, node, 'preview')"
                     >
-                        <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
+                        <img *ngIf="node.preview?.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && node.preview && !node.preview.isIcon)"
                              src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&maxWidth=300&maxHeight=300' : '') : null}}"
                              [title]="viewType==0 ? '' : getTitle(node)"
                              (mouseenter)="animateIcon(node,true)"
@@ -197,7 +197,7 @@
                              [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
                              alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title || node.name}}"
                         />
-                        <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
+                        <div class="previewCollectionContainer" *ngIf="isCollection(node) && (!node.preview || node.preview.isIcon) && viewType != 2">
                             <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
                                 <i icon="layers"></i>
                             </div>

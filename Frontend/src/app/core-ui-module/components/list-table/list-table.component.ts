@@ -613,6 +613,34 @@ export class ListTableComponent implements EventListener {
         return this.getReference(node).iconURL;
     }
 
+    getBackgroundColor(node: Node): string | null {
+        if (!this.isCollection(node)) {
+            return null;
+        } else if (
+            this.viewType === ListTableComponent.VIEW_TYPE_GRID_SMALL &&
+            node.preview &&
+            !node.preview.isIcon
+        ) {
+            return '#000';
+        } else {
+            return this.getCollectionColor(node);
+        }
+    }
+
+    getIsDarkColor(node: Node): boolean {
+        if (!this.isCollection(node)) {
+            return false;
+        } else if (
+            this.viewType === ListTableComponent.VIEW_TYPE_GRID_SMALL &&
+            // node.preview &&
+            !node.preview?.isIcon
+        ) {
+            return false;
+        } else {
+            return this.isBrightColorCollection(this.getCollectionColor(node));
+        }
+    }
+
     isCollection(node: any): boolean {
         return this.nodeHelper.isNodeCollection(node);
     }
