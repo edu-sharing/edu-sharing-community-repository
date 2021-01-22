@@ -126,7 +126,7 @@ export class WorkspaceManagementDialogsComponent  {
     @Input() nodeTemplate : Node;
     @Output() nodeTemplateChange = new EventEmitter();
     @Input() nodeContributor : Node;
-    @Output() nodeContributorChange = new EventEmitter();
+    @Output() nodeContributorChange = new EventEmitter<Node>();
     @Input() set nodeSimpleEdit (nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
         this._nodeFromUpload = false;
@@ -390,13 +390,13 @@ export class WorkspaceManagementDialogsComponent  {
    this.showUploadSelect=false
    this.showUploadSelectChange.emit(false);
  }
- public closeContributor(){
+ public closeContributor(node: Node){
      if(this.editorPending){
          this.editorPending=false;
          this._nodeMetadata=[this.nodeContributor];
      }
    this.nodeContributor=null;
-   this.nodeContributorChange.emit(null);
+   this.nodeContributorChange.emit(node);
  }
   private closeLtiTools() {
     this.showLtiTools = false;

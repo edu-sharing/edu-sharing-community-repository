@@ -22,7 +22,7 @@ import {MessageType} from '../../../core-module/ui/message-type';
   ]
 })
 export class ModalDialogToastComponent {
-  private buttons: DialogButton[];
+  buttons: DialogButton[];
   private onCancel: () => void;
   node: Node | Node[];
 
@@ -37,6 +37,7 @@ export class ModalDialogToastComponent {
       this.node = data.node;
       this.messageParameters = data.messageParameters;
       this.messageType = data.messageType || ModalMessageType.Text;
+      this.priority = data.priority || 10;
       this.isCancelable = data.isCancelable;
       this.buttons = data.buttons;
       this.onCancel = data.onCancel;
@@ -55,6 +56,10 @@ export class ModalDialogToastComponent {
    * The title, will be translated automatically
    */
    title: string;
+    /**
+     * The priority (for z-index). defaults to 10
+     */
+    priority: number;
   /**
    * The message, will be translated automatically
    */
@@ -92,6 +97,7 @@ export class ModalDialogOptions {
   progressType?: ProgressType;
   dialogType?: CardType;
   messageParameters?: any;
+  priority?: number;
   messageType? = ModalMessageType.Text;
   node?: Node|Node[];
   isCancelable? = true;

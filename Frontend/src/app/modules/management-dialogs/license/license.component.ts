@@ -556,8 +556,8 @@ export class WorkspaceLicenseComponent  {
     }
 
     /**
-     * Get all the key from countries and return the array with key and name (Translated) 
-     * @param {string[]} countries array with all Countries Key 
+     * Get all the key from countries and return the array with key and name (Translated)
+     * @param {string[]} countries array with all Countries Key
      */
     translateLicenceCountries(countries: string[]) {
       this._ccCountries=[];
@@ -568,12 +568,12 @@ export class WorkspaceLicenseComponent  {
     }
 
     /**
-     * Function wich compare 2 string and return one of those numbers -1,0,1 
-     *  
-     *   -1 if a<b  
-     *    1 if a>b  
+     * Function wich compare 2 string and return one of those numbers -1,0,1
+     *
+     *   -1 if a<b
+     *    1 if a>b
      *    0 if a=b
-     * 
+     *
      * @param {string} a first string
      * @param {string} b second string
      * @returns {number}   -1 | 0 | 1

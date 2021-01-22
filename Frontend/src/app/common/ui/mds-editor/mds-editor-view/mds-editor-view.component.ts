@@ -45,7 +45,7 @@ import { MdsEditorWidgetFileUploadComponent } from '../widgets/mds-editor-widget
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
     onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
-    getValues?: (values: Values) => Promise<Values>;
+    getValues?: (values: Values, node: Node) => Promise<Values>;
     getStatus?: () => InputStatus;
     focus?: () => void;
 }

@@ -1,5 +1,5 @@
 <card title="{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate }}"
-      [node]="node"
+      [node]="_node"
       width="small"
       height="large"
       priority="2"
@@ -30,15 +30,6 @@
     <button mat-raised-button class="btnAdd" (click)="addVCard('metadata')"><i icon="add"></i> {{'ADD' | translate}}</button>
   </div>
 </card>
-<modal-dialog
-        [priority]="1"
-        [title]="dialogTitle"
-        [message]="dialogMessage"
-        [messageParameters]="dialogParameters"
-        [buttons]="dialogButtons"
-        [isCancelable]="true"
-        (onCancel)="dialogTitle=null"
-></modal-dialog>
 <card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
       subtitle="{{'WORKSPACE.CONTRIBUTOR.TYPE.'+editScopeNew.toUpperCase() | translate}}"
       priority="3"

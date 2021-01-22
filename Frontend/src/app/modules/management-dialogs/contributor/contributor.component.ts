@@ -30,7 +30,6 @@ export class WorkspaceContributorComponent  {
   public rolesLifecycle=RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE;
   public rolesMetadata=RestConstants.CONTRIBUTOR_ROLES_METADATA;
 
-  private _nodeId: string;
   public loading=true;
   public edit: VCard;
   public editMode: string;
@@ -40,11 +39,31 @@ export class WorkspaceContributorComponent  {
   public editScopeNew: string;
   private editScopeOld: string;
   editOriginal: VCard;
-  public dialogTitle: string;
-  public dialogMessage: string;
-  public dialogButtons: DialogButton[];
-  public dialogParameters: any;
-  public node: Node;
+  _node: Node;
+  @Input() set node (node: Node){
+      this._node = node;
+      for(let role of this.rolesLifecycle){
+          this.contributorLifecycle[role]=[];
+          let list=node.properties[RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX+role];
+          if(!list)
+              continue;
+          for(let vcard of list){
+              if(vcard && new VCard(vcard).isValid())
+                  this.contributorLifecycle[role].push(new VCard(vcard));
+          }
+      }
+      for(let role of this.rolesMetadata){
+          this.contributorMetadata[role]=[];
+          let list=node.properties[RestConstants.CONTRIBUTOR_METADATA_PREFIX+role];
+          if(!list)
+              continue;
+          for(let vcard of list){
+              if(vcard && new VCard(vcard).isValid())
+                  this.contributorMetadata[role].push(new VCard(vcard));
+          }
+      }
+      this.loading=false;
+  }
   public date : Date;
   buttons: DialogButton[];
   private editButtons: DialogButton[];
@@ -56,49 +75,29 @@ export class WorkspaceContributorComponent  {
   suggestionOrgs$: Observable<VCardResult[]>;
   editDisabled = false;
   @Input() set nodeId(nodeId : string){
-    this._nodeId=nodeId;
     this.loading=true;
     this.nodeService.getNodeMetadata(nodeId,[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
       this.node=data.node;
-      for(let role of this.rolesLifecycle){
-        this.contributorLifecycle[role]=[];
-        let list=data.node.properties[RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX+role];
-        if(!list)
-          continue;
-        for(let vcard of list){
-          if(vcard && new VCard(vcard).isValid())
-            this.contributorLifecycle[role].push(new VCard(vcard));
-        }
-      }
-      for(let role of this.rolesMetadata){
-        this.contributorMetadata[role]=[];
-        let list=data.node.properties[RestConstants.CONTRIBUTOR_METADATA_PREFIX+role];
-        if(!list)
-          continue;
-        for(let vcard of list){
-          if(vcard && new VCard(vcard).isValid())
-            this.contributorMetadata[role].push(new VCard(vcard));
-        }
-      }
-      this.loading=false;
     });
 
   }
-  @Output() onClose=new EventEmitter();
+  @Output() onClose=new EventEmitter<Node>();
   @Output() onLoading=new EventEmitter();
   givenname = new FormControl('');
   userAuthor = false;
   public remove(data:any[],pos:number){
-    this.dialogTitle='WORKSPACE.CONTRIBUTOR.DELETE_TITLE';
-    this.dialogMessage='WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE';
-    this.dialogParameters={name:data[pos].getDisplayName()};
-    this.dialogButtons=DialogButton.getYesNo(()=>{
-      this.dialogTitle=null;
-    },()=>{
-      data.splice(pos,1);
-      this.dialogTitle=null;
-    });
-
+      this.toast.showConfigurableDialog({
+          title: 'WORKSPACE.CONTRIBUTOR.DELETE_TITLE',
+          message: 'WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE',
+          messageParameters: {name:data[pos].getDisplayName()},
+          isCancelable: true,
+          buttons: DialogButton.getYesNo(()=>{
+              this.toast.closeModalDialog();
+          },()=>{
+              data.splice(pos,1);
+              this.toast.closeModalDialog();
+          })
+      });
   }
   public addVCard(mode = this.editMode) {
     this.date=null;
@@ -189,9 +188,9 @@ export class WorkspaceContributorComponent  {
       }
       properties["ccm:metadatacontributer_"+role]=prop;
     }
-    this.nodeService.editNodeMetadataNewVersion(this._nodeId,RestConstants.COMMENT_CONTRIBUTOR_UPDATE,properties).subscribe(()=>{
+    this.nodeService.editNodeMetadataNewVersion(this._node.ref.id,RestConstants.COMMENT_CONTRIBUTOR_UPDATE,properties).subscribe(({node})=>{
       this.toast.toast('WORKSPACE.TOAST.CONTRIBUTOR_UPDATED');
-      this.onClose.emit();
+      this.onClose.emit(node);
       this.onLoading.emit(false);
     },(error:any)=>{
       this.toast.error(error);
@@ -203,7 +202,7 @@ export class WorkspaceContributorComponent  {
       this.edit=null;
       return;
     }
-    this.onClose.emit();
+    this.onClose.emit(null);
   }
   public constructor(
     private nodeService:RestNodeService,

@@ -635,7 +635,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
         // `getValues()`.
         for (const widget of this.nativeWidgets) {
-            values = widget.getValues ? await widget.getValues(values) : values;
+            values = widget.getValues ? await widget.getValues(values, node) : values;
         }
 
         return values;

@@ -197,9 +197,9 @@
                               (onLinkSelected)="createUrlLink($event)"
 ></workspace-file-upload-select>
 <workspace-contributor *ngIf="nodeContributor"
-                       [nodeId]="nodeContributor.ref.id"
+                       [node]="nodeContributor"
                        (onLoading)="globalProgress=$event"
-                       (onClose)="closeContributor()"
+                       (onClose)="closeContributor($event)"
 ></workspace-contributor>
 <modal-dialog
               *ngIf="dialogTitle"
