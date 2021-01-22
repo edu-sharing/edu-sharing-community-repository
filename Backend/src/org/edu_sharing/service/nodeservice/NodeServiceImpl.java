@@ -45,6 +45,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
@@ -124,9 +125,25 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		CopyService copyService = serviceRegistry.getCopyService();
 
-		String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-		NodeRef copyNodeRef = copyService.copyAndRename(nodeRef, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
-				QName.createQName(name), copyChildren);
+		// copy and rename has a weird naming scheme
+		String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+		NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
+				QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
+				QName.createQName(originalName), copyChildren);
+		int renameCounter = 1;
+		while(true) {
+			try {
+				String name = originalName;
+				if(renameCounter > 1){
+					name = NodeServiceHelper.renameNode(originalName, renameCounter);
+				}
+				nodeServiceAlfresco.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
+				break;
+			} catch (DuplicateChildNodeNameException e){
+				renameCounter++;
+			}
+		}
 		resetVersion(copyNodeRef);
 		return copyNodeRef;
 	}
