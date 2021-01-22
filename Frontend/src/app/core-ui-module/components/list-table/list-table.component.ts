@@ -450,7 +450,7 @@ export class ListTableComponent implements EventListener {
         event: any;
         type: 'move' | 'copy';
     }>();
-    
+
     /**
      * Called when the user clicked the delete for a missing reference object.
      */
@@ -1172,9 +1172,9 @@ export class ListTableComponent implements EventListener {
         this.nodesChange.emit(this._nodes);
         this.refreshAvailableOptions();
     }
-    updateNodes(objects: Node[] | any) {
-        objects.forEach((o: any) => {
-            const index = this._nodes.findIndex(n => n.ref.id === o.ref.id);
+    replaceNodes(newObjects: Node[], localArray: Node[]){
+        newObjects.forEach((o: any) => {
+            const index = localArray.findIndex(n => n.ref.id === o.ref.id);
             if (index === -1) {
                 console.warn(
                     'tried to update node which not exist inside the list -> falling back to full reload',
@@ -1183,8 +1183,12 @@ export class ListTableComponent implements EventListener {
                 this.onRequestRefresh.emit();
                 return;
             }
-            this._nodes.splice(index, 1, o);
+            localArray.splice(index, 1, o);
         });
+    }
+    updateNodes(objects: Node[] | any) {
+        this.replaceNodes(objects, this._nodes);
+        this.replaceNodes(objects, this.selectedNodes);
         this.nodesChange.emit(this._nodes);
     }
     addVirtualNodes(objects: Node[]) {

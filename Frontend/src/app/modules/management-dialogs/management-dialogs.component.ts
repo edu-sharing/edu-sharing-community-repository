@@ -397,7 +397,8 @@ export class WorkspaceManagementDialogsComponent  {
      }
    this.nodeContributor=null;
    this.nodeContributorChange.emit(node);
- }
+   this.onRefresh.emit([node]);
+  }
   private closeLtiTools() {
     this.showLtiTools = false;
     this.showLtiToolsChange.emit(false);
@@ -419,8 +420,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.nodeLicenseOnUpload=false;
     this.nodeLicenseChange.emit(null);
   }
-  private updateLicense(nodes:Node[]) {
-      console.log(nodes);
+  updateLicense(nodes:Node[]) {
     this.closeLicense();
     this.onUpdateLicense.emit();
     this.onRefresh.emit(nodes);
