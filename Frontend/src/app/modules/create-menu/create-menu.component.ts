@@ -381,6 +381,9 @@ export class CreateMenuComponent {
     }
 
     afterUpload(nodes: Node[]) {
+        if(nodes == null){
+            return;
+        }
         if (this.params.reurl) {
             this.nodeHelper.addNodeToLms(
                 nodes[0],

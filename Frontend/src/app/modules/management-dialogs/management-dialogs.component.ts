@@ -435,6 +435,7 @@ export class WorkspaceManagementDialogsComponent  {
   }
   private closeEditor(refresh:boolean,nodes: Node[]=null){
       if (this.nodeDeleteOnCancel && nodes == null) {
+          this.nodeDeleteOnCancel = false;
           this.deleteNodes(this._nodeMetadata);
           return;
       }
