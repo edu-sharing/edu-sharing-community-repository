@@ -78,10 +78,10 @@
     [style.background-color]="collectionContent.node.collection.color"
   >
     <div class="card-collection-image-container"
-         [class.card-collection-icon-container]="collectionContent.node.preview.isIcon"
+         [class.card-collection-icon-container]="!hasNonIconPreview()"
          style="width:100%;">
       <div
-        *ngIf="collectionContent.node.preview.isIcon"
+        *ngIf="!hasNonIconPreview()"
         style="width: 250px; height: 200px; margin-left: auto; margin-right: auto;"
       >
         <div class="card-image-icon-container">
@@ -96,7 +96,7 @@
       </div>
 
       <div
-        *ngIf="!collectionContent.node.preview.isIcon"
+        *ngIf="hasNonIconPreview()"
         class="card-image-icon-container"
       >
         <img

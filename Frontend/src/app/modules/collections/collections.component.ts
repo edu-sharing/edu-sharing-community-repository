@@ -940,6 +940,10 @@ export class CollectionsMainComponent {
             : ListTableComponent.VIEW_TYPE_GRID_SMALL;
     }
 
+    hasNonIconPreview(): boolean {
+        return this.collectionContent.node.preview && !this.collectionContent.node.preview.isIcon;
+    }
+
     private renderBreadcrumbs() {
         this.path = [];
         this.nodeService

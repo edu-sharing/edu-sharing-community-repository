@@ -41,6 +41,8 @@ public interface AuthenticationExceptionMessages {
 	final public static String CHECKTICKETSERVICE_NOTREACHABLE = "CHECKTICKETSERVICE_NOTREACHABLE";
 	final public static String MISSING_PARAM = "MISSING_PARAM";
 	final public static String INVALID_CLIENT_SESSION = "Invalid client session.";
-	final public static String INVALID_AUTHENTICATION_METHOD = "INVALID_AUTHENTICATION_METHOD"; 
+	final public static String INVALID_AUTHENTICATION_METHOD = "INVALID_AUTHENTICATION_METHOD";
+	final public static String NOT_IN_WHITELIST = "NOT_IN_WHITELIST";
+
 	
 }

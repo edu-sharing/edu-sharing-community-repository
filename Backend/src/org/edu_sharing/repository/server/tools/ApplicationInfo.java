@@ -163,6 +163,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String AUTHBYAPP_USERNAME_PROP_MAIL = "MAIL";
 	
 	public static final String AUTHBYAPP_USERNAME_PROP_USERNAME = "USERNAME";
+
+	public static final String AUTHBYAPP_USER_WHITELIST = "auth_by_app_user_whitelist";
 	
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
 
@@ -280,6 +282,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	//allow login from applications without sending an confirmation mail
 	private boolean authByAppSendMail = false;
+
+	private String authByAppUserWhitelist = null;
 	
 	private String publicKey = null;
 	
@@ -442,7 +446,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		authByAppUsernameMappingDirectoryUsername = properties.getProperty("auth_by_app_usernamemapping_dir_username");
 		
 		authByAppUsernameMappingRepositoryUsername = properties.getProperty("auth_by_app_usernamemapping_rep_username");
-		
+
+		authByAppUserWhitelist = properties.getProperty(AUTHBYAPP_USER_WHITELIST);
+
 		allowedAuthenticationTypes = properties.getProperty("allowed_authentication_types");
 		
 		customCss = properties.getProperty("custom_css");
@@ -916,5 +922,13 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public String getCookieAttributes() {
 		return cookieAttributes;
+	}
+
+	public void setAuthByAppUserWhitelist(String authByAppUserWhitelist) {
+		this.authByAppUserWhitelist = authByAppUserWhitelist;
+	}
+
+	public String getAuthByAppUserWhitelist() {
+		return authByAppUserWhitelist;
 	}
 }
