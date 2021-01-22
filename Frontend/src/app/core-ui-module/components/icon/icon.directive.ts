@@ -119,10 +119,12 @@ export class IconDirective implements OnInit, OnDestroy {
     }
 
     private setAltText(altText: string): void {
-        if (!this.altTextSpan) {
+        if (altText && !this.altTextSpan) {
             this.insertAltTextSpan();
         }
-        this.altTextSpan.innerText = altText;
+        if (this.altTextSpan) {
+            this.altTextSpan.innerText = altText;
+        }
     }
 
     private insertAltTextSpan(): void {

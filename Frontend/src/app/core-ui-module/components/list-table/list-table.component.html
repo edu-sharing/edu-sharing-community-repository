@@ -147,7 +147,15 @@
                     </div>
                     <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                         <div class="nodeRating"></div>
-                        <div class="nodeComments" *ngIf="!isSavedSearch(node)" (appDistinctClick)="onDistinctClick($event, node, 'comments')"><i icon="comment"></i> <div>{{node.commentCount}}</div></div>
+                        <div
+                            class="nodeComments"
+                            *ngIf="!isSavedSearch(node)"
+                            (appDistinctClick)="onDistinctClick($event, node, 'comments')"
+                            [matTooltip]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
+                        >
+                            <i icon="comment" [altText]="'COMMENTS_MULTIPLE' | translate"></i>
+                            <div>{{node.commentCount}}</div>
+                        </div>
                     </div>
                     <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                     <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon="edu-pin"></i></div>
@@ -252,8 +260,9 @@
                 <div class="more column" *ngIf="_options && _options.length>1" >
                     <button mat-icon-button
                             (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
-                            text="test">
-                        <i icon="more_vert" [aria]="false"></i>
+                            text="test"
+                    >
+                        <i icon="more_vert" [aria]="true"></i>
                     </button>
                 </div>
                 <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
