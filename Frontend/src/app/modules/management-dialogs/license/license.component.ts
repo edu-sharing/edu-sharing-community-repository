@@ -334,7 +334,7 @@ export class WorkspaceLicenseComponent  {
     this.rightsDescription=this.getValueForAll(RestConstants.LOM_PROP_RIGHTS_DESCRIPTION);
     let contactState=this.getValueForAll(RestConstants.CCM_PROP_QUESTIONSALLOWED,"multi","true");
     this.contact=contactState=='true' || contactState==true;
-    this.oerMode=this.isOerLicense() || this.type=='NONE';
+    this.oerMode=this.isOerLicense() || this.primaryType=='NONE';
     UIHelper.invalidateMaterializeTextarea('authorFreetext');
     UIHelper.invalidateMaterializeTextarea('licenseRights');
     this.contactIndeterminate=contactState=='multi';
