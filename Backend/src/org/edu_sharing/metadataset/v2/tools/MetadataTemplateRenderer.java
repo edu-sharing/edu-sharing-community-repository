@@ -7,6 +7,7 @@ import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
@@ -649,12 +650,16 @@ public class MetadataTemplateRenderer {
 				if(!result.isEmpty())
 					result+=", ";
 				if(valuesMap.containsKey(s))
-					s=valuesMap.get(s).getCaption();
+					s=replaceHTML(valuesMap.get(s).getCaption());
 				result+=s;
 			}
 			i++;
 		}
 		return result;
+	}
+
+	private String replaceHTML(String text) {
+		return StringEscapeUtils.unescapeHtml4(text);
 	}
 
 	private MetadataWidget applyAttributes(MetadataWidget widget, String str) throws IllegalArgumentException {

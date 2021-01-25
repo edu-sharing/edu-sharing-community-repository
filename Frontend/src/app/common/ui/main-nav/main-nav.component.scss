@@ -207,7 +207,8 @@ user-profile {
         }
         input:focus {
             box-shadow: none !important;
-            outline: 1px solid $focusColor;
+            border-radius: 0;
+            outline: 2px solid #fff;
         }
         >button {
             position: absolute;
