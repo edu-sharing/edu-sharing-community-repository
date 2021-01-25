@@ -99,12 +99,15 @@ export class WorkspaceContributorComponent  {
           })
       });
   }
+  public resetVCard(){
+      this.date = null;
+      this.editType=WorkspaceContributorComponent.TYPE_PERSON;
+      this.edit=new VCard();
+      this.editDisabled = false;
+  }
   public addVCard(mode = this.editMode) {
-    this.date=null;
-    this.editType=WorkspaceContributorComponent.TYPE_PERSON;
+    this.resetVCard();
     this.editMode=mode;
-    this.edit=new VCard();
-    this.editDisabled = false;
     this.editOriginal=null;
     this.editScopeOld=null;
     this.editScopeNew=this.editMode=='lifecycle' ? this.rolesLifecycle[0] : this.rolesMetadata[0];
@@ -256,7 +259,7 @@ export class WorkspaceContributorComponent  {
       this.userAuthor = true;
       this.editDisabled = true;
     } else {
-      this.addVCard();
+      this.resetVCard();
     }
 
   }

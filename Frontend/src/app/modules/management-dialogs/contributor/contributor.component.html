@@ -40,7 +40,7 @@
   <div *ngIf="editDisabled && !userAuthor">
     <info-message message="{{'WORKSPACE.CONTRIBUTOR.EDIT_DISABLED' | translate}}"></info-message>
     <div class="edit-reset">
-      <button mat-button color="primary" (click)="addVCard()"><i icon="delete"></i>
+      <button mat-button color="primary" (click)="resetVCard()"><i icon="delete"></i>
         {{'WORKSPACE.CONTRIBUTOR.RESET' | translate}}
       </button>
     </div>
