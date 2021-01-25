@@ -68,6 +68,7 @@ import { ListNodeWorkflowComponent } from './components/list-table/widgets/list-
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { TitleDirective } from './directives/title.directive';
 import { FallbackTranslationHandler } from './translation';
+import {NodeSourcePipe} from "./pipes/node-source.pipe";
 
 @NgModule({
     declarations: [
@@ -105,6 +106,7 @@ import { FallbackTranslationHandler } from './translation';
         NodeImageSizePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
+        NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         SafeHtmlPipe,
@@ -179,6 +181,7 @@ import { FallbackTranslationHandler } from './translation';
         PermissionNamePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
+        NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         ListCollectionInfoComponent,

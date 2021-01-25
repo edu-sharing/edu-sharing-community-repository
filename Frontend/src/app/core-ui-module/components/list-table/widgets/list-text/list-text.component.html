@@ -61,12 +61,11 @@
   </span>
   <span
     *ngSwitchCase="'ccm:replicationsource'"
-    [matTooltip]="showFieldTooltip ? ('NODE.ccm:replicationsource' | translate) : null"
-  >
-    {{
-      'REPOSITORIES.' + node.properties['ccm:replicationsource']
-        | translate: { fallback: node.properties['ccm:replicationsource'] }
-    }}
+    [matTooltip]="showFieldTooltip ? ('NODE.ccm:replicationsource' | translate) + ': ' +
+        ('REPOSITORIES.' + (node.properties['ccm:replicationsource'] | appNodeSource: {mode: 'escaped'})
+        | translate: { fallback: (node.properties['ccm:replicationsource'] | appNodeSource: {mode: 'text'})})
+          : null"  >
+       <img src="{{ node.properties['ccm:replicationsource'] | appNodeSource:{mode: 'url'} }}" alt="">
   </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
