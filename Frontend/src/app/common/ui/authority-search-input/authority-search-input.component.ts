@@ -44,7 +44,9 @@ export class AuthoritySearchInputComponent {
      */
     @Input() showRecent = true;
     @Input() mode = AuthoritySearchMode.UsersAndGroups;
-    @Input() disabled = false;
+    @Input() set disabled(disabled: boolean){
+        disabled ? this.input.disable() : this.input.enable();
+    }
     @Input() maxSuggestions = 10;
     @Input() inputIcon = 'search';
     @Input() placeholder = 'WORKSPACE.INVITE_FIELD';

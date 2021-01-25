@@ -21,7 +21,10 @@ import {
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { AuthorityNamePipe } from '../../../core-ui-module/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
-import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {
+    NodeHelperService,
+    WorkflowDefinitionStatus
+} from '../../../core-ui-module/node-helper.service';
 
 type WorkflowReceiver = UserSimple | Group;
 
@@ -58,6 +61,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     @Output() onDone = new EventEmitter<Node[]>();
     @Output() onClose = new EventEmitter();
     @Output() onLoading = new EventEmitter();
+    defaultStatus: WorkflowDefinition;
 
     constructor(
         private nodeService: RestNodeService,
@@ -175,6 +179,9 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         const histories = await forkJoin(
             nodes.map((node) => this.nodeService.getWorkflowHistory(node.ref.id)),
         ).toPromise();
+        ({
+            initial: this.defaultStatus
+        } = this.nodeHelper.getDefaultWorkflowStatus(false));
         if (nodes.length > 1) {
             if (histories.some((history) => history.length > 0)) {
                 this.toast.error(null, 'WORKSPACE.WORKFLOW.BULK_WORKFLOWS_EXIST');
