@@ -22,8 +22,8 @@
           *ngIf="user"
           [user]="user.person"
           [size]="'medium'"
-          class="clickable"
-          (click)="onOpenProfile()"
+          [class.clickable]="!loginInfo.isGuest"
+          (click)="loginInfo.isGuest ? null : onOpenProfile()"
         ></user-avatar>
         <div *ngIf="user && !loginInfo.isGuest">{{ username }}</div>
         <div *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</div>
