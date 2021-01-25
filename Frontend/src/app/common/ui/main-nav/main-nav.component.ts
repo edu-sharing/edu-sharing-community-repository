@@ -305,6 +305,14 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         ) {
             return;
         }
+        // FIXME: These classes don't work properly when resizing the view causes the banner to
+        // change height. To reproduce, load an affected extension (e.g. Lisum) and resize the
+        // window to trigger the mobile menu switch. We have two problems:
+        //
+        // - Some updates happen only on first scroll after resize.
+        // - Some updates happen only after the page is reloaded.
+        //
+        // Interim states are visually broken.
         const elementsScroll = document.getElementsByClassName(
             'scrollWithBanner',
         );
