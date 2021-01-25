@@ -19,7 +19,7 @@ export class NodeSourcePipe implements PipeTransform {
           }
           return rawSrc;
       } else if(args.mode === 'url') {
-          const src = this.escape(rawSrc);
+          const src = this.escape(rawSrc) ?? 'home';
           return this.nodeHelper.getSourceIconPath(src);
       } else if(args.mode === 'escaped') {
           return this.escape(rawSrc);
