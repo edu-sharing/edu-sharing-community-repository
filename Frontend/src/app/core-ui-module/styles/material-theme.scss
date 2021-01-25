@@ -373,6 +373,7 @@ mat-label.mat-label-standalone{
 }
 .mat-menu-panel {
   min-height: initial !important;
+  overflow-x: hidden! important; // prevent scrollbars on FF
 }
 
 .cdk-drag-preview {
