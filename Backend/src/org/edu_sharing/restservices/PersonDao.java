@@ -255,22 +255,20 @@ public class PersonDao {
 
 	}
 	
-	public void delete() throws DAOException {
-		
+	public void delete(boolean force) throws DAOException {
 		try {
-
-			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser(); 
-			
+			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
 			if (currentUser.equals(getUserName())) {
-								
 				throw new DAOValidationException(
 						new IllegalArgumentException("Session user can not be deleted."));
 			}
-
+			if(!force && !PersonLifecycleService.PersonStatus.todelete.equals(getStatus().getStatus())){
+				throw new IllegalStateException("User status is not yet set " +
+						PersonLifecycleService.PersonStatus.todelete + ", got " + getStatus().getStatus());
+			}
 			((MCAlfrescoAPIClient)this.baseClient).deleteUser(getUserName());
 			
 		} catch (Exception e) {
-
 			throw DAOException.mapping(e);
 		}
 	}
