@@ -10,6 +10,7 @@
         "NO_MATCHING_ITEMS_FOLDER": "Keine Elemente innerhalb des Ordners \"{{name}}\" entsprechen der Suchanfrage",
         "SEARCH_GLOBAL": "Überall suchen",
         "SEARCH": "Suchen...",
+        "SEARCH_ACTION": "Suchen",
         "SAFE_SEARCH": "Safe durchsuchen...",
         "ALL_FILES": "Alle Dateien",
         "MY_FILES": "Meine Inhalte",

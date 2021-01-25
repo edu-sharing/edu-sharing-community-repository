@@ -9,6 +9,7 @@
         "NO_MATCHING_ITEMS": "No matching elements",
         "NO_MATCHING_ITEMS_FOLDER": "No matchine elements found in folder \"{{name}}\"",
         "SEARCH": "Search...",
+        "SEARCH_ACTION": "Search",
         "SAFE_SEARCH": "Search the safe…",
         "MY_FILES": "My content",
         "SEARCH_GLOBAL": "Search everywhere",

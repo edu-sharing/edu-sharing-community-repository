@@ -70,6 +70,8 @@ $dialogZIndex: 120;
 $dialogNonModalZIndex: 90; // before the top bar on mobile, but behind the mobile tabs and the top bar on desktop
 $topBarZIndex: 98;
 $topBarMobileZIndex: 80;
+$workspaceTopBarInputBackground: #555;
+$workspaceTopBarInputText: #fff;
 $mobileTabsZIndex: 110;
 $mobileTabSwitchWidth:   $mobileWidth+$mobileStage*2;
 $mobileTabNavHeight:62px;
