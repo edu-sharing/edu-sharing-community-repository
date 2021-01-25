@@ -71,10 +71,12 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 				if (authHdr.length() > 5 && authHdr.substring(0, 5).equalsIgnoreCase("BASIC")) {
 					logger.debug("auth is BASIC");
 					validatedAuth = httpBasicAuth(authHdr);
-					String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
-					String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
-					String username = validatedAuth.get(CCConstants.AUTH_USERNAME);
-					authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET),authMethod, session);
+					if(validatedAuth != null) {
+						String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
+						String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
+						String username = validatedAuth.get(CCConstants.AUTH_USERNAME);
+						authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET), authMethod, session);
+					}
 				} else if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")) {
 					
 					logger.info("auth is OAuth");
