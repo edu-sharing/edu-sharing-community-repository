@@ -609,7 +609,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         );
     }
 
-    private doSearch(
+    doSearch(
         value = this.search.nativeElement.value,
         broadcast = true,
     ) {
