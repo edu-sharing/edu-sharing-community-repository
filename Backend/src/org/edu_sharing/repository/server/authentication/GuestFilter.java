@@ -19,6 +19,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.config.model.Values;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 public class GuestFilter implements javax.servlet.Filter {
 
@@ -62,6 +63,9 @@ public class GuestFilter implements javax.servlet.Filter {
 					else {
 						HashMap<String, String> authInfoGuest = authTool.createNewSession(guestLogin, guestPW);
 						authTool.storeAuthInfoInSession(authInfoGuest.get(CCConstants.AUTH_USERNAME), authInfoGuest.get(CCConstants.AUTH_TICKET),CCConstants.AUTH_TYPE_DEFAULT, session);
+
+						// prewarm tp session cache
+						ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions();
 					}
 				}else{
 					logger.debug("no guest defined");
