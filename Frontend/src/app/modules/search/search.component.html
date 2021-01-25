@@ -267,29 +267,35 @@
                         <i class="material-icons">search</i>
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
-                    <div class="heading" *ngIf="searchService.searchResult.length">
-                        <h2>
-                          {{ 'SEARCH.MATERIALS' | translate }}
-                          <ng-container *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</ng-container>
-                        </h2>
-                        <!-- TODO: make popup menu usable with keyboard -->
+                  <div class="heading" *ngIf="searchService.searchResult.length">
+                    <h2>
+                      {{ 'SEARCH.MATERIALS' | translate }}
+                      <ng-container *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</ng-container>
+                    </h2>
+                    <!-- TODO: make popup menu usable with keyboard -->
+                    <div class="sort-by">
+                      <label for="sorting">{{'SORT_BY' | translate}}</label>
+                      <div>
                         <button
-                            *ngIf="searchService.sort.materialsColumns"
-                            class="sorting clickable"
-                            (click)="searchService.sort.materials = true"
-                            aria-haspopup="true"
+                          mat-button
+                          *ngIf="searchService.sort.materialsColumns"
+                          id="sorting"
+                          (click)="searchService.sort.materials = true"
+                          aria-haspopup="true"
                         >
-                            <div class="sorting-info">
-                                <div>{{'NODE.'+searchService.sort.materialsSortBy | translate}}</div>
-                                <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
-                            </div>
+                          <div class="sorting-info">
+                            <div>{{'NODE.'+searchService.sort.materialsSortBy | translate}}</div>
+                            <i *ngIf="searchService.sort.materialsColumns" class="material-icons">arrow_{{searchService.sort.materialsSortAscending ? 'upward' : 'downward'}}</i>
+                          </div>
                         </button>
-                        <sort-dropdown [(open)]="searchService.sort.materials"
-                                        [columns]="searchService.sort.materialsColumns"
-                                        [sortAscending]="searchService.sort.materialsSortAscending"
-                                        [sortBy]="searchService.sort.materialsSortBy"
-                                        (onSort)="sortMaterials($event)"></sort-dropdown>
+                      </div>
+                      <sort-dropdown [(open)]="searchService.sort.materials"
+                                     [columns]="searchService.sort.materialsColumns"
+                                     [sortAscending]="searchService.sort.materialsSortAscending"
+                                     [sortBy]="searchService.sort.materialsSortBy"
+                                     (onSort)="sortMaterials($event)"></sort-dropdown>
                     </div>
+                  </div>
                     <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
                     <listTable
                             #list
