@@ -23,7 +23,7 @@
         (widget.observeIsDisabled() | async) === false &&
         (indeterminateValues$ | async)?.includes(value.key)
           ? ('MDS.INDETERMINATE_NOTICE' | translate)
-          : undefined
+          : value.label
       "
     >
       <span class="mat-chip-label">{{ value.label }}</span>
