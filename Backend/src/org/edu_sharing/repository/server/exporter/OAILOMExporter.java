@@ -62,7 +62,7 @@ public class OAILOMExporter {
 
 			File f = new File(outputDir + "/" + sourceId + ".xml");
 			FileOutputStream os=new FileOutputStream(f);
-
+			write(os,ioId);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
