@@ -35,7 +35,7 @@
     </div>-->
     <div class="receivers">
       <mat-chip-list *ngIf="status.hasReceiver">
-        <mat-chip *ngFor="let receiver of receivers" (removed)="removeReceiver(receiver)">
+        <mat-chip *ngFor="let receiver of receivers" (removed)="removeReceiver(receiver)" class="badge">
           <div class="mat-chip-group">
             <span class="primary">{{receiver | authorityName}}</span>
             <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
@@ -66,9 +66,9 @@
                 </mat-chip>
               </mat-chip-list>
               <mat-chip-list *ngIf="!(i==history.length-1 || !getWorkflowForId(history[i+1].status).hasReceiver)">
-                <mat-chip *ngFor="let receiver of history[i+1].receiver">
+                <mat-chip *ngFor="let receiver of history[i+1].receiver" class="badge">
                   <i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
-                  <div class="badge-group">
+                  <div class="mat-chip-group">
                     <span class="primary">{{receiver | authorityName}}</span>
                     <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
                   </div>
@@ -96,7 +96,8 @@
                 </mat-chip>
               </mat-chip-list>
               <mat-chip-list *ngIf="getWorkflowForId(history[i].status).hasReceiver && entry.receiver?.length">
-                <mat-chip *ngFor="let receiver of entry.receiver"><i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+                <mat-chip *ngFor="let receiver of entry.receiver" class="badge">
+                  <i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
                   <div class="mat-chip-group">
                     <span class="primary">{{receiver | authorityName}}</span>
                     <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
