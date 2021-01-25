@@ -1,5 +1,5 @@
 import { ActivatedRoute } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, MissingTranslationHandler, MissingTranslationHandlerParams } from '@ngx-translate/core';
 import { BehaviorSubject, Observer, ReplaySubject } from 'rxjs';
 import 'rxjs/add/observable/concat';
 import 'rxjs/add/observable/forkJoin';
@@ -226,5 +226,11 @@ export class Translation {
 
     private static setLanguage(language: string) {
         Translation.language = language;
+    }
+}
+
+export class FallbackTranslationHandler implements MissingTranslationHandler {
+    handle(params: MissingTranslationHandlerParams) {
+        return (params.interpolateParams as any)?.fallback || params.key;
     }
 }

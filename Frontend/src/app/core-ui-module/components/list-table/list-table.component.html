@@ -240,7 +240,7 @@
                              [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
                         <div class="row-group">
                             <div class="rowInner">
-                                <app-list-base [node]="node" [item]="item"></app-list-base>
+                                <app-list-base [node]="node" [item]="item" [showFieldTooltip]="viewType !== 0"></app-list-base>
                             </div>
                             <div *ngIf="i==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                                 <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>

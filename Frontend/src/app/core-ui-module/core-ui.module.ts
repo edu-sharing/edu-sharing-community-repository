@@ -17,7 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule, MissingTranslationHandler } from '@ngx-translate/core';
 import { Ng5SliderModule } from 'ng5-slider';
 import { ToastyModule } from 'ngx-toasty';
 import { RestLocatorService } from '../core-module/rest/services/rest-locator.service';
@@ -56,17 +56,18 @@ import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { TranslationLoader } from './translation-loader';
-import {BitwisePipe} from './pipes/bitwise.pipe';
+import { BitwisePipe } from './pipes/bitwise.pipe';
 import { ElementRefDirective } from './directives/element-ref.directive';
-import {NodeHelperService} from './node-helper.service';
-import {ListCollectionInfoComponent} from './components/list-table/widgets/list-collection-info/list-collection-info.component';
-import {ListTextComponent} from './components/list-table/widgets/list-text/list-text.component';
-import {ListBaseComponent} from './components/list-table/widgets/list-base/list-base.component';
-import {ListNodeLicenseComponent} from './components/list-table/widgets/list-node-license/list-node-license.component';
-import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
-import {ListNodeWorkflowComponent} from './components/list-table/widgets/list-node-workflow/list-node-workflow.component';
-import {NodeImageSizePipe} from './pipes/node-image-size.pipe';
+import { NodeHelperService } from './node-helper.service';
+import { ListCollectionInfoComponent } from './components/list-table/widgets/list-collection-info/list-collection-info.component';
+import { ListTextComponent } from './components/list-table/widgets/list-text/list-text.component';
+import { ListBaseComponent } from './components/list-table/widgets/list-base/list-base.component';
+import { ListNodeLicenseComponent } from './components/list-table/widgets/list-node-license/list-node-license.component';
+import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
+import { ListNodeWorkflowComponent } from './components/list-table/widgets/list-node-workflow/list-node-workflow.component';
+import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { TitleDirective } from './directives/title.directive';
+import { FallbackTranslationHandler } from './translation';
 
 @NgModule({
     declarations: [
@@ -140,12 +141,13 @@ import { TitleDirective } from './directives/title.directive';
                 useFactory: TranslationLoader.create,
                 deps: [HttpClient, RestLocatorService],
             },
+            missingTranslationHandler: {
+                provide: MissingTranslationHandler,
+                useClass: FallbackTranslationHandler,
+            },
         }),
     ],
-    providers: [
-        Toast,
-        NodeHelperService
-    ],
+    providers: [Toast, NodeHelperService],
     exports: [
         TranslateModule,
         ListTableComponent,

@@ -1,58 +1,83 @@
 <ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
-    <ng-container [ngSwitch]="item.name">
-        <ng-container *ngSwitchCase="'displayName'">
-            {{ node.profile.displayName }}
-        </ng-container>
-        <ng-container *ngSwitchCase="'groupType'">
-            {{ 'PERMISSIONS.GROUP_TYPE.'+node.profile.groupType | translate }}
-        </ng-container>
-        <ng-container *ngSwitchDefault>
-            {{node[item.name]}}
-        </ng-container>
-    </ng-container>
+  <ng-container [ngSwitch]="item.name">
+    <span *ngSwitchCase="'displayName'">
+      {{ node.profile.displayName }}
+    </span>
+    <span *ngSwitchCase="'groupType'">
+      {{ 'PERMISSIONS.GROUP_TYPE.' + node.profile.groupType | translate }}
+    </span>
+    <span *ngSwitchDefault>
+      {{ node[item.name] }}
+    </span>
+  </ng-container>
 </ng-container>
 <ng-container *ngIf="item.type === 'USER'">
-    <ng-container *ngIf="isUserProfileAttribute(item.name)">
-        {{node.profile[item.name]}}
-    </ng-container>
-    <ng-container *ngIf="item.name === 'status'">
-        {{ 'PERMISSIONS.USER_STATUS.'+node.status.status | translate }}
-    </ng-container>
-    <ng-container *ngIf="!isUserProfileAttribute(item.name) && item.name !== 'status'">
-        {{node[item.name]}}
-    </ng-container>
+  <span *ngIf="isUserProfileAttribute(item.name)">
+    {{ node.profile[item.name] }}
+  </span>
+  <span *ngIf="item.name === 'status'">
+    {{ 'PERMISSIONS.USER_STATUS.' + node.status.status | translate }}
+  </span>
+  <span *ngIf="!isUserProfileAttribute(item.name) && item.name !== 'status'">
+    {{ node[item.name] }}
+  </span>
 </ng-container>
 <ng-container [ngSwitch]="item.name" *ngIf="item.type === 'NODE' || item.type === 'COLLECTION'">
-    <ng-container *ngSwitchCase="'name'">
-        {{node.name}}
+  <span *ngSwitchCase="'name'">
+    {{ node.name }}
+  </span>
+  <span *ngSwitchCase="'title'">
+    {{ node.title || node.name }}
+  </span>
+  <span *ngSwitchCase="'cclom:title'">
+    {{ node.title || node.name }}
+  </span>
+  <span
+    *ngSwitchCase="'mediatype'"
+    [matTooltip]="showFieldTooltip ? ('NODE.mediatype' | translate) : null"
+  >
+    {{ 'MEDIATYPE.' + node.mediatype | translate }}
+  </span>
+  <span *ngSwitchCase="'size'" [matTooltip]="showFieldTooltip ? ('NODE.size' | translate) : null">
+    {{ node.size | formatSize }}
+  </span>
+  <span
+    *ngSwitchCase="'dimensions'"
+    [matTooltip]="showFieldTooltip ? ('NODE.dimensions' | translate) : null"
+  >
+    {{ node | NodeImageSize }}
+  </span>
+  <span
+    *ngSwitchCase="'cm:creator'"
+    [matTooltip]="showFieldTooltip ? ('NODE.cm:creator' | translate) : null"
+  >
+    {{ node.createdBy | nodePersonName }}
+  </span>
+  <span
+    *ngSwitchCase="'cm:modifier'"
+    [matTooltip]="showFieldTooltip ? ('NODE.cm:modifier' | translate) : null"
+  >
+    {{ node.modifiedBy | nodePersonName }}
+  </span>
+  <span
+    *ngSwitchCase="'ccm:replicationsource'"
+    [matTooltip]="showFieldTooltip ? ('NODE.ccm:replicationsource' | translate) : null"
+  >
+    {{
+      'REPOSITORIES.' + node.properties['ccm:replicationsource']
+        | translate: { fallback: node.properties['ccm:replicationsource'] }
+    }}
+  </span>
+  <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
+    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
+      {{
+        node.properties[item.name + '_DISPLAYNAME']
+          ? node.properties[item.name + '_DISPLAYNAME'].join(', ')
+          : node.properties[item.name]?.join(', ')
+      }}
     </ng-container>
-    <ng-container *ngSwitchCase="'title'">
-        {{node.title || node.name}}
+    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
+      {{ node.properties[item.name][0] | formatDate }}
     </ng-container>
-    <ng-container *ngSwitchCase="'cclom:title'">
-        {{node.title || node.name}}
-    </ng-container>
-    <ng-container *ngSwitchCase="'mediatype'">
-        {{'MEDIATYPE.' + node.mediatype | translate}}
-    </ng-container>
-    <ng-container *ngSwitchCase="'size'">
-        {{node.size | formatSize}}
-    </ng-container>
-    <ng-container *ngSwitchCase="'dimensions'">
-        {{node | NodeImageSize}}
-    </ng-container>
-    <ng-container *ngSwitchCase="'cm:creator'">
-        {{node.createdBy | nodePersonName}}
-    </ng-container>
-    <ng-container *ngSwitchCase="'cm:modifier'">
-        {{node.modifiedBy | nodePersonName}}
-    </ng-container>
-    <ng-container *ngSwitchDefault>
-        <div *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
-            {{ node.properties[item.name+'_DISPLAYNAME'] ? node.properties[item.name+'_DISPLAYNAME'].join(', ') : node.properties[item.name]?.join(', ') }}
-        </div>
-        <div *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
-            {{ node.properties[item.name][0] | formatDate }}
-        </div>
-    </ng-container>
+  </span>
 </ng-container>
