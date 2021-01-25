@@ -1,4 +1,4 @@
-<div class="avatar size_{{size}}">
+<div class="avatar size_{{size}}" role="presentation">
   <div class="avatarOuter sizable">
     <ng-container *ngIf="_user?.authorityType === 'GROUP'">
       <div *ngFor="let i of [0,1,2]" class="avatarCircle sizable avatarCircleGroup" style.border-color="{{ _user | authorityColor}}"></div>
