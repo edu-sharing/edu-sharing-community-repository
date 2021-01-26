@@ -51,7 +51,7 @@
           ({{ (selectedNodes?.length || 0) + '/' + totalCount }})
         </div>
         <sort-dropdown #sortDropdown class="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
-        <button *ngIf="sortDropdown?.menu" #sortDropdownMenuTrigger [matMenuTriggerFor]="sortDropdown.menu" class="cdk-visually-hidden" aria-hidden="true"></button>
+        <button *ngIf="sortDropdown?.menu" #sortDropdownMenuTrigger [matMenuTriggerFor]="sortDropdown.menu" class="cdk-visually-hidden" aria-hidden="true" tabindex="-1"></button>
 
         <div class="heading" [attr.role]="viewType === 0 ? 'row' : null">
         <div *ngIf="hasCheckbox"
