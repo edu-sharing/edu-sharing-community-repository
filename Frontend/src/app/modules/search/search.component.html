@@ -61,10 +61,17 @@
   >
         <div class="mobile-move-top">
             <div class="extendedSearch" #extendedSearch>
-                <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
-                    <span id="extended-search-label">{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
-                    <span class="mobile" *ngIf="!selection || !selection.length">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
-                    <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
+                <button
+                  mat-button
+                  matTooltip="{{(searchService.sidenavOpened ? 'SEARCH.HIDE_EXPANDED_SEARCH' : 'SEARCH.SHOW_EXTENDED_SEARCH') | translate}}"
+                  attr.aria-label="{{(searchService.sidenavOpened ? 'SEARCH.HIDE_EXPANDED_SEARCH' : 'SEARCH.SHOW_EXTENDED_SEARCH') | translate}}"
+                  (click)="toggleSidenav()"
+                  class="pointed filtertoggler"
+                >
+                  <span id="extended-search-label">{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
+                  <span class="mobile" *ngIf="!selection || !selection.length">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
+                  <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i>
+                </button>
             </div>
             <div class="switchToCollections" *ngIf="isGuest">
                 <a tabindex="0" title="{{'SEARCH.TO_COLLECTIONS' | translate}}" class="clickable" (click)="switchToCollections()" (keyup.enter)="switchToCollections()">{{'SEARCH.TO_COLLECTIONS' | translate}} <i class="material-icons">arrow_forward</i></a>

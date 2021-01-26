@@ -117,7 +117,7 @@ $sidenavTopBaseOffset:110px;
     min-height: auto;
     max-height: none;
 }
-.extendedSearch a, .switchToCollections a, .switchToSearch a{
+.switchToCollections a, .switchToSearch a{
     padding: 5px;
 }
 
@@ -126,6 +126,9 @@ sort-dropdown{
     right: 250px;
 }
 .extendedSearch{
+    button {
+        margin-left: -1px; // align with main content
+    }
     .mobile{
         display:none!important;
     }
@@ -301,13 +304,13 @@ a, a:hover, a:visited, a:active, button {
     }
     actionbar{
         position: relative;
-        top: -4px;
     }
     >div {
         height: $secondaryBarHeight;
         background-color: #fff;
         display: flex;
-        padding: 20px;
+        align-items: center;
+        padding: 10px;
         @include materialShadow();
     }
 }
