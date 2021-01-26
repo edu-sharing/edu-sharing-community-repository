@@ -837,7 +837,7 @@ public class SearchServiceImpl implements SearchService {
 		
 		Set<String> authoritiesForUser = serviceRegistry.getAuthorityService().getAuthorities();
 		// Do not display io_references
-		String query = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND NOT ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND (@ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"";
+		String query = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND ISUNSET:\"" + CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL + "\" AND NOT ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND (@ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"";
 		for(String authority : authoritiesForUser) {
 			query+=" OR @ccm\\:wf_receiver:\"" + authority + "\"";
 		}
