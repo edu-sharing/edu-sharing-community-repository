@@ -12,14 +12,14 @@ export class NodeSourcePipe implements PipeTransform {
     transform(replicationSource: string, args: {
         mode: 'text' | 'url' | 'escaped'
     }): string {
-      const rawSrc = replicationSource ? replicationSource.toString().trim() : null;
+      const rawSrc = replicationSource ? replicationSource.toString().trim() : 'home';
       if(args.mode === 'text') {
           if(rawSrc === 'home') {
-              return RestNetworkService.getRepositoryById(RestConstants.HOME_REPOSITORY)?.title ?? 'home';
+              return RestNetworkService.getRepositoryById(RestConstants.HOME_REPOSITORY)?.title || 'home';
           }
           return rawSrc;
       } else if(args.mode === 'url') {
-          const src = this.escape(rawSrc) ?? 'home';
+          const src = this.escape(rawSrc);
           return this.nodeHelper.getSourceIconPath(src);
       } else if(args.mode === 'escaped') {
           return this.escape(rawSrc);

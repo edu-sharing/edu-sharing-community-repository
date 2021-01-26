@@ -1041,5 +1041,14 @@
         "MAIN_CONTENT": "Springe zum Hauptinhalt"
     },
     "REPOSITORIES": {
+        "de_fwu": "FWU",
+        "ddb": "Deutsche Digitale Bibliothek",
+        "geogebra": "GeoGebra",
+        "memucho": "Memucho",
+        "omega": "Omega",
+        "pixabay": "Pixabay",
+        "tutory": "Tutory",
+        "youtube": "YouTube",
+        "zum": "ZUM Wiki"
     }
 }
