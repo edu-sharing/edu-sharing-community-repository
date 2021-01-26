@@ -807,6 +807,7 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		ArrayList<String> result = new ArrayList<String>();
 		if (node != null) {
 			NodeList langList = (NodeList) xpath.evaluate("string", node, XPathConstants.NODESET);
+			if(langList.getLength() == 0) langList = (NodeList) xpath.evaluate("langstring", node, XPathConstants.NODESET);
 			for (int i = 0; i < langList.getLength(); i++) {
 				Node langValNode = langList.item(i);
 				String language = (String) xpath.evaluate("@language", langValNode, XPathConstants.STRING);
