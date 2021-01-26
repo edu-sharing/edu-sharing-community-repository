@@ -112,9 +112,6 @@
       [class.sidenavHidden]="!searchService.sidenavOpened"
       [@fromLeft]="searchService.sidenavOpened"
     >
-     <div class="apply" *ngIf="searchService.sidenavOpened && !isMdsLoading()">
-        <actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar>
-     </div>
      <div class="row tab-group" *ngIf="!isGuest">
        <div class="col s12">
          <ul class="tabs">
@@ -198,6 +195,9 @@
              <button mat-button (click)="goToSaveSearchWorkspace()">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</button>
            </div>
        </div>
+     </div>
+     <div class="apply" *ngIf="searchService.sidenavOpened && !isMdsLoading()">
+        <actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2" highlight="last"></actionbar>
      </div>
      <!--
       <label id="keywordlabel" class="a11y_hidden_label">{{'SEARCH.KEYWORD' | translate}}</label>

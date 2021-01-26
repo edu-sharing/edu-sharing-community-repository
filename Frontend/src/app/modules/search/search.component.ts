@@ -1128,39 +1128,35 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     private updateMdsActions(): void {
         this.savedSearchOptions.addOptions = [];
-
         this.mdsActions = [];
-        this.mdsActions.push(
-            new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
-                this.applyParameters(await this.getActiveMds().getValues());
-            }),
-        );
-        if (this.applyMode) {
-            let apply = new OptionItem('APPLY', 'redo', (node: Node) => {
-                this.nodeHelper.addNodeToLms(
-                    node,
-                    this.searchService.reurl,
-                );
-            });
-            this.savedSearchOptions.addOptions.push(apply);
-        } else {
-        }
-        let save = new OptionItem(
-            this.applyMode
-                ? 'SEARCH.EMBED_SEARCH_ACTION'
-                : 'SEARCH.SAVE_SEARCH_ACTION',
-            this.applyMode ? 'redo' : 'save',
-            () => {
-                this.saveSearchDialog = true;
-            },
-        );
         if (!this.isGuest) {
-            this.mdsActions.push(save);
+            this.mdsActions.push(
+                new OptionItem(
+                    this.applyMode
+                        ? 'SEARCH.EMBED_SEARCH_ACTION'
+                        : 'SEARCH.SAVE_SEARCH_ACTION',
+                    this.applyMode ? 'redo' : 'save',
+                    () => {
+                        this.saveSearchDialog = true;
+                    },
+                ),
+            );
         }
-        this.mdsButtons = DialogButton.fromOptionItem(this.mdsActions).slice(
-            0,
-            1,
-        );
+        if (this.applyMode) {
+            this.savedSearchOptions.addOptions.push(
+                new OptionItem('APPLY', 'redo', (node: Node) => {
+                    this.nodeHelper.addNodeToLms(
+                        node,
+                        this.searchService.reurl,
+                    );
+                }),
+            );
+        }
+        const searchAction = new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
+            this.applyParameters(await this.getActiveMds().getValues());
+        });
+        this.mdsActions.push(searchAction);
+        this.mdsButtons = DialogButton.fromOptionItem([searchAction]);
     }
 
     private closeSaveSearchDialog() {

@@ -11,30 +11,12 @@
   [class.actionbar-round]="appearance == 'round'"
 >
   <button
-    mat-flat-button
-    color="primary"
-    *ngIf="optionsAlways.length > 0"
-    [disabled]="!optionsAlways[0].isEnabled"
-    [class.display-none]="!optionsAlways[0].isEnabled && !showDisabled"
-    matTooltip="{{
-      optionsAlways[0].showName && appearance != 'round'
-        ? null
-        : (optionsAlways[0].name | translate)
-    }}"
-    [attr.aria-label]="optionsAlways[0].name | translate"
-    (click)="click(optionsAlways[0])"
-  >
-    <i [icon]="optionsAlways[0].icon"></i>
-    <span class="action-always-caption" *ngIf="optionsAlways[0].showName && appearance != 'round'">
-      {{ optionsAlways[0].name | translate }}</span
-    >
-  </button>
-  <button
+    *ngFor="let option of optionsAlways; let i = index"
     mat-button
     color="primary"
-    *ngFor="let option of optionsAlways.slice(1); let i = index"
     [disabled]="!option.isEnabled"
     [class.display-none]="!option.isEnabled && !showDisabled"
+    [class.mat-flat-button]="shouldHighlight(i)"
     matTooltip="{{ option.showName ? null : (option.name | translate) }}"
     [attr.aria-label]="option.name | translate"
     (click)="click(option)"
@@ -48,7 +30,7 @@
     mat-button
     color="primary"
     class="more button-icon"
-    aria-label="{{'OPTIONS.SHOW_ALL_OPTIONS' | translate}}"
+    attr.aria-label="{{'OPTIONS.SHOW_ALL_OPTIONS' | translate}}"
     [matMenuTriggerFor]="dropdownRef.menu"
     *ngIf="canShowDropdown()"
   >
