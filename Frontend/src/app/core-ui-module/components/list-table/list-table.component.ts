@@ -16,7 +16,7 @@ import {
     Input,
     Output,
     TemplateRef,
-    ViewChild, ViewContainerRef, SimpleChanges, OnChanges,
+    ViewChild, ViewContainerRef, SimpleChanges, OnChanges, Renderer2,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -54,7 +54,6 @@ import { DistinctClickEvent } from '../../directives/distinct-click.directive';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 import { CustomOptions, OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
-import { UIHelper } from '../../ui-helper';
 import {NodeHelperService} from '../../node-helper.service';
 
 
@@ -113,6 +112,7 @@ export class ListTableComponent implements OnChanges, EventListener {
     @ViewChild('drag') drag: ElementRef;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
     @ViewChild('dropdown') dropdownElement: ElementRef;
+    @ViewChild('sortDropdownMenuTrigger') sortDropdownMenuTrigger: ElementRef<HTMLButtonElement>;
 
     @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
@@ -482,7 +482,6 @@ export class ListTableComponent implements OnChanges, EventListener {
     currentDragColumn: ListItem;
     optionsAlways: OptionItem[] = [];
     private repositories: Repository[];
-    sortMenu = false;
 
     constructor(
         private ui: UIService,
@@ -503,6 +502,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         private optionsHelper: OptionsHelperService,
         private bridge: BridgeService,
         private frame: FrameEventsService,
+        private renderer: Renderer2,
     ) {
         this.nodeHelper.setViewContainerRef(this.viewContainerRef);
         this.reorderButtons = DialogButton.getSaveCancel(
@@ -981,6 +981,7 @@ export class ListTableComponent implements OnChanges, EventListener {
     setSortingIntern(
         sortBy: ListItem,
         isPrimaryElement: boolean,
+        target: HTMLElement,
     ): void {
         if (
             isPrimaryElement &&
@@ -988,7 +989,7 @@ export class ListTableComponent implements OnChanges, EventListener {
                 UIConstants.MOBILE_WIDTH + UIConstants.MOBILE_STAGE * 4
         ) {
             if (this.sortByMobile) {
-                this.sortMenu = true;
+                this.triggerSortDropdownMenu(target);
             }
             return;
         }
@@ -998,6 +999,21 @@ export class ListTableComponent implements OnChanges, EventListener {
         }
         (sortBy as any).ascending = ascending;
         this.setSorting(sortBy);
+    }
+
+    private triggerSortDropdownMenu(target: HTMLElement): void {
+        const targetRect = target.getClientRects()[0];
+        const menuTriggerStyle = {
+            position: 'fixed',
+            top: targetRect.top + 'px',
+            left: targetRect.left + 'px',
+            width: targetRect.width + 'px',
+            height: targetRect.height + 'px',
+        }
+        for (const [key, value] of Object.entries(menuTriggerStyle)) {
+            this.renderer.setStyle(this.sortDropdownMenuTrigger.nativeElement, key, value)
+        }
+        this.sortDropdownMenuTrigger.nativeElement.click();
     }
 
     setSorting(sortBy: any): void {

@@ -1,12 +1,22 @@
-<div class="dialog" *ngIf="open" (click)="setOpen(false);$event.stopPropagation();" (contextmenu)="setOpen(false);$event.preventDefault();$event.stopPropagation();"></div>
-<div class="group">
-    <div class="sortMenu collection" *ngIf="open" [@openOverlay]="open">
-        <div class="collection-item-title">{{'SORT_BY' | translate}}</div>
-        <a *ngFor="let item of columns" (click)="setSort(item)" class="collection-item" [class.active]="sortBy==item.name">
-            <div class="title" *ngIf="item.label">{{item.label}}</div>
-            <div class="title" *ngIf="!item.label">{{item.type+"."+item.name | translate}}</div>
-            <a *ngIf="sortBy==item.name"><i class="material-icons" *ngIf="sortAscending">arrow_upward</i><i class="material-icons" *ngIf="!sortAscending">arrow_downward</i></a>
-            <a *ngIf="sortBy!=item.name"></a>
-        </a>
-    </div>
-</div>
+<mat-menu #menu="matMenu" class="sort-dropdown-menu">
+  <div class="collection-item-title">{{ 'SORT_BY' | translate }}</div>
+  <button
+    *ngFor="let item of columns"
+    mat-menu-item
+    (click)="setSort(item)"
+    class="collection-item"
+    [class.active]="sortBy == item.name"
+  >
+    <div class="title" *ngIf="item.label">{{ item.label }}</div>
+    <div class="title" *ngIf="!item.label">{{ item.type + '.' + item.name | translate }}</div>
+    <ng-container *ngIf="sortBy == item.name">
+      <i class="material-icons" *ngIf="sortAscending" [altText]="'ASCENDING' | translate">
+        arrow_upward
+      </i>
+      <i class="material-icons" *ngIf="!sortAscending" [altText]="'DESCENDING' | translate">
+        arrow_downward
+      </i>
+      <span class="cdk-visually-hidden">{{ 'SELECTED' | translate }}</span>
+    </ng-container>
+  </button>
+</mat-menu>

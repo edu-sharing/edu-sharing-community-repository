@@ -50,7 +50,8 @@
         >
           ({{ (selectedNodes?.length || 0) + '/' + totalCount }})
         </div>
-        <sort-dropdown class="sortMenu" [(open)]="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
+        <sort-dropdown #sortDropdown class="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
+        <button *ngIf="sortDropdown?.menu" #sortDropdownMenuTrigger [matMenuTriggerFor]="sortDropdown.menu" class="cdk-visually-hidden" aria-hidden="true"></button>
 
         <div class="heading" [attr.role]="viewType === 0 ? 'row' : null">
         <div *ngIf="hasCheckbox"
@@ -65,11 +66,11 @@
             >
             <!-- FIXME: This should be a pushbutton if and only if it is clickable, otherwise a
             non-interactive element, e.g., span. -->
-            <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item,j==0)">
+            <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item, j==0, $event.target)">
                 <ng-container *ngIf="!item.label">{{item.type+"."+item.name | translate}}</ng-container>
                 <ng-container *ngIf="item.label">{{item.label}}</ng-container>
             </a>
-            <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,j==0)" aria-hidden="true">
+            <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,j==0, $event.target)" aria-hidden="true">
                 <a class="" *ngIf="sortBy==item.name && sortAscending"><i icon="arrow_drop_up"></i></a>
                 <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon="arrow_drop_down"></i></a>
             </div>
