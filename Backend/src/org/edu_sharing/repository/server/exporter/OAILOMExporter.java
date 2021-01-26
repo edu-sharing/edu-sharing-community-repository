@@ -41,6 +41,8 @@ public class OAILOMExporter {
 
 	NodeRef nodeRef = null;
 
+	Locale nodeLanguage = null;
+
 	Document doc;
 
 	public OAILOMExporter() throws ParserConfigurationException {
@@ -69,6 +71,11 @@ public class OAILOMExporter {
 	}
 	public void write(OutputStream os,String ioId) {
 		nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ioId);
+
+		List<String> language = (List<String>)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
+		nodeLanguage = (language != null && language.size() > 0) ? Locale.forLanguageTag(language.get(0).trim()) : Locale.getDefault();
+		if(nodeLanguage == null) nodeLanguage = Locale.getDefault();
+
 		QName type = nodeService.getType(nodeRef);
 
 		if (!type.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
@@ -250,7 +257,7 @@ public class OAILOMExporter {
 			String tar = tarFrom + "-" + tarTo;
 			Element typicalAgeRange = createAndAppendElement("typicalAgeRange", educational);
 			Element eleString = createAndAppendElement("string", typicalAgeRange,tar);
-			eleString.setAttribute("language", "en");
+			eleString.setAttribute("language", nodeLanguage.getLanguage());
 		}
 
 		//createAndAppendElement("typicalAgeRange", educational, QName.createQName(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE));
@@ -312,13 +319,13 @@ public class OAILOMExporter {
 	public void createKeyword(Element general) {
 		Element keywordEle = createAndAppendElement("keyword", general);
 		Element keywordStrEle = createAndAppendElement("string", keywordEle, QName.createQName(CCConstants.LOM_PROP_GENERAL_KEYWORD));
-		if(keywordStrEle != null)keywordStrEle.setAttribute("language", "de");
+		if(keywordStrEle != null)keywordStrEle.setAttribute("language", nodeLanguage.getLanguage());
 	}
 
 	public void createDescription(Element general) {
 		Element descriptionEle = createAndAppendElement("description", general);
 		Element descriptionStrEle = createAndAppendElement("string", descriptionEle, QName.createQName(CCConstants.LOM_PROP_GENERAL_DESCRIPTION));
-		if(descriptionStrEle != null)descriptionStrEle.setAttribute("language", "de");
+		if(descriptionStrEle != null)descriptionStrEle.setAttribute("language", nodeLanguage.getLanguage());
 	}
 
 	public void createLanguage(Element general) {
@@ -332,7 +339,7 @@ public class OAILOMExporter {
 			title= (String) nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
 		}
 		Element titleStrEle = createAndAppendElement("string", titleEle,title);
-		if(titleStrEle != null)titleStrEle.setAttribute("language", "de");
+		if(titleStrEle != null)titleStrEle.setAttribute("language", nodeLanguage.getLanguage());
 	}
 
 	/**
@@ -468,12 +475,14 @@ public class OAILOMExporter {
         List<MLText> deTextLst = new ArrayList<>();
         Serializable textLst = nodeService.getProperty(nodeRef, textProp);
         if (textLst != null) {
+
+
             if (textLst instanceof List) {
                 for (String deText : (List<String>) textLst)
                     if (!deText.isEmpty())
-                        deTextLst.add(new MLText(Locale.ROOT, deText));
+                        deTextLst.add(new MLText(nodeLanguage, deText));
             } else if (textLst instanceof String)
-                deTextLst.add(new MLText(Locale.ROOT, (String) textLst));
+                deTextLst.add(new MLText(nodeLanguage, (String) textLst));
             return this.createAndAppendElement(elementName, parent, (Serializable) deTextLst, false);
         }
         return null;
@@ -505,7 +514,7 @@ public class OAILOMExporter {
                 Element srcEle = createAndAppendElement("source", element);
                 langEle = createAndAppendElement("langstring", srcEle, src, false);
                 if (langEle != null)
-                    langEle.setAttribute("language", "x-none");
+                    langEle.setAttribute("language", nodeLanguage.getLanguage());
             }
 
             // ## set correct id !
@@ -515,8 +524,7 @@ public class OAILOMExporter {
             if (entEle != null) {
                 langEle = createAndAppendElement("langstring", entEle, repoValue, false);
                 if (langEle != null)
-                    // ## Decide if names are in English or German!
-                    langEle.setAttribute("language", "en");
+                    langEle.setAttribute("language", nodeLanguage.getLanguage());
             }
             return element;
         }
@@ -551,13 +559,13 @@ public class OAILOMExporter {
 				Element srcEle = createAndAppendElement("source", element);
 				langEle = createAndAppendElement("langstring", srcEle, src, false);
 				if (langEle != null)
-					langEle.setAttribute("language", "x-none");
+					langEle.setAttribute("language", nodeLanguage.getLanguage());
 			}
 			Element valEle = createAndAppendElement("value", element);
 			if (valEle != null) {
 				langEle = createAndAppendElement("langstring", valEle, repoValue, false);
 				if (langEle != null)
-					langEle.setAttribute("language", "x-none");
+					langEle.setAttribute("language", nodeLanguage.getLanguage());
 			}
 			return element;
 		}
