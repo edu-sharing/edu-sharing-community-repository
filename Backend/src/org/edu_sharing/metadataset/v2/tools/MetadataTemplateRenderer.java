@@ -18,7 +18,6 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
-import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -27,7 +26,6 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
-import javax.swing.text.NumberFormatter;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -60,9 +58,12 @@ public class MetadataTemplateRenderer {
 		this.mds = mds;
 		this.nodeRef = nodeRef;
 		this.userName = userName;
-		this.properties = cleanupHTMLMultivalueProperties(properties);
+		this.properties = cleanupTextMultivalueProperties(properties);
 	}
 
+	public Map<String, String[]> getProcessedProperties(){
+		return this.properties;
+	}
 	public static HashMap<String, String[]> convertProps(Map<String, Object> props) {
 		HashMap<String, String[]> propsConverted = new HashMap<>();
 		for(String key : props.keySet()){
@@ -540,33 +541,51 @@ public class MetadataTemplateRenderer {
 		return value;
 	}
 
-	public static Map<String, Object> cleanupHTMLProperties(Map<String, Object> properties) {
+	/*
+	public static Map<String, Object> cleanupTextProperties(MetadataSetV2 mds, Map<String, Object> properties) {
 		Map<String,Object> cleaned=new HashMap<>();
 		for(Map.Entry<String,Object> entry : properties.entrySet()){
 			if(entry.getValue()==null)
 				cleaned.put(entry.getKey(), null);
 			else
-				cleaned.put(entry.getKey(),cleanupHTML(entry.getValue().toString()));
+				cleaned.put(entry.getKey(), cleanupText(, entry.getValue().toString()));
 		}
 		return cleaned;
 	}
-	public static HashMap<String, String[]> cleanupHTMLMultivalueProperties(Map<String, String[]> properties) {
+	*/
+	public HashMap<String, String[]> cleanupTextMultivalueProperties(Map<String, String[]> properties) {
 		HashMap<String,String[]> cleaned=new HashMap<>();
 		for(Map.Entry<String,String[]> entry : properties.entrySet()){
-			if(entry.getValue()==null)
+			if(entry.getValue()==null) {
 				cleaned.put(entry.getKey(), null);
-			else
+			} else {
+				MetadataWidget widget;
+				try {
+					widget = mds.findWidget(entry.getKey());
+				}catch(IllegalArgumentException e){
+					widget = null;
+				}
+				MetadataWidget.TextEscapingPolicy textEscapingPolicy = widget == null ?
+						MetadataWidget.TextEscapingPolicy.htmlBasic : widget.getTextEscapingPolicy();
 				cleaned.put(entry.getKey(),
-					Arrays.stream(entry.getValue()).map(MetadataTemplateRenderer::cleanupHTML).toArray(String[]::new)
+						Arrays.stream(entry.getValue()).map((String v) -> cleanupText(textEscapingPolicy, v)).toArray(String[]::new)
 				);
+			}
 		}
 		return cleaned;
 	}
 
-	private static String cleanupHTML(String untrustedHTML) {
-		PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
-		return policy.sanitize(untrustedHTML);
-
+	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
+		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+			return policy.sanitize(untrustedHTML);
+		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
+			return StringEscapeUtils.escapeHtml4(untrustedHTML);
+		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.none)){
+			return untrustedHTML;
+		} else {
+			throw new RuntimeException("Invalid textEscapingPolicy " + textEscapingPolicy);
+		}
 	}
 
 	private String getLicenseName(String licenseName, Map<String, String[]> properties) {

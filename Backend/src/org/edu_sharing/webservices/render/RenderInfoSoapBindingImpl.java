@@ -377,13 +377,14 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		*/
         return null;
     }
-
+    /*
     private Map<String, Object> processProperties(String type, Map<String, Object> props) {
         props=removeUTF16Chars(props);
-        props=MetadataTemplateRenderer.cleanupHTMLProperties(props);
+        props=MetadataTemplateRenderer.cleanupTextProperties(props);
         props=VCardConverter.addVCardProperties(type,props);
         return props;
     }
+     */
 
     private KeyValue[] convertProperties(Map<String,Object> propertiesIn) {
         List<KeyValue> propsresult = new ArrayList<KeyValue>();

@@ -445,6 +445,9 @@ public class MetadataReaderV2 {
 						widget.setRequired(MetadataWidget.Required.valueOf(value));
 					}
 				}
+				if(name.equals("textEscapingPolicy")) {
+					widget.setTextEscapingPolicy(MetadataWidget.TextEscapingPolicy.valueOf(value));
+				}
 				if(name.equals("hideIfEmpty"))
 					widget.setHideIfEmpty(value.equalsIgnoreCase("true"));
 				if(name.equals("valuespace_i18n")){
@@ -475,7 +478,7 @@ public class MetadataReaderV2 {
 				if(name.equals("step"))
 					widget.setStep(Integer.parseInt(value));			
 				if(name.equals("allowempty"))
-					widget.setAllowempty(value.equalsIgnoreCase("true"));				
+					widget.setAllowempty(value.equalsIgnoreCase("true"));
 			}
 			for(int j=0;j<list2.getLength();j++){
 				Node data=list2.item(j);

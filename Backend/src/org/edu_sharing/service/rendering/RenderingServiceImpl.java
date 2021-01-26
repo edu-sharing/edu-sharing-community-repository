@@ -2,7 +2,6 @@ package org.edu_sharing.service.rendering;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.GsonBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -34,7 +32,6 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
@@ -192,8 +189,15 @@ public class RenderingServiceImpl implements RenderingService{
 				});
 			}
 		}
+		ApplicationInfo remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRepositoryDao().getId());
 		// remove any javascript (important for title)
-		node.setProperties(MetadataTemplateRenderer.cleanupHTMLMultivalueProperties(node.getProperties()));
+		node.setProperties(new HashMap<>(new MetadataTemplateRenderer(
+				MetadataHelper.getMetadataset(
+					remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+				user,
+				nodeDao.getAllProperties())
+			.getProcessedProperties()));
 		data.setNode(node);
 		if(CCConstants.CCM_TYPE_SAVED_SEARCH.equals(nodeService.getType(nodeId))){
 			SearchResult<Node> search = nodeDao.runSavedSearch(0,
@@ -210,7 +214,6 @@ public class RenderingServiceImpl implements RenderingService{
 		}
 		// template
 		// switch to the remote appInfo (for shadow objects) so the mds is the right one
-		ApplicationInfo remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRepositoryDao().getId());
 		data.setMetadataHTML(new MetadataTemplateRenderer(
 				MetadataHelper.getMetadataset(
 						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
