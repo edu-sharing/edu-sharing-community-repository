@@ -88,13 +88,16 @@
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
       {{
-        node.properties[item.name + '_DISPLAYNAME']
+      node.properties ?
+        (node.properties[item.name + '_DISPLAYNAME']
           ? node.properties[item.name + '_DISPLAYNAME'].join(', ')
           : node.properties[item.name]?.join(', ')
+        )
+         : ''
       }}
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
-      {{ node.properties[item.name][0] | formatDate }}
+      {{ node.properties[item.name] ? (node.properties[item.name][0] | formatDate) : '' }}
     </ng-container>
   </span>
 </ng-container>

@@ -112,6 +112,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     }
 
     selected(event: MatAutocompleteSelectedEvent) {
+        console.log('selected', event);
         this.add(event.option.value);
         this.input.nativeElement.value = '';
         this.inputControl.setValue(null);
@@ -123,6 +124,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     }
 
     add(value: DisplayValue): void {
+        console.log('add', this.chipsControl.value.some((v: DisplayValue) => v.key === value.key), value, this.chipsControl.value);
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
             this.chipsControl.setValue([...this.chipsControl.value, value]);
         }
@@ -132,6 +134,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     private removeFromIndeterminateValues(key: string): void {
         const indeterminateValues = this.indeterminateValues$.value;
         if (key && indeterminateValues?.includes(key)) {
+            console.log('remove indeterminate', key);
             indeterminateValues.splice(indeterminateValues.indexOf(key), 1);
             this.indeterminateValues$.next(indeterminateValues);
         }

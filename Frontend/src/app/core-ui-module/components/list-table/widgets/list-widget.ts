@@ -1,9 +1,9 @@
 import { Input, Type } from '@angular/core';
-import { Group, Node, Person } from '../../../../core-module/rest/data-object';
+import {Group, Node, Statistics, Person} from '../../../../core-module/rest/data-object';
 import { ListItem } from '../../../../core-module/ui/list-item';
 
 export class ListWidget {
-    @Input() node: Node | Group | Person; // node (or group/user)
+    @Input() node: Node | Group | Person | Statistics; // node (or group/user)
     @Input() item: ListItem;
     /**
      * Whether to add a tooltip to non-obvious fields that describes the field the given value

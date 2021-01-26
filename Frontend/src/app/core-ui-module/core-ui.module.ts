@@ -69,6 +69,7 @@ import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { TitleDirective } from './directives/title.directive';
 import { FallbackTranslationHandler } from './translation';
 import {NodeSourcePipe} from "./pipes/node-source.pipe";
+import {ListCountsComponent} from "./components/list-table/widgets/list-counts/list-counts.component";
 
 @NgModule({
     declarations: [
@@ -79,6 +80,7 @@ import {NodeSourcePipe} from "./pipes/node-source.pipe";
         ListNodeLicenseComponent,
         ListNodeWorkflowComponent,
         ListTextComponent,
+        ListCountsComponent,
         DropdownComponent,
         SortDropdownComponent,
         IconDirective,

@@ -1,6 +1,7 @@
 <ng-container [ngSwitch]="widgetType">
     <app-list-collection-info *ngSwitchCase="'CollectionInfo'" [item]="item" [node]="node"></app-list-collection-info>
     <app-list-text *ngSwitchCase="'Text'" [item]="item" [node]="node" [showFieldTooltip]="showFieldTooltip"></app-list-text>
+    <app-list-counts *ngSwitchCase="'NodeCounts'" [item]="item" [node]="node"></app-list-counts>
     <app-list-node-license *ngSwitchCase="'NodeLicense'" [item]="item" [node]="node"></app-list-node-license>
     <app-list-node-workflow *ngSwitchCase="'NodeWorkflow'" [item]="item" [node]="node"></app-list-node-workflow>
 </ng-container>
