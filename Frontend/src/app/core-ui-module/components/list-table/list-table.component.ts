@@ -6,7 +6,6 @@ import {
     trigger,
 } from '@angular/animations';
 import {
-    AfterViewInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -15,9 +14,9 @@ import {
     EventEmitter,
     HostListener,
     Input,
-    Output, QueryList,
+    Output,
     TemplateRef,
-    ViewChild, ViewChildren, ViewContainerRef,
+    ViewChild, ViewContainerRef, SimpleChanges, OnChanges,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -106,7 +105,7 @@ import {NodeHelperService} from '../../node-helper.service';
 /**
  * A provider to render multiple Nodes as a list
  */
-export class ListTableComponent implements EventListener {
+export class ListTableComponent implements OnChanges, EventListener {
     public static VIEW_TYPE_LIST = 0;
     public static VIEW_TYPE_GRID = 1;
     public static VIEW_TYPE_GRID_SMALL = 2;
@@ -522,6 +521,13 @@ export class ListTableComponent implements EventListener {
             this.refreshAvailableOptions();
             this.loadRepos();
         });
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        // Make sure viewType is a number
+        if (changes.viewType && typeof changes.viewType.currentValue === 'string') {
+            this.viewType = parseInt(changes.viewType.currentValue, 10);
+        }
     }
 
     setViewType(viewType: number) {

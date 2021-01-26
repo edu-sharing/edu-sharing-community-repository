@@ -1339,7 +1339,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.hasCheckbox = true;
                 this.searchService.reurl = null;
                 if (param.viewType != null) {
-                    this.setViewType(param.viewType);
+                    this.setViewType(parseInt(param.viewType, 10));
                 }
                 if (param.addToCollection) {
                     this.collectionApi
