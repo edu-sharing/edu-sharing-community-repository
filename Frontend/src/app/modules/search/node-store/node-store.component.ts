@@ -41,7 +41,7 @@ export class SearchNodeStoreComponent {
   };
   public buttons = DialogButton.getSingleButton('CLOSE',()=>this.cancel(), DialogButton.TYPE_CANCEL);
   public loading=true;
-  public sortBy=RestConstants.CM_PROP_TITLE;
+  public sortBy=RestConstants.LOM_PROP_TITLE;
   public sortAscending=true;
   public nodes: Node[] = [];
 
@@ -57,7 +57,7 @@ export class SearchNodeStoreComponent {
               private translate : TranslateService,
               private iam : RestIamService,
               private service : TemporaryStorageService){
-    this.columns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
+    this.columns.push(new ListItem("NODE",RestConstants.LOM_PROP_TITLE));
     //this.columns.push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
     this.refresh();
 

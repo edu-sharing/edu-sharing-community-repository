@@ -159,7 +159,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.searchService.showspinner = true;
         }
         this.savedSearchColumns.push(
-            new ListItem('NODE', RestConstants.CM_PROP_TITLE),
+            new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
         );
         this.connector.setRoute(this.activatedRoute).subscribe(() => {
             Translation.initialize(
@@ -1271,7 +1271,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.savedSearchLoading = true;
             let request: any = {
                 propertyFilter: [RestConstants.ALL],
-                sortBy: [RestConstants.CM_PROP_TITLE],
+                sortBy: [RestConstants.LOM_PROP_TITLE],
                 sortAscending: true,
                 offset: 0,
             };

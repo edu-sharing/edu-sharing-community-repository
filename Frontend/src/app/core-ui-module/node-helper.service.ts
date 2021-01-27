@@ -445,7 +445,7 @@ export class NodeHelperService {
       if(item.name === RestConstants.CM_NAME) {
         return data.name
       }
-      if(item.name === RestConstants.CM_PROP_TITLE){
+      if(item.name === RestConstants.CM_PROP_TITLE || item.name === RestConstants.LOM_PROP_TITLE) {
         return data.title;
       }
       if(item.name === RestConstants.CM_PROP_C_CREATED || item.name === RestConstants.CM_MODIFIED_DATE) {
