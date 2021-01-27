@@ -176,16 +176,16 @@
       <div class="topbar-search-right">
         <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
           <a
+            cdkMonitorElementFocus
             tabindex="0"
-            class="focus-underline"
             *ngIf="config.imprintUrl"
             (click)="openImprint()"
             (keyup.enter)="openImprint()"
             >{{ 'IMPRINT' | translate }}</a
           >
           <a
+            cdkMonitorElementFocus
             tabindex="0"
-            class="focus-underline"
             *ngIf="config.privacyInformationUrl"
             (click)="openPrivacy()"
             (keyup.enter)="openPrivacy()"

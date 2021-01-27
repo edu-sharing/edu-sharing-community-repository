@@ -159,16 +159,21 @@ $badgeWidth: 250px;
 :host ::ng-deep {
     .list .node-row{
         app-node-url, app-node-url > a{
-            overflow: visible;
             display: block;
             width: 100%;
             height: 100%;
         }
     }
+    // focus handling
     .list.cdk-keyboard-focused {
         .cardList, .cardSmallList {
             .row a:focus {
                 @include setGlobalKeyboardFocus();
+            }
+        }
+        .tableList {
+            .row a:focus {
+                @include setGlobalKeyboardFocus('border');
             }
         }
     }
@@ -404,11 +409,6 @@ $badgeWidth: 250px;
     background-color: $backgroundColor;
     outline: 2px solid $primary;
 }
-.row:focus {
-    @include setGlobalInsetFocus();
-    outline: 1px $primary solid;
-    /* background-color:$workspaceSelectedBackground!important; */
-}
 .cardSmallList .row:focus {
     box-shadow: none !important;
 }
@@ -482,9 +482,11 @@ $badgeWidth: 250px;
         .row {
             position: relative;
             app-node-url > a {
-                display: table;
+                display: flex;
+                align-items: center;
+                width: 100%;
                 // keep spacing for more options item
-                width: calc(100% - 50px);
+                padding-right: 50px;
 
                 .column {
                     display: table-cell;

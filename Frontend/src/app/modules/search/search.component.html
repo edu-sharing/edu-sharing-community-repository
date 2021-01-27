@@ -255,7 +255,13 @@
                           <h2>
                             {{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})
                           </h2>
-                          <a tabindex="0" *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore" (keyup.enter)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
+                          <button
+                            *ngIf="hasMoreCollections"
+                            mat-button
+                            color="primary"
+                            class="toggle"
+                            (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</button>
+                          </div>
                     </div>
                     <div class="collections" [class.collectionsMore]="collectionsMore" id="collections">
                         <listTable

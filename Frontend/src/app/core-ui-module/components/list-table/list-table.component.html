@@ -133,7 +133,7 @@
                  [attr.aria-label]="node.name"
             >
                 <!-- custom data binding from outside -->
-                <app-node-url matRipple matRippleColor="primary" [node]="node" [nodes]="_nodes" [scope]="scope" [unclickable]="!createLink">
+                <app-node-url [node]="node" [nodes]="_nodes" [scope]="scope" [unclickable]="!createLink">
                     <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
                     <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                         <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>

@@ -72,6 +72,7 @@ $sidenavTopBaseOffset:110px;
     color: $textLight;
     // padding-bottom: 10px;
     margin-left: 15px;
+    margin-right: 5px;
     h2 {
         font-size: 120%;
         margin: 1rem 0;
@@ -84,6 +85,7 @@ $sidenavTopBaseOffset:110px;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        min-height: 70px;
         .sorting-info {
             padding: 0 10px;
             display: flex;

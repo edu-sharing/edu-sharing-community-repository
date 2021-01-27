@@ -71,11 +71,15 @@
     box-shadow: none !important;
   }
 }
-@mixin setGlobalKeyboardFocus(){
+@mixin setGlobalKeyboardFocus($mode: 'outline'){
     //respect element border radius
     @include removeDefaultFocus();
-    outline: 2px solid darken($focusColor, 30%);
-    outline-offset: 2px;
+    @if $mode=='outline' {
+        outline: 2px solid darken($focusColor, 10%);
+        outline-offset: 2px;
+    } @else if $mode=='border' {
+        border:2px solid darken($focusColor, 10%);
+    }
 }
 @mixin setGlobalDashedFocus(){
   @include removeDefaultFocus();

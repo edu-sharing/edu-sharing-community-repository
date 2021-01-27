@@ -9,11 +9,12 @@ import {NodeHelperService} from '../../node-helper.service';
     selector: 'app-node-url',
     template: `
         <ng-template #content><ng-content></ng-content></ng-template>
-        <a *ngIf="unclickable">
+        <a *ngIf="unclickable" matRipple matRippleColor="primary">
             <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
         <a
             *ngIf="!unclickable"
+            matRipple matRippleColor="primary"
             [routerLink]="get('routerLink')"
             [state]="getState()"
             [queryParams]="get('queryParams')"
