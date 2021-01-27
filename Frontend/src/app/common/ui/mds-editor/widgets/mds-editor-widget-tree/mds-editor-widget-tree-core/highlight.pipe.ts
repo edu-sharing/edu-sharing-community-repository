@@ -15,7 +15,7 @@ export class HighlightPipe implements PipeTransform {
                     highlightWords,
                     index + 1,
                 ));
-                // if (index === 0 || (index > 0 && /\s/.test(value[index - 1]))) {
+                // (index === 0 || (index > 0 && /\s/.test(value[index - 1]))) {
                 if (index !== -1) {
                     const matchingString = value.substr(index, length);
                     value =

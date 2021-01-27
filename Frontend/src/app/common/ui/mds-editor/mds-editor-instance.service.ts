@@ -294,8 +294,8 @@ export class MdsEditorInstanceService implements OnDestroy {
                 const filterString = searchString.toLowerCase();
                 return this.definition.values.filter(
                     (value) =>
-                        value.caption.toLowerCase().indexOf(filterString) === 0 ||
-                        value.id.toLowerCase().indexOf(filterString) === 0,
+                        value.caption.toLowerCase().indexOf(filterString) !== -1 ||
+                        value.id.toLowerCase().indexOf(filterString) !== -1,
                 );
             } else {
                 return this.definition.values;

@@ -40,7 +40,7 @@
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
       [matChipInputAddOnBlur]="false"
       (matChipInputTokenEnd)="onInputTokenEnd($event)"
-      (blur)="inputControl.setValue(null)"
+      (blur)="blurEvent($event)"
     />
     <button
       matSuffix

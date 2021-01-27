@@ -258,7 +258,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             const nodeWords = node.caption.trim().toLowerCase().split(/\s+/);
             const filterWords = filterString.trim().toLowerCase().split(/\s+/);
             return filterWords.every((filterWord) =>
-                nodeWords.some((nodeWord) => nodeWord.indexOf(filterWord) === 0),
+                nodeWords.some((nodeWord) => nodeWord.indexOf(filterWord) !== -1),
             );
         });
     }
