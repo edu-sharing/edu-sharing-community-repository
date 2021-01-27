@@ -159,9 +159,17 @@ $badgeWidth: 250px;
 :host ::ng-deep {
     .list .node-row{
         app-node-url, app-node-url > a{
+            overflow: visible;
             display: block;
             width: 100%;
             height: 100%;
+        }
+    }
+    .list.cdk-keyboard-focused {
+        .cardList, .cardSmallList {
+            .row a:focus {
+                @include setGlobalKeyboardFocus();
+            }
         }
     }
     .headingGroup .heading,

@@ -224,16 +224,18 @@
         ></breadcrumbs>
       </div>
 
-      <a
+      <button
         *ngIf="!isLoading && isGuest"
-        class="clickable switchToSearch"
+        mat-button
+        color="primary"
+        class="switchToSearch"
         title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
         tabindex="0"
         (click)="navigateToSearch()"
-        (keypress)="$event.which === 13 ? navigateToSearch() : 0"
-      >{{ 'COLLECTIONS.TO_SEARCH' | translate }}
-        <i class="material-icons">arrow_forward</i>
-      </a>
+      >
+        {{ 'COLLECTIONS.TO_SEARCH' | translate }}
+        <i icon="arrow_forward"></i>
+      </button>
 
       <!-- content (collection cards) if not error -->
 

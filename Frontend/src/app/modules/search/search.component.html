@@ -67,7 +67,12 @@
                     <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
             </div>
             <div class="switchToCollections" *ngIf="isGuest">
-                <a tabindex="0" title="{{'SEARCH.TO_COLLECTIONS' | translate}}" class="clickable" (click)="switchToCollections()" (keyup.enter)="switchToCollections()">{{'SEARCH.TO_COLLECTIONS' | translate}} <i class="material-icons">arrow_forward</i></a>
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="switchToCollections()">
+                  {{'SEARCH.TO_COLLECTIONS' | translate}} <i icon="arrow_forward"></i>
+                </button>
             </div>
             <small-collection *ngIf="addToCollection"
                               [collection]="addToCollection"

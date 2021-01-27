@@ -243,6 +243,11 @@ input.mat-input-element, mat-label, .mat-select-value{
     color: $primary;
   }
 }
+button.mat-button{
+    &.cdk-keyboard-focused{
+        @include setGlobalKeyboardFocus();
+    }
+}
 .mat-button-wrapper{
   position: relative;
   display: flex !important;

@@ -31,15 +31,10 @@ mat-tab-group {
 }
 .switchToSearch {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     font-weight: bold;
-    text-transform: uppercase;
-    padding: 12px;
-}
-
-.switchToSearch i {
-    position: relative;
-    top: 6px;
+    margin-top: 15px;
 }
 
 .table-tab {
