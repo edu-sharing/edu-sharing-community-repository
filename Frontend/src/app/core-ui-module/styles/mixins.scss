@@ -75,6 +75,7 @@
     //respect element border radius
     @include removeDefaultFocus();
     outline: 2px solid darken($focusColor, 30%);
+    outline-offset: 2px;
 }
 @mixin setGlobalDashedFocus(){
   @include removeDefaultFocus();
