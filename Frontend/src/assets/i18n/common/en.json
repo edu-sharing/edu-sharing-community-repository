@@ -534,7 +534,8 @@
         "NEW_COLLECTION": "Add collection",
         "LINK_MAP": "Create link",
         "TOGGLE_SHARED_TO_ME": "Toggle share receiver",
-        "TOGGLE_VIEWTYPE": "Toggle view type",
+        "SWITCH_TO_LIST_VIEW": "Switch to list view",
+        "SWITCH_TO_CARDS_VIEW": "Switch to cards view",
         "LIST_SETTINGS": "Configure List",
         "METADATA_SIDEBAR": "Material details"
     },

@@ -118,7 +118,7 @@ $sidenavTopBaseOffset:110px;
     min-height: auto;
     max-height: none;
 }
-.extendedSearch a, .switchToCollections a, .switchToSearch a{
+.switchToCollections a, .switchToSearch a{
     padding: 5px;
 }
 
@@ -127,6 +127,9 @@ sort-dropdown{
     right: 250px;
 }
 .extendedSearch{
+    button {
+        margin-left: -16px;
+    }
     .mobile{
         display:none!important;
     }
@@ -300,11 +303,15 @@ a, a:hover, a:visited, a:active, button {
     &.no-mainnav{
         top: 48px;
     }
+    actionbar{
+        margin-right: -5px;
+    }
     >div {
         height: $secondaryBarHeight;
         background-color: #fff;
         display: flex;
-        padding: 16px 20px;
+        align-items: center;
+        padding: 0 25px;
         @include materialShadow();
     }
 }

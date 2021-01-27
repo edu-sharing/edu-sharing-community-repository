@@ -899,19 +899,27 @@ export class OptionsHelperService {
         feedbackCollectionView.group = DefaultGroups.View;
         feedbackCollectionView.priority = 20;
 
-        /*
-        const options = [];
-        this.viewToggle = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.viewType === 0 ? 'view_module' : 'list', (node: Node) => this.toggleView());
-        this.viewToggle.isToggle = true;
-        options.push(this.viewToggle);
-         */
-        // tslint:disable-next-line:triple-equals
-        const toggleViewType = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.list ? this.list.viewType == 0 ? 'view_module' : 'list' : '', (object) => {
-            // tslint:disable-next-line:triple-equals
-            this.list.setViewType(this.list.viewType == 1 ? 0 : 1);
-            // tslint:disable-next-line:triple-equals
-            toggleViewType.icon = this.list ? this.list.viewType == 0 ? 'view_module' : 'list' : '';
+        const setViewType = (viewType: number) => {
+            switch (viewType) {
+                case 0:
+                    this.list.setViewType(0);
+                    toggleViewType.name = 'OPTIONS.SWITCH_TO_CARDS_VIEW';
+                    toggleViewType.icon = 'view_module';
+                    break;
+                case 1:
+                    this.list.setViewType(1);
+                    toggleViewType.name = 'OPTIONS.SWITCH_TO_LIST_VIEW';
+                    toggleViewType.icon = 'list';
+                    break;
+            }
+        }
+        const toggleViewType = new OptionItem('', '', () => {
+            switch(this.list.viewType) {
+                case 0: setViewType(1); break;
+                case 1: setViewType(0); break;
+            }
         });
+        setViewType(this.list?.viewType);
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;

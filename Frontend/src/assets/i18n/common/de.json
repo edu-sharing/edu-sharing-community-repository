@@ -568,7 +568,8 @@
         "NEW_COLLECTION": "Neue Sammlung",
         "LINK_MAP": "Verlinkung erstellen",
         "TOGGLE_SHARED_TO_ME": "Freigaben-Empfänger umschalten",
-        "TOGGLE_VIEWTYPE": "Ansicht umschalten",
+        "SWITCH_TO_LIST_VIEW": "Zur Listenansicht wechseln",
+        "SWITCH_TO_CARDS_VIEW": "Zur Kachelansicht wechseln",
         "LIST_SETTINGS": "Liste konfigurieren",
         "METADATA_SIDEBAR": "Materialinformationen"
     },
