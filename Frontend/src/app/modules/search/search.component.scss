@@ -574,7 +574,21 @@ listtable {
         }
     }
 }
-.sidenav{
+.sidenav {
+    & ::ng-deep .mat-tab-labels {
+        .mat-tab-label {
+            flex-grow: 1;
+            min-width: unset;
+        }
+    }
+    .tab-label {
+        display: flex;
+        align-items: center;
+        i {
+            font-size: 20px;
+            margin-right: 3px;
+        }
+    }
     .empty{
         margin-top:20px;
         text-align: center;

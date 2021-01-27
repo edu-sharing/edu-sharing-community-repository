@@ -25,6 +25,10 @@ import { SearchService } from './search.service';
 import { WindowRefService } from './window-ref.service';
 import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
+import { FormControl } from '@angular/forms';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { MatTabGroup } from '@angular/material/tabs';
 
 @Component({
     selector: 'app-search',
@@ -42,6 +46,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('toolbar') toolbar: any;
+    @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
 
     toolPermissions: string[];
     searchFail: boolean = false;
@@ -51,7 +56,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     tutorialElement: ElementRef;
     mdsSuggestions: any = {};
     mdsExtended = false;
-    sidenavTab = 0;
     collectionsMore = false;
     nodeReport: Node;
     nodeVariant: Node;
@@ -90,6 +94,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     savedSearchQuery: string = null;
     savedSearchQueryModel: string = null;
     addToCollection: Node;
+    extendedSearchSelectedTab = new FormControl(0);
 
     private renderedNode: Node;
     private viewToggle: OptionItem;
@@ -110,11 +115,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private currentSavedSearch: Node;
     private login: LoginResult;
     private savedSearchOwn = true;
-    private queryParamsSubscription: Subscription;
     private nodeDisplayed: Node;
     customOptions: CustomOptions = {
         useDefaultOptions: true
     };
+    private destroyed$ = new ReplaySubject<void>(1);
 
     constructor(
         private router: Router,
@@ -261,6 +266,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     });
             });
         });
+        this.searchService.sidenavOpened$
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(() => this.extendedSearchTabGroup?.realignInkBar());
     }
 
     ngAfterViewInit() {
@@ -270,9 +278,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        if (this.queryParamsSubscription) {
-            this.queryParamsSubscription.unsubscribe();
-        }
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
     @HostListener('window:scroll', ['$event'])
@@ -1240,7 +1247,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private loadSavedSearchNode(node: Node) {
-        this.sidenavTab = 0;
+        this.extendedSearchSelectedTab.setValue(0);
         UIHelper.routeToSearchNode(this.router, this.searchService.reurl, node);
         this.currentSavedSearch = node;
     }
@@ -1307,7 +1314,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initParams() {
-        this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
+        this.activatedRoute.queryParams.pipe(takeUntil(this.destroyed$)).subscribe(
             (param) => {
                 if(this.oldParams) {
                     // check if reinit can be skipped (e.g. if only view relevant params changed)

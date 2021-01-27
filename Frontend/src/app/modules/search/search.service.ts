@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Node } from '../../core-module/core.module';
 import { ListItem } from '../../core-module/core.module';
+import { BehaviorSubject } from 'rxjs';
 
 /**
  * Session state for search.component.
@@ -29,7 +30,13 @@ export class SearchService {
     reinit = true;
     resultCount: any = {};
     sidenavSet = false;
-    sidenavOpened = false;
+    sidenavOpened$ = new BehaviorSubject(false);
+    set sidenavOpened(value: boolean) {
+        this.sidenavOpened$.next(value);
+    }
+    get sidenavOpened(): boolean {
+        return this.sidenavOpened$.value;
+    }
     showspinner: boolean;
     ex: boolean;
     viewType = -1;
