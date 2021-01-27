@@ -526,7 +526,7 @@ public class OAILOMExporter {
             if (entEle != null) {
                 langEle = createAndAppendElement("langstring", entEle, repoValue, false);
                 if (langEle != null)
-                    langEle.setAttribute(xmlLanguageAttribute, nodeLanguage.getLanguage());
+                    langEle.setAttribute(xmlLanguageAttribute, "x-none");
             }
             return element;
         }
