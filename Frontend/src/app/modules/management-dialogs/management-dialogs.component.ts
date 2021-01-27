@@ -397,7 +397,9 @@ export class WorkspaceManagementDialogsComponent  {
      }
    this.nodeContributor=null;
    this.nodeContributorChange.emit(node);
-   this.onRefresh.emit([node]);
+   if(node) {
+       this.onRefresh.emit([node]);
+   }
   }
   private closeLtiTools() {
     this.showLtiTools = false;

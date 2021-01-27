@@ -206,7 +206,7 @@ export class WorkspaceContributorComponent  {
       this.edit=null;
       return;
     }
-    this.onClose.emit(null);
+    this.onClose.emit();
   }
   public constructor(
     private nodeService:RestNodeService,
