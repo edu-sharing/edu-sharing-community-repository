@@ -45,6 +45,8 @@ public class OAILOMExporter {
 
 	Document doc;
 
+	protected String xmlLanguageAttribute = "language";
+
 	public OAILOMExporter() throws ParserConfigurationException {
 		ApplicationContext context = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) context.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -120,7 +122,7 @@ public class OAILOMExporter {
 				for(String kw : classificationKeyword) {
 					Element keyword = createAndAppendElement("keyword", classification);
 					Element kwStrEle = createAndAppendElement("string", keyword,kw);
-					if(kwStrEle != null)kwStrEle.setAttribute("language", "de");
+					if(kwStrEle != null)kwStrEle.setAttribute(xmlLanguageAttribute, "de");
 				}
 			}
 
@@ -128,7 +130,7 @@ public class OAILOMExporter {
 				Element taxonPath = createAndAppendElement("taxonPath", classification);
 				Element tpSource = createAndAppendElement("source", taxonPath);
 				Element tpSourceString = createAndAppendElement("string", tpSource,"EAF Thesaurus");
-				tpSourceString.setAttribute("language", "x-t-eaf");
+				tpSourceString.setAttribute(xmlLanguageAttribute, "x-t-eaf");
 				try{
 					MetadataWidget widget = MetadataHelper.getLocalDefaultMetadataset().findWidget("ccm:taxonid");
 					Map<String, MetadataKey> values = widget.getValuesAsMap();
@@ -143,7 +145,7 @@ public class OAILOMExporter {
 									Element entry = createAndAppendElement("entry", taxon);
 									Element string = createAndAppendElement("string", entry,cata.getValue().getCaption());
 									//<string language="de">Sachkunde</string>
-									string.setAttribute("language", "de");
+									string.setAttribute(xmlLanguageAttribute, "de");
 								}
 							}
 
@@ -167,7 +169,7 @@ public class OAILOMExporter {
 			Element resource = createAndAppendElement("resource", relation);
 			Element description = createAndAppendElement("description", resource);
 			Element string = createAndAppendElement("string", description,thumbnailUrl);
-			string.setAttribute("language", "en");
+			string.setAttribute(xmlLanguageAttribute, "en");
 		}
 	}
 
@@ -189,7 +191,7 @@ public class OAILOMExporter {
 			createAndAppendElement("value",copyrightAndOtherRestrictions,"yes");
 			Element description = createAndAppendElement("description",rights);
 			Element rightsDescStrEle = createAndAppendElement("string", description,url);
-			if(rightsDescStrEle != null) rightsDescStrEle.setAttribute("language", "de");
+			if(rightsDescStrEle != null) rightsDescStrEle.setAttribute(xmlLanguageAttribute, "de");
 			createAndAppendElement("cost", rights,"no");
 
 		} else {
@@ -257,7 +259,7 @@ public class OAILOMExporter {
 			String tar = tarFrom + "-" + tarTo;
 			Element typicalAgeRange = createAndAppendElement("typicalAgeRange", educational);
 			Element eleString = createAndAppendElement("string", typicalAgeRange,tar);
-			eleString.setAttribute("language", nodeLanguage.getLanguage());
+			eleString.setAttribute(xmlLanguageAttribute, nodeLanguage.getLanguage());
 		}
 
 		//createAndAppendElement("typicalAgeRange", educational, QName.createQName(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE));
@@ -319,17 +321,17 @@ public class OAILOMExporter {
 	public void createKeyword(Element general) {
 		Element keywordEle = createAndAppendElement("keyword", general);
 		Element keywordStrEle = createAndAppendElement("string", keywordEle, QName.createQName(CCConstants.LOM_PROP_GENERAL_KEYWORD));
-		if(keywordStrEle != null)keywordStrEle.setAttribute("language", nodeLanguage.getLanguage());
+		if(keywordStrEle != null)keywordStrEle.setAttribute(xmlLanguageAttribute, nodeLanguage.getLanguage());
 	}
 
 	public void createDescription(Element general) {
 		Element descriptionEle = createAndAppendElement("description", general);
 		Element descriptionStrEle = createAndAppendElement("string", descriptionEle, QName.createQName(CCConstants.LOM_PROP_GENERAL_DESCRIPTION));
-		if(descriptionStrEle != null)descriptionStrEle.setAttribute("language", nodeLanguage.getLanguage());
+		if(descriptionStrEle != null)descriptionStrEle.setAttribute(xmlLanguageAttribute, nodeLanguage.getLanguage());
 	}
 
 	public void createLanguage(Element general) {
-		createAndAppendElement("language", general,QName.createQName(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
+		createAndAppendElement(xmlLanguageAttribute, general,QName.createQName(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
 	}
 
 	public void createTitle(Element general) {
@@ -339,7 +341,7 @@ public class OAILOMExporter {
 			title= (String) nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
 		}
 		Element titleStrEle = createAndAppendElement("string", titleEle,title);
-		if(titleStrEle != null)titleStrEle.setAttribute("language", nodeLanguage.getLanguage());
+		if(titleStrEle != null)titleStrEle.setAttribute(xmlLanguageAttribute, nodeLanguage.getLanguage());
 	}
 
 	/**
@@ -443,7 +445,7 @@ public class OAILOMExporter {
 	public void appendMLText(MLText mlText, Element mlElement){
 		for(Map.Entry<Locale,String> entry : mlText.entrySet()){
 			Element langEle = this.createAndAppendElement("string", mlElement,entry.getValue());
-			langEle.setAttribute("language", entry.getKey().getLanguage());
+			langEle.setAttribute(xmlLanguageAttribute, entry.getKey().getLanguage());
 		}
 	}
 
@@ -514,7 +516,7 @@ public class OAILOMExporter {
                 Element srcEle = createAndAppendElement("source", element);
                 langEle = createAndAppendElement("langstring", srcEle, src, false);
                 if (langEle != null)
-                    langEle.setAttribute("language", nodeLanguage.getLanguage());
+                    langEle.setAttribute(xmlLanguageAttribute, "x-none");
             }
 
             // ## set correct id !
@@ -524,7 +526,7 @@ public class OAILOMExporter {
             if (entEle != null) {
                 langEle = createAndAppendElement("langstring", entEle, repoValue, false);
                 if (langEle != null)
-                    langEle.setAttribute("language", nodeLanguage.getLanguage());
+                    langEle.setAttribute(xmlLanguageAttribute, nodeLanguage.getLanguage());
             }
             return element;
         }
@@ -559,13 +561,13 @@ public class OAILOMExporter {
 				Element srcEle = createAndAppendElement("source", element);
 				langEle = createAndAppendElement("langstring", srcEle, src, false);
 				if (langEle != null)
-					langEle.setAttribute("language", nodeLanguage.getLanguage());
+					langEle.setAttribute(xmlLanguageAttribute, "x-none");
 			}
 			Element valEle = createAndAppendElement("value", element);
 			if (valEle != null) {
 				langEle = createAndAppendElement("langstring", valEle, repoValue, false);
 				if (langEle != null)
-					langEle.setAttribute("language", nodeLanguage.getLanguage());
+					langEle.setAttribute(xmlLanguageAttribute, "x-none");
 			}
 			return element;
 		}
