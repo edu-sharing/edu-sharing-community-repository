@@ -763,9 +763,8 @@ a.rowInner {
     float: left;
     margin: 6px;
     position: relative;
-    // safari height fix
     app-list-option-item{
-        height: $cardHeight;
+        height: 0; // size is done via flex-grow
     }
 
 }
