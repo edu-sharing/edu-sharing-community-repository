@@ -107,6 +107,7 @@ export class WorkspaceContributorComponent  {
   }
   public addVCard(mode = this.editMode) {
     this.resetVCard();
+    this.userAuthor = false;
     this.editMode=mode;
     this.editOriginal=null;
     this.editScopeOld=null;

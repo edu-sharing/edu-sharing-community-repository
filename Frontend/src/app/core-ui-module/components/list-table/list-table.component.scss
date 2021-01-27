@@ -165,15 +165,23 @@ $badgeWidth: 250px;
         }
     }
     // focus handling
-    .list.cdk-keyboard-focused {
-        .cardList, .cardSmallList {
-            .row a:focus {
-                @include setGlobalKeyboardFocus();
-            }
+    .list{
+        *:focus{
+            @include removeDefaultFocus();
         }
-        .tableList {
-            .row a:focus {
-                @include setGlobalKeyboardFocus('border');
+        &.cdk-keyboard-focused {
+            .cardList, .cardSmallList {
+                .row:focus,
+                .row a:focus {
+                    @include setGlobalKeyboardFocus();
+                }
+            }
+
+            .tableList {
+                .row:focus,
+                .row a:focus {
+                    @include setGlobalKeyboardFocus('border');
+                }
             }
         }
     }
