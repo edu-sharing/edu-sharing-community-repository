@@ -825,6 +825,7 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 			for (int i = 0; i < langList.getLength(); i++) {
 				Node langValNode = langList.item(i);
 				String language = (String) xpath.evaluate("@language", langValNode, XPathConstants.STRING);
+				language = (language == null || language.trim().equals("")) ? (String) xpath.evaluate("@lang", langValNode, XPathConstants.STRING) : language;
 				String value = (String) xpath.evaluate(".", langValNode, XPathConstants.STRING);
 				if (language != null && !language.trim().equals("") && value != null && !value.trim().equals("")) {
 					// wir brauchen das LAND damit i18n richtig funktioniert
