@@ -28,6 +28,7 @@
 package org.edu_sharing.repository.client.tools.forms;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 
@@ -71,6 +72,17 @@ public class VCardTool {
 		if(!xESLomContributeDate.equals("")){
 			vCard += CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE+":"+xESLomContributeDate+ "\n";
 		}
+
+		//extended atts
+		for(Map.Entry<String,String> entry: map.entrySet()){
+			if(entry.getKey().startsWith("X-")){
+				String validValue = getValid(entry.getKey());
+				if(!validValue.trim().equals("")){
+					vCard += entry.getKey()+":"+entry.getValue()+ "\n";
+				}
+			}
+		}
+
 		//close vcard
 		vCard += "END:VCARD\n";
 		
