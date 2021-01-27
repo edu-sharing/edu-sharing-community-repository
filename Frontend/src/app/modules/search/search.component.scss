@@ -127,7 +127,7 @@ sort-dropdown{
 }
 .extendedSearch{
     button {
-        margin-left: -1px; // align with main content
+        margin-left: -16px;
     }
     .mobile{
         display:none!important;
@@ -304,13 +304,14 @@ a, a:hover, a:visited, a:active, button {
     }
     actionbar{
         position: relative;
+        margin-right: -5px;
     }
     >div {
         height: $secondaryBarHeight;
         background-color: #fff;
         display: flex;
         align-items: center;
-        padding: 10px;
+        padding: 0 25px;
         @include materialShadow();
     }
 }
