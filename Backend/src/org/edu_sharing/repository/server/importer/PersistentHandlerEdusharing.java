@@ -146,12 +146,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		String replicationId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 		String lomCatalogId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
 
-		if (replicationId == null) {
+		if (replicationId == null || replicationId.trim().equals("")) {
 			getLogger().error("no replicationId in newNodeProps provided. will not safe/modify record.");
 			return null;
 		}
 
-		if (lomCatalogId == null) {
+		if (lomCatalogId == null || lomCatalogId.trim().equals("")) {
 			getLogger().error("no lomCatalogId in newNodeProps provided. will not safe/modify record.");
 			return null;
 		}
