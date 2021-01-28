@@ -305,7 +305,13 @@ export class CreateMenuComponent {
             this.options,
             Target.CreateMenu,
         );
+
+        // If the menu was open, we just removed all its items, leaving focus on <body>.
+        setTimeout(() => {
+            this.dropdown?.menu.focusFirstItem()
+        });
     }
+
     public hasUsableOptions() {
         return this.options.some((o) => o.isEnabled);
     }
