@@ -98,7 +98,22 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     @Input() valueType: ValueType;
     @Input() label: string | boolean;
     @Input() control: AbstractControl;
+    /**
+     * Whether to wrap in a `mat-form-field`.
+     *
+     * Defaults to `true` if `control` is set, otherwise `false`.
+     */
     @Input() wrapInFormField: boolean;
+    /**
+     * Whether the content should be semantically grouped and labelled using ARIA.
+     *
+     * Applies only when not wrapping in a `mat-form-field`.
+     *
+     * Should be set to false when
+     * - a labelled grouping of elements is already provided, e.g. with a `radiogroup`, or
+     * - there is only a single element, for which the label and description is provided.
+     */
+    @Input() wrapInGroup = true;
 
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 

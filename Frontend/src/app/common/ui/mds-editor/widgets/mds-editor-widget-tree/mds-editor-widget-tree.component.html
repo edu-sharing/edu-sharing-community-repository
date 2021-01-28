@@ -1,4 +1,5 @@
 <app-mds-editor-widget-container
+  #container
   [widget]="widget"
   [label]="false"
   [valueType]="valueType"
@@ -6,7 +7,7 @@
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
 >
-  <mat-chip-list #chipList [formControl]="chipsControl">
+  <mat-chip-list #chipList [formControl]="chipsControl" [attr.aria-labelledby]="container.labelId">
     <mat-chip
       *ngFor="let value of chipsControl.value"
       [selectable]="false"
@@ -25,7 +26,13 @@
       [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
       [matChipInputFor]="chipList"
     />
-    <button matSuffix mat-icon-button class="mat-button-select-arrow" (click)="input.focus()" #arrowButton>
+    <button
+      matSuffix
+      mat-icon-button
+      class="mat-button-select-arrow"
+      (click)="input.focus()"
+      #arrowButton
+    >
       <span class="mat-select-arrow"></span>
     </button>
   </mat-chip-list>
