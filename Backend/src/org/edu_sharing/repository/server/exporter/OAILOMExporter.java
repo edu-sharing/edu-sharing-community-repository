@@ -490,48 +490,7 @@ public class OAILOMExporter {
         return null;
     }
 
-    public Element createAndAppendElementSrcIdEnt(String elementName, Element parent, QName property, String src) {
-        if (property != null) {
-            Serializable repoValue = nodeService.getProperty(nodeRef, property);
-            return this.createAndAppendElementSrcIdEnt(elementName, parent, repoValue, src);
-        }
-        return null;
-    }
-
-    // ## The IDs have to be extracted here! Maybe the implementation like in createTaxon() is more helpful!
-    //    In that case set lang attribute to "de" or "en" in entry!
-    public Element createAndAppendElementSrcIdEnt(String elementName, Element parent, Serializable repoValue, String src) {
-        if (repoValue != null) {
-            Element langEle = null;
-
-            if (repoValue instanceof List) {
-                Element ele = null;
-                for (Object lval : (List) repoValue)
-                    ele = this.createAndAppendElementSrcIdEnt(elementName, parent, (Serializable) lval, src);
-                return ele;
-            }
-
-            Element element = createAndAppendElement(elementName, parent);
-            if (src != null) {
-                Element srcEle = createAndAppendElement("source", element);
-                langEle = createAndAppendElement("langstring", srcEle, src, false);
-                if (langEle != null)
-                    langEle.setAttribute(xmlLanguageAttribute, "x-none");
-            }
-
-            // ## set correct id !
-            createAndAppendElement("id", element, "DUMMY ID");
-
-            Element entEle = createAndAppendElement("entry", element);
-            if (entEle != null) {
-                langEle = createAndAppendElement("langstring", entEle, repoValue, false);
-                if (langEle != null)
-                    langEle.setAttribute(xmlLanguageAttribute, "x-none");
-            }
-            return element;
-        }
-        return null;
-    }
+   
 
 
 	/**
