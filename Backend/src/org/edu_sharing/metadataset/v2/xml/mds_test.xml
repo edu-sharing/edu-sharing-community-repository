@@ -205,24 +205,47 @@
 			</values>
 		</widget>
 		<widget>
-			<id>ccm:test_horizontal_checkbox</id>
-			<caption>Horizontal-checkbox Widget</caption>
+			<id>ccm:test_suggestion_chips</id>
+			<type>multivalueSuggestBadges</type>
+			<caption>Suggestion Chips</caption>
 			<bottomCaption>Bla bla bla bla bla</bottomCaption>
-			<type>checkboxHorizontal</type>
 			<values>
 				<value cap="Foo">foo</value>
 				<value cap="Bar">bar</value>
 				<value cap="Baz">baz</value>
 			</values>
 		</widget>
-	</widgets>
-	<templates>
-		<template>
-			<id>test</id>
-			<caption>Widget Test</caption>
-			<icon>done_all</icon>
-			<html>
-				<![CDATA[
+		<widget>
+		<id>ccm:test_horizontal_checkbox</id>
+		<caption>Horizontal-checkbox Widget</caption>
+		<bottomCaption>Bla bla bla bla bla</bottomCaption>
+		<type>checkboxHorizontal</type>
+		<values>
+			<value cap="Foo">foo</value>
+			<value cap="Bar">bar</value>
+			<value cap="Baz">baz</value>
+		</values>
+	</widget>
+	<widget>
+		<id>ccm:test_vertical_radio</id>
+		<caption>Vertical-radiobuttons Widget</caption>
+		<bottomCaption>Bla bla bla bla bla</bottomCaption>
+		<type>radioVertical</type>
+		<defaultvalue>foo</defaultvalue>
+		<values>
+			<value>foo</value>
+			<value>bar</value>
+			<value>baz</value>
+		</values>
+	</widget>
+</widgets>
+<templates>
+	<template>
+		<id>test</id>
+		<caption>Widget Test</caption>
+		<icon>done_all</icon>
+		<html>
+			<![CDATA[
 					<ccm:test_default_value>
 					<ccm:test_text>
 					<ccm:test_extended>
@@ -234,41 +257,43 @@
 					<ccm:test_single_value_tree>
 					<ccm:test_multi_value_tree>
 					<ccm:test_single_option>
+					<ccm:test_suggestion_chips>
 					<ccm:test_horizontal_checkbox>
+					<ccm:test_vertical_radio>
 				]]>
-			</html>
-		</template>
-		<template>
-			<id>native_widgets_test</id>
-			<caption>Native Widgets Test</caption>
-			<icon>description</icon>
-			<html>
-				<![CDATA[
+		</html>
+	</template>
+	<template>
+		<id>native_widgets_test</id>
+		<caption>Native Widgets Test</caption>
+		<icon>description</icon>
+		<html>
+			<![CDATA[
 					<preview>
 					<author>
 					<license>
 					<version>
 					<childobjects>
 				]]>
-			</html>
-		</template>
-	</templates>
-	<groups>
-		<group>
-			<id>io</id>
-			<rendering>angular</rendering>
-			<views>
-				<view>test</view>
-				<view>native_widgets_test</view>
-			</views>
-		</group>
-		<group>
-			<id>io_bulk</id>
-			<rendering>angular</rendering>
-			<views>
-				<view>test</view>
-				<view>native_widgets_test</view>
-			</views>
-		</group>
-	</groups>
+		</html>
+	</template>
+</templates>
+<groups>
+	<group>
+		<id>io</id>
+		<rendering>angular</rendering>
+		<views>
+			<view>test</view>
+			<view>native_widgets_test</view>
+		</views>
+	</group>
+	<group>
+		<id>io_bulk</id>
+		<rendering>angular</rendering>
+		<views>
+			<view>test</view>
+			<view>native_widgets_test</view>
+		</views>
+	</group>
+</groups>
 </metadataset>
