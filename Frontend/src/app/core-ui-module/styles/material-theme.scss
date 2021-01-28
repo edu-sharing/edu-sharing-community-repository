@@ -130,6 +130,12 @@ mat-button-toggle-group{
     background-color: $workspaceTopBarBackground;
     .mat-tab-label {
       color: $workspaceTopBarFontColor;
+      &.cdk-keyboard-focused:not(.mat-tab-disabled) {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      .mat-ripple-element {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
     }
   }
   .mat-ink-bar{
