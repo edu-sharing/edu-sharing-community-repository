@@ -15,6 +15,8 @@ import {
     LoginResult,
     RestConnectorService,
     RestIamService,
+    UIConstants,
+    RestConstants,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {
@@ -32,10 +34,11 @@ import {ConfigEntry} from '../../../core-ui-module/node-helper.service';
     ],
 })
 export class MainMenuSidebarComponent implements OnInit {
+    readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
+    readonly ME = RestConstants.ME;
     @Input() currentScope: string;
 
     @Output() showLicenses = new EventEmitter<void>();
-    @Output() openProfile = new EventEmitter<void>();
 
     // Internal state
     show = false;
@@ -92,11 +95,6 @@ export class MainMenuSidebarComponent implements OnInit {
 
     hide() {
         this.show = false;
-    }
-
-    onOpenProfile() {
-        this.hide();
-        this.openProfile.emit();
     }
 
     onShowLicenses() {
