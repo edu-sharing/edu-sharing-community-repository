@@ -19,7 +19,7 @@
          (click)="i<currentStepPosition() ? newCollectionStep=step : null"
          [class.current]="step==newCollectionStep"
          [class.finished]="i<currentStepPosition()">
-      <div class="circle"></div><i class="material-icons">{{STEP_ICONS[step]}}</i><div class="label">{{ 'COLLECTIONS.STEP.'+step | translate }}</div>
+      <div class="circle"></div><i [icon]="STEP_ICONS[step]"></i><div class="label">{{ 'COLLECTIONS.STEP.'+step | translate }}</div>
       <div class="connection"></div>
     </div>
     <div class="finish">
@@ -35,46 +35,46 @@
         (onCancel)="newCollectionCancel()">
     <div class="createCollection collectionShadow">
       <button mat-button class="collection-item clickable" (click)="setCollectionType('MY')">
-        <div class="iconLeft"><i class="material-icons" style="color:#995b5b;">lock</i></div>
+        <div class="iconLeft"><i icon="lock" style="color:#995b5b;"></i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.PRIVATE' | translate}}</div>
           <div class="description">{{'COLLECTIONS.CREATE.PRIVATE_DESCRIPTION' | translate}}</div>
         </div>
-        <i class="material-icons next">keyboard_arrow_right</i>
+        <i icon="keyboard_arrow_right" class="next"></i>
       </button>
       <button mat-button class="collection-item clickable" *ngIf="canInvite" (click)="setCollectionType('CUSTOM')">
-        <div class="iconLeft"><i class="material-icons" style="color:#4F7899;">group</i></div>
+        <div class="iconLeft"><i icon="group" style="color:#4F7899;"></i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.SHARED' | translate}}</div>
           <div class="description">{{'COLLECTIONS.CREATE.SHARED_DESCRIPTION' | translate}}</div>
         </div>
-        <i class="material-icons next">keyboard_arrow_right</i>
+        <i icon="keyboard_arrow_right" class="next"></i>
       </button>
       <button mat-button class="collection-item clickable" *ngIf="shareToAll && canInvite" (click)="setCollectionType('EDU_ALL')">
-        <div class="iconLeft"> <i class="material-icons" style="color:#5C998F;">public</i></div>
+        <div class="iconLeft"> <i icon="public" style="color:#5C998F;"></i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.PUBLIC' | translate}}</div>
           <div class="description">{{'COLLECTIONS.CREATE.PUBLIC_DESCRIPTION' | translate}}</div>
         </div>
-        <i class="material-icons next">keyboard_arrow_right</i>
+        <i icon="keyboard_arrow_right" class="next"></i>
       </button>
       <div class="group" *ngIf="createEditorial && shareToAll">
         <button mat-button class="collection-item clickable" *ngIf="createEditorial" (click)="setCollectionType('EDITORIAL')">
-          <div class="iconLeft"><i class="material-icons" style="color:#E9B42A;">star</i></div>
+          <div class="iconLeft"><i icon="star" style="color:#E9B42A;"></i></div>
           <div class="content">
             <div class="title">{{'COLLECTIONS.CREATE.EDITORIAL' | translate}}</div>
             <div class="description">{{'COLLECTIONS.CREATE.EDITORIAL_DESCRIPTION' | translate}}</div>
           </div>
-          <i class="material-icons next">keyboard_arrow_right</i>
+          <i icon="keyboard_arrow_right" class="next"></i>
         </button>
         <!--
         <div class="collection-item clickable" *ngIf="createCurriculum" (click)="setCollectionType('CURRICULUM')">
-          <div class="iconLeft"><i class="material-icons" style="color:#995C99;">school</i></div>
+          <div class="iconLeft"><i icon="school" style="color:#995C99;">school</i></div>
           <div class="content">
             <div class="title">{{'COLLECTIONS.CREATE.CURRICULUM' | translate}}</div>
             <div class="description">{{'COLLECTIONS.CREATE.CURRICULUM_DESCRIPTION' | translate}}</div>
           </div>
-          <i class="material-icons next">keyboard_arrow_right</i>
+          <i icon="keyboard_arrow_right" class="next"></i>
         </div>
         -->
         </div>
@@ -114,7 +114,7 @@
               <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
                   <div class="card-image-distance"></div>
                   <div class="card-image-icon-container" [style.background-color]="currentCollection.collection.color">
-                      <i class="material-icons">layers</i>
+                      <i icon="layers"></i>
                   </div>
               </div>
 
@@ -233,7 +233,7 @@
           <div class="title">{{'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate}}</div>
           <div class="description">{{'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate}}</div>
         <div class="dialog-basic-area permissionsBtn">
-          <button mat-raised-button (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</button>
+          <button mat-raised-button (click)="editPermissions()"><i icon="person_add"></i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</button>
         </div>
         <div class="status">{{('COLLECTIONS.PERMISSIONS_STATUS_'+getShareStatus()) | translate}}</div>
       </div>

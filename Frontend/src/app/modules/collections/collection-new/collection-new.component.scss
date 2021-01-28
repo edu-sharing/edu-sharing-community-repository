@@ -379,11 +379,11 @@ $imagePath: '../../../../assets/images/collections/';
     border-radius: 160px;
     background-color: darkgray;
     margin: auto;
-    text-align: center;
-    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   i{
     font-size: 75px;
-    margin-top: 44px;
   }
 }
 

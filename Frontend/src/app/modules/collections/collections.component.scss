@@ -101,11 +101,13 @@ section {
     height: 90px;
     border-radius: 50%;
     background-color: rgba(0,0,0,.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     @include unselectableText();
     > i {
         color:#fff;
         font-size: 45px;
-        margin-top: 25px;
     }
 }
 .collection-header-image {
