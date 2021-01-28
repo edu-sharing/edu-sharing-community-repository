@@ -8,7 +8,7 @@ import { OptionItem } from '../../option-item';
 })
 export class ListOptionItemComponent implements OnInit {
     @Input() option: OptionItem;
-    
+
     constructor() {}
 
     ngOnInit(): void {}
