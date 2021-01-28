@@ -109,9 +109,9 @@ user-quota{
   z-index: 62;
   >div {
     height:$workspaceBreadcrumbsHeight - 3px;
-    margin-right: 10px;
     padding-top: 15px;
     padding-left: 20px;
+    padding-right: 10px;
     background: linear-gradient(to right, rgba(255, 255, 255, 0.001) 0, #fff 10px, #fff 100%); /* safari fix */
   }
 }

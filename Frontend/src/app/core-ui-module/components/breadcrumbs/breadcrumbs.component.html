@@ -13,7 +13,7 @@
   </div>
 
   <!-- Short breadcrumbs
-  
+
   Show only the last breadcrumbs and either a back- or a home button.
   -->
   <div class="breadcrumb breadcrumb-short">
@@ -97,7 +97,7 @@ Short version works only with `short="always"`.
 </ng-template>
 
 <ng-template #simpleBreadcrumbElement let-index="index" let-inner="inner" let-classes="classes">
-  <div
+  <a
     #trigger
     cdkMonitorElementFocus
     class="breadcrumb-element clickable {{ classes }}"
@@ -109,7 +109,7 @@ Short version works only with `short="always"`.
       <ng-container *ngTemplateOutlet="inner"></ng-container>
     </div>
     <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
-  </div>
+  </a>
 </ng-template>
 
 <ng-template #nodeBreadcrumbElement let-node="node" let-index="index" let-inner="inner">

@@ -106,6 +106,9 @@ mat-button-toggle-group{
 .mat-tab-labels {
   background-color: $actionDialogBackground;
   .mat-tab-label {
+    &.cdk-keyboard-focused{
+        @include setGlobalKeyboardFocus('border');
+    }
     text-transform: uppercase;
     &.mat-tab-label-active{
       opacity: 0.9;

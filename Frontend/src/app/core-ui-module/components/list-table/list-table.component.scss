@@ -171,6 +171,7 @@ $badgeWidth: 250px;
         }
         &.cdk-keyboard-focused {
             .cardList, .cardSmallList {
+                app-list-option-item >div:focus,
                 .row:focus,
                 .row a:focus {
                     @include setGlobalKeyboardFocus();
