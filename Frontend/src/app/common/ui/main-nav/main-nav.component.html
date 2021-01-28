@@ -167,7 +167,7 @@
               [attr.aria-label]="searchPlaceholder | translate"
             />
             <i class="searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()" icon="clear"></i>
-            <button mat-icon-button (click)="doSearch()" aria-label="{{'WORKSPACE.SEARCH_ACTION' | translate}}">
+            <button mat-icon-button (click)="doSearch()" attr.aria-label="{{'WORKSPACE.SEARCH_ACTION' | translate}}">
               <i icon="search" [aria]="false"></i>
             </button>
           </div>
