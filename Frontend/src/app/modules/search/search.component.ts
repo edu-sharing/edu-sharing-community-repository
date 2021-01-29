@@ -747,8 +747,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private checkFail() {
         this.searchFail =
-            this.searchService.searchResult.length < 1 &&
-            this.searchService.searchResultCollections.length < 1;
+            this.searchService.searchResult.length < 1; // &&
+            //this.searchService.searchResultCollections.length < 1;
     }
 
     private updateSortMds() {

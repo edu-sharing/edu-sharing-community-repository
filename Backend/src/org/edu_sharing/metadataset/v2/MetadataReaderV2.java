@@ -215,6 +215,7 @@ public class MetadataReaderV2 {
 			List<MetadataQuery> queries = new ArrayList<>();
 			for (int i = 0; i < queriesNode.getLength(); i++) {
 				MetadataQuery query = new MetadataQuery();
+				query.setSyntax(syntaxName);
 				Map<String, String> basequeries = new HashMap<>();
 				Node node = queriesNode.item(i);
 				NamedNodeMap nodeMap = node.getAttributes();
@@ -290,6 +291,7 @@ public class MetadataReaderV2 {
 				query.setParameters(parameters);
 				queries.add(query);
 			}
+			entry.setSyntax(syntaxName);
 			entry.setQueries(queries);
 			result.put(syntaxName, entry);
 		}

@@ -1,6 +1,7 @@
 package org.edu_sharing.metadataset.v2;
 
-import org.springframework.extensions.webscripts.Runtime;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.List;
@@ -21,6 +22,11 @@ public class MetadataQueryParameter implements Serializable {
 	MetadataQueryParameter(String syntax){
 		this.syntax = syntax;
 	}
+
+	public String getSyntax() {
+		return syntax;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -43,12 +49,24 @@ public class MetadataQueryParameter implements Serializable {
 		if(statement==null) {
 			statement = getDefaultStatement();
 		}
-		return QueryUtils.replaceCommonQueryParams(statement, QueryUtils.luceneReplacer);
+		return QueryUtils.replaceCommonQueryParams(statement, QueryUtils.replacerFromSyntax(syntax));
 	}
 	private String getDefaultStatement() {
 		if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_DSL)){
 			//return "{\"wildcard\":{\"properties." + name  +"\":{\"value\":\"${value}\"}}}";
-			return "{\"term\":{\"properties." + name +".keyword" +"\":{\"value\":\"${value}\"}}}";
+			try {
+
+				JSONObject jsonObject = new JSONObject();
+				JSONObject termObject = new JSONObject();
+				JSONObject detailObject = new JSONObject();
+				jsonObject.put("wildcard", termObject);
+				termObject.put("properties." + name + ".keyword", detailObject);
+				detailObject.put("case_insensitive", true);
+				detailObject.put("value", "*${value}*");
+				return jsonObject.toString();
+			}catch(JSONException e){
+				throw new RuntimeException(e);
+			}
 		} else if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_LUCENE)) {
 			return "@" + name.replace(":", "\\:") + ":\"*${value}*\"";
 		}

@@ -282,8 +282,10 @@ public class MetadataSearchHelper {
 			String andQuery="";
 			if(lucene!=null && !lucene.trim().isEmpty())
 				andQuery=" AND (" + lucene + ")";
-			if(queries.findBasequery(parameters.keySet())!=null && !queries.findBasequery(parameters.keySet()).isEmpty())
-				lucene=queries.findBasequery(parameters.keySet())+andQuery;
+			if(queries.findBasequery(parameters.keySet())!=null &&
+					!queries.findBasequery(parameters.keySet()).isEmpty()) {
+				lucene = queries.findBasequery(parameters.keySet()) + andQuery;
+			}
 			lucene = applyCondition(queries, lucene);
 		}
 		lucene = applyCondition(query, lucene);
