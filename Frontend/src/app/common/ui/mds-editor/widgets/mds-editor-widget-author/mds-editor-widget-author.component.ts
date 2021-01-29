@@ -65,6 +65,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidget {
             .nodeContributorChange.first()
             .subscribe((n) => {
                 if(n) {
+                    this.mdsEditorValues.updateNodes([n]);
                     this.updateValues([n]);
                 }
             });

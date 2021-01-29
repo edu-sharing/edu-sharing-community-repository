@@ -855,6 +855,18 @@ export class MdsEditorInstanceService implements OnDestroy {
             completed: completed.length,
         };
     }
+
+    /**
+     * update currently used nodes with new data
+     * (e.g when some metadata has changed outside of the current context)
+     */
+    updateNodes(nodes: Node[]) {
+        this.nodes$.next(this.nodes$.value.map((n1) => {
+            return nodes.find((n2) =>
+                n1.ref.id === n2.ref.id && n1.ref.repo === n2.ref.repo
+            ) || n1;
+        }));
+    }
 }
 
 function arraysAreEqual<T>(arrays: T[][]) {
