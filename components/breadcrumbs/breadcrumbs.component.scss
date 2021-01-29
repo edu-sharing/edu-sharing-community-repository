@@ -49,16 +49,26 @@
     display: inline;
     font-size: $fontSizeSmall;
     span{
-      line-height: 2;
     }
-    i{
-      position: relative;
-      top: 5px;
-    }
-    &.breadcrumbShort{
-      @include limitLineCount(1);
-      span{
+
+    &.breadcrumbShort {
+      @include limitLineCount(1, 1.25);
+      > span {
         line-height: 1;
+      }
+    }
+    > span {
+      line-height: 2;
+
+      &:not(:first-child) {
+        position: relative;
+        padding-left: 19px;
+
+        i {
+          position: absolute;
+          left: 0;
+          top: -1px;
+        }
       }
     }
   }
