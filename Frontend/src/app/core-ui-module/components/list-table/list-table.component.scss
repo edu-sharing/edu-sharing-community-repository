@@ -755,7 +755,8 @@ a.rowInner {
     position: relative;
     // safari height fix
     app-list-option-item{
-        height: $cardHeight;
+        height: 0;
+        flex-grow: 1;
     }
 
 }
@@ -843,7 +844,8 @@ a.rowInner {
     margin: 6px !important;
     // safari height fix
     app-list-option-item{
-        height: $listCardSmallHeight;
+        height: 0;
+        flex-grow: 1;
     }
 }
 
