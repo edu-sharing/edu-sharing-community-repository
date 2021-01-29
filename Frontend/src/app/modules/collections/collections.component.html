@@ -107,6 +107,8 @@
           role="presentation"
         />
       </div>
+      <!-- Making the image area clickable poses a violation of accessibility rules. Merge
+      christopher/fix/image-click-areas to remove. -->
       <div
         *ngIf="isAllowedToEditCollection()"
         (click)="collectionEdit()"

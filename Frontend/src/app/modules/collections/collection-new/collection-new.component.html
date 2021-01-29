@@ -120,6 +120,8 @@
                   </button>
               </div>
 
+              <!-- Making the image area clickable poses a violation of accessibility rules. Merge
+              christopher/fix/image-click-areas to remove. -->
               <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
                   <div class="card-image-distance"></div>
                   <div class="card-image-icon-container" [style.background-color]="currentCollection.collection.color">
