@@ -445,7 +445,9 @@ public class OAILOMExporter {
 	public void appendMLText(MLText mlText, Element mlElement){
 		for(Map.Entry<Locale,String> entry : mlText.entrySet()){
 			Element langEle = this.createAndAppendElement("string", mlElement,entry.getValue());
-			langEle.setAttribute(xmlLanguageAttribute, entry.getKey().getLanguage());
+			if(entry.getKey() != null){
+				langEle.setAttribute(xmlLanguageAttribute, entry.getKey().getLanguage());
+			}
 		}
 	}
 
@@ -473,7 +475,7 @@ public class OAILOMExporter {
         return null;
     }
 
-    public Element createAndAppendElementLangStr(String elementName, Element parent, QName textProp) {
+    public Element createAndAppendElementLangStr(String elementName, Element parent, QName textProp, Locale locale) {
         List<MLText> deTextLst = new ArrayList<>();
         Serializable textLst = nodeService.getProperty(nodeRef, textProp);
         if (textLst != null) {
@@ -482,9 +484,9 @@ public class OAILOMExporter {
             if (textLst instanceof List) {
                 for (String deText : (List<String>) textLst)
                     if (!deText.isEmpty())
-                        deTextLst.add(new MLText(nodeLanguage, deText));
+                        deTextLst.add(new MLText(locale, deText));
             } else if (textLst instanceof String)
-                deTextLst.add(new MLText(nodeLanguage, (String) textLst));
+                deTextLst.add(new MLText(locale, (String) textLst));
             return this.createAndAppendElement(elementName, parent, (Serializable) deTextLst, false);
         }
         return null;
