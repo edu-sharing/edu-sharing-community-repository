@@ -103,11 +103,20 @@
                   class="image-upload-field-input">
               </div>
               <div class="button-icon">
-                  <button mat-fab color="white" (click)="file.click()">
-                      <i icon="file_upload" aria="true"></i>
+                  <button mat-fab color="white" (click)="file.click()"
+                    [matTooltip]="'collectionNew_uploadCollectionImage' | translate"
+                    [attr.aria-label]="'collectionNew_uploadCollectionImage' | translate"
+                  >
+                    <i icon="file_upload"></i>
                   </button>
-                  <button mat-fab color="white" *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (click)="deleteImage()">
-                      <i icon="delete" aria="true"></i>
+                  <button
+                    mat-fab
+                    color="white"
+                    *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (click)="deleteImage()"
+                    [matTooltip]="'collectionNew_deleteCollectionImage' | translate"
+                    [attr.aria-label]="'collectionNew_deleteCollectionImage' | translate"
+                  >
+                    <i icon="delete"></i>
                   </button>
               </div>
 
