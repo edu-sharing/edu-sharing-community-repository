@@ -603,27 +603,22 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
     }
     private openBreadcrumb(position: number) {
-        /*this.path=this.path.slice(0,position+1);
-        */
         this.searchQuery = null;
-        let id = '';
-        const length = this.path ? this.path.length : 0;
-        if (position > 0) {
+        if (position > 0 || this.path) {
             // handled automatically via routing
-            return;
-        }
-        else if (length > 0) {
-            id = null;
-        }
-        else {
-            if(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)) {
+        } else {
+            // TODO: handle with homeRouterLink if possible.
+            if (
+                UIHelper.evaluateMediaQuery(
+                    UIConstants.MEDIA_QUERY_MAX_WIDTH,
+                    UIConstants.MOBILE_TAB_SWITCH_WIDTH
+                )
+            ) {
                 this.showSelectRoot = true;
             }
-            return;
         }
-
-        this.openDirectory(id);
     }
+
     private refresh(refreshPath = true,nodes: Node[] = null) {
         // only refresh properties in this case
         if(nodes && nodes.length){

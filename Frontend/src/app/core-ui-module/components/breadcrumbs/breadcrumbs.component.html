@@ -1,9 +1,7 @@
 <ng-container *ngIf="clickable">
   <!-- Full (not short) breadcrumbs -->
   <div class="breadcrumb breadcrumb-full">
-    <ng-container
-      *ngTemplateOutlet="simpleBreadcrumbElement; context: { index: 0, inner: homeInner }"
-    ></ng-container>
+    <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
     <ng-container *ngFor="let node of nodes; let index = index">
       <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
       <ng-container
@@ -21,10 +19,8 @@
     <ng-container *ngIf="nodes.length <= 1">
       <ng-container
         *ngTemplateOutlet="
-          simpleBreadcrumbElement;
+          homeBreadcrumbElement;
           context: {
-            index: 0,
-            inner: homeInner,
             classes: 'breadcrumb-element-home'
           }
         "
@@ -63,9 +59,7 @@ Short version works only with `short="always"`.
 -->
 <div *ngIf="!clickable" class="breadcrumb breadcrumb-readonly">
   <span *ngIf="home" class="home mat-button-no-uppercase">{{ home | translate }}</span>
-  <span *ngIf="!home" class="home home-icon mat-button-no-uppercase"
-    ><i icon="home"></i
-  ></span>
+  <span *ngIf="!home" class="home home-icon mat-button-no-uppercase"><i icon="home"></i></span>
   <ng-container *ngIf="short === 'always' && nodes.length > 1">
     <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="folder">...</span>
@@ -79,37 +73,44 @@ Short version works only with `short="always"`.
 </div>
 
 <ng-template #homeInner>
-  <ng-container *ngIf="home">
-    {{ home | translate }}
-  </ng-container>
-  <ng-container *ngIf="!home">
-    <i icon="home" class="home-icon"></i>
-  </ng-container>
-  <i
-    *ngIf="nodes.length < 1"
-    icon="keyboard_arrow_down"
-    class="dropdown-icon mobile-only"
-  ></i>
+  <div class="breadcrumb-inner">
+    <ng-container *ngIf="home">
+      {{ home | translate }}
+    </ng-container>
+    <ng-container *ngIf="!home">
+      <i icon="home" class="home-icon"></i>
+    </ng-container>
+    <i *ngIf="nodes.length < 1" icon="keyboard_arrow_down" class="dropdown-icon mobile-only"></i>
+  </div>
 </ng-template>
 
 <ng-template #backInner>
   <i icon="keyboard_arrow_left" class="breadcrumb-arrow"></i>
 </ng-template>
 
-<ng-template #simpleBreadcrumbElement let-index="index" let-inner="inner" let-classes="classes">
+<ng-template #homeBreadcrumbElement let-classes="classes">
   <a
+    *ngIf="homeRouterLink"
     #trigger
+    [routerLink]="homeRouterLink.routerLink"
+    [queryParams]="homeRouterLink.queryParams"
+    [queryParamsHandling]="homeRouterLink.queryParamsHandling"
     cdkMonitorElementFocus
-    class="breadcrumb-element clickable {{ classes }}"
-    role="button"
-    tabindex="0"
-    (click)="openBreadcrumb(index)"
+    class="breadcrumb-element {{ classes }}"
   >
-    <div class="breadcrumb-inner">
-      <ng-container *ngTemplateOutlet="inner"></ng-container>
-    </div>
+    <ng-container *ngTemplateOutlet="homeInner"></ng-container>
     <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
   </a>
+  <button
+    *ngIf="!homeRouterLink"
+    #trigger
+    cdkMonitorElementFocus
+    class="breadcrumb-element {{ classes }}"
+    (click)="openBreadcrumb(0)"
+  >
+    <ng-container *ngTemplateOutlet="homeInner"></ng-container>
+    <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
+  </button>
 </ng-template>
 
 <ng-template #nodeBreadcrumbElement let-node="node" let-index="index" let-inner="inner">

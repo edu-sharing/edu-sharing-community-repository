@@ -953,14 +953,6 @@ export class CollectionsMainComponent {
             });
     }
 
-    private openBreadcrumb(position: number) {
-        if (position === 0) {
-            this.selectTab(this.tabSelected);
-            return;
-        }
-        // other navigation is handled via breadcrumbs angular routing
-    }
-
     private initialize() {
         this.optionsService.clearComponents(
             this.mainNavRef,

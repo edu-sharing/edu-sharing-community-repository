@@ -76,6 +76,15 @@
     }
 }
 
+button {
+    padding: unset;
+    border: unset;
+    background: unset;
+    &:focus {
+        outline: unset;
+    }
+}
+
 .breadcrumb-inner {
     color: $primary;
     display: flex;

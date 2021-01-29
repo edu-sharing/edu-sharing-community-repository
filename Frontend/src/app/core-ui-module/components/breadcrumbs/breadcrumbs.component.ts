@@ -1,6 +1,7 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Node, RestNodeService } from '../../../core-module/core.module';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
+import { Params, QueryParamsHandling } from '@angular/router';
 
 /**
  * Breadcrumbs for nodes or collections.
@@ -15,6 +16,16 @@ export class BreadcrumbsComponent {
      * Caption of the home, if not set, an icon is used.
      */
     @Input() home: string;
+    /**
+     * The path to give to `routerLink` on the home element.
+     *
+     * If not given, clicks will be emitted via the `onClick` output.
+     */
+    @Input() homeRouterLink: {
+        routerLink: any[] | string;
+        queryParams?: Params | null;
+        queryParamsHandling?: QueryParamsHandling | null
+    };
     /**
      * Attach a clickable class so the user cursor will be a hand.
      */

@@ -217,10 +217,10 @@
         <breadcrumbs
           class="collections-breadcrumb"
           [home]="'COLLECTIONS.TAB.' + tabSelected"
+          [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
           [breadcrumbsAsNode]="path"
           [canDrop]="canDropOnCollection"
           (onDrop)="dropOnCollection($event)"
-          (onClick)="openBreadcrumb($event)"
         ></breadcrumbs>
       </div>
 
