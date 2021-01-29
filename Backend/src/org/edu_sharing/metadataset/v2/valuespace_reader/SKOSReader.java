@@ -62,9 +62,11 @@ public class SKOSReader extends ValuespaceReader{
         key.setKey(entry.getString("id"));
         String de = entry.getJSONObject("prefLabel").getString("de");
         key.setCaption(de);
+        key.setLocale("de");
         if("en_US".equals(locale)) {
             try {
                 key.setCaption(entry.getJSONObject("prefLabel").getString("en"));
+                key.setLocale("en");
             }catch(JSONException ignored) { }
         }
         // @TODO handle tree structures

@@ -4,7 +4,7 @@ import java.util.List;
 
 public class MetadataKey extends MetadataTranslatable {
 	
-	private String key,caption,description,parent;
+	private String key,caption,description,parent,locale;
 	/**
 	 * List of other keys this child is a precedor of
 	 */
@@ -52,4 +52,8 @@ public class MetadataKey extends MetadataTranslatable {
 	public void setPreceds(List<String> preceds) {
 		this.preceds = preceds;
 	}
+
+	public void setLocale(String locale) { this.locale = locale;}
+
+	public String getLocale() { return locale;}
 }
