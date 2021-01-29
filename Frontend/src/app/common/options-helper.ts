@@ -510,7 +510,7 @@ export class OptionsHelperService {
         const createNodeVariant = new OptionItem('OPTIONS.VARIANT', 'call_split', (object) =>
             management.nodeVariant =  this.getObjects(object)[0]
         );
-        createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
         createNodeVariant.customShowCallback = (nodes) => {
             if (nodes) {
                 createNodeVariant.name = 'OPTIONS.VARIANT' + (this.connectors.connectorSupportsEdit(nodes[0]) ? '_OPEN' : '');
