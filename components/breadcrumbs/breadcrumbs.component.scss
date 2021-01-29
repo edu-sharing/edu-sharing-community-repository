@@ -1,114 +1,152 @@
 @import '../../styles/variables';
 
 :host {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 :host[short='always'] .breadcrumb-full {
-    display: none;
+  display: none;
 }
 
 :host[short='never'] .breadcrumb-short {
-    display: none;
+  display: none;
 }
 
 :host[short='auto'] {
-    @media screen and (max-width: $mobileTabSwitchWidth) {
-        .breadcrumb-full {
-            display: none;
-        }
+  @media screen and (max-width: $mobileTabSwitchWidth) {
+    .breadcrumb-full {
+      display: none;
     }
-    @media screen and (min-width: $mobileTabSwitchWidth) {
-        .breadcrumb-short {
-            display: none;
-        }
+  }
+  @media screen and (min-width: $mobileTabSwitchWidth) {
+    .breadcrumb-short {
+      display: none;
     }
+  }
 }
 
 .mobile-only {
-    @media screen and (min-width: $mobileTabSwitchWidth) {
-        display: none !important;
-    }
+  @media screen and (min-width: $mobileTabSwitchWidth) {
+    display: none !important;
+  }
 }
 
 .breadcrumb::before {
-    content: '' !important;
+  content: '' !important;
 }
 
 .breadcrumb {
-    display: flex;
-    width: 100%;
-    max-height: 1.5em;
-    align-items: center;
-    overflow: hidden;
-    &:not(.breadcrumb-readonly) {
-        @media screen and (max-width: $mobileTabSwitchWidth) {
-            margin-top: -2px;
-            min-height: 25px;
-            margin-left: -10px;
-            .breadcrumb-element-home {
-                margin-left: 20px;
-            }
-        }
+  display: flex;
+  width: 100%;
+  max-height: 1.5em;
+  align-items: center;
+  overflow: hidden;
+  &:not(.breadcrumb-readonly) {
+    @media screen and (max-width: $mobileTabSwitchWidth) {
+      margin-top: -2px;
+      min-height: 25px;
+      margin-left: -10px;
+      .breadcrumb-element-home {
+        margin-left: 20px;
+      }
     }
-    &.breadcrumb-readonly {
-        // This should wrap as a whole with '>' separators blending into lines.
-        display: inline;
-        font-size: $fontSizeSmall;
-        i {
-            position: relative;
-            top: 5px;
-        }
+  }
+  &.breadcrumb-readonly {
+    // This should wrap as a whole with '>' separators blending into lines.
+    display: inline;
+    font-size: $fontSizeSmall;
+    i {
+      position: relative;
+      top: 5px;
     }
+  }
 }
 
 .breadcrumb-element {
-    position: relative;
-    max-height: 1.5em;
-    display: flex;
-    align-items: center;
-    &.cdk-keyboard-focused {
-        background-color: $primaryLight;
-    }
-    i {
-        width: 35px;
-        text-align: center;
-    }
+  position: relative;
+  max-height: 1.5em;
+  display: flex;
+  align-items: center;
+  &.cdk-keyboard-focused {
+    background-color: $primaryLight;
+  }
+  i {
+    width: 35px;
+    text-align: center;
+  }
 }
 
 .breadcrumb-inner {
-    color: $primary;
-    display: flex;
-    padding: 2px 4px;
-    font-size: 95%;
-    white-space: nowrap;
+  color: $primary;
+  display: flex;
+  padding: 2px 4px;
+  font-size: 95%;
+  white-space: nowrap;
 }
 
 .mat-ripple {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
 }
 
 .home-icon {
-    margin-top: 3px;
+  margin-top: 3px;
 }
 
 .dropdown-icon {
-    margin-top: -2px;
+  margin-top: -2px;
 }
 
 .breadcrumb-arrow {
-    font-size: 15pt;
-    color: $textLight;
+  font-size: 15pt;
+  color: $textLight;
 }
 
+.homeIsIcon {
+  margin-top: 3px;
+}
+
+.homeIcon {
+  margin-top: 0;
+  max-height: none;
+  min-width: 30px;
+}
+}
+&.breadcrumb-readonly{
+  display: inline;
+  font-size: $fontSizeSmall;
+  span{
+  }
+
+  &.breadcrumbShort {
+    @include limitLineCount(1, 1.25);
+    > span {
+      line-height: 1;
+    }
+  }
+  > span {
+    line-height: 2;
+
+    &:not(:first-child) {
+      position: relative;
+      padding-left: 19px;
+
+      i {
+        position: absolute;
+        left: 0;
+        top: -1px;
+      }
+    }
+  }
+}
+}
 .selected {
-    background-color: #fff;
-    border: 2px dashed $primary;
-    padding: 0 2px !important;
+  background-color: #fff;
+  border: 2px dashed $primary;
+  padding: 0 2px !important;
 }
