@@ -360,6 +360,7 @@ export class NodeRenderComponent implements EventListener {
             }
             else {
                 this._node=data.node;
+                this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
                         this.similarNodeColumns = MdsHelper.getColumns(this.translate, set,'search');
