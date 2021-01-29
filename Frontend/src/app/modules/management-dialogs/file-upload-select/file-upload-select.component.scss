@@ -109,6 +109,7 @@ mat-form-field{
   }
   .picker-group{
     display: flex;
+    align-items: center;
     padding:10px 15px;
     background-color: $buttonHoverBackground;
     > breadcrumbs{
