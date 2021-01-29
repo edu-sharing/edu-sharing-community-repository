@@ -148,6 +148,11 @@ export class Toast {
                                 permission,
                             });
                 } else if (
+                    json.error.indexOf('DAORestrictedAccessException') !== -1
+                ) {
+                    this.dialogTitle = 'RESTRICTED_ACCESS_ERROR_TITLE';
+                    this.dialogMessage = 'RESTRICTED_ACCESS_ERROR_MESSAGE';
+                } else if (
                     json.error.indexOf('SystemFolderDeleteDeniedException') !==
                     -1
                 ) {
