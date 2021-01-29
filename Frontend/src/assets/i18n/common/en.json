@@ -104,6 +104,8 @@
     "CONNECTOR_FORMAT_LABEL": "File type",
     "CONNECTOR_QUOTA_REACHED_TITLE": "Upload quota exceeded",
     "CONNECTOR_QUOTA_REACHED_MESSAGE": "This function is unavailable because the upload quota is fully exceeded.\n\nDelete files to reclaim storage space and try it again.",
+    "RESTRICTED_ACCESS_ERROR_TITLE": "No license for material",
+    "RESTRICTED_ACCESS_ERROR_MESSAGE": "The current material requires a license to be accessed. You currently don't have sufficient rights to access it",
     "TOOLPERMISSION_ERROR": "You have insufficient permissions for this task",
     "TOOLPERMISSION_ERROR_INLINE": "You can't do this action because the permission \"{{permission}}\" is missing",
     "TOOLPERMISSION_ERROR_TITLE": "Insufficient permissions",

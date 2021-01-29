@@ -1,4 +1,4 @@
-import { trigger } from '@angular/animations';
+import {trigger} from '@angular/animations';
 import { Component, Input } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIService } from '../../../core-module/core.module';

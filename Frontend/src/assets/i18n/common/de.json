@@ -102,6 +102,8 @@
     "CONNECTOR_FORMAT_LABEL": "Dateityp",
     "CONNECTOR_QUOTA_REACHED_TITLE": "Speicherplatz-Quota überschritten",
     "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Sie das Speicherplatz-Quota vollständig überschritten haben.\n\nLöschen Sie einige Dateien, um Speicherplatz zu schaffen und versuchen Sie es anschließend erneut.",
+    "RESTRICTED_ACCESS_ERROR_TITLE": "Keine Lizenz für Material",
+    "RESTRICTED_ACCESS_ERROR_MESSAGE": "Beim aktuellen Material handelt es sich um ein lizenziertes Material. Sie besitzen jedoch keine Lizenz, um auf das Material zuzugreifen",
     "TOOLPERMISSION_ERROR": "Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
     "TOOLPERMISSION_ERROR_INLINE": "Sie dürfen diese Aktion nicht durchführen, da die Berechtigung \"{{permission}}\" fehlt.",
     "TOOLPERMISSION_ERROR_TITLE": "Fehlende Berechtigung",

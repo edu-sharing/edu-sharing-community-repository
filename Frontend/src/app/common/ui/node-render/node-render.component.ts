@@ -321,7 +321,7 @@ export class NodeRenderComponent implements EventListener {
     }
 
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
-    download.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+    download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()) {
@@ -359,6 +359,7 @@ export class NodeRenderComponent implements EventListener {
             }
             else {
                 this._node=data.node;
+                this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
                         this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');

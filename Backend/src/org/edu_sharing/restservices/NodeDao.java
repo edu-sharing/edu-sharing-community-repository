@@ -67,6 +67,7 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -1924,14 +1925,33 @@ public class NodeDao {
 
 	public NodeDao createFork(String sourceId) throws DAOException {
 		try {
-			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, false);
-			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(),	CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
-			nodeService.addAspect(newNode.getId(),CCConstants.CCM_ASPECT_FORKED);
-			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN,
-					new org.alfresco.service.cmr.repository.NodeRef(storeProtocol,storeId,sourceId));
-			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
-					nodeService.getProperty(storeProtocol,storeId,sourceId,CCConstants.LOM_PROP_LIFECYCLE_VERSION));
-			return new NodeDao(repoDao, newNode.getId());
+			NodeDao sourceDao = NodeDao.getNode(repoDao, sourceId);
+			String[] source = new String[]{nodeId};
+			RunAsWork<NodeDao> work = () -> {
+				try {
+					org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(source[0], nodeId, false);
+					permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+					nodeService.addAspect(newNode.getId(), CCConstants.CCM_ASPECT_FORKED);
+					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN,
+							new org.alfresco.service.cmr.repository.NodeRef(storeProtocol, storeId, source[0]));
+					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
+					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+					return new NodeDao(repoDao, newNode.getId());
+				} catch (Throwable throwable) {
+					throw new RuntimeException(throwable);
+				}
+			};
+			if(sourceDao.isCollectionReference()){
+				// validate ccm:restricted_access
+				NodeServiceHelper.validatePermissionRestrictedAccess(
+						new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(storeProtocol, storeId), sourceId),
+						CCConstants.PERMISSION_READ_ALL);
+				source[0] = sourceDao.getReferenceOriginalId();
+				return AuthenticationUtil.runAsSystem(work);
+			} else {
+				return work.doWork();
+			}
+
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}

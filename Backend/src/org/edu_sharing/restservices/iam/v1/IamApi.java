@@ -473,6 +473,44 @@ public class IamApi  {
     	}
     }
 
+	@DELETE
+
+	@Path("/people/{repository}/{person}")
+
+	@ApiOperation(
+			value = "Delete the user.",
+			notes = "Delete the user. (admin rights are required.)")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = "OK.", response = Void.class),
+					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+			})
+
+	public Response deleteUser(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "username",required=true) @PathParam("person") String person,
+			@ApiParam(value = "force the deletion (if false then only persons which are previously marked for deletion are getting deleted)",required=false, defaultValue = "false") @QueryParam("force") Boolean force,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			PersonDao personDao = PersonDao.getPerson(repoDao, person);
+
+			personDao.delete(force != null && force);
+
+			return Response.status(Response.Status.OK).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
     @OPTIONS        
     @Path("/people/{repository}/{person}")
     @ApiOperation(hidden = true, value = "")
