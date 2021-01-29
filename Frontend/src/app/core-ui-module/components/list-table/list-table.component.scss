@@ -190,154 +190,157 @@ $badgeWidth: 250px;
     .tableList .node-row app-node-url > a{
         /* fallback for unset/unknown fields */
         > div {
-            min-width: 120px;
+            width: 120px;
+            &.row_1{
+                flex-grow: 1;
+            }
         }
 
         .more-header,
         .more {
-            min-width: 50px;
+            width: 50px;
         }
 
         .collectionEditorial,
         .collectionPinned {
-            min-width: initial;
+            width: initial;
         }
 
         .editColumns {
-            min-width: initial;
+            width: initial;
         }
 
         .icon {
-            min-width: 50px;
+            width: 50px;
         }
 
         .checkbox {
-            min-width: 70px;
+            width: 70px;
         }
 
         .checkboxDummy {
-            min-width: 10px;
+            width: 10px;
         }
 
         .node_mediatype {
-            min-width: 100px;
+            width: 100px;
         }
 
         .node_cm_modified,
         .node_sys_archivedDate,
         .node_cm_created {
-            min-width: 160px;
+            width: 160px;
         }
 
         .node_ccm_educationaltypicalagerange {
-            min-width: 50px;
+            width: 50px;
         }
 
         .node_ccm_wf_status {
-            min-width: 100px;
+            width: 100px;
         }
         .node_ccm_editorial_state {
-            min-width: 130px;
+            width: 130px;
         }
 
         .node_cm_name {
-            min-width: 80px;
+            width: 80px;
         }
 
         .node_size {
-            min-width: 110px;
+            width: 110px;
         }
 
         .node_ccm_educationallearningresourcetype {
-            min-width: 150px;
+            width: 150px;
         }
 
         .node_ccm_replicationsourceid {
-            min-width: 150px;
+            width: 150px;
         }
 
         .node_ccm_eaf_productionyear {
-            min-width: 115px;
+            width: 115px;
         }
 
         .node_ccm_eaf_sequence_title {
-            min-width: 130px;
+            width: 130px;
         }
 
         .node_ccm_eaf_subtitle {
-            min-width: 130px;
+            width: 130px;
         }
 
         .node_dimensions {
-            min-width: 110px;
+            width: 110px;
         }
 
         .node_cclom_title {
-            min-width: 160px;
+            width: 160px;
             word-break: break-all;
         }
 
         .node_ccm_educationalcontext {
-            min-width: 180px;
+            width: 180px;
             word-break: break-all;
         }
 
         .node_cclom_general_keyword {
-            min-width: 160px;
+            width: 160px;
             word-break: break-all;
         }
 
         .node_cclom_version {
-            min-width: 60px;
+            width: 60px;
         }
 
         .node_sys_node-uuid {
-            min-width: 150px;
+            width: 150px;
         }
 
         .node_virtual_usagecount {
-            min-width: 150px;
+            width: 150px;
         }
 
         .node_ccm_commonlicense_key {
-            min-width: 130px;
+            width: 130px;
         }
 
         .node_cm_creator,
         .node_ccm_lifecyclecontributer_authorFN,
         .node_ccm_metadatacontributer_creatorFN {
-            min-width: 130px;
+            width: 130px;
             word-break: break-all;
         }
 
         .node_ccm_replicationsource {
-            min-width: 80px;
+            width: 80px;
         }
 
         .node_ccm_lifecyclecontributer_publisherFN {
-            min-width: 50px;
+            width: 50px;
             text-align: center;
         }
 
         .node_counts_view_material,
         .node_counts_view_material_embedded,
         .node_counts_download_material {
-            min-width: 80px;
+            width: 80px;
         }
 
         .user_firstName,
         .user_lastName {
-            min-width: 130px;
+            width: 130px;
             word-break: break-all;
         }
 
         .group_groupType {
-            min-width: 160px;
+            width: 160px;
             word-break: break-all;
         }
 
         .user_email {
-            min-width: 180px;
+            width: 180px;
             word-break: break-all;
         }
 
@@ -498,7 +501,7 @@ $badgeWidth: 250px;
                 padding-right: 50px;
 
                 .column {
-                    display: table-cell;
+                    display: flex;
                     flex-direction: column;
                     justify-content: center;
                 }
