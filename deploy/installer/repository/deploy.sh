@@ -44,7 +44,7 @@ build() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
-	echo "Checking artifact-id ..."
+	echo "Checking artifactId ..."
 
 	EXPECTED_ARTIFACTID="edu_sharing-community-repository"
 
@@ -54,7 +54,7 @@ build() {
 	popd >/dev/null || exit
 
 	[[ "${EXPECTED_ARTIFACTID}" != "${PROJECT_ARTIFACTID}" ]] && {
-		echo "Error: expected artifact-id [ ${EXPECTED_ARTIFACTID} ] is different."
+		echo "Error: expected artifactId [ ${EXPECTED_ARTIFACTID} ] is different."
 		exit
 	}
 

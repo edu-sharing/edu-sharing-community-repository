@@ -86,9 +86,9 @@ Installation
 5. Deploy the Alfresco Module Packages (AMP) by calling:
 
    ```
-   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/1 $CATALINA_HOME/webapps/alfresco -directory -force
-   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/2 $CATALINA_HOME/webapps/alfresco -directory -force
-   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/3 $CATALINA_HOME/webapps/edu-sharing -directory -force
+   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/1 $CATALINA_HOME/webapps/alfresco -directory -force
+   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/2 $CATALINA_HOME/webapps/alfresco -directory -force
+   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/edu-sharing/1 $CATALINA_HOME/webapps/edu-sharing -directory -force
    ```
 
 6. Change the environment variables `CATALINA_OPTS` by calling:

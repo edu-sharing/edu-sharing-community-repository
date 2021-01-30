@@ -57,7 +57,7 @@
               <includeArtifactIds>
                 edu_sharing-community-repository-backend-alfresco-module
               </includeArtifactIds>
-              <outputDirectory>${project.build.directory}/build/amps/1</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/amps/alfresco/1</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -70,7 +70,7 @@
               <includeArtifactIds>
                 edu_sharing-plugin-remote-repository-backend-alfresco-module
               </includeArtifactIds>
-              <outputDirectory>${project.build.directory}/build/amps/2</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/amps/alfresco/2</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -83,7 +83,7 @@
               <includeArtifactIds>
                 edu_sharing-plugin-remote-repository-backend-services-module
               </includeArtifactIds>
-              <outputDirectory>${project.build.directory}/build/amps/3</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/amps/edu-sharing/1</outputDirectory>
             </configuration>
           </execution>
         </executions>

@@ -36,11 +36,11 @@ USER worker
 
 ### Tomcat #############################################################################################################
 
-COPY assets/tomcat/logging.properties tomcat/conf/logging.properties
+COPY --chown=worker:worker assets/tomcat/logging.properties tomcat/conf/logging.properties
 
 ### Alfresco Solr4 #####################################################################################################
 
-COPY artifacts/alfresco-solr4-distribution-${repository.alfresco.platform.version}.zip /tmp/alfresco-solr4-distribution.zip
+COPY --chown=worker:worker artifacts/alfresco-solr4-distribution-${repository.alfresco.platform.version}.zip /tmp/alfresco-solr4-distribution.zip
 
 RUN set -eux \
 	&& mkdir -p /tmp/install/alfresco-solr4 \
@@ -75,7 +75,7 @@ RUN set -eux \
         's|@@ALFRESCO_SOLR4_DATA_DIR@@|'"$ALF_HOME"'/alf_data/solr4/index|' \
         solr4/workspace-SpacesStore/conf/solrcore.properties
 
-COPY assets/solr4 solr4/log4j-solr.properties
+COPY --chown=worker:worker assets/solr4 solr4/log4j-solr.properties
 
 ########################################################################################################################
 

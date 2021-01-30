@@ -217,7 +217,7 @@ build() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
-	echo "Checking artifact-id ..."
+	echo "Checking artifactId ..."
 
 	EXPECTED_ARTIFACTID="edu_sharing-community-repository"
 
@@ -227,7 +227,7 @@ build() {
 	popd >/dev/null || exit
 
 	[[ "${EXPECTED_ARTIFACTID}" != "${PROJECT_ARTIFACTID}" ]] && {
-		echo "Error: expected artifact-id [ ${EXPECTED_ARTIFACTID} ] is different."
+		echo "Error: expected artifactId [ ${EXPECTED_ARTIFACTID} ] is different."
 		exit
 	}
 
@@ -366,7 +366,7 @@ reload-alfresco() {
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
 		exec repository-service \
-		java -jar bin/alfresco-mmt.jar install amps tomcat/webapps/alfresco -directory -nobackup -force || exit
+		java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force || exit
 
 	$COMPOSE_EXEC \
 		-f "repository.yml" \

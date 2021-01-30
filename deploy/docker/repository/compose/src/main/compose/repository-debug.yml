@@ -3,7 +3,7 @@ services:
 
   repository-service:
     volumes:
-      - "${COMMUNITY_PATH}/Backend/alfresco/module/target/edu_sharing-community-repository-backend-alfresco-module-${community.repository.version}.amp:/opt/alfresco/amps/edu_sharing-community-repository-backend-alfresco-module-${community.repository.version}.amp"
+      - "${COMMUNITY_PATH}/Backend/alfresco/module/target/edu_sharing-community-repository-backend-alfresco-module-${community.repository.version}.amp:/opt/alfresco/amps/alfresco/1/edu_sharing-community-repository-backend-alfresco-module-${community.repository.version}.amp"
       - "${COMMUNITY_PATH}/Backend/services/base/target/edu_sharing-community-repository-backend-services-base-${community.repository.version}.jar:/opt/alfresco/tomcat/webapps/edu-sharing/WEB-INF/lib/edu_sharing-community-repository-backend-services-base-${community.repository.version}.jar"
       - "${COMMUNITY_PATH}/Backend/services/core/target/edu_sharing-community-repository-backend-services-core-${community.repository.version}.jar:/opt/alfresco/tomcat/webapps/edu-sharing/WEB-INF/lib/edu_sharing-community-repository-backend-services-core-${community.repository.version}.jar"
       - "${COMMUNITY_PATH}/Backend/services/rest/client/target/edu_sharing-community-repository-backend-services-rest-client-${community.repository.version}.jar:/opt/alfresco/tomcat/webapps/edu-sharing/WEB-INF/lib/edu_sharing-community-repository-backend-services-rest-client-${community.repository.version}.jar"

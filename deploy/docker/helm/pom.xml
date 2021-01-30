@@ -21,6 +21,12 @@
     </chart.icon>
     <!--suppress UnresolvedMavenProperty -->
     <chart.version>${git.closest.tag.name}</chart.version>
+    <helm.repository.url>https://artifacts.edu-sharing.com/repository/community-helm/</helm.repository.url>
+    <helm.repository.type>NEXUS</helm.repository.type>
+    <!--suppress UnresolvedMavenProperty -->
+    <helm.repository.user>${env.MAVEN_REPO_USER}</helm.repository.user>
+    <!--suppress UnresolvedMavenProperty -->
+    <helm.repository.pass>${env.MAVEN_REPO_PASS}</helm.repository.pass>
     <helm.version>3.4.1</helm.version>
   </properties>
 
@@ -100,21 +106,17 @@
             <addDefaultRepo>false</addDefaultRepo>
             <uploadRepoStable>
               <name>edu-sharing.community.helm</name>
-              <url>https://artifacts.edu-sharing.com/repository/community-helm/</url>
-              <type>NEXUS</type>
-              <!--suppress UnresolvedMavenProperty -->
-              <username>${env.MAVEN_REPO_USER}</username>
-              <!--suppress UnresolvedMavenProperty -->
-              <password>${env.MAVEN_REPO_PASS}</password>
+              <url>${helm.repository.url}</url>
+              <type>${helm.repository.type}</type>
+              <username>${helm.repository.user}</username>
+              <password>${helm.repository.pass}</password>
             </uploadRepoStable>
             <uploadRepoSnapshot>
               <name>edu-sharing.community.helm</name>
-              <url>https://artifacts.edu-sharing.com/repository/community-helm/</url>
-              <type>NEXUS</type>
-              <!--suppress UnresolvedMavenProperty -->
-              <username>${env.MAVEN_REPO_USER}</username>
-              <!--suppress UnresolvedMavenProperty -->
-              <password>${env.MAVEN_REPO_PASS}</password>
+              <url>${helm.repository.url}</url>
+              <type>${helm.repository.type}</type>
+              <username>${helm.repository.user}</username>
+              <password>${helm.repository.pass}</password>
             </uploadRepoSnapshot>
           </configuration>
         </plugin>
