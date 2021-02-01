@@ -104,6 +104,7 @@
     "collectionNew_uploadCollectionImage": "Ein neues Sammlungsbild hochladen",
     "collectionNew_deleteCollectionImage": "Das Sammlungsbild löschen",
     "collectionNew_setColor": "Farbe für diese Sammlung:",
+    "collectionNew_colorIndex": "Farbe {{ index }}",
     "collectionNew_createCollection": "erstellen",
     "collectionNew_storeChanges": "speichern",
 

@@ -207,6 +207,7 @@ export class CollectionNewComponent {
       });
     });
   }
+
     getShareStatus(){
       if(this.permissions || this.originalPermissions){
         let perms=this.permissions || this.originalPermissions;
@@ -283,8 +284,24 @@ export class CollectionNewComponent {
         if (id==null) id = this.editId;
         this.navigateToCollectionId(id);
     }
-    setColor(color:string) : void {
+
+    setColor(color: string) : void {
         this.currentCollection.collection.color = color;
+    }
+
+    setColorByDirection(event: KeyboardEvent): void {
+        const rowLength = 6;
+        let index = this.COLORS.indexOf(this.currentCollection.collection.color);
+        switch (event.key) {
+            case 'ArrowUp': index -= rowLength; break;
+            case 'ArrowDown': index += rowLength; break;
+            case 'ArrowLeft': index -= 1; break;
+            case 'ArrowRight': index += 1; break;
+        }
+        if (index >= 0 && index < this.COLORS.length) {
+            this.setColor(this.COLORS[index]);
+            event.preventDefault();
+        }
     }
 
     imageDataChanged(event:any) : void {

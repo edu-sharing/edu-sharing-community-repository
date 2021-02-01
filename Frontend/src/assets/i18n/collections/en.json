@@ -104,6 +104,7 @@
     "collectionNew_uploadCollectionImage": "Upload a new collection image",
     "collectionNew_deleteCollectionImage": "Delete the collection image",
     "collectionNew_setColor": "color of the collection:",
+    "collectionNew_colorIndex": "color {{ index }}",
     "collectionNew_createCollection": "create",
     "collectionNew_storeChanges": "save changes",
 

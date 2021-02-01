@@ -209,14 +209,18 @@ $imagePath: '../../../../assets/images/collections/';
     margin: auto;
     //max-width: 220px;
     justify-content: center;
+    &:focus {
+      outline: unset;
+    }
+    &.cdk-keyboard-focused {
+      @include setGlobalKeyboardFocus();
+    }
     .color-option {
       display:inline-block;
       border-radius: 4pt;
       width: 14%;
       height: 30px;
-      margin-left: 3px;
-      margin-right: 3px;
-      margin-bottom: 8px;
+      margin: 4px 3px;
       cursor: pointer;
     }
     .color-selected {

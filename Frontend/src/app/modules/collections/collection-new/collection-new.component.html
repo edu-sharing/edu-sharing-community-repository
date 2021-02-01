@@ -172,15 +172,43 @@
             </div>
 
               <div class="dialog-basic-area dialog-color-group">
-                  <div class="collection-new-preview-infoline">
+                  <div
+                      id="collection-new-color-picker-label"
+                      class="collection-new-preview-infoline"
+                  >
                       {{ 'collectionNew_setColor' | translate }}
                   </div>
-                  <div class="color-group">
-                      <div *ngFor="let color of COLORS"(click)="setColor(color)"
-                           class="color-option"
-                           [ngClass]="{'color-selected': (currentCollection.collection.color==color)}"
-                           [style.background-color]="color">&nbsp;</div>
-                  </div>
+                  <ul
+                      class="color-group"
+                      aria-labelledby="collection-new-color-picker-label"
+                      tabindex="0"
+                      role="listbox"
+                      aria-orientation="horizontal"
+                      cdkMonitorElementFocus
+                      (keydown.arrowright)="setColorByDirection($event)"
+                      (keydown.arrowup)="setColorByDirection($event)"
+                      (keydown.arrowleft)="setColorByDirection($event)"
+                      (keydown.arrowdown)="setColorByDirection($event)"
+                      [attr.aria-activedescendant]="
+                        COLORS.indexOf(currentCollection.collection.color) !== -1
+                        ? 'collection-new-color-picker-option-' + COLORS.indexOf(currentCollection.collection.color)
+                        : null"
+                      >
+                      <li
+                        id="collection-new-color-picker-option-{{index}}"
+                        *ngFor="let color of COLORS; let index = index"
+                        role="option"
+                        class="color-option"
+                        [ngClass]="{'color-selected': (currentCollection.collection.color === color)}"
+                        [attr.aria-selected]="currentCollection.collection.color === color"
+                        [style.background-color]="color"
+                        (click)="setColor(color)"
+                      >
+                        <span class="cdk-visually-hidden">
+                          {{ 'collectionNew_colorIndex' | translate: { index: index + 1 } }}
+                        </span>
+                      </li>
+                  </ul>
               </div>
           </div>
         </div>
