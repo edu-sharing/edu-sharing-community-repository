@@ -24,7 +24,7 @@ public class ConnectorDAO {
 		
 		ApplicationInfo service = ApplicationInfoList.getRepositoryInfoByType(ApplicationInfo.TYPE_CONNECTOR);
 		if(service==null){
-			logger.warn("No connector registered, register a connector via admin tools first");
+			logger.debug("No connector registered, register a connector via admin tools first");
 			return result;
 		}
 		result.setUrl(service.getContentUrl());
