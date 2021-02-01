@@ -148,7 +148,9 @@
             <div class="dialog-basic-area dialog-input-area">
                 <mat-form-field [class.mat-form-field-bright]="!isBrightColor()">
                     <mat-label>{{'collectionNew_placeholderTitle' | translate }}</mat-label>
-                    <input matInput class="title" [(ngModel)]="currentCollection.title" autofocus>
+                    <!-- Autofocus and autocomplete don't work well together here, because the
+                    autocomplete list will open before the card animation finishes. -->
+                    <input matInput class="title" [(ngModel)]="currentCollection.title" autofocus autocomplete="off">
                 </mat-form-field>
                   <mat-form-field [class.mat-form-field-bright]="!isBrightColor()">
                       <mat-label>{{'collectionNew_placeholderDescription' | translate }}</mat-label>
