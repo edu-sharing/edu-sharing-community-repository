@@ -553,6 +553,11 @@
 					<type>d:text</type>
 					<mandatory>true</mandatory>
 				</property>
+				<!-- edu-sharing show or hide email in profile: true=show , false=hide   -->
+				<property name="ccm:showEmail">
+					<type>d:boolean</type>
+					<default>false</default>
+				</property>
 				<!-- edu-sharing customization: list of recently invited persons / groups -->
 				<property name="ccm:userRecentlyInvited">
 					<type>d:noderef</type>

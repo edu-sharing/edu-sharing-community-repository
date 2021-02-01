@@ -45,6 +45,7 @@ export class ProfilesComponent {
         this.editProfileUrl=this.config.instant('editProfileUrl');
         this.editProfile=this.config.instant('editProfile',true);
         this.loadUser(params.authority);
+        this.getProfileSetting(params.authority);
       });
     });
     this.editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
@@ -69,6 +70,7 @@ export class ProfilesComponent {
   editProfile: boolean;
   private editProfileUrl: string;
   private avatarImage: any;
+  private profileSettings: ProfileSettings;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
   // can the particular user profile (based on the source) be edited?
@@ -103,6 +105,13 @@ export class ProfilesComponent {
         this.toast.error(null, 'PROFILES.LOAD_ERROR');
       });
     });
+  }
+  private getProfileSetting(authority:string){
+        this.iamService.getProfileSettings(authority).subscribe((res: ProfileSettings) => {
+            this.profileSettings = res;
+        }, (error: any) => {
+            this.profileSettings=null;
+        });
   }
   public updateAvatar(event:any) {
     if(this.avatarElement.nativeElement.files && this.avatarElement.nativeElement.files.length) {
@@ -167,7 +176,7 @@ export class ProfilesComponent {
     }
     this.toast.showProgressDialog();
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=> {
-      this.saveAvatar();
+      this.saveProfileSettings();
     },(error:any)=> {
       this.toast.closeModalDialog();
       this.toast.error(error);
@@ -208,6 +217,14 @@ export class ProfilesComponent {
     }
   }
 
+  private saveProfileSettings() {
+    this.iamService.setProfileSettings(this.profileSettings, this.user.authorityName).subscribe(() => {
+      this.saveAvatar();
+    }, (error) => {
+      this.toast.closeModalDialog();
+      this.toast.error(error);
+    });
+  }
   public aboutEdit() {
     this.userEdit=Helper.deepCopy(this.user);
     this.editAbout = true;

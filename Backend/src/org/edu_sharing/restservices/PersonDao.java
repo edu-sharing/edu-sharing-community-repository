@@ -38,6 +38,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -322,8 +323,12 @@ public class PersonDao {
     	return data;
 	}
 
-	private Map<String,String[]> getProperties() {
-		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(userInfo));
+	private Map<String, String[]> getProperties() {
+		Map<String, Serializable> properties = userInfo;
+		if (!(getProfileSettings().getShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
+			properties.replace(CCConstants.CM_PROP_PERSON_EMAIL, null);
+
+		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
 	}
 
 	private UserQuota getQuota() {
@@ -344,8 +349,14 @@ public class PersonDao {
 		UserProfile profile = new UserProfile();
     	profile.setFirstName(getFirstName());
     	profile.setLastName(getLastName());
-    	profile.setEmail(getEmail());
-    	profile.setPrimaryAffiliation(getPrimaryAffiliation());
+		// Admin user can see all email even if they are not showed
+		// hide only for non admin user and if showEmail is false
+		if (getProfileSettings().getShowEmail() || isCurrentUserOrAdmin()) {
+			profile.setEmail(getEmail());
+		} else {
+			profile.setEmail("");
+		}
+		profile.setPrimaryAffiliation(getPrimaryAffiliation());
     	profile.setAvatar(getAvatar());
     	profile.setAbout(getAbout());
     	profile.setSkills(getSkills());
@@ -553,6 +564,31 @@ public class PersonDao {
 		newUserInfo.put(CCConstants.CCM_PROP_PERSON_PREFERENCES, preferences);		
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 	}
+
+	/**
+	 * retrieve All property for ProfileSetting from alfresco db
+	 *
+	 * @return object of ProfileSettings
+	 */
+	public ProfileSettings getProfileSettings() {
+		ProfileSettings profileSettings = new ProfileSettings();
+		profileSettings.setShowEmail(
+				(this.userInfo.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) ? (boolean) this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) : false)
+		);
+		return profileSettings;
+	}
+
+	/**
+	 * set value into alfresco database
+	 * @param  profileSettings (Object)
+	 */
+	public void setProfileSettings(ProfileSettings profileSettings) throws Exception{
+		HashMap<String, String> newUserInfo = new HashMap<String, String>();
+		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
+		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL,Boolean.toString(profileSettings.getShowEmail()));
+		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
+	}
+
 	public void addNodeList(String list,String nodeId) throws Exception {
 		// Simply check if node is valid
 		NodeDao node=NodeDao.getNode(repoDao, nodeId);

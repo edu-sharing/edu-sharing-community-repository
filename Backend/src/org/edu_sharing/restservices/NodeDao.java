@@ -43,7 +43,8 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
-
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -95,7 +96,7 @@ public class NodeDao {
 	private RepositoryDao remoteRepository;
 
 	private String version;
-
+	private AuthorityService authorityService;
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
@@ -465,7 +466,7 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
-
+			this.authorityService= AuthorityServiceFactory.getAuthorityService(repoDao.getId());
 			/**
 			 * call getProperties on demand
 			 */
@@ -1298,7 +1299,9 @@ public class NodeDao {
 				.get(CCConstants.NODECREATOR_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODECREATOR_LASTNAME));
-		ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
+		if(this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
+			ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
+
 		return ref;
 	}
 	
@@ -1309,9 +1312,56 @@ public class NodeDao {
 		Person ref = new Person();
 		ref.setFirstName(owner.getGivenName());
 		ref.setLastName(owner.getSurname());
-		ref.setMailbox(owner.getEmail());
+		if(this.checkUserHasPermissionToSeeMail(owner.getUsername()))//only admin can see even if users have hide email
+			ref.setMailbox(owner.getEmail());
+
 		return ref;
 	}
+
+
+	/**
+	 * Check if normal USER has permision to see email
+	 * ADMIN can see the email even if the email is private for specific USER
+	 *
+	 * @param (String) userName  of Person,
+	 * @return true || false
+	 */
+	private boolean checkUserHasPermissionToSeeMail(String userName) {
+		try {
+			if (this.isCurrentUserAdminOrSameUserAsUserName(userName)) // if is ADMIN or sameUser, don't need to countinue;
+				return true;
+			else {
+				Map<String, Serializable> profileSettings = authorityService.getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+				boolean isEmailPublic = false;
+				if (profileSettings.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL)) {
+					isEmailPublic = (boolean) profileSettings.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+				}
+				return isEmailPublic;
+			}
+
+		} catch (Exception e) {
+			logger.warn("Cannot check if current User has permision to see email or not  : " + e.getMessage(), e);
+			return false;
+		}
+	}
+
+	/**
+	 * Method which check if:
+	 * -  login User is ADMIN or simple USER,
+	 * -  login User is similar with userName
+	 *
+	 * @param userName get a userName as parameter to controll
+	 * @return TRUE if is ADMIN or Same USER || FALSE in other cases
+	 */
+	public boolean isCurrentUserAdminOrSameUserAsUserName(String userName) {
+		if (AuthorityServiceFactory.getLocalService().isGlobalAdmin()) // if userLogin is ADMIN, don't need to countinue;
+			return true;
+		else {
+			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+			return currentUser.equals(userName);
+		}
+	}
+
 
 	private Date getModifiedAt() {
 
@@ -1330,7 +1380,8 @@ public class NodeDao {
 				.get(CCConstants.NODEMODIFIER_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODEMODIFIER_LASTNAME));
-		ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
+		if(this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
+			ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
 
 		return ref;
 	}

@@ -172,6 +172,8 @@
     "USER_TUTORIAL_HEADING": "Dein Profil",
     "USER_TUTORIAL_DESCRIPTION": "Hier kannst du ein eigenes Profilbild angeben und zeigen, wer du bist und was du tust. Du entscheidest, was Andere sehen können.",
     "PROFILE_UPDATED": "Profilinformationen wurden aktualisiert",
+    "SHOW_EMAIL_UPDATED": "Die E-Mail ist öffentlich",
+    "HIDE_EMAIL_UPDATED": "Die E-Mail ist vertraulich",
     "CHANGE_PASSWORD": "Passwort ändern",
     "OLD_PASSWORD": "Altes Passwort",
     "NEW_PASSWORD": "Neues Passwort",
@@ -472,6 +474,11 @@
             "system": "Systemaccount",
             "function": "Funktionsaccount"
         }
+    },
+    "PROFILE_SETTINGS": {
+        "SHOW_EMAIL_LABEL": "E-Mail öffentlich",
+        "SHOW_EMAIL": "E-Mail wird angezeigt",
+        "HIDE_EMAIL": "E-Mail wird versteckt"
     },
     "CONNECTOR": {
         "ONLY_OFFICE": {
