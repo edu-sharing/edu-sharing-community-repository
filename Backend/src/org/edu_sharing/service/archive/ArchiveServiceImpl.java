@@ -27,6 +27,7 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 
 import org.edu_sharing.service.archive.model.RestoreResult;
@@ -228,6 +229,8 @@ public class ArchiveServiceImpl implements ArchiveService  {
 			restoreResult.setRestoreStatus(RESTORESTATUS_FINE);
 		}
 		restoreResult.setName(name);
+
+		new RepositoryCache().remove(restoredNode.getId());
 		
 		return restoreResult;
 	}
