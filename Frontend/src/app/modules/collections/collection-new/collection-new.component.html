@@ -148,7 +148,9 @@
             <div class="dialog-basic-area dialog-input-area">
                 <mat-form-field [class.mat-form-field-bright]="!isBrightColor()">
                     <mat-label>{{'collectionNew_placeholderTitle' | translate }}</mat-label>
-                    <input matInput class="title" [(ngModel)]="currentCollection.title" autofocus>
+                    <!-- Autofocus and autocomplete don't work well together here, because the
+                    autocomplete list will open before the card animation finishes. -->
+                    <input matInput class="title" [(ngModel)]="currentCollection.title" autofocus autocomplete="off">
                 </mat-form-field>
                   <mat-form-field [class.mat-form-field-bright]="!isBrightColor()">
                       <mat-label>{{'collectionNew_placeholderDescription' | translate }}</mat-label>
@@ -157,18 +159,34 @@
                                 ></textarea>
                   </mat-form-field>
             </div>
-            <div class="collection-new-owner" *ngIf="!authorFreetext">
-                <i icon="person"></i>
-                <span>{{user | authorityName}}</span>
-                <button mat-icon-button *ngIf="authorFreetextAllowed" (click)="switchToAuthorFreetext()"><i icon="edit"></i></button>
-            </div>
-            <div class="collection-new-owner" *ngIf="authorFreetext">
-                <i icon="person"></i>
-                <mat-form-field class="mat-form-field-no-padding" [class.mat-form-field-bright]="!isBrightColor()">
-                    <mat-label>{{'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}</mat-label>
-                    <input matInput [(ngModel)]="currentCollection.collection.authorFreetext">
-                </mat-form-field>
-                <button mat-icon-button (click)="cancelAuthorFreetext()"><i icon="close"></i></button>
+            <div class="collection-new-owner">
+              <ng-container *ngIf="!authorFreetext">
+                  <i icon="person"></i>
+                  <span>{{user | authorityName}}</span>
+                  <button
+                    *ngIf="authorFreetextAllowed"
+                    mat-icon-button
+                    [attr.aria-label]="'EDIT' | translate: {thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate)}"
+                    (click)="switchToAuthorFreetext()"
+                  >
+                    <i icon="edit"></i>
+                  </button>
+              </ng-container>
+              <ng-container *ngIf="authorFreetext">
+                  <i icon="person"></i>
+                  <mat-form-field class="mat-form-field-no-padding" [class.mat-form-field-bright]="!isBrightColor()">
+                      <mat-label id="collection-new-author-freetext-label">
+                        {{'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}
+                      </mat-label>
+                      <input #authorFreetextInput matInput [(ngModel)]="currentCollection.collection.authorFreetext">
+                  </mat-form-field>
+                  <button
+                    mat-icon-button
+                    [attr.aria-label]="'CANCEL' | translate"
+                    aria-describedby="collection-new-author-freetext-label"
+                    (click)="cancelAuthorFreetext()"
+                  ><i icon="close"></i></button>
+              </ng-container>
             </div>
 
               <div class="dialog-basic-area dialog-color-group">

@@ -95,6 +95,7 @@ export class CollectionNewComponent {
   private permissionsInfo: any;
 
   @ViewChild('file') imageFileRef : ElementRef;
+  @ViewChild('authorFreetextInput') authorFreetextInput : ElementRef<HTMLInputElement>;
   buttons: DialogButton[];
   authorFreetext=false;
   authorFreetextAllowed=false;
@@ -660,6 +661,9 @@ export class CollectionNewComponent {
         this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ||
         this.currentCollection.collection.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ?
             this.mediacenter : this.user,null);
+    setTimeout(() => {
+        this.authorFreetextInput.nativeElement.focus();
+    });
   }
 
   cancelAuthorFreetext() {
