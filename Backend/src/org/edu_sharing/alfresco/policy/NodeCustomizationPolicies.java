@@ -533,6 +533,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		if(p == null){
 			return "";
 		} else if(p instanceof MLText){
+			if(((MLText) p).getDefaultValue() == null){
+				return "";
+			}
 			return ((MLText) p).getDefaultValue();
 		} else if(p instanceof String) {
 			return (String)p;
