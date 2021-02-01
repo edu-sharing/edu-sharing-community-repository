@@ -151,18 +151,25 @@ user-quota{
     }
   }
   @media screen and (min-width: ($mobileTabSwitchWidth)) {
-    workspace-explorer listTable .list-type-table{
-      overflow-y: auto;
-      position: relative;
-      top: $listHeadingHeight;
-      height:calc(100vh - #{$mainnavHeight+$secondaryBarHeight+$listHeadingHeight});
-      .headingGroup {
-        position: fixed !important;
-        z-index: 1;
-        top: $mainnavHeight + $workspaceBreadcrumbsHeight;
-        width: calc(100% - #{$workspaceTreeWidth});
+      workspace-explorer listTable .list{
+          overflow-y: auto;
+          position: relative;
+          &.list-type-card {
+              top: 0;
+              height: calc(100vh - #{$mainnavHeight+$secondaryBarHeight});
+          }
+          &.list-type-table {
+              top: $listHeadingHeight;
+              height: calc(100vh - #{$mainnavHeight+$secondaryBarHeight+$listHeadingHeight});
+              .headingGroup {
+                  position: fixed !important;
+                  z-index: 1;
+                  top: $mainnavHeight + $workspaceBreadcrumbsHeight;
+                  width: calc(100% - #{$workspaceTreeWidth});
+              }
+          }
+
       }
-    }
   }
   @media screen and (min-width: ($mobileWidth+$mobileStage*6)) {
     workspace-explorer.explorerMetadata listTable .list-type-table .headingGroup {
