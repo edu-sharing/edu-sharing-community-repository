@@ -104,6 +104,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private mdsSets: MdsInfo[];
     private _mdsId: string;
     private isSearching = false;
+    isSearchingCollections = false;
     private groupedRepositories: Repository[];
     private enabledRepositories: string[];
     // we only initalize the banner once to prevent flickering
@@ -490,6 +491,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.isHomeRepository() ||
                 this.currentRepository == RestConstants.ALL
             ) {
+                this.isSearchingCollections = true;
                 this.search
                     .search(
                         this.getCriterias(this.currentValues, searchString, false),
@@ -512,6 +514,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     )
                     .subscribe(
                         (data: NodeList) => {
+                            this.isSearchingCollections = false;
                             this.searchService.searchResultCollections =
                                 data.nodes;
                             this.searchService.resultCount.collections =
@@ -519,6 +522,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             this.checkFail();
                         },
                         (error: any) => {
+                            this.isSearchingCollections = false;
                             this.toast.error(error);
                         },
                     );
