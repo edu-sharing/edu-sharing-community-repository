@@ -121,31 +121,35 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
-		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+		NodeRef result = serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 
-		CopyService copyService = serviceRegistry.getCopyService();
+			CopyService copyService = serviceRegistry.getCopyService();
 
-		// copy and rename has a weird naming scheme
-		String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-		NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
-				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
-				QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
-				QName.createQName(originalName), copyChildren);
-		int renameCounter = 1;
-		while(true) {
-			try {
-				String name = originalName;
-				if(renameCounter > 1){
-					name = NodeServiceHelper.renameNode(originalName, renameCounter);
+			// copy and rename has a weird naming scheme
+			String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+			NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
+					new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
+					QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
+					QName.createQName(originalName), copyChildren);
+			int renameCounter = 1;
+			while(true) {
+				try {
+					String name = originalName;
+					if(renameCounter > 1){
+						name = NodeServiceHelper.renameNode(originalName, renameCounter);
+					}
+					nodeServiceAlfresco.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
+					break;
+				} catch (DuplicateChildNodeNameException e){
+					renameCounter++;
 				}
-				nodeServiceAlfresco.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
-				break;
-			} catch (DuplicateChildNodeNameException e){
-				renameCounter++;
 			}
-		}
-		resetVersion(copyNodeRef);
-		return copyNodeRef;
+			resetVersion(copyNodeRef);
+			return copyNodeRef;
+		});
+
+		return result;
 	}
 	
 	private void resetVersion(NodeRef nodeRef) throws Throwable {
