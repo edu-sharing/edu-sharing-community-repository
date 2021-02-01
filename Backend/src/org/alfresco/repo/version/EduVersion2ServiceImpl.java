@@ -213,12 +213,20 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
 		    }
             
             this.nodeService.setProperties(nodeRef, newProps);
-                
-                //Restore forum properties
-                if (needToRestoreDiscussion)
-                {
-                    this.nodeService.addProperties(nodeRef, forumProps);
+            /**
+             * edu-sharing FIX: many properties with null value after revert
+             */
+            for(Map.Entry<QName,Serializable> entry : newProps.entrySet()){
+                if(entry.getValue() == null){
+                    this.nodeService.removeProperty(nodeRef,entry.getKey());
                 }
+            }
+                
+            //Restore forum properties
+            if (needToRestoreDiscussion)
+            {
+                this.nodeService.addProperties(nodeRef, forumProps);
+            }
 
             Set<QName> aspectsToRemove = new HashSet<QName>(oldAspectQNames);
         	aspectsToRemove.removeAll(newAspectQNames);
