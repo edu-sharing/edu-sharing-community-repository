@@ -283,6 +283,15 @@ $path:'../../../assets/images/';
     }
   }
 }
+
+.email-group-form{
+    display: flow-root;
+    mat-slide-toggle{
+        position: relative;
+        z-index: 1;
+    }
+}
+
 :host ::ng-deep{
   input-password mat-form-field{
     width: 100%;
@@ -293,6 +302,10 @@ $path:'../../../assets/images/';
     width: 100%;
     left: 0;
     padding-bottom: 20px + $mobileTabNavHeight;
+  }
+
+  .email-group-form{
+    margin-bottom: calc(#{$mobileTabNavHeight} / 2);
   }
 }
 @media only screen and (max-width: $mobileWidth - $mobileStage*2) {

@@ -198,6 +198,19 @@ mat-button-toggle-group{
     }
   }
 }
+mat-slide-toggle.mat-primary-bright{
+    &.mat-checked {
+        .mat-slide-toggle-thumb {
+            background-color: $primaryMediumLight;
+        }
+        .mat-slide-toggle-bar{
+            background-color: $primaryLight;
+        }
+    }
+    .mat-slide-toggle-content{
+        color: #fff;
+    }
+}
   // will fix g and y to cut off with custom font
 input.mat-input-element, mat-label, .mat-select-value{
   line-height: normal;

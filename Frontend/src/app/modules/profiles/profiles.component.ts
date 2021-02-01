@@ -1,7 +1,7 @@
 
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from '../../core-ui-module/translation';
-import {SessionStorageService, UserStats} from '../../core-module/core.module';
+import {ProfileSettings, SessionStorageService, UserStats} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -45,6 +45,7 @@ export class ProfilesComponent {
         this.editProfileUrl=this.config.instant('editProfileUrl');
         this.editProfile=this.config.instant('editProfile',true);
         this.loadUser(params.authority);
+        this.getProfileSetting(params.authority);
       });
     });
     this.editAction = new OptionItem('PROFILES.EDIT', 'edit', () => this.beginEdit());
@@ -69,6 +70,7 @@ export class ProfilesComponent {
   editProfile: boolean;
   private editProfileUrl: string;
   private avatarImage: any;
+  profileSettings: ProfileSettings;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
   // can the particular user profile (based on the source) be edited?
@@ -91,7 +93,7 @@ export class ProfilesComponent {
         this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
         GlobalContainerComponent.finishPreloading();
         this.iamService.getUser().subscribe((me)=> {
-          this.isMe = profile.person.authorityName == me.person.authorityName;
+          this.isMe = profile.person.authorityName === me.person.authorityName;
           if(this.isMe && login.isGuest) {
             RestHelper.goToLogin(this.router,this.config);
           }
@@ -103,6 +105,13 @@ export class ProfilesComponent {
         this.toast.error(null, 'PROFILES.LOAD_ERROR');
       });
     });
+  }
+  private getProfileSetting(authority:string){
+        this.iamService.getProfileSettings(authority).subscribe((res: ProfileSettings) => {
+            this.profileSettings = res;
+        }, (error: any) => {
+            this.profileSettings=null;
+        });
   }
   public updateAvatar(event:any) {
     if(this.avatarElement.nativeElement.files && this.avatarElement.nativeElement.files.length) {
@@ -116,6 +125,7 @@ export class ProfilesComponent {
       return;
     }
     this.userEdit=Helper.deepCopy(this.user);
+    this.userEdit.profile.vcard = this.user.profile.vcard.copy();
     this.edit=true;
     this.avatarFile=null;
   }
@@ -167,7 +177,7 @@ export class ProfilesComponent {
     }
     this.toast.showProgressDialog();
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=> {
-      this.saveAvatar();
+      this.saveProfileSettings();
     },(error:any)=> {
       this.toast.closeModalDialog();
       this.toast.error(error);
@@ -208,6 +218,14 @@ export class ProfilesComponent {
     }
   }
 
+  private saveProfileSettings() {
+    this.iamService.setProfileSettings(this.profileSettings, this.user.authorityName).subscribe(() => {
+      this.saveAvatar();
+    }, (error) => {
+      this.toast.closeModalDialog();
+      this.toast.error(error);
+    });
+  }
   public aboutEdit() {
     this.userEdit=Helper.deepCopy(this.user);
     this.editAbout = true;

@@ -168,6 +168,8 @@
     "USER_TUTORIAL_HEADING": "Your Profile",
     "USER_TUTORIAL_DESCRIPTION": "Here you can add a profile picture and show who you are and what you do. You decide what others can see.",
     "PROFILE_UPDATED": "Account details updated",
+    "SHOW_EMAIL_UPDATED": "E-mail now is public",
+    "HIDE_EMAIL_UPDATED": "E-mail now is private",
     "CHANGE_PASSWORD": "Change password",
     "OLD_PASSWORD": "Old password",
     "NEW_PASSWORD": "New password",
@@ -405,6 +407,11 @@
             "system": "system account",
             "function": "function account"
         }
+    },
+    "PROFILE_SETTINGS": {
+        "SHOW_EMAIL_LABEL": "E-Mail public",
+        "SHOW_EMAIL": "Email is displayed",
+        "HIDE_EMAIL": "E-mail is hidden"
     },
     "CONNECTOR": {
         "ONLY_OFFICE": {

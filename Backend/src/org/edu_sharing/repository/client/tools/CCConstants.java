@@ -322,6 +322,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
 
+	public final static String CCM_PROP_PERSON_SHOW_EMAIL = "{http://www.campuscontent.de/model/1.0}showEmail";
+
 	public final static String CCM_PROP_PERSON_RECENTLY_INVITED = "{http://www.campuscontent.de/model/1.0}userRecentlyInvited";
 
 	public final static String CCM_PROP_PERSON_RECENT_COLLECTIONS = "{http://www.campuscontent.de/model/1.0}userRecentCollections";
@@ -2122,5 +2124,15 @@ public class CCConstants {
 	public static final String VERSION_COMMENT_BULK_CREATE = "BULK_CREATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
+
+	/**
+	 * Methos that set all the Properties for ProfileSettings
+	 * @return (List) list of all properties we want to be in ProfileSettings
+	 */
+	public static List<String> getAllPropertiesOfProfileSettings(){
+		List<String> listOfProperties=new ArrayList<>();
+		listOfProperties.add(CCM_PROP_PERSON_SHOW_EMAIL);
+		return listOfProperties;
+	}
 
 }
