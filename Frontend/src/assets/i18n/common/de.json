@@ -476,9 +476,10 @@
         }
     },
     "PROFILE_SETTINGS": {
-        "SHOW_EMAIL_LABEL": "E-Mail öffentlich",
-        "SHOW_EMAIL": "E-Mail wird angezeigt",
-        "HIDE_EMAIL": "E-Mail wird versteckt"
+        "SHOW_EMAIL_LABEL": "E-Mail öffentlich anzeigen",
+        "SHOW_EMAIL_TOOLTIP": "Steuert, ob andere Nutzer die E-Mail-Adresse sehen können, z.B. im Einlade-Dialog oder beim Aufrufen des Profils",
+        "SHOW_EMAIL": "E-Mail wird öffentlich angezeigt",
+        "HIDE_EMAIL": "E-Mail wird nicht öffentlich angezeigt"
     },
     "CONNECTOR": {
         "ONLY_OFFICE": {

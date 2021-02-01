@@ -48,7 +48,7 @@
 
         <div *ngIf="!edit">
           <div class="name">{{user | authorityName}}</div>
-          <div *ngIf="profileSettings.showEmail ||(isMe || isCurrentUserAdmin) " class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
+          <div *ngIf="user.profile.email " class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
           <!--<div class="authorityName">-->
           <!--<div>{{'USER.authorityName' | translate}}: {{ user.authorityName }}</div>-->
           <!--</div>-->
@@ -69,7 +69,9 @@
               <mat-label>{{'USER.email' | translate}}</mat-label>
               <input matInput type="email" [(ngModel)]="userEdit.profile.email">
             </mat-form-field>
-            <mat-slide-toggle color="primary" class="mat-slide" [checked]="profileSettings.showEmail"
+            <mat-slide-toggle color="primary-bright"
+                              matTooltip="{{ 'PROFILE_SETTINGS.SHOW_EMAIL_TOOLTIP' | translate}}"
+                              [checked]="profileSettings.showEmail"
                               [(ngModel)]="profileSettings.showEmail">
               <mat-label class="mat-slide-label">{{ 'PROFILE_SETTINGS.SHOW_EMAIL_LABEL' | translate}}</mat-label>
             </mat-slide-toggle>

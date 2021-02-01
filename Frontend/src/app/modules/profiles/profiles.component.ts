@@ -1,7 +1,7 @@
 
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from '../../core-ui-module/translation';
-import {SessionStorageService, UserStats} from '../../core-module/core.module';
+import {ProfileSettings, SessionStorageService, UserStats} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -70,7 +70,7 @@ export class ProfilesComponent {
   editProfile: boolean;
   private editProfileUrl: string;
   private avatarImage: any;
-  private profileSettings: ProfileSettings;
+  profileSettings: ProfileSettings;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
   // can the particular user profile (based on the source) be edited?
@@ -93,7 +93,7 @@ export class ProfilesComponent {
         this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
         GlobalContainerComponent.finishPreloading();
         this.iamService.getUser().subscribe((me)=> {
-          this.isMe = profile.person.authorityName == me.person.authorityName;
+          this.isMe = profile.person.authorityName === me.person.authorityName;
           if(this.isMe && login.isGuest) {
             RestHelper.goToLogin(this.router,this.config);
           }
@@ -125,6 +125,7 @@ export class ProfilesComponent {
       return;
     }
     this.userEdit=Helper.deepCopy(this.user);
+    this.userEdit.profile.vcard = this.user.profile.vcard.copy();
     this.edit=true;
     this.avatarFile=null;
   }

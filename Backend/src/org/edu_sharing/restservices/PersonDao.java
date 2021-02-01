@@ -572,8 +572,9 @@ public class PersonDao {
 	 */
 	public ProfileSettings getProfileSettings() {
 		ProfileSettings profileSettings = new ProfileSettings();
+		// fallback to true: because otherwise it will break previous behaviour
 		profileSettings.setShowEmail(
-				(this.userInfo.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) ? (boolean) this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) : false)
+				(!this.userInfo.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) || (boolean) this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL))
 		);
 		return profileSettings;
 	}
@@ -583,9 +584,9 @@ public class PersonDao {
 	 * @param  profileSettings (Object)
 	 */
 	public void setProfileSettings(ProfileSettings profileSettings) throws Exception{
-		HashMap<String, String> newUserInfo = new HashMap<String, String>();
+		HashMap<String, Serializable> newUserInfo = new HashMap<>();
 		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL,Boolean.toString(profileSettings.getShowEmail()));
+		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, profileSettings.getShowEmail());
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 	}
 

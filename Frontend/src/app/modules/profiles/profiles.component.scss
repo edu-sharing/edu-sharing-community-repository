@@ -285,7 +285,11 @@ $path:'../../../assets/images/';
 }
 
 .email-group-form{
-  display: flow-root;
+    display: flow-root;
+    mat-slide-toggle{
+        position: relative;
+        z-index: 1;
+    }
 }
 
 :host ::ng-deep{
