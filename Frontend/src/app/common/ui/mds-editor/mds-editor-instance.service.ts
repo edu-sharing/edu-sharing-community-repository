@@ -155,6 +155,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             } else {
                 this.initialValues = { jointValues: values?.[this.definition.id] || [] };
             }
+            // Set initial values, so the initial completion status is calculated correctly.
+            this.value$.next([...this.initialValues.jointValues]);
         }
 
         getInitialValues(): InitialValues {
