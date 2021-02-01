@@ -80,6 +80,7 @@
     "NO_MATCHES": "No matches found",
     "NO_CC_PUBLISH": "no publishing permissions for object",
     "SELECT": "select {{ element }}",
+    "EDIT": "edit {{ thing }}",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "Add to recently used collections",
         "SEARCH_COLLECTIONS": "Find collection...",
