@@ -71,6 +71,7 @@
   <div
     *ngIf="!isRootLevelCollection() && !isLoading && isReady && tabSelected.length >= -1"
     role="complementary"
+    [attr.aria-label]="'COLLECTIONS.DETAILS' | translate"
     class="collections-header"
     [class.alignWithBanner]="isMobileWidth()"
     [class.scrollWithBanner]="!isMobileWidth()"

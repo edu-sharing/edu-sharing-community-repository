@@ -11,6 +11,7 @@
         "ORDER_SAVED": "The object order has been changed.",
         "CUSTOM_ORDER":"change element order",
         "PERMISSIONS": "Invited:",
+        "DETAILS": "Collection details",
         "STEP": {
             "GENERAL": "Title, Image, Description and Color",
             "METADATA": "Additional information",
