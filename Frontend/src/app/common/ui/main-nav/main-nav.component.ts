@@ -258,7 +258,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         return;
                     }
                     setInterval(() => this.updateTimeout(), 1000);
-                    this.route.queryParams.subscribe((params: Params) => {
+                    this.route.queryParams.subscribe(async (params: Params) => {
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
@@ -266,18 +266,17 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         this.isGuest = data.isGuest;
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
-                        this.iam.getUser().subscribe((user: IamUser) => {
-                            this.user = user;
-                            this.canEditProfile = user.editProfile;
-                            this.configService.getAll().subscribe(() => {
-                                this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
-                                    this.user.person,
-                                    this.configService,
-                                );
-                            });
-                        });
                         this.refreshNodeStore();
                         this.checkConfig();
+                        const user = await this.iam.getCurrentUserAsync();
+                        this.user = user;
+                        this.canEditProfile = user.editProfile;
+                        this.configService.getAll().subscribe(() => {
+                            this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
+                                this.user.person,
+                                this.configService,
+                            );
+                        });
                     });
                 });
             });
@@ -519,15 +518,14 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.startTutorial();
     }
 
-    startTutorial() {
-        if(this.connector.getCurrentLogin().statusCode=='OK') {
-            this.iam.getUser().subscribe((user) => {
-                if(user.editProfile && this.configService.instant('editProfile', false)) {
-                    this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
-                        this.tutorialElement = this.userRef;
-                    });
-                }
-            });
+    async startTutorial() {
+        if (this.connector.getCurrentLogin().statusCode === RestConstants.STATUS_CODE_OK) {
+            const user = await this.iam.getCurrentUserAsync();
+            if (user.editProfile && this.configService.instant('editProfile', false)) {
+                this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
+                    this.tutorialElement = this.userRef;
+                });
+            }
         }
     }
 

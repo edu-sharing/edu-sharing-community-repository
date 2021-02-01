@@ -387,7 +387,7 @@ export class CreateMenuComponent {
     }
 
     afterUpload(nodes: Node[]) {
-        if(nodes == null){
+        if(nodes == null) {
             return;
         }
         if (this.params.reurl) {
@@ -399,25 +399,24 @@ export class CreateMenuComponent {
         this.onCreate.emit(nodes);
     }
 
-    showCreateConnector(connector: Connector) {
+    async showCreateConnector(connector: Connector) {
         this.createConnectorName = '';
         this.createConnectorType = connector;
-        this.iamService.getUser().subscribe(user => {
-            if (
-                user.person.quota.enabled &&
-                user.person.quota.sizeCurrent >= user.person.quota.sizeQuota
-            ) {
-                this.toast.showModalDialog(
-                    'CONNECTOR_QUOTA_REACHED_TITLE',
-                    'CONNECTOR_QUOTA_REACHED_MESSAGE',
-                    DialogButton.getOk(() => {
-                        this.toast.closeModalDialog();
-                    }),
-                    true,
-                );
-                this.createConnectorName = null;
-            }
-        });
+        const user = await this.iamService.getUser().toPromise();
+        if (
+            user.person.quota.enabled &&
+            user.person.quota.sizeCurrent >= user.person.quota.sizeQuota
+        ) {
+            this.toast.showModalDialog(
+                'CONNECTOR_QUOTA_REACHED_TITLE',
+                'CONNECTOR_QUOTA_REACHED_MESSAGE',
+                DialogButton.getOk(() => {
+                    this.toast.closeModalDialog();
+                }),
+                true,
+            );
+            this.createConnectorName = null;
+        }
     }
 
     private openCamera() {

@@ -210,7 +210,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.connector.setRoute(this.route);
         this.globalProgress = true;
         this.cardHasOpenModals$ = card.hasOpenModals.delay(0);
-}
+    }
 
     private hideDialog(): void {
         this.toast.closeModalDialog();
@@ -271,8 +271,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             return;
         }
         this.node.moveNode(target.ref.id, source[position].ref.id).subscribe((data: NodeWrapper) => {
-            this.moveNode(target, source, position + 1);
-        },
+                this.moveNode(target, source, position + 1);
+            },
             (error: any) => {
                 this.nodeHelper.handleNodeError(source[position].name, error);
                 source.splice(position, 1);
@@ -287,8 +287,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             return;
         }
         this.node.copyNode(target.ref.id, source[position].ref.id).subscribe((data: NodeWrapper) => {
-            this.copyNode(target, source, position + 1);
-        },
+                this.copyNode(target, source, position + 1);
+            },
             (error: any) => {
                 this.nodeHelper.handleNodeError(source[position].name, error);
                 source.splice(position, 1);
@@ -308,114 +308,110 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.globalProgress = false;
         this.refresh();
     }
-    private initialize() {
-        this.route.params.subscribe((routeParams: Params) => {
+    private async initialize() {
+        this.user = await (this.iam.getCurrentUserAsync());
+        this.route.params.subscribe(async (routeParams: Params) => {
             this.isSafe = routeParams.mode === 'safe';
-            this.connector.isLoggedIn().subscribe((login: LoginResult) => {
-                if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-                    RestHelper.goToLogin(this.router, this.config);
+            const login = await this.connector.isLoggedIn().toPromise();
+            if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
+                RestHelper.goToLogin(this.router, this.config);
+                return;
+            }
+            await this.prepareActionbar();
+            this.loadFolders(this.user);
+
+            let valid = true;
+            this.isGuest = login.isGuest;
+            if (!login.isValidLogin || login.isGuest) {
+                valid = false;
+            }
+            this.isBlocked = !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_WORKSPACE);
+            this.isAdmin = login.isAdmin;
+            if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
+                valid = false;
+            }
+            if (!this.isSafe && login.currentScope != null) {
+                this.connector.logout().subscribe(() => {
+                    this.goToLogin();
+                }, (error: any) => {
+                    this.toast.error(error);
+                    this.goToLogin();
+                })
+                return;
+            }
+            if (!valid) {
+                this.goToLogin();
+                return;
+            }
+            this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
+            this.isLoggedIn = true;
+            try {
+                this.connectorList = (await this.connectors.list().toPromise()).connectors;
+            } catch (e) {
+                console.warn('no connectors found: ' + e.toString());
+            }
+            const data = await this.node.getHomeDirectory().toPromise();
+            this.globalProgress = false;
+            this.homeDirectory = data.id;
+            this.route.queryParams.subscribe((params: Params) => {
+
+                if (params.connector) {
+                    this.showCreateConnector(this.connectorList.filter((c) => c.id === params.connector)[0]);
+                }
+
+                let needsUpdate = false;
+                if (this.oldParams) {
+                    for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
+                        if (params[key] === this.oldParams[key]) {
+                            continue;
+                        }
+                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                            continue;
+                        }
+                        needsUpdate = true;
+                    }
+                } else {
+                    needsUpdate = true;
+                    this.explorer.showLoading = true;
+                }
+                this.oldParams = params;
+                if (params.viewType != null) {
+                    this.setViewType(params.viewType, false);
+                } else {
+                    this.setViewType(this.config.instant('workspaceViewType', 0), false);
+                }
+                if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
+                    this.root = params.root;
+                } else {
+                    this.root = 'MY_FILES';
+                }
+                if (params.reurl) {
+                    this.reurl = params.reurl;
+                }
+                this.reurlDirectories = params.applyDirectories === 'true';
+                this.createAllowed = this.root === 'MY_FILES';
+                this.mainnav = params.mainnav === 'false' ? false : true;
+
+                if (params.file) {
+                    this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
+                        this.setSelection([paramNode.node]);
+                        this.parameterNode = paramNode.node;
+                        this.mainNavRef.management.nodeSidebar = paramNode.node;
+                    });
+                }
+
+                if (!needsUpdate) {
                     return;
                 }
-                this.iam.getUser().subscribe(async (user: IamUser) => {
-                    this.user = user;
-                    await this.prepareActionbar();
-                    this.loadFolders(user);
-
-                    let valid = true;
-                    this.isGuest = login.isGuest;
-                    if (!login.isValidLogin || login.isGuest) {
-                        valid = false;
-                    }
-                    this.isBlocked = !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_WORKSPACE);
-                    this.isAdmin = login.isAdmin;
-                    if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
-                        valid = false;
-                    }
-                    if (!this.isSafe && login.currentScope != null) {
-                        this.connector.logout().subscribe(() => {
-                            this.goToLogin();
-                        }, (error: any) => {
-                            this.toast.error(error);
-                            this.goToLogin();
-                        })
-                        return;
-                    }
-                    if (!valid) {
-                        this.goToLogin();
-                        return;
-                    }
-                    this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
-                    this.isLoggedIn = true;
-                    try {
-                        this.connectorList = (await this.connectors.list().toPromise()).connectors;
-                    } catch(e) {
-                        console.warn('no connectors found: ' + e.toString());
-                    }
-                    const data = await this.node.getHomeDirectory().toPromise();
-                    this.globalProgress = false;
-                    this.homeDirectory = data.id;
-                    this.route.queryParams.subscribe((params: Params) => {
-
-                        if (params.connector) {
-                            this.showCreateConnector(this.connectorList.filter((c) => c.id === params.connector)[0]);
-                        }
-
-                        let needsUpdate = false;
-                        if (this.oldParams) {
-                            for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
-                                if (params[key] === this.oldParams[key]) {
-                                    continue;
-                                }
-                                if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
-                                    continue;
-                                }
-                                needsUpdate = true;
-                            }
-                        }
-                        else {
-                            needsUpdate = true;
-                        }
-                        this.oldParams = params;
-                        if (params.viewType != null) {
-                            this.setViewType(params.viewType, false);
-                        } else {
-                            this.setViewType(this.config.instant('workspaceViewType', 0), false);
-                        }
-                        if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
-                            this.root = params.root;
-                        }
-                        else {
-                            this.root = 'MY_FILES';
-                        }
-                        if (params.reurl) {
-                            this.reurl = params.reurl;
-                        }
-                        this.reurlDirectories = params.applyDirectories === 'true';
-                        this.createAllowed = this.root === 'MY_FILES';
-                        this.mainnav = params.mainnav === 'false' ? false : true;
-
-                        if (params.file) {
-                            this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
-                                this.setSelection([paramNode.node]);
-                                this.parameterNode = paramNode.node;
-                                this.mainNavRef.management.nodeSidebar = paramNode.node;
-                            });
-                        }
-
-                        if (!needsUpdate) {
-                            return;
-                        }
-                        const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
-                        if(!params.id && lastLocation) {
-                            this.openDirectory(lastLocation);
-                        } else {
-                            this.openDirectoryFromRoute(params);
-                        }
-                        if (params.showAlpha) {
-                            this.showAlpha();
-                        }
-                    });
-                });
+                const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                if (!params.id && lastLocation) {
+                    this.openDirectory(lastLocation);
+                } else {
+                    this.openDirectoryFromRoute(params);
+                }
+                if (params.showAlpha) {
+                    this.showAlpha();
+                }
             });
         });
     }
@@ -468,7 +464,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             */
             this.currentNode = list[0];
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
-            {
+                {
                     state: {
                         nodes: this.currentNodes,
                         scope: 'workspace'
