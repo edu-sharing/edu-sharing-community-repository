@@ -179,6 +179,13 @@ public class MetadataTemplateRenderer {
 			else {
 				for(String value : values){
 					String rawValue = value;
+					HashMap<String, Object> vcardData = null;
+					if("vcard".equals(widget.getType())){
+						ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(value);
+						if(map.size() > 0) {
+							vcardData = map.get(0);
+						}
+					}
 					if(widget.getId().equals("license")){
 						wasEmpty = false;
 						String licenseName=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)) ?
@@ -264,44 +271,8 @@ public class MetadataTemplateRenderer {
 						widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 						isLink=true;
 					}
-					else if("vcard".equals(widget.getType())){
-						try {
-							VCardEngine vCardEngine = new VCardEngine();
-							VCard vcard = vCardEngine.parse(value);
-							HashMap<String, Object> data = VCardConverter.vcardToHashMap(value).get(0);
-							value = VCardConverter.getNameForVCard("",data);
-							if(renderingMode.equals(RenderingMode.HTML)){
-								String persistentIdUrl = null;
-								for(ExtendedType type : vcard.getExtendedTypes()){
-									if(type.getExtendedName().equals(CCConstants.VCARD_T_X_ORCID) ||
-											type.getExtendedName().equals(CCConstants.VCARD_T_X_GND_URI) ||
-											type.getExtendedName().equals(CCConstants.VCARD_T_X_ROR) ||
-											type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)){
-										 persistentIdUrl = type.getExtendedValue();
-										 break;
-									}
-								}
-								if(persistentIdUrl != null && !persistentIdUrl.isEmpty()){
-									value += "<br><a href=\"" + persistentIdUrl + "\" target=\"blank\">" + 
-											MetadataHelper.getTranslation("vcard_link_persistent_id") + "</a>";
-								}
-							}
-							Object linkUrl = data.get(widget.getLink() == null ? CCConstants.VCARD_URL :
-									widget.getLink().equals("email") ? CCConstants.VCARD_EMAIL
-											: null);
-							String url=linkUrl != null ? linkUrl.toString() : "";
-							if(!url.isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
-								if(widget.getLink().equals("email")) {
-									url = "mailto:" + url;
-								} else if (!url.contains("://")) {
-									url = "http://" + url;
-								}
-								widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
-								isLink = true;
-							}
-						}catch(Throwable t){
-							// empty or invalid value
-						}
+					else if(vcardData != null){
+						value = VCardConverter.getNameForVCard("",vcardData);
 					}
 					if(renderingMode.equals(RenderingMode.HTML)){
 						widgetHtml.append("<div class='mdsValue' data-value-key='" + rawValue + "'>");
@@ -318,7 +289,50 @@ public class MetadataTemplateRenderer {
 					if (renderingMode.equals(RenderingMode.HTML)) {
 						widgetHtml.append("<div>");
 					}
+					if(vcardData != null && renderingMode.equals(RenderingMode.HTML)){
+						Object linkUrl = vcardData.get(widget.getLink() == null ? CCConstants.VCARD_URL :
+								widget.getLink().equals("email") ? CCConstants.VCARD_EMAIL
+										: null);
+						String url=linkUrl != null ? linkUrl.toString() : "";
+						if(!url.isEmpty()) {
+							if(widget.getLink().equals("email")) {
+								url = "mailto:" + url;
+							} else if (!url.contains("://")) {
+								url = "http://" + url;
+							}
+							widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
+							isLink = true;
+						}
+					}
 					widgetHtml.append(value);
+					if(vcardData != null && renderingMode.equals(RenderingMode.HTML)) {
+						if(isLink){
+							widgetHtml.append("</a>");
+						}
+						try{
+							VCardEngine vCardEngine = new VCardEngine();
+							VCard vcard = vCardEngine.parse(rawValue);
+							String persistentIdUrl = null;
+							for (ExtendedType type : vcard.getExtendedTypes()) {
+								if (type.getExtendedName().equals(CCConstants.VCARD_T_X_ORCID) ||
+										type.getExtendedName().equals(CCConstants.VCARD_T_X_GND_URI) ||
+										type.getExtendedName().equals(CCConstants.VCARD_T_X_ROR) ||
+										type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)) {
+									persistentIdUrl = type.getExtendedValue();
+									break;
+								}
+							}
+							if (persistentIdUrl != null && !persistentIdUrl.isEmpty()) {
+								widgetHtml.append("<br><a href=\"").append(persistentIdUrl)
+										.append("\" target=\"blank\">")
+										.append(MetadataHelper.getTranslation("vcard_link_persistent_id"))
+										.append("</a>");
+							}
+						}catch(Throwable t){
+							// empty or invalid value
+						}
+					}
+
 					if (renderingMode.equals(RenderingMode.HTML)) {
 						widgetHtml.append("</div>");
 					}
