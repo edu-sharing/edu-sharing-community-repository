@@ -125,7 +125,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
-    private viewType = 0;
+    private viewType: 0|1 = 0;
     private reurlDirectories: boolean;
     private reorderDialog: boolean;
     @HostListener('window:beforeunload', ['$event'])
@@ -376,9 +376,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                 }
                                 this.oldParams = params;
                                 if (params.viewType != null) {
-                                    this.setViewType(params.viewType);
-                                } else{
-                                    this.setViewType(this.config.instant('workspaceViewType', 0));
+                                    this.setViewType(params.viewType, false);
+                                } else {
+                                    this.setViewType(this.config.instant('workspaceViewType', 0), false);
                                 }
                                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
                                     this.root = params.root;
@@ -723,7 +723,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
 
     private toggleView() {
-        this.setViewType(1 - this.viewType);
+        this.setViewType(this.viewType === 1 ? 0 : 1);
         if (this.viewType === 0) {
             this.viewToggle.icon = 'view_module';
         }
@@ -814,12 +814,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
      * function to add value to viewType
      * @param viewType as params accept number, in this case we want just 0|1
      */
-    private setViewType(viewType: number) {
-        try {
-            this.viewType = viewType;
+    private setViewType(viewType: 0|1, refreshRoute = true) {
+        this.viewType = viewType;
+        if(refreshRoute) {
             this.refreshRoute();
-        } catch (referenceError) {
-            this.viewType = 0;
         }
     }
 }
