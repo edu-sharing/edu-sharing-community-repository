@@ -26,7 +26,7 @@
                 <div class="link-info">
                     <mat-form-field>
                         <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate}}</mat-label>
-                        <input matInput [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
+                        <input matInput [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://" autocomplete="off">
                     </mat-form-field>
                 </div>
                 <div class="lti" *ngIf="showLti">
