@@ -15,7 +15,9 @@ import {RestNetworkService} from "../../../core-module/rest/services/rest-networ
     <a *ngIf="!unclickable"
       [routerLink]="get('routerLink')"
       [state]="getState()"
-      [queryParams]="get('queryParams')">
+      [queryParams]="get('queryParams')"
+      queryParamsHandling="merge"
+    >
       <ng-container *ngTemplateOutlet="content"></ng-container>
     </a>`,
 })
