@@ -3,6 +3,7 @@ import {BehaviorSubject} from 'rxjs';
 import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
 import {MainNavService} from '../../../../services/main-nav.service';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
+import {NodeWrapper, Node, Collection} from "../../core-module/core.module";
 
 @Component({
     selector: 'app-mds-editor-widget-link',
@@ -36,8 +37,10 @@ export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidget {
 
     async onClick() {
         if (this.widgetName === 'maptemplate') {
-            let nodes = await this.mdsEditorInstanceService.save();
-            this.mainnav.getDialogs().onRefresh.emit(nodes);
+            const nodes = await this.mdsEditorInstanceService.save();
+            if(Array.isArray(nodes)) {
+                this.mainnav.getDialogs().onRefresh.emit(nodes);
+            }
             this.mainnav.getDialogs().nodeMetadata = null;
 
             this.mainnav.getDialogs().nodeMetadata = null;
