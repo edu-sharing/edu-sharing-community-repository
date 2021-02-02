@@ -1178,6 +1178,9 @@ a.rowInner {
     .cardList > .item-container {
         width: 100%;
         height: 160px;
+        > app-list-option-item{
+            height: 120px;
+        }
         box-shadow: none;
         .typeicon {
             display: none !important;
