@@ -126,12 +126,12 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
      *
      * Use `getValues()`
      */
-    saveValues(): Promise<{ [property: string]: string[] }> {
+    async saveValues(): Promise<{ [property: string]: string[] }> {
         switch (this.editorType) {
             case 'legacy':
                 return this.mdsRef.saveValues();
             case 'angular':
-                const values = this.mdsEditorInstance.getValues();
+                const values = await this.mdsEditorInstance.getValues();
                 this.onDone.emit(values);
                 return values;
             default:
