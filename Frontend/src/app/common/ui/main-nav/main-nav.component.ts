@@ -850,8 +850,12 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         if (this.tabNav == null || this.tabNav.nativeElement == null) {
             return;
         }
+        // Take the scroll position inside a viewport that was zoomed in using pinch-to-zoom into
+        // account. This allows us to scroll bottom elements out of view, but is not really needed
+        // for top elements. Using for both as long as no problems come up.
+        const scrollY = (window as any).visualViewport?.pageTop ?? window.scrollY;
         if (this.lastScroll === -1) {
-            this.lastScroll = window.scrollY;
+            this.lastScroll = scrollY;
             return;
         }
         const elementsTop: any = document.getElementsByClassName(
@@ -874,8 +878,8 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 top = rect.top;
             }
         }
-        let diffTop = window.scrollY - this.lastScroll;
-        let diffBottom = window.scrollY - this.lastScroll;
+        let diffTop = scrollY - this.lastScroll;
+        let diffBottom = scrollY - this.lastScroll;
         if (diffTop < 0) {
             diffTop *= 2;
         }
@@ -883,10 +887,16 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             diffBottom *= 2;
         }
 
+        // Don't move top elements any further up when they already lie above the screen.
         if (diffTop > 0 && bottom < 0) {
             diffTop = 0;
         }
+        // Don't move bottom elements any further down when they already lie below the screen.
         if (diffBottom > 0 && top > window.innerHeight) {
+            diffBottom = 0;
+        }
+        // Don't move bottom elements any further up when the page is zoomed in on mobile.
+        if (diffBottom < 0 && (window as any).visualViewport?.scale > 1) {
             diffBottom = 0;
         }
         this.elementsTopY += diffTop;
@@ -895,7 +905,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.elementsBottomY = Math.max(0, this.elementsBottomY);
         // For ios elastic scroll
         if (
-            window.scrollY <= 0 ||
+            window.scrollY < 0 ||
             this.fixScrollElements ||
             !UIHelper.evaluateMediaQuery(
                 UIConstants.MEDIA_QUERY_MAX_WIDTH,
@@ -913,7 +923,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             elementsBottom.item(i).style.position = 'relative';
             elementsBottom.item(i).style.top = this.elementsBottomY + 'px';
         }
-        this.lastScroll = window.scrollY;
+        this.lastScroll = scrollY;
     }
 
     private showTimeout() {

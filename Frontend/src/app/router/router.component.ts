@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, DoCheck, NgZone, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, DoCheck, NgZone, ViewChild, OnInit } from '@angular/core';
 import { MainNavService } from '../common/services/main-nav.service';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
@@ -27,15 +27,16 @@ import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
-import {Routes} from '@angular/router';
-import {CookieInfoComponent} from '../common/ui/cookie-info/cookie-info.component';
+import { Routes } from '@angular/router';
+import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
+import { BridgeService } from '../core-bridge-module/bridge.service';
 
 @Component({
     selector: 'router',
     templateUrl: 'router.component.html',
     providers: [MainNavService],
 })
-export class RouterComponent implements DoCheck, AfterViewInit {
+export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 60;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
 
@@ -64,11 +65,19 @@ export class RouterComponent implements DoCheck, AfterViewInit {
         return result;
     }
 
-    constructor(private mainNavService: MainNavService, private ngZone: NgZone) {
+    constructor(
+        private mainNavService: MainNavService,
+        private ngZone: NgZone,
+        private bridge: BridgeService,
+    ) {
         this.ngZone.runOutsideAngular(() => {
             // Do not trigger change detection with setInterval.
             this.checksMonitorInterval = window.setInterval(() => this.monitorChecks(), 1000);
         });
+    }
+
+    ngOnInit(): void {
+        this.setUserScale();
     }
 
     ngDoCheck(): void {
@@ -101,6 +110,13 @@ export class RouterComponent implements DoCheck, AfterViewInit {
             this.consecutiveTransgression = 0;
         }
         this.numberOfChecks = 0;
+    }
+
+    private setUserScale(): void {
+        if (this.bridge.isRunningCordova()) {
+            const viewport: HTMLMetaElement = document.head.querySelector('meta[name="viewport"]');
+            viewport.content += ', user-scalable=no';
+        }
     }
 }
 
