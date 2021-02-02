@@ -12,6 +12,13 @@ $bannerHeight:130px;
   background-position: 0 0;
 }
 
+app-header {
+  position: relative;
+  display: flex;
+  // Make sure bars with class="mobile-move-top" to cover the banner during their animation.
+  z-index: 95;
+}
+
 @media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .banner{
     display: none;
