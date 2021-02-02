@@ -8,15 +8,16 @@
         (onFileSelected)="addFiles($event)"
         (onLinkSelected)="addLink($event)"
 ></workspace-file-upload-select>
-<mds
+<app-mds-editor-wrapper
         *ngIf="_edit"
         [priority]="2"
-        [groupId]="'io_childobject'"
+        groupId="io_childobject"
+        editorMode="nodes"
         [currentValues]="_edit.properties"
         (onCancel)="_edit=null"
         (onDone)="setProperties($event)"
         [invalidate]="_edit!=null"
-></mds>
+></app-mds-editor-wrapper>
 <workspace-license
         *ngIf="_editLicense"
         [priority]="2"

@@ -115,6 +115,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         );
     }
     setProperties(props: Values) {
+        if(!props) {
+            return;
+        }
         const edit = this._edit ?? this._editLicense;
         // keep any existing license data
         if (this._edit && edit.child.properties) {
@@ -124,9 +127,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         } else {
             edit.child.properties = props;
         }
-        edit.child.name = props[RestConstants.LOM_PROP_TITLE]?.[0]
-            ? props[RestConstants.LOM_PROP_TITLE][0]
-            : props[RestConstants.CM_NAME][0];
+        edit.child.name = edit.child.properties[RestConstants.LOM_PROP_TITLE]?.[0]
+            ? edit.child.properties[RestConstants.LOM_PROP_TITLE][0]
+            : edit.child.properties[RestConstants.CM_NAME][0];
         this._edit = null;
         this._editLicense = null;
         this.onChange();

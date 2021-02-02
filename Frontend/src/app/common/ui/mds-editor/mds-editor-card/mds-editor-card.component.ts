@@ -13,6 +13,7 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 })
 export class MdsEditorCardComponent implements OnInit {
     @Input() title: string;
+    @Input() priority = 0;
     @Output() cancel = new EventEmitter();
     @Output() save = new EventEmitter();
 

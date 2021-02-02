@@ -47,7 +47,7 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="contributors">
+      <div class="contributors" *ngIf="showContributorDialog && mdsEditorValues.nodes$.value">
         <button
           mat-button
           color="primary"

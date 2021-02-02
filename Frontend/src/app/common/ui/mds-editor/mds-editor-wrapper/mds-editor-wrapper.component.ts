@@ -65,7 +65,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
-    @Output() onDone = new EventEmitter();
+    @Output() onDone = new EventEmitter<Node[]|Values>();
     @Output() onMdsLoaded = new EventEmitter();
     @Output() openContributor = new EventEmitter();
     @Output() openLicense = new EventEmitter();
@@ -83,7 +83,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         //
         // TODO: Make sure that inputs are ready when this component is initialized and remove calls
         // to `loadMds()`.
-        if (this.nodes) {
+        if (this.nodes || this.currentValues) {
             this.init();
         }
     }
@@ -182,7 +182,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     async onSave(): Promise<void> {
         this.isLoading = true;
         try {
-            console.log(this.mdsEditorInstance.getCanSave());
             if (!this.mdsEditorInstance.getCanSave()) {
                 // no changes, behave like close
                 if(this.mdsEditorInstance.getIsValid()){

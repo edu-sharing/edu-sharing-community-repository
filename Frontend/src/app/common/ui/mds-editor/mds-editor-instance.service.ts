@@ -373,6 +373,8 @@ export class MdsEditorInstanceService implements OnDestroy {
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
     /** Nodes with updated and complete metadata. */
     nodes$ = new BehaviorSubject<Node[]>(null);
+    /** Current values (if not in node mode) */
+    values$ = new BehaviorSubject<Values>(null);
     /** MDS Views of the relevant group (in order). */
     views: MdsView[];
     /** Whether the editor is in bulk mode to edit multiple nodes at once. */
@@ -486,7 +488,8 @@ export class MdsEditorInstanceService implements OnDestroy {
     ): Promise<EditorType> {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
-        await this.initMds(groupId, mdsId, repository);
+        this.values$.next(initialValues);
+        await this.initMds(groupId, mdsId, repository, null, initialValues);
         for (const widget of this.widgets.value) {
             widget.initWithValues(initialValues);
         }
@@ -504,7 +507,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         // outside the component. Therefore, we have to reload and redraw everything here.
         //
         // TODO: Handle values in a way that allows dynamic updates.
-        await this.initMds(this.groupId, this.mdsId, this.repository, this.nodes$.value);
+        await this.initMds(this.groupId, this.mdsId, this.repository, this.nodes$.value, this.values$.value);
         for (const widget of this.widgets.value) {
             widget.initWithValues();
         }
@@ -573,7 +576,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
     }
 
-    async save(): Promise<Node[]> {
+    async save(): Promise<Node[]|Values> {
+        if(!this.nodes$.value) {
+            return this.getValues();
+        }
         const newValues = await this.getNodeValuePairs();
         let updatedNodes: Node[];
         const versionWidget: MdsEditorWidgetVersionComponent = this.nativeWidgets.find(
@@ -666,6 +672,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         mdsId: string,
         repository?: string,
         nodes?: Node[],
+        values?: Values,
     ): Promise<void> {
         if (this.mdsId !== mdsId || this.repository !== repository || this.groupId !== groupId) {
             this.mdsId = mdsId;
@@ -678,7 +685,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         const mdsDefinition = this.mdsDefinition$.value;
         const group = this.getGroup(mdsDefinition, groupId);
         this.views = this.getViews(mdsDefinition, group);
-        this.widgets.next(await this.generateWidgets(mdsDefinition, this.views, nodes));
+        this.widgets.next(await this.generateWidgets(mdsDefinition, this.views, nodes, values));
         this.mdsInitDone.next();
     }
 
@@ -726,6 +733,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         mdsDefinition: MdsDefinition,
         views: MdsView[],
         nodes?: Node[],
+        values?: Values,
     ): Promise<Widget[]> {
         const result: Widget[] = [];
         const availableWidgets = mdsDefinition.widgets
@@ -735,7 +743,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     !Object.values(NativeWidgetType).includes(widget.id as NativeWidgetType),
             )*/
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
-            .filter((widget) => this.meetsCondition(widget, nodes));
+            .filter((widget) => this.meetsCondition(widget, nodes, values));
         const variables = await this.restLocator.getConfigVariables().toPromise();
         for (const view of views) {
             for (const widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
@@ -773,7 +781,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
     }
 
-    private meetsCondition(widget: MdsWidget, nodes?: Node[]): boolean {
+    private meetsCondition(widget: MdsWidget, nodes?: Node[], values?: Values): boolean {
         if (!widget.condition) {
             return true;
         } else if (widget.condition.type === 'PROPERTY') {
@@ -781,6 +789,8 @@ export class MdsEditorInstanceService implements OnDestroy {
                 return nodes.every(
                     (node) => widget.condition.negate === !node.properties[widget.condition.value],
                 );
+            } else if (values) {
+                return widget.condition.negate === !values[widget.condition.value]
             } else {
                 return true;
             }
