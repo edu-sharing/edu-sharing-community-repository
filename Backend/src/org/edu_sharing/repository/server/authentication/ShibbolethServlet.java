@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.HttpHeaders;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -76,6 +77,7 @@ public class ShibbolethServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		logger.info("req.getRemoteUser():"+req.getRemoteUser());
+
 
 		ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 
@@ -169,6 +171,12 @@ public class ShibbolethServlet extends HttpServlet {
 				ShibbolethSessions.put(shibbolethSessionId, new SessionInfo(ticket, req.getSession()));
 				req.getSession().setAttribute(CCConstants.AUTH_SSO_SESSIONID, shibbolethSessionId);
 			}
+
+			String referer = req.getHeader(HttpHeaders.REFERER);
+			if(referer != null && referer.trim().equals("")){
+				req.getSession().setAttribute(SSOAuthorityMapper.SSO_REFERER,referer);
+			}
+
 
 			Object alfAuthService = AlfAppContextGate.getApplicationContext().getBean("authenticationService");
 			if(alfAuthService instanceof SubsystemChainingAuthenticationService) {
