@@ -41,7 +41,7 @@
                 type="text"
                 name="startTime"
                 id="startTime"
-                pattern="\d\d:\d\d:\d\d"
+                pattern="\d\d:\d\d(:\d\d)?"
                 [ngModel]="values.startTime | duration: video.duration"
                 (ngModelChange)="values.startTime = ($event.length === 8 || $event.length === 5) && convertStringToTime($event) !== 0 ? convertStringToTime($event) : values.startTime"
               />
@@ -57,7 +57,7 @@
                 type="text"
                 name="endTime"
                 id="endTime"
-                pattern="\d\d:\d\d:\d\d"
+                pattern="\d\d:\d\d(:\d\d)?"
                 [ngModel]="values.endTime | duration: video.duration"
                 (ngModelChange)="values.endTime = ($event.length === 8 || $event.length === 5) && convertStringToTime($event) !== 0 ? convertStringToTime($event) : values.endTime"
               />
