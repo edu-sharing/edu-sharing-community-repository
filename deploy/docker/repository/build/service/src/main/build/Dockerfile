@@ -61,16 +61,6 @@ RUN set -eux \
         's|^[#]*\s*shared\.loader=.*|shared.loader=${catalina.base}/shared/classes,${catalina.base}/shared/lib/*.jar|' \
         tomcat/conf/catalina.properties \
     && xmlstarlet ed -L \
-        -d '/Context/Manager[@className="org.redisson.tomcat.RedissonSessionManager"]' \
-        -s '/Context' -t elem -n "Manager" -v "" \
-        --var redis '$prev' \
-        -i '$redis' -t attr -n "className" -v "org.redisson.tomcat.RedissonSessionManager" \
-        -i '$redis' -t attr -n "configPath" -v "tomcat/conf/redisson.yaml" \
-        -i '$redis' -t attr -n "readMode" -v "REDIS" \
-        -i '$redis' -t attr -n "updateMode" -v "DEFAULT" \
-        -i '$redis' -t attr -n "broadcastSessionEvents" -v "false" \
-        tomcat/conf/context.xml \
-    && xmlstarlet ed -L \
         -i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n 'hostConfigClass' -v 'org.edu_sharing.catalina.startup.OrderedHostConfig' \
         tomcat/conf/server.xml
 
@@ -176,6 +166,18 @@ RUN set -eux \
 	&& cp tomcat/webapps/edu-sharing/META-INF/context.xml tomcat/conf/Catalina/localhost/edu-sharing.xml
 
 COPY --chown=worker:worker assets/edu-sharing/log4j2.xml tomcat/webapps/edu-sharing/WEB-INF/log4j2.xml
+
+RUN set -eux \
+    && xmlstarlet ed -L \
+        -d '/Context/Manager[@className="org.redisson.tomcat.RedissonSessionManager"]' \
+        -s '/Context' -t elem -n "Manager" -v "" \
+        --var redis '$prev' \
+        -i '$redis' -t attr -n "className" -v "org.redisson.tomcat.RedissonSessionManager" \
+        -i '$redis' -t attr -n "configPath" -v "tomcat/conf/redisson.yaml" \
+        -i '$redis' -t attr -n "readMode" -v "REDIS" \
+        -i '$redis' -t attr -n "updateMode" -v "DEFAULT" \
+        -i '$redis' -t attr -n "broadcastSessionEvents" -v "false" \
+        tomcat/conf/Catalina/localhost/edu-sharing.xml
 
 
 COPY --chown=worker:worker amps amps/
