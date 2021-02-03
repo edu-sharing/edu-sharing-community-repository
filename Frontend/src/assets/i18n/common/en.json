@@ -213,7 +213,8 @@
         "400_checked": "Checked"
     },
     "LIST_TABLE": {
-        "DUMMY_ICON_LABEL": "File type"
+        "DUMMY_ICON_LABEL": "File type",
+        "TOGGLE_ALL": "Select all/none"
     },
     "NODE": {
         "cm:name": "filename",

@@ -57,7 +57,10 @@
         <div class="heading" [attr.role]="viewType === 0 ? 'row' : null">
         <div *ngIf="hasCheckbox"
              class="checkbox">
-            <mat-checkbox *ngIf="_nodes && _nodes.length" (change)="toggleAll()" [ngModel]="selectedNodes.length==_nodes.length"></mat-checkbox>
+            <mat-checkbox *ngIf="_nodes && _nodes.length"
+                          (change)="toggleAll()"
+                          [ngModel]="selectedNodes.length==_nodes.length"
+                          aria-label="{{'LIST_TABLE.TOGGLE_ALL' | translate}}">&nbsp;</mat-checkbox>
         </div>
         <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
         <div class="icon" *ngIf="hasIcon" [attr.role]="viewType === 0 ? 'columnheader' : null" attr.aria-label="{{'LIST_TABLE.DUMMY_ICON_LABEL' | translate}}">&nbsp;</div>
@@ -161,7 +164,13 @@
                     <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon="edu-pin"></i></div>
                     <!-- FIXME: Interactive elements should be outside of links (app-node-url). -->
                     <div class="checkbox column" *ngIf="hasCheckbox">
-                        <mat-checkbox [ngModel]="getSelectedPos(node)!=-1" (change)="onCheckboxClick(node)" (click)="$event.stopPropagation()" aria-label="{{ 'SELECT' | translate:{element: node.name} }}"></mat-checkbox>
+                      <mat-checkbox
+                        [ngModel]="getSelectedPos(node)!=-1"
+                        (change)="onCheckboxClick(node)"
+                        (click)="$event.stopPropagation()"
+                        aria-label="{{ 'SELECT' | translate:{element: node.name} }}">
+                        &nbsp;
+                      </mat-checkbox>
                     </div>
                     <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
                     <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">

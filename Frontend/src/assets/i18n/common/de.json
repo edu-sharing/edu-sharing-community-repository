@@ -229,7 +229,8 @@
         "400_checked": "Geprüft"
     },
     "LIST_TABLE": {
-        "DUMMY_ICON_LABEL": "Dateityp"
+        "DUMMY_ICON_LABEL": "Dateityp",
+        "TOGGLE_ALL": "Alle / Nichts auswählen"
     },
     "NODE": {
         "cm:name": "Dateiname",
