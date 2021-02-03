@@ -105,6 +105,8 @@ public class SSOAuthorityMapper {
 	public static final String SSO_TYPE_CAS = "cas";
 
 	public static final String SSO_TYPE_AuthByApp = "AuthByApp";
+
+	public static final String SSO_REFERER = "SSO_REFERER";
 	
 	boolean createUser = true;
 	boolean updateUser = true;
