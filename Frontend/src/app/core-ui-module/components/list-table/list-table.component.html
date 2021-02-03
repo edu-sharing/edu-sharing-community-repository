@@ -160,7 +160,9 @@
                             <div>{{node.commentCount}}</div>
                         </div>
                     </div>
-                    <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
+                    <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'"
+                         class="collectionEditorial"
+                         aria-hidden="true"><i class="material-icons">star</i></div>
                     <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon="edu-pin"></i></div>
                     <!-- FIXME: Interactive elements should be outside of links (app-node-url). -->
                     <div class="checkbox column" *ngIf="hasCheckbox">
