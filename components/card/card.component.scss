@@ -50,7 +50,7 @@
 }
 
 @mixin setZIndex($baseZIndex) {
-  @each $p in 0, 1, 2, 3, 4, 5 {
+  @for $p from 0 through 10 {
     &[priority="#{$p}"] {
       z-index: $baseZIndex + $p;
     }
