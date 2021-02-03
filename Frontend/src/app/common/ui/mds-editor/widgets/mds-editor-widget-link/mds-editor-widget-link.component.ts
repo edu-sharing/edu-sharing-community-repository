@@ -3,7 +3,6 @@ import {BehaviorSubject} from 'rxjs';
 import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
 import {MainNavService} from '../../../../services/main-nav.service';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
-import {NodeWrapper, Node, Collection} from "../../core-module/core.module";
 
 @Component({
     selector: 'app-mds-editor-widget-link',
