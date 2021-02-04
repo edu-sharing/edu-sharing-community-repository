@@ -57,7 +57,10 @@ ingress:
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/session-cookie-name: edusharing-rendering
     nginx.ingress.kubernetes.io/session-cookie-path: "*"
-    nginx.ingress.kubernetes.io/proxy-body-size: 5g
+    nginx.ingress.kubernetes.io/proxy-body-size: "5g"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
 #    nginx.ingress.kubernetes.io/configuration-snippet: |
 #      location /esrender/application/ {return 403;}
 #      location /esrender/conf/ {return 403;}
