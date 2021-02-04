@@ -102,11 +102,10 @@ user-profile {
 
 .topBarSearch {
     flex: auto;
-    padding: 19px 20px 0 10px;
+    margin: 0 20px;
 }
 .addDesktop{
     margin-left: 50px;
-    margin-right: 10px;
     padding-right: 25px;
     height: 39px;
     background-color: rgba(red($workspaceTopBarFontColor),green($workspaceTopBarFontColor),blue($workspaceTopBarFontColor),.1);
@@ -194,6 +193,8 @@ user-profile {
         ); //rgba(255,255,255,0.165);/* => #595959;*/
     }
     .topBarSearch .searchInputGroup {
+        display: flex;
+        height: 40px;
         input,
         input:focus {
             padding-right: 40px; // space for clear icon
@@ -202,7 +203,6 @@ user-profile {
             background: $workspaceTopBarInputBackground;
             color: $workspaceTopBarInputText;
             border: none !important;
-            height: 40px;
             -webkit-appearance: none;
         }
         input:focus {
@@ -213,7 +213,7 @@ user-profile {
         >button {
             position: absolute;
             top: 0;
-            right: -50px;
+            right: 0;
             height: 40px;
             border-radius: 0;
             color: $workspaceTopBarInputText;
@@ -231,10 +231,7 @@ user-profile {
 .searchInputGroup {
     position: relative;
     width: 100%;
-    max-width: 500px;
-}
-.noUser .searchInputGroup {
-    width: calc(100% - 150px);
+    max-width: 550px;
 }
 
 .topBar .topBarSearch form {
@@ -258,6 +255,8 @@ user-profile {
     display: flex;
     padding: 0;
     margin: 0px 10px;
+    height: 40px;
+    align-items: center;
     div {
         overflow: hidden;
         margin-top: 1px;
@@ -330,11 +329,6 @@ user-profile {
         color: $textOnPrimaryLight;
     }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
-    .searchInputGroup {
-        width: calc(100% - 80px);
-    }
-}
 @media screen and (max-width: ($mobileTabSwitchWidth)) {
     #scrollToTop {
         display: none !important;
@@ -348,6 +342,11 @@ user-profile {
     .menuButton {
         display: none;
     }
+    .add-material {
+        button.addDesktop {
+            margin-left: 20px;
+        }
+    }
     .topBar {
         z-index: $topBarMobileZIndex;
         .rocketchat {
@@ -357,10 +356,6 @@ user-profile {
         .help,
         .imprint {
             display: none;
-        }
-        .topBarSearch {
-            padding-left: 20px;
-            padding-right: 12px;
         }
         .timeout {
             display: none;
@@ -377,7 +372,9 @@ user-profile {
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
     .topBar .user {
-        padding: 0;
+        min-width: 0;
+        margin-left: 0;
+        margin-right: 20px;
         justify-content: center;
         .material-icons {
             margin-left: 0;
