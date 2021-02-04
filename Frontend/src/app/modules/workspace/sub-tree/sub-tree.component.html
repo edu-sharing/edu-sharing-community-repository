@@ -1,7 +1,10 @@
 <div class="sub-tree-wrapper">
   <dropdown #dropdown
   ></dropdown>
-  <button #dropdownTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [style.left]="dropdownLeft" [style.top]="dropdownTop" [matMenuTriggerFor]="dropdown.menu"></button>
+  <button #dropdownTrigger="matMenuTrigger" mat-button class="dropdown-dummy"
+          [style.left]="dropdownLeft" [style.top]="dropdownTop"
+          tabindex="-1"
+          [matMenuTriggerFor]="dropdown.menu"></button>
 
   <div *ngIf="_nodes && _nodes.length" [@open]="_nodes && _nodes.length">
   <div *ngFor="let node of _nodes;let i=index;"

@@ -119,6 +119,22 @@
 		]]>
 		</message>
 	</template>
+	<template name="invited_safe">
+		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a material.</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} invited you to: "{{name}}".</h2>
+			Your access rights are:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			After logging into the safe area you will find the element at "shared with me".
+			<br><br>
+			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="invited_collection">
 		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a collection.</subject>
 		<message><![CDATA[
@@ -233,6 +249,50 @@
 			New Status: {{newStatus}}
 			<br><br><br>
 			Should this change not be in your interest, please immediately contact the provider of your system.
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupList">
+		<subject>A new user wants to join "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello!</h1>
+			<h2>{{firstName}} {{lastName}} wants to join "{{group}}".</h2>
+			<br>
+			Please go to the user management and manage the waiting list of your group.
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupUser">
+		<subject>Joined "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			<h2>You've successfully joined "{{group}}".</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupConfirmed">
+		<subject>Joined "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			<h2>You're request to join "{{group}}" has been accepted! You are now member of this group.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupRejected">
+		<subject>Could not join "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			<h2>We're sorry to inform you that your request to join "{{group}}" has been rejected by the group administrator.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupAdmin">
+		<subject>A new user joined "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello!</h1>
+			<h2>{{firstName}} {{lastName}} just joined "{{group}}".</h2>
+			<br>
+			You can manage the members of your group in the user management.
 		]]>
 		</message>
 	</template>

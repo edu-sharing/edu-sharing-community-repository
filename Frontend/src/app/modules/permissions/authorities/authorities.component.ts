@@ -9,7 +9,7 @@ import {
   IamUsers,
   ListItem,
   NodeList,
-  Organization,
+  Organization, GroupSignupDetails,
   OrganizationOrganizations,
   RestConnectorService,
   RestConstants,
@@ -18,21 +18,25 @@ import {
   RestOrganizationService,
   SharedFolder, UIService,
   User,
-  UserSimple
+  UserSimple, Person
 } from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Constrain, CustomOptions, DefaultGroups, ElementType, OptionItem} from '../../../core-ui-module/option-item';
+import {Constrain, CustomOptions, DefaultGroups, ElementType, OptionGroup, OptionItem} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {SuggestItem} from '../../../common/ui/autocomplete/autocomplete.component';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
 import {Helper} from '../../../core-module/rest/helper';
 import {trigger} from '@angular/animations';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
+import {Observable} from 'rxjs';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
+import {CsvHelper} from '../../../core-module/csv.helper';
+import {ListItemType} from '../../../core-module/ui/list-item';
 
 @Component({
   selector: 'permissions-authorities',
@@ -85,9 +89,15 @@ export class PermissionsAuthoritiesComponent {
   private embeddedQuery: string;
   editButtons: DialogButton[];
   memberButtons: DialogButton[];
+  signupButtons: DialogButton[];
+  signupListButtons: DialogButton[];
   editStatus: UserSimple;
   editStatusNotify = true;
   editStatusButtons: DialogButton[];
+  hasMore: boolean;
+  groupSignup: Organization;
+  groupSignupList: UserSimple[];
+  groupSignupDetails: GroupSignupDetails;
   private _org: Organization;
   @Output() onDeselectOrg = new EventEmitter();
   @Input() set searchQuery(searchQuery: string){
@@ -99,7 +109,7 @@ export class PermissionsAuthoritiesComponent {
   }
   @Input() selected: Organization[]|Group[]|UserSimple[] = [];
 
-  public _mode: string;
+  public _mode: ListItemType;
   public addTo: any;
   private addToSelection: any;
   public globalProgress= false;
@@ -120,6 +130,10 @@ export class PermissionsAuthoritiesComponent {
   private memberListOffset: number;
   // show primary affiliations as list (or free text)
   primaryAffiliationList = true;
+  signupActions: CustomOptions = {
+    useDefaultOptions: false,
+  };
+  groupSignupSelected: UserSimple[] = [];
   private updateMemberSuggestions(event: any){
     if (this.editMembers == this.org || this.org == null){
       this.iam.searchUsers(event.input).subscribe(
@@ -165,7 +179,7 @@ export class PermissionsAuthoritiesComponent {
       }, (error: any) => this.handleError(error));
     }
   }
-  @Input() set mode(mode: string){
+  @Input() set mode(mode: ListItemType){
    this._mode = mode;
    if (mode == 'USER'){
      this.sortBy = 'firstName';
@@ -183,14 +197,14 @@ export class PermissionsAuthoritiesComponent {
   private getMemberOptions(): OptionItem[] {
     const options: OptionItem[] = [];
     const removeMembership = new OptionItem('PERMISSIONS.MENU_REMOVE_MEMBERSHIP', 'delete', (data) =>
-        this.deleteMembership(NodeHelper.getActionbarNodes(this.selectedMembers, data))
+        this.deleteMembership(NodeHelperService.getActionbarNodes(this.selectedMembers, data))
     );
     removeMembership.constrains = [Constrain.User];
     removeMembership.group = DefaultGroups.Delete;
     removeMembership.elementType = [ElementType.Group];
     options.push(removeMembership);
     const removeFromGroup = new OptionItem('PERMISSIONS.MENU_REMOVE_MEMBER', 'delete', (data) =>
-        this.deleteMember(NodeHelper.getActionbarNodes(this.selectedMembers, data))
+        this.deleteMember(NodeHelperService.getActionbarNodes(this.selectedMembers, data))
     );
     removeFromGroup.constrains = [Constrain.User];
     removeFromGroup.group = DefaultGroups.Delete;
@@ -199,7 +213,7 @@ export class PermissionsAuthoritiesComponent {
     return options;
   }
 
-  private getColumns(mode: string, fromDialog= false){
+  private getColumns(mode: ListItemType, fromDialog= false){
     const columns: ListItem[] = [];
     if (mode == 'USER'){
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_NAME));
@@ -223,6 +237,7 @@ export class PermissionsAuthoritiesComponent {
   constructor(private toast: Toast,
               private node: RestNodeService,
               private config: ConfigurationService,
+              private nodeHelper: NodeHelperService,
               private uiService: UIService,
               private router: Router,
               private translate: TranslateService,
@@ -233,6 +248,7 @@ export class PermissionsAuthoritiesComponent {
       this.connector.isLoggedIn().subscribe(() => {
         this.isAdmin = data.canCreate;
         this.updateOptions();
+        this.updateButtons();
       });
     });
   }
@@ -254,7 +270,7 @@ export class PermissionsAuthoritiesComponent {
     this.onSelection.emit(data);
   }
   private getList<T>(data: T): T[] {
-    return NodeHelper.getActionbarNodes((this.selected as any), data);
+    return NodeHelperService.getActionbarNodes((this.selected as any), data);
   }
   private updateOptions() {
     if (this.embedded) {
@@ -317,6 +333,34 @@ export class PermissionsAuthoritiesComponent {
       newOrg.constrains = [Constrain.Admin, Constrain.NoSelection];
       options.push(newOrg);
     }
+    const orgSignupList = new OptionItem('PERMISSIONS.ORG_SIGNUP_LIST', 'playlist_add', async (data) => {
+      this.toast.showProgressDialog();
+      this.groupSignup = this.getList(data)[0];
+      this.groupSignupSelected = [];
+      this.groupSignupList = (await this.iam.getGroupSignupList(this.groupSignup.authorityName).toPromise());
+      this.toast.closeModalDialog();
+    });
+    orgSignupList.elementType = [ElementType.Group];
+    orgSignupList.group = DefaultGroups.Edit;
+    orgSignupList.customShowCallback = (nodes) => {
+      return nodes[0].signupMethod === 'list';
+    };
+    orgSignupList.priority = 20;
+    orgSignupList.constrains = [Constrain.Admin, Constrain.NoBulk];
+    options.push(orgSignupList);
+    const orgSignup = new OptionItem('PERMISSIONS.ORG_SIGNUP', 'checkbox', (data) => {
+          this.groupSignup = this.getList(data)[0];
+          this.groupSignupDetails = {
+            signupMethod: this.getList(data)[0].signupMethod ?? 'disabled',
+            signupPassword: ''
+          }
+        }
+    );
+    orgSignup.elementType = [ElementType.Group];
+    orgSignup.group = DefaultGroups.Edit;
+    orgSignup.priority = 30;
+    orgSignup.constrains = [Constrain.Admin, Constrain.NoBulk];
+    options.push(orgSignup);
     const addToGroup = new OptionItem('PERMISSIONS.MENU_ADD_TO_GROUP', 'group_add', (data) =>
         this.addToGroup(data)
     );
@@ -408,6 +452,40 @@ export class PermissionsAuthoritiesComponent {
     if (this.listRef) {
       this.listRef.refreshAvailableOptions();
     }
+
+    const signupAdd = new OptionItem('PERMISSIONS.ORG_SIGNUP_ADD', 'person_add', (node: UserSimple) => {
+      this.toast.showProgressDialog();
+      const users = NodeHelperService.getActionbarNodes(this.groupSignupSelected, node);
+      Observable.forkJoin(users.map((u) =>
+          this.iam.confirmSignup(this.groupSignup.authorityName, u.authorityName)
+      )).subscribe(() => {
+        this.groupSignupList = null;
+        this.toast.toast('PERMISSIONS.ORG_SIGNUP_ADD_CONFIRM');
+        this.toast.closeModalDialog();
+      }, error => {
+        this.toast.error(error);
+        this.toast.closeModalDialog();
+      })
+    });
+    signupAdd.elementType = [ElementType.Person];
+    signupAdd.group = DefaultGroups.Primary;
+    const signupRemove = new OptionItem('PERMISSIONS.ORG_SIGNUP_REJECT', 'close', (node: UserSimple) => {
+        this.toast.showProgressDialog();
+        const users = NodeHelperService.getActionbarNodes(this.groupSignupSelected, node);
+        Observable.forkJoin(users.map((u) =>
+            this.iam.rejectSignup(this.groupSignup.authorityName, u.authorityName)
+        )).subscribe(() => {
+          this.groupSignupList = null;
+          this.toast.toast('PERMISSIONS.ORG_SIGNUP_REJECT_CONFIRM');
+          this.toast.closeModalDialog();
+        }, error => {
+          this.toast.error(error);
+          this.toast.closeModalDialog();
+        })
+    });
+    signupRemove.elementType = [ElementType.Person];
+    signupRemove.group = DefaultGroups.Delete;
+    this.signupActions.addOptions = [signupAdd, signupRemove];
   }
   private cancelEdit(){
     this.edit = null;
@@ -530,19 +608,23 @@ export class PermissionsAuthoritiesComponent {
   public loadAuthorities() {
     this.loading = true;
     let sort = RestConstants.AUTHORITY_NAME;
-    if (this._mode == 'ORG')
-      sort = RestConstants.CM_PROP_AUTHORITY_AUTHORITYNAME;
+    if (this._mode == 'ORG') {
+        sort = RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME;
+    }
     if (this._mode == 'GROUP' && !this.org) {
       sort = this.sortBy;
       if (sort == RestConstants.AUTHORITY_DISPLAYNAME){
-        sort = RestConstants.AUTHORITY_NAME;
+        sort = RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME;
       }
       if (sort == RestConstants.AUTHORITY_GROUPTYPE) {
         sort = RestConstants.CCM_PROP_AUTHORITY_GROUPTYPE;
       }
+    } else  if (this._mode == 'USER' && !this.org) {
+        sort = this.sortBy;
+        if(sort === RestConstants.AUTHORITY_STATUS){
+            sort = RestConstants.CM_ESPERSONSTATUS;
+        }
     }
-    if (this._mode == 'USER' && !this.org)
-      sort = this.sortBy;
 
     const request = {sortBy: [sort], sortAscending: this.sortAscending, offset: this.offset};
     const query = this._searchQuery ? this._searchQuery : '';
@@ -557,6 +639,8 @@ export class PermissionsAuthoritiesComponent {
           if (org.administrationAccess) {
             this.list.push(org);
           }
+          // org endpoint does not support proper pagination, so check if result was empty
+          this.hasMore = orgs.organizations.length > 0;
         }
         this.loading = false;
         this.updateOptions();
@@ -582,24 +666,31 @@ export class PermissionsAuthoritiesComponent {
       if (this.org) {
         this.offset += this.connector.numberPerRequest;
         this.iam.getGroupMembers(this.org.authorityName, query, this._mode, request).subscribe((data: IamAuthorities) => {
-          for (const auth of data.authorities)
-            this.list.push(auth);
+          for (const auth of data.authorities) {
+              this.list.push(auth);
+          }
+          // org endpoint does not support proper
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }
       else if (this._mode == 'GROUP'){
         this.offset += this.connector.numberPerRequest;
-        this.iam.searchGroups(query, true, '', request).subscribe((data: IamGroups) => {
-          for (const auth of data.groups)
-            this.list.push(auth);
+        this.iam.searchGroups(query, true, '', '', request).subscribe((data: IamGroups) => {
+          for (const auth of data.groups) {
+              this.list.push(auth);
+          }
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }
       else if (this._mode == 'USER'){
         this.offset += this.connector.numberPerRequest;
         this.iam.searchUsers(query, true, '', request).subscribe((data: IamUsers) => {
-          for (const auth of data.users)
-            this.list.push(auth);
+          for (const auth of data.users) {
+              this.list.push(auth);
+          }
+          this.hasMore = this.list.length < data.pagination.total;
           this.loading = false;
         });
       }
@@ -949,25 +1040,18 @@ export class PermissionsAuthoritiesComponent {
   }
 
   private downloadMembers() {
-    let data = '';
-    let i = 0;
-    for (const column of this.columns) {
-      if (i)
-        data += ';';
-      data += this.translate.instant(this._mode + '.' + column.name);
-      i++;
+    const headers = this.columns.map((c) => this.translate.instant(this._mode + '.' + c.name));
+    const data:string[][] = [];
+    for (const entry of (this.list as UserSimple[])){
+      data.push([
+          entry.authorityName,
+          entry.profile.firstName,
+          entry.profile.lastName,
+          entry.profile.email,
+          entry.status.status
+      ]);
     }
-    for (const entry of this.list){
-      data += '\n';
-      let i = 0;
-      for (const column of this.columns) {
-        if (i)
-          data += ';';
-        data += NodeHelper.getAttribute(this.translate, this.config, entry, column);
-        i++;
-      }
-    }
-    Helper.downloadContent(this.translate.instant('PERMISSIONS.DOWNLOAD_MEMBER_FILENAME'), data);
+    CsvHelper.download(this.translate.instant('PERMISSIONS.DOWNLOAD_MEMBER_FILENAME'), headers, data);
   }
   openFolder(folder: SharedFolder) {
       UIHelper.goToWorkspaceFolder(this.node, this.router, this.connector.getCurrentLogin(), folder.id);
@@ -1000,7 +1084,9 @@ export class PermissionsAuthoritiesComponent {
         this.editStatusButtons = [
         new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {this.editStatus = null; }),
         new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.savePersonStatus())
-      ];
+        ];
+        this.signupButtons = DialogButton.getSaveCancel(() => this.groupSignup = null, () => this.saveGroupSignup());
+        this.signupListButtons = [new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.groupSignupList = null)];
     }
   private setPersonStatus(data: UserSimple) {
     this.editStatus = data;
@@ -1015,6 +1101,19 @@ export class PermissionsAuthoritiesComponent {
     }, (error) => {
       this.toast.closeModalDialog();
       this.toast.error(error);
+    });
+  }
+
+  saveGroupSignup() {
+    this.toast.showProgressDialog();
+    this.iam.editGroupSignup(this.groupSignup.authorityName, this.groupSignupDetails).subscribe(() => {
+      this.groupSignupDetails = null;
+      this.refresh();
+      this.toast.toast('PERMISSIONS.ORG_SIGNUP_SAVED');
+      this.toast.closeModalDialog();
+    }, error => {
+      this.toast.error(error);
+      this.toast.closeModalDialog();
     });
   }
 }

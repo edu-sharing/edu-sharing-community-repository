@@ -11,7 +11,6 @@ import {
   TemporaryStorageService
 } from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {Router} from "@angular/router";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {TranslateService} from "@ngx-translate/core";
@@ -20,6 +19,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {ActionbarHelperService} from "../../../common/services/actionbar-helper";
 import {HttpClient} from '@angular/common/http';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
   selector: 'search-node-store',
@@ -41,7 +41,7 @@ export class SearchNodeStoreComponent {
   };
   public buttons = DialogButton.getSingleButton('CLOSE',()=>this.cancel(), DialogButton.TYPE_CANCEL);
   public loading=true;
-  public sortBy=RestConstants.CM_PROP_TITLE;
+  public sortBy=RestConstants.LOM_PROP_TITLE;
   public sortAscending=true;
   public nodes: Node[] = [];
 
@@ -52,11 +52,12 @@ export class SearchNodeStoreComponent {
               private config : ConfigurationService,
               private connector : RestConnectorService,
               private actionbar : ActionbarHelperService,
+              private nodeHelper: NodeHelperService,
               private temporaryStorageService : TemporaryStorageService,
               private translate : TranslateService,
               private iam : RestIamService,
               private service : TemporaryStorageService){
-    this.columns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
+    this.columns.push(new ListItem("NODE",RestConstants.LOM_PROP_TITLE));
     //this.columns.push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
     this.refresh();
 
@@ -81,9 +82,9 @@ export class SearchNodeStoreComponent {
   }
   private updateActionOptions() {
     this.options.addOptions=[];
-    const download = this.actionbar.createOptionIfPossible('DOWNLOAD', this.selected, (node: Node) => NodeHelper.downloadNodes(this.connector, node ? [node] : this.selected));
+    const download = this.actionbar.createOptionIfPossible('DOWNLOAD', this.selected, (node: Node) => this.nodeHelper.downloadNodes(node ? [node] : this.selected));
     /*let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
-      (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
+      (node: Node) => this.nodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
       */
     download.group = DefaultGroups.FileOperations;
     this.options.addOptions.push(download);

@@ -82,11 +82,24 @@ $path:'../../../assets/images/';
         //background-color: rgba(255,255,255,0.1);
       }
 
-      .edit {
+      .edit, actionbar {
         position: absolute;
         right: 20px;
         top: 20px;
-        z-index: 1;
+        z-index: 10;
+      }
+      ::ng-deep {
+        .mat-flat-button, .mat-button {
+          background-color: transparent;
+          color: #fff;
+          &:disabled{
+            opacity: 0.25;
+          }
+          transition: all $transitionNormal;
+          &:hover{
+            background-color: rgba(0,0,0,.1);
+          }
+        }
       }
 
       .editAvatar {
@@ -125,13 +138,15 @@ $path:'../../../assets/images/';
       }
     }
 
-    .about, .stats, .authorityName, .changePassword {
+    .about, .stats, .authorityName, .changePassword, .persistent-id {
       max-width: 500px;
       margin: auto;
       padding: 0 25px;
     }
 
-    .changePassword {
+    .changePassword, .persistent-id {
+      display: flex;
+      flex-direction: column;
       padding-top: 40px;
 
       .toggle {
@@ -157,7 +172,20 @@ $path:'../../../assets/images/';
       width: 100%;
       text-align: right;
     }
-
+    .persistent-id{
+      >.persistent-id-inputs {
+        display: flex;
+        flex-direction: column;
+        mat-form-field {
+          padding-bottom: 20px;
+        }
+        info-message {
+          display: flex;
+          width: 100%;
+          margin-bottom: 20px;
+        }
+      }
+    }
     .about {
       position: relative;
 
@@ -255,6 +283,15 @@ $path:'../../../assets/images/';
     }
   }
 }
+
+.email-group-form{
+    display: flow-root;
+    mat-slide-toggle{
+        position: relative;
+        z-index: 1;
+    }
+}
+
 :host ::ng-deep{
   input-password mat-form-field{
     width: 100%;
@@ -265,6 +302,10 @@ $path:'../../../assets/images/';
     width: 100%;
     left: 0;
     padding-bottom: 20px + $mobileTabNavHeight;
+  }
+
+  .email-group-form{
+    margin-bottom: calc(#{$mobileTabNavHeight} / 2);
   }
 }
 @media only screen and (max-width: $mobileWidth - $mobileStage*2) {

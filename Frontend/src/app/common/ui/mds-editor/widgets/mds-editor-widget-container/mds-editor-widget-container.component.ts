@@ -17,9 +17,11 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { BulkMode, InputStatus, RequiredMode } from '../../types';
-import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
-import {UIAnimation} from '../../../../../core-module/ui/ui-animation';
+import { BulkMode, EditorBulkMode, InputStatus, RequiredMode } from '../../types';
+import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
+import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
+import { BulkBehavior } from '../../../mds/mds.component';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
 // its `FormFieldControl`.
@@ -75,7 +77,7 @@ export class RegisterFormFieldDirective {
                     // Animate hight, margin, and opacity to original values
                     animate(UIAnimation.ANIMATION_TIME_FAST),
                     // Keep `overflow: hidden` until the widget is fully expanded
-                    animate(UIAnimation.ANIMATION_TIME_FAST, style({ overflow: 'hidden' }))
+                    animate(UIAnimation.ANIMATION_TIME_FAST, style({ overflow: 'hidden' })),
                 ]),
             ]),
             transition('shown => hidden', [
@@ -92,11 +94,26 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
     readonly ValueType = ValueType;
 
     @Input() widget: Widget;
-    @Input() injectedView: MdsEditorWidgetBase;
+    @Input() injectedView: MdsEditorWidgetBase | NativeWidget;
     @Input() valueType: ValueType;
     @Input() label: string | boolean;
     @Input() control: AbstractControl;
+    /**
+     * Whether to wrap in a `mat-form-field`.
+     *
+     * Defaults to `true` if `control` is set, otherwise `false`.
+     */
     @Input() wrapInFormField: boolean;
+    /**
+     * Whether the content should be semantically grouped and labelled using ARIA.
+     *
+     * Applies only when not wrapping in a `mat-form-field`.
+     *
+     * Should be set to false when
+     * - a labelled grouping of elements is already provided, e.g. with a `radiogroup`, or
+     * - there is only a single element, for which the label and description is provided.
+     */
+    @Input() wrapInGroup = true;
 
     @ContentChild(MatFormFieldControl) formFieldControl: MatFormFieldControl<any>;
 
@@ -105,7 +122,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         return this.isHidden ? 'hidden' : 'shown';
     }
 
-    readonly isBulk: boolean;
+    readonly editorBulkMode: EditorBulkMode;
     readonly labelId: string;
     readonly descriptionId: string;
     bulkMode: BehaviorSubject<BulkMode>;
@@ -118,7 +135,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         private cdr: ChangeDetectorRef,
         private formFieldRegistration: FormFieldRegistrationService,
     ) {
-        this.isBulk = this.mdsEditorInstance.isBulk;
+        this.editorBulkMode = this.mdsEditorInstance.editorBulkMode;
         const id = Math.random().toString(36).substr(2);
         this.labelId = id + '_label';
         this.descriptionId = id + '_description';
@@ -128,15 +145,23 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         this.formFieldRegistration.onRegister((formField) => {
             formField._control = this.formFieldControl;
         });
-        this.cdr.detectChanges();
+        // This seems to be the only way to prevent changed-after-checked errors when dealing with
+        // formControls across components.
+        this.cdr.detach();
+        setTimeout(() => {
+            this.cdr.detectChanges();
+            this.cdr.reattach();
+        });
     }
 
     ngOnInit(): void {
         if (this.label === true) {
             this.label = this.widget.definition.caption;
         }
-        if (this.widget && this.isBulk) {
-            this.bulkMode = new BehaviorSubject('no-change');
+        if (this.widget && this.editorBulkMode?.isBulk) {
+            this.bulkMode = new BehaviorSubject(
+                this.editorBulkMode.bulkBehavior === BulkBehavior.Replace ? 'replace' : 'no-change',
+            );
             this.bulkMode.subscribe((bulkMode) => this.widget.setBulkMode(bulkMode));
         }
         if (this.control) {
@@ -156,6 +181,14 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
 
     shouldShowError(): boolean {
         return !!this.control?.invalid && (this.control.touched || this.control.dirty);
+    }
+
+    shouldShowBulkEditToggle(): boolean {
+        return (
+            this.editorBulkMode?.isBulk &&
+            this.editorBulkMode?.bulkBehavior === BulkBehavior.Default &&
+            !!this.widget
+        );
     }
 
     private initFormControl(formControl: AbstractControl): void {

@@ -39,25 +39,29 @@ public class FFMPEGMetadataExtractor extends AbstractMappingMetadataExtracter {
         TikaInputStream tis = TikaInputStream.get(contentReader.getContentInputStream());//TempFileProvider.createTempFile(contentReader.getContentInputStream(),"edu",".bin");
         File tmpFile = tis.getFile();
 
-        String resolution = getResolutionString(tmpFile.getCanonicalPath());
+        try {
+            String resolution = getResolutionString(tmpFile.getCanonicalPath());
 
-        Integer resolutionX = null;
-        Integer resolutionY = null;
-        if(resolution != null && resolution.contains("x")){
-            resolutionX = Integer.parseInt(resolution.split("x")[0]);
-            resolutionY = Integer.parseInt(resolution.split("x")[1]);
-        }
-        if(resolutionX != null && resolutionY != null) {
-            result.put(KEY_WIDTH,resolutionX);
-            result.put(KEY_HEIGHT,resolutionY);
-        }
+            Integer resolutionX = null;
+            Integer resolutionY = null;
+            if (resolution != null && resolution.contains("x")) {
+                resolutionX = Integer.parseInt(resolution.split("x")[0]);
+                resolutionY = Integer.parseInt(resolution.split("x")[1]);
+            }
+            if (resolutionX != null && resolutionY != null) {
+                result.put(KEY_WIDTH, resolutionX);
+                result.put(KEY_HEIGHT, resolutionY);
+            }
 
-        long videoLength = getVideoLength(tmpFile.getCanonicalPath());
-        if(videoLength > 0) {
-            result.put(KEY_LENGTH,"PT" + videoLength + "S");
-        }
+            long videoLength = getVideoLength(tmpFile.getCanonicalPath());
+            if (videoLength > 0) {
+                result.put(KEY_LENGTH, "PT" + videoLength + "S");
+            }
 
-        tis.close();
+            tis.close();
+        }finally {
+            tmpFile.delete();
+        }
         return result;
     }
 

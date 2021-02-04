@@ -53,6 +53,7 @@ import { WorkspaceManagementDialogsComponent } from '../../../modules/management
 import { MainMenuEntriesService } from '../../services/main-menu-entries.service';
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
+import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
 import {MainNavService} from '../../services/main-nav.service';
 
 /**
@@ -114,6 +115,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
     @ViewChild('mainMenuSidebar') mainMenuSidebar: MainMenuSidebarComponent;
+    @ViewChild('mainMenuDropdown') mainMenuDropdown: MainMenuDropdownComponent;
 
     /**
      * Show and enables the search field
@@ -245,6 +247,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             false,
         );
         this.setMenuStyle();
+
         this.connector.setRoute(this.route).subscribe(() => {
             this.connector.getAbout().subscribe(about => {
                 this.about = about;
@@ -255,7 +258,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         return;
                     }
                     setInterval(() => this.updateTimeout(), 1000);
-                    this.route.queryParams.subscribe((params: Params) => {
+                    this.route.queryParams.subscribe(async (params: Params) => {
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
@@ -263,18 +266,17 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         this.isGuest = data.isGuest;
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
-                        this.iam.getUser().subscribe((user: IamUser) => {
-                            this.user = user;
-                            this.canEditProfile = user.editProfile;
-                            this.configService.getAll().subscribe(() => {
-                                this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
-                                    this.user.person,
-                                    this.configService,
-                                );
-                            });
-                        });
                         this.refreshNodeStore();
                         this.checkConfig();
+                        const user = await this.iam.getCurrentUserAsync();
+                        this.user = user;
+                        this.canEditProfile = user.editProfile;
+                        this.configService.getAll().subscribe(() => {
+                            this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
+                                this.user.person,
+                                this.configService,
+                            );
+                        });
                     });
                 });
             });
@@ -302,6 +304,14 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         ) {
             return;
         }
+        // FIXME: These classes don't work properly when resizing the view causes the banner to
+        // change height. To reproduce, load an affected extension (e.g. Lisum) and resize the
+        // window to trigger the mobile menu switch. We have two problems:
+        //
+        // - Some updates happen only on first scroll after resize.
+        // - Some updates happen only after the page is reloaded.
+        //
+        // Interim states are visually broken.
         const elementsScroll = document.getElementsByClassName(
             'scrollWithBanner',
         );
@@ -365,8 +375,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     }
 
     toggleMenuSidebar() {
-        if (this.canOpen && this.mainMenuSidebar) {
-            this.mainMenuSidebar.toggle();
+        if (this.canOpen) {
+
+            if(this.mainMenuSidebar) {
+                this.mainMenuSidebar.toggle();
+            } else if(this.mainMenuDropdown) {
+                this.mainMenuDropdown.dropdown.menuTrigger.openMenu();
+            }
         }
     }
 
@@ -503,11 +518,14 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.startTutorial();
     }
 
-    startTutorial() {
-        if (this.connector.getCurrentLogin().statusCode === 'OK') {
-            this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
-                this.tutorialElement = this.userRef;
-            });
+    async startTutorial() {
+        if (this.connector.getCurrentLogin().statusCode === RestConstants.STATUS_CODE_OK) {
+            const user = await this.iam.getCurrentUserAsync();
+            if (user.editProfile && this.configService.instant('editProfile', false)) {
+                this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
+                    this.tutorialElement = this.userRef;
+                });
+            }
         }
     }
 
@@ -589,7 +607,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         );
     }
 
-    private doSearch(
+    doSearch(
         value = this.search.nativeElement.value,
         broadcast = true,
     ) {
@@ -719,6 +737,14 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                     this.openProfile(),
                 ),
             );
+            if(this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_SIGNUP_GROUP)) {
+                this.userMenuOptions.push(
+                    new OptionItem('SIGNUP_GROUP.TITLE', 'group_add', () => {
+                        this.management.signupGroup = true;
+                        this.management.signupGroupChange.emit(true);
+                    })
+                );
+            }
         }
         if (this.isGuest) {
             if (this.config.loginOptions) {

@@ -53,6 +53,7 @@ public interface TrackingService {
     enum UserTrackingMode{
         none,
         obfuscate,
+        session,
         full
     }
 }

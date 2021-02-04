@@ -51,6 +51,7 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -145,12 +146,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		String replicationId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 		String lomCatalogId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
 
-		if (replicationId == null) {
+		if (replicationId == null || replicationId.trim().equals("")) {
 			getLogger().error("no replicationId in newNodeProps provided. will not safe/modify record.");
 			return null;
 		}
 
-		if (lomCatalogId == null) {
+		if (lomCatalogId == null || lomCatalogId.trim().equals("")) {
 			getLogger().error("no lomCatalogId in newNodeProps provided. will not safe/modify record.");
 			return null;
 		}
@@ -364,16 +365,11 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		try {
 			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
 		}catch(DuplicateChildNodeNameException e){
-			simpleProps.put(CCConstants.CM_NAME, makeUniqueName((String) simpleProps.get(CCConstants.CM_NAME)));
+			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String) simpleProps.get(CCConstants.CM_NAME)));
 			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
 		}
 		createChildobjects(nodeId, nodeProps);
 	}
-
-	private String makeUniqueName(String name) {
-		return name+"_"+ DigestUtils.shaHex(System.currentTimeMillis()+""+RandomUtils.nextLong());
-	}
-
 
 	private void createChildobjects(String nodeId, HashMap<String, Object> nodeProps) throws Throwable {
 		if(importer!=null && !importer.getRecordHandler().createSubobjects()){
@@ -422,7 +418,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		try {
 			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
 		} catch (DuplicateChildNodeNameException e) {
-			simpleProps.put(CCConstants.CM_NAME, makeUniqueName((String)simpleProps.get(CCConstants.CM_NAME)));
+			simpleProps.put(CCConstants.CM_NAME, EduSharingNodeHelper.makeUniqueName((String)simpleProps.get(CCConstants.CM_NAME)));
 			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
 		}
 		if (aspects != null) {

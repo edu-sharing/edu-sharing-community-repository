@@ -4,6 +4,7 @@ import io.swagger.annotations.*;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.xpath.operations.Bool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;
@@ -351,6 +352,7 @@ public class CollectionApi {
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
 			@ApiParam(value = "scope (only relevant if parent == -root-)", required = true) @QueryParam("scope") @DefaultValue(value = "MY") SearchScope scope,
+			@ApiParam(value = "fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data", required = false) @QueryParam("fetchCounts") @DefaultValue(value = "true") Boolean fetchCounts,
 			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
 			@ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
 			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
@@ -365,7 +367,12 @@ public class CollectionApi {
 			List<Node> collections = new ArrayList<>();
 			Filter filter = new Filter();
 			filter.setProperties(propertyFilter);
-			CollectionBaseEntries base = CollectionDao.getCollectionsSubcollections(repoDao, parentId, scope, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
+			CollectionBaseEntries base = CollectionDao.getCollectionsSubcollections(repoDao, parentId, scope,
+					fetchCounts == null || fetchCounts,
+					filter,
+					sortDefinition,
+					skipCount == null ? 0 : skipCount,
+					maxItems == null ? 500 : maxItems);
 			for(Node item : base.getEntries()) {
 				collections.add(item);
 			}
@@ -469,6 +476,7 @@ public class CollectionApi {
 			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
 			@ApiParam(value = "ID of node", required = true) @PathParam("node") String nodeId,
 			@ApiParam(value = "ID of source repository", required=true ) @QueryParam("sourceRepo")  String sourceRepo,
+			@ApiParam(value = "Allow that a node that already is inside the collection can be added again", required=true, defaultValue = "false") @QueryParam("allowDuplicate")  Boolean allowDuplicate,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -484,9 +492,9 @@ public class CollectionApi {
             NodeEntry entry=new NodeEntry();
 
             if(sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId())){
-				entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo).asNode());
+				entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo, allowDuplicate != null && allowDuplicate).asNode());
             }else {
-                entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId).asNode());
+                entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId, null, allowDuplicate != null && allowDuplicate).asNode());
             }
 
 

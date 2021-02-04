@@ -2580,13 +2580,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		
 	}
 	
-	public void updateUser(HashMap<String, String> userInfo) throws Exception {
+	public void updateUser(HashMap<String, ?> userInfo) throws Exception {
 		
 		if(userInfo == null) {
 			throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
 		}
 		
-		String userName = userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
+		String userName = (String)userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
 		String currentUser = AuthenticationUtil.getRunAsUser();
 
 		if (!currentUser.equals(userName) && !isAdmin()) {

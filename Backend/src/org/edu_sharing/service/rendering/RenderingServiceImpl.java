@@ -143,15 +143,61 @@ public class RenderingServiceImpl implements RenderingService{
 		}
 	}
 	@Override
-	public RenderingServiceData getData(ApplicationInfo appInfo, String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Exception {
+	public RenderingServiceData getData(ApplicationInfo appInfo, String nodeId, String nodeVersion, String user, RenderingServiceOptions options) throws Throwable {
 		long time=System.currentTimeMillis();
 		NodeService nodeService = NodeServiceFactory.getNodeService(appInfo.getAppId());
 		RenderingServiceData data=new RenderingServiceData();
 		RepositoryDao repoDao = RepositoryDao.getRepository(this.appInfo.getAppId());
 		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
+
+		// child object: inherit all props from parent
+		if(nodeDao.getAspectsNative().contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
+			Map<String, Object> props = nodeDao.getNativeProperties();
+			String parentRef = nodeService.getPrimaryParent(nodeId);
+			HashMap<String,Object> propsParent =
+					nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,
+							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							parentRef);
+			// ignore some technical properties, like mimetypes etc.
+			for(String prop : CCConstants.CHILDOBJECT_IGNORED_PARENT_PROPERTIES)
+				propsParent.remove(prop);
+			// override it with the props from the child
+			for(Map.Entry<String,Object> entry : props.entrySet()){
+				propsParent.put(entry.getKey(),entry.getValue());
+			}
+			nodeDao.setNativeProperties(propsParent);
+		}
+
 		Node node = nodeDao.asNode();
+
+		if(appInfo.ishomeNode()) {
+			if (nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,
+					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+					nodeId,
+					CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+				String original = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
+						StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+						nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+				AuthenticationUtil.runAsSystem(() -> {
+					try {
+						NodeDao originalNodeDao = NodeDao.getNode(repoDao, original);
+						node.setContent(originalNodeDao.asNode().getContent());
+					} catch (DAOException e) {
+						logger.error(e.getMessage());
+					}
+					return null;
+				});
+			}
+		}
+		ApplicationInfo remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRepositoryDao().getId());
 		// remove any javascript (important for title)
-		node.setProperties(MetadataTemplateRenderer.cleanupHTMLMultivalueProperties(node.getProperties()));
+		node.setProperties(new HashMap<>(new MetadataTemplateRenderer(
+				MetadataHelper.getMetadataset(
+					remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+				user,
+				nodeDao.getAllProperties())
+			.getProcessedProperties()));
 		data.setNode(node);
 		if(CCConstants.CCM_TYPE_SAVED_SEARCH.equals(nodeService.getType(nodeId))){
 			SearchResult<Node> search = nodeDao.runSavedSearch(0,
@@ -168,7 +214,6 @@ public class RenderingServiceImpl implements RenderingService{
 		}
 		// template
 		// switch to the remote appInfo (for shadow objects) so the mds is the right one
-		ApplicationInfo remoteApp=ApplicationInfoList.getRepositoryInfoById(nodeDao.getRepositoryDao().getId());
 		data.setMetadataHTML(new MetadataTemplateRenderer(
 				MetadataHelper.getMetadataset(
 						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),

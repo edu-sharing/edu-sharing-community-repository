@@ -33,7 +33,7 @@ export class RecycleMainComponent {
   };
   public fullscreenLoading:boolean;
   loadData(currentQuery :string,offset : number,sortBy : string,sortAscending : boolean){
-    return this.archive.search(currentQuery,"",{propertyFilter:[RestConstants.CM_ARCHIVED_DATE],offset:offset,sortBy:[sortBy],sortAscending:sortAscending})
+    return this.archive.search(currentQuery,"",{propertyFilter:[RestConstants.ALL],offset:offset,sortBy:[sortBy],sortAscending:sortAscending})
   }
   constructor(private archive : RestArchiveService,private toast : Toast,private translate : TranslateService,private service : TemporaryStorageService){
     this.columns.push(new ListItem("NODE",RestConstants.CM_NAME));

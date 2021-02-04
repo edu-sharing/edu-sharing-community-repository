@@ -85,23 +85,28 @@ public class CollectionDao {
 				throw new IllegalArgumentException("Invalid parameter for parentId");
 			}
 
-			return getCollectionsChildren(repoDao, parentId, null, filter, Arrays.asList(new String[]{"files"}), sortDefinition, skipCount, maxItems);
+			return getCollectionsChildren(repoDao, parentId, null, false, filter, Arrays.asList(new String[]{"files"}), sortDefinition, skipCount, maxItems);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
-	public static CollectionBaseEntries getCollectionsSubcollections(RepositoryDao repoDao, String parentId, SearchScope scope, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
+	public static CollectionBaseEntries getCollectionsSubcollections(RepositoryDao repoDao, String parentId, SearchScope scope, boolean fetchCounts, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
 		try {
-			return getCollectionsChildren(repoDao, parentId, scope, filter, Arrays.asList(new String[]{"folders"}), sortDefinition, skipCount, maxItems);
+			return getCollectionsChildren(repoDao, parentId, scope, fetchCounts, filter, Arrays.asList(new String[]{"folders"}), sortDefinition, skipCount, maxItems);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
-	private static CollectionBaseEntries getCollectionsChildren(RepositoryDao repoDao, String parentId, SearchScope scope, Filter propFilter, List<String> filter, SortDefinition sortDefinition, int skipCount, int maxItems) throws DAOException {
+	private static CollectionBaseEntries getCollectionsChildren(RepositoryDao repoDao, String parentId, SearchScope scope, boolean fetchCounts, Filter propFilter, List<String> filter, SortDefinition sortDefinition, int skipCount, int maxItems) throws DAOException {
 		try {
 			List<Node> result = new ArrayList<>();
+			NodeDao parentNode = null;
+			if(!ROOT.equals(parentId)) {
+				parentNode = NodeDao.getNode(repoDao, parentId);
+				parentNode.fetchCounts = false;
+			}
 			// if this collection is ordered by user, use the position of the elements as primary order criteria
-			if (!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(NodeDao.getNode(repoDao, parentId).asNode().getCollection().getOrderMode())) {
+			if (parentNode != null && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(parentNode.asNode().getCollection().getOrderMode())) {
 				sortDefinition.addSortDefinitionEntry(
 						new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION), true), 0);
 			}
@@ -113,7 +118,16 @@ public class CollectionDao {
 
 
 			//NodeDao.convertAlfrescoNodeRef(repoDao,children)
-			NodeEntries sorted = NodeDao.convertToRest(repoDao, Filter.createShowAllFilter(), NodeDao.convertAlfrescoNodeRef(repoDao, children), skipCount, maxItems);
+			NodeEntries sorted = NodeDao.convertToRest(repoDao,
+					Filter.createShowAllFilter(),
+					NodeDao.convertAlfrescoNodeRef(repoDao, children),
+					skipCount,
+					maxItems,
+					(dao) -> {
+						dao.fetchCounts = fetchCounts;
+						return dao;
+					})
+			;
 			Pagination pagination = sorted.getPagination();
 			for (Node child : sorted.getNodes()) {
 
@@ -157,7 +171,7 @@ public class CollectionDao {
 			this.collectionId = collectionId;
 			this.nodeDao=NodeDao.getNode(repoDao, collectionId);
 
-			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getStoreIdentifier(),nodeDao.getStoreProtocol(),collectionId));
+			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getStoreIdentifier(),nodeDao.getStoreProtocol(),collectionId, nodeDao.fetchCounts));
 			this.baseClient = repoDao.getBaseClient();
 
 		} catch (Exception e) {
@@ -174,7 +188,7 @@ public class CollectionDao {
 			this.repoDao = repoDao;
 			this.collectionId = collectionId;
 			this.nodeDao=nodeDao;
-			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getStoreIdentifier(),nodeDao.getStoreProtocol(),collectionId));
+			this.collection = unmarshalling(repoDao.getId(), collectionClient.get(nodeDao.getStoreIdentifier(),nodeDao.getStoreProtocol(),collectionId, nodeDao.fetchCounts));
 			this.baseClient = repoDao.getBaseClient();
 			this.access = node.getAccess();//baseClient.hasAllPermissions(collectionId, PERMISSIONS);
 			this.preview= node.getPreview();
@@ -241,41 +255,17 @@ public class CollectionDao {
 		}
 			
 	}
-	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId) throws DAOException {
+	
+	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId, boolean allowDuplicate) throws DAOException {
 		try {
 
 			String resultId=CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
-					addToCollection(collectionId,nodeId);
+					addToCollection(collectionId,nodeId,sourceRepositoryId,allowDuplicate);
 			return NodeDao.getNode(repoDao,resultId,Filter.createShowAllFilter());
 		} catch (Throwable t) {
 
 			throw DAOException.mapping(t);
 		}
-	}
-	
-	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId) throws DAOException {
-		try {
-
-			String resultId=CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
-					addToCollection(collectionId,nodeId,sourceRepositoryId);
-			return NodeDao.getNode(repoDao,resultId,Filter.createShowAllFilter());
-		} catch (Throwable t) {
-
-			throw DAOException.mapping(t);
-		}
-	}
-	
-	public void addToCollection(NodeDao node) throws DAOException {
-		
-		try {
-		
-			collectionClient.addToCollection(nodeDao.getRef().getId(), node.getRef().getId());
-			
-		} catch (Throwable t) {
-
-			throw DAOException.mapping(t);
-		}
-			
 	}
 	
 	public void removeFromCollection(NodeDao node) throws DAOException {

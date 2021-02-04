@@ -48,6 +48,73 @@
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/toolCategory/index.json</valuespace>
 		</widget>
 		<widget>
+			<caption>Zugangsbedingungen (Login)</caption>
+			<id>ccm:conditionsOfAccess</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/conditionsOfAccess/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Enthält Werbung</caption>
+			<id>ccm:containsAdvertisement</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/containsAdvertisement/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Kosten</caption>
+			<id>ccm:price</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/price/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Barrierefreiheit</caption>
+			<id>ccm:accessibilitySummary</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/accessibilitySummary/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>DSGVO</caption>
+			<id>ccm:dataProtectionConformity</id>
+			<type>multivalueFixedBadges</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/dataProtectionConformity/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>FSK</caption>
+			<id>ccm:fskRating</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/fskRating/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Nutzungsrechte</caption>
+			<id>ccm:license_oer</id>
+			<type>singleoption</type>
+			<allowempty>true</allowempty>
+			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oer/index.json</valuespace>
+		</widget>
+		<widget>
+			<caption>Interner Quellenname</caption>
+			<id>ccm:general_identifier</id>
+			<type>text</type>
+			<hideIfEmpty>true</hideIfEmpty>
+		</widget>
+		<widget>
+			<caption>Notizen / Bermerkungen (intern)</caption>
+			<id>ccm:notes</id>
+			<type>textarea</type>
+			<hideIfEmpty>true</hideIfEmpty>
+			<toolpermission>TOOLPERMISSION_COLLECTION_EDITORIAL</toolpermission>
+		</widget>
+		<widget>
 			<caption>Typ des Objekts</caption>
 			<id>ccm:objecttype</id>
 			<type>singleoption</type>
@@ -104,6 +171,7 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>node_general</view>
+				<view>node_editorial</view>
 			</views>
 		</group>
 		<group>
@@ -117,6 +185,7 @@
 			<id>io_render</id>
 			<views>
 				<view>node_general_render</view>
+				<view>node_editorial</view>
 			</views>
 		</group>
 	</groups>
@@ -139,6 +208,22 @@
 			  <ccm:sourceContentType>
 			  <ccm:toolCategory>
               <license>
+				]]></html>
+		</template>
+		<template>
+			<id>node_editorial</id>
+			<caption>Quellen-Informationen</caption>
+			<icon>archive</icon>
+			<html><![CDATA[
+				<ccm:conditionsOfAccess>
+				<ccm:containsAdvertisement>
+				<ccm:price>
+				<ccm:accessibilitySummary>
+				<ccm:dataProtectionConformity>
+				<ccm:fskRating>
+				<ccm:license_oer>
+				<ccm:general_identifier>
+				<ccm:notes>
 				]]></html>
 		</template>
 		<template>
@@ -169,6 +254,7 @@
               <cclom:title>
               <cclom:general_keyword>
               <cclom:general_description type="textarea">
+              <ccm:objecttype>
 			  <ccm:taxonid>
 			  <ccm:educationalintendedenduserrole>
 			  <ccm:educationalcontext>
@@ -201,7 +287,7 @@
 		<template>
 			<id>node_wordpress</id>
 			<caption>dialog_upload_tab_basic</caption>
-			<icon>description</icon>ccm:usageressourceid
+			<icon>description</icon>
 			<html><![CDATA[
               <cclom:title>
               <cclom:general_keyword>

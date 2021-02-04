@@ -30,11 +30,13 @@
     "GO_TO_TOP": "nach oben",
     "FIELD_REQUIRED": "Pflichtfeld",
     "FIELD_VALIDATION_ERROR_INTEGER": "Ganze Zahlen verwenden",
-    "EXTENSION_NOT_MATCH": "Dateierweiterung ändern?",
-    "EXTENSION_NOT_MATCH_INFO": "Sind Sie sicher, dass Sie die Dateierweiterung von '{{extensionOld}}' auf '{{extensionNew}}' ändern möchten?\n\n{{warning}}",
-    "EXTENSION_NOT_MATCH_INFO_OLD": "Sind Sie sicher, dass Sie die Dateierweiterung '{{extensionOld}}' entfernen möchten?\n\n{{warning}}",
-    "EXTENSION_NOT_MATCH_INFO_NEW": "Sind Sie sicher, dass Sie die Dateierweiterung '{{extensionNew}}' hinzufügen möchten?",
+    "EXTENSION_NOT_MATCH": "Dateiendung ändern?",
+    "EXTENSION_NOT_MATCH_INFO": "Sind Sie sicher, dass Sie die Dateiendung von '{{extensionOld}}' auf '{{extensionNew}}' ändern möchten?\n\n{{warning}}",
+    "EXTENSION_NOT_MATCH_INFO_OLD": "Sind Sie sicher, dass Sie die Dateiendung '{{extensionOld}}' entfernen möchten?\n\n{{warning}}",
+    "EXTENSION_NOT_MATCH_INFO_NEW": "Sind Sie sicher, dass Sie die Dateiendung '{{extensionNew}}' hinzufügen möchten?",
     "EXTENSION_NOT_MATCH_WARNING": "Dadurch wird die Datei u.U. unbrauchbar, wenn Sie heruntergeladen oder geöffnet wird.",
+    "EXTENSION_CHANGE": "Ja, ändern",
+    "EXTENSION_KEEP": "Dateiendung beibehalten",
     "INPUT_HOURS": "Std.",
     "INPUT_MINUTES": "Min.",
     "HOUR": "Stunde",
@@ -68,12 +70,16 @@
     "LOGOUT": "Abmelden",
     "INVALID_OPERATION": "Diese Funktion wird leider nicht unterstützt",
     "SORT_BY": "Sortieren nach",
+    "ASCENDING": "aufsteigend",
+    "DESCENDING": "absteigend",
+    "SELECTED": "ausgewählt",
     "CLEAR_FILTERS": "Alle Filter zurücksetzen",
     "EDIT_ACCOUNT": "Profil verwalten",
     "CHANGE_LANGUAGE": "Sprache ändern",
     "DEFAULT_METADATASET": "Standard-Metadatenset ({{name}})",
     "NO_MATCHES": "Keine übereinstimmenden Einträge",
     "NO_CC_PUBLISH": "Kein Recht zum Veröffentlichen",
+    "SELECT": "{{ element }} auswählen",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
         "SEARCH_COLLECTIONS": "Sammlung suchen...",
@@ -96,6 +102,8 @@
     "CONNECTOR_FORMAT_LABEL": "Dateityp",
     "CONNECTOR_QUOTA_REACHED_TITLE": "Speicherplatz-Quota überschritten",
     "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Sie das Speicherplatz-Quota vollständig überschritten haben.\n\nLöschen Sie einige Dateien, um Speicherplatz zu schaffen und versuchen Sie es anschließend erneut.",
+    "RESTRICTED_ACCESS_ERROR_TITLE": "Keine Lizenz für Material",
+    "RESTRICTED_ACCESS_ERROR_MESSAGE": "Beim aktuellen Material handelt es sich um ein lizenziertes Material. Sie besitzen jedoch keine Lizenz, um auf das Material zuzugreifen",
     "TOOLPERMISSION_ERROR": "Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
     "TOOLPERMISSION_ERROR_INLINE": "Sie dürfen diese Aktion nicht durchführen, da die Berechtigung \"{{permission}}\" fehlt.",
     "TOOLPERMISSION_ERROR_TITLE": "Fehlende Berechtigung",
@@ -128,6 +136,7 @@
         "TOOLPERMISSION_CREATE_ELEMENTS_FILES": "Dateien anlegen/hochladen",
         "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS": "Sammlungen anlegen",
         "TOOLPERMISSION_HANDLESERVICE": "Eindeutige Ids für Materialien beim Handleservice anfordern",
+        "TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS": "Explizite Rechteprüfung steuern. D.h. Materialien als lizenziert markieren, um einen Zugriff ohne Rechte am Originalobjekt verbieten und eine Weiternutzung (z.B. innerhalb von Sammlungen) zu kontrollieren",
         "TOOLPERMISSION_USAGE_STATISTIC": "Informationen über die Verwendung aller Objekte dieses Repositories abfragen",
         "TOOLPERMISSION_COMMENT_WRITE":"Kommentare an Objekten verfassen",
         "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "Statistiken zur Verwendung von Materialien dieses Repositories anzeigen",
@@ -139,7 +148,8 @@
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
-        "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken"
+        "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
+        "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)"
     },
     "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
     "NODE_SEARCH": "Elemente suchen...",
@@ -162,6 +172,8 @@
     "USER_TUTORIAL_HEADING": "Dein Profil",
     "USER_TUTORIAL_DESCRIPTION": "Hier kannst du ein eigenes Profilbild angeben und zeigen, wer du bist und was du tust. Du entscheidest, was Andere sehen können.",
     "PROFILE_UPDATED": "Profilinformationen wurden aktualisiert",
+    "SHOW_EMAIL_UPDATED": "Die E-Mail ist öffentlich",
+    "HIDE_EMAIL_UPDATED": "Die E-Mail ist vertraulich",
     "CHANGE_PASSWORD": "Passwort ändern",
     "OLD_PASSWORD": "Altes Passwort",
     "NEW_PASSWORD": "Neues Passwort",
@@ -215,6 +227,9 @@
         "300_hasflaws": "Hat Mängel",
         "400_checked": "Geprüft"
     },
+    "LIST_TABLE": {
+        "DUMMY_ICON_LABEL": "Dateityp"
+    },
     "NODE": {
         "cm:name": "Dateiname",
         "cm:title": "Titel",
@@ -258,6 +273,7 @@
     "LICENSE": {
         "TITLE_OF_WORK": "Titel",
         "LINK_AUTHOR": "Link zum Autor",
+        "DESCRIPTION_REQUIRED": "Die Lizenzbeschreibung muss ausgefüllt sein",
         "NAMES": {
             "NONE": "Keine oder unbekannte Lizenz",
             "MULTI": "Unterschiedliche Lizenzen",
@@ -374,7 +390,7 @@
     },
     "COLLECTION": {
         "INFO_REFERENCES": "Sammlung",
-        "INFO_REFERENCES_MULTI": "Sammlungen",
+        "INFO_REFERENCES_MULTI": "Untersammlungen",
         "INFO_CHILDS": "Material",
         "INFO_CHILDS_MULTI": "Materialien",
         "INFO_NO_CONTENT": "Leere Sammlung",
@@ -428,6 +444,7 @@
         "SOURCE": "Quelle"
     },
     "AUTHORITY_TYPE_GROUP": "Gruppe",
+    "AUTHORITY_TYPE_ORG": "Organisation",
     "GROUP": {
         "displayName": "Gruppenname",
         "groupEmail": "E-Mail",
@@ -457,6 +474,12 @@
             "system": "Systemaccount",
             "function": "Funktionsaccount"
         }
+    },
+    "PROFILE_SETTINGS": {
+        "SHOW_EMAIL_LABEL": "E-Mail öffentlich anzeigen",
+        "SHOW_EMAIL_TOOLTIP": "Steuert, ob andere Nutzer die E-Mail-Adresse sehen können, z.B. im Einlade-Dialog oder beim Aufrufen des Profils",
+        "SHOW_EMAIL": "E-Mail wird öffentlich angezeigt",
+        "HIDE_EMAIL": "E-Mail wird nicht öffentlich angezeigt"
     },
     "CONNECTOR": {
         "ONLY_OFFICE": {
@@ -504,13 +527,15 @@
     },
     "LIST": {
         "REORDER_TITLE": "Listenelemente anpassen",
-        "REORDER_DRAG_DROP": "Sie können die Reihenfolge der Elemente durch Drag & Drop verändern"
+        "REORDER_DRAG_DROP": "Sie können die Reihenfolge der Elemente durch Drag & Drop verändern",
+        "TOTAL_COUNT_TOOLTIP": "{{selected}} Elemente ausgewählt von insgesamt {{total}}"
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Material zur Sammlung hinzufügen?",
         "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
     },
     "OPTIONS": {
+        "SHOW_ALL_OPTIONS": "Weitere Aktionen",
         "APPLY": "Übernehmen",
         "SHOW": "Vorschau & Infos",
         "SHOW_IN_FOLDER": "Zum Speicherort",
@@ -551,7 +576,12 @@
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
         "NEW_COLLECTION": "Neue Sammlung",
-        "LINK_MAP": "Verlinkung erstellen"
+        "LINK_MAP": "Verlinkung erstellen",
+        "TOGGLE_SHARED_TO_ME": "Freigaben-Empfänger umschalten",
+        "SWITCH_TO_LIST_VIEW": "Zur Listenansicht wechseln",
+        "SWITCH_TO_CARDS_VIEW": "Zur Kachelansicht wechseln",
+        "LIST_SETTINGS": "Liste konfigurieren",
+        "METADATA_SIDEBAR": "Materialinformationen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
@@ -586,7 +616,8 @@
         "CONFIRM_DISCARD_MESSAGE": "Dialog schließen, ohne die Änderungen zu speichern?",
         "REQUIRED_MESSAGE": "Pflichtfeld",
         "REQUIRED_FOR_PUBLISH_MESSAGE": "Für die Veröffentlichung erforderliches Feld",
-        "INDETERMINATE_NOTICE": "Klicken Sie auf den Wert, um ihn allen Elementen hinzuzufügen, oder entfernen Sie ihn, um ihn aus allen Elementen zu löschen (wenn \"Ersetzen\" ausgewählt ist)."
+        "INDETERMINATE_NOTICE": "Klicken Sie auf den Wert, um ihn allen Elementen hinzuzufügen, oder entfernen Sie ihn, um ihn aus allen Elementen zu löschen (wenn \"Ersetzen\" ausgewählt ist).",
+        "SHOW_OPTIONS_BUTTON": "Zeige Auswahlmöglichkeiten"
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",
@@ -607,11 +638,11 @@
             "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen von Berechtigungen ist nicht möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
             "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist in dieser Ansicht nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
             "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
-            "UNSET": "Nicht festgelegt",
+            "UNSET": "Keine hinzufügen",
             "PUBLISH": "Alle (Veröffentlichen)",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Nur Administratoren",
-                "TEACHER": "Nur Lehrkräfte"
+                "ORG_ADMINISTRATORS": "Administratoren von\n{{school}}",
+                "TEACHER": "Lehrkräfte von\n{{school}}"
             }
         },
         "LICENSE": {
@@ -622,7 +653,7 @@
             "SOURCE_OWN": "Eigenes Material",
             "SOURCE_FOREIGN": "Fremdes Material",
             "SET_LICENSE": "Lizenz des Materials",
-            "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen der Lizenz möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
+            "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen der Lizenz ist nicht möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
             "INVALID_STATE": "Für die gewählten Elemente kann keine passenden Lizenz in diesem Dialog gefunden werden. Wählen Sie \"Lizenz ersetzen\", wenn Sie die Lizenz neu festlegen wollen.",
             "LICENSES": {
                 "NONE": "Unlizenziert",
@@ -663,6 +694,7 @@
         "PASSWORD_CORRECT": "Passwort korrekt"
     },
     "VIDEO_CONTROLS": {
+        "HEADING": "Einen Ausschnitt zum Speichern in einer Sammlung festlegen",
         "SAVED": "Änderungen wurden gespeichert"
     },
     "TOAST": {
@@ -700,7 +732,17 @@
         "Zip": "PLZ",
         "City": "Ort",
         "Region": "Bundesland",
-        "Country": "Land"
+        "Country": "Land",
+        "X-ORCID": "ORCID",
+        "X-GND-URI": "GND-URI",
+        "X-ROR": "ROR (Research Organization Registry)",
+        "X-Wikidata": "Wikidata-Eintrag"
+    },
+    "VCARD_HINT": {
+        "X-ORCID": "Verweis auf einen persistenten ORCID-Identifier. <a target='blank' href='https://orcid.org/'>Registrierung & Infos</a>",
+        "X-GND-URI": "Verweis auf eine persistente GND-URI der Deutschen Nationalbibliothek. <a target='blank' href='https://portal.dnb.de/opac.htm'>Personen suchen</a>",
+        "X-ROR": "Verweis auf einen Eintrag bei Research Organization Registry. <a target='blank' href='https://ror.org/'>Infos</a>",
+        "X-Wikidata": "Verweis auf einen Eintag bei Wikidata. <a target='blank' href='https://www.wikidata.org/wiki/Wikidata:Main_Page'>Infos</a>"
     },
     "ICON_LABELS": {
         "more_vert": "Optionen",
@@ -721,6 +763,32 @@
         "REQUIRED": "erforderliche Felder",
         "REQUIREDPUBLISH": "für Veröffentlichung erforderliche Felder",
         "SHOW": "zeigen"
+    },
+    "SIGNUP_GROUP" : {
+        "TITLE": "In Gruppe einschreiben",
+        "SUBTITLE": "Einer neuen Gruppe beitreten",
+        "SELECT_GROUP": "Wählen Sie eine Gruppe aus der untenstehenden Liste, in welche Sie beitreten möchten",
+        "NO_GROUPS": "Derzeit sind keine Gruppen verfügbar, denen beigetreten werden kann.",
+        "CONFIRM_GROUP": "Sie werden der folgenden Gruppe beitreten:",
+        "GROUP_PASSWORD": "Gruppen-Passwort eingeben",
+        "SIGNUP": "Beitreten",
+        "SIGNUP_TYPE": {
+            "simple": "Zutritt ohne Beschränkung möglich",
+            "password": "Zutritt nur mit Passwort möglich",
+            "list": "Zutritt über Warteliste"
+        },
+        "DESCRIPTION": {
+            "simple": "Der Zutritt zur gewählten Gruppe ist ohne Beschränkung möglich. Nach Bestätigung werden Sie automatisch Mitglied der Gruppe",
+            "password": "Der gewählten Gruppe darf nur mit einem gültigen Passwort beigetreten werden. Geben Sie das Passwort unten ein, um Mitglied der Gruppe zu werden",
+            "list": "Der Gruppen-Administrator wird über Ihre Beitrittsanfrage informiert. Sie erhalten eine E-Mail, sobald der Administrator Ihnen den Zugang genehmigt hat"
+        },
+        "TOAST": {
+            "InvalidPassword": "Das angegebene Passwort ist ungültig",
+            "AlreadyInList": "Sie sind bereits auf der Warteliste dieser Gruppe. Sie erhalten eine E-Mail-Benachrichtigung, sobald Sie freigeschaltet wurden",
+            "AlreadyMember": "Sie sind bereits Mitglied der gewählten Gruppe",
+            "ADDED_TO_LIST": "Sie wurden auf die Warteliste gesetzt und der Gruppen-Administrator wird benachrichtigt. Sie erhalten eine E-Mail-Benachrichtung, sobald Sie freigeschaltet wurden",
+            "ADDED_TO_GROUP": "Sie sind nun Mitglied der Gruppe {{group}}"
+        }
     },
     "LANGUAGE": {
         "INTERNATIONAL": "International",
@@ -977,5 +1045,24 @@
       },
     "ROCKETCHAT": {
         "TITLE": "Chat"
+    },
+    "NAV": {
+        "MAIN": "Hauptmenü",
+        "SKIP": "Sprungmarken",
+        "COLLECTIONS": "Sammlungen"
+    },
+    "SKIP_LINKS": {
+        "MAIN_CONTENT": "Springe zum Hauptinhalt"
+    },
+    "REPOSITORIES": {
+        "de_fwu": "FWU",
+        "ddb": "Deutsche Digitale Bibliothek",
+        "geogebra": "GeoGebra",
+        "memucho": "Memucho",
+        "omega": "Omega",
+        "pixabay": "Pixabay",
+        "tutory": "Tutory",
+        "youtube": "YouTube",
+        "zum": "ZUM Wiki"
     }
 }

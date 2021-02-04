@@ -1,10 +1,13 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import com.ibm.icu.text.SimpleDateFormat;
 import jersey.repackaged.com.google.common.collect.Lists;
+import net.sourceforge.cardme.engine.VCardEngine;
+import net.sourceforge.cardme.vcard.VCard;
+import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
@@ -25,6 +28,7 @@ import org.owasp.html.Sanitizers;
 
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +47,7 @@ public class MetadataTemplateRenderer {
 	private RenderingMode renderingMode = RenderingMode.HTML;
 	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
 	private static final String TEXT_LICENSE_SEPERATOR = " / ";
+	private static final String TEXT_MULTIVALUE_SEPERATOR = "; ";
 	private String userName;
 	private NodeRef nodeRef;
 	private MetadataSetV2 mds;
@@ -53,9 +58,12 @@ public class MetadataTemplateRenderer {
 		this.mds = mds;
 		this.nodeRef = nodeRef;
 		this.userName = userName;
-		this.properties = cleanupHTMLMultivalueProperties(properties);
+		this.properties = cleanupTextMultivalueProperties(properties);
 	}
 
+	public Map<String, String[]> getProcessedProperties(){
+		return this.properties;
+	}
 	public static HashMap<String, String[]> convertProps(Map<String, Object> props) {
 		HashMap<String, String[]> propsConverted = new HashMap<>();
 		for(String key : props.keySet()){
@@ -107,7 +115,14 @@ public class MetadataTemplateRenderer {
 		}
 		return html;
 	}
-
+	public static <T> T firstNonNull(T ...items) {
+		for(T i : items) {
+			if (i != null) {
+				return i;
+			}
+		}
+		return null;
+	}
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
 		if(renderingMode.equals(RenderingMode.HTML)) {
@@ -132,7 +147,7 @@ public class MetadataTemplateRenderer {
 			}
 			StringBuffer widgetHtml=new StringBuffer();
 			if(renderingMode.equals(RenderingMode.HTML)) {
-				widgetHtml.append("<div data-widget-id='").append(widget.getId()).append("' class='mdsWidget'");
+				widgetHtml.append("<div data-widget-id='").append(widget.getId()).append("' class='mdsWidget");
 				if (widget.getType() != null) {
 					widgetHtml.append(" mdsWidget_").append(widget.getType());
 				}
@@ -164,6 +179,13 @@ public class MetadataTemplateRenderer {
 			else {
 				for(String value : values){
 					String rawValue = value;
+					HashMap<String, Object> vcardData = null;
+					if("vcard".equals(widget.getType())){
+						ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(value);
+						if(map.size() > 0) {
+							vcardData = map.get(0);
+						}
+					}
 					if(widget.getId().equals("license")){
 						wasEmpty = false;
 						String licenseName=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)) ?
@@ -194,7 +216,7 @@ public class MetadataTemplateRenderer {
 								value += name;
 							}
 						}
-						if(!group.equals(name)) {
+						if(group != null && !group.equals(name)) {
 							if(renderingMode.equals(RenderingMode.HTML)) {
 								value += "<div class='licenseGroup'>" + group + "</div>";
 							}else if(renderingMode.equals(RenderingMode.TEXT)){
@@ -204,16 +226,8 @@ public class MetadataTemplateRenderer {
 								value += group;
 							}
 						}
-						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
-							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
-							if(renderingMode.equals(RenderingMode.HTML)) {
-								value+="<div class='licenseDescription'>"+licenseDescription+"</div>";
-							}else if(renderingMode.equals(RenderingMode.TEXT)){
-								if(!value.isEmpty()){
-									value += TEXT_LICENSE_SEPERATOR;
-								}
-								value += licenseDescription;
-							}
+						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName)) {
+							// skipping description
 						}
 						else{
 							if(renderingMode.equals(RenderingMode.HTML)) {
@@ -252,26 +266,13 @@ public class MetadataTemplateRenderer {
 						continue;
 					value=renderWidgetValue(widget,value);
 					boolean isLink=false;
-					if(widget.getLink()!=null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)){
+					// do not use global link for vcard, they handle links seperately
+					if(!widget.getType().equals("vcard") && widget.getLink()!=null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)){
 						widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 						isLink=true;
 					}
-					else if("vcard".equals(widget.getType())){
-						try {
-							HashMap<String, Object> data = VCardConverter.vcardToHashMap(value).get(0);
-							value = VCardConverter.getNameForVCard("",data);
-							if (data.get(CCConstants.VCARD_URL) != null) {
-								String url = data.get(CCConstants.VCARD_URL).toString();
-								if(!url.isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
-									if (!url.contains("://"))
-										url = "http://" + url;
-									widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
-									isLink = true;
-								}
-							}
-						}catch(Throwable t){
-							// empty or invalid value
-						}
+					else if(vcardData != null){
+						value = VCardConverter.getNameForVCard("",vcardData);
 					}
 					if(renderingMode.equals(RenderingMode.HTML)){
 						widgetHtml.append("<div class='mdsValue' data-value-key='" + rawValue + "'>");
@@ -281,16 +282,59 @@ public class MetadataTemplateRenderer {
 					}
 					if(!value.trim().isEmpty()) {
 						if(!empty && renderingMode.equals(RenderingMode.TEXT)){
-							widgetHtml.append(", ");
+							widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
 						}
 						empty = false;
 					}
 					if (renderingMode.equals(RenderingMode.HTML)) {
-						widgetHtml.append("<span>");
+						widgetHtml.append("<div>");
+					}
+					if(vcardData != null && renderingMode.equals(RenderingMode.HTML)){
+						Object linkUrl = vcardData.get(widget.getLink() == null ? CCConstants.VCARD_URL :
+								widget.getLink().equals("email") ? CCConstants.VCARD_EMAIL
+										: null);
+						String url=linkUrl != null ? linkUrl.toString() : "";
+						if(!url.isEmpty()) {
+							if(widget.getLink().equals("email")) {
+								url = "mailto:" + url;
+							} else if (!url.contains("://")) {
+								url = "http://" + url;
+							}
+							widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
+							isLink = true;
+						}
 					}
 					widgetHtml.append(value);
+					if(vcardData != null && renderingMode.equals(RenderingMode.HTML)) {
+						if(isLink){
+							widgetHtml.append("</a>");
+						}
+						try{
+							VCardEngine vCardEngine = new VCardEngine();
+							VCard vcard = vCardEngine.parse(rawValue);
+							String persistentIdUrl = null;
+							for (ExtendedType type : vcard.getExtendedTypes()) {
+								if (type.getExtendedName().equals(CCConstants.VCARD_T_X_ORCID) ||
+										type.getExtendedName().equals(CCConstants.VCARD_T_X_GND_URI) ||
+										type.getExtendedName().equals(CCConstants.VCARD_T_X_ROR) ||
+										type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)) {
+									persistentIdUrl = type.getExtendedValue();
+									break;
+								}
+							}
+							if (persistentIdUrl != null && !persistentIdUrl.isEmpty()) {
+								widgetHtml.append("<br><a href=\"").append(persistentIdUrl)
+										.append("\" target=\"blank\">")
+										.append(MetadataHelper.getTranslation("vcard_link_persistent_id"))
+										.append("</a>");
+							}
+						}catch(Throwable t){
+							// empty or invalid value
+						}
+					}
+
 					if (renderingMode.equals(RenderingMode.HTML)) {
-						widgetHtml.append("</span>");
+						widgetHtml.append("</div>");
 					}
 					if(renderingMode.equals(RenderingMode.HTML)) {
 						widgetHtml.append("</div>");
@@ -408,6 +452,7 @@ public class MetadataTemplateRenderer {
 		String[] keys = properties.get(widget.getId());
 		boolean empty=true;
 		if(keys != null) {
+			int i = 0;
 			for (String value : keys) {
 				MetadataKey key = valuesMap.get(value);
 				if (key == null)
@@ -423,13 +468,17 @@ public class MetadataTemplateRenderer {
 					}
 				}
 				path = Lists.reverse(path);
-				int i = 0;
+				int j = 0;
 				if (renderingMode.equals(RenderingMode.HTML)) {
 					widgetHtml.append("<div class='mdsValue'>");
+				} else if (renderingMode.equals(RenderingMode.TEXT)) {
+					if(i > 0) {
+						widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
+					}
 				}
 				empty = path.size() == 0;
 				for (String p : path) {
-					if (i > 0) {
+					if (j > 0) {
 						if (renderingMode.equals(RenderingMode.HTML)) {
 							widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
 						} else if (renderingMode.equals(RenderingMode.TEXT)) {
@@ -437,11 +486,12 @@ public class MetadataTemplateRenderer {
 						}
 					}
 					widgetHtml.append(p);
-					i++;
+					j++;
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
 					widgetHtml.append("</div>");
 				}
+				i++;
 			}
 		}
 		return empty;
@@ -452,13 +502,28 @@ public class MetadataTemplateRenderer {
 			if(widget.getType().equals("date")){
 				try{
 					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-						value=new SimpleDateFormat(widget.getFormat()).format(Long.parseLong(value));
+						value=new SimpleDateFormat(widget.getFormat()).format(new Date(Long.parseLong(value)));
 					}
 					else{
 						value=new DateTool().formatDate(Long.parseLong(value));
 					}
 				}catch(Throwable t){
 					// wrong data or text
+				}
+			} else if (widget.getType().equals("duration")){
+				try {
+					NumberFormat nf = NumberFormat.getInstance();
+					nf.setMaximumFractionDigits(0);
+					nf.setMinimumIntegerDigits(1);
+					long time = Long.parseLong(value) / 1000 / 60;
+					long mins = time % 60;
+					long hours = time / 60;
+					value = nf.format(hours) + "h ";
+					nf.setMinimumIntegerDigits(2);
+					value += nf.format(mins) + "m";
+
+				}catch(Throwable ignored) {
+
 				}
 			}
 			if(widget.getType().equals("filesize")){
@@ -490,39 +555,61 @@ public class MetadataTemplateRenderer {
 		return value;
 	}
 
-	public static Map<String, Object> cleanupHTMLProperties(Map<String, Object> properties) {
+	/*
+	public static Map<String, Object> cleanupTextProperties(MetadataSetV2 mds, Map<String, Object> properties) {
 		Map<String,Object> cleaned=new HashMap<>();
 		for(Map.Entry<String,Object> entry : properties.entrySet()){
 			if(entry.getValue()==null)
 				cleaned.put(entry.getKey(), null);
 			else
-				cleaned.put(entry.getKey(),cleanupHTML(entry.getValue().toString()));
+				cleaned.put(entry.getKey(), cleanupText(, entry.getValue().toString()));
 		}
 		return cleaned;
 	}
-	public static HashMap<String, String[]> cleanupHTMLMultivalueProperties(Map<String, String[]> properties) {
+	*/
+	public HashMap<String, String[]> cleanupTextMultivalueProperties(Map<String, String[]> properties) {
 		HashMap<String,String[]> cleaned=new HashMap<>();
 		for(Map.Entry<String,String[]> entry : properties.entrySet()){
-			if(entry.getValue()==null)
+			if(entry.getValue()==null) {
 				cleaned.put(entry.getKey(), null);
-			else
+			} else {
+				MetadataWidget widget;
+				try {
+					widget = mds.findWidget(entry.getKey());
+				}catch(IllegalArgumentException e){
+					widget = null;
+				}
+				MetadataWidget.TextEscapingPolicy textEscapingPolicy = widget == null ?
+						MetadataWidget.TextEscapingPolicy.htmlBasic : widget.getTextEscapingPolicy();
 				cleaned.put(entry.getKey(),
-					Arrays.stream(entry.getValue()).map(MetadataTemplateRenderer::cleanupHTML).toArray(String[]::new)
+						Arrays.stream(entry.getValue()).map((String v) -> cleanupText(textEscapingPolicy, v)).toArray(String[]::new)
 				);
+			}
 		}
 		return cleaned;
 	}
 
-	private static String cleanupHTML(String untrustedHTML) {
-		PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
-		return policy.sanitize(untrustedHTML);
-
+	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
+		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+			return policy.sanitize(untrustedHTML);
+		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
+			return StringEscapeUtils.escapeHtml4(untrustedHTML);
+		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.none)){
+			return untrustedHTML;
+		} else {
+			throw new RuntimeException("Invalid textEscapingPolicy " + textEscapingPolicy);
+		}
 	}
 
 	private String getLicenseName(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())
 			return null;
-		List<String> supported=Arrays.asList(CCConstants.COMMON_LICENSE_CC_ZERO,CCConstants.COMMON_LICENSE_PDM);
+		String[] description = properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION));
+		if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && description != null) {
+			return description[0];
+		}
+			List<String> supported=Arrays.asList(CCConstants.COMMON_LICENSE_CC_ZERO,CCConstants.COMMON_LICENSE_PDM);
 		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY) || supported.contains(licenseName)) {
 			String name=I18nAngular.getTranslationAngular("common","LICENSE.NAMES."+licenseName);
 			if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
@@ -550,7 +637,9 @@ public class MetadataTemplateRenderer {
 	private String getLicenseGroup(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())
 			licenseName="NONE";
-
+		if(licenseName.equals(CCConstants.COMMON_LICENSE_CUSTOM)) {
+			return null;
+		}
 		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)) {
 			licenseName=CCConstants.COMMON_LICENSE_CC_BY;
 		}
@@ -594,12 +683,16 @@ public class MetadataTemplateRenderer {
 				if(!result.isEmpty())
 					result+=", ";
 				if(valuesMap.containsKey(s))
-					s=valuesMap.get(s).getCaption();
+					s=replaceHTML(valuesMap.get(s).getCaption());
 				result+=s;
 			}
 			i++;
 		}
 		return result;
+	}
+
+	private String replaceHTML(String text) {
+		return StringEscapeUtils.unescapeHtml4(text);
 	}
 
 	private MetadataWidget applyAttributes(MetadataWidget widget, String str) throws IllegalArgumentException {

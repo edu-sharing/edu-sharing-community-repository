@@ -11,8 +11,6 @@ import {RestConnectorService} from '../../core-module/core.module';
 import {Node, NodeList, LoginResult} from '../../core-module/core.module';
 import {OptionItem, Scope} from '../../core-ui-module/option-item';
 import {TemporaryStorageService} from '../../core-module/core.module';
-import {UIHelper} from '../../core-ui-module/ui-helper';
-import {Title} from '@angular/platform-browser';
 import {ConfigurationService} from '../../core-module/core.module';
 import {SessionStorageService} from '../../core-module/core.module';
 import {UIConstants} from '../../core-module/ui/ui-constants';
@@ -23,6 +21,7 @@ import {MdsHelper} from '../../core-module/rest/mds-helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {Helper} from '../../core-module/rest/helper';
 import {NodeUrlComponent} from "../../core-ui-module/components/node-url/node-url.component";
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 
 
@@ -55,15 +54,14 @@ export class OerComponent {
     private route : ActivatedRoute,
     private connector:RestConnectorService,
     private nodeService: RestNodeService,
+    private nodeHelper: NodeHelperService,
     private searchService: RestSearchService,
     private mdsService:RestMdsService,
     private storage : TemporaryStorageService,
     private session : SessionStorageService,
-    private title : Title,
     private config : ConfigurationService,
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=> {
-        UIHelper.setTitle('SEARCH.TITLE',title,translate,config);
         GlobalContainerComponent.finishPreloading();
           for(let i=0;i<this.TYPE_COUNT;i++) {
               this.columns.push([]);
@@ -213,9 +211,8 @@ export class OerComponent {
 
    }
    private openNode(node: Node){
-      NodeUrlComponent.getInfo('routerLink', node)
-      this.router.navigate([NodeUrlComponent.getInfo('routerLink', node)],
-          {queryParams: (NodeUrlComponent.getInfo('queryParams', node) as any)}
+      this.router.navigate([this.nodeHelper.getNodeLink('routerLink', node)],
+          {queryParams: (this.nodeHelper.getNodeLink('queryParams', node) as any)}
       );
    }
    private updateOptions(mode:number,node:Node=null) {

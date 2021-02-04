@@ -188,26 +188,45 @@ user-profile {
 .topBar {
     @include placeholder {
         color: mix(
-            $workspaceTopBarFontColor,
-            $workspaceTopBarBackground,
-            50%
+                $workspaceTopBarInputBackground,
+                $workspaceTopBarInputText,
+                20%
         ); //rgba(255,255,255,0.165);/* => #595959;*/
     }
-}
-.topBar input,
-.topBar input:focus {
-    padding: 0 40px;
-    border-radius: 2px;
-    width: 100%;
-    background: mix(
-        $workspaceTopBarFontColor,
-        $workspaceTopBarBackground,
-        12%
-    ); //rgba(255,255,255,0.165);/* => #595959;*/
-    border: none !important;
-    height: 40px;
-    box-shadow: none !important;
-    -webkit-appearance: none;
+    .topBarSearch .searchInputGroup {
+        input,
+        input:focus {
+            padding-right: 40px; // space for clear icon
+            border-radius: 2px;
+            width: 100%;
+            background: $workspaceTopBarInputBackground;
+            color: $workspaceTopBarInputText;
+            border: none !important;
+            height: 40px;
+            -webkit-appearance: none;
+        }
+        input:focus {
+            box-shadow: none !important;
+            border-radius: 0;
+            outline: 2px solid #fff;
+        }
+        >button {
+            position: absolute;
+            top: 0;
+            right: -50px;
+            height: 40px;
+            border-radius: 0;
+            color: $workspaceTopBarInputText;
+            background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
+        }
+        .searchClearIcon {
+            color: $workspaceTopBarInputText;
+            opacity: 0.8;
+            top: 9px;
+            right: 0;
+            @include clickable();
+        }
+    }
 }
 .searchInputGroup {
     position: relative;
@@ -233,10 +252,6 @@ user-profile {
 }
 .searchIcon {
     left: 8px;
-}
-.searchClearIcon {
-    right: -70px;
-    @include clickable();
 }
 .topBar .user {
     position: relative;

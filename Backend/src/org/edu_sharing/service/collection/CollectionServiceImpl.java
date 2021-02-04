@@ -137,8 +137,7 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 	}
 	
-	@Override
-	public String addToCollection(String collectionId, String refNodeId) throws Throwable {
+	private String addToCollection(String collectionId, String refNodeId, boolean allowDuplicate) throws Throwable {
 		
 		try{
 			/**
@@ -187,7 +186,7 @@ public class CollectionServiceImpl implements CollectionService{
 				throw new Exception("Only Files are allowed to be added!");
 			}
 			NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId, CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
-			if(child!=null){
+			if(child!=null && !allowDuplicate){
 				throw new DuplicateNodeException("Node is already in collection");
 			}
 			/*
@@ -268,25 +267,20 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
-	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
+	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate)
 			throws DuplicateNodeException, Throwable {
-		ApplicationInfo rep = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
-		if(rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())){
-			return addToCollection(collectionId, originalNodeId);
+		if(sourceRepositoryId != null) {
+			ApplicationInfo rep = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
+			if (rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())) {
+				return addToCollection(collectionId, originalNodeId, allowDuplicate);
+			}
+			String nodeId = new RemoteObjectService().getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
+			return this.addToCollection(collectionId, nodeId, allowDuplicate);
+		} else {
+			return addToCollection(collectionId, originalNodeId, allowDuplicate);
 		}
-		String nodeId = new RemoteObjectService().getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
-		return this.addToCollection(collectionId, nodeId);
 	}
-	
-	@Override
-	public String[] addToCollection(String collectionId, String[] originalNodeIds) throws Throwable {
-		List<String> refIds = new ArrayList<String>();
-		for(String orgId : originalNodeIds){
-			refIds.add(addToCollection(collectionId, orgId));
-		}
-		return refIds.toArray(new String[refIds.size()]);
-	}
-	
+
 	@Override
 	public Collection create(String parentId, Collection collection) throws Throwable {
 	
@@ -527,7 +521,7 @@ public class CollectionServiceImpl implements CollectionService{
         collection.setChildCollectionsCount((int) serviceRegistry.getSearchService().query(params).getNumberFound());
     }
 	@Override
-	public Collection get(String storeId,String storeProtocol,String collectionId) {
+	public Collection get(String storeId, String storeProtocol, String collectionId, boolean fetchCounts) {
 		try{
 			HashMap<String,Object> props = client.getProperties(storeProtocol,storeId,collectionId);
 			throwIfNotACollection(storeProtocol,storeId,collectionId);
@@ -535,7 +529,9 @@ public class CollectionServiceImpl implements CollectionService{
 			Collection collection = asCollection(props);
 
 			// using solr to count all underlying refs recursive
-            addCollectionCountProperties(new NodeRef(new StoreRef(storeProtocol,storeId),collectionId),collection);
+			if(fetchCounts) {
+				addCollectionCountProperties(new NodeRef(new StoreRef(storeProtocol, storeId), collectionId), collection);
+			}
 			//collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
 			//collection.setChildCollectionsCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_MAP).size());
 						

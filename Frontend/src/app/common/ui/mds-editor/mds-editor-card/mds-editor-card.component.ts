@@ -27,7 +27,9 @@ export class MdsEditorCardComponent implements OnInit {
     completedProperties: FillTypeStatus;
     totalProperties: FillTypeStatus;
 
-    constructor(private mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
+    constructor(private mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {
+        this.mdsEditorInstance.isEmbedded = false;
+    }
 
     ngOnInit(): void {
         this.nodes = this.mdsEditorInstance.nodes$.value;

@@ -1,0 +1,22 @@
+<mat-menu #menu="matMenu" class="sort-dropdown-menu">
+  <div class="collection-item-title">{{ 'SORT_BY' | translate }}</div>
+  <button
+    *ngFor="let item of columns"
+    mat-menu-item
+    (click)="setSort(item)"
+    class="collection-item"
+    [class.active]="sortBy == item.name"
+  >
+    <div class="title" *ngIf="item.label">{{ item.label }}</div>
+    <div class="title" *ngIf="!item.label">{{ item.type + '.' + item.name | translate }}</div>
+    <ng-container *ngIf="sortBy == item.name">
+      <i class="material-icons" *ngIf="sortAscending" [altText]="'ASCENDING' | translate">
+        arrow_upward
+      </i>
+      <i class="material-icons" *ngIf="!sortAscending" [altText]="'DESCENDING' | translate">
+        arrow_downward
+      </i>
+      <span class="cdk-visually-hidden">{{ 'SELECTED' | translate }}</span>
+    </ng-container>
+  </button>
+</mat-menu>

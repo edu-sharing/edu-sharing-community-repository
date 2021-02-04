@@ -3,9 +3,11 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
+import org.edu_sharing.repository.server.importer.PersistentHandlerInterface;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.importer.sax.ListIdentifiersHandler;
 import org.edu_sharing.repository.server.importer.sax.RecordHandlerLOM;
@@ -24,7 +26,7 @@ public class ImporterJobSAX extends ImporterJob {
 	
 	
 	@Override
-	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList) {
+	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String[] sets, String recordHandlerClass, String binaryHandlerClass, String persistentHandlerClass, String importerClass, String[] idList, Date from, Date until) {
 		try{
 			for(String set: sets){
 				long millisec = System.currentTimeMillis();
@@ -39,8 +41,16 @@ public class ImporterJobSAX extends ImporterJob {
 				}else{
 					recordHandler = new RecordHandlerLOM(metadataSetId);
 				}
+				PersistentHandlerInterface persistentHandler = null;
+				if(persistentHandlerClass != null){
+					Class tClass = Class.forName(persistentHandlerClass);
+					Constructor constructor = tClass.getConstructor(String.class);
+					persistentHandler = (PersistentHandlerInterface)constructor.newInstance();
+				}else{
+					persistentHandler = new PersistentHandlerEdusharing(this,null,true);
+				}
 				
-				new ListIdentifiersHandler(recordHandler, new PersistentHandlerEdusharing(this,null,true), null, oaiBaseUrl, set, metadataPrefix, metadataSetId,false);
+				new ListIdentifiersHandler(recordHandler, persistentHandler, null, oaiBaseUrl, set, metadataPrefix, metadataSetId,false,null,null);
 				logger.info("finished import in "+(System.currentTimeMillis() - millisec)/1000+" secs");
 			}
 		}catch(Throwable e){

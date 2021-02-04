@@ -188,7 +188,8 @@ export class FileChooserComponent implements OnInit{
       this.collectionApi.search(this.searchQuery,{
         offset: this.offset,
         sortBy: [this.sortBy],
-        sortAscending: this.sortAscending
+        sortAscending: this.sortAscending,
+        propertyFilter: [RestConstants.ALL]
       }).subscribe((data)=>{
         let result:any=[];
         for(let c of data.collections){
@@ -204,7 +205,8 @@ export class FileChooserComponent implements OnInit{
       this.node.getChildren(directory, this.filter, {
         offset: this.offset,
         sortBy: [this.sortBy],
-        sortAscending: this.sortAscending
+        sortAscending: this.sortAscending,
+        propertyFilter: [RestConstants.ALL]
       })
         .subscribe((list: NodeList) => this.showList(list.nodes));
     }

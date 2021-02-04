@@ -84,6 +84,13 @@
 				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
 				<searchable>true</searchable>
 			</widget>
+			<widget>
+				<id>ccm:restricted_access</id>
+				<type>checkbox</type>
+				<caption>cb_restricted_access</caption>
+				<bottomCaption>cb_restricted_access_info</bottomCaption>
+				<condition type="TOOLPERMISSION">TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS</condition>
+			</widget>
 
 			<widget>
 				<id>ccm:tool_category</id>
@@ -288,7 +295,6 @@
 				<caption>ccm_prop_io_license</caption>
 				<type>license</type>
 				<valuespace_i18n_prefix>license_info_</valuespace_i18n_prefix>
-				<defaultvalue>ignore</defaultvalue>
 				<values>
 					<entry description="description_OPEN">OPEN</entry>
 					<entry description="description_CC_BY_OPEN">CC_BY_OPEN</entry>
@@ -405,6 +411,7 @@
               <cclom:general_description>
               <author>
               <license>
+              <ccm:restricted_access>
               <version>
               <childobjects>
 				]]></html>
@@ -736,6 +743,7 @@
 			</group>
 			<group>
 				<id>collection_editorial</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>collection_editorial</view>
 				</views>
@@ -937,6 +945,12 @@
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
 				</property>
+			</query>
+			<query join="AND" id="sharedToMe">
+				<basequery>(TYPE:"ccm:io" OR TYPE:"ccm:map") AND NOT ASPECT:"ccm:collection_io_reference" AND NOT ASPECT:"ccm:collection"</basequery>
+			</query>
+			<query join="AND" id="sharedByMe">
+				<basequery>(TYPE:"ccm:io" OR TYPE:"ccm:map") AND NOT ASPECT:"ccm:collection_io_reference" AND NOT ASPECT:"ccm:collection"</basequery>
 			</query>
 			<query join="AND" id="mediacenter_filter">
 				<basequery>TYPE:"ccm:io"</basequery>

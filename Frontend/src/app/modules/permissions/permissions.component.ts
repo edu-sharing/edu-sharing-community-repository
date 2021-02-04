@@ -10,8 +10,6 @@ import {Toast} from "../../core-ui-module/toast";
 import {RestConnectorService} from "../../core-module/core.module";
 import {RestOrganizationService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
-import {Title} from "@angular/platform-browser";
-import {UIHelper} from "../../core-ui-module/ui-helper";
 import {SessionStorageService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
@@ -37,13 +35,11 @@ export class PermissionsMainComponent {
               private route: ActivatedRoute,
               private router: Router,
               private config: ConfigurationService,
-              private title: Title,
               private translate: TranslateService,
               private storage : SessionStorageService,
               private organization: RestOrganizationService,
               private connector: RestConnectorService) {
     Translation.initialize(translate,this.config,this.storage,this.route).subscribe(()=>{
-      UIHelper.setTitle('PERMISSIONS.TITLE',this.title,this.translate,this.config);
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             if(data.isValidLogin && !data.isGuest && !data.currentScope){
                 this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {

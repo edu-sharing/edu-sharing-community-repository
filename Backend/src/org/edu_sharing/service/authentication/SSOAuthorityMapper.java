@@ -180,7 +180,7 @@ public class SSOAuthorityMapper {
 				return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
 			}
 		};
-		return AuthenticationUtil.runAs(runAs, ApplicationInfoList.getHomeRepository().getUsername());
+		return AuthenticationUtil.runAsSystem(runAs);
 	}
 	
 	
@@ -209,6 +209,19 @@ public class SSOAuthorityMapper {
 			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
 		}
 
+		String appId = ssoAttributes.get(PARAM_APP_ID);
+		ApplicationInfo appInfo = (appId != null) ? ApplicationInfoList.getRepositoryInfoById(appId) : null;
+
+		if(SSO_TYPE_AuthByApp.equals(ssoType)) {
+			String userWhiteList = appInfo.getAuthByAppUserWhitelist();
+			if(userWhiteList != null && !userWhiteList.trim().equals("")){
+				List<String> userList = Arrays.asList(userWhiteList.split(","));
+				if(!userList.contains(tmpUserName)){
+					throw new AuthenticationException(AuthenticationExceptionMessages.NOT_IN_WHITELIST);
+				}
+			}
+		}
+
 		if(SSO_TYPE_AuthByApp.equals(ssoType)) {
 			tmpUserName = mapAdminAuthority(tmpUserName, ssoAttributes.get(PARAM_APP_ID));
 		}
@@ -231,11 +244,7 @@ public class SSOAuthorityMapper {
 			boolean hashGroupNames = isHashGroupNames();
 			boolean updateMemberships = isUpdateMemberships();
 
-			
 
-			String appId = ssoAttributes.get(PARAM_APP_ID);
-			ApplicationInfo appInfo = (appId != null) ? ApplicationInfoList.getRepositoryInfoById(appId) : null;
-			
 			/**
 			 * SSO_TYPE_AuthByApp: need the Application type to
 			 * decide if Crud Operations on user and group are
@@ -617,13 +626,17 @@ public class SSOAuthorityMapper {
 	}
 
 	public String getSSOUsernameProp() {
-		String userName = null;
+		return getUserAttribute(CCConstants.CM_PROP_PERSON_USERNAME);
+	}
+
+	public String getUserAttribute(String alfrescoUserAtt){
+		String result = null;
 		for (Map.Entry<String, String> entry : mappingConfig.getPersonMapping().entrySet()) {
-			if (entry.getValue().equals(CCConstants.CM_PROP_PERSON_USERNAME)) {
-				userName = entry.getKey();
+			if (entry.getValue().equals(alfrescoUserAtt)) {
+				result = entry.getKey();
 			}
 		}
-		return userName;
+		return result;
 	}
 
 	private void logErrorParams(String missing, HashMap<String, String> ssoAttributes) {

@@ -1,13 +1,24 @@
 @import "../../../core-ui-module/styles/variables";
+.info-disabled{
+  display: flex;
+  justify-content: center;
+  margin-top: 20%;
+}
 .frontpage {
   width: 100%;
   max-width: 1300px;
   .save{
     justify-content: flex-end;
   }
+  .group-info{
+    margin: 0 10%;
+  }
   .group {
     display: flex;
     margin: 50px 10%;
+    .select-collection{
+      justify-content: flex-end;
+    }
     &.queries{
       margin:30px 12%;
     }

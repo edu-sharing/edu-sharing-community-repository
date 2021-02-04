@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.tools.security;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -24,10 +25,12 @@ public class SignatureVerifier {
 	public class Result{
 		int statuscode;
 		String message;
+		ApplicationInfo appInfo;
 		
-		public Result(int statuscode,String message) {
+		public Result(int statuscode, String message, ApplicationInfo appInfo) {
 			this.statuscode = statuscode;
 			this.message = message;
+			this.appInfo = appInfo;
 		}
 		
 		public String getMessage() {
@@ -37,6 +40,8 @@ public class SignatureVerifier {
 		public int getStatuscode() {
 			return statuscode;
 		}
+
+		public ApplicationInfo getAppInfo() { return appInfo; }
 	}
 	
 	
@@ -46,20 +51,20 @@ public class SignatureVerifier {
 			
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 			if(appInfo == null){
-				return new Result(HttpServletResponse.SC_BAD_REQUEST,"appid "+appId+" is not registered");
+				return new Result(HttpServletResponse.SC_BAD_REQUEST,"appid "+appId+" is not registered",appInfo);
 			}
 			
 			if(appInfo.getPublicKey() == null || appInfo.getPublicKey().trim().equals("")){
-				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING PUBLIC KEY for appId:"+appId);
+				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING PUBLIC KEY for appId:"+appId,appInfo);
 			}
 			
 			if(sig == null){
-				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING Signature");
+				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING Signature",appInfo);
 			}
 			
 			
 			if(timeStamp == null || timeStamp.trim().equals("")){
-				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING timestamp");
+				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING timestamp",appInfo);
 			}
 		
 			
@@ -69,22 +74,22 @@ public class SignatureVerifier {
 			long messageSendOffset = appInfo.getMessageSendOffsetMs();
 
 			if((messageSendTs - messageSendOffset) > messageArrivedTs){
-				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MESSAGE SEND TIMESTAMP newer than MESSAGE ARRIVED TIMESTAMP");
+				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MESSAGE SEND TIMESTAMP newer than MESSAGE ARRIVED TIMESTAMP",appInfo);
 			}
 			
 			long messageOffset = appInfo.getMessageOffsetMs();
 			
 			if((messageArrivedTs - messageSendTs) > messageOffset ){
-				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MESSAGE SEND TIMESTAMP TO OLD");
+				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MESSAGE SEND TIMESTAMP TO OLD",appInfo);
 			}
 						
 			
 			if(signed == null){
-				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING signed data");
+				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING signed data",appInfo);
 			}
 			
 			if(!signed.contains(timeStamp)){
-				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING timestamp in signed data");
+				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING timestamp in signed data",appInfo);
 			}
 			
 			boolean verified = false;
@@ -98,16 +103,54 @@ public class SignatureVerifier {
 				
 			}catch(Exception e){
 				e.printStackTrace();
-				return new Result(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
+				return new Result(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage(),appInfo);
 			}
 			
 			
 			if(!verified){
-				return new Result(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Signature could not be verified!");
+				return new Result(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Signature could not be verified!",appInfo);
 			}
 			
 			
-			return new Result(HttpServletResponse.SC_OK, "OK");
+			return new Result(HttpServletResponse.SC_OK, "OK",appInfo);
 		
+	}
+
+	/**
+	 *
+	 * @param httpReq
+	 * @return ApplicationInfo of verified app
+	 */
+	public Result verifyAppSignature(HttpServletRequest httpReq) {
+		ApplicationInfo appResult = null;
+		SignatureVerifier.Result result = null;
+
+		if(httpReq.getHeader("X-Edu-App-Id") == null){
+			return result = new Result(HttpServletResponse.SC_BAD_REQUEST,"MISSING X-Edu-App-Id",null);
+		}
+
+
+		String appId=httpReq.getHeader("X-Edu-App-Id");
+		String sig=httpReq.getHeader("X-Edu-App-Sig");
+		String signed=httpReq.getHeader("X-Edu-App-Signed");
+		String ts=httpReq.getHeader("X-Edu-App-Ts");
+		ApplicationInfo app = ApplicationInfoList.getRepositoryInfoById(appId);
+
+
+		if(app==null){
+			String message = "X-Edu-App-Id header was sent but the app/tool "+appId+" was not found in the list of registered apps";
+			logger.warn(message);
+			result = new Result(HttpServletResponse.SC_BAD_REQUEST,message,app);
+		}else{
+			result = this.verify(appId, sig, signed, ts);
+			if(result.getStatuscode() == HttpServletResponse.SC_OK){
+				logger.debug("Application request verified returning "+ appId);
+			}
+			else{
+				logger.warn("X-Edu-App-Id header was sent but signature check failed for app "+appId+":"+result.getMessage());
+			}
+		}
+
+		return result;
 	}
 }

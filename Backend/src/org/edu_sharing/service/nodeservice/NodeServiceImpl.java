@@ -2,6 +2,10 @@ package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,10 +45,11 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
-import org.edu_sharing.service.search.CMISSearchHelper;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.springframework.context.ApplicationContext;
@@ -116,15 +121,35 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
-		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+		NodeRef result = serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 
-		CopyService copyService = serviceRegistry.getCopyService();
+			CopyService copyService = serviceRegistry.getCopyService();
 
-		String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-		NodeRef copyNodeRef = copyService.copyAndRename(nodeRef, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId), QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
-				QName.createQName(name), copyChildren);
-		resetVersion(copyNodeRef);
-		return copyNodeRef;
+			// copy and rename has a weird naming scheme
+			String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+			NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
+					new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
+					QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
+					QName.createQName(originalName), copyChildren);
+			int renameCounter = 1;
+			while(true) {
+				try {
+					String name = originalName;
+					if(renameCounter > 1){
+						name = NodeServiceHelper.renameNode(originalName, renameCounter);
+					}
+					nodeServiceAlfresco.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
+					break;
+				} catch (DuplicateChildNodeNameException e){
+					renameCounter++;
+				}
+			}
+			resetVersion(copyNodeRef);
+			return copyNodeRef;
+		});
+
+		return result;
 	}
 	
 	private void resetVersion(NodeRef nodeRef) throws Throwable {
@@ -222,7 +247,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				continue;
 			}
 			id=CCConstants.getValidGlobalName(id);
-			String [] values = props.get(id);
+			String[] propsValue = props.get(id);
+			List<Serializable> values = propsValue != null ? Arrays.asList((Serializable[])propsValue) : null;
 			if("range".equals(widget.getType())){
 				String [] valuesFrom = props.get(id+"_from");
 				String [] valuesTo = props.get(id+"_to");
@@ -235,18 +261,33 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				logger.info("will save property "+widget.getId()+" with predefined defaultvalue "+widget.getDefaultvalue());
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
+			} else if("date".equals(widget.getType())){
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					values = Arrays.stream(props.get(id)).map((p) -> {
+						try {
+							return sdf.parse(p);
+						} catch (ParseException e) {
+							throw new RuntimeException(e);
+						}
+					}).collect(Collectors.toList());
+
+				}catch(Throwable t){
+					logger.warn("Could not parse date for widget id " + widget.getId(), t);
+					values = new ArrayList<>();
+				}
 			}
 			// changed: otherwise reset values for multivalue fields is not possible
 			// if(values==null || values.length==0)
 			if(values==null)
 				continue;
-			if(!widget.isMultivalue() && values.length>1)
+			if(!widget.isMultivalue() && values.size()>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
 			if(widget.isMultivalue()){
-				toSafe.put(id,values.length==0 ? null : new ArrayList<String>(Arrays.asList(values)));
+				toSafe.put(id,values.size()==0 ? null : new ArrayList<>(values));
 			}
 			else{
-				toSafe.put(id,values.length==0 ? null : values[0]);
+				toSafe.put(id,values.size()==0 ? null : values.get(0));
 			}
 		}
 
@@ -873,6 +914,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public void writeContent(StoreRef store, String nodeID, InputStream content, String mimetype, String _encoding,
 			String property) throws Exception {
+		// if trying to write to an io ref -> switch to original (this can cause permission denied!)
+		if(hasAspect(store.getProtocol(), store.getIdentifier(), nodeID, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+			nodeID = getProperty(store.getProtocol(), store.getIdentifier(), nodeID, CCConstants.CCM_PROP_IO_ORIGINAL);
+		}
 		apiClient.writeContent(store, nodeID, content, mimetype, _encoding, property);
 		RenderingTool.buildRenderingCache(nodeID);
 	}
@@ -892,7 +937,31 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		apiClient.removeNode(nodeId, parentId, recycle);
 	}
-	
+
+	@Override
+	public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle) {
+		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId),nodeId);
+		if(!recycle){
+			nodeServiceAlfresco.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+		}
+		//serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
+			Method method = null;
+			try {
+				method = nodeServiceAlfresco.getClass().getDeclaredMethod("deleteNode", NodeRef.class,boolean.class);
+				method.setAccessible(true);
+
+				Object r = method.invoke(nodeServiceAlfresco,nodeRef,false);
+			} catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+			}
+		/*	return null;
+		});*/
+	}
+
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable{
 		return apiClient.getProperties(storeProtocol, storeId, nodeId);
@@ -1036,17 +1105,26 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	private ContentReader getContentReader(String storeProtocol, String storeId, String nodeId,String version,String contentProp){
 		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if(version==null) {
-			return contentService.getReader(nodeRef, QName.createQName(contentProp)).getReader();
+			ContentReader cr = contentService.getReader(nodeRef, QName.createQName(contentProp));
+			if(cr != null) {
+				return cr.getReader();
+			}else return null;
 		}
 		else{
 			VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
 			Version versionObj = versionHistory.getVersion(version);
-			return contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
+			ContentReader cr = contentService.getReader(versionObj.getFrozenStateNodeRef(), QName.createQName(contentProp)).getReader();
+			if(cr != null) {
+				return cr.getReader();
+			}else return null;
 		}
 	}
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String version,String contentProp) throws Throwable{
-		return getContentReader(storeProtocol,storeId,nodeId,version,contentProp).getContentInputStream();
+		ContentReader cr = getContentReader(storeProtocol,storeId,nodeId,version,contentProp);
+		if(cr != null) {
+			return cr.getContentInputStream();
+		}else return null;
 	}
 
 	@Override

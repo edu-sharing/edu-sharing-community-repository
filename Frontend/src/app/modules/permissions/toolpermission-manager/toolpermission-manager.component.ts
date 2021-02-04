@@ -46,6 +46,7 @@ export class ToolpermissionManagerComponent {
             RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
             RestConstants.TOOLPERMISSION_PUBLISH_COPY,
             RestConstants.TOOLPERMISSION_HANDLESERVICE,
+        RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS,
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
@@ -55,6 +56,9 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
             RestConstants.TOOLPERMISSION_COMMENT_WRITE,
             RestConstants.TOOLPERMISSION_RATE
+    ]},
+    {name:"ACCOUNT_MANAGEMENT",icon:"group",permissions:[
+              RestConstants.TOOLPERMISSION_SIGNUP_GROUP,
     ]},
     {name:"SAFE",icon:"lock",permissions:[
         RestConstants.TOOLPERMISSION_CONFIDENTAL,

@@ -15,12 +15,14 @@ import {
     LoginResult,
     RestConnectorService,
     RestIamService,
+    UIConstants,
+    RestConstants,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {
     MainMenuEntriesService,
 } from '../../services/main-menu-entries.service';
-import {ConfigEntry} from '../../../core-ui-module/node-helper';
+import {ConfigEntry} from '../../../core-ui-module/node-helper.service';
 
 @Component({
     selector: 'app-main-menu-sidebar',
@@ -32,10 +34,11 @@ import {ConfigEntry} from '../../../core-ui-module/node-helper';
     ],
 })
 export class MainMenuSidebarComponent implements OnInit {
+    readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
+    readonly ME = RestConstants.ME;
     @Input() currentScope: string;
 
     @Output() showLicenses = new EventEmitter<void>();
-    @Output() openProfile = new EventEmitter<void>();
 
     // Internal state
     show = false;
@@ -69,7 +72,7 @@ export class MainMenuSidebarComponent implements OnInit {
     async ngOnInit() {
         this.loginInfo = await this.connector.isLoggedIn().toPromise();
         if (this.loginInfo.isValidLogin) {
-            this.user = await this.iam.getUser().toPromise();
+            this.user = await this.iam.getCurrentUserAsync();
             this.username = await this.getUsername();
         }
     }
@@ -92,11 +95,6 @@ export class MainMenuSidebarComponent implements OnInit {
 
     hide() {
         this.show = false;
-    }
-
-    onOpenProfile() {
-        this.hide();
-        this.openProfile.emit();
     }
 
     onShowLicenses() {

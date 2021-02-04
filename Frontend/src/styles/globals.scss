@@ -21,6 +21,9 @@ body:not(.sb-show-main) {
 }
 a{
   color:$primary;
+  &.cdk-keyboard-focused {
+    @include setGlobalKeyboardFocus();
+  }
 }
 .action-title{
   background-color: $actionDialogBackground;
@@ -141,12 +144,6 @@ a{
   margin-top:-15px;
   color:$textLight;
   font-size: 0.8em;
-}
-a:focus,
-.btn:focus,
-.btn-flat:focus,
-.clickable:focus {
-  @include setGlobalInsetFocus();
 }
 .focus-underline{
   cursor: pointer;

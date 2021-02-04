@@ -5,7 +5,7 @@ import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
+import {NodeHelperService} from "../../../core-ui-module/node-helper.service";
 import {ConfigurationService} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
@@ -98,9 +98,16 @@ export class WorkspaceLicenseComponent  {
   }
 
   private _oerMode=true;
-  public set oerMode(oerMode:boolean){
+  public set oerMode(oerMode:boolean) {
     this._oerMode=oerMode;
     this.showCcAuthor=false;
+    if(oerMode) {
+        if(this.isOerLicense()) {
+            return;
+        } else {
+            this.type = 'NONE';
+        }
+    }
   }
   public get oerMode(){
     return this._oerMode;
@@ -133,9 +140,9 @@ export class WorkspaceLicenseComponent  {
     this.loadConfig();
     this._properties = properties;
     this.readLicense();
-    this.mdsEditorInstanceService.initForNodes([({
+    this.mdsEditorInstanceService.initWithNodes([({
         properties
-    } as any)], false);
+    } as any)], { refetch: false });
     this.loading=false;
     this.updateButtons();
   }
@@ -156,7 +163,7 @@ export class WorkspaceLicenseComponent  {
       this._nodes=[];
       this.loadNodes(nodes,()=>{
           this._nodes=Helper.deepCopyArray(this._nodes);
-          this.mdsEditorInstanceService.initForNodes(this._nodes);
+          this.mdsEditorInstanceService.initWithNodes(this._nodes);
           this.loadConfig();
           this.checkAllowRelease();
           this.readLicense();
@@ -170,7 +177,7 @@ export class WorkspaceLicenseComponent  {
                   this.permissions = permissions.permissions.localPermissions;
                   this.readPermissions(i==this._nodes.length);
                   if(this._nodes.length==1) {
-                      this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions.localPermissions.permissions);
+                      this.doiActive = this.nodeHelper.isDOIActive(node, permissions.permissions.localPermissions.permissions);
                       this.doiDisabled = this.doiActive;
                   }
               });
@@ -218,6 +225,7 @@ export class WorkspaceLicenseComponent  {
     private connector : RestConnectorService,
     private translate : TranslateService,
     private config : ConfigurationService,
+    private nodeHelper: NodeHelperService,
     private mdsEditorInstanceService : MdsEditorInstanceService,
     private ui : UIService,
     private iamApi : RestIamService,
@@ -232,40 +240,44 @@ export class WorkspaceLicenseComponent  {
     this.onCancel.emit();
   }
 
-  public saveLicense(callback:Function=null){
-    if(this._properties){
-        this.onDone.emit(this.getProperties(this._properties));
-        return;
-    }
-    if(!this.getLicenseProperty() && this.release){
-      //this.toast.error(null,'WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE');
-      //return;
-    }
-    let prop: Values = {};
+  public async saveLicense(callback: Function = null) {
+      if(this.type === 'CUSTOM' && !this.rightsDescription.trim()){
+          this.toast.error(null, 'LICENSE.DESCRIPTION_REQUIRED');
+          return;
+      }
+      if (this._properties) {
+          this.onDone.emit(await this.getProperties(this._properties));
+          return;
+      }
+      if (!this.getLicenseProperty() && this.release) {
+          //this.toast.error(null,'WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE');
+          //return;
+      }
+      let prop: Values = {};
 
-    prop=this.getProperties(prop);
-    let i=0;
-    this.onLoading.emit(true);
-    const updatedNodes: Node[] = [];
-    for(let node of this._nodes) {
-      node.properties=prop;
-      i++;
-      this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
-        updatedNodes.push(result.node);
-        this.savePermissions(node);
-        if(updatedNodes.length === this._nodes.length) {
-          this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
-          this.onLoading.emit(false);
-          this.onDone.emit(updatedNodes);
-          if (callback) {
-              callback();
-          }
-        }
-      }, (error: any) => {
-        this.onLoading.emit(false);
-        this.toast.error(error);
-      });
-    }
+      prop = await this.getProperties(prop);
+      let i = 0;
+      this.onLoading.emit(true);
+      const updatedNodes: Node[] = [];
+      for (let node of this._nodes) {
+          node.properties = prop;
+          i++;
+          this.nodeApi.editNodeMetadataNewVersion(node.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe((result) => {
+              updatedNodes.push(result.node);
+              this.savePermissions(node);
+              if (updatedNodes.length === this._nodes.length) {
+                  this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
+                  this.onLoading.emit(false);
+                  this.onDone.emit(updatedNodes);
+                  if (callback) {
+                      callback();
+                  }
+              }
+          }, (error: any) => {
+              this.onLoading.emit(false);
+              this.toast.error(error);
+          });
+      }
   }
   private getValueForAll(prop:string,fallbackNotIdentical:any="",fallbackIsEmpty=fallbackNotIdentical,asArray=false){
     let found=null;
@@ -273,7 +285,7 @@ export class WorkspaceLicenseComponent  {
     if(this._properties){
       return this._properties[prop] ? this._properties[prop][0] : fallbackIsEmpty;
     }
-    return NodeHelper.getValueForAll(this._nodes, prop, fallbackNotIdentical, fallbackIsEmpty, asArray);
+    return this.nodeHelper.getValueForAll(this._nodes, prop, fallbackNotIdentical, fallbackIsEmpty, asArray);
   }
   private readLicense() {
     let license=this.getValueForAll(RestConstants.CCM_PROP_LICENSE,"MULTI","NONE");
@@ -322,7 +334,7 @@ export class WorkspaceLicenseComponent  {
     this.rightsDescription=this.getValueForAll(RestConstants.LOM_PROP_RIGHTS_DESCRIPTION);
     let contactState=this.getValueForAll(RestConstants.CCM_PROP_QUESTIONSALLOWED,"multi","true");
     this.contact=contactState=='true' || contactState==true;
-    this.oerMode=this.isOerLicense() || this.type=='NONE';
+    this.oerMode=this.isOerLicense() || this.primaryType=='NONE';
     UIHelper.invalidateMaterializeTextarea('authorFreetext');
     UIHelper.invalidateMaterializeTextarea('licenseRights');
     this.contactIndeterminate=contactState=='multi';
@@ -354,16 +366,16 @@ export class WorkspaceLicenseComponent  {
     return name;
   }
   private getLicenseName(){
-    return NodeHelper.getLicenseNameByString(this.getLicenseProperty(),this.translate);
+    return this.nodeHelper.getLicenseNameByString(this.getLicenseProperty());
   }
   private getLicenseUrl(){
-    return NodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
+    return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
   }
   private getLicenseUrlVersion(type:string){
-      return NodeHelper.getLicenseUrlByString(type,this.ccVersion);
+      return this.nodeHelper.getLicenseUrlByString(type,this.ccVersion);
   }
   private getLicenseIcon(){
-    return NodeHelper.getLicenseIconByString(this.getLicenseProperty(),this.connector);
+    return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());
   }
   private savePermissions(node:Node){
     if(this.releaseIndeterminate){
@@ -466,40 +478,40 @@ export class WorkspaceLicenseComponent  {
     this.cc0Type='CC_0';
   }
 
-  getProperties(prop = this._properties) {
-        prop[RestConstants.CCM_PROP_LICENSE]=[this.getLicenseProperty()];
-        if(!this.contactIndeterminate)
-            prop[RestConstants.CCM_PROP_QUESTIONSALLOWED]=[this.contact];
-        if(this.isCCAttributableLicense()){
-            prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = null;
-            if (this.ccTitleOfWork) {
-                prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
-            }
-            if (this.ccSourceUrl) {
-                prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [this.ccSourceUrl];
-            }
-            if (this.ccProfileUrl) {
-                prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
-            }
-            if (this.ccVersion) {
-                prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
-            }
-            if (this.ccCountry) {
-                prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
-            }
-        }
-          prop = this.author.getValues(prop);
+  async getProperties(prop = this._properties) {
+      prop[RestConstants.CCM_PROP_LICENSE] = [this.getLicenseProperty()];
+      if (!this.contactIndeterminate)
+          prop[RestConstants.CCM_PROP_QUESTIONSALLOWED] = [this.contact];
+      if (this.isCCAttributableLicense()) {
+          prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
+          prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
+          prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
+          prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = null;
+          prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = null;
+          if (this.ccTitleOfWork) {
+              prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
+          }
+          if (this.ccSourceUrl) {
+              prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [this.ccSourceUrl];
+          }
+          if (this.ccProfileUrl) {
+              prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
+          }
+          if (this.ccVersion) {
+              prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = [this.ccVersion];
+          }
+          if (this.ccCountry) {
+              prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
+          }
+      }
+      prop = await this.author.getValues(prop, this._nodes?.length === 1 ? this._nodes[0] : null);
 
 
-          if(this.type=='CUSTOM') {
-            prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
-        }
-        return prop;
-    }
+      if (this.type == 'CUSTOM') {
+          prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
+      }
+      return prop;
+  }
 
     openContributorDialog() {
         let nodes=this._nodes;
@@ -544,8 +556,8 @@ export class WorkspaceLicenseComponent  {
     }
 
     /**
-     * Get all the key from countries and return the array with key and name (Translated) 
-     * @param {string[]} countries array with all Countries Key 
+     * Get all the key from countries and return the array with key and name (Translated)
+     * @param {string[]} countries array with all Countries Key
      */
     translateLicenceCountries(countries: string[]) {
       this._ccCountries=[];
@@ -556,12 +568,12 @@ export class WorkspaceLicenseComponent  {
     }
 
     /**
-     * Function wich compare 2 string and return one of those numbers -1,0,1 
-     *  
-     *   -1 if a<b  
-     *    1 if a>b  
+     * Function wich compare 2 string and return one of those numbers -1,0,1
+     *
+     *   -1 if a<b
+     *    1 if a>b
      *    0 if a=b
-     * 
+     *
      * @param {string} a first string
      * @param {string} b second string
      * @returns {number}   -1 | 0 | 1

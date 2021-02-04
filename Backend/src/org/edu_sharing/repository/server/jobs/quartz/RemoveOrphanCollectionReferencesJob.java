@@ -34,6 +34,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -46,7 +47,7 @@ import org.quartz.JobExecutionException;
 
 import java.util.Collections;
 
-
+@JobDescription(description = "Remove all orphan collection references (with no valid original object)")
 public class RemoveOrphanCollectionReferencesJob extends AbstractJob{
 
 	private SearchService searchService=SearchServiceFactory.getLocalService();

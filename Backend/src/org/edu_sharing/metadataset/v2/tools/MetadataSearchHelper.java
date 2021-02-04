@@ -3,6 +3,7 @@ package org.edu_sharing.metadataset.v2.tools;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,17 +47,20 @@ public class MetadataSearchHelper {
 		}
 		return criteriasMap;
 	}
-	public static String getLuceneSearchQuery(MetadataQueries queries, String queryId, Map<String,String[]> parameters) throws IllegalArgumentException{
+	static String getLuceneSearchQuery(MetadataQueries queries, String queryId, Map<String,String[]> parameters) throws IllegalArgumentException{
 		return getLuceneSearchQuery(queries.findQuery(queryId), parameters);
 	}
-	public static String getLuceneSearchQuery(MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException{
+	static String getLuceneSearchQuery(MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException{
 
 				// We need to add the basequery, it's currently still getting the base query from the old mds -> added at other stage
 				//String queryString="("+queries.getBasequery()+")";
 				String queryString="";
-				String basequery = query.findBasequery(parameters.keySet());
+				String basequery = query.findBasequery(parameters != null ? parameters.keySet() : null);
 				if(basequery!=null && !basequery.trim().isEmpty()){
 					queryString+="("+replaceCommonQueryVariables(basequery)+")";
+				}
+				if(parameters == null){
+					return queryString;
 				}
 				for(String name : parameters.keySet()){
 					MetadataQueryParameter parameter = query.findParameterByName(name);
@@ -217,6 +221,14 @@ public class MetadataSearchHelper {
 				String kwValue = resultSet.getString(1);
 				Suggestion sqlKw = new Suggestion();
 				sqlKw.setKey(kwValue.trim());
+
+				try {
+					String displayString = resultSet.getString(2);
+					sqlKw.setDisplayString(displayString);
+				}catch (SQLException e){
+					//no display string in result
+				}
+
 				result.add(sqlKw);
 			}	
 		}catch(Throwable e){
@@ -257,14 +269,23 @@ public class MetadataSearchHelper {
 		result = result + ")";
 		return result;
 	}
+	public static String getLuceneString(String queryId,Map<String,String[]> parameters) throws Exception {
+		MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE);
+		return getLuceneString(queries, queries.findQuery(queryId), null, parameters);
+	}
 	public static String getLuceneString(MetadataQueries queries,MetadataQuery query, SearchCriterias searchCriterias,Map<String,String[]> parameters) throws IllegalArgumentException {
+		if(parameters == null){
+			parameters = new HashMap<>();
+		}
 		String lucene=getLuceneSearchQuery(query, parameters);
 		if(query.isApplyBasequery()){
 			String andQuery="";
 			if(lucene!=null && !lucene.trim().isEmpty())
 				andQuery=" AND (" + lucene + ")";
-			if(queries.findBasequery(parameters.keySet())!=null && !queries.findBasequery(parameters.keySet()).isEmpty())
-				lucene=queries.findBasequery(parameters.keySet())+andQuery;
+			if(queries.findBasequery(parameters.keySet())!=null &&
+					!queries.findBasequery(parameters.keySet()).isEmpty()) {
+				lucene = queries.findBasequery(parameters.keySet()) + andQuery;
+			}
 			lucene = applyCondition(queries, lucene);
 		}
 		lucene = applyCondition(query, lucene);

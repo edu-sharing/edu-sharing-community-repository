@@ -10,6 +10,33 @@
     font-style: italic;
     padding: 5px 10px;
 }
+mat-button-toggle-group {
+    overflow: visible;
+}
+.toggle-org{
+    display: flex;
+    flex-wrap: wrap;
+    .button-toggle-org {
+        width: 50%;
+        border-top: solid 1px rgba(0, 0, 0, 0.12);
+    }
+    @for $i from 1 to 4 {
+        .button-toggle-org:nth-child(0n + #{$i}) {
+            width: 33%;
+            border-top: none;
+        }
+    }
+    ::ng-deep{
+        .mat-button-toggle-label-content{
+            white-space: pre-line;
+            line-height: 1.5em;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
 .toggles {
     display: flex;
     flex-direction: column;

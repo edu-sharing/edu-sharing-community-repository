@@ -52,7 +52,8 @@
   display:none;
 }
 :host ::ng-deep {
-  .scope {
+  app-list-collection-info {
+    display: flex;
     > i {
       font-size: 18px;
     }

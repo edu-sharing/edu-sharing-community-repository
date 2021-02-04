@@ -21,6 +21,8 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidget {
     src: SafeResourceUrl | string;
     nodeSrc: string;
     file: File;
+    node: Node;
+    delete = false;
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
         private nodeService: RestNodeService,
@@ -31,6 +33,7 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidget {
         this.mdsEditorValues.nodes$.subscribe((nodes) => {
             if (nodes?.length === 1) {
                 this.nodeSrc = nodes[0].preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
+                this.node = nodes[0];
                 this.updateSrc();
                 // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
                 // FIXME: this will run forever!
@@ -45,6 +48,7 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidget {
     }
     setPreview(event: Event): void {
         this.file = (event.target as HTMLInputElement).files[0];
+        this.delete = false;
         this.updateSrc();
     }
     updateSrc() {
@@ -53,9 +57,13 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidget {
         } else {
             this.src = this.nodeSrc.replace(':cache', new Date().getTime().toString());
         }
-        this.hasChanges.next(this.file != null);
+        this.hasChanges.next(this.file != null || this.delete);
     }
     onSaveNode(nodes: Node[]) {
+        if (this.delete) {
+            return Observable.forkJoin(nodes.map((n) => this.nodeService.deleteNodePreview(n.ref.id))).
+                map(() => nodes).toPromise();
+        }
         if(this.file == null) {
             return null;
         }

@@ -1,4 +1,4 @@
-<h3 *ngIf="view.caption" id="{{ view.id }}_header" class="card-title-element heading">
+<h3 *ngIf="!isEmbedded && view.caption" id="{{ view.id }}_header" class="card-title-element heading">
   <i class="material-icons">{{ view.icon }}</i>
   <ng-container>{{ view.caption }}</ng-container>
 </h3>

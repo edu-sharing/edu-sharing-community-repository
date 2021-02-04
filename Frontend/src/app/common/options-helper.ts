@@ -7,7 +7,6 @@ import {Constrain, CustomOptions, DefaultGroups, ElementType, HideMode, KeyCombi
 import {UIHelper} from '../core-ui-module/ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
-import {NodeHelper} from '../core-ui-module/node-helper';
 import {Connector, Filetype, Node, NodesRightMode, NodeWrapper} from '../core-module/rest/data-object';
 import {Helper} from '../core-module/rest/helper';
 import {ClipboardObject, TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
@@ -24,6 +23,7 @@ import {Toast} from '../core-ui-module/toast';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from '../core-ui-module/components/dropdown/dropdown.component';
+import {ConfigOptionItem, NodeHelperService} from '../core-ui-module/node-helper.service';
 
 
 export class OptionsHelperConfig {
@@ -93,6 +93,7 @@ export class OptionsHelperService {
         private connectors: RestConnectorsService,
         private iamService: RestIamService,
         private router: Router,
+        private nodeHelper: NodeHelperService,
         private route: ActivatedRoute,
         private eventService: FrameEventsService,
         private http: HttpClient,
@@ -159,7 +160,7 @@ export class OptionsHelperService {
             this.nodeService.copyNode(target, source).subscribe(
                 (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
                 (error: any) => {
-                    NodeHelper.handleNodeError(this.bridge, clip.nodes[nodes.length].name, error);
+                    this.nodeHelper.handleNodeError(clip.nodes[nodes.length].name, error);
                     this.bridge.closeModalDialog();
                 });
         }
@@ -167,7 +168,7 @@ export class OptionsHelperService {
             this.nodeService.moveNode(target, source).subscribe(
                 (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
                 (error: any) => {
-                    NodeHelper.handleNodeError(this.bridge, clip.nodes[nodes.length].name, error);
+                    this.nodeHelper.handleNodeError(clip.nodes[nodes.length].name, error);
                     this.bridge.closeModalDialog();
                 }
             );
@@ -258,10 +259,10 @@ export class OptionsHelperService {
         if (target === Target.List) {
             objects = this.data.allObjects && this.data.allObjects.length ? [this.data.allObjects[0]] : null;
         } else if (target === Target.Actionbar) {
-            objects = this.data.selectedObjects || (this.data.activeObject ? [this.data.activeObject] : null);
+            objects = this.data.selectedObjects || (this.data.activeObjects);
         } else if (target === Target.ListDropdown) {
-            if (this.data.activeObject) {
-                objects = [this.data.activeObject];
+            if (this.data.activeObjects) {
+                objects = this.data.activeObjects;
             } else {
                 return null;
             }
@@ -271,8 +272,8 @@ export class OptionsHelperService {
            options = this.prepareOptions(this.mainNav.management, objects);
         }
         options = this.applyExternalOptions(options);
-        const custom = this.configService.instant('customOptions');
-        NodeHelper.applyCustomNodeOptions(this.toast, this.http, this.connector, custom, this.data.allObjects, objects, options);
+        const custom = this.configService.instant<ConfigOptionItem[]>('customOptions');
+        this.nodeHelper.applyCustomNodeOptions(custom, this.data.allObjects, objects, options);
         // do pre-handle callback options for dropdown + actionbar
         options = this.filterOptions(options, target, objects);
         if (target !== Target.Actionbar) {
@@ -359,9 +360,9 @@ export class OptionsHelperService {
             } else if(object.mediatype === 'folder-link') {
                 return ElementType.MapRef;
             } else {
-                if(NodeHelper.isNodePublishedCopy(object)) {
+                if(this.nodeHelper.isNodePublishedCopy(object)) {
                     return ElementType.NodePublishedCopy;
-                } else if (object.properties[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true') {
+                } else if (object.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true') {
                     return ElementType.NodeBlockedImport;
                 }
                 return ElementType.Node;
@@ -377,7 +378,7 @@ export class OptionsHelperService {
     }
     private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
         return option.permissions.filter((p) =>
-            NodeHelper.getNodesRight(objects, p, option.permissionsRightMode) === false
+            this.nodeHelper.getNodesRight(objects, p, option.permissionsRightMode) === false
         ).length === 0;
     }
 
@@ -385,9 +386,9 @@ export class OptionsHelperService {
         const options: OptionItem[] = [];
 
         /*
-        let apply=new OptionItem('APPLY', 'redo', (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
+        let apply=new OptionItem('APPLY', 'redo', (node: Node) => this.nodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
       apply.enabledCallback=((node:Node)=> {
-        return NodeHelper.getNodesRight([node],RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
+        return this.nodeHelper.getNodesRight([node],RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
       });
       if(fromList || (nodes && nodes.length==1))
         options.push(apply);
@@ -395,7 +396,7 @@ export class OptionsHelperService {
          */
 
         const applyNode = new OptionItem('APPLY', 'redo', (object) =>
-            NodeHelper.addNodeToLms(this.router, this.storage, this.getObjects(object)[0], this.queryParams.reurl)
+            this.nodeHelper.addNodeToLms(this.getObjects(object)[0], this.queryParams.reurl)
         );
 
         applyNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
@@ -414,9 +415,9 @@ export class OptionsHelperService {
         /*
        if(nodes && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
        option = new OptionItem("OPTIONS.INVITE", "group_add", callback);
-       option.isSeperate = NodeHelper.allFiles(nodes);
+       option.isSeperate = this.nodeHelper.allFiles(nodes);
        option.showAsAction = true;
-       option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
+       option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
      }
         */
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
@@ -487,17 +488,17 @@ export class OptionsHelperService {
         /**
          if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("OPTIONS.COLLECTION", "layers", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
+        option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         option.showAsAction = true;
         option.customShowCallback = (node: Node) => {
             let n=ActionbarHelperService.getNodes(nodes,node);
             if(n==null)
                 return false;
-            return NodeHelper.referenceOriginalExists(node) && NodeHelper.allFiles(nodes) && n.length>0;
+            return this.nodeHelper.referenceOriginalExists(node) && this.nodeHelper.allFiles(nodes) && n.length>0;
         }
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
+          return this.nodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,NodesRightMode.Original);
         }
         option.disabledCallback = () =>{
           this.connectors.getRestConnector().getBridgeService().showTemporaryMessage(MessageType.error, null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
@@ -514,7 +515,7 @@ export class OptionsHelperService {
         addNodeToCollection.customShowCallback = (nodes) => {
             addNodeToCollection.name = this.data.scope === Scope.CollectionsReferences ?
                 'OPTIONS.COLLECTION_OTHER' : 'OPTIONS.COLLECTION';
-            return NodeHelper.referenceOriginalExists(nodes ? nodes[0] : null);
+            return this.nodeHelper.referenceOriginalExists(nodes ? nodes[0] : null);
         };
         addNodeToCollection.permissions = [RestConstants.ACCESS_CC_PUBLISH];
         addNodeToCollection.permissionsRightMode = NodesRightMode.Original;
@@ -533,11 +534,11 @@ export class OptionsHelperService {
         const createNodeVariant = new OptionItem('OPTIONS.VARIANT', 'call_split', (object) =>
             management.nodeVariant =  this.getObjects(object)[0]
         );
-        createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
         createNodeVariant.customShowCallback = (nodes) => {
             if (nodes) {
                 createNodeVariant.name = 'OPTIONS.VARIANT' + (this.connectors.connectorSupportsEdit(nodes[0]) ? '_OPEN' : '');
-                return NodeHelper.referenceOriginalExists(nodes[0]);
+                return this.nodeHelper.referenceOriginalExists(nodes[0]);
             }
             return false;
         };
@@ -586,13 +587,13 @@ export class OptionsHelperService {
         /*
         if (nodes && nodes.length==1 && !nodes[0].isDirectory  && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1) {
             option = new OptionItem("OPTIONS.WORKFLOW", "swap_calls", callback);
-            option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
+            option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
         }
          */
         const workflowNode = new OptionItem('OPTIONS.WORKFLOW', 'swap_calls', (object) =>
-            management.nodeWorkflow =  this.getObjects(object)[0]
+            management.nodeWorkflow = this.getObjects(object)
         );
-        workflowNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.NoBulk, Constrain.User];
+        workflowNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
         workflowNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         workflowNode.permissionsMode = HideMode.Disable;
         workflowNode.group = DefaultGroups.Edit;
@@ -614,7 +615,7 @@ export class OptionsHelperService {
             return isAllowed;
          */
         const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
-            NodeHelper.downloadNodes(this.connector, this.getObjects(object))
+            this.nodeHelper.downloadNodes(this.getObjects(object))
         );
         downloadNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
         downloadNode.constrains = [Constrain.Files];
@@ -633,7 +634,7 @@ export class OptionsHelperService {
             return false;
         };
         const downloadMetadataNode = new OptionItem('OPTIONS.DOWNLOAD_METADATA', 'format_align_left', (object) =>
-            NodeHelper.downloadNode(this.connector.getBridgeService(), this.getObjects(object)[0], RestConstants.NODE_VERSION_CURRENT, true)
+            this.nodeHelper.downloadNode(this.getObjects(object)[0], RestConstants.NODE_VERSION_CURRENT, true)
         );
         downloadMetadataNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
         downloadMetadataNode.constrains = [Constrain.Files, Constrain.NoBulk];
@@ -702,7 +703,7 @@ export class OptionsHelperService {
         /**
          const cut = new OptionItem('OPTIONS.CUT', 'content_cut', (node: Node) => this.cutCopyNode(node, false));
          cut.isSeperate = true;
-         cut.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE)
+         cut.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE)
          && (this.root === 'MY_FILES' || this.root === 'SHARED_FILES');
          options.push(cut);
          options.push(new OptionItem('OPTIONS.COPY', 'content_copy', (node: Node) => this.cutCopyNode(node, true)));
@@ -898,19 +899,27 @@ export class OptionsHelperService {
         feedbackCollectionView.group = DefaultGroups.View;
         feedbackCollectionView.priority = 20;
 
-        /*
-        const options = [];
-        this.viewToggle = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.viewType === 0 ? 'view_module' : 'list', (node: Node) => this.toggleView());
-        this.viewToggle.isToggle = true;
-        options.push(this.viewToggle);
-         */
-        // tslint:disable-next-line:triple-equals
-        const toggleViewType = new OptionItem('OPTIONS.TOGGLE_VIEWTYPE', this.list ? this.list.viewType == 0 ? 'view_module' : 'list' : '', (object) => {
-            // tslint:disable-next-line:triple-equals
-            this.list.setViewType(this.list.viewType == 1 ? 0 : 1);
-            // tslint:disable-next-line:triple-equals
-            toggleViewType.icon = this.list ? this.list.viewType == 0 ? 'view_module' : 'list' : '';
+        const setViewType = (viewType: number) => {
+            switch (viewType) {
+                case 0:
+                    this.list.setViewType(0);
+                    toggleViewType.name = 'OPTIONS.SWITCH_TO_CARDS_VIEW';
+                    toggleViewType.icon = 'view_module';
+                    break;
+                case 1:
+                    this.list.setViewType(1);
+                    toggleViewType.name = 'OPTIONS.SWITCH_TO_LIST_VIEW';
+                    toggleViewType.icon = 'list';
+                    break;
+            }
+        }
+        const toggleViewType = new OptionItem('', '', () => {
+            switch(this.list.viewType) {
+                case 0: setViewType(1); break;
+                case 1: setViewType(0); break;
+            }
         });
+        setViewType(this.list?.viewType);
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;
@@ -996,7 +1005,7 @@ export class OptionsHelperService {
         UIHelper.openConnector(this.connectors, this.iamService, this.eventService, this.toast, node, type, win, connectorType);
     }
     private canAddObjects() {
-        return this.data.parent && NodeHelper.getNodesRight([this.data.parent], RestConstants.ACCESS_ADD_CHILDREN);
+        return this.data.parent && this.nodeHelper.getNodesRight([this.data.parent], RestConstants.ACCESS_ADD_CHILDREN);
     }
 
     private addVirtualObjects(objects: any[]) {
@@ -1027,11 +1036,11 @@ export class OptionsHelperService {
     private handleCallbacks(options: OptionItem[], objects: Node[]|any) {
         options.forEach((o) => {
             o.showCallback = ((object) => {
-                const list = NodeHelper.getActionbarNodes(objects, object);
+                const list = NodeHelperService.getActionbarNodes(objects, object);
                 return this.isOptionAvailable(o, list);
             });
             o.enabledCallback = ((object) => {
-                const list = NodeHelper.getActionbarNodes(objects, object);
+                const list = NodeHelperService.getActionbarNodes(objects, object);
                 return this.isOptionEnabled(o, list);
             });
         });
@@ -1048,7 +1057,7 @@ export class OptionsHelperService {
     }
 
     private getObjects(object: Node | any) {
-        return NodeHelper.getActionbarNodes(this.data.selectedObjects || [this.data.activeObject], object);
+        return NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
     }
 
     applyExternalOptions(options: OptionItem[]) {
@@ -1218,7 +1227,7 @@ export interface OptionsListener {
 }
 export interface OptionData {
     scope: Scope;
-    activeObject?: Node|any;
+    activeObjects?: Node[]|any[];
     selectedObjects?: Node[] | any[];
     allObjects?: Node[] | any[];
     parent?: Node|any;

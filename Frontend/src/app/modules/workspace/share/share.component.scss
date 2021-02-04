@@ -154,15 +154,8 @@ a.active{
   .mat-heading-4{
     padding-bottom: 15px;
   }
-  mat-radio-button {
-    .mat-radio-label{
-      align-items: baseline;
-    }
+  .mat-radio-button {
     padding: 5px 10px;
-    .label-primary{
-      font-weight: bold;
-      padding-bottom: 5px;
-    }
   }
 }
 :host ::ng-deep{

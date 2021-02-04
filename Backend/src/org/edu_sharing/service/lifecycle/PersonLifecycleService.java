@@ -19,22 +19,19 @@ import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.EduSharingRatingCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
-import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
-import org.edu_sharing.service.search.CMISSearchHelper;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
@@ -516,6 +513,10 @@ public class PersonLifecycleService {
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		if(scope==null){
 			homeFolder = getHomeFolder(personNodeRef);
+			if(homeFolder==null){
+				logger.info("Person "+userName+" does not have a home folder, skipping it");
+				return new PersonDeleteResult.Counts(new ArrayList<>());
+			}
 		}
 		else{
 			ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
@@ -658,7 +659,7 @@ public class PersonLifecycleService {
 		try {
 			NodeServiceInterceptor.setEduSharingScope(scope);
 			String username = (String) nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-			NodeRef deleted = getDeletedFolderForOrg(options.receiverGroup, scope);
+			NodeRef deleted = getDeletedFolderForOrg(options, scope);
 			String userFolder = NodeServiceFactory.getLocalService().findNodeByName(deleted.getId(), username);
 			if (userFolder == null) {
 				HashMap<String, Object> props = new HashMap<>();
@@ -680,7 +681,8 @@ public class PersonLifecycleService {
 
 
 
-	private NodeRef getDeletedFolderForOrg(String orgName, String scope) {
+	private NodeRef getDeletedFolderForOrg(PersonDeleteOptions options, String scope) {
+		String orgName = options.receiverGroup;
 		NodeRef orgRef = authorityService.getAuthorityNodeRef(scope==null ? orgName : orgName + "_" + scope);
 		if(orgRef == null) {
 			if(scope!=null) {
@@ -700,18 +702,27 @@ public class PersonLifecycleService {
 			HashMap<String, Object> props=new HashMap<>();
 			props.put(CCConstants.CM_NAME,DELETED_PERSONS_FOLDER);
 			deletedHome=NodeServiceFactory.getLocalService().createNodeBasic(orgHome.getId(), CCConstants.CCM_TYPE_MAP, props);
+			NodeRef deletedRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, deletedHome);
+			permissionService.setInheritParentPermissions(deletedRef, false);
+			permissionService.setPermission(deletedRef,getAdminGroup(options) , CCConstants.PERMISSION_COORDINATOR, true);
 		}
 		return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,deletedHome);
 	}
-
+	private String getAdminGroup(PersonDeleteOptions options){
+		return PermissionService.GROUP_PREFIX + org.edu_sharing.service.authority.AuthorityService.getGroupName(
+				org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP, options.receiverGroup
+		);
+	}
 	private void setOwnerAndPermissions(List<NodeRef> children, String userName, PersonDeleteOptions options) {
+		String adminGroup = getAdminGroup(options);
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 			children.forEach((ref) -> {
 				if (skipNode(ref,SKIP_ASPECTS_OWNER)) return;
 				setOwner(ref, userName, options.receiver, options);
 				policyBehaviourFilter.disableBehaviour(ref);
-				permissionService.setPermission(ref, options.receiverGroup, CCConstants.PERMISSION_COORDINATOR, true);
+
+				permissionService.setPermission(ref, adminGroup, CCConstants.PERMISSION_COORDINATOR, true);
 				policyBehaviourFilter.enableBehaviour(ref);
 				logger.debug("setOwnerAndPermissions for " + ref);
 			});

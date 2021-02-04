@@ -7,12 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.edu_sharing.service.organization.GroupSignupMethod;
 
 import java.util.List;
 
 @ApiModel(description = "")
 public class Group extends Authority {
 
+	private GroupSignupMethod signupMethod;
 	private String groupName = null;
 	private GroupProfile profile = null;
 	private NodeRef ref = null;
@@ -98,6 +100,15 @@ public class Group extends Authority {
 
 	public void setOrganizations(List<Organization> organizations) {
 		this.organizations = organizations;
+	}
+
+	@JsonProperty
+	public GroupSignupMethod getSignupMethod() {
+		return signupMethod;
+	}
+
+	public void setSignupMethod(GroupSignupMethod signupMethod) {
+		this.signupMethod = signupMethod;
 	}
 
 }

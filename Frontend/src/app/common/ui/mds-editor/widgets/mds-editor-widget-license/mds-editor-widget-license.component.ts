@@ -8,7 +8,7 @@ import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {Node} from '../../../../../core-module/rest/data-object';
 import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
 import {TranslateService} from '@ngx-translate/core';
-import {NodeHelper} from '../../../../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../../../../core-ui-module/node-helper.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {MdsWidgetValue, Values} from '../../types';
 
@@ -36,6 +36,7 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         private mainnav: MainNavService,
         private sanitizer: DomSanitizer,
         public translate: TranslateService,
+        private nodeHelper: NodeHelperService,
         public mdsEditorValues: MdsEditorInstanceService,
     ) {
         super(mdsEditorValues, translate);
@@ -46,7 +47,7 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         this.nodes = this.mdsEditorValues.nodes$.value;
         this.mdsEditorValues.nodes$.subscribe((n) => this.nodes = n);
         this.licenses = this.widget?.definition?.values.map((v) => {
-            const url = NodeHelper.getLicenseIconByString(v.id, this.connector, false);
+            const url = this.nodeHelper.getLicenseIconByString(v.id, false);
             const license: License = v;
             if(url) {
                 license.imageUrl = this.sanitizer.bypassSecurityTrustUrl(url);
@@ -55,7 +56,11 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         });
         this.checked = this.widget.getInitialValues().jointValues ?? [];
     }
-    getValues(values: Values) {
+    async getValues(values: Values) {
+        // nodes mode is read-only, so do not change anything
+        if(this.mdsEditorValues.editorMode === 'nodes') {
+            return values;
+        }
         if(this.checked.length) {
             values[this.widget.definition.id] = this.checked;
         }

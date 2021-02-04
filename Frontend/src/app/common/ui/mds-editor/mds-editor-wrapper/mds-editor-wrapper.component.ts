@@ -9,11 +9,18 @@ import {
     ViewChild,
 } from '@angular/core';
 import { first } from 'rxjs/operators';
-import {Node, RestConstants} from '../../../../core-module/core.module';
+import { Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
-import { BulkBehaviour, MdsComponent } from '../../mds/mds.component';
+import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import { EditorType, MdsWidget, Suggestions, UserPresentableError, Values } from '../types';
+import {
+    EditorMode,
+    EditorType,
+    MdsWidget,
+    Suggestions,
+    UserPresentableError,
+    Values,
+} from '../types';
 
 /**
  * Wrapper component to select between the legacy `<mds>` component and the Angular-native
@@ -37,7 +44,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
 
     @Input() addWidget = false;
     @Input() allowReplacing = true;
-    @Input() bulkBehaviour = BulkBehaviour.Default;
+    @Input() bulkBehaviour = BulkBehavior.Default;
     @Input() create: string;
     @Input() currentValues: Values;
     @Input() customTitle: string;
@@ -52,6 +59,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() parentNode: Node;
     @Input() priority = 1;
     @Input() repository = RestConstants.HOME_REPOSITORY;
+    @Input() editorMode: EditorMode;
     @Input() setId: string;
     @Input() suggestions: Suggestions;
 
@@ -101,12 +109,12 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         }
     }
 
-    getValues(): { [property: string]: string[] } {
+    async getValues(node: Node = null): Promise<{ [property: string]: string[] }> {
         switch (this.editorType) {
             case 'legacy':
-                return this.mdsRef.getValues();
+                return this.mdsRef.getValues(node?.properties);
             case 'angular':
-                return this.mdsEditorInstance.getValues();
+                return this.mdsEditorInstance.getValues(node);
             default:
                 console.warn('getValues() was called before init finished');
                 return null;
@@ -118,7 +126,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
      *
      * Use `getValues()`
      */
-    saveValues(): { [property: string]: string[] } {
+    saveValues(): Promise<{ [property: string]: string[] }> {
         switch (this.editorType) {
             case 'legacy':
                 return this.mdsRef.saveValues();
@@ -138,7 +146,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
             case 'legacy':
                 return this.mdsRef.currentWidgets;
             case 'angular':
-                return this.mdsEditorInstance.widgets.map((widget) => widget.definition);
+                return this.mdsEditorInstance.widgets.value.map((widget) => widget.definition);
             default:
                 console.warn('get currentWidgets() was called before init finished');
                 return null;
@@ -174,8 +182,15 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     async onSave(): Promise<void> {
         this.isLoading = true;
         try {
-            if(!this.mdsEditorInstance.getCanSave()) {
-                this.mdsEditorInstance.showMissingRequiredWidgets();
+            console.log(this.mdsEditorInstance.getCanSave());
+            if (!this.mdsEditorInstance.getCanSave()) {
+                // no changes, behave like close
+                if(this.mdsEditorInstance.getIsValid()){
+                    this.onDone.emit(this.nodes);
+                    return;
+                } else {
+                    this.mdsEditorInstance.showMissingRequiredWidgets();
+                }
                 return;
             }
             const updatedNodes = await this.mdsEditorInstance.save();
@@ -196,14 +211,28 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         this.isLoading = true;
         try {
             if (this.nodes) {
-                this.editorType = await this.mdsEditorInstance.initForNodes(this.nodes);
+                this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, {
+                    groupId: this.groupId,
+                    bulkBehavior: this.bulkBehaviour,
+                });
             } else {
-                this.editorType = await this.mdsEditorInstance.initForSearch(
+                this.editorType = await this.mdsEditorInstance.initWithoutNodes(
                     this.groupId,
                     this.setId,
                     this.repository,
+                    this.editorMode ?? 'search',
                     this.currentValues,
                 );
+            }
+            if (!this.editorType) {
+                console.warn(
+                    'mds ' +
+                        this.setId +
+                        ' at ' +
+                        this.repository +
+                        ' did not specify any rendering type',
+                );
+                this.editorType = 'legacy';
             }
         } catch (error) {
             this.handleError(error);
@@ -213,7 +242,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     private handleError(error: any): void {
-        if (error instanceof UserPresentableError) {
+        if (error instanceof UserPresentableError || error.message) {
             this.toast.error(null, error.message);
         } else {
             console.error(error);

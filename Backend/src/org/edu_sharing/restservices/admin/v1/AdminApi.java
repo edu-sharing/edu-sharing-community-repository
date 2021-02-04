@@ -39,12 +39,11 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
+import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
-import org.edu_sharing.repository.tomcat.ClassHelper;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.DAOException;
@@ -283,7 +282,7 @@ public class AdminApi {
 
 	@ApiOperation(value = "get all available jobs")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = JobInfo[].class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = JobDescription[].class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -594,8 +593,8 @@ public class AdminApi {
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
 	public Response removeCacheEntry(
-            @ApiParam(value="cacheIndex", defaultValue="false") @QueryParam("cacheIndex") Integer cacheIndex,
-            @ApiParam(value="bean", defaultValue="false") @QueryParam("bean") String bean,
+            @ApiParam(value="cacheIndex") @QueryParam("cacheIndex") Integer cacheIndex,
+            @ApiParam(value="bean") @QueryParam("bean") String bean,
             @Context HttpServletRequest req){
 		try {
             AdminServiceFactory.getInstance().removeCacheEntry(cacheIndex, bean);
@@ -735,6 +734,7 @@ public class AdminApi {
 			@ApiParam(value = "Excel file to import", required = true) @FormDataParam("excel") InputStream is,
 			@Context HttpServletRequest req) {
 		try {
+			addToCollection = (addToCollection == null) ? false : addToCollection;
 			int count = AdminServiceFactory.getInstance().importExcel(parent, is, addToCollection);
 			ExcelResult result = new ExcelResult();
 			result.setRows(count);
@@ -785,13 +785,17 @@ public class AdminApi {
 			@ApiParam(value = "importer class name (call /classes to obtain a list)", required = false, defaultValue = "org.edu_sharing.repository.server.importer.OAIPMHLOMImporter") @QueryParam("importerClassName") String importerClassName,
 			@ApiParam(value = "RecordHandler class name", required = false, defaultValue = "org.edu_sharing.repository.server.importer.RecordHandlerLOM") @QueryParam("recordHandlerClassName") String recordHandlerClassName,
 			@ApiParam(value = "BinaryHandler class name (may be empty for none)", required = false, defaultValue = "") @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
+		    @ApiParam(value = "PersistentHandlerClassName class name (may be empty for none)", required = false, defaultValue = "") @QueryParam("persistentHandlerClassName") String persistentHandlerClassName,
 			@ApiParam(value = "url to file", required = false) @QueryParam("fileUrl") String fileUrl,
 			@ApiParam(value = "OAI Ids to import, can be null than the whole set will be imported", required = false, defaultValue = "") @QueryParam("oaiIds") String oaiIds,
 			@ApiParam(value = "force Update of all entries", required = false, defaultValue = "false") @QueryParam("forceUpdate") Boolean forceUpdate,
-			@Context HttpServletRequest req) {
+			@ApiParam(value = "from: datestring yyyy-MM-dd)", required = false, defaultValue = "") @QueryParam("from") String from,
+			@ApiParam(value = "until: datestring yyyy-MM-dd)", required = false, defaultValue = "") @QueryParam("until") String until,
+		  	@ApiParam(value = "periodInDays: internal sets from and until. only effective if from/until not set)", required = false, defaultValue = "") @QueryParam("periodInDays") String periodInDays,
+		    @Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().importOai(set, fileUrl, baseUrl, metadataset, metadataPrefix, className,
-					importerClassName, recordHandlerClassName, binaryHandlerClassName, oaiIds, forceUpdate != null ? forceUpdate.booleanValue() : false);
+					importerClassName, recordHandlerClassName, binaryHandlerClassName,persistentHandlerClassName, oaiIds, forceUpdate != null ? forceUpdate.booleanValue() : false, from, until, periodInDays);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

@@ -14,10 +14,14 @@ import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
+import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
+import org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob;
+import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
@@ -55,6 +59,9 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,6 +76,9 @@ public class NodeFrontpage {
     private PermissionService permissionService= PermissionServiceFactory.getLocalService();
     private RestHighLevelClient client;
     private HashMap<String, Date> APPLY_DATES;
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
     public NodeFrontpage(){
         APPLY_DATES=new HashMap<>();
         Calendar calendar = Calendar.getInstance();
@@ -102,6 +112,18 @@ public class NodeFrontpage {
                         TrackingServiceFactory.getTrackingService().trackActivityOnNode(ref,null, TrackingService.EventType.DOWNLOAD_MATERIAL);
                         return null;
                     });*/
+
+                    String storeProt = ref.getStoreRef().getProtocol();
+                    String storeId = ref.getStoreRef().getIdentifier();
+                    if(nodeService.hasAspect(storeProt, storeId, ref.getId(), CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+                        String original = nodeService.getProperty(ref.getStoreRef().getProtocol(), storeProt, storeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+                        if(original == null || !nodeService.exists(storeProt, storeId,
+                                ref.getId())){
+                            logger.warn("leave out collection ref object cause original does not exist:" + ref +" orig:"+original);
+                            return;
+                        }
+                    }
+
                     XContentBuilder builder = jsonBuilder().startObject();
                     addAuthorities(ref, builder);
                     addNodeMetadata(ref, builder);
@@ -191,7 +213,22 @@ public class NodeFrontpage {
                 if(val instanceof org.alfresco.repo.domain.node.ContentDataWithId){
                     continue;
                 }
-                builder.field(CCConstants.getValidLocalName(prop.getKey().toString()),val);
+                String field =CCConstants.getValidLocalName(prop.getKey().toString());
+                if(field != null) {
+                    if(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP.equals(prop.getKey().toString())){
+                       try {
+                           val = sdf.parse((String) val);
+                       }catch(ParseException | NumberFormatException e){
+                           logger.error(ref+ "error while parsing replicationsourcetimestamp:" + val);
+                           val = null;
+                       }
+                    }
+                    if(val != null) {
+                        builder.field(field, val);
+                    }
+                }else{
+                    logger.error("no valid local name for: " + prop.getKey());
+                }
             }
             builder.endObject();
             builder.startArray("aspects");
@@ -203,6 +240,7 @@ public class NodeFrontpage {
             logger.info(t.getMessage(),t);
         }
     }
+
 
     private void addRatings(NodeRef ref, XContentBuilder builder) throws IOException {
         RatingService ratingService = RatingServiceFactory.getLocalService();
@@ -292,7 +330,7 @@ public class NodeFrontpage {
                 }
                 return false;
             }).forEach((q)-> {
-             query.must(QueryBuilders.wrapperQuery(QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.luceneReplacer)));
+             query.must(QueryBuilders.wrapperQuery(QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.replacerFromSyntax(MetadataReaderV2.QUERY_SYNTAX_DSL))));
             });
         }
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();

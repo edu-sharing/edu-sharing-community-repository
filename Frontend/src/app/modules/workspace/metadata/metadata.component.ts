@@ -1,26 +1,14 @@
-import {Component, Input, EventEmitter, Output, AfterViewInit} from '@angular/core';
-import {ListItem, RestNodeService} from '../../../core-module/core.module';
-import {
-    Node, NodeList, NodeWrapper, NodePermissions, NodeVersions, UsageList,
-    Version, LoginResult, IamUser, Permission, Usage, Collection, CollectionUsage
-} from '../../../core-module/core.module';
-import {RestConstants} from '../../../core-module/core.module';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ConfigurationHelper, ConfigurationService, IamUser, ListItem, Node, NodePermissions, NodeVersions, Permission, RestConstants, RestHelper, RestIamService, RestNodeService, RestSearchService, RestUsageService, Usage, UsageList, Version} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
-import {RestUsageService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
-import {RestConnectorService} from '../../../core-module/core.module';
-import {RestIamService} from '../../../core-module/core.module';
-import {ConfigurationService} from '../../../core-module/core.module';
 import {VCard} from '../../../core-module/ui/VCard';
-import {RestHelper} from '../../../core-module/core.module';
 import {Router} from '@angular/router';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
-import {ConfigurationHelper} from '../../../core-module/core.module';
-import {RestSearchService} from '../../../core-module/core.module';
-import {Helper} from '../../../core-module/rest/helper';
-import {VersionLabelPipe} from '../../../common/ui/version-label.pipe';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {NodeDatePipe} from '../../../core-ui-module/pipes/date.pipe';
+import {NodeImageSizePipe} from '../../../core-ui-module/pipes/node-image-size.pipe';
 
 // Charts.js
 declare var Chart: any;
@@ -162,21 +150,21 @@ export class WorkspaceMetadataComponent{
       data.keywords = null;
     //data["creator"]=node.properties[RestConstants.CM_CREATOR];
     data.creator = ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy, this.config);
-    data.createDate = NodeHelper.getNodeAttribute(this.translate, this.config, node, new ListItem('NODE', RestConstants.CM_PROP_C_CREATED));
+    data.createDate = new NodeDatePipe(this.translate).transform(node.createdAt);
     data.duration = RestHelper.getDurationFormatted(node);
     data.author = this.toVCards(node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]).join(', ');
     data.author_freetext = node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] ? node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT][0] : null;
     data.mediatype = node.mediatype == 'file' ? node.mimetype : node.mediatype;
     data.mimetype = node.mimetype;
     data.size = node.size;
-    if (node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL])
-      data.exifDate = NodeHelper.getNodeAttribute(this.translate, this.config, node, new ListItem('NODE', RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL));
+    if (node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL]) {
+        data.exifDate = new NodeDatePipe(this.translate).transform(node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL][0]);
+    }
 
-    data.dimensions = NodeHelper.getNodeAttribute(this.translate, this.config, node, new ListItem('NODE', RestConstants.DIMENSIONS));
-    data.dimensions = NodeHelper.getNodeAttribute(this.translate, this.config, node, new ListItem('NODE', RestConstants.DIMENSIONS), null);
+    data.dimensions = new NodeImageSizePipe().transform(node);
 
-    data.license = NodeHelper.getLicenseIcon(node);
-    data.licenseName = NodeHelper.getLicenseName(node, this.translate);
+    data.license = this.nodeHelper.getLicenseIcon(node);
+    data.licenseName = this.nodeHelper.getLicenseName(node);
 
     data.properties = [];
     data.aspects = node.aspects.sort();
@@ -194,6 +182,7 @@ export class WorkspaceMetadataComponent{
   }
   constructor(private translate: TranslateService,
               private config: ConfigurationService,
+              private nodeHelper: NodeHelperService,
               private router: Router,
               private iamApi: RestIamService,
               private nodeApi: RestNodeService,
@@ -210,7 +199,7 @@ export class WorkspaceMetadataComponent{
     return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
   }
   private isAnimated(){
-    return NodeHelper.hasAnimatedPreview(this.nodeObject);
+    return this.nodeHelper.hasAnimatedPreview(this.nodeObject);
   }
   private formatPermissions(login: IamUser, permissions: NodePermissions): any{
     const data: any = {};

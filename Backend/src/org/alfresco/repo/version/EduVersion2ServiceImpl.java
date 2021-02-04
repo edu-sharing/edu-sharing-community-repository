@@ -97,6 +97,8 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
             throw new VersionServiceException(MSGID_ERR_REVERT_MISMATCH);
         }
 
+        QName nodeType = this.nodeService.getType(nodeRef);
+
         // Turn off any auto-version policy behaviours
         this.policyBehaviourFilter.disableBehaviour(nodeRef, ContentModel.ASPECT_VERSIONABLE);
         try
@@ -180,6 +182,18 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
         	 */
         	newAspectQNames.add(QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY));
         	newAspectQNames.add(QName.createQName(CCConstants.CCM_ASPECT_TRACKING));
+
+            /**
+             * edu-sharing fix old nodes that do not got mandatory educontext aspect
+             */
+        	if(QName.createQName(CCConstants.CCM_TYPE_IO).equals(nodeType)
+                    || QName.createQName(CCConstants.CCM_TYPE_MAP).equals(nodeType)){
+        	    QName aspectEduContext = QName.createQName(CCConstants.CCM_ASPECT_EDUCONTEXT);
+        	    if(!oldAspectQNames.contains(aspectEduContext)){
+                    newAspectQNames.add(aspectEduContext);
+                }
+            }
+
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_ACTION));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
         	propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_INVITED));
@@ -199,12 +213,20 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
 		    }
             
             this.nodeService.setProperties(nodeRef, newProps);
-                
-                //Restore forum properties
-                if (needToRestoreDiscussion)
-                {
-                    this.nodeService.addProperties(nodeRef, forumProps);
+            /**
+             * edu-sharing FIX: many properties with null value after revert
+             */
+            for(Map.Entry<QName,Serializable> entry : newProps.entrySet()){
+                if(entry.getValue() == null){
+                    this.nodeService.removeProperty(nodeRef,entry.getKey());
                 }
+            }
+                
+            //Restore forum properties
+            if (needToRestoreDiscussion)
+            {
+                this.nodeService.addProperties(nodeRef, forumProps);
+            }
 
             Set<QName> aspectsToRemove = new HashSet<QName>(oldAspectQNames);
         	aspectsToRemove.removeAll(newAspectQNames);
@@ -407,7 +429,6 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
 		 * 
 		 * also we recreate the preview again
 		 */
-        QName nodeType = this.nodeService.getType(nodeRef);
 		if(nodeType.toString().equals(CCConstants.CCM_TYPE_IO)){
 			
 			this.nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION), version.getVersionLabel());

@@ -190,7 +190,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
+	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck) {
 		return null;
 	}
 

@@ -39,6 +39,7 @@ public class Values implements Serializable {
 	@XmlElement	public AvailableMds[] availableMds;
 	@XmlElement	public String[] availableRepositories;
 	@XmlElement	public Integer searchViewType;
+	@XmlElement	public Integer workspaceViewType;
 	@XmlElement	public Integer itemsPerRequest;
 	@XmlElement	public Rendering rendering;
 	@XmlElement	public SessionExpiredDialog sessionExpiredDialog;
@@ -52,7 +53,10 @@ public class Values implements Serializable {
 	@XmlElement	public Services services;
 	@XmlElement	public HelpMenuOptions[] helpMenuOptions;
 	@XmlElement	public Image[] images;
+	@XmlElement	public FontIcon[] icons;
 	@XmlElement	public Stream stream;
 	@XmlElement	public Admin admin;
 	@XmlElement	public SimpleEdit simpleEdit;
+	@XmlElement	public ConfigFrontpage frontpage;
+	@XmlElement	public ConfigUpload upload;
 }

@@ -19,6 +19,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.Helper;
@@ -42,6 +43,8 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SearchVCard;
+import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -49,6 +52,7 @@ import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLEncoder;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -87,16 +91,17 @@ public class SearchServiceImpl implements SearchService {
 		token.setMaxResult(maxItems);
 		token.setSortDefinition(sortDefinition);
 		token.setContentType(contentType);
-
-		token.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP +"\") "
-				+ " AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE+"\""
-				+ " AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedByMe",
+				null
+		);
+		token.setLuceneString(mdsQuery + " AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
 		return search(token);
 	}
 
 
 	@Override
-	public SearchResultNodeRef getFilesSharedToMe(SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
+	public SearchResultNodeRef getFilesSharedToMe(SharedToMeType type, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 
 		SearchToken token=new SearchToken();
@@ -109,18 +114,24 @@ public class SearchServiceImpl implements SearchService {
 		memberships.add(username);
 		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
 		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
-
-		StringBuilder query= new StringBuilder("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") "
-				+ "AND ISNOTNULL:\"ccm:ph_users\" "
-				+ "AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE+"\""
-				+ "AND NOT ASPECT:\""+CCConstants.CCM_ASPECT_COLLECTION+"\" AND NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedToMe",
+				null
+		);
+		StringBuilder query= new StringBuilder(mdsQuery + " AND ("
+				+ "NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
 				+ " AND (");
 		int i=0;
-		for(String m : memberships){
-			if(i++>0)
-				query.append(" OR ");
-			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
+		if(type.equals(SharedToMeType.All)) {
+			for (String m : memberships) {
+				if (i++ > 0)
+					query.append(" OR ");
+				query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
+			}
+		} else if (type.equals(SharedToMeType.Private)){
+			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(username)).append("\"");
 		}
+		query.append(")");
 		query.append(")");
 		token.setLuceneString(query.toString());
 
@@ -240,12 +251,8 @@ public class SearchServiceImpl implements SearchService {
 						String param = QueryParser.escape(pattern == null ? "" : pattern);
 						
 						//only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
-						StringBuilder qbMemberShips=null;
-						if(onlyMemberShips == true || 
-								(onlyMemberShips == false && !isAdmin)) {
-							
-						
-							
+						StringBuilder additionalQuery=null;
+						if(onlyMemberShips) {
 							List<String> memberShibsOrg = new ArrayList<String>(); 
 							if(memberships != null && memberships.size() > 0) {
 								for(String membershib : memberships) {
@@ -258,22 +265,25 @@ public class SearchServiceImpl implements SearchService {
 									}
 								}
 								if(memberShibsOrg.size() > 0) {
-									qbMemberShips = new StringBuilder();
-									qbMemberShips.append(" AND (");
+									additionalQuery = new StringBuilder();
+									additionalQuery.append(" AND (");
 									int i = 0;
 									for(String membershibOrg : memberShibsOrg) {
 										if(i > 0) {
-											qbMemberShips.append(" OR ");
+											additionalQuery.append(" OR ");
 										}
-										qbMemberShips.append("@cm\\:authorityName:\"" + QueryParser.escape(membershibOrg) + "\"");
+										additionalQuery.append("@cm\\:authorityName:\"" + QueryParser.escape(membershibOrg) + "\"");
 										i++;
 									}
-									qbMemberShips.append(")");
+									additionalQuery.append(")");
 								}else {
 									return new SearchResult<EduGroup>();
 								}
 								
 							}
+						} else if(!isAdmin) {
+							additionalQuery = new StringBuilder();
+							additionalQuery.append(" AND NOT ISNULL:\"ccm:group_signup_method\"");
 						}
 						
 						parameters
@@ -281,7 +291,7 @@ public class SearchServiceImpl implements SearchService {
 										"(@cm\\:authorityName:\"*" + param + "*\"" + 
 										" OR @cm\\:authorityDisplayName:\"*" + param + "*\"" + 
 										") AND @ccm\\:edu_homedir:\"workspace://*\"" + 
-										((qbMemberShips != null) ? " " + qbMemberShips.toString() : "") );
+										((additionalQuery != null) ? " " + additionalQuery.toString() : "") );
 						logger.info("query:" +parameters.getQuery());
 						
 						ResultSet edugroups = searchService.query(parameters);
@@ -827,7 +837,7 @@ public class SearchServiceImpl implements SearchService {
 		
 		Set<String> authoritiesForUser = serviceRegistry.getAuthorityService().getAuthorities();
 		// Do not display io_references
-		String query = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND NOT ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND (@ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"";
+		String query = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND ISUNSET:\"" + CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL + "\" AND NOT ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND (@ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"";
 		for(String authority : authoritiesForUser) {
 			query+=" OR @ccm\\:wf_receiver:\"" + authority + "\"";
 		}
@@ -842,8 +852,14 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws Exception {
-		if(globalContext)
+		String signupMethod = customProperties == null ? null : customProperties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD));
+		boolean searchingSignupGroups = ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP) &&
+										AuthorityType.GROUP.equals(type) &&
+										signupMethod != null &&
+										!signupMethod.isEmpty();
+		if(globalContext && !searchingSignupGroups) {
 			checkGlobalSearchPermission();
+		}
 		List<String> searchFields = new ArrayList<>();
 
 		// fields to search in - not using username
@@ -854,10 +870,11 @@ public class SearchServiceImpl implements SearchService {
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
 		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,searchFields, globalContext);
-		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
+		// we're skipping TP checks when the search requested signup groups -> it's possible to see them even without GLOBAL_AUTHORITY_SEARCH permissions
+		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext, searchingSignupGroups);
 		
 
-		if(findUsersQuery == null || findGroupsQuery == null) {
+		if(findUsersQuery == null && findGroupsQuery == null) {
 			return new SearchResult<String>(new ArrayList<String>(), 0, 0);
 		}
 		
@@ -880,7 +897,10 @@ public class SearchServiceImpl implements SearchService {
 			if(findUsersQuery!=null)
 				finalQuery += "("+findUsersQuery+")";
 			if(findGroupsQuery!=null) {
-				finalQuery += " OR (" + findGroupsQuery + ")";
+				if(findUsersQuery != null){
+					finalQuery += " OR ";
+				}
+				finalQuery += "(" + findGroupsQuery + ")";
 			}
 		}
 		else if(type.equals(AuthorityType.USER)) {
@@ -1020,5 +1040,10 @@ public class SearchServiceImpl implements SearchService {
 			return result;
 
 
+	}
+
+	@Override
+	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
+		throw new NotImplementedException("searchContributors not supported via Solr");
 	}
 }

@@ -95,6 +95,8 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 
 		String replicationTimeStamp = (String) xpath.evaluate("header/datestamp", nodeRecord, XPathConstants.STRING);
 
+		String lomNamespace = (String)xpath.evaluate("metadata/lom/@schemaLocation",nodeRecord,XPathConstants.STRING);
+
 		/**
 		 * general
 		 */
@@ -119,6 +121,18 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 			generalIdentifierToSafeMap.put(CCConstants.LOM_PROP_IDENTIFIER_CATALOG, tmpLomCatalogId);
 
 			generalIdentifierList.add(generalIdentifierToSafeMap);
+		}
+
+		//fallback to dini-ag dialect
+		String oerbwNs = "https://www.oerbw.de/hsoerlom";
+		if(lomNamespace != null && lomNamespace.trim().contains(oerbwNs)){
+
+			if(replicationId == null || replicationId.trim().equals("")){
+				replicationId = (String) xpath.evaluate("metadata/lom/general/identifier", nodeRecord, XPathConstants.STRING);
+			}
+			if(lomCatalogId == null || lomCatalogId.trim().equals("")){
+				lomCatalogId = oerbwNs;
+			}
 		}
 
 		ArrayList<String> generalTitleI18n = getMultiLangValueNew((Node) xpath.evaluate("metadata/lom/general/title", nodeRecord, XPathConstants.NODE));
@@ -807,9 +821,11 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		ArrayList<String> result = new ArrayList<String>();
 		if (node != null) {
 			NodeList langList = (NodeList) xpath.evaluate("string", node, XPathConstants.NODESET);
+			if(langList.getLength() == 0) langList = (NodeList) xpath.evaluate("langstring", node, XPathConstants.NODESET);
 			for (int i = 0; i < langList.getLength(); i++) {
 				Node langValNode = langList.item(i);
 				String language = (String) xpath.evaluate("@language", langValNode, XPathConstants.STRING);
+				language = (language == null || language.trim().equals("")) ? (String) xpath.evaluate("@lang", langValNode, XPathConstants.STRING) : language;
 				String value = (String) xpath.evaluate(".", langValNode, XPathConstants.STRING);
 				if (language != null && !language.trim().equals("") && value != null && !value.trim().equals("")) {
 					// wir brauchen das LAND damit i18n richtig funktioniert

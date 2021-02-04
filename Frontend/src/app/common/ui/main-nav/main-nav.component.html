@@ -1,4 +1,6 @@
-<div *ngIf="visible">
+<app-banner *ngIf="visible" [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
+
+<div *ngIf="visible" role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
   <div class="preload" *ngIf="getPreloading()">
     <img src="assets/images/edu-sharing-loading-animation.svg" image-config alt="" />
   </div>
@@ -18,7 +20,6 @@
     </div>
   </card>
 
-  <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
   <global-progress *ngIf="globalProgress"></global-progress>
   <tutorial
     [element]="tutorialElement"
@@ -78,7 +79,7 @@
     [class.noUser]="!_showUser"
   >
     <div class="mobile-move-top2">
-      <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle" >
+      <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle">
         <ng-container *ngSwitchCase="'dropdown'">
           <app-main-menu-dropdown
             #mainMenuDropdown
@@ -103,7 +104,6 @@
             #mainMenuSidebar
             [currentScope]="_currentScope"
             (showLicenses)="showLicenses()"
-            (openProfile)="openProfile()"
           ></app-main-menu-sidebar>
           <button
             *ngIf="showScope"
@@ -121,7 +121,7 @@
         </ng-container>
       </div>
       <div class="timeout" *ngIf="isSafe() && timeout">
-        <i icon iconId="av_timer"></i>
+        <i icon="av_timer"></i>
         {{ timeout }}
       </div>
       <div class="add-material">
@@ -133,8 +133,9 @@
           #dropdownTrigger="matMenuTrigger"
           (menuOpened)="createMenu.updateOptions()"
           [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+          [attr.aria-label]="'WORKSPACE.ADD' | translate"
         >
-          <i icon iconId="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+          <i icon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
         </button>
         <button
           class="create-dummy"
@@ -143,11 +144,17 @@
           [style.top]="createMenuY + 'px'"
           #dropdownTriggerDummy="matMenuTrigger"
           [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+          tabindex="-1"
+          aria-hidden="true"
         ></button>
       </div>
       <div class="topBarSearch" [class.noScope]="!showScope">
         <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
-        <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled" role="search">
+        <form
+              autocomplete="off"
+              *ngIf="searchEnabled"
+              role="search"
+              #searchForm>
           <div class="searchInputGroup">
             <input
               #search
@@ -155,29 +162,31 @@
               type="search"
               [(ngModel)]="searchQuery"
               (change)="searchQueryChange.emit(searchQuery)"
-              title="{{ searchPlaceholder | translate }}"
               placeholder="{{ searchPlaceholder | translate }}"
+              [attr.aria-label]="searchPlaceholder | translate"
             />
-            <i class="material-icons searchIcon">search</i>
-            <i class="material-icons searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()"
-              >clear</i
-            >
+            <i class="searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()" icon="clear"></i>
+            <button mat-icon-button (click)="doSearch()" attr.aria-label="{{'WORKSPACE.SEARCH_ACTION' | translate}}">
+              <i icon="search" [aria]="false"></i>
+            </button>
           </div>
         </form>
       </div>
       <div class="topbar-search-right">
         <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
           <a
+            cdkMonitorElementFocus
             tabindex="0"
-            class="focus-underline"
+            class="clickable"
             *ngIf="config.imprintUrl"
             (click)="openImprint()"
             (keyup.enter)="openImprint()"
             >{{ 'IMPRINT' | translate }}</a
           >
           <a
+            cdkMonitorElementFocus
             tabindex="0"
-            class="focus-underline"
+            class="clickable"
             *ngIf="config.privacyInformationUrl"
             (click)="openPrivacy()"
             (keyup.enter)="openPrivacy()"
@@ -185,7 +194,7 @@
           >
         </div>
         <button mat-icon-button *ngIf="user && showChat()" class="rocketchat" (click)="openChat()">
-          <i icon iconId="message"></i>
+          <i icon="message"></i>
           <div class="mat-button-badge" [class.rocketchat-count-none]="getChatCount() == 0">
             {{ getChatCount() }}
           </div>
@@ -217,7 +226,7 @@
     tabindex="0"
     (click)="scrollToTop()"
   >
-    <i icon iconId="arrow_upward"></i> {{ 'GO_TO_TOP' | translate }}
+    <i icon="arrow_upward"></i> {{ 'GO_TO_TOP' | translate }}
   </button>
   <div *ngIf="canOpen && _currentScope != 'render'" #tabNav class="tab-nav">
     <app-main-menu-bottom

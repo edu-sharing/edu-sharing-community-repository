@@ -360,9 +360,6 @@ main-nav{
   .group .inputGroup{
     padding:0;
   }
-  .jobParams{
-    min-height: 80px;
-  }
   .catalina{
     margin-bottom: 40px;
     button {
@@ -435,6 +432,13 @@ main-nav{
   }
   .search-list{
     padding-top: 20px;
+    actionbar{
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      width: 100%;
+      height: 40px;
+    }
   }
   .export-properties{
     min-height: 150px;
@@ -471,6 +475,9 @@ main-nav{
   display: flex;
   align-items: center;
   flex-direction: column;
+  .jobParams{
+    min-height: 250px;
+  }
   .group{
     position: relative;
     float:left;
@@ -486,6 +493,43 @@ main-nav{
     }
     mat-form-field{
       width: 100%;
+    }
+  }
+  .params {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    .param-table {
+      display: table;
+
+      .param-row {
+        display: table-row;
+
+        .param-name {
+          font-weight: bold;
+          span{
+            color: $textLight;
+            font-size: $fontSizeSmall;
+          }
+        }
+        .param-value {
+          min-width: 30%;
+          .param-table{
+            margin: 5px;
+            padding: 5px;
+            border:1px solid $inputBorderColor;
+          }
+        }
+
+        > div {
+          display: table-cell;
+          padding: 2px 5px;
+          vertical-align: middle;
+        }
+      }
+    }
+    button {
+      margin-top: 10px;
     }
   }
   .job-class{

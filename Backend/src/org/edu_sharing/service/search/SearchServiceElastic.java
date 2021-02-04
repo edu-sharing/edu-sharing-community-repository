@@ -1,13 +1,13 @@
 package org.edu_sharing.service.search;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import com.google.gson.Gson;
+import net.sourceforge.cardme.engine.VCardEngine;
+import net.sourceforge.cardme.vcard.VCard;
+import net.sourceforge.cardme.vcard.exceptions.VCardParseException;
+import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.permissions.PermissionReference;
-import org.alfresco.repo.security.permissions.impl.RequiredPermission;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
-import org.alfresco.repo.security.permissions.impl.model.PermissionSet;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.namespace.QName;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -18,35 +18,44 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
+import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
-import org.edu_sharing.service.util.AlfrescoDaoHelper;
+import org.edu_sharing.service.search.model.SearchVCard;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.LoggingDeprecationHandler;
+import org.elasticsearch.common.xcontent.NamedXContentRegistry;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.collapse.CollapseBuilder;
-import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SearchServiceElastic extends SearchServiceImpl {
     static RestHighLevelClient client;
@@ -78,9 +87,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     @Override
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
-        if(client == null || !client.ping(RequestOptions.DEFAULT)){
-             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
-        }
+        checkClient();
         MetadataQuery queryData;
         try{
             queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
@@ -140,7 +147,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.from(searchToken.getFrom());
             searchSourceBuilder.size(searchToken.getMaxResult());
             searchSourceBuilder.trackTotalHits(true);
-            searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+            searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
 
 
 
@@ -152,7 +159,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, RequestOptions.DEFAULT));
 
+
+            logger.info("query: "+searchSourceBuilder.toString());
             SearchHits hits = searchResponse.getHits();
+            logger.info("result count: "+hits.getTotalHits());
 
             long millisPerm = 0;
             for (SearchHit hit : hits) {
@@ -284,7 +294,149 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
+    enum CONTRIBUTOR_PROP {firstname,lastname,email,url,uid};
 
+    @Override
+    public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException{
+        checkClient();
+        SearchRequest searchRequest = new SearchRequest("workspace");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        List<String> searchFields = new ArrayList<>();
+        if(fields == null || fields.size() == 0){
+            for(CONTRIBUTOR_PROP att : CONTRIBUTOR_PROP.values()){
+                searchFields.add("contributor." + att.name());
+            }
+        }else{
+            for(String f : fields){
+                if(Stream.of(CONTRIBUTOR_PROP.values()).anyMatch(v -> v.name().equals(f))){
+                    searchFields.add("contributor." + f);
+                }
+            }
+        }
+        BoolQueryBuilder qb = QueryBuilders.boolQuery();
+        for(String searchField : searchFields){
+            String search = new String(suggest);
+            if(!search.contains("*")) search = "*"+search+"*";
+            qb.should(QueryBuilders.wildcardQuery(searchField,search));
+        }
+
+        if(contributorProperties.size() > 0) {
+            BoolQueryBuilder bqb = QueryBuilders.boolQuery().minimumShouldMatch(1);
+            for (String contributorProp : contributorProperties) {
+                bqb.should(QueryBuilders.termQuery("contributor.property", contributorProp));
+            }
+            qb.must(bqb);
+        }
+
+        if(contributorKind == ContributorKind.ORGANIZATION){
+            qb.must(QueryBuilders.boolQuery().should(
+                    QueryBuilders.existsQuery("contributor.X-ROR")
+                ).should(
+                    QueryBuilders.existsQuery("contributor.X-Wikidata")
+                ).minimumShouldMatch(1)
+            );
+        }else{
+            qb.must(QueryBuilders.boolQuery().should(
+                    QueryBuilders.existsQuery("contributor.X-ORCID")
+                    ).should(
+                    QueryBuilders.existsQuery("contributor.X-GND-URI")
+                    ).minimumShouldMatch(1)
+            );
+        }
+
+
+        searchSourceBuilder.query(qb);
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.size(0);
+        searchSourceBuilder.trackTotalHits(true);
+        searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+        searchSourceBuilder.aggregation(AggregationBuilders.terms("vcard").field("contributor.vcard.keyword").size(10000));
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        ParsedStringTerms aggregation = searchResponse.getAggregations().get("vcard");
+        /*
+        for (Terms.Bucket bucket : aggregation.getBuckets()) {
+            ArrayList<Map<String,Serializable>> contributor = (ArrayList<Map<String,Serializable>>) sourceAsMap.get("contributor");
+
+            List<Map<String,Serializable>> remove = new ArrayList<>();
+            for(Map<String,Serializable> map:contributor){
+                boolean inResult = false;
+                boolean propertyIsInFilter = true;
+
+                if(contributorKind == ContributorKind.ORGANIZATION){
+                    if(!map.containsKey("X-ROR") && !map.containsKey("X-Wikidata")){
+                        remove.add(map);
+                        continue;
+                    }
+                }else{
+                    if(!map.containsKey("X-ORCID") && !map.containsKey("X-GND-URI")){
+                        remove.add(map);
+                        continue;
+                    }
+                }
+
+                for(Map.Entry<String,Serializable> entry : map.entrySet()){
+                    if(entry.getKey().equals("property")){
+                        if(contributorProperties.size() > 0){
+                            if(!contributorProperties.contains(entry.getValue())){
+                                propertyIsInFilter = false;
+                            }
+                        }
+                        continue;
+                    }
+                    if(fields.size() > 0 && !fields.contains(entry.getKey())){
+                        continue;
+                    }
+                    if(entry.getValue() == null){
+                        continue;
+                    }
+                    if(((String)entry.getValue()).toLowerCase().contains(suggest.toLowerCase())){
+                       inResult = true;
+                    }
+                }
+                if(!inResult || !propertyIsInFilter)remove.add(map);
+            }
+            for(Map<String,Serializable> map : remove) contributor.remove(map);
+            if(contributor.size() > 0) result.addAll(contributor);
+
+
+        }*/
+        VCardEngine engine = new VCardEngine();
+        return aggregation.getBuckets().stream().
+                map(Terms.Bucket::getKey).
+                // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
+                filter(
+                    (k) -> Arrays.stream(
+                        suggest.toLowerCase().split(" ")).allMatch(
+                                (t) -> k.toString().toLowerCase().contains(t)
+                        )
+                ).
+                filter((k) -> {
+                    try {
+                        VCard vcard = engine.parse(k.toString());
+                        if(contributorKind == ContributorKind.ORGANIZATION){
+                            return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
+                                    (e) -> e.equals("X-ROR") || e.equals("X-Wikidata")
+                            );
+                        } else {
+                            return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
+                                    (e) -> e.equals("X-ORCID") || e.equals("X-GND-URI")
+                            );
+                        }
+                    } catch (Exception ignored) {
+                        return false;
+                    }
+                }).
+                map((k) -> new SearchVCard(k.toString())).
+                collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public void checkClient() throws IOException {
+        if(client == null || !client.ping(RequestOptions.DEFAULT)){
+             client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
+        }
+    }
 
 
 }

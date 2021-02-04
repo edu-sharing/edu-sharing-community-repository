@@ -38,6 +38,8 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -51,19 +53,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Batch edit property for multiple nodes
- * Required parameters:
- * property: The property name to replace
- * value: the target value to set
- * OR copy: the source property to copy the value of
- * startFolder: The id of the folder to start (recursively processing all children)
- * mode: The mode, see enum
- * types: the types of nodes to process, e.g. ccm:io (comma seperated string)
- *
- */
+@JobDescription(description = "Bulk delete authorities (users/groups)")
 public class BulkDeleteAuthoritiesJob extends AbstractJob{
 	protected Logger logger = Logger.getLogger(BulkDeleteAuthoritiesJob.class);
+	@JobFieldDescription(file = true)
+	private String data;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -75,7 +69,7 @@ public class BulkDeleteAuthoritiesJob extends AbstractJob{
 		AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
 		PersonService personService = serviceRegistry.getPersonService();
 		NodeService nodeService = serviceRegistry.getNodeService();
-		String data = (String) context.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA);
+		data = (String) context.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA);
 		if (data == null){
 			throw new IllegalArgumentException("Missing required file data");
 		}
@@ -99,7 +93,8 @@ public class BulkDeleteAuthoritiesJob extends AbstractJob{
 				entry = entry.trim();
 				try {
 					if(entry.startsWith(PermissionService.GROUP_PREFIX)) {
-						authorityService.deleteAuthority(entry);
+						// use alf authority service to remove admin groups
+						serviceRegistry.getAuthorityService().deleteAuthority(entry);
 					} else {
 						NodeRef personRef = personService.getPersonOrNull(entry);
 						if(personRef == null){

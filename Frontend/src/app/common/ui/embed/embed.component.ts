@@ -11,12 +11,13 @@ import {Toast} from "../../../core-ui-module/toast";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {MdsEditorWrapperComponent} from '../mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {MainNavService} from '../../services/main-nav.service';
 
 @Component({
     selector: 'mds-embed',
     encapsulation: ViewEncapsulation.None,
     template: `
-        <app-mds-editor-wrapper #mdsRef [embedded]="true" [currentValues]="data" [setId]="setId" [groupId]="groupId" *ngIf="component==='mds'"></app-mds-editor-wrapper>
+        <app-mds-editor-wrapper #mdsRef [embedded]="true" editorMode="form" [currentValues]="data" [setId]="setId" [groupId]="groupId" *ngIf="component==='mds'"></app-mds-editor-wrapper>
         <workspace-license #licenseRef [properties]="data" [embedded]="true" *ngIf="component==='license'"></workspace-license>
     `,
     styleUrls: ['embed.component.scss']
@@ -32,10 +33,13 @@ export class EmbedComponent implements EventListener {
     constructor(private translate:TranslateService,
                 private config:ConfigurationService,
                 private storage:SessionStorageService,
+                private mainNavService:MainNavService,
                 private toast:Toast,
                 private ngZone:NgZone,
                 private route:ActivatedRoute,
                 private event : FrameEventsService) {
+        // disable the cookie info when in embedded context
+        this.mainNavService.getCookieInfo().show = false;
         this.event.addListener(this);
         this.toast.showProgressDialog();
         Translation.initialize(this.translate,this.config,this.storage,this.route).subscribe(()=> {
@@ -54,7 +58,6 @@ export class EmbedComponent implements EventListener {
                     if(this.component === 'mds') {
                         UIHelper.waitForComponent(this.ngZone,this, 'mdsRef').subscribe(async () => {
                             await this.mdsRef.reInit();
-                            this.mdsRef.mdsEditorInstance.editorMode = 'nodes';
                             this.toast.closeModalDialog();
                         });
                     } else {
@@ -64,12 +67,13 @@ export class EmbedComponent implements EventListener {
             });
         });
     }
-    onEvent(event: string, data: any): void {
-        if(event==FrameEventsService.EVENT_PARENT_FETCH_DATA) {
-            if(this.component=='mds')
-                this.event.broadcastEvent(FrameEventsService.EVENT_POST_DATA,this.mdsRef.getValues());
-            if(this.component=='license')
-                this.event.broadcastEvent(FrameEventsService.EVENT_POST_DATA,this.licenseRef.getProperties());
+    async onEvent(event: string, data: any) {
+        if (event === FrameEventsService.EVENT_PARENT_FETCH_DATA) {
+            if (this.component === 'mds') {
+                this.event.broadcastEvent(FrameEventsService.EVENT_POST_DATA, await this.mdsRef.getValues());
+            } else if (this.component === 'license') {
+                this.event.broadcastEvent(FrameEventsService.EVENT_POST_DATA, this.licenseRef.getProperties());
+            }
         }
     }
 }

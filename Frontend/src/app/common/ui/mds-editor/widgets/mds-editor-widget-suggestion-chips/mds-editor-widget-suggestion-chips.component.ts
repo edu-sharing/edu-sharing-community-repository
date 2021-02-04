@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import {MdsWidgetFacetValue, MdsWidgetValue} from '../../types';
+import { MdsWidgetFacetValue, MdsWidgetValue } from '../../types';
 
 @Component({
     selector: 'app-mds-editor-widget-suggestion-chips',
@@ -21,7 +21,16 @@ export class MdsEditorWidgetSuggestionChipsComponent implements OnInit {
 
     ngOnInit(): void {
         this.primaryWidget = this.mdsEditorInstance.getPrimaryWidget(this.widget.definition.id);
-        this.filteredSuggestions$ = this.getFilteredSuggestions(this.primaryWidget);
+        if (this.primaryWidget) {
+            this.filteredSuggestions$ = this.getFilteredSuggestions(this.primaryWidget);
+        } else {
+            console.error(
+                'Could not find corresponding primary widget for suggestion widget.\n',
+                `widget: ${this.widget.definition.id}\n`,
+                `group: ${this.mdsEditorInstance.groupId}\n`,
+                `mds: ${this.mdsEditorInstance.mdsId}`,
+            );
+        }
     }
 
     add(suggestion: MdsWidgetValue): void {

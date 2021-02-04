@@ -29,22 +29,24 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.namespace.QName;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.service.nodeservice.RecurseMode;
+import org.edu_sharing.service.util.CSVTool;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
+import java.io.BufferedReader;
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -58,22 +60,44 @@ import java.util.stream.Collectors;
  * types: the types of nodes to process, e.g. ccm:io (comma seperated string)
  *
  */
+@JobDescription(description = "Bulk change metadata of nodes")
 public class BulkEditNodesJob extends AbstractJob{
-
 	protected Logger logger = Logger.getLogger(BulkEditNodesJob.class);
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
-	private String property;
-	private Serializable value;
-	private String copy;
-	private String searchToken;
-	private String replaceToken;
+	@JobFieldDescription(description = "folder id to start from")
+	private String startFolder;
+	@JobFieldDescription(description = "Lucene query to fetch the nodes that shall be processed. When used, the 'startFolder' parameter is ignored")
+	private String lucene;
+	@JobFieldDescription(description = "Mode to use")
 	private Mode mode;
+	@JobFieldDescription(description = "property to modify, e.g. cm:name", sampleValue = "cm:name")
+	private String property;
+	@JobFieldDescription(description = "Value to replace target property with")
+	private Serializable value;
+	@JobFieldDescription(description = "property to copy value from, if mode == Copy", sampleValue = "cclom:title")
+	private String copy;
+	@JobFieldDescription(description = "token to replace, if mode == ReplaceToken")
+	private String searchToken;
+	@JobFieldDescription(description = "Token to replace with, if mode == ReplaceToken")
+	private String replaceToken;
+	@JobFieldDescription(description = "Element types to modify (comma seperated list), e.g. ccm:map,ccm:io", sampleValue = "ccm:map,ccm:io")
 	private List<String> types;
+	@JobFieldDescription(description = "RecurseMode to use")
+	private RecurseMode recurseMode;
+	@JobFieldDescription(file = true, description = "Mapping list (csv with oldValue + newValue headers), only if mode == ReplaceMapping")
+	private String data;
+	private CSVTool.CSVResult csv;
 
 	private enum Mode{
+		@JobFieldDescription(description = "Replace a property with a fixed string")
 		Replace,
+		@JobFieldDescription(description = "Search and Replace a string value inside the properties")
 		ReplaceToken,
+		@JobFieldDescription(description = "Find specific keys in the list and map it to new ones (list must contain oldValue and newValue as csv-headings!)")
+		ReplaceMapping,
+		@JobFieldDescription(description = "Currently Unsupported")
 		Append,
+		@JobFieldDescription(description = "Remove the property")
 		Remove
 	};
 
@@ -113,7 +137,9 @@ public class BulkEditNodesJob extends AbstractJob{
 			replaceToken = prepareParam(context, "replaceToken", true);
 		}
 
-		String startFolder =prepareParam(context, "startFolder", true);
+		lucene =prepareParam(context, "lucene", false);
+
+		startFolder =prepareParam(context, "startFolder", true);
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
@@ -122,7 +148,7 @@ public class BulkEditNodesJob extends AbstractJob{
 		if(types==null || types.isEmpty()) {
 			throwMissingParam("types");
 		}
-		RecurseMode recurseMode = RecurseMode.Folders;
+		recurseMode = RecurseMode.Folders;
 		try {
 			if(context.getJobDetail().getJobDataMap().get("recurseMode") != null) {
 				recurseMode = RecurseMode.valueOf((String) context.getJobDetail().getJobDataMap().get("recurseMode"));
@@ -130,6 +156,11 @@ public class BulkEditNodesJob extends AbstractJob{
 		}catch(Throwable t){
 			throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
 		}
+		data = (String) context.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA);
+		if(mode.equals(Mode.ReplaceMapping)){
+			csv = readCSVMapping(data);
+		}
+
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
 			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
@@ -142,19 +173,24 @@ public class BulkEditNodesJob extends AbstractJob{
 			}
 			else if(mode.equals(Mode.Remove)){
 				nodeService.removeProperty(nodeRef,QName.createQName(property));
-			} else if(mode.equals(Mode.ReplaceToken)){
-				Serializable current=nodeService.getProperty(nodeRef, QName.createQName(property));
-				if(current!=null) {
+			} else if(mode.equals(Mode.ReplaceToken) || mode.equals(Mode.ReplaceMapping)) {
+				Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+				if (current != null) {
 					if (current instanceof String) {
-						nodeService.setProperty(nodeRef, QName.createQName(property), ((String) current).replace(searchToken, replaceToken));
+						nodeService.setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
 					} else if (current instanceof List) {
-						nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List<String>) current).stream().map((s) -> s.replace(searchToken, replaceToken)).collect(Collectors.toList()));
+						nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
+							if(v instanceof String){
+								return processPropertyValue((String) v);
+							} else {
+								return v;
+							}
+						}).collect(Collectors.toList()));
 					} else {
 						logger.info("Can not replace property " + property + "for node " + nodeRef + ": current data is not of type String/List");
 					}
 				}
-			}
-			else {
+			} else {
 				throw new IllegalArgumentException("Mode " + mode + " is currently not supported");
 			}
 		});
@@ -163,10 +199,45 @@ public class BulkEditNodesJob extends AbstractJob{
 		runner.setThreaded(false);
 		runner.setRecurseMode(recurseMode);
 		runner.setStartFolder(startFolder);
+		runner.setLucene(lucene);
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		int count=runner.run();
 		logger.info("Processed "+count+" nodes");
+	}
+
+	public static CSVTool.CSVResult readCSVMapping(String data) {
+		if(data==null) {
+			throw new IllegalArgumentException("Missing or invalid value for parameter 'data'");
+		}
+		CSVTool.CSVResult csv = CSVTool.readCSV(new BufferedReader(new StringReader(data)), ',');
+		if(csv == null){
+			throw new IllegalArgumentException("Could not read csv");
+		}
+		if(!csv.getHeaders().contains("oldValue") || !csv.getHeaders().contains("newValue")){
+			throw new IllegalArgumentException("Provided csv must contain oldValue and newValue headers");
+		}
+		return csv;
+	}
+
+	private Serializable processPropertyValue(String value) {
+		if(mode.equals(Mode.ReplaceToken)) {
+		return value.replace(searchToken, replaceToken);
+		} else if (mode.equals(Mode.ReplaceMapping)) {
+			List<Map<String, String>> filtered = csv.getLines().stream().
+					filter((l) -> !l.get("oldValue").isEmpty()).
+					filter((l) -> l.get("oldValue").trim().equals(value.trim())).collect(Collectors.toList());
+			if(filtered.size() == 0){
+				logger.warn("No mapping found for '" + value + "'! Check your csv data if this value should be mapped");
+				return value;
+			}
+			if(filtered.size() == 1){
+				return filtered.get(0).get("newValue");
+			}
+			logger.warn("Multiple matches for value '" + value + "'! No mapping applied. Make sure your csv data is valid");
+			return value;
+		}
+		return null;
 	}
 
 	private String prepareParam(JobExecutionContext context, String param, boolean required) {
@@ -185,10 +256,9 @@ public class BulkEditNodesJob extends AbstractJob{
 	public void run() {
 
 	}
-	
+
 	@Override
 	public Class[] getJobClasses() {
-		// TODO Auto-generated method stub
 		return allJobs;
 	}
 }

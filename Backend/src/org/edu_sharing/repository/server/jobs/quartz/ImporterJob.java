@@ -29,22 +29,15 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.lang.reflect.Constructor;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.server.importer.BinaryHandler;
-import org.edu_sharing.repository.server.importer.Importer;
-import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
-import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
-import org.edu_sharing.repository.server.importer.RecordHandlerInterface;
-import org.edu_sharing.repository.server.importer.RecordHandlerLOM;
+import org.edu_sharing.repository.server.importer.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -116,11 +109,44 @@ public class ImporterJob extends AbstractJob {
 		String recordHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_RECORDHANDLER);
 		String binaryHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_BINARYHANDLER);
 
+		String persistentHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_PERSISTENTHANDLER);
+
 		String importerClass = (String) jobDataMap.get(OAIConst.PARAM_IMPORTERCLASS);
 		
 		String oaiIds = (String) jobDataMap.get(OAIConst.PARAM_OAI_IDS);
 		
 		String[] idArr = (oaiIds != null) ? oaiIds.split(",") : null;
+
+		// force update if single ids should be updated
+		if(idArr != null && idArr.length > 0){
+			jobDataMap.put(OAIConst.PARAM_FORCE_UPDATE, true);
+		}
+
+		Date from = null;
+		Date until = null;
+		try {
+			from = OAIConst.DATE_FORMAT.parse((String)jobDataMap.get(OAIConst.PARAM_FROM));
+			until = OAIConst.DATE_FORMAT.parse((String)jobDataMap.get(OAIConst.PARAM_UNTIL));
+		} catch (ParseException e) {
+			logger.error(e.getMessage());
+		}catch (NullPointerException e){
+			logger.debug("from/until not set");
+		}
+
+		if(from == null && until == null){
+			String periodInDaysStr = (String)jobDataMap.get(OAIConst.PARAM_PERIOD_IN_DAYS);
+			if(periodInDaysStr != null && !periodInDaysStr.trim().equals("")) {
+				try {
+					Long periodInDays = new Long(periodInDaysStr);
+					Long periodInMs = periodInDays * 24 * 60 * 60 * 1000;
+					until = new Date();
+					from = new Date((until.getTime() - periodInMs));
+					logger.info("using from:" + from + " until:" + until);
+				}catch (NumberFormatException e){
+					logger.error(e.getMessage());
+				}
+			}
+		}
 
 
 		byte[] xmlData= (byte[]) jobDataMap.get(OAIConst.PARAM_XMLDATA);
@@ -136,7 +162,7 @@ public class ImporterJob extends AbstractJob {
 		if (xmlData != null) {
 			return start(xmlData, recordHandlerClass, binaryHandlerClass);
 		}
-		start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass, importerClass, idArr);
+		start(finalUrlImport, oaiBaseUrl, metadataSetId, finalMetadataPrefix, finalSets, recordHandlerClass, binaryHandlerClass,persistentHandlerClass, importerClass, idArr, from, until);
 		return null;
 	}
 
@@ -175,7 +201,7 @@ public class ImporterJob extends AbstractJob {
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-			String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList) {
+						 String[] sets, String recordHandlerClass, String binaryHandlerClass, String persistentHandlerClass, String importerClass, String[] idList, Date from, Date until) {
 		try {
 			for(String set : sets) {
 				Importer importer = null;
@@ -193,6 +219,7 @@ public class ImporterJob extends AbstractJob {
 
 				Constructor<RecordHandlerInterface> recordHandler = null;
 				Constructor<BinaryHandler> binaryHandler = null;
+				Constructor<PersistentHandlerInterface> persistentHandler = null;
 
 				if (recordHandlerClass != null) {
 					Class tClass = Class.forName(recordHandlerClass);
@@ -207,6 +234,13 @@ public class ImporterJob extends AbstractJob {
 					binaryHandler = null;
 				}
 
+				if(persistentHandlerClass != null){
+					Class tClass = Class.forName(persistentHandlerClass);
+					persistentHandler = tClass.getConstructor();
+				}else{
+					persistentHandler = null;
+				}
+
 				logger.info("importer:" + importer.getClass().getName());
 
 				importer.setBaseUrl(oaiBaseUrl);
@@ -214,11 +248,18 @@ public class ImporterJob extends AbstractJob {
 				importer.setMetadataPrefix(metadataPrefix);
 				importer.setNrOfRecords(-1);
 				importer.setNrOfResumptions(-1);
-				importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,true));
+				if(persistentHandler != null){
+					importer.setPersistentHandler(persistentHandler.newInstance());
+				}else{
+					importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer,true));
+				}
+
 				importer.setSet(set);
 				importer.setMetadataSetId(metadataSetId);
 				importer.setRecordHandler(recordHandler);
 				importer.setJob(this);
+				importer.setFrom(from);
+				importer.setUntil(until);
 				if (urlImport != null) {
 					RecordHandlerLOM recordHandlerLom = new RecordHandlerLOM(null);
 					((OAIPMHLOMImporter) importer).importOAIObjectsFromFile(urlImport, recordHandlerLom);

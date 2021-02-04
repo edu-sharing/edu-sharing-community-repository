@@ -4,12 +4,11 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
 import {
   ConfigurationService,
-  DialogButton,
+  DialogButton, JobDescription,
   ListItem,
   RestIamService,
   RestMediacenterService
 } from '../../core-module/core.module';
-import {Title} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestConnectorService} from '../../core-module/core.module';
@@ -44,6 +43,7 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
+import {Scope} from '../../core-ui-module/option-item';
 
 
 @Component({
@@ -55,11 +55,12 @@ import {NgxEditorModel} from 'ngx-monaco-editor';
   ]
 })
 export class AdminComponent {
+  readonly SCOPES = Scope;
+
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
               private config: ConfigurationService,
-              private title: Title,
               private translate: TranslateService,
               private iamService: RestIamService,
               private storage : SessionStorageService,
@@ -77,9 +78,7 @@ export class AdminComponent {
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-          this.prepareJobClasses();
           this.storage.refresh();
-      UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       GlobalContainerComponent.finishPreloading();
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
@@ -105,7 +104,15 @@ export class AdminComponent {
   static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   mailTemplates=[
       'invited',
+      'invited_safe',
+      'invited_collection',
       'nodeIssue',
+      'userStatusChanged',
+      'groupSignupList',
+      'groupSignupUser',
+      'groupSignupConfirmed',
+      'groupSignupRejected',
+      'groupSignupAdmin',
       'userRegister',
       'passwordRequest',
       'userRegisterInformation'
@@ -119,7 +126,11 @@ export class AdminComponent {
   public cacheName:string;
   public cacheInfo:string;
   public oai:any={};
-  public job:any={};
+  public job: {
+    params?: string;
+    name?:string,
+    class?:string,
+    object?:JobDescription} = {};
   public jobs: any;
   public jobsOpen: boolean[]=[];
   public jobsLogFilter:any = [];
@@ -158,6 +169,7 @@ export class AdminComponent {
   @ViewChild('dynamic') dynamicComponent : any;
 
   buttons:any[]=[];
+  availableJobs: JobDescription[];
   private excelFile: File;
   private collectionsFile: File;
   private uploadTempFile: File;
@@ -190,7 +202,7 @@ export class AdminComponent {
     this.globalProgress=true;
     this.admin.startJob(this.job.class,JSON.parse(this.job.params), this.uploadJobsFile).subscribe(()=> {
         this.globalProgress=false;
-        this.uploadJobsFile = null;
+        // this.uploadJobsFile = null;
         this.toast.toast('ADMIN.JOBS.JOB_STARTED');
     },(error:any)=> {
         this.globalProgress=false;
@@ -485,8 +497,8 @@ export class AdminComponent {
     }
     else {
         this.admin.importOAI(this.oai.url, this.oai.set, this.oai.prefix, this.oai.className, this.oai.importerClassName,
-            this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName, this.oai.metadata,
-            this.oai.file, this.oai.ids, this.oai.forceUpdate).subscribe(() => {
+            this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName, this.oai.persistentHandlerClassName, this.oai.metadata,
+            this.oai.file, this.oai.ids, this.oai.forceUpdate,this.oai.from,this.oai.until,this.oai.periodInDays).subscribe(() => {
             this.globalProgress = false;
             const additional: any = {
                 link: {
@@ -923,27 +935,13 @@ export class AdminComponent {
     }
 
     private prepareJobClasses() {
-        const jobs=[
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RemoveNodeJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.ConvertMultivalueToSinglevalueJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkEditNodesJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteNodesJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.UpdateFrontpageCacheJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.RestoreNodesBySolrQuery'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.SyncOrganisationFolderName'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.SetPermissionsOrgAdminGroup'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.TrashcanCleanerSolrJob'),
-            new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.CheckLinkJob')
-        ];
-        const deleteAuthorities = new SuggestItem('org.edu_sharing.repository.server.jobs.quartz.BulkDeleteAuthoritiesJob')
-        deleteAuthorities.originalObject = {upload: true};
-        jobs.push(deleteAuthorities);
-        this.jobClasses=jobs.map((job)=> {
-          const id=job.id.split('.');
-          job.title=this.translate.instant('ADMIN.JOBS.NAMES.'+id[id.length-1]);
-          job.secondaryTitle=id[id.length-1];
+        this.jobClasses=this.availableJobs.map((j)=> {
+          const job = new SuggestItem('');
+          const id=j.name.split('.');
+          job.id = j.name;
+          job.title = j.description;
+          job.secondaryTitle = id[id.length-1];
+          job.originalObject = j;
           return job;
         });
     }
@@ -958,7 +956,14 @@ export class AdminComponent {
 
   updateJobSuggestions(event: any) {
     const name=event ? event.input.toString().toLowerCase() : '';
-    this.jobClassesSuggested=this.jobClasses.filter((j)=>j.title.toLowerCase().indexOf(name)!=-1 || j.secondaryTitle.toLowerCase().indexOf(name)!=-1);
+    if(name === '*') {
+      this.jobClassesSuggested = this.jobClasses;
+    } else {
+      console.log(name);
+      this.jobClassesSuggested = this.jobClasses.filter((j) =>
+          j.title && j.title.toLowerCase().indexOf(name) !== -1 ||
+          j.secondaryTitle && j.secondaryTitle.toLowerCase().indexOf(name) !== -1)
+    }
   }
 
   refreshUpdateList() {
@@ -1112,6 +1117,10 @@ export class AdminComponent {
             this.reloadJobStatus();
             this.runTpChecks();
             this.runChecks();
+            this.admin.getAllJobs().subscribe((jobs) => {
+              this.availableJobs = jobs;
+              this.prepareJobClasses();
+            });
             setInterval(() => {
                 if (this.mode == 'JOBS')
                     this.reloadJobStatus();
@@ -1182,6 +1191,34 @@ export class AdminComponent {
       this.admin.setToolpermissions(RestConstants.AUTHORITY_EVERYONE, tp).subscribe(() => this.runTpChecks());
     });
 
+  }
+
+  supportsUpload(job: JobDescription) {
+    return job?.params?.some((p) => p.file);
+  }
+
+  setJob(item: any) {
+    this.job.name=item.item.title;
+    this.job.class=item.item.id;
+    this.job.object=item.item.originalObject;
+  }
+  setJobParamsTemplate() {
+    const data: any = {};
+    let modified = false;
+    for(const param of this.job.object.params) {
+      if (param.file) {
+        continue;
+      }
+      data[param.name] = param.sampleValue ?? '';
+      if(param.values) {
+        data[param.name] = param.values.map((v) => v.name).join('|');
+      }
+      modified = true;
+    }
+    console.log(data, this.job);
+    if(modified) {
+      this.job.params = JSON.stringify(data, null, 2);
+    }
   }
 }
 

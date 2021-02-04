@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.transaction.UserTransaction;
@@ -92,9 +93,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public void deleteAuthority(String authorityName) {
-				
+
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
+
                 new RetryingTransactionCallback<Void>()
                 {
                     public Void execute() throws Throwable
@@ -107,7 +108,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
                 		return null;
                     }
-                }, false); 
+                }, false);
 	}
 
 	@Override
@@ -153,9 +154,14 @@ public class AuthorityServiceImpl implements AuthorityService {
 			if(groupName.startsWith(PermissionService.GROUP_PREFIX)){
 				groupName = groupName.substring(PermissionService.GROUP_PREFIX.length());
 			}
-			Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
-			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+			if(AuthenticationUtil.isRunAsUserTheSystemUser()){
 				return true;
+			}
+			Set<String> admins = serviceRegistry.getAuthorityService().getContainedAuthorities(AuthorityType.USER, CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS,false);
+			if(admins.contains(AuthenticationUtil.getRunAsUser())){
+				return true;
+			}
+			Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(postfix,groupName);
 			if(memberships.contains(group))
 				return isAdminGroup(group);
@@ -190,12 +196,12 @@ public class AuthorityServiceImpl implements AuthorityService {
 	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
 			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
 				return true;
-			
-			
+
+
 			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP,orgName);
 			if(memberships.contains(group))
 				return groupIsOfType(group,CCConstants.ADMINISTRATORS_GROUP_TYPE);
-			
+
 		} catch (Throwable t) {
 			logger.error("Error while getting Admin access:" + orgName, t);
 		}
@@ -366,7 +372,7 @@ public EduGroup getEduGroup(String authority){
 							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, folderParentId),
 									ContentModel.ASSOC_CONTAINS, QName.createQName(assocName),
 									QName.createQName(CCConstants.CCM_TYPE_MAP), folderProps);
-							
+
 							nodeService.addAspect(newNode.getChildRef(), QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE),
 									propsAspectEduScope);
 							ownableService.setOwner(newNode.getChildRef(), AuthenticationUtil.getRunAsUser());
@@ -381,8 +387,8 @@ public EduGroup getEduGroup(String authority){
 								new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, eduGroupHomeFolderId));
 						nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP),
 								propsAspectEduGroup);
-						
-						
+
+
 						//copy ORG_ADMINISTRATORS
 						if(unscopedEduGroup != null && eduGroup.getScope() != null){
 							Set<String> containedAuthorities = authorityService.getContainedAuthorities(AuthorityType.GROUP, unscopedEduGroup.getGroupname(), true);
@@ -398,14 +404,14 @@ public EduGroup getEduGroup(String authority){
 									nodeService.setProperty(groupAdministratorsNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.ADMINISTRATORS_GROUP_TYPE);
 									//scope
 									nodeService.addAspect(groupAdministratorsNodeRef, QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE), propsAspectEduScope);
-									
+
 									authorityService.addAuthority(eduGroup.getGroupname(), groupAdministrators);
 									permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,eduGroupHomeFolderId), groupAdministrators, CCConstants.PERMISSION_ES_CHILD_MANAGER, true);
 								}
 							}
 						}
 
-						
+
 
 					} catch (Throwable e) {
 						logger.error(e.getMessage(), e);
@@ -417,17 +423,17 @@ public EduGroup getEduGroup(String authority){
 					}
 					transaction.commit();
 				}
-				
+
 				lock.unlock();
-				
+
 				return getEduGroup(eduGroup.getGroupname());
 			}
 		};
-		
+
 		return AuthenticationUtil.runAs(createEduGroupWorker, ApplicationInfoList.getHomeRepository().getUsername());
 
 	}
-	
+
 	@Override
 	public boolean authorityExists(String authority) {
 		return authorityService.authorityExists(authority);
@@ -629,5 +635,32 @@ public EduGroup getEduGroup(String authority){
 				}, false);
 
 	}
+
+	@Override
+	public Map<String, Serializable> getProfileSettingsProperties(String userName, String profileSettingsProperty) {
+		List<String> properties = new ArrayList<>();// ProfileSettings property to return
+		String user = userName;
+		Map<String, Serializable> profileSettings = new HashMap<String, Serializable>();
+
+		// If profileSettingsProperty==null than  Get all Properties for ProfileSettings
+		if (profileSettingsProperty == null)
+			properties = CCConstants.getAllPropertiesOfProfileSettings();
+		else
+			properties.add(profileSettingsProperty);
+
+
+		//check if userName exist, if not get login USER
+		if (user == null)
+			user = AuthenticationUtil.getFullyAuthenticatedUser();
+
+		NodeRef personRef = serviceRegistry.getPersonService().getPerson(user, false);
+
+		for (String property : properties) {
+			profileSettings.put(property, serviceRegistry.getNodeService().getProperty(personRef, QName.createQName(property)));
+		}
+
+		return profileSettings;
+	}
+
 
 }

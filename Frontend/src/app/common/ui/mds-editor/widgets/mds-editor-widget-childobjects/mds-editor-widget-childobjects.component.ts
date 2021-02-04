@@ -13,10 +13,10 @@ import {MainNavService} from '../../../../services/main-nav.service';
 import {RestNodeService} from '../../../../../core-module/rest/services/rest-node.service';
 import {RestHelper} from '../../../../../core-module/rest/rest-helper';
 import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';
-import {NodeHelper} from '../../../../../core-ui-module/node-helper';
 import {RestUtilitiesService} from '../../../../../core-module/rest/services/rest-utilities.service';
 import {Toast} from '../../../../../core-ui-module/toast';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import {NodeHelperService} from '../../../../../core-ui-module/node-helper.service';
 
 
 interface Childobject {
@@ -52,6 +52,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         private nodeApi: RestNodeService,
         private connector: RestConnectorService,
         private utilities: RestUtilitiesService,
+        private nodeHelper: NodeHelperService,
         public toast: Toast,
     ) {}
 
@@ -86,7 +87,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         this.onChange();
     }
     addLink(linkData: any) {
-        const link = NodeHelper.addHttpIfRequired(linkData.link);
+        const link = this.nodeHelper.addHttpIfRequired(linkData.link);
         this.add = false;
         const properties = RestHelper.createNameProperty(link);
         properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];

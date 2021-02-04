@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.json.simple.JSONValue;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -34,7 +35,8 @@ query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFull
         return query;
     }
 
-    public static ReplaceInterface luceneReplacer = (str, search, replace) -> str.replace(search, QueryParser.escape(replace));
+    private static ReplaceInterface luceneReplacer = (str, search, replace) -> str.replace(search, QueryParser.escape(replace));
+    private static ReplaceInterface dslReplacer = (str, search, replace) -> str.replace(search, JSONValue.escape(replace));
 
     public static void setUserInfo(Map<String, Serializable> userInfo) {
         QueryUtils.userInfo.set(userInfo);
@@ -44,7 +46,17 @@ query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFull
         return userInfo.get();
     }
 
-    private interface ReplaceInterface {
+    public static ReplaceInterface replacerFromSyntax(String syntax) {
+        if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_DSL)){
+            return dslReplacer;
+        } else if (syntax.equals(MetadataReaderV2.QUERY_SYNTAX_LUCENE)) {
+            return luceneReplacer;
+        } else {
+            throw new IllegalArgumentException("No replacer for search syntax " + syntax);
+        }
+    }
+
+    public interface ReplaceInterface {
         String replaceString(String str, String search, String replace);
     }
 }

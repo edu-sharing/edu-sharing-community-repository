@@ -1,0 +1,103 @@
+<ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
+  <ng-container [ngSwitch]="item.name">
+    <span *ngSwitchCase="'displayName'">
+      {{ node.profile.displayName }}
+    </span>
+    <span *ngSwitchCase="'groupType'">
+      {{ 'PERMISSIONS.GROUP_TYPE.' + node.profile.groupType | translate }}
+    </span>
+    <span *ngSwitchDefault>
+      {{ node[item.name] }}
+    </span>
+  </ng-container>
+</ng-container>
+<ng-container *ngIf="item.type === 'USER'">
+  <span *ngIf="isUserProfileAttribute(item.name)">
+    {{ node.profile[item.name] }}
+  </span>
+  <span *ngIf="item.name === 'status'">
+    {{ 'PERMISSIONS.USER_STATUS.' + node.status.status | translate }}
+  </span>
+  <span *ngIf="!isUserProfileAttribute(item.name) && item.name !== 'status'">
+    {{ node[item.name] }}
+  </span>
+</ng-container>
+<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'NODE' || item.type === 'COLLECTION'">
+  <span *ngSwitchCase="'name'">
+    {{ node.name }}
+  </span>
+  <span *ngSwitchCase="'title'">
+    {{ node.title || node.name }}
+  </span>
+  <span *ngSwitchCase="'cclom:title'">
+    {{ node.title || node.name }}
+  </span>
+  <span
+    *ngSwitchCase="'mediatype'"
+    [matTooltip]="showFieldTooltip ? ('NODE.mediatype' | translate) : null"
+  >
+    {{ 'MEDIATYPE.' + node.mediatype | translate }}
+  </span>
+  <span *ngSwitchCase="'size'" [matTooltip]="showFieldTooltip ? ('NODE.size' | translate) : null">
+    {{ node.size | formatSize }}
+  </span>
+  <span
+    *ngSwitchCase="'dimensions'"
+    [matTooltip]="showFieldTooltip ? ('NODE.dimensions' | translate) : null"
+  >
+    {{ node | NodeImageSize }}
+  </span>
+  <span
+    *ngSwitchCase="'cm:creator'"
+    [matTooltip]="showFieldTooltip ? ('NODE.cm:creator' | translate) : null"
+  >
+    {{ node.createdBy | nodePersonName }}
+  </span>
+  <span
+    *ngSwitchCase="'cm:modifier'"
+    [matTooltip]="showFieldTooltip ? ('NODE.cm:modifier' | translate) : null"
+  >
+    {{ node.modifiedBy | nodePersonName }}
+  </span>
+  <span
+    *ngSwitchCase="'ccm:replicationsource'"
+    [matTooltip]="
+      ('NODE.ccm:replicationsource' | translate) +
+      ': ' +
+      ('REPOSITORIES.' +
+        (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
+        | translate
+          : {
+              fallback: (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
+            })
+    "
+  >
+    <img
+      src="{{ node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'url' } }}"
+      alt="{{
+        'REPOSITORIES.' +
+          (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
+          | translate
+            : {
+                fallback:
+                  (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
+              }
+      }}"
+    />
+  </span>
+  <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
+    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
+      {{
+      node.properties ?
+        (node.properties[item.name + '_DISPLAYNAME']
+          ? node.properties[item.name + '_DISPLAYNAME'].join(', ')
+          : node.properties[item.name]?.join(', ')
+        )
+         : ''
+      }}
+    </ng-container>
+    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
+      {{ node.properties[item.name] ? (node.properties[item.name][0] | formatDate) : '' }}
+    </ng-container>
+  </span>
+</ng-container>

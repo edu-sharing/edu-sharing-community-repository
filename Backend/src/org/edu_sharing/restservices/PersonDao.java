@@ -38,6 +38,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -213,6 +214,7 @@ public class PersonDao {
         newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills());
+        newUserInfo.put(CCConstants.CM_PROP_PERSON_VCARD, profile.getVCard());
 		if(profile.getSizeQuota()>0)
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, ""+profile.getSizeQuota());
 		else
@@ -263,22 +265,20 @@ public class PersonDao {
 
 	}
 	
-	public void delete() throws DAOException {
-		
+	public void delete(boolean force) throws DAOException {
 		try {
-
-			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser(); 
-			
+			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
 			if (currentUser.equals(getUserName())) {
-								
 				throw new DAOValidationException(
 						new IllegalArgumentException("Session user can not be deleted."));
 			}
-
+			if(!force && !PersonLifecycleService.PersonStatus.todelete.equals(getStatus().getStatus())){
+				throw new IllegalStateException("User status is not yet set " +
+						PersonLifecycleService.PersonStatus.todelete + ", got " + getStatus().getStatus());
+			}
 			((MCAlfrescoAPIClient)this.baseClient).deleteUser(getUserName());
 			
 		} catch (Exception e) {
-
 			throw DAOException.mapping(e);
 		}
 	}
@@ -299,7 +299,6 @@ public class PersonDao {
 
 
 		data.setProfile(getProfile());
-    	data.setStats(getStats());
     	data.setStatus(getStatus());
     	data.setProperties(getProperties());
 
@@ -324,14 +323,18 @@ public class PersonDao {
     	return data;
 	}
 
-	private Map<String,String[]> getProperties() {
-		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(userInfo));
+	private Map<String, String[]> getProperties() {
+		Map<String, Serializable> properties = userInfo;
+		if (!(getProfileSettings().getShowEmail() || isCurrentUserOrAdmin())) // email must be showed only if is admin, or if email ragards to user login
+			properties.replace(CCConstants.CM_PROP_PERSON_EMAIL, null);
+
+		return NodeServiceHelper.getPropertiesMultivalue(NodeServiceHelper.transformLongToShortProperties(properties));
 	}
 
 	private UserQuota getQuota() {
 		UserQuota quota=new UserQuota();
 		Long sizeQuota = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
-		if(sizeQuota==null || sizeQuota.equals("-1")){
+		if(sizeQuota==null || sizeQuota.equals(-1L)){
 			quota.setEnabled(false);
 			return quota;
 		}
@@ -346,18 +349,35 @@ public class PersonDao {
 		UserProfile profile = new UserProfile();
     	profile.setFirstName(getFirstName());
     	profile.setLastName(getLastName());
-    	profile.setEmail(getEmail());
-    	profile.setPrimaryAffiliation(getPrimaryAffiliation());
+		// Admin user can see all email even if they are not showed
+		// hide only for non admin user and if showEmail is false
+		if (getProfileSettings().getShowEmail() || isCurrentUserOrAdmin()) {
+			profile.setEmail(getEmail());
+		} else {
+			profile.setEmail("");
+		}
+		profile.setPrimaryAffiliation(getPrimaryAffiliation());
     	profile.setAvatar(getAvatar());
     	profile.setAbout(getAbout());
     	profile.setSkills(getSkills());
+    	profile.setVCard(getVCard());
     	profile.setType(getType());
     	return profile;
 	}
+
+	private String getVCard() {
+		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_VCARD);
+	}
+
 	private UserStatus getStatus() {
 		UserStatus status = new UserStatus();
-		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null)
-			status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
+		if(this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)!=null) {
+			try {
+				status.setStatus(PersonLifecycleService.PersonStatus.valueOf((String) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
+			} catch(IllegalArgumentException e) {
+				logger.warn("Person " + getAuthorityName() +" has invalid lifecycle status: " + this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
+			}
+		}
 		// cast to long for rest api
 		Date date = (Date) this.userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE);
 		if(date != null) {
@@ -365,7 +385,7 @@ public class PersonDao {
 		}
 		return status;
 	}
-	private UserStats getStats() {
+	public UserStats getStats() {
 		UserStats stats = new UserStats();
 		// run as admin so solr counts all materials and collections
 		return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {
@@ -544,6 +564,32 @@ public class PersonDao {
 		newUserInfo.put(CCConstants.CCM_PROP_PERSON_PREFERENCES, preferences);		
 		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 	}
+
+	/**
+	 * retrieve All property for ProfileSetting from alfresco db
+	 *
+	 * @return object of ProfileSettings
+	 */
+	public ProfileSettings getProfileSettings() {
+		ProfileSettings profileSettings = new ProfileSettings();
+		// fallback to true: because otherwise it will break previous behaviour
+		profileSettings.setShowEmail(
+				(!this.userInfo.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL) || (boolean) this.userInfo.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL))
+		);
+		return profileSettings;
+	}
+
+	/**
+	 * set value into alfresco database
+	 * @param  profileSettings (Object)
+	 */
+	public void setProfileSettings(ProfileSettings profileSettings) throws Exception{
+		HashMap<String, Serializable> newUserInfo = new HashMap<>();
+		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
+		newUserInfo.put(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL, profileSettings.getShowEmail());
+		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
+	}
+
 	public void addNodeList(String list,String nodeId) throws Exception {
 		// Simply check if node is valid
 		NodeDao node=NodeDao.getNode(repoDao, nodeId);

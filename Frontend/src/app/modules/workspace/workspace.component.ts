@@ -31,12 +31,11 @@ import {
     Version
 } from '../../core-module/core.module';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { OptionItem } from '../../core-ui-module/option-item';
+import {CustomOptions, DefaultGroups, ElementType, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { NodeHelper } from '../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { KeyEvents } from '../../core-module/ui/key-events';
-import { Title } from '@angular/platform-browser';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { trigger } from '@angular/animations';
 import { UIConstants } from '../../core-module/ui/ui-constants';
@@ -68,6 +67,7 @@ import { Observable } from 'rxjs';
 })
 export class WorkspaceMainComponent implements EventListener, OnDestroy {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
+    @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
 
@@ -75,9 +75,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private isRootFolder: boolean;
     private homeDirectory: string;
     private sharedFolders: Node[] = [];
-    private path: Node[] = [];
+    path: Node[] = [];
     private parameterNode: Node;
-    private root = 'MY_FILES';
+    root = 'MY_FILES';
 
     private selection: Node[] = [];
 
@@ -109,6 +109,13 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private isAdmin = false;
     public isBlocked = false;
     private isGuest: boolean;
+
+    customOptions: CustomOptions = {
+        useDefaultOptions: true,
+    };
+
+    toMeSharedToggle: boolean;
+
     private currentNodes: Node[];
     private appleCmd = false;
     private reurl: string;
@@ -118,7 +125,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
-    private viewType = 0;
+    private viewType: 0|1 = 0;
     private reurlDirectories: boolean;
     private reorderDialog: boolean;
     @HostListener('window:beforeunload', ['$event'])
@@ -178,6 +185,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         private route: ActivatedRoute,
         private router: Router,
         private http: HttpClient,
+        private nodeHelper: NodeHelperService,
         private translate: TranslateService,
         private storage: TemporaryStorageService,
         private config: ConfigurationService,
@@ -190,7 +198,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         private mds: RestMdsService,
         private node: RestNodeService,
         private ui: UIService,
-        private title: Title,
         private event: FrameEventsService,
         private connector: RestConnectorService,
         private cordova: CordovaService,
@@ -198,7 +205,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     ) {
         this.event.addListener(this);
         Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
-            UIHelper.setTitle('WORKSPACE.TITLE', title, translate, config);
             this.initialize();
         });
         this.connector.setRoute(this.route);
@@ -265,10 +271,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             return;
         }
         this.node.moveNode(target.ref.id, source[position].ref.id).subscribe((data: NodeWrapper) => {
-            this.moveNode(target, source, position + 1);
-        },
+                this.moveNode(target, source, position + 1);
+            },
             (error: any) => {
-                NodeHelper.handleNodeError(this.bridge, source[position].name, error);
+                this.nodeHelper.handleNodeError(source[position].name, error);
                 source.splice(position, 1);
                 this.moveNode(target, source, position + 1);
             });
@@ -281,10 +287,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             return;
         }
         this.node.copyNode(target.ref.id, source[position].ref.id).subscribe((data: NodeWrapper) => {
-            this.copyNode(target, source, position + 1);
-        },
+                this.copyNode(target, source, position + 1);
+            },
             (error: any) => {
-                NodeHelper.handleNodeError(this.bridge, source[position].name, error);
+                this.nodeHelper.handleNodeError(source[position].name, error);
                 source.splice(position, 1);
                 this.copyNode(target, source, position + 1);
             });
@@ -302,112 +308,110 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.globalProgress = false;
         this.refresh();
     }
-    private initialize() {
-        this.route.params.subscribe((params: Params) => {
-            this.isSafe = params.mode === 'safe';
-            this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-                if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
-                    RestHelper.goToLogin(this.router, this.config);
+    private async initialize() {
+        this.user = await (this.iam.getCurrentUserAsync());
+        this.route.params.subscribe(async (routeParams: Params) => {
+            this.isSafe = routeParams.mode === 'safe';
+            const login = await this.connector.isLoggedIn().toPromise();
+            if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
+                RestHelper.goToLogin(this.router, this.config);
+                return;
+            }
+            await this.prepareActionbar();
+            this.loadFolders(this.user);
+
+            let valid = true;
+            this.isGuest = login.isGuest;
+            if (!login.isValidLogin || login.isGuest) {
+                valid = false;
+            }
+            this.isBlocked = !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_WORKSPACE);
+            this.isAdmin = login.isAdmin;
+            if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
+                valid = false;
+            }
+            if (!this.isSafe && login.currentScope != null) {
+                this.connector.logout().subscribe(() => {
+                    this.goToLogin();
+                }, (error: any) => {
+                    this.toast.error(error);
+                    this.goToLogin();
+                })
+                return;
+            }
+            if (!valid) {
+                this.goToLogin();
+                return;
+            }
+            this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
+            this.isLoggedIn = true;
+            try {
+                this.connectorList = (await this.connectors.list().toPromise()).connectors;
+            } catch (e) {
+                console.warn('no connectors found: ' + e.toString());
+            }
+            const data = await this.node.getHomeDirectory().toPromise();
+            this.globalProgress = false;
+            this.homeDirectory = data.id;
+            this.route.queryParams.subscribe((params: Params) => {
+
+                if (params.connector) {
+                    this.showCreateConnector(this.connectorList.filter((c) => c.id === params.connector)[0]);
+                }
+
+                let needsUpdate = false;
+                if (this.oldParams) {
+                    for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
+                        if (params[key] === this.oldParams[key]) {
+                            continue;
+                        }
+                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                            continue;
+                        }
+                        needsUpdate = true;
+                    }
+                } else {
+                    needsUpdate = true;
+                    this.explorer.showLoading = true;
+                }
+                this.oldParams = params;
+                if (params.viewType != null) {
+                    this.setViewType(params.viewType, false);
+                } else {
+                    this.setViewType(this.config.instant('workspaceViewType', 0), false);
+                }
+                if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
+                    this.root = params.root;
+                } else {
+                    this.root = 'MY_FILES';
+                }
+                if (params.reurl) {
+                    this.reurl = params.reurl;
+                }
+                this.reurlDirectories = params.applyDirectories === 'true';
+                this.createAllowed = this.root === 'MY_FILES';
+                this.mainnav = params.mainnav === 'false' ? false : true;
+
+                if (params.file) {
+                    this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
+                        this.setSelection([paramNode.node]);
+                        this.parameterNode = paramNode.node;
+                        this.mainNavRef.management.nodeSidebar = paramNode.node;
+                    });
+                }
+
+                if (!needsUpdate) {
                     return;
                 }
-                this.iam.getUser().subscribe((user: IamUser) => {
-                    this.user = user;
-                    this.loadFolders(user);
-
-                    let valid = true;
-                    this.isGuest = data.isGuest;
-                    if (!data.isValidLogin || data.isGuest) {
-                        valid = false;
-                    }
-                    this.isBlocked = !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_WORKSPACE);
-                    this.isAdmin = data.isAdmin;
-                    if (this.isSafe && data.currentScope !== RestConstants.SAFE_SCOPE) {
-                        valid = false;
-                    }
-                    if (!this.isSafe && data.currentScope != null) {
-                        this.connector.logout().subscribe(() => {
-                            this.goToLogin();
-                        }, (error: any) => {
-                            this.toast.error(error);
-                            this.goToLogin();
-                        })
-                        return;
-                    }
-                    if (!valid) {
-                        this.goToLogin();
-                        return;
-                    }
-                    this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
-                    this.isLoggedIn = true;
-                    this.node.getHomeDirectory().subscribe((data: NodeRef) => {
-                        this.globalProgress = false;
-                        this.homeDirectory = data.id;
-                        this.route.params.forEach((params: Params) => {
-                            this.route.queryParams.subscribe((params: Params) => {
-
-                                this.connectors.list().subscribe(() => {
-                                    this.connectorList = this.connectors.getConnectors();
-                                    if (params.connector) {
-                                        this.showCreateConnector(this.connectorList.filter((c) => c.id === params.connector)[0]);
-                                    }
-                                });
-
-                                let needsUpdate = false;
-                                if (this.oldParams) {
-                                    for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
-                                        if (params[key] === this.oldParams[key]) {
-                                            continue;
-                                        }
-                                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
-                                            continue;
-                                        }
-                                        needsUpdate = true;
-                                    }
-                                }
-                                else {
-                                    needsUpdate = true;
-                                }
-                                this.oldParams = params;
-                                if (params.viewType != null) {
-                                    this.viewType = params.viewType;
-                                }
-                                if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
-                                    this.root = params.root;
-                                }
-                                else {
-                                    this.root = 'MY_FILES';
-                                }
-                                if (params.reurl) {
-                                    this.reurl = params.reurl;
-                                }
-                                this.reurlDirectories = params.applyDirectories === 'true';
-                                this.createAllowed = this.root === 'MY_FILES';
-                                this.mainnav = params.mainnav === 'false' ? false : true;
-
-                                if (params.file) {
-                                    this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
-                                        this.setSelection([paramNode.node]);
-                                        this.parameterNode = paramNode.node;
-                                        this.mainNavRef.management.nodeSidebar = paramNode.node;
-                                    });
-                                }
-
-                                if (!needsUpdate) {
-                                    return;
-                                }
-                                const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
-                                if(!params.id && lastLocation) {
-                                    this.openDirectory(lastLocation);
-                                } else {
-                                    this.openDirectoryFromRoute(params);
-                                }
-                                if (params.showAlpha) {
-                                    this.showAlpha();
-                                }
-                            });
-                        });
-                    });
-                });
+                const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                if (!params.id && lastLocation) {
+                    this.openDirectory(lastLocation);
+                } else {
+                    this.openDirectoryFromRoute(params);
+                }
+                if (params.showAlpha) {
+                    this.showAlpha();
+                }
             });
         });
     }
@@ -460,7 +464,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             */
             this.currentNode = list[0];
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
-            {
+                {
                     state: {
                         nodes: this.currentNodes,
                         scope: 'workspace'
@@ -486,10 +490,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.node.getNodeMetadata(folder.id).subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
         }
     }
-    private setRoot(root: string) {
+    setRoot(root: string) {
         this.root = root;
         this.searchQuery = null;
         this.routeTo(root, null, null);
+        this.actionbarRef.invalidate();
     }
     private updateList(nodes: Node[]) {
         this.currentNodes = nodes;
@@ -514,14 +519,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     searchGlobal(query: string) {
         this.routeTo(this.root, null, query);
     }
-    private openDirectoryFromRoute(params: any) {
-        let id = params.id;
+    private openDirectoryFromRoute(params: any = null) {
+        let id = params?.id;
         this.selection = [];
         this.closeMetadata();
         this.createAllowed = false;
         if (!id) {
             this.path = [];
-            id = this.getRootFolderId();
+            id = this.getRootFolderInternalId();
             if (this.root === 'RECYCLE') {
                 // GlobalContainerComponent.finishPreloading();
                 // return;
@@ -556,7 +561,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     }
                 });
                 this.updateNodeByParams(params, data.node);
-                this.createAllowed = !this.searchQuery && NodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
+                this.createAllowed = !this.searchQuery && this.nodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
                 this.recoverScrollposition();
             }, (error: any) => {
                 this.updateNodeByParams(params, { ref: { id } });
@@ -581,7 +586,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     }
     private openNode(node: Node, useConnector = true) {
-        if (NodeHelper.isSavedSearchObject(node)) {
+        if (this.nodeHelper.isSavedSearchObject(node)) {
             UIHelper.routeToSearchNode(this.router, null, node);
         }
         else if (RestToolService.isLtiObject(node)) {
@@ -595,27 +600,22 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
     }
     private openBreadcrumb(position: number) {
-        /*this.path=this.path.slice(0,position+1);
-        */
         this.searchQuery = null;
-        let id = '';
-        const length = this.path ? this.path.length : 0;
-        if (position > 0) {
+        if (position > 0 || this.path) {
             // handled automatically via routing
-            return;
-        }
-        else if (length > 0) {
-            id = null;
-        }
-        else {
-            if(UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)) {
+        } else {
+            // TODO: handle with homeRouterLink if possible.
+            if (
+                UIHelper.evaluateMediaQuery(
+                    UIConstants.MEDIA_QUERY_MAX_WIDTH,
+                    UIConstants.MOBILE_TAB_SWITCH_WIDTH
+                )
+            ) {
                 this.showSelectRoot = true;
             }
-            return;
         }
-
-        this.openDirectory(id);
     }
+
     private refresh(refreshPath = true,nodes: Node[] = null) {
         // only refresh properties in this case
         if(nodes && nodes.length){
@@ -687,7 +687,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         RestHelper.goToLogin(this.router, this.config, this.isSafe ? RestConstants.SAFE_SCOPE : '');
     }
 
-    private getRootFolderId() {
+    getRootFolderId() {
         if (this.root === 'MY_FILES') {
             return RestConstants.USERHOME;
         }
@@ -706,9 +706,19 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         return '';
     }
 
+    getRootFolderInternalId(){
+        if(this.root === 'TO_ME_SHARED_FILES') {
+            if (this.toMeSharedToggle) {
+                return RestConstants.TO_ME_SHARED_FILES;
+            } else {
+                return RestConstants.TO_ME_SHARED_FILES_PERSONAL;
+            }
+        }
+        return this.getRootFolderId();
+    }
+
     private toggleView() {
-        this.viewType = 1 - this.viewType;
-        this.refreshRoute();
+        this.setViewType(this.viewType === 1 ? 0 : 1);
         if (this.viewType === 0) {
             this.viewToggle.icon = 'view_module';
         }
@@ -740,12 +750,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             });
             return;
         }*/
-        NodeHelper.addNodeToLms(this.router, this.storage, node, this.reurl);
+        this.nodeHelper.addNodeToLms(node, this.reurl);
     }
 
     private updateNodeByParams(params: any, node: Node | any) {
         GlobalContainerComponent.finishPreloading();
-        if (params.query) {
+        if (params?.query) {
             this.doSearchFromRoute(params, node);
         }
         else {
@@ -770,6 +780,39 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             if (hit && hit.length === 1) {
                 Helper.copyObjectProperties(node, hit[0]);
             }
+        }
+    }
+
+    async prepareActionbar() {
+        this.toMeSharedToggle = await this.session.get('toMeSharedGroup', false).toPromise();
+        const toggle = new OptionItem('OPTIONS.TOGGLE_SHARED_TO_ME',
+            this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
+            () => {
+                this.toMeSharedToggle = !this.toMeSharedToggle;
+                toggle.icon = this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private';
+                this.session.set('toMeSharedGroup', this.toMeSharedToggle);
+                this.openDirectoryFromRoute();
+                //this.treeComponent.reload = Boolean(true);
+                this.toast.toast('WORKSPACE.TOAST.TO_ME_SHARED_' + (this.toMeSharedToggle ? 'ALL' : 'PERSONAL'));
+            });
+        toggle.isToggle = true;
+        toggle.group = DefaultGroups.Toggles;
+        toggle.elementType = [ElementType.Unknown];
+        toggle.priority = 5;
+        toggle.customShowCallback = () => {
+            return this.root === 'TO_ME_SHARED_FILES';
+        }
+        this.customOptions.addOptions = [toggle];
+    }
+
+    /**
+     * function to add value to viewType
+     * @param viewType as params accept number, in this case we want just 0|1
+     */
+    private setViewType(viewType: 0|1, refreshRoute = true) {
+        this.viewType = viewType;
+        if(refreshRoute) {
+            this.refreshRoute();
         }
     }
 }

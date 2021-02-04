@@ -322,6 +322,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
 
+	public final static String CCM_PROP_PERSON_SHOW_EMAIL = "{http://www.campuscontent.de/model/1.0}showEmail";
+
 	public final static String CCM_PROP_PERSON_RECENTLY_INVITED = "{http://www.campuscontent.de/model/1.0}userRecentlyInvited";
 
 	public final static String CCM_PROP_PERSON_RECENT_COLLECTIONS = "{http://www.campuscontent.de/model/1.0}userRecentCollections";
@@ -418,6 +420,8 @@ public class CCConstants {
 	public final static String CCM_ASPECT_PERMISSION_HISTORY = "{http://www.campuscontent.de/model/1.0}permission_history";
 
 	public final static String CCM_ASPECT_TRACKING = "{http://www.campuscontent.de/model/1.0}tracking";
+
+	public final static String CCM_ASPECT_EDUCONTEXT = "{http://www.campuscontent.de/model/1.0}educontext";
 
 	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
@@ -875,9 +879,13 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE = "TOOLPERMISSION_MEDIACENTER_MANAGE";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS = "TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY = "TOOLPERMISSION_PUBLISH_COPY";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK = "TOOLPERMISSION_CREATE_MAP_LINK";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP = "TOOLPERMISSION_SIGNUP_GROUP";
 
 	public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
@@ -1136,6 +1144,12 @@ public class CCConstants {
 
 	public final static String CM_PROP_METADATASET_EDU_FORCEMETADATASET = "{http://www.alfresco.org/model/content/1.0}edu_forcemetadataset";
 
+	/**
+	 * Marks an original object as a licensed object
+	 * This means that access to content is denied even if there should be access via a collection ref, only the original node permissions are working
+	 */
+	public final static String CCM_PROP_RESTRICTED_ACCESS ="{http://www.campuscontent.de/model/1.0}restricted_access";
+
 
 	/**
 	 * LOM Props
@@ -1177,6 +1191,8 @@ public class CCConstants {
 	public final static String LOM_PROP_TECHNICAL_DURATION = "{http://www.campuscontent.de/model/lom/1.0}duration";
 
 	public final static String LOM_PROP_TECHNICAL_SIZE = "{http://www.campuscontent.de/model/lom/1.0}size";
+
+	public final static String LOM_PROP_TECHNICAL_OTHERPLATFORMREQUIREMENTS = "{http://www.campuscontent.de/model/lom/1.0}otherplatformrequirements";
 
 	public final static String LOM_PROP_RELATION_KIND = "{http://www.campuscontent.de/model/lom/1.0}kind";
 
@@ -1260,6 +1276,15 @@ public class CCConstants {
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE = "EDUSYSTEM_VALUESPACE";
 
 
+	public final static String CCM_ASPECT_GROUP_SIGNUP = "{http://www.campuscontent.de/model/1.0}group_signup";
+
+	public final static String CCM_PROP_GROUP_SIGNUP_METHOD = "{http://www.campuscontent.de/model/1.0}group_signup_method";
+
+	public final static String CCM_PROP_GROUP_SIGNUP_PASSWORD = "{http://www.campuscontent.de/model/1.0}group_signup_password";
+
+	public final static String CCM_PROP_GROUP_SIGNUP_LIST = "{http://www.campuscontent.de/model/1.0}group_signup_list";
+
+
 	public final static String CCM_VALUE_IO_NAME_CONFIG_NODE_NAME = "RepositoryConfig";
 
 
@@ -1293,6 +1318,7 @@ public class CCConstants {
 	public static final String CM_PROP_PERSON_ALLOW_NOTIFICATIONS = "{http://www.alfresco.org/model/content/1.0}personallownotifications";
 	public static final String CM_PROP_PERSON_ABOUT = "{http://www.alfresco.org/model/content/1.0}personabout";
 	public static final String CM_PROP_PERSON_SKILLS = "{http://www.alfresco.org/model/content/1.0}personskills";
+	public static final String CM_PROP_PERSON_VCARD = "{http://www.alfresco.org/model/content/1.0}personvcard";
 
 	/**
 	 * tempory, non persistent properties
@@ -1909,6 +1935,11 @@ public class CCConstants {
 
 	public final static String VCARD_T_X_ES_LOM_CONTRIBUTE_DATE = "X-ES-LOM-CONTRIBUTE-DATE";
 
+	public final static String VCARD_T_X_ORCID = "X-ORCID";
+	public final static String VCARD_T_X_GND_URI = "X-GND-URI";
+	public final static String VCARD_T_X_ROR = "X-ROR";
+	public final static String VCARD_T_X_WIKIDATA = "X-Wikidata";
+
 	public final static String CCM_PROPS_IO_OBJECTTYPE_IO = "0";
 
 	public final static String CCM_PROPS_IO_OBJECTTYPE_LS = "1";
@@ -2093,5 +2124,15 @@ public class CCConstants {
 	public static final String VERSION_COMMENT_BULK_CREATE = "BULK_CREATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
+
+	/**
+	 * Methos that set all the Properties for ProfileSettings
+	 * @return (List) list of all properties we want to be in ProfileSettings
+	 */
+	public static List<String> getAllPropertiesOfProfileSettings(){
+		List<String> listOfProperties=new ArrayList<>();
+		listOfProperties.add(CCM_PROP_PERSON_SHOW_EMAIL);
+		return listOfProperties;
+	}
 
 }

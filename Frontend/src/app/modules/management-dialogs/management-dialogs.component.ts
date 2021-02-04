@@ -8,7 +8,7 @@ import {NodeWrapper, Node, Collection} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {RestToolService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
-import {MdsComponent} from "../../common/ui/mds/mds.component";
+import {BulkBehavior, MdsComponent} from "../../common/ui/mds/mds.component";
 import {RestCollectionService} from "../../core-module/core.module";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../core-module/ui/ui-animation";
@@ -19,9 +19,14 @@ import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.m
 import {RestUsageService} from "../../core-module/core.module";
 import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
-import {LinkData, NodeHelper} from '../../core-ui-module/node-helper';
+import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
+
+export enum DialogType {
+    SimpleEdit = 'SimpleEdit',
+    Mds = 'Mds'
+}
 @Component({
   selector: 'workspace-management',
   templateUrl: 'management-dialogs.component.html',
@@ -33,6 +38,7 @@ import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor
   ]
 })
 export class WorkspaceManagementDialogsComponent  {
+  readonly BulkBehaviour = BulkBehavior;
   @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef : MdsEditorWrapperComponent;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
@@ -74,7 +80,7 @@ export class WorkspaceManagementDialogsComponent  {
           if (nodeDelete[0].collection) {
               this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_COLLECTION';
               this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_COLLECTION';
-          } else if (NodeHelper.isNodePublishedCopy(nodeDelete[0])) {
+          } else if (this.nodeHelper.isNodePublishedCopy(nodeDelete[0])) {
               this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_PUBLISHED_COPY';
               this.nodeDeleteMessage = 'WORKSPACE.DELETE_MESSAGE_PUBLISHED_COPY';
           } else if (nodeDelete[0].mediatype === 'folder-link') {
@@ -102,23 +108,28 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeDebugChange = new EventEmitter<Node[]>();
     @Input() nodeShareLink : Node;
     @Output() nodeShareLinkChange = new EventEmitter();
-    @Input() nodeWorkflow : Node;
+    @Input() nodeWorkflow : Node[];
     @Output() nodeWorkflowChange = new EventEmitter();
+    @Input() signupGroup : boolean;
+    @Output() signupGroupChange = new EventEmitter<boolean>();
   @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
   @Input() addNodesStream : Node[];
   @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant : Node;
     @Output() nodeVariantChange = new EventEmitter();
-  @Input() nodeMetadata : Node[];
+    @Input() set nodeMetadata (nodeMetadata : Node[]){
+      this._nodeMetadata = nodeMetadata;
+      this._nodeFromUpload = false;
+  }
     @Output() nodeMetadataChange = new EventEmitter<Node[]>();
     @Input() nodeTemplate : Node;
     @Output() nodeTemplateChange = new EventEmitter();
     @Input() nodeContributor : Node;
-    @Output() nodeContributorChange = new EventEmitter();
+    @Output() nodeContributorChange = new EventEmitter<Node>();
     @Input() set nodeSimpleEdit (nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
-        this._nodeSimpleFromUpload = false;
+        this._nodeFromUpload = false;
     }
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
     @Input() collectionWriteFeedback: Node;
@@ -139,8 +150,9 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onCloseAddToCollection=new EventEmitter();
   @Output() onStoredAddToCollection=new EventEmitter();
   _nodeDelete: Node[];
+  _nodeMetadata: Node[];
   _nodeSimpleEdit: Node[];
-  _nodeSimpleFromUpload = false;
+  _nodeFromUpload = false;
   nodeDeleteTitle: string;
   nodeDeleteMessage: string;
   nodeDeleteMessageParams: any;
@@ -184,7 +196,7 @@ export class WorkspaceManagementDialogsComponent  {
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.key === 'Escape') {
-      if(this.nodeMetadata!=null || this.createMetadata){
+      if(this._nodeMetadata!=null || this.createMetadata){
         if (this.mdsEditorWrapperRef.handleKeyboardEvent(event)) {
           return;
         }
@@ -248,6 +260,7 @@ export class WorkspaceManagementDialogsComponent  {
     private connector:RestConnectorService,
     private searchService:RestSearchService,
     private toast:Toast,
+    private nodeHelper: NodeHelperService,
     private bridge:BridgeService,
     private router:Router,
   ){
@@ -274,11 +287,11 @@ export class WorkspaceManagementDialogsComponent  {
              this.toast.closeModalDialog();
          });
  }
-    public closeWorkflow(node: Node = null){
+    public closeWorkflow(nodes: Node[] = null){
         this.nodeWorkflow = null;
         this.nodeWorkflowChange.emit(null);
-        if (node) {
-            this.onRefresh.emit([node]);
+        if (nodes) {
+            this.onRefresh.emit(nodes);
         }
     }
     private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
@@ -361,7 +374,7 @@ export class WorkspaceManagementDialogsComponent  {
    this.onUploadFileSelected.emit(event);
  }
   createUrlLink(link : LinkData) {
-    const urlData = NodeHelper.createUrlLink(link);
+    const urlData = this.nodeHelper.createUrlLink(link);
     this.closeUploadSelect();
     this.toast.showProgressDialog();
     this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
@@ -377,14 +390,17 @@ export class WorkspaceManagementDialogsComponent  {
    this.showUploadSelect=false
    this.showUploadSelectChange.emit(false);
  }
- public closeContributor(){
+ public closeContributor(node: Node){
      if(this.editorPending){
          this.editorPending=false;
-         this.nodeMetadata=[this.nodeContributor];
+         this._nodeMetadata=[this.nodeContributor];
      }
    this.nodeContributor=null;
-   this.nodeContributorChange.emit(null);
- }
+   this.nodeContributorChange.emit(node);
+   if(node) {
+       this.onRefresh.emit([node]);
+   }
+  }
   private closeLtiTools() {
     this.showLtiTools = false;
     this.showLtiToolsChange.emit(false);
@@ -394,20 +410,19 @@ export class WorkspaceManagementDialogsComponent  {
       this.showMetadataAfterUpload(this.nodeLicense);
     }
     else {
-        if(this._nodeSimpleFromUpload)
+        if(this._nodeFromUpload)
             this.onUploadFilesProcessed.emit(this.nodeLicense);
-        this._nodeSimpleFromUpload = false;
+        this._nodeFromUpload = false;
     }
       if(this.editorPending){
           this.editorPending=false;
-          this.nodeMetadata=this.nodeLicense;
+          this._nodeMetadata=this.nodeLicense;
       }
     this.nodeLicense=null;
     this.nodeLicenseOnUpload=false;
     this.nodeLicenseChange.emit(null);
   }
-  private updateLicense(nodes:Node[]) {
-      console.log(nodes);
+  updateLicense(nodes:Node[]) {
     this.closeLicense();
     this.onUpdateLicense.emit();
     this.onRefresh.emit(nodes);
@@ -416,27 +431,28 @@ export class WorkspaceManagementDialogsComponent  {
       this.toast.showProgressDialog();
       Observable.forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
           .subscribe(() => {
-              this.nodeDeleteOnCancel = false;
-              this.nodeDeleteOnCancelChange.emit(false);
               this.toast.closeModalDialog();
               this.closeEditor(true);
           });
   }
-  private closeEditor(refresh:boolean,node: Node[]=null){
-      if (this.nodeDeleteOnCancel && node == null) {
-          this.deleteNodes(this.nodeMetadata);
+  private closeEditor(refresh:boolean,nodes: Node[]=null){
+      if (this.nodeDeleteOnCancel && nodes == null) {
+          this.nodeDeleteOnCancel = false;
+          this.deleteNodes(this._nodeMetadata);
           return;
       }
-    this.nodeDeleteOnCancel=false;
-    this.nodeDeleteOnCancelChange.emit(false);
-    this.nodeMetadata=null;
+    this.setNodeDeleteOnCancel(false);
+    this._nodeMetadata=null;
     this.nodeMetadataChange.emit(null);
     this.createMetadata=null;
-    this.onCloseMetadata.emit(node);
+    this.onCloseMetadata.emit(nodes);
     if(refresh) {
-      this.onRefresh.emit(node);
-      if(node && node.length === 1 && node[0].aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
-        this.currentLtiTool = node[0];
+        if(this._nodeFromUpload) {
+            this.onUploadFilesProcessed.emit(nodes);
+        }
+        this.onRefresh.emit(nodes);
+      if(nodes?.length === 1 && nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
+        this.currentLtiTool = nodes[0];
       }
       else{
         this.ltiToolRefresh=new Boolean();
@@ -445,7 +461,7 @@ export class WorkspaceManagementDialogsComponent  {
   }
   public editLti(event:Node){
     //this.closeLtiTools();
-    this.nodeMetadata=[event];
+    this._nodeMetadata=[event];
   }
   public createLti(event:any){
     //this.closeLtiTools();
@@ -513,7 +529,7 @@ export class WorkspaceManagementDialogsComponent  {
       this.dialogTitle=null;
     }
     this.toast.showProgressDialog();
-    UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,list,()=>{
+    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list,()=>{
         this.toast.closeModalDialog();
        this.onStoredAddToCollection.emit(collection);
       if(callback)
@@ -522,10 +538,16 @@ export class WorkspaceManagementDialogsComponent  {
   }
 
     private showMetadataAfterUpload(event: Node[]) {
-        this._nodeSimpleEdit = event;
-        this.nodeSimpleEditChange.emit(event);
-        this._nodeSimpleFromUpload = true;
-
+        const dialog = this.config.instant('upload.postDialog', DialogType.SimpleEdit);
+        if(dialog === DialogType.SimpleEdit) {
+            this._nodeSimpleEdit = event;
+            this.nodeSimpleEditChange.emit(event);
+        } else if (dialog === DialogType.Mds){
+            this._nodeMetadata = event;
+        } else {
+            console.error('Invalid configuration for upload.postDialog: ' + dialog);
+        }
+        this._nodeFromUpload = true;
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);
     }
@@ -619,14 +641,16 @@ export class WorkspaceManagementDialogsComponent  {
     }
 
     closeSimpleEdit(saved: boolean, nodes: Node[] = null) {
-        if (saved && this._nodeSimpleFromUpload) {
+      console.log('close simple', saved);
+        if (saved && this._nodeFromUpload) {
             this.onUploadFilesProcessed.emit(nodes);
-        } else if(!saved && this._nodeSimpleFromUpload) {
+        } else if(!saved && this.nodeDeleteOnCancel) {
             this.deleteNodes(this._nodeSimpleEdit);
         }
         if (nodes) {
             this.onRefresh.emit(nodes);
         }
+        this.setNodeDeleteOnCancel(false);
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);
     }
@@ -657,5 +681,10 @@ export class WorkspaceManagementDialogsComponent  {
     closeLinkMap(node: Node = null) {
       this.linkMap = null;
       this.linkMapChange.emit(null);
+    }
+
+    private setNodeDeleteOnCancel(nodeDeleteOnCancel: boolean) {
+        this.nodeDeleteOnCancel = nodeDeleteOnCancel;
+        this.nodeDeleteOnCancelChange.emit(nodeDeleteOnCancel);
     }
 }

@@ -6,12 +6,17 @@
   <!-- <span *ngIf="widget?.getHasChanged()" class="changes-notice">{{
     'MDS.HAS_CHANGES' | translate
   }}</span> -->
-  <mat-slide-toggle *ngIf="isBulk && widget" (change)="onBulkEditToggleChange($event)">{{
+  <mat-slide-toggle *ngIf="shouldShowBulkEditToggle()" (change)="onBulkEditToggleChange($event)">{{
     'MDS.BULK_EDIT' | translate
   }}</mat-slide-toggle>
 </div>
 
-<ng-container *ngIf="!wrapInFormField">
+<div
+  *ngIf="!wrapInFormField"
+  [attr.role]="wrapInGroup ? 'group' : null"
+  [attr.aria-labelledby]="wrapInGroup ? labelId : null"
+  [attr.aria-describedby]="wrapInGroup ? descriptionId : null"
+>
   <ng-container *ngTemplateOutlet="content"></ng-container>
   <p
     *ngIf="widget?.definition.bottomCaption && !shouldShowError()"
@@ -27,16 +32,20 @@
   >
     <ng-container *ngTemplateOutlet="error"></ng-container>
   </p>
-</ng-container>
+</div>
 
 <mat-form-field
   appRegisterFormField
   *ngIf="wrapInFormField"
+  [floatLabel]="widget.definition.placeholder ? 'always' : 'auto'"
+  class="widget-form-field-{{ widget.definition.id.replace(':', '-') }}"
   [class.warn]="missingRequired === RequiredMode.MandatoryForPublish"
 >
-  <mat-label>
+  <mat-label [id]="labelId">
     {{ widget.definition.caption }}
-    <span *ngIf="widget.definition.isRequired === RequiredMode.Mandatory" class="required-marker">*</span>
+    <span *ngIf="widget.definition.isRequired === RequiredMode.Mandatory" class="required-marker"
+      >*</span
+    >
   </mat-label>
   <ng-container *ngTemplateOutlet="content"></ng-container>
   <mat-hint *ngIf="widget.definition.bottomCaption">

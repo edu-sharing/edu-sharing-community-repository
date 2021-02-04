@@ -1,9 +1,7 @@
 package org.edu_sharing.restservices.search.v1;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.io.Serializable;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -19,7 +17,6 @@ import javax.ws.rs.core.Response;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
@@ -27,10 +24,10 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.CombineMode;
+import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SearchVCard;
 import org.edu_sharing.service.search.model.SortDefinition;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -406,6 +403,40 @@ public class SearchApi {
 	public Response options02() {
 
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
+
+
+	@GET
+	@Path("/queriesV2/{repository}/contributor")
+	@Consumes({ "application/json" })
+
+	@ApiOperation(value = "Search for contributors", notes = "")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchVCard[].class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response searchContributor(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "search word", required = true) @QueryParam("searchWord") String searchWord,
+			@ApiParam(value = "contributor kind", required = true, defaultValue = "PERSON") @QueryParam("contributorKind") SearchService.ContributorKind contributorKind,
+			@ApiParam(value = "define which authority fields should be searched: ['firstname', 'lastname', 'email', 'uuid', 'url']") @QueryParam("fields") List<String> fields,
+			@ApiParam(value = "define which contributor props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']") @QueryParam("contributorProperties") List<String> contributorProperties,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			Set<SearchVCard> result = SearchServiceFactory.getSearchService(repoDao.getId()).searchContributors(searchWord, fields, contributorProperties, contributorKind);
+			return Response.status(Response.Status.OK).entity(result).build();
+
+		}  catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
 	}
 
 }

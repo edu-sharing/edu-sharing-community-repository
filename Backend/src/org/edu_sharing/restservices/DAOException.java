@@ -13,6 +13,7 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.permission.RestrictedAccessException;
 
 public class DAOException extends Exception {
 
@@ -63,6 +64,9 @@ public class DAOException extends Exception {
 		}
 		if(t instanceof ToolPermissionException){
 			return new DAOToolPermissionException(t);
+		}
+		if(t instanceof RestrictedAccessException){
+			return new DAORestrictedAccessException(t,nodeId);
 		}
 		if(t instanceof DuplicateChildNodeNameException || t instanceof DuplicateNodeException){
 			return new DAODuplicateNodeNameException(t,nodeId);

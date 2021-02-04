@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, NgZone, Output, ViewChild} from '@angular/core';
 import {ConfigurationService, DialogButton, FrameEventsService, Node, RestConnectorService, RestConnectorsService, RestConstants, RestHelper, RestIamService, RestNodeService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
@@ -11,7 +11,7 @@ import {SimpleEditInviteComponent} from './simple-edit-invite/simple-edit-invite
 import {SimpleEditLicenseComponent} from './simple-edit-license/simple-edit-license.component';
 import {Observable} from 'rxjs';
 import {CardType} from '../../../core-ui-module/components/card/card.component';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 @Component({
   selector: 'app-simple-edit-dialog',
@@ -33,13 +33,12 @@ export class SimpleEditDialogComponent  {
    * if true, the ui will behave a bit differently
    */
   @Input() fromUpload = false;
-  initState: { license: boolean; metadata: boolean; invite: boolean };
+  initState: { license: boolean; invite: boolean };
   tpInvite: boolean;
   tpLicense: boolean;
   @Input() set nodes(nodes : Node[]) {
     this._nodes = nodes;
     this.initState = {
-      metadata: false,
       invite: false,
       license: false
     };
@@ -60,12 +59,16 @@ export class SimpleEditDialogComponent  {
     private config : ConfigurationService,
     private toast : Toast,
     private bridge : BridgeService,
+    private ngZone: NgZone,
     private events : FrameEventsService,
     private router : Router,
     private nodeApi : RestNodeService) {
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((tp) => this.tpInvite = tp);
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_LICENSE).subscribe((tp) => this.tpLicense = tp);
     this.updateButtons();
+    UIHelper.waitForComponent(this.ngZone, this, 'metadata').subscribe(() => {
+      this.metadata.isInited.subscribe(() => this.updateInitState())
+    });
   }
   public cancel() {
     this.onCancel.emit();
@@ -114,8 +117,8 @@ export class SimpleEditDialogComponent  {
       this.showDirtyDialog(() => this.openDialog(callback,true));
       return;
     }
-    callback();
     this.onClose.emit(this._nodes);
+    callback();
   }
   openMetadata(force = false) {
     this.openDialog(() => this.onOpenMetadata.emit(this._nodes));
@@ -146,10 +149,11 @@ export class SimpleEditDialogComponent  {
       ],
     })
   }
-  updateInitState(type: string) {
-    console.log('init ' + type);
-    (this.initState as any)[type] = true;
-    if(this.initState.metadata && this.initState.invite && this.initState.license) {
+  updateInitState(type = '') {
+    if(type) {
+      (this.initState as any)[type] = true;
+    }
+    if(this.metadata.isInited && this.initState.invite && this.initState.license) {
       this.toast.closeModalDialog();
     }
   }

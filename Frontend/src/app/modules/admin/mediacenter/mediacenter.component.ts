@@ -1,28 +1,23 @@
-import {RestAdminService} from '../../../core-module/rest/services/rest-admin.service';
-import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {
-    NodeStatistics,
-    Node,
-    Statistics,
-    IamGroup,
-    Group,
-    NodeList,
-    Mediacenter
-} from '../../../core-module/rest/data-object';
+import {Group, IamGroup, Mediacenter, Node} from '../../../core-module/rest/data-object';
 // import {NodeList} from "../../../core-module/core.module";
 import {ListItem} from '../../../core-module/ui/list-item';
 import {RestConstants} from '../../../core-module/rest/rest-constants';
 import {RestHelper} from '../../../core-module/rest/rest-helper';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
-import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
-import {DialogButton, RestConnectorService, RestIamService, RestMdsService, RestMediacenterService, RestSearchService} from '../../../core-module/core.module';
+import {
+    DialogButton, RequestObject,
+    RestConnectorService,
+    RestIamService,
+    RestMdsService,
+    RestMediacenterService,
+    RestSearchService
+} from '../../../core-module/core.module';
 import {Helper} from '../../../core-module/rest/helper';
 import {Toast} from '../../../core-ui-module/toast';
-import {OptionItem} from '../../../core-ui-module/option-item';
+import {CustomOptions, ElementType, OptionItem} from '../../../core-ui-module/option-item';
 import {MdsComponent} from '../../../common/ui/mds/mds.component';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
-import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 // Charts.js
 declare var Chart: any;
@@ -50,15 +45,20 @@ export class AdminMediacenterComponent {
     mediacenterNodesSearchWord='';
     hasMoreMediacenterNodes = true;
     isLoadingMediacenterNodes=false;
-
+    mediacenterNodesSort = {
+        sortBy: RestConstants.LOM_PROP_TITLE,
+        sortAscending: true
+    };
 
     groupColumns: ListItem[];
     nodeColumns: ListItem[];
-    groupActions: OptionItem[];
+    groupActions: CustomOptions = {
+        useDefaultOptions: false
+    };
     currentTab = 0;
     mediacenterMdsReload = new Boolean(true);
-    private isAdmin: boolean;
-    private hasManagePermissions: boolean;
+    isAdmin: boolean;
+    hasManagePermissions: boolean;
     public mediacentersFile: File;
     public organisationsFile: File;
     public orgMcFile: File;
@@ -85,16 +85,15 @@ export class AdminMediacenterComponent {
         this.mdsService.getSet().subscribe((mds) => {
             this.nodeColumns = MdsHelper.getColumns(this.translate, mds, 'mediacenterManaged');
         });
-
-        this.groupActions = [
-            new OptionItem('ADMIN.MEDIACENTER.GROUPS.REMOVE', 'delete', (authority: Group) => {
-                this.toast.showModalDialog('ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE', 'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
-                    DialogButton.getYesNo(() => this.toast.closeModalDialog(), () => {
-                        this.toast.closeModalDialog();
-                        this.deleteGroup(authority)
-                    }), true, () => this.toast.closeModalDialog(), {name: authority.profile.displayName});
-            })
-        ];
+        const remove = new OptionItem('ADMIN.MEDIACENTER.GROUPS.REMOVE', 'delete', (authority: Group) => {
+            this.toast.showModalDialog('ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE', 'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
+                DialogButton.getYesNo(() => this.toast.closeModalDialog(), () => {
+                    this.toast.closeModalDialog();
+                    this.deleteGroup(authority)
+                }), true, () => this.toast.closeModalDialog(), {name: authority.profile.displayName});
+        });
+        remove.elementType = [ElementType.Group];
+        this.groupActions.addOptions = [remove];
     }
 
 
@@ -103,10 +102,7 @@ export class AdminMediacenterComponent {
         this.currentMediacenterCopy = Helper.deepCopy(mediacenter);
         this.mediacenterGroups = null;
 
-        this.mediacenterNodes = null;
-        this.mediacenterNodesTotal = 0;
-        this.mediacenterNodesOffset = 0;
-        this.hasMoreMediacenterNodes = true
+        this.resetMediacenterNodes();
 
         if (mediacenter) {
             this.mediacenterService.getManagedGroups(mediacenter.authorityName).subscribe((groups) => {
@@ -128,10 +124,12 @@ export class AdminMediacenterComponent {
             return;
         }
         if (this.currentMediacenter) {
-            const licensedNodeReq = {
+            const licensedNodeReq: RequestObject = {
                 offset: this.mediacenterNodesOffset,
                 count: this.mediacenterNodesMax,
-                propertyFilter: [RestConstants.ALL]
+                propertyFilter: [RestConstants.ALL],
+                sortBy: [this.mediacenterNodesSort.sortBy],
+                sortAscending: [this.mediacenterNodesSort.sortAscending]
             };
             this.isLoadingMediacenterNodes = true;
 
@@ -151,7 +149,7 @@ export class AdminMediacenterComponent {
             console.log(this.mediacenterMds.getValues())
 
             this.mediacenterService.getLicensedNodes(this.currentMediacenter.authorityName, criterias,
-                RestConstants.HOME_REPOSITORY, null, licensedNodeReq).subscribe((data) => {
+                RestConstants.HOME_REPOSITORY, licensedNodeReq).subscribe((data) => {
                 this.mediacenterNodesTotal = data.pagination.total;
                 if (this.mediacenterNodesTotal < (this.mediacenterNodesOffset + this.mediacenterNodesMax)) {
                     this.hasMoreMediacenterNodes = false;
@@ -337,5 +335,18 @@ export class AdminMediacenterComponent {
             this.toast.error(error);
             this.globalProgress = false;
         });
+    }
+
+    setMediacenterNodesSort(sort: { sortBy: string; sortAscending: boolean }) {
+        this.mediacenterNodesSort = sort;
+        this.resetMediacenterNodes();
+        this.loadMediacenterNodes();
+    }
+
+    private resetMediacenterNodes() {
+        this.mediacenterNodes = null;
+        this.mediacenterNodesTotal = 0;
+        this.mediacenterNodesOffset = 0;
+        this.hasMoreMediacenterNodes = true
     }
 }

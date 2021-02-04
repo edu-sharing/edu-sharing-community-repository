@@ -1,6 +1,6 @@
 <div class="tree">
   <div class="tree-header">
-    <mat-form-field>
+    <mat-form-field floatLabel="always">
       <mat-label>{{widget.definition.caption}}</mat-label>
       <mat-icon matPrefix>search</mat-icon>
       <input matInput
@@ -8,7 +8,7 @@
              autocomplete="off"
              [(ngModel)]="filterString">
     </mat-form-field>
-    <button mat-button (click)="close.emit()"><i icon iconId="close"></i></button>
+    <button mat-button (click)="close.emit()"><i icon="close"></i></button>
   </div>
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <!-- Leaf nodes -->
@@ -50,7 +50,7 @@
             [indeterminate]="node.isIndeterminate"
             [disabled]="getIsDisabled(node)"
             (change)="toggleNode(node, $event.checked)"
-    ><span [innerHTML]="node.caption | highlight: filterString"></span
+    ><span [innerHTML]="node.caption | sanitizeHTML | highlight: filterString"></span
     ></mat-checkbox>
   </ng-template>
 
@@ -60,7 +60,7 @@
             [checked]="getIsChecked(node)"
             [disabled]="getIsDisabled(node)"
             (change)="toggleNode(node, true)"
-    ><span [innerHTML]="node.caption | highlight: filterString"></span
+    ><span [innerHTML]="node.caption | sanitizeHTML | highlight: filterString"></span
     ></mat-radio-button>
   </ng-template>
 </div>

@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {DialogButton, RestNodeService} from "../../../core-module/core.module";
+import {DialogButton, RestIamService, RestNodeService, RestSearchService, VCardResult} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
@@ -9,6 +9,10 @@ import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
+import {debounceTime, filter, startWith, switchMap} from 'rxjs/operators';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {FormControl} from '@angular/forms';
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 
 @Component({
   selector: 'workspace-contributor',
@@ -26,73 +30,85 @@ export class WorkspaceContributorComponent  {
   public rolesLifecycle=RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE;
   public rolesMetadata=RestConstants.CONTRIBUTOR_ROLES_METADATA;
 
-  private _nodeId: string;
   public loading=true;
   public edit: VCard;
   public editMode: string;
   public editType: number;
   public more = false;
+  public showPersistentIds = false;
   public editScopeNew: string;
   private editScopeOld: string;
-  private editOriginal: VCard;
-  public dialogTitle: string;
-  public dialogMessage: string;
-  public dialogButtons: DialogButton[];
-  public dialogParameters: any;
-  public node: Node;
+  editOriginal: VCard;
+  _node: Node;
+  @Input() set node (node: Node){
+      this._node = node;
+      for(let role of this.rolesLifecycle){
+          this.contributorLifecycle[role]=[];
+          let list=node.properties[RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX+role];
+          if(!list)
+              continue;
+          for(let vcard of list){
+              if(vcard && new VCard(vcard).isValid())
+                  this.contributorLifecycle[role].push(new VCard(vcard));
+          }
+      }
+      for(let role of this.rolesMetadata){
+          this.contributorMetadata[role]=[];
+          let list=node.properties[RestConstants.CONTRIBUTOR_METADATA_PREFIX+role];
+          if(!list)
+              continue;
+          for(let vcard of list){
+              if(vcard && new VCard(vcard).isValid())
+                  this.contributorMetadata[role].push(new VCard(vcard));
+          }
+      }
+      this.loading=false;
+  }
   public date : Date;
   buttons: DialogButton[];
   private editButtons: DialogButton[];
   private static TYPE_PERSON = 0;
   private static TYPE_ORG = 1;
+  private fullName = new BehaviorSubject('');
+  private orgName = new BehaviorSubject('');
+  suggestionPersons$: Observable<VCardResult[]>;
+  suggestionOrgs$: Observable<VCardResult[]>;
+  editDisabled = false;
   @Input() set nodeId(nodeId : string){
-    this._nodeId=nodeId;
     this.loading=true;
     this.nodeService.getNodeMetadata(nodeId,[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
       this.node=data.node;
-      for(let role of this.rolesLifecycle){
-        this.contributorLifecycle[role]=[];
-        let list=data.node.properties[RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX+role];
-        if(!list)
-          continue;
-        for(let vcard of list){
-          if(vcard && new VCard(vcard).isValid())
-            this.contributorLifecycle[role].push(new VCard(vcard));
-        }
-      }
-      for(let role of this.rolesMetadata){
-        this.contributorMetadata[role]=[];
-        let list=data.node.properties[RestConstants.CONTRIBUTOR_METADATA_PREFIX+role];
-        if(!list)
-          continue;
-        for(let vcard of list){
-          if(vcard && new VCard(vcard).isValid())
-            this.contributorMetadata[role].push(new VCard(vcard));
-        }
-      }
-      this.loading=false;
     });
 
   }
-  @Output() onClose=new EventEmitter();
+  @Output() onClose=new EventEmitter<Node>();
   @Output() onLoading=new EventEmitter();
+  givenname = new FormControl('');
+  userAuthor = false;
   public remove(data:any[],pos:number){
-    this.dialogTitle='WORKSPACE.CONTRIBUTOR.DELETE_TITLE';
-    this.dialogMessage='WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE';
-    this.dialogParameters={name:data[pos].getDisplayName()};
-    this.dialogButtons=DialogButton.getYesNo(()=>{
-      this.dialogTitle=null;
-    },()=>{
-      data.splice(pos,1);
-      this.dialogTitle=null;
-    });
-
+      this.toast.showConfigurableDialog({
+          title: 'WORKSPACE.CONTRIBUTOR.DELETE_TITLE',
+          message: 'WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE',
+          messageParameters: {name:data[pos].getDisplayName()},
+          isCancelable: true,
+          buttons: DialogButton.getYesNo(()=>{
+              this.toast.closeModalDialog();
+          },()=>{
+              data.splice(pos,1);
+              this.toast.closeModalDialog();
+          })
+      });
   }
-  public addVCard(mode:string) {
-    this.date=null;
-    this.editType=WorkspaceContributorComponent.TYPE_PERSON;
+  public resetVCard(){
+      this.date = null;
+      this.editType=WorkspaceContributorComponent.TYPE_PERSON;
+      this.edit=new VCard();
+      this.editDisabled = false;
+  }
+  public addVCard(mode = this.editMode) {
+    this.resetVCard();
+    this.userAuthor = false;
     this.editMode=mode;
-    this.edit=new VCard();
     this.editOriginal=null;
     this.editScopeOld=null;
     this.editScopeNew=this.editMode=='lifecycle' ? this.rolesLifecycle[0] : this.rolesMetadata[0];
@@ -106,9 +122,14 @@ export class WorkspaceContributorComponent  {
     this.editMode=mode;
     this.editOriginal=vcard;
     this.edit=vcard.copy();
+    this.editDisabled = !!(vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata);
     this.editScopeOld=scope;
     this.editScopeNew=scope;
     this.editType=vcard.givenname||vcard.surname ? WorkspaceContributorComponent.TYPE_PERSON : WorkspaceContributorComponent.TYPE_ORG;
+    if(vcard.uid === this.iamService.getCurrentUserVCard().uid) {
+      this.userAuthor = true;
+      this.editDisabled = true;
+    }
     this.date=null;
     let contributeDate=vcard.contributeDate;
     if(contributeDate) {
@@ -171,9 +192,9 @@ export class WorkspaceContributorComponent  {
       }
       properties["ccm:metadatacontributer_"+role]=prop;
     }
-    this.nodeService.editNodeMetadataNewVersion(this._nodeId,RestConstants.COMMENT_CONTRIBUTOR_UPDATE,properties).subscribe(()=>{
+    this.nodeService.editNodeMetadataNewVersion(this._node.ref.id,RestConstants.COMMENT_CONTRIBUTOR_UPDATE,properties).subscribe(({node})=>{
       this.toast.toast('WORKSPACE.TOAST.CONTRIBUTOR_UPDATED');
-      this.onClose.emit();
+      this.onClose.emit(node);
       this.onLoading.emit(false);
     },(error:any)=>{
       this.toast.error(error);
@@ -189,9 +210,23 @@ export class WorkspaceContributorComponent  {
   }
   public constructor(
     private nodeService:RestNodeService,
+    private searchService:RestSearchService,
+    private iamService:RestIamService,
     private translate:TranslateService,
     private toast:Toast,
-  ){
+  ) {
+    this.suggestionPersons$ = this.fullName.pipe(
+        startWith(''),
+        filter((v) => v !== ''),
+        debounceTime(200),
+        switchMap((v) => this.searchService.searchContributors(v.trim(), 'PERSON')),
+    );
+    this.suggestionOrgs$ = this.orgName.pipe(
+        startWith(''),
+        filter((v) => v !== ''),
+        debounceTime(200),
+        switchMap((v) => this.searchService.searchContributors(v.trim(), 'ORGANIZATION')),
+    );
     this.buttons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
         new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveContributor())
@@ -202,4 +237,31 @@ export class WorkspaceContributorComponent  {
     ];
   }
 
+    updatePersonSuggestions() {
+
+    }
+
+  setFullName() {
+    this.fullName.next(this.edit.givenname + ' ' + this.edit.surname);
+  }
+  setOrgName() {
+    this.orgName.next(this.edit.org);
+  }
+
+  useVCardSuggestion(event: MatAutocompleteSelectedEvent) {
+    console.log(event);
+    this.edit = event.option.value.copy();
+    this.editDisabled = true;
+  }
+
+  setVCardAuthor(set: boolean) {
+    if(set) {
+      this.edit = this.iamService.getCurrentUserVCard();
+      this.userAuthor = true;
+      this.editDisabled = true;
+    } else {
+      this.resetVCard();
+    }
+
+  }
 }

@@ -36,6 +36,7 @@
     "EXTENSION_NOT_MATCH_INFO_NEW": "Are you sure you want to add the file extension '{{extensionNew}}'?\n\n{{warning}}",
     "EXTENSION_NOT_MATCH_WARNING": "The file may become unusable when it gets downloaded or openend.",
     "EXTENSION_CHANGE": "Yes, change",
+    "EXTENSION_KEEP": "Keep extension",
     "INPUT_HOURS": "Hrs.",
     "INPUT_MINUTES": "Min.",
     "HOUR": "Hour",
@@ -69,12 +70,16 @@
     "LOGOUT": "Log out",
     "INVALID_OPERATION": "This feature is currently not supported",
     "SORT_BY": "Sort by",
+    "ASCENDING": "ascending",
+    "DESCENDING": "descending",
+    "SELECTED": "selected",
     "CLEAR_FILTERS": "Clear all filters",
     "EDIT_ACCOUNT": "Manage account",
     "CHANGE_LANGUAGE": "Change language",
     "DEFAULT_METADATASET": "Default-Metadataset ({{name}})",
     "NO_MATCHES": "No matches found",
     "NO_CC_PUBLISH": "no publishing permissions for object",
+    "SELECT": "select {{ element }}",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "Add to recently used collections",
         "SEARCH_COLLECTIONS": "Find collection...",
@@ -99,6 +104,8 @@
     "CONNECTOR_FORMAT_LABEL": "File type",
     "CONNECTOR_QUOTA_REACHED_TITLE": "Upload quota exceeded",
     "CONNECTOR_QUOTA_REACHED_MESSAGE": "This function is unavailable because the upload quota is fully exceeded.\n\nDelete files to reclaim storage space and try it again.",
+    "RESTRICTED_ACCESS_ERROR_TITLE": "No license for material",
+    "RESTRICTED_ACCESS_ERROR_MESSAGE": "The current material requires a license to be accessed. You currently don't have sufficient rights to access it",
     "TOOLPERMISSION_ERROR": "You have insufficient permissions for this task",
     "TOOLPERMISSION_ERROR_INLINE": "You can't do this action because the permission \"{{permission}}\" is missing",
     "TOOLPERMISSION_ERROR_TITLE": "Insufficient permissions",
@@ -131,6 +138,7 @@
         "TOOLPERMISSION_CREATE_ELEMENTS_FILES": "Create/upload files",
         "TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS": "Create collections",
         "TOOLPERMISSION_HANDLESERVICE": "Resolve unique ids from a handle service for materials",
+        "TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS": "Define materials as licensed, which means they can not gain permissions via redistribution (e.g. collections)",
         "TOOLPERMISSION_USAGE_STATISTIC": "Fetch information about the usage of all nodes of the repository",
         "TOOLPERMISSION_COMMENT_WRITE":"Creating comments on objects",
         "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "View stats of material access of the repository",
@@ -142,7 +150,8 @@
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" can be used",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed",
-        "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders"
+        "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders",
+        "TOOLPERMISSION_SIGNUP_GROUP": "Signup to an organisation/group (only applies to organisation/groups which are configured for signup)"
     },
     "NO_WRITE_PERMISSIONS": "No permissions",
     "NODE_SEARCH": "Search elements...",
@@ -159,6 +168,8 @@
     "USER_TUTORIAL_HEADING": "Your Profile",
     "USER_TUTORIAL_DESCRIPTION": "Here you can add a profile picture and show who you are and what you do. You decide what others can see.",
     "PROFILE_UPDATED": "Account details updated",
+    "SHOW_EMAIL_UPDATED": "E-mail now is public",
+    "HIDE_EMAIL_UPDATED": "E-mail now is private",
     "CHANGE_PASSWORD": "Change password",
     "OLD_PASSWORD": "Old password",
     "NEW_PASSWORD": "New password",
@@ -199,6 +210,9 @@
         "200_tocheck": "To check",
         "300_hasflaws": "Has flaws",
         "400_checked": "Checked"
+    },
+    "LIST_TABLE": {
+        "DUMMY_ICON_LABEL": "File type"
     },
     "NODE": {
         "cm:name": "filename",
@@ -310,7 +324,7 @@
     },
     "COLLECTION": {
         "INFO_REFERENCES": "collection",
-        "INFO_REFERENCES_MULTI": "collections",
+        "INFO_REFERENCES_MULTI": "subcollections",
         "INFO_CHILDS": "material",
         "INFO_CHILDS_MULTI": "materials",
         "INFO_NO_CONTENT": "empty collection",
@@ -364,6 +378,7 @@
         "SOURCE": "source"
     },
     "AUTHORITY_TYPE_GROUP": "Group",
+    "AUTHORITY_TYPE_ORG": "Organisation",
     "GROUP": {
         "displayName": "group name",
         "groupEmail": "e-mail",
@@ -392,6 +407,11 @@
             "system": "system account",
             "function": "function account"
         }
+    },
+    "PROFILE_SETTINGS": {
+        "SHOW_EMAIL_LABEL": "E-Mail public",
+        "SHOW_EMAIL": "Email is displayed",
+        "HIDE_EMAIL": "E-mail is hidden"
     },
     "CONNECTOR": {
         "ONLY_OFFICE": {
@@ -428,6 +448,7 @@
     "LICENSE": {
         "TITLE_OF_WORK": "Title",
         "LINK_AUTHOR": "Link to author",
+        "DESCRIPTION_REQUIRED": "Please add a license description",
         "NAMES": {
             "NONE": "No or unknown license",
             "MULTI": "Multiple licenses",
@@ -471,13 +492,15 @@
     },
     "LIST": {
         "REORDER_TITLE": "Change columns",
-        "REORDER_DRAG_DROP": "You can change the order of the elements via drag & drop"
+        "REORDER_DRAG_DROP": "You can change the order of the elements via drag & drop",
+        "TOTAL_COUNT_TOOLTIP": "{{selected}} items selected from a total of {{total}}"
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Add material to collection?",
         "COLLECTION_SHARE_PUBLIC_INFO": "By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it."
     },
     "OPTIONS": {
+        "SHOW_ALL_OPTIONS": "More actions",
         "APPLY": "Apply",
         "SHOW": "Preview & Info",
         "SHOW_IN_FOLDER": "Open storage location",
@@ -518,7 +541,12 @@
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
-        "LINK_MAP": "Create link"
+        "LINK_MAP": "Create link",
+        "TOGGLE_SHARED_TO_ME": "Toggle share receiver",
+        "SWITCH_TO_LIST_VIEW": "Switch to list view",
+        "SWITCH_TO_CARDS_VIEW": "Switch to cards view",
+        "LIST_SETTINGS": "Configure List",
+        "METADATA_SIDEBAR": "Material details"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",
@@ -553,7 +581,8 @@
         "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
         "REQUIRED_MESSAGE": "Field is required",
         "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing",
-        "INDETERMINATE_NOTICE": "Click on the value in order to add it to all elements, or remove it in order to delete it from all elements (when \"replace\" is selected)."
+        "INDETERMINATE_NOTICE": "Click on the value in order to add it to all elements, or remove it in order to delete it from all elements (when \"replace\" is selected).",
+        "SHOW_OPTIONS_BUTTON": "Show options"
     },
 
      "SIMPLE_EDIT": {
@@ -575,11 +604,11 @@
             "ERROR_TOOLPERMISSION_MISSING": "It is not possible to set permissions because your profile has no permissions to do so",
             "ERROR_INHERIT": "It is not possible to set permissions in this view because the item(s) already receive(s) invitations from the parent folder:",
             "ERROR_HELP": "Please use the option \"Advanced invitations\" to configure the permissions",
-            "UNSET": "Not set",
+            "UNSET": "Add none",
             "PUBLISH": "All (Publish)",
             "GROUP_TYPES": {
-                "ORG_ADMINISTRATORS": "Administrators only",
-                "TEACHER": "Teachers only"
+                "ORG_ADMINISTRATORS": "Administrators from\n{{school}}",
+                "TEACHER": "Teachers from\n{{school}}"
             }
         },
         "LICENSE": {
@@ -633,6 +662,7 @@
         "PASSWORD_CORRECT": "Password correct"
     },
     "VIDEO_CONTROLS": {
+        "HEADING": "Select a clip for saving to a collection",
         "SAVED": "Saved changes"
     },
     "TOAST": {
@@ -656,7 +686,7 @@
         "Country": "Country"
     },
     "ICON_LABELS": {
-        "more_vert": "Option",
+        "more_vert": "Options",
         "close": "close",
         "help_outline": "Help",
         "info_outline": "Information",
@@ -926,5 +956,15 @@
     },
     "ROCKETCHAT": {
         "TITLE": "Chat"
+    },
+    "NAV": {
+        "MAIN": "main",
+        "SKIP": "skip",
+        "COLLECTIONS": "collections"
+    },
+    "SKIP_LINKS": {
+        "MAIN_CONTENT": "Skip to main content"
+    },
+    "REPOSITORIES": {
     }
 }

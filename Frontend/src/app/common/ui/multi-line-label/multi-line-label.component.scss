@@ -1,0 +1,23 @@
+@import '../../../core-ui-module/styles/variables.scss';
+
+:host {
+    white-space: normal;
+}
+
+::ng-deep .has-multi-line-label .mat-radio-label {
+    align-items: flex-start;
+}
+
+.label {
+    line-height: normal;
+    font-weight: bold;
+    margin-bottom: 4px;
+    margin-top: 2px;
+}
+
+.description {
+    line-height: normal;
+    font-size: 90%;
+    color: $textLight;
+    margin-bottom: 4px;
+}

@@ -26,18 +26,15 @@ mat-tab-group {
 .collection-new-preview-headline {
     word-break: normal;
     overflow-wrap: break-word;
+    line-height: normal;
+    margin: 0;
 }
 .switchToSearch {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     font-weight: bold;
-    text-transform: uppercase;
-    padding: 12px;
-}
-
-.switchToSearch i {
-    position: relative;
-    top: 6px;
+    margin-top: 15px;
 }
 
 .table-tab {
@@ -64,10 +61,6 @@ mat-tab-group {
 
 section {
     padding: 20px 0px;
-}
-
-.collections-breadcrumb {
-    margin-top: 10px;
 }
 
 .coll-breadcrumb {
@@ -108,11 +101,13 @@ section {
     height: 90px;
     border-radius: 50%;
     background-color: rgba(0,0,0,.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     @include unselectableText();
     > i {
         color:#fff;
         font-size: 45px;
-        margin-top: 25px;
     }
 }
 .collection-header-image {
@@ -257,7 +252,7 @@ section {
     justify-content: flex-end;
     margin-top: 1.46rem; // Same as mat-heading-3
     margin-bottom: 5px;
-    > h3.mat-heading-3 {
+    > h2.mat-heading-3 {
         flex-grow: 1;
         margin-top: 0;
         margin-right: 10px;
@@ -355,7 +350,7 @@ section {
     }
     .collections-breadcrumb {
         position: absolute;
-        top: -10px;
+        top: 0;
         left: 0;
         width: 100%;
         z-index: 1;
@@ -379,7 +374,7 @@ section {
         margin-top: 0;
         top: unset;
         left: unset;
-        height: unset;
+        height: 400px;
         width: 100%;
         position: relative;
         overflow-x: hidden;

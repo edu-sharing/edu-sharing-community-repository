@@ -78,7 +78,7 @@
         "NO_ORG": "View all",
         "INTERNAL_NAME": "Internal name",
         "CURRENT_MEMBERS": "Current members of group {{group}}:",
-        "DOWNLOAD_MEMBER_FILENAME": "Users.csv",
+        "DOWNLOAD_MEMBER_FILENAME": "Users",
         "SET_STATUS": "Set user status",
         "STATUS_LABEL": "User status",
         "STATUS_NOTIFY": "Inform user via mail about status change",
@@ -124,6 +124,7 @@
                 "SHARING": "Sharing",
                 "LICENSING": "Licensing & Publishing",
                 "DATA_MANAGEMENT": "File Management",
+                "ACCOUNT_MANAGEMENT": "Account Management",
                 "SAFE": "Secure Area (Safe)",
                 "COLLECTIONS": "Collections",
                 "CONNECTORS": "Connectors & Editors",
@@ -144,7 +145,7 @@
             "RECEIVER_CAPTION": "The selected user will be displayed as the creator of the data & collections in the future",
             "RECEIVER": "Search user...",
             "RECEIVER_GROUP_CAPTION": "The following organisation will be given administrative rights to the data",
-            "RECEIVER_GROUP_HINT": "The organization will be the coordinator of all folders, materials & collections. Exceptions are collection references in third-party collections",
+            "RECEIVER_GROUP_HINT": "The admins of the organization will be the coordinator of all folders, materials & collections. Exceptions are collection references in third-party collections",
             "RECEIVER_GROUP": "Search organization...",
             "START": "Start process",
             "RESULTS": "Deletion results",
@@ -204,6 +205,28 @@
                 "assign": "Assign to new user",
                 "delete": "Delete irreversibly"
             }
+        },
+        "ORG_SIGNUP_SAVED": "Enrollment settings updated",
+        "ORG_SIGNUP": "Configure enrollment",
+        "ORG_SIGNUP_LIST": "Show waiting list",
+        "ORG_SIGNUP_METHOD": "enrollment method",
+        "ORG_SIGNUP_PASSWORD": "Password for registration",
+        "ORG_SIGNUP_PASSWORD_HINT": "If a password has already been set and this field is left blank, the original password will be used.",
+        "ORG_SIGNUP_NO_EMAIL": "The current organization/group does not yet has an e-mail assigned. Please set an e-mail to get nofifications about joined users.",
+        "ORG_SIGNUP_ADD": "Confirm Membership",
+        "ORG_SIGNUP_REJECT": "Reject Membership",
+        "ORG_SIGNUP_LIST_EMPTY": "No users on waiting list",
+        "ORG_SIGNUP_ADD_CONFIRM": "User(s) added to group",
+        "ORG_SIGNUP_REJECT_CONFIRM": "User(s) removed from waiting list and added to group",
+        "ORG_SIGNUP_METHODS":{
+            "disabled": "No enrollment allowed",
+            "simple": "self-enrollment without password",
+            "password": "self-enrollment with password",
+            "list": "self-enrollment with waiting list",
+            "disabled_DETAILS": "Users cannot enroll in the organization/group on their own, but must be added manually by an administrator.",
+            "simple_DETAILS": "Users can register independently in the organization/group and become members immediately.",
+            "password_DETAILS": "Users can enroll in the organization/group independently and become members at once if they know the correct password.",
+            "list_DETAILS": "Users can enroll in the organization/group on their own and are placed on a waiting list. An administrator must then confirm the registration."
         }
     }
 }

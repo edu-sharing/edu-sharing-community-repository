@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { filter } from 'rxjs/operators';
+import {filter, skip} from 'rxjs/operators';
 import { MdsWidgetValue } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
@@ -31,8 +31,9 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
                 }
             });
         }
-        this.formControl.valueChanges.pipe(filter((value) => value !== null)).subscribe((value) => {
-            this.setValue([value.id]);
+        // skip first because the form will always fire a value on init
+        this.formControl.valueChanges.pipe(skip(1)).subscribe((value) => {
+            this.setValue(value ?[value.id] : [null]);
         });
     }
 }

@@ -3,7 +3,7 @@
 <div class="sidebar" *ngIf="show" [@fromLeft]="show" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="main">
     <button mat-button class="close" (click)="hide()">
-      <i icon iconId="close" aria="true"></i>
+      <i icon="close" aria="true"></i>
     </button>
     <!-- We should get loginInfo in any case, but it might not be ready from the start. -->
     <div
@@ -17,16 +17,23 @@
         class="blurred-image"
         [src]="user.person.profile.avatar + '&crop=true&width=200&height=200'"
       />
-      <div class="profile">
-        <user-avatar
-          *ngIf="user"
-          [user]="user.person"
-          [size]="'medium'"
-          class="clickable"
-          (click)="onOpenProfile()"
-        ></user-avatar>
-        <div *ngIf="user && !loginInfo.isGuest">{{ username }}</div>
-        <div *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</div>
+      <div *ngIf="user" class="profile">
+        <ng-template #userAvatar>
+            <user-avatar
+              [user]="user.person"
+              size="medium"
+            ></user-avatar>
+            <div id="main-menu-sidebar-username" class="username">
+              <ng-container *ngIf="user && !loginInfo.isGuest">{{ username }}</ng-container>
+              <ng-container *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</ng-container>
+            </div>
+        </ng-template>
+        <a
+          *ngIf="!loginInfo.isGuest; else userAvatar"
+          [routerLink]="['/' + ROUTER_PREFIX + 'profiles', ME]"
+          [attr.aria-label]="'PROFILES.TITLE_NAV' | translate"
+          aria-describedby="main-menu-sidebar-username"
+        ><ng-container *ngTemplateOutlet="userAvatar"></ng-container></a>
       </div>
     </div>
     <button

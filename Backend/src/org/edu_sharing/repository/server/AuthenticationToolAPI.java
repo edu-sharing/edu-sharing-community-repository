@@ -212,7 +212,10 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		//validate a second time cause super.storeAuthInfoInSession makes a logout when another tickets is in session
 		//i.e jession with ticket + basic auth in ApiAuthenticationFilter
 		authenticationService.validate(ticket);
-		
+
+		// prewarm tp session cache
+		ToolPermissionServiceFactory.getInstance().getAllAvailableToolPermissions();
+
 		try {
 			HashMap<String, String> userInfo = getUserInfo(authenticationService.getCurrentUserName(), ticket);
 			session.setAttribute(CCConstants.AUTH_USERNAME_CAPTION, userInfo.get(CCConstants.AUTH_USERNAME_CAPTION));

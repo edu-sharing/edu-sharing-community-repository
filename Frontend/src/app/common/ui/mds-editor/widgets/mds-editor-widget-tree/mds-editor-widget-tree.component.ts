@@ -1,7 +1,7 @@
 import { CdkConnectedOverlay, ConnectedPosition, OverlayRef } from '@angular/cdk/overlay';
 import {AfterViewInit, ApplicationRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
+import {BehaviorSubject, fromEvent, merge, Observable, ReplaySubject} from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { MdsWidgetType } from '../../types';
 import { DisplayValue } from '../DisplayValues';
@@ -10,6 +10,7 @@ import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/
 import { Tree } from './tree';
 import {TranslateService} from '@ngx-translate/core';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
+import {MatButton} from '@angular/material/button';
 @Component({
     selector: 'app-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
@@ -21,6 +22,7 @@ export class MdsEditorWidgetTreeComponent
     @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
     @ViewChild('input') input: ElementRef<HTMLElement>;
     @ViewChild('treeRef') treeRef: MdsEditorWidgetTreeCoreComponent;
+    @ViewChild('arrowButton') arrowButton: MatButton;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
 
@@ -90,11 +92,15 @@ export class MdsEditorWidgetTreeComponent
     }
 
     ngAfterViewInit(): void {
-        fromEvent(this.input.nativeElement, 'focus')
-            .pipe(takeUntil(this.destroyed$))
+        merge(
+            fromEvent(this.input.nativeElement, 'focus'),
+            fromEvent(this.input.nativeElement, 'keyup'),
+            fromEvent(this.input.nativeElement, 'mouseup')
+        ).pipe(takeUntil(this.destroyed$))
             .subscribe(() => {
                 this.openOverlay();
             });
+
     }
 
     ngOnDestroy() {
@@ -110,14 +116,12 @@ export class MdsEditorWidgetTreeComponent
     }
 
     openOverlay(): void {
-        if (this.overlayIsVisible) {
-            return;
-        }
         // Don't interfere with change detection
         setTimeout(async () => {
             this.overlayIsVisible = true;
-            await this.applicationRef.tick();
-            setTimeout(() => this.treeRef.input.nativeElement.focus());
+            setTimeout(() => {
+                this.treeRef.input.nativeElement.focus()
+            });
             // Wait for overlay
             setTimeout(() => {
                 overlayClickOutside(
@@ -130,6 +134,7 @@ export class MdsEditorWidgetTreeComponent
 
     closeOverlay(): void {
         this.overlayIsVisible = false;
+        this.arrowButton.focus();
     }
 
     onOverlayKeydown(event: KeyboardEvent) {
@@ -151,8 +156,11 @@ export class MdsEditorWidgetTreeComponent
 
     remove(toBeRemoved: DisplayValue): void {
         const treeNode = this.tree.findById(toBeRemoved.key);
-        treeNode.isChecked = false;
-        treeNode.isIndeterminate = false;
+        // old values are may not available in tree, so check for null
+        if(treeNode) {
+            treeNode.isChecked = false;
+            treeNode.isIndeterminate = false;
+        }
         const values: DisplayValue[] = this.chipsControl.value;
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));

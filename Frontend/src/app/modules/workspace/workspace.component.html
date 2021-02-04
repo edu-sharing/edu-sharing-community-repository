@@ -20,22 +20,22 @@
 
   <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot=false"></div>
   <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">
-    <a class="collection-item" [class.rootSelected]="root=='MY_FILES'" (click)="showSelectRoot=false;setRoot('MY_FILES')"><i icon iconId="person"></i> {{ 'WORKSPACE.MY_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i icon iconId="group"></i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i icon iconId="share"></i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i icon iconId="send"></i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i icon iconId="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i icon iconId="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='MY_FILES'" (click)="showSelectRoot=false;setRoot('MY_FILES')"><i icon="person"></i> {{ 'WORKSPACE.MY_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i icon="group"></i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i icon="share"></i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i icon="send"></i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i icon="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i icon="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
-
   <div class="tree" *ngIf="isLoggedIn">
-  <workspace-tree
+      <workspace-tree
                   [class.tree-quota]="user.person.quota.enabled"
                   [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
                   [mainNav]="mainNavRef"
                   [selectedNode]="selectedNodeTree"
                   [root]="root"
+                  [workspace]="this"
                   [isSafe]="isSafe"
                   (onDrop)="handleDrop($event)"
                   (onSetRoot)="setRoot($event)"
@@ -50,9 +50,13 @@
           [breadcrumbsAsNode]="path"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.'+root"
+          [homeRouterLink]="path ? {
+            routerLink: '.',
+            queryParams: { id: null },
+            queryParamsHandling: 'merge'
+          } : null"
           [canDrop]="canDropBreadcrumbs"
           (onDrop)="handleDrop($event)"
-          [homeId]="getRootFolderId()"
           (onClick)="openBreadcrumb($event)"
         ></breadcrumbs>
     </div>
@@ -65,13 +69,17 @@
   <actionbar #actionbar
 ></actionbar>
 </div></div>
+<h1 appTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
   <workspace-explorer class="explorer"
                       #explorer
+                      role="main"
+                      appSkipTarget="MAIN_CONTENT"
                       appCreateContextMenu
                       *ngIf="root!='RECYCLE'"
                       [current]="currentFolder"
                       [selection]="selection"
                       [searchQuery]="searchQuery"
+                      [customOptions]="customOptions"
                       [viewType]="viewType"
                       [(reorderDialog)]="reorderDialog"
                       [preventKeyevents]="cardHasOpenModals$ | async"

@@ -18,7 +18,7 @@
   </div>
   <div class="currentLicenseDescription">
     <div class="customLicenseDescription" *ngIf="type=='CUSTOM'">{{rightsDescription}}</div>
-    <div *ngIf="type!='CUSTOM' && type!='COPYRIGHT'" innerHTML="{{ 'LICENSE.DESCRIPTION.'+type | translate }}">
+    <div *ngIf="type!='CUSTOM' && type!='COPYRIGHT'" innerHTML="{{ 'LICENSE.DESCRIPTION.'+(type==='PDM' ? 'CC_0' : type) | translate }}">
     </div>
     <div *ngIf="type=='COPYRIGHT'">
       <div innerHTML="{{ 'LICENSE.DESCRIPTION.'+copyrightType | translate}}"></div>

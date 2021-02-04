@@ -23,6 +23,22 @@
 		]]>
 		</message>
 	</template>
+	<template name="invited_safe">
+		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zu einem Material eingeladen.</subject>
+		<message><![CDATA[
+			<h1>Hallo {{firstName}} {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} hat "{{name}}" für Sie freigegeben.</h2>
+			Ihnen wurden die folgenden Rechte zugeteilt:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			Nach Login in den Safe ist das Element im Bereich "Für mich freigegeben" zu finden.
+			<br><br>
+			{{if message}}Nachricht vom Nutzer:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="invited_collection">
 		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zur Mitarbeit an einer Sammlung eingeladen.</subject>
 		<message><![CDATA[
@@ -123,6 +139,50 @@
 			Neuer Status: {{newStatus}}
 			<br><br><br>
 			Sollte diese Änderung nicht in Ihrem Interesse sein, setzen Sie sich bitte umgehend mit dem Betreiber des Systems in Verbindung.
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupList">
+		<subject>Ein Nutzer möchte "{{group}}" beitreten</subject>
+		<message><![CDATA[
+			<h1>Hallo!</h1>
+			<h2>{{firstName}} {{lastName}} möchte "{{group}}" beitreten.</h2>
+			<br>
+			Bitte wechseln Sie zur Nutzerverwaltung und prüfen Sie die Warteliste der Gruppe.
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupUser">
+		<subject>"{{group}}" beigetreten</subject>
+		<message><![CDATA[
+			<h1>Hallo {{firstName}} {{lastName}}!</h1>
+			<h2>Sie sind erfolgreich "{{group}}" beigetreten.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupConfirmed">
+		<subject>"{{group}}" beigetreten</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			<h2>You're request to join "{{group}}" has been accepted! You are now member of this group.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupRejected">
+		<subject>Could not join "{{group}}"</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			<h2>We're sorry to inform you that your request to join "{{group}}" has been rejected by the group administrator.</h2>
+		]]>
+		</message>
+	</template>
+	<template name="groupSignupAdmin">
+		<subject>Ein neuer Nutzer ist "{{group}}" beigetreten</subject>
+		<message><![CDATA[
+			<h1>Hallo!</h1>
+			<h2> {{firstName}} {{lastName}} ist soeben "{{group}}" beigetreten.</h2>
+			<br>
+			Sie können die Mitglieder der Gruppe in der Nutzerverwaltung verwalten.
 		]]>
 		</message>
 	</template>

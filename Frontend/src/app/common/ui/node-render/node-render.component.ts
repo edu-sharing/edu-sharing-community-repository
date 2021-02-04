@@ -6,10 +6,8 @@ import {Translation} from '../../../core-ui-module/translation';
 import {DefaultGroups, ElementType, OptionItem, Scope} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {Title} from '@angular/platform-browser';
 import {trigger} from '@angular/animations';
-import {Location} from '@angular/common';
-import {NodeHelper} from '../../../core-ui-module/node-helper';
+import {Location, PlatformLocation} from '@angular/common';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {SearchService} from '../../../modules/search/search.service';
 import {ActionbarHelperService} from '../../services/actionbar-helper';
@@ -48,6 +46,7 @@ import {VideoControlsComponent} from '../../../core-ui-module/components/video-c
 import {ActionbarComponent} from '../actionbar/actionbar.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper';
 import {RestTrackingService} from "../../../core-module/rest/services/rest-tracking.service";
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 declare var jQuery:any;
 declare var window: any;
@@ -75,6 +74,7 @@ export class NodeRenderComponent implements EventListener {
     constructor(
       private translate : TranslateService,
       private tracking : RestTrackingService,
+      private nodeHelper: NodeHelperService,
       private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
@@ -92,13 +92,13 @@ export class NodeRenderComponent implements EventListener {
       private actionbarService : ActionbarHelperService,
       private toast : Toast,
       private cd: ChangeDetectorRef,
-      private title : Title,
       private config : ConfigurationService,
       private storage : SessionStorageService,
       private route : ActivatedRoute,
       private networkService : RestNetworkService,
       private _ngZone: NgZone,
       private router : Router,
+      private platformLocation : PlatformLocation,
       private optionsHelper : OptionsHelperService,
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).nodeRenderComponentRef = {component: this, zone: _ngZone};
@@ -167,7 +167,7 @@ export class NodeRenderComponent implements EventListener {
   public nodeMetadata: Node[];
   public nodeShare: Node;
   public nodeShareLink: Node;
-  public nodeWorkflow: Node;
+  public nodeWorkflow: Node[];
   public addNodesStream: Node[];
   public nodeDelete: Node[];
   public nodeVariant: Node;
@@ -238,7 +238,7 @@ export class NodeRenderComponent implements EventListener {
         }
         else {
           if(this.fromLogin) {
-            this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace']);
+            UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, false);
           }
           else {
             if(window.history.state?.scope === 'search') {
@@ -321,7 +321,7 @@ export class NodeRenderComponent implements EventListener {
     }
 
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
-    download.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+    download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
     download.isEnabled=this._node.downloadUrl!=null;
     download.showAsAction=true;
     if(this.isCollectionRef()) {
@@ -359,6 +359,7 @@ export class NodeRenderComponent implements EventListener {
             }
             else {
                 this._node=data.node;
+                this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
                         this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
@@ -474,14 +475,14 @@ export class NodeRenderComponent implements EventListener {
   }
   private downloadSequence() {
       const nodes = [this.sequenceParent].concat(this.sequence.nodes);
-      NodeHelper.downloadNodes(this.connector,nodes, this.sequenceParent.name+'.zip');
+      this.nodeHelper.downloadNodes(nodes, this.sequenceParent.name+'.zip');
   }
 
   private downloadCurrentNode() {
       if(this.downloadUrl) {
-          NodeHelper.downloadUrl(this.connector.getBridgeService(), this.downloadUrl);
+          this.nodeHelper.downloadUrl(this.downloadUrl);
       } else {
-          NodeHelper.downloadNode(this.connector.getBridgeService(), this._node, this.isChildobject ? null : this.version);
+          this.nodeHelper.downloadNode(this._node, this.isChildobject ? null : this.version);
       }
   }
 
@@ -497,7 +498,7 @@ export class NodeRenderComponent implements EventListener {
     private initOptions(options:OptionItem[]) {
         this.optionsHelper.setData({
             scope: Scope.Render,
-            activeObject: this._node,
+            activeObjects: [this._node],
             parent: new Node(this._node.parent.id),
             allObjects: this.list,
             customOptions: {
@@ -534,7 +535,6 @@ export class NodeRenderComponent implements EventListener {
           }
           this.initOptions(options);
     });
-    UIHelper.setTitleNoTranslation(RestHelper.getName(this._node),this.title,this.config);
   }
   setDownloadUrl(url:string) {
       if(this.downloadButton!=null)
@@ -589,6 +589,13 @@ export class NodeRenderComponent implements EventListener {
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
+    }
+    getName(): string {
+      if (this._node) {
+        return this.getNodeName(this._node);
+      } else {
+        return '';
+      }
     }
     private getNodeTitle(node:Node) {
         return RestHelper.getTitle(node);

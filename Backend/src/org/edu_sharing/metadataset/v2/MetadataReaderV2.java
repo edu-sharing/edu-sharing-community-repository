@@ -140,8 +140,14 @@ public class MetadataReaderV2 {
                 reader = new MetadataReaderV2(mdsName + "_override.xml", locale);
                 MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
                 mds.overrideWith(mdsOverride);
-            } catch (IOException e) {
-            	logger.info("no "+mdsName+"_override.xml was found -> only default file will be used");
+            }catch(org.apache.http.conn.ConnectTimeoutException e){
+            	logger.error(e.getMessage(),e);
+			}catch (IOException e) {
+            	if(e.toString().contains(mdsName)) {
+					logger.info("no " + mdsName + "_override.xml was found -> only default file will be used");
+				} else {
+            		logger.error("IOException parsing " + mdsName + "_override.xml:" + e.toString(),e);
+				}
             }
             mdsCache.put(id, mds);
             return mds;
@@ -209,6 +215,7 @@ public class MetadataReaderV2 {
 			List<MetadataQuery> queries = new ArrayList<>();
 			for (int i = 0; i < queriesNode.getLength(); i++) {
 				MetadataQuery query = new MetadataQuery();
+				query.setSyntax(syntaxName);
 				Map<String, String> basequeries = new HashMap<>();
 				Node node = queriesNode.item(i);
 				NamedNodeMap nodeMap = node.getAttributes();
@@ -284,6 +291,7 @@ public class MetadataReaderV2 {
 				query.setParameters(parameters);
 				queries.add(query);
 			}
+			entry.setSyntax(syntaxName);
 			entry.setQueries(queries);
 			result.put(syntaxName, entry);
 		}
@@ -439,6 +447,9 @@ public class MetadataReaderV2 {
 						widget.setRequired(MetadataWidget.Required.valueOf(value));
 					}
 				}
+				if(name.equals("textEscapingPolicy")) {
+					widget.setTextEscapingPolicy(MetadataWidget.TextEscapingPolicy.valueOf(value));
+				}
 				if(name.equals("hideIfEmpty"))
 					widget.setHideIfEmpty(value.equalsIgnoreCase("true"));
 				if(name.equals("valuespace_i18n")){
@@ -469,7 +480,7 @@ public class MetadataReaderV2 {
 				if(name.equals("step"))
 					widget.setStep(Integer.parseInt(value));			
 				if(name.equals("allowempty"))
-					widget.setAllowempty(value.equalsIgnoreCase("true"));				
+					widget.setAllowempty(value.equalsIgnoreCase("true"));
 			}
 			for(int j=0;j<list2.getLength();j++){
 				Node data=list2.item(j);
@@ -521,7 +532,7 @@ public class MetadataReaderV2 {
 				if("caption".equals(widget.getValuespaceSort())){
 					return o1.getCaption().compareTo(o2.getCaption());
 				}
-				logger.warn("Invalid value for valuespaceSort '"+widget.getValuespaceSort()+"' for widget '"+widget.getId()+"'");
+				logger.error("Invalid value for valuespaceSort '"+widget.getValuespaceSort()+"' for widget '"+widget.getId()+"'");
 				return 0;
 			});
 		}
@@ -824,7 +835,9 @@ public class MetadataReaderV2 {
 		try{
 			getMetadataset(home, "-default-","de_DE", true);
 			getMetadataset(home, "-default-","en_US", true);
-		}catch(Throwable t){}
+		}catch(Throwable t){
+			logger.error("Error occured while preparing the default mds: ", t);
+		}
 	}
 	
 }

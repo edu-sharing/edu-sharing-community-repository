@@ -296,7 +296,8 @@ public class JobHandler {
 			}
 		});
 
-		quartzScheduler.start();
+		// use startDelayed() to not block server startup by IMMEDIATE jobs
+		quartzScheduler.startDelayed(10);
 
 		refresh();
 

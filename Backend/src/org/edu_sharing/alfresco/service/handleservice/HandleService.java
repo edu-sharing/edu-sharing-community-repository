@@ -8,8 +8,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import com.typesafe.config.Config;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 
 import net.handle.api.HSAdapter;
@@ -26,6 +28,7 @@ import net.handle.hdllib.Util;
 
 public class HandleService {
 
+	private final Config config;
 	String privkeyPath = null;
 	
 	
@@ -40,10 +43,11 @@ public class HandleService {
 	
 	
 	public HandleService() throws HandleServiceNotConfiguredException{
+		config = LightbendConfigLoader.get().getConfig("repository.handleservice");
 		if(this.handleServerAvailable()) {
-			handleServerPrefix = HandleServiceProperties.instance.getHandleServerPrefix();
-			handleServerRepoId = HandleServiceProperties.instance.getHandleServerRepoId();
-			privkeyPath = HandleServiceProperties.instance.getHandleServerPrivKey();
+			handleServerPrefix = config.getString("prefix");
+			handleServerRepoId = config.getString("repoid");
+			privkeyPath = config.getString("privkey");
 			id = "0.NA/"+handleServerPrefix;
 		}else {
 			throw new HandleServiceNotConfiguredException();
@@ -154,12 +158,7 @@ public class HandleService {
 	}
 	
 	public boolean handleServerAvailable() {
-		if(HandleServiceProperties.instance.getHandleServerPrefix() != null && !HandleServiceProperties.instance.getHandleServerPrefix().trim().equals("") 
-				&& HandleServiceProperties.instance.getHandleServerPrivKey() != null && !HandleServiceProperties.instance.getHandleServerPrivKey().trim().equals("")) {
-			return true;
-		}else {
-			return false;
-		}
+		return config.getBoolean("enabled");
 	}
 	
 	public String generateHandle() throws SQLException  {
@@ -176,7 +175,7 @@ public class HandleService {
 	public HandleValue[] getDefautValues(String url) {
 		HandleValue hvUrl = new HandleValue(1,Common.STD_TYPE_URL, url.getBytes());
 		
-		String mail = HandleServiceProperties.instance.getHandleServerEMail(); 
+		String mail = config.getString("email");
 		mail = (mail == null) ? "info@edu-sharing.com" : mail;
 		
 		HandleValue hvMail = new HandleValue(2,Common.STD_TYPE_EMAIL, mail.getBytes());

@@ -40,8 +40,12 @@ public class Login  {
   public final static String STATUS_CODE_PREVIOUS_USER_WRONG = "PREVIOUS_USER_WRONG";
   public final static String STATUS_CODE_INVALID_SCOPE = "INVALID_SCOPE";
   public final static String STATUS_CODE_PASSWORD_EXPIRED = "PASSWORD_EXPIRED";
+  public final static String STATUS_CODE_PERSON_BLOCKED = "PERSON_BLOCKED";
 
 
+  public Login(){
+
+  }
 
 
 public Login(boolean isValidLogin, String scope, HttpSession session) {

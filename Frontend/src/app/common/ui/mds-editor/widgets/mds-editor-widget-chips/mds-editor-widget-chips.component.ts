@@ -1,13 +1,26 @@
-import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {MatAutocomplete, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {MatChipInputEvent} from '@angular/material/chips';
-import {BehaviorSubject, combineLatest, from, Observable} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, startWith, switchMap,} from 'rxjs/operators';
-import {MdsWidgetType, MdsWidgetValue} from '../../types';
-import {DisplayValue} from '../DisplayValues';
-import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import {
+    MatAutocomplete,
+    MatAutocompleteSelectedEvent,
+    MatAutocompleteTrigger,
+} from '@angular/material/autocomplete';
+import { MatChipInputEvent } from '@angular/material/chips';
+import { TranslateService } from '@ngx-translate/core';
+import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
+import {
+    debounceTime,
+    distinctUntilChanged,
+    filter,
+    map,
+    startWith,
+    switchMap,
+} from 'rxjs/operators';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { MdsWidgetType, MdsWidgetValue } from '../../types';
+import { DisplayValue } from '../DisplayValues';
+import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
     selector: 'app-mds-editor-widget-chips',
@@ -16,6 +29,8 @@ import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
 })
 export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implements OnInit {
     @ViewChild('input') input: ElementRef<HTMLInputElement>;
+    @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
+    trigger: MatAutocompleteTrigger;
     @ViewChild('auto') matAutocomplete: MatAutocomplete;
 
     readonly valueType: ValueType = ValueType.MultiValue;
@@ -24,7 +39,15 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     chipsControl: FormControl;
     filteredValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
-    filterString: string;
+    showDropdownArrow: boolean;
+
+    constructor(
+        mdsEditorInstance: MdsEditorInstanceService,
+        translate: TranslateService,
+        private changeDetectorRef: ChangeDetectorRef,
+    ) {
+        super(mdsEditorInstance, translate);
+    }
 
     ngOnInit(): void {
         this.chipsControl = new FormControl(
@@ -37,10 +60,14 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         this.indeterminateValues$ = new BehaviorSubject(
             this.widget.getInitialValues().individualValues,
         );
-        if(this.widget.definition.type === MdsWidgetType.MultiValueBadges ||
-            this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges) {
-            this.widget.definition.bottomCaption = this.widget.definition.bottomCaption ??
+        if (
+            this.widget.definition.type === MdsWidgetType.MultiValueBadges ||
+            this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges
+        ) {
+            this.widget.definition.bottomCaption =
+                this.widget.definition.bottomCaption ??
                 this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER');
+            this.changeDetectorRef.detectChanges();
         }
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
@@ -51,6 +78,10 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         ) {
             this.filteredValues = this.subscribeForSuggestionUpdates();
         }
+        this.showDropdownArrow =
+            this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
+            !!this.widget.definition.values;
+
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
@@ -81,10 +112,11 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         this.removeFromIndeterminateValues(toBeRemoved.key);
     }
 
-    selected(event: MatAutocompleteSelectedEvent): void {
+    selected(event: MatAutocompleteSelectedEvent) {
         this.add(event.option.value);
         this.input.nativeElement.value = '';
         this.inputControl.setValue(null);
+        setTimeout(() => this.trigger.openPanel());
     }
 
     focus() {
@@ -94,7 +126,6 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     add(value: DisplayValue): void {
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
             this.chipsControl.setValue([...this.chipsControl.value, value]);
-            console.log(this.chipsControl.value);
         }
         this.removeFromIndeterminateValues(value.key);
     }
@@ -164,5 +195,13 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
                     ),
             ),
         );
+    }
+
+    blurEvent(event: FocusEvent) {
+        // ignore mat option focus to prevent resetting before selection is done
+        if((event.relatedTarget as HTMLElement)?.tagName === 'MAT-OPTION') {
+            return;
+        }
+        this.inputControl.setValue(null);
     }
 }

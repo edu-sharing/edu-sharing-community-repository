@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ContentChild, ElementRef, TemplateRef, ViewChild} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
 import * as EduData from '../../core-module/core.module';
@@ -31,10 +31,9 @@ import { Toast } from '../../core-ui-module/toast';
 import {DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
 import { NodeRenderComponent } from '../../common/ui/node-render/node-render.component';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { Title } from '@angular/platform-browser';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import { NodeHelper } from '../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
@@ -49,6 +48,7 @@ import { GlobalContainerComponent } from '../../common/ui/global-container/globa
 import { Observable } from 'rxjs';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-helper';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 // component class
 @Component({
@@ -85,6 +85,8 @@ export class CollectionsMainComponent {
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections')
     listCollections: ListTableComponent;
+    @ContentChild('beforeCollectionHeader') beforeCollectionHeaderRef: TemplateRef<any>;
+
 
     viewTypeNodes = ListTableComponent.VIEW_TYPE_GRID;
 
@@ -231,6 +233,7 @@ export class CollectionsMainComponent {
         private temporaryStorageService: TemporaryStorageService,
         private location: Location,
         private collectionService: RestCollectionService,
+        private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
         private networkService: RestNetworkService,
         private organizationService: RestOrganizationService,
@@ -246,7 +249,6 @@ export class CollectionsMainComponent {
         private optionsService: OptionsHelperService,
         private toast: Toast,
         private bridge: BridgeService,
-        private title: Title,
         private config: ConfigurationService,
         private translationService: TranslateService,
     ) {
@@ -260,12 +262,6 @@ export class CollectionsMainComponent {
             this.storage,
             this.route,
         ).subscribe(() => {
-            UIHelper.setTitle(
-                'COLLECTIONS.TITLE',
-                title,
-                translationService,
-                config,
-            );
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
                     if (data.isValidLogin && data.currentScope == null) {
@@ -470,7 +466,7 @@ export class CollectionsMainComponent {
     }
 
     getScopeInfo() {
-        return NodeHelper.getCollectionScopeInfo(this.collectionContent.node);
+        return this.nodeHelper.getCollectionScopeInfo(this.collectionContent.node);
     }
     dropOnCollection(event: any) {
         const target = event.target;
@@ -494,6 +490,7 @@ export class CollectionsMainComponent {
             );
         } else {
             UIHelper.addToCollection(
+                this.nodeHelper,
                 this.collectionService,
                 this.router,
                 this.bridge,
@@ -532,6 +529,7 @@ export class CollectionsMainComponent {
     addNodesToCollection(nodes: Node[]) {
         this.toast.showProgressDialog();
         UIHelper.addToCollection(
+            this.nodeHelper,
             this.collectionService,
             this.router,
             this.bridge,
@@ -544,37 +542,43 @@ export class CollectionsMainComponent {
         );
     }
 
-    canDropOnCollection = (event: any) => {
-        if (event.source[0].ref.id === event.target.ref.id) {
+    canDropOnCollection = (event: DropData) => {
+        if (event.nodes[0].ref.id === event.target.ref.id) {
             return false;
         }
         if (event.target.ref.id === this.collectionContent.node.ref.id) {
             return false;
         }
-        // in case it's via breadcrums, unmarshall the collection item
-        if (event.target.collection) {
-            event.target = event.target.collection;
+        console.log(event.nodes[0], event.dropAction);
+        if(event.nodes[0].collection && event.dropAction === 'copy') {
+            return false;
         }
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
-        if (event.source[0].hasOwnProperty('childCollectionsCount')) {
+        if (event.nodes[0].collection?.hasOwnProperty('childCollectionsCount')) {
             if (
-                (event.source[0].type ===
+                (event.nodes[0].collection.type ===
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type !==
+                    event.target.collection.type !==
                         RestConstants.COLLECTIONTYPE_EDITORIAL) ||
-                (event.source[0].type !==
+                (event.nodes[0].collection.type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.type ===
+                    event.target.collection.type ===
                         RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }
         }
-
         if (
-            !NodeHelper.getNodesRight(
-                event.source[0],
+            event.dropAction === 'copy' &&
+            !this.nodeHelper.getNodesRight(
+                event.nodes,
                 RestConstants.ACCESS_CC_PUBLISH,
+                NodesRightMode.Original,
+            )
+            || event.dropAction === 'move' &&
+            !this.nodeHelper.getNodesRight(
+                event.nodes,
+                RestConstants.ACCESS_WRITE,
                 NodesRightMode.Original,
             )
         ) {
@@ -582,8 +586,8 @@ export class CollectionsMainComponent {
         }
 
         if (
-            !NodeHelper.getNodesRight(
-                event.target,
+            !this.nodeHelper.getNodesRight(
+                [event.target],
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Local,
             )
@@ -594,7 +598,7 @@ export class CollectionsMainComponent {
         return true;
     };
 
-    canDropOnRef() {
+    canDropOnRef(event: DropData) {
         // do not allow to drop here
         return false;
     }
@@ -936,6 +940,10 @@ export class CollectionsMainComponent {
             : ListTableComponent.VIEW_TYPE_GRID_SMALL;
     }
 
+    hasNonIconPreview(): boolean {
+        return this.collectionContent.node.preview && !this.collectionContent.node.preview.isIcon;
+    }
+
     private renderBreadcrumbs() {
         this.path = [];
         this.nodeService
@@ -943,14 +951,6 @@ export class CollectionsMainComponent {
             .subscribe((data: EduData.NodeList) => {
                 this.path = data.nodes.reverse();
             });
-    }
-
-    private openBreadcrumb(position: number) {
-        if (position === 0) {
-            this.selectTab(this.tabSelected);
-            return;
-        }
-        // other navigation is handled via breadcrumbs angular routing
     }
 
     private initialize() {
@@ -1140,7 +1140,7 @@ export class CollectionsMainComponent {
     private isAllowedToDeleteNodes(nodes: Node[]) {
         return (
             this.isAllowedToDeleteCollection() ||
-            NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)
+            this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)
         );
     }
 
@@ -1151,7 +1151,7 @@ export class CollectionsMainComponent {
     private setOptionsCollection() {
         this.optionsService.setData({
             scope: Scope.CollectionsCollection,
-            activeObject: this.collectionContent.node,
+            activeObjects: [this.collectionContent.node],
         });
         this.optionsService.initComponents(
             this.mainNavRef,
@@ -1185,7 +1185,7 @@ export class CollectionsMainComponent {
         if (this.mainNavRef) {
             this.mainNavRef.refreshBanner();
         }
-        
+
         // Cannot trivially reference the add button for the tutorial with
         // current implementation of generic options.
         //

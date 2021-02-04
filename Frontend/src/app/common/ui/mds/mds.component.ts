@@ -16,7 +16,7 @@ import { Toast } from '../../../core-ui-module/toast';
 import { VCard } from '../../../core-module/ui/VCard';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { NodeHelper } from '../../../core-ui-module/node-helper';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {
@@ -43,6 +43,7 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { Observable } from 'rxjs';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
+import {DateHelper} from '../../../core-ui-module/DateHelper';
 declare var noUiSlider: any;
 
 @Component({
@@ -67,7 +68,7 @@ export class MdsComponent {
     /**
      * bulk behaviour: this controls how the bulk feature shall behave
      */
-    @Input() bulkBehaviour = BulkBehaviour.Default;
+    @Input() bulkBehaviour = BulkBehavior.Default;
 
     private activeAuthorType: number;
     private static VCARD_FIELDS=["Title","Givenname","Surname"];
@@ -103,7 +104,7 @@ export class MdsComponent {
      * mode, currently "search" or "default"
      * @type {string}
      */
-    @Input() mode: string = 'default';
+  @Input() mode : 'search' | 'default'='default';
 
     @Output() extendedChange = new EventEmitter();
     private static AUTHOR_TYPE_FREETEXT = 0;
@@ -292,6 +293,7 @@ export class MdsComponent {
         private sanitizer: DomSanitizer,
         private config: ConfigurationService,
         private mdsEditorCommon: MdsEditorCommonService,
+        private nodeHelper: NodeHelperService,
         private _ngZone: NgZone,
     ) {
         //Translation.initialize(this.translate,this.config,this.storage,this.route);
@@ -910,6 +912,8 @@ export class MdsComponent {
                         }
                     } else if (widget.type == 'singleoption') {
                         element.value = props[0] ? props[0] : '';
+                    } else if(widget.type == 'date') {
+                        element.value=props[0] ? DateHelper.formatDateByPattern(props[0],'y-M-d') : '';
                     } else {
                         let caption = props[0];
                         if (widget.values) {
@@ -1029,7 +1033,7 @@ export class MdsComponent {
         const id = this.getDomId(widget.id + '_bulk');
         return (
             `<div class="bulk-enable switch" ` +
-            (this.bulkBehaviour === BulkBehaviour.Replace ? 'style="display:none"' : '') +
+            (this.bulkBehaviour === BulkBehavior.Replace ? 'style="display:none"' : '') +
             `>
                 <label>
                   ` +
@@ -1044,7 +1048,7 @@ export class MdsComponent {
             widget.id +
             `', event)"
                     ` +
-            (this.bulkBehaviour === BulkBehaviour.Replace ? 'checked' : '') +
+            (this.bulkBehaviour === BulkBehavior.Replace ? 'checked' : '') +
             `>
                   <span class="lever"></span>
                  </label>
@@ -1058,7 +1062,7 @@ export class MdsComponent {
         const id = this.getDomId(widget.id + '_bulk');
         return (
             `<div class="bulk-enable" ` +
-            (this.bulkBehaviour === BulkBehaviour.Replace ? 'style="display:none"' : '') +
+            (this.bulkBehaviour === BulkBehavior.Replace ? 'style="display:none"' : '') +
             `>
                 <input type="radio" name="` +
             id +
@@ -1069,7 +1073,7 @@ export class MdsComponent {
             `.setBulkMode('` +
             widget.id +
             `', event)"` +
-            (this.bulkBehaviour === BulkBehaviour.Default ? 'checked' : '') +
+            (this.bulkBehaviour === BulkBehavior.Default ? 'checked' : '') +
             `>
                 <label for="` +
             id +
@@ -1085,7 +1089,7 @@ export class MdsComponent {
             `.setBulkMode('` +
             widget.id +
             `', event)"` +
-            (this.bulkBehaviour === BulkBehaviour.Replace ? 'checked' : '') +
+            (this.bulkBehaviour === BulkBehavior.Replace ? 'checked' : '') +
             `>
                 <label for="` +
             id +
@@ -1136,7 +1140,7 @@ export class MdsComponent {
             'class="' +
             css +
             '"';
-        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehavior.Replace) {
             html += ' disabled';
         }
         html += '>';
@@ -1252,7 +1256,7 @@ export class MdsComponent {
             widget.id +
             `').childNodes;
         for(var i=0;i<elements.length;i++){
-            if(elements[i].getAttribute('data-value')==this.value){
+            if(elements[i].getAttribute('data-value',undefined,undefined,undefined,htmlElement)==this.value){
                 return;
             }
         }
@@ -1432,17 +1436,13 @@ export class MdsComponent {
                         property: id,
                         pattern: element.value,
                     },
-                    criterias: RestSearchService.convertCritierias(
-                        Helper.arrayJoin(this._currentValues, this.getValues()),
-                        this.mds.widgets,
-                    ),
-                },
-                this._setId,
-                this._repository,
-            )
-            .subscribe(
-                (data: MdsValueList) => {
-                    if (this.lastMdsQuery != element.value) return;
+                    criterias:this.mode==='search' ?
+                        RestSearchService.convertCritierias(
+                            Helper.arrayJoin(this._currentValues,this.getValues()),this.mds.widgets
+                        ) : null,
+                },this._setId,this._repository).subscribe((data:MdsValueList)=>{
+                  if(this.lastMdsQuery!=element.value)
+                    return;
 
                     for (let i = 1; i < elements.length; ) {
                         list.removeChild(elements.item(i));
@@ -1766,20 +1766,9 @@ export class MdsComponent {
                 widget.valuesTree[value.parent].push(value);
             }
         }
-        let html =
-            this.autoSuggestField(
-                widget,
-                '',
-                false,
-                this.getWindowComponent() + `.openTree('` + widget.id + `')`,
-                'arrow_forward',
-                widget.type == 'singlevalueTree',
-            ) +
-            `     <div class="dialog darken" style="display:none;z-index:` +
-            (122 + this.priority) +
-            `;" id="` +
-            domId +
-            `_tree">
+    let html=this.autoSuggestField(widget,'',false,
+                this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
+        +`     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('` +
@@ -1842,7 +1831,7 @@ export class MdsComponent {
         let html = '';
         html += this.addBulkCheckbox(widget);
         html += '<textarea class="materialize-textarea" id="' + this.getWidgetDomId(widget) + '"';
-        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehavior.Replace) {
             html += ' disabled';
         }
         if (widget.placeholder) {
@@ -1942,7 +1931,7 @@ export class MdsComponent {
                     `_minutes').value=Math.floor(unencoded%60);
                   };
                   slider.noUiSlider.on('slide', sliderUpdate);
-                  slider.noUiSlider.on('update', sliderUpdate);                 
+                  slider.noUiSlider.on('update', sliderUpdate);
             `,
             );
         }, 5);
@@ -1987,7 +1976,7 @@ export class MdsComponent {
                     max: widget.max,
                 },
             });
-            if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+            if (this.isBulkMode() && this.bulkBehaviour !== BulkBehavior.Replace) {
                 slider.setAttribute('disabled', 'true');
             }
         }, 5);
@@ -2003,7 +1992,7 @@ export class MdsComponent {
             );
         }
         html += '<select id="' + this.getWidgetDomId(widget) + '"';
-        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehaviour.Replace) {
+        if (this.isBulkMode() && this.bulkBehaviour !== BulkBehavior.Replace) {
             html += ' disabled';
         }
         html += '>';
@@ -2028,7 +2017,7 @@ export class MdsComponent {
             this.getWidgetDomId(widget) +
             `').childNodes;
         for(var i=0;i<elements.length;i++){
-            if(elements[i].getAttribute('data-value')==this.value){
+            if(elements[i].getAttribute('data-value',undefined,undefined,undefined,htmlElement)==this.value){
                 return;
             }
         }
@@ -2389,14 +2378,14 @@ export class MdsComponent {
         if (this.connector.getApiVersion() >= RestConstants.API_VERSION_4_0) {
             preview +=
                 `<div class="changePreview">
-                      <a tabindex="0" 
+                      <a tabindex="0"
                       onclick="document.getElementById('` +
                 this.getDomId('preview-select') +
                 `').click()" 
                       onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="` +
                 this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') +
                 `">file_upload</i></a>
-                          <a tabindex="0" 
+                          <a tabindex="0"
                           id="` +
                 this.getDomId('preview-delete') +
                 `"
@@ -2406,7 +2395,7 @@ export class MdsComponent {
                           onclick="` +
                 this.getWindowComponent() +
                 `.deletePreview()" 
-                          onkeydown="if(event.keyCode==13) this.click();" 
+                          onkeydown="if(event.keyCode==13) this.click();"
                           class="btn-circle"><i class="material-icons" aria-label="` +
                 this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW') +
                 `">delete</i></a>
@@ -2449,8 +2438,8 @@ export class MdsComponent {
         let list = document.getElementById(this.getDomId('mdsChildobjects'));
         list.innerHTML +=
             `
-        <div class="childobject" 
-        draggable="true" 
+        <div class="childobject"
+        draggable="true"
         ondragstart="` +
             this.getWindowComponent() +
             `.startChildobjectDrag(event,` +
@@ -2507,7 +2496,7 @@ export class MdsComponent {
         this.refreshChildobjects();
     }
     private addChildobjectLink(event: any) {
-        let link = NodeHelper.addHttpIfRequired(event.link);
+        let link = this.nodeHelper.addHttpIfRequired(event.link);
         this.addChildobject = false;
         let properties = RestHelper.createNameProperty(link);
         properties[RestConstants.CCM_PROP_IO_WWWURL] = [link];
@@ -2745,7 +2734,7 @@ export class MdsComponent {
                 return "widget 'license' does not have values connected, can't render it.";
             }
             for (let value of widget.values) {
-                let image = NodeHelper.getLicenseIconByString(value.id, this.connector, false);
+                let image = this.nodeHelper.getLicenseIconByString(value.id, false);
                 if (image) value.imageSrc = image;
             }
             widget.type = 'checkboxVertical';
@@ -2793,7 +2782,7 @@ export class MdsComponent {
     }
     private renderWorkflow(widget: any) {
         if (this.mode == 'search') {
-            let workflows = NodeHelper.getWorkflows(this.config);
+            let workflows = this.nodeHelper.getWorkflows();
             widget.values = [];
             for (let w of workflows) {
                 let value: any = {};
@@ -3278,7 +3267,7 @@ export class MdsComponent {
         return properties;
     }
 }
-export enum BulkBehaviour {
+export enum BulkBehavior {
     Default, // default equals no replace on choose, but show options
     Replace, // Don't display settings, simply replace for all (usefull after uploads)
 }

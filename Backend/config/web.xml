@@ -105,6 +105,10 @@
       <filter-class>org.edu_sharing.restservices.ApiAuthenticationFilter</filter-class>
     </filter>
    
+    <filter>
+        <filter-name>App Signature Filter</filter-name>
+        <filter-class>org.edu_sharing.repository.server.authentication.AppSignatureFilter</filter-class>
+    </filter>
     
     <filter>
     	<filter-name>Shibboleth SoapAction Header Fix</filter-name>
@@ -160,6 +164,11 @@
     </filter-mapping>
 
     <filter-mapping>
+        <filter-name>App Signature Filter</filter-name>
+        <url-pattern>/rest/authentication/v1/appauth/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
       <filter-name>REST Origin Filter</filter-name>
       <url-pattern>/rest/*</url-pattern>
    </filter-mapping> 
@@ -179,6 +188,10 @@
    </filter-mapping>
     
    <!-- Filter Mapping Edu Context Management Filter-->
+    <filter-mapping>
+        <filter-name>Edu Context Management Filter</filter-name>
+        <url-pattern>/oauth2/*</url-pattern>
+    </filter-mapping>
    <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
 	      <url-pattern>/index.html</url-pattern>
@@ -232,7 +245,7 @@
     <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
 	      <url-pattern>/restservice/*</url-pattern>
-   </filter-mapping>   
+   </filter-mapping>
    <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
    		  <url-pattern>/rest/*</url-pattern>

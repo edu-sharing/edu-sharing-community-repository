@@ -8,6 +8,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -44,7 +45,6 @@ public class ToolPermissionBaseService {
             @Override
             public String doWork() throws Exception {
                 try {
-
                     return getToolPermissionNodeId(toolPermission);
                 } catch (Throwable e) {
                     logger.error(e.getMessage(), e);
@@ -62,6 +62,10 @@ public class ToolPermissionBaseService {
         }
 
         String toolNodeId = AuthenticationUtil.runAsSystem(workTP);
+        if(toolNodeId == null){
+            logger.warn("Could not fetch toolpermission " + toolPermission + "in alfresco context, fallback to false");
+            return false;
+        }
         AccessStatus accessStatus = permissionService.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toolNodeId), PermissionService.READ);
         AccessStatus accessStatusDenied = permissionService.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toolNodeId), CCConstants.PERMISSION_DENY);
         if(accessStatusDenied.equals(AccessStatus.ALLOWED)) {
@@ -103,6 +107,6 @@ public class ToolPermissionBaseService {
     }
 
     protected String getToolPermissionNodeId(String toolPermission) throws Throwable{
-        throw new RuntimeException("getToolPermissionNodeId is not implemented in alfresco context");
+        throw new NotImplementedException("getToolPermissionNodeId is not implemented in alfresco context");
     }
 }

@@ -41,14 +41,17 @@ $licenseInfoHeight: 40px;
                 width: 100%;
                 text-align: center;
                 color: #fff;
-                > user-avatar{
+                a {
+                    color: unset;
+                }
+                user-avatar{
                     display: flex;
                     justify-content: center;
                 }
                 i {
                     font-size: 50pt;
                 }
-                > div {
+                .username {
                     font-size: 120%;
                     overflow: hidden;
                     margin-top: 5px;
@@ -80,7 +83,7 @@ $licenseInfoHeight: 40px;
             }
         }
         button.close,
-        .top .profile > div {
+        .top .profile .username {
             text-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
         }
     }

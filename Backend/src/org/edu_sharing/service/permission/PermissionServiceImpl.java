@@ -53,6 +53,7 @@ import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
@@ -384,6 +385,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						send=false;
 					}
 				}
+				if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
+					template = "invited_safe";
+				}
 				if(send) {
 					mail.sendMailHtml(context, senderName, senderInfo.get(CCConstants.CM_PROP_PERSON_EMAIL), emailaddress, MailTemplate.getSubject(template, currentLocale),
 							MailTemplate.getContent(template, currentLocale, true), replace);
@@ -530,7 +534,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY);
 		}
-		
+
 		Comparator c = new Comparator<Notify>() {
 			@Override
 			public int compare(Notify o1, Notify o2) {
@@ -547,7 +551,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 
 		};
-		
+
 		Gson gson = new Gson();
 		List<String> jsonHistory = (List<String>)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
 		
@@ -555,20 +559,20 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(jsonHistory != null) {
 			for(String json : jsonHistory) {
 				Notify notify = gson.fromJson(json, Notify.class);
-				
+
 				NodeRef personRef = personService.getPerson(notify.getUser().getAuthorityName(),false);
 				Map<QName, Serializable> personProps = nodeService.getProperties(personRef);
 				notify.getUser().setGivenName((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME)));
 				notify.getUser().setSurname((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME)));
 				notify.getUser().setEmail((String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_EMAIL)));
-				
+
 				/**
 				 * @todo overwrite acl user firstname, lastname, email
 				 */
-				
+
 				notifyList.add(notify);
 			}
-			
+
 			Collections.sort(notifyList, c);
 		}
 
@@ -1124,8 +1128,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
-		boolean fuzzyGroupSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
+	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck) {
+		boolean fuzzyGroupSearch = skipTpCheck || !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 		
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:authorityContainer AND NOT @ccm\\:scopetype:system");
@@ -1201,7 +1205,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
 		}
-		boolean hasToolPermission = toolPermission
+		boolean hasToolPermission = skipTpCheck || toolPermission
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
 
 		if (globalContext) {
@@ -1321,7 +1325,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		searchFields.add("lastName");
 
 		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,searchFields, globalContext);
-		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext);
+		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext, false);
 
 		/**
 		 * don't find groups of scopes when no scope is provided
@@ -1411,7 +1415,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	@Override
 	public Result<List<Group>> findGroups(String searchWord, boolean globalContext, int from, int nrOfResults) {
 
-		StringBuffer searchQuery = getFindGroupsSearchString(searchWord, globalContext);
+		StringBuffer searchQuery = getFindGroupsSearchString(searchWord, globalContext, false);
 
 		if (searchQuery == null) {
 			return new Result<List<Group>>();
@@ -1472,9 +1476,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
 			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY), null);
 		}
-		
+
 		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
-		
+
 		ArrayList<String> phUsers = (ArrayList<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
 		if(phUsers == null) phUsers = new ArrayList<String>();
 		if(!phUsers.contains(user)) phUsers.add(user);
@@ -1482,8 +1486,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		Date created = new Date();
 		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
 
-		
-		//ObjectMapper jsonMapper = new ObjectMapper(); 
+
+		//ObjectMapper jsonMapper = new ObjectMapper();
 		Gson gson = new Gson();
 		Notify n = new Notify();
 		try {
@@ -1493,7 +1497,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 			acl.setAces(acl.getAces());
 
-			
+
 			n.setAcl(acl);
 			n.setCreated(created);
 			n.setNotifyAction(action);
@@ -1502,8 +1506,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			u.setAuthorityName(user);
 			u.setUsername(user);
 			n.setUser(u);
-			
-			
+
+
 			String jsonStringACL = gson.toJson(n);
 			List<String> history = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
 			history = (history == null)? new ArrayList<String>() : history;
@@ -1516,7 +1520,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 	}
 
 	@Override
@@ -1615,7 +1619,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		List<String> result=new ArrayList<>();
 		Set<AccessPermission> permissions = permissionService.getAllSetPermissions(nodeRef);
 		for(AccessPermission permission:permissions) {
-			if(permission.getAuthority().equals(authorityId) && 
+			if(permission.getAuthority().equals(authorityId) &&
 					CCConstants.getPermissionList().contains(permission.getPermission())){
 				result.add(permission.getPermission());
 			}

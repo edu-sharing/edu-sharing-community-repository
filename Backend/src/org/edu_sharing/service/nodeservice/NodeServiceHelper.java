@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -23,11 +24,13 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.NodeTool;
-import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.PermissionException;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.permission.RestrictedAccessException;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -117,6 +120,15 @@ public class NodeServiceHelper {
 	public static void setProperty(NodeRef nodeRef,String key, Serializable value){
 		NodeServiceFactory.getLocalService().setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key,value);
 	}
+	public static void addAspect(NodeRef nodeRef,String aspect){
+		NodeServiceFactory.getLocalService().addAspect(nodeRef.getId(),aspect);
+	}
+	public static void removeAspect(NodeRef nodeRef,String aspect){
+		NodeServiceFactory.getLocalService().removeAspect(nodeRef.getId(),aspect);
+	}
+	public static void removeProperty(NodeRef nodeRef,String key){
+		NodeServiceFactory.getLocalService().removeProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
+	}
 	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -134,6 +146,21 @@ public class NodeServiceHelper {
     public static HashMap<String, Object> getProperties(NodeRef nodeRef) throws Throwable {
         return NodeServiceFactory.getLocalService().getProperties(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
     }
+	public static HashMap<String, Object> getPropertiesVersion(NodeRef nodeRef, String version) throws Throwable {
+    	if(version == null){
+    		return getProperties(nodeRef);
+		}
+		HashMap<String, HashMap<String, Object>> versionHistory = NodeServiceFactory.getLocalService().getVersionHistory(nodeRef.getId());
+
+		if (versionHistory != null) {
+			for (HashMap<String, Object> versionData : versionHistory.values()) {
+				if(version.equals(versionData.get(CCConstants.CM_PROP_VERSIONABLELABEL))){
+					return versionData;
+				}
+			}
+		}
+		throw new IllegalArgumentException("No version " + version +" found for node " + nodeRef);
+	}
 
 	/**
 	 * return the native properties
@@ -150,6 +177,16 @@ public class NodeServiceHelper {
 	}
 	public static InputStream getContent(NodeRef nodeRef) throws Throwable {
 		return NodeServiceFactory.getLocalService().getContent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),null, ContentModel.PROP_CONTENT.toString());
+	}
+
+	public static void validatePermissionRestrictedAccess(NodeRef nodeRef, String permission) throws RestrictedAccessException {
+		if(NodeServiceHelper.hasAspect(nodeRef,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+			String refNodeId = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+			Boolean restricted = (Boolean) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS));
+			if (restricted != null && restricted && !PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId), permission)) {
+				throw new RestrictedAccessException(refNodeId);
+			}
+		}
 	}
 	public static void writeContent(NodeRef nodeRef,InputStream content,String mimetype) throws Throwable {
 		NodeServiceFactory.getLocalService().writeContent(
@@ -253,6 +290,16 @@ public class NodeServiceHelper {
 		Repository repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 		return repositoryHelper.getCompanyHome();
 	}
+	public static NodeRef getNodeInCompanyNode(String name){
+		return getNodeByName(getCompanyHome(), CCConstants.CCM_TYPE_MAP, name);
+	}
+	public static NodeRef getNodeByName(NodeRef parent, String type, String name){
+		return NodeServiceFactory.getLocalService().getChild(parent.getStoreRef(), parent.getId(), type, CCConstants.CM_NAME, name);
+	}
+	public static void blockImport(NodeRef node) throws Exception {
+		setProperty(node, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED, true);
+		PermissionServiceFactory.getLocalService().setPermissions(node.getId(), new ArrayList<>(), false);
+	}
 
 
 	public static String getContainerId(String rootId, String pattern) {
@@ -339,6 +386,35 @@ public class NodeServiceHelper {
 			rootId = search.keySet().iterator().next();
 		}
 		return rootId;
+	}
+
+	/** fetches the properties from the original node
+	 * if the node is a collection ref, the permissions will be handled accordingly
+	 * @param nodeRef
+	 * @return
+	 */
+	public static HashMap<String, Object> getPropertiesOriginal(NodeRef nodeRef) throws Throwable{
+		if(NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+			if(!PermissionServiceHelper.hasPermission(nodeRef, CCConstants.PERMISSION_READ)){
+				throw new PermissionException(nodeRef.toString(), CCConstants.PERMISSION_READ);
+			}
+			// @TODO: Additional permissions check might later required for licensed content
+			NodeRef original;
+			Serializable originalProp = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+			if(originalProp instanceof String){
+				original = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String) originalProp);
+			} else {
+				original = (NodeRef) originalProp;
+			}
+			return AuthenticationUtil.runAsSystem(() -> {
+				try {
+					return NodeServiceHelper.getProperties(original);
+				} catch (Throwable throwable) {
+					throw new RuntimeException(throwable);
+				}
+			});
+		}
+		return NodeServiceHelper.getProperties(nodeRef);
 	}
 
 	public static void convertMutlivaluePropToGeneric(String[] arr, HashMap<String, Object> target, String property) {

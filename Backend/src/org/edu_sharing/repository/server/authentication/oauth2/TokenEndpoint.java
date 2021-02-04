@@ -86,7 +86,7 @@ public class TokenEndpoint extends HttpServlet {
 						
 						// check
 						HashMap<String, String> authInfo = RepoFactory.getAuthenticationToolInstance(null)
-							.createNewSession(username, oauthRequest.getPassword());						
+							.createNewSession(username, oauthRequest.getPassword());
 
 						tokenService.createToken(username, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
                         TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,TrackingService.EventType.LOGIN_USER_OAUTH_PASSWORD);

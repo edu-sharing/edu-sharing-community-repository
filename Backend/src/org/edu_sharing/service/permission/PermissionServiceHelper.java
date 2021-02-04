@@ -3,6 +3,7 @@ package org.edu_sharing.service.permission;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -60,5 +61,10 @@ public class PermissionServiceHelper {
 			return result;
 			
 		}
-	
+	public static boolean hasPermission(NodeRef nodeRef, String permission){
+			return PermissionServiceFactory.getLocalService().hasPermission(nodeRef.getStoreRef().getProtocol(),
+					nodeRef.getStoreRef().getIdentifier(),
+					nodeRef.getId(),
+					permission);
+	}
 }

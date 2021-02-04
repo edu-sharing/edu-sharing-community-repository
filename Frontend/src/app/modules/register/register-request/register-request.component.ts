@@ -22,7 +22,7 @@ export class RegisterRequestComponent {
     @Output() onDone=new EventEmitter();
     emailFormControl = new FormControl('', [
         Validators.required,
-        Validators.email,
+        //Validators.email, // also local accounts are allowed for restore
     ]);
     constructor(private connector: RestConnectorService,
                 private toast: Toast,

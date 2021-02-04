@@ -14,16 +14,16 @@ import {Router} from '@angular/router';
 import {RestHelper} from '../../../../core-module/core.module';
 import {RestConnectorsService} from '../../../../core-module/core.module';
 import {FrameEventsService} from '../../../../core-module/core.module';
-import {NodeHelper} from '../../../../core-ui-module/node-helper';
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
-import {BulkBehaviour, MdsComponent} from '../../../../common/ui/mds/mds.component';
+import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
 import {Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {WorkspaceShareComponent} from '../../../workspace/share/share.component';
 import {Helper} from '../../../../core-module/rest/helper';
 import {CollectionChooserComponent} from '../../../../core-ui-module/components/collection-chooser/collection-chooser.component';
 import {VCard} from '../../../../core-module/ui/VCard';
+import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
 
 @Component({
   selector: 'app-simple-edit-license',
@@ -62,6 +62,7 @@ export class SimpleEditLicenseComponent {
     private connector : RestConnectorService,
     private configService : ConfigurationService,
     private iamApi : RestIamService,
+    private nodeHelper: NodeHelperService,
     private organizationApi : RestOrganizationService,
     private toast : Toast,
   ) {
@@ -109,17 +110,16 @@ export class SimpleEditLicenseComponent {
     Observable.forkJoin(this._nodes.map((n) => this.nodeApi.getNodeMetadata(n.ref.id,[RestConstants.ALL])))
         .subscribe((nodes) => {
           this._nodes = nodes.map((n) => n.node);
-          const license = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE, null, 'NONE',false);
-          this.authorFreetext = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_AUTHOR_FREETEXT, '', '',false);
-          this.ccTitleOfWork = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK, '');
-          this.ccProfileUrl = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_PROFILE_URL, '');
-          this.ccSourceUrl = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_SOURCE_URL, '');
-          const vcard = new VCard(NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, '', '',false));
-          console.log(license);
+          const license = this.nodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE, null, 'NONE',false);
+          this.authorFreetext = this.nodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_AUTHOR_FREETEXT, '', '',false);
+          this.ccTitleOfWork = this.nodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK, '');
+          this.ccProfileUrl = this.nodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_PROFILE_URL, '');
+          this.ccSourceUrl = this.nodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_SOURCE_URL, '');
+          const vcard = new VCard(this.nodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, '', '',false));
           let isValid = true;
           if(license) {
             if (license.startsWith('CC_BY')) {
-              const version = NodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_CC_VERSION, null, null, false);
+              const version = this.nodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE_CC_VERSION, null, null, false);
               isValid = version === '4.0';
             }
             if(this.allowedLicenses.indexOf(license) === -1) {

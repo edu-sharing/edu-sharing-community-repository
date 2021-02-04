@@ -1,0 +1,11 @@
+@import '../../styles/variables';
+
+// Draw focus highlight above content background
+:host {
+    position: relative;
+}
+a {
+    &:focus {
+        @include removeDefaultFocus();
+    }
+}

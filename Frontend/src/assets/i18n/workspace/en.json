@@ -9,6 +9,7 @@
         "NO_MATCHING_ITEMS": "No matching elements",
         "NO_MATCHING_ITEMS_FOLDER": "No matchine elements found in folder \"{{name}}\"",
         "SEARCH": "Search...",
+        "SEARCH_ACTION": "Search",
         "SAFE_SEARCH": "Search the safe…",
         "MY_FILES": "My content",
         "SEARCH_GLOBAL": "Search everywhere",
@@ -21,6 +22,8 @@
         "ADD_OBJECT_SUBTITLE": "Add a new file or link",
         "ADD_OBJECT_MESSAGE": "Drag & Drop to upload or",
         "ADD_OBJECT_BROWSE": "Browse",
+        "ADD_OBJECT_LINK_SELECTED": "You've entered a link address",
+        "ADD_OBJECT_RESET": "Reset selected file",
         "SELECT_COLLECTION": "Select collection",
         "SELECT_ORG": "or",
         "SELECT_LINK": "Enter URL",
@@ -79,7 +82,7 @@
         "TAB_ADVANCED": "Advanced",
         "BTN_INVITE": "Invite",
         "INVITE_FIELD": "Add persons or groups",
-        "INVITE_LOCAL_RESULTS": "In my organisation",
+        "INVITE_LOCAL_RESULTS": "In my organisations",
         "INVITE_GLOBAL_RESULTS": "Global results",
         "INVITE_RECENT_AUTHORITIES": "Recently invited",
         "FILE_LOCATION": "Storage location",
@@ -198,7 +201,8 @@
                 "CONTENT_UPDATE": "Updated content",
                 "CONTRIBUTOR_UPDATE": "Updated contributors",
                 "LICENSE_UPDATE": "Updated license",
-                "EDITOR_UPLOAD": "File updated by editor",
+                "EDITOR_UPLOAD": "File updated by editor {{editor}}",
+                "EDITOR_UPLOAD_USER": "File saved in {{editor}} by user",
                 "NODE_PUBLISHED": "File published",
                 "PREVIEW_CHANGED": "Preview image updated",
                 "BULK_CREATE": "Node imported via bulk",
@@ -257,14 +261,16 @@
             "COMMENT": "comments",
             "COMMENT_INFO": "What changes have been made?",
             "RECEIVERS_NEXT": "pass on to",
+            "NOBODY": "<nobody>",
             "OLD_STATUS": "old status",
             "NEW_STATUS": "new status",
             "HISTORY": "workflow activities",
             "NO_COMMENT": "Please enter a comment for workflow activity.",
             "NO_HISTORY": "No entries for workflow activites have been made yet.",
             "USER_NO_PERMISSION": "Missing permissions",
-            "USER_NO_PERMISSION_INFO": "The user in charge '{{user}}' has currently no permission to access this document.\n\nIf you proceed, the user will gain editing and sharing permissions for this document.",
-            "PROCEED": "Proceed"
+            "USER_NO_PERMISSION_INFO": "The user in charge '{{user}}' has currently no permission to access this document / these documents. Do you want to grant them coordinator permissions?\n\nCoordinators may edit the material and grant additional users access.",
+            "PROCEED": "Yes, grant permissions",
+            "BULK_WORKFLOWS_EXIST": "Some of the selected documents already have an active workflow. Please edit these documents separately."
         },
         "CONTRIBUTOR": {
             "TITLE": "Set Contributors",
@@ -275,8 +281,13 @@
             "SCOPE": "role",
             "DATE": "date  (optional)",
             "MORE": "Add more data",
+            "CHECKBOX_ME": "I am contributor",
+            "PERSISTENT_IDS": "Set persistent ids",
+            "PERSISTENT_ID_SET": "A persistent id has been set. This entry will be available to other users for reusage.",
             "ORG_INFO": "Organization of contributor (optional)",
             "ADDRESS_INFO": "Address of contributor (optional)",
+            "RESET": "Reset fields",
+            "EDIT_DISABLED": "Editing of this entry is disabled because it uses one or more persistent identifiers. Choose \"Reset fields\" to re-enter all data.",
             "MODE_PERSON": "Person",
             "MODE_ORG": "Organization",
             "ERROR_PERSON_NAME": "Please enter the contributors name",
@@ -361,7 +372,7 @@
             },
             "CC0": {
                 "CC0": "CC 0",
-                "CC0_INFO": "I am the sole holder of the copyright of this object chose to dedicate the work to the public domain by waiving all of my rights to the work worldwide under copyright law, including all related and neighbouring rights, to the extent allowed by law.",
+                "CC0_INFO": "I am the sole holder of the copyright of this object and I choose to dedicate the work to the public domain by waiving all of my rights to the work worldwide under copyright law, including all related and neighbouring rights, to the extent allowed by law.",
                 "PDM": "Public Domain Mark",
                 "PDM_INFO": "This object is free of known restrictions covered by copyright law."
             }
@@ -373,6 +384,7 @@
             "ADDED_TO_COLLECTION_MY": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible for you",
             "ADDED_TO_COLLECTION_SHARED": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to all invited persons",
             "ADDED_TO_COLLECTION_PUBLIC": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to everyone",
+            "ADDED_TO_COLLECTION_MEDIA_CENTER": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to members of the mediacenter",
             "ADD_TO_COLLECTION_DISABLED": "At least 1 selected material can not be collected",
             "DELETE_FINISHED": "Element(s) move to recycle",
             "CUT_COPY": "{{count}} Element(s) copied to clipboard",
@@ -390,7 +402,9 @@
             "WORKFLOW_UPDATED": "Workflow information have been updated",
             "METADATA_TEMPLATE_UPDATED": "Information of metadata template have been updated",
             "LTI_FIELDS_REQUIRED": "All required fields must be filled out in order to create a lti-resource",
-            "LTI_FIELDS_REQUIRED_LINK": "Create regular link"
+            "LTI_FIELDS_REQUIRED_LINK": "Create regular link",
+            "TO_ME_SHARED_PERSONAL": "Content shared with me is displayed",
+            "TO_ME_SHARED_ALL": "Content shared with me or my groups is displayed"
         }
     }
 }

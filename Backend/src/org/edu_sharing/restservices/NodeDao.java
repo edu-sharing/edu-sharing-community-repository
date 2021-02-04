@@ -1,18 +1,17 @@
 package org.edu_sharing.restservices;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
@@ -41,13 +40,16 @@ import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
-
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.*;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -57,6 +59,7 @@ import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
@@ -65,6 +68,7 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -72,6 +76,7 @@ public class NodeDao {
 	private static Logger logger = Logger.getLogger(NodeDao.class);
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 	private static final String[] DAO_PERMISSIONS = new String[]{
+			org.alfresco.service.cmr.security.PermissionService.READ,
 			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
 			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
 			org.alfresco.service.cmr.security.PermissionService.WRITE,
@@ -82,12 +87,16 @@ public class NodeDao {
 			CCConstants.PERMISSION_READ_ALL
 	};
 	final List<String> access;
+	/*
+	whether this node dao is supposed to fetch collection counts (more expensive when true)
+	 */
+	boolean fetchCounts = true;
 	// id of the object by the remote repository (null if not a remote object)
 	private String remoteId;
 	private RepositoryDao remoteRepository;
 
 	private String version;
-
+	private AuthorityService authorityService;
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
@@ -457,7 +466,7 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
-
+			this.authorityService= AuthorityServiceFactory.getAuthorityService(repoDao.getId());
 			/**
 			 * call getProperties on demand
 			 */
@@ -518,11 +527,35 @@ public class NodeDao {
 			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
 		}
 	}
-    public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
+	public static NodeEntries convertToRest(RepositoryDao repoDao,
+											Filter propFilter,
+											List<NodeRef> children,
+											Integer skipCount,
+											Integer maxItems) throws DAOException {
+		return convertToRest(repoDao, propFilter, children, skipCount, maxItems, null);
+	}
+    public static NodeEntries convertToRest(RepositoryDao repoDao,
+											Filter propFilter,
+											List<NodeRef> children,
+											Integer skipCount,
+											Integer maxItems,
+											Function<NodeDao, NodeDao> transform
+
+	) throws DAOException {
+
         NodeEntries result=new NodeEntries();
         List<Node> nodes=new ArrayList<>();
         for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
-            nodes.add(NodeDao.getNode(repoDao,children.get(i).getId(),propFilter).asNode());
+        	try {
+				NodeDao nodeDao = NodeDao.getNode(repoDao, children.get(i).getId(), propFilter);
+				if(transform != null){
+					nodeDao = transform.apply(nodeDao);
+				}
+				nodes.add(nodeDao.asNode());
+			}
+        	catch(DAOMissingException daoException){
+        		logger.warn("Missing node " + children.get(i).getId()+" tryed to fetch, skipping fetch", daoException);
+			}
         }
 
         Pagination pagination=new Pagination();
@@ -867,7 +900,7 @@ public class NodeDao {
 	}
 
 	private void fillNodeReference(CollectionReference reference) throws DAOException {
-		final String originalId = (String) getNativeProperties().get(CCConstants.CCM_PROP_IO_ORIGINAL);
+		final String originalId = getReferenceOriginalId();
 		reference.setOriginalId(originalId);
 		try {
 			reference.setAccessOriginal(NodeDao.getNode(repoDao, originalId).asNode(false).getAccess());
@@ -880,15 +913,27 @@ public class NodeDao {
 			public Void doWork() throws Exception {
 				try {
 					NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao, originalId);
+					Serializable originalAccess = NodeServiceHelper.getPropertyNative(
+							new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId)
+							, CCConstants.CCM_PROP_RESTRICTED_ACCESS);
 					reference.setCreatedBy(nodeDaoOriginal.asNode(false).getCreatedBy());
-				} catch (Throwable t) {
+					reference.setOriginalRestrictedAccess(originalAccess != null && (Boolean) originalAccess);
+				} catch (InvalidNodeRefException t) {
 					reference.setOriginalId(null);
 					// original maybe deleted
+				} catch (Throwable t){
+					logger.warn("Could not fetch original node for id " + nodeId, t);
+					reference.setOriginalId(null);
 				}
 				return null;
 			}
 
 		});
+	}
+
+	private String getReferenceOriginalId() throws DAOException {
+		final String originalId = (String) getNativeProperties().get(CCConstants.CCM_PROP_IO_ORIGINAL);
+		return originalId;
 	}
 
 	private void fillNodeObject(Node data) throws DAOException {
@@ -910,7 +955,7 @@ public class NodeDao {
 		data.setModifiedAt(getModifiedAt());
 		data.setModifiedBy(getModifiedBy());
 
-		data.setContent(getContent());
+		data.setContent(getContent(data));
 
 		data.setDownloadUrl(getDownloadUrl());
 		data.setMetadataset(getMetadataSet());
@@ -924,7 +969,7 @@ public class NodeDao {
 		data.setIconURL(getIconURL());
 		data.setCommentCount(getCommentCount());
 		data.setLicense(getLicense());
-		data.setSize(getSize());
+		data.setSize(getSize(data));
 
 		data.setRating(getRating());
 		try {
@@ -946,9 +991,10 @@ public class NodeDao {
 		if(!isFromRemoteRepository())
 			return null;
 		Remote remote=new Remote();
-		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
+		String remoteObjectRepositoryId = (String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
+		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY) && remoteObjectRepositoryId != null){
 			remote.setId((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-			remote.setRepository(RepositoryDao.getRepository((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)).asRepo());
+			remote.setRepository(RepositoryDao.getRepository(remoteObjectRepositoryId).asRepo());
 		} else if(remoteId!=null){
 			remote.setId(remoteId);
 			remote.setRepository(remoteRepository.asRepo());
@@ -969,12 +1015,19 @@ public class NodeDao {
 		return license;
 	}
 
-	private Content getContent() {
+	private Content getContent(Node data) throws DAOException {
 		Content content=new Content();
-		content.setVersion(getContentVersion());
+		content.setVersion(getContentVersion(data));
 		content.setUrl(getContentUrl());
 
-		content.setHash(nodeService.getContentHash(storeProtocol,storeId,nodeId,this.version,org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+			content.setHash(AuthenticationUtil.runAsSystem(() ->
+					nodeService.getContentHash(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							((CollectionReference) data).getOriginalId(),this.version,org.alfresco.model.ContentModel.PROP_CONTENT.toString())
+			));
+		} else {
+			content.setHash(nodeService.getContentHash(storeProtocol, storeId, nodeId, this.version, org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+		}
 		return content;
 	}
 
@@ -1246,7 +1299,9 @@ public class NodeDao {
 				.get(CCConstants.NODECREATOR_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODECREATOR_LASTNAME));
-		ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
+		if(this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_CREATOR)))
+			ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
+
 		return ref;
 	}
 	
@@ -1257,9 +1312,56 @@ public class NodeDao {
 		Person ref = new Person();
 		ref.setFirstName(owner.getGivenName());
 		ref.setLastName(owner.getSurname());
-		ref.setMailbox(owner.getEmail());
+		if(this.checkUserHasPermissionToSeeMail(owner.getUsername()))//only admin can see even if users have hide email
+			ref.setMailbox(owner.getEmail());
+
 		return ref;
 	}
+
+
+	/**
+	 * Check if normal USER has permision to see email
+	 * ADMIN can see the email even if the email is private for specific USER
+	 *
+	 * @param (String) userName  of Person,
+	 * @return true || false
+	 */
+	private boolean checkUserHasPermissionToSeeMail(String userName) {
+		try {
+			if (this.isCurrentUserAdminOrSameUserAsUserName(userName)) // if is ADMIN or sameUser, don't need to countinue;
+				return true;
+			else {
+				Map<String, Serializable> profileSettings = authorityService.getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+				boolean isEmailPublic = false;
+				if (profileSettings.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL)) {
+					isEmailPublic = (boolean) profileSettings.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+				}
+				return isEmailPublic;
+			}
+
+		} catch (Exception e) {
+			logger.warn("Cannot check if current User has permision to see email or not  : " + e.getMessage(), e);
+			return false;
+		}
+	}
+
+	/**
+	 * Method which check if:
+	 * -  login User is ADMIN or simple USER,
+	 * -  login User is similar with userName
+	 *
+	 * @param userName get a userName as parameter to controll
+	 * @return TRUE if is ADMIN or Same USER || FALSE in other cases
+	 */
+	public boolean isCurrentUserAdminOrSameUserAsUserName(String userName) {
+		if (AuthorityServiceFactory.getLocalService().isGlobalAdmin()) // if userLogin is ADMIN, don't need to countinue;
+			return true;
+		else {
+			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+			return currentUser.equals(userName);
+		}
+	}
+
 
 	private Date getModifiedAt() {
 
@@ -1278,13 +1380,20 @@ public class NodeDao {
 				.get(CCConstants.NODEMODIFIER_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODEMODIFIER_LASTNAME));
-		ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
+		if(this.checkUserHasPermissionToSeeMail((String) nodeProps.get(CCConstants.CM_PROP_C_MODIFIER)))
+			ref.setMailbox((String) nodeProps.get(CCConstants.NODEMODIFIER_EMAIL));
 
 		return ref;
 	}
 
-	private String getContentVersion() {
-		return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+	private String getContentVersion(Node data) throws DAOException {
+		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+			return AuthenticationUtil.runAsSystem(() ->
+					nodeService.getProperty(storeProtocol, storeId, ((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
+			);
+		} else {
+			return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+		}
 	}
 
 	private String getContentUrl() {
@@ -1369,10 +1478,13 @@ public class NodeDao {
 		return version;
 	}
 
-	public HashMap<String,Object> getNativeProperties() throws DAOException {
+	public HashMap<String,Object> getNativeProperties() {
 		return nodeProps;
 	}
-	
+	public void setNativeProperties(HashMap<String,Object> nodeProps) {
+		this.nodeProps = nodeProps;
+	}
+
 	public HashMap<String,String[]> getAllProperties() throws DAOException {
 		return getProperties(null,Filter.createShowAllFilter());
 	}
@@ -1531,7 +1643,12 @@ public class NodeDao {
 		return MimeTypesV2.getNodeType(type,nodeProps,aspects);
 	}
 
-	private String getSize() {
+	private String getSize(Node data) {
+		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+			return AuthenticationUtil.runAsSystem(() ->
+					nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+					((CollectionReference) data).getOriginalId(), CCConstants.LOM_PROP_TECHNICAL_SIZE));
+		}
 		return nodeProps.containsKey(CCConstants.LOM_PROP_TECHNICAL_SIZE) ? (String) nodeProps
 						.get(CCConstants.LOM_PROP_TECHNICAL_SIZE) : null;
 	}
@@ -1649,13 +1766,13 @@ public class NodeDao {
 		}
 	}
 	
-	public static SearchResult<NodeDao> getFilesSharedToMe(RepositoryDao repoDao, List<String> filter, Filter propertyFilter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
+	public static SearchResult<NodeDao> getFilesSharedToMe(RepositoryDao repoDao, SharedToMeType shareType, List<String> filter, Filter propertyFilter, SortDefinition sortDefinition, Integer skipCount, Integer maxItems) throws DAOException {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
 			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 			try {
-				SearchResultNodeRef result = searchService.getFilesSharedToMe(sortDefinition,mapFilterToContentType(filter),skipCount.intValue(),maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
+				SearchResultNodeRef result = searchService.getFilesSharedToMe(shareType, sortDefinition,mapFilterToContentType(filter),skipCount.intValue(),maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems.intValue());
 				return NodeDao.convertResultSet(repoDao, propertyFilter, result);
 			} catch (Exception e) {
 				throw DAOException.mapping(e);
@@ -1859,14 +1976,33 @@ public class NodeDao {
 
 	public NodeDao createFork(String sourceId) throws DAOException {
 		try {
-			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, false);
-			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(),	CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
-			nodeService.addAspect(newNode.getId(),CCConstants.CCM_ASPECT_FORKED);
-			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN,
-					new org.alfresco.service.cmr.repository.NodeRef(storeProtocol,storeId,sourceId));
-			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
-					nodeService.getProperty(storeProtocol,storeId,sourceId,CCConstants.LOM_PROP_LIFECYCLE_VERSION));
-			return new NodeDao(repoDao, newNode.getId());
+			NodeDao sourceDao = NodeDao.getNode(repoDao, sourceId);
+			String[] source = new String[]{nodeId};
+			RunAsWork<NodeDao> work = () -> {
+				try {
+					org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(source[0], nodeId, false);
+					permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+					nodeService.addAspect(newNode.getId(), CCConstants.CCM_ASPECT_FORKED);
+					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN,
+							new org.alfresco.service.cmr.repository.NodeRef(storeProtocol, storeId, source[0]));
+					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
+					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+					return new NodeDao(repoDao, newNode.getId());
+				} catch (Throwable throwable) {
+					throw new RuntimeException(throwable);
+				}
+			};
+			if(sourceDao.isCollectionReference()){
+				// validate ccm:restricted_access
+				NodeServiceHelper.validatePermissionRestrictedAccess(
+						new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(storeProtocol, storeId), sourceId),
+						CCConstants.PERMISSION_READ_ALL);
+				source[0] = sourceDao.getReferenceOriginalId();
+				return AuthenticationUtil.runAsSystem(work);
+			} else {
+				return work.doWork();
+			}
+
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}

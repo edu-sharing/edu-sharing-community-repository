@@ -273,7 +273,7 @@ public class ExcelLOMImporter {
 		eduProps.put(CCConstants.LOM_PROP_GENERAL_TITLE, nodeName);
 		new DuplicateFinder().transformToSafeName(currentLevelObjects, eduProps);
 		toSafe.put(QName.createQName(CCConstants.CM_NAME), (String)eduProps.get(CCConstants.CM_NAME));
-		return nodeName;
+		return (String)toSafe.get(QName.createQName(CCConstants.CM_NAME));
 	}
 
 	private void addToCollections(ChildAssociationRef newNode, LinkedHashSet<String> collectionsForNode, Boolean addToCollection){
@@ -315,7 +315,7 @@ public class ExcelLOMImporter {
 				logger.info("adding;" + nodeName +";"+newNode.getChildRef() +";TO;" + pathsMatch.iterator().next() +"/"+nodeService.getProperty(pathMatchesNodeRef,ContentModel.PROP_NAME));
 				try {
 					if(addToCollection) {
-						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.getId(), newNode.getChildRef().getId());
+						CollectionServiceFactory.getLocalService().addToCollection(pathMatchesNodeRef.getId(), newNode.getChildRef().getId(), null, false);
 					}
 				} catch (Throwable throwable) {
 

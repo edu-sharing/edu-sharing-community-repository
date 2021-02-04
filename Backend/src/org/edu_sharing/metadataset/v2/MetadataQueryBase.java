@@ -9,10 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MetadataQueryBase implements Serializable{
+public abstract class MetadataQueryBase implements Serializable{
     static Logger logger = Logger.getLogger(MetadataQueryBase.class);
     protected Map<String, String> basequery;
     protected List<MetadataQueryCondition> conditions=new ArrayList<>();
+    private String syntax;
 
     public void addCondition(MetadataQueryCondition condition) {
         conditions.add(condition);
@@ -39,8 +40,16 @@ public class MetadataQueryBase implements Serializable{
             return existingParameters!=null && !existingParameters.contains(e.getKey());
         }).collect(Collectors.toList());
         if(filter.size() == 0) {
-            return QueryUtils.replaceCommonQueryParams(basequery.get(null), QueryUtils.luceneReplacer);
+            return QueryUtils.replaceCommonQueryParams(basequery.get(null), QueryUtils.replacerFromSyntax(syntax));
         }
-        return QueryUtils.replaceCommonQueryParams(filter.get(0).getValue(), QueryUtils.luceneReplacer);
+        return QueryUtils.replaceCommonQueryParams(filter.get(0).getValue(), QueryUtils.replacerFromSyntax(syntax));
+    }
+
+    public void setSyntax(String syntax) {
+        this.syntax = syntax;
+    }
+
+    public String getSyntax() {
+        return syntax;
     }
 }

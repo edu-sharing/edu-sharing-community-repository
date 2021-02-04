@@ -106,12 +106,12 @@ user-quota{
   position: fixed;
   top: $mainnavHeight;
   right:0;
-  z-index: 97;
+  z-index: 62;
   >div {
     height:$workspaceBreadcrumbsHeight - 3px;
-    margin-right: 10px;
     padding-top: 15px;
     padding-left: 20px;
+    padding-right: 10px;
     background: linear-gradient(to right, rgba(255, 255, 255, 0.001) 0, #fff 10px, #fff 100%); /* safari fix */
   }
 }
@@ -151,18 +151,25 @@ user-quota{
     }
   }
   @media screen and (min-width: ($mobileTabSwitchWidth)) {
-    workspace-explorer listTable .list-type-table{
-      overflow-y: auto;
-      position: relative;
-      top: $listHeadingHeight;
-      height:calc(100vh - #{$mainnavHeight+$secondaryBarHeight+$listHeadingHeight});
-      .headingGroup {
-        position: fixed !important;
-        z-index: 1;
-        top: $mainnavHeight + $workspaceBreadcrumbsHeight;
-        width: calc(100% - #{$workspaceTreeWidth});
+      workspace-explorer listTable .list{
+          overflow-y: auto;
+          position: relative;
+          &.list-type-card {
+              top: 0;
+              height: calc(100vh - #{$mainnavHeight+$secondaryBarHeight});
+          }
+          &.list-type-table {
+              top: $listHeadingHeight;
+              height: calc(100vh - #{$mainnavHeight+$secondaryBarHeight+$listHeadingHeight});
+              .headingGroup {
+                  position: fixed !important;
+                  z-index: 1;
+                  top: $mainnavHeight + $workspaceBreadcrumbsHeight;
+                  width: calc(100% - #{$workspaceTreeWidth});
+              }
+          }
+
       }
-    }
   }
   @media screen and (min-width: ($mobileWidth+$mobileStage*6)) {
     workspace-explorer.explorerMetadata listTable .list-type-table .headingGroup {

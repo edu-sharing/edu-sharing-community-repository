@@ -1,9 +1,7 @@
 import {Translation} from "../../core-ui-module/translation";
-import {UIHelper} from "../../core-ui-module/ui-helper";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Toast} from "../../core-ui-module/toast";
 import {ConfigurationService} from "../../core-module/core.module";
-import {Title} from "@angular/platform-browser";
 import {TranslateService} from "@ngx-translate/core";
 import {SessionStorageService} from "../../core-module/core.module";
 import {RestConnectorService} from "../../core-module/core.module";
@@ -24,7 +22,6 @@ export class MessagesComponent {
               private route: ActivatedRoute,
               private router: Router,
               private config: ConfigurationService,
-              private titleService: Title,
               private translate: TranslateService,
               private storage : SessionStorageService) {
     Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
@@ -36,7 +33,6 @@ export class MessagesComponent {
           this.message="MESSAGES.INVALID";
           this.messageDetail="MESSAGES.DETAILS.INVALID";
         }
-        UIHelper.setTitle(this.message, this.titleService, this.translate, this.config);
         GlobalContainerComponent.finishPreloading();
       })
     });

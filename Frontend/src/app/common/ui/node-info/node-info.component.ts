@@ -95,25 +95,33 @@ export class NodeInfoComponent{
     return this._node && this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
   }
 
-  saveEdits() {
-    let props:any={};
-    for(let prop of this._properties){
-      props[prop[0]]=prop[1].split(", ");
+  addProperty() {
+    if(this.customProperty[0]) {
+        this.saving = true;
+        this.nodeApi.editNodeProperty(this._node.ref.id, this.customProperty[0], this.customProperty[1], this._node.ref.repo).subscribe(() => {
+            this.customProperty = [];
+            this.refreshMeta();
+        }, (error) => {
+            this.toast.error(error);
+            this.saving = false;
+        })
     }
-    if(this.customProperty[0]){
-      props[this.customProperty[0]]=this.customProperty[1] ? this.customProperty[1].split(", ") : '';
-    }
-    this.saving=true;
-    this.nodeApi.editNodeMetadata(this._node.ref.id,props,this._node.ref.repo).subscribe(()=>{
-      this.nodeApi.getNodeMetadata(this._node.ref.id,[RestConstants.ALL],this._node.ref.repo).subscribe((node)=>{
-        this.saving=false;
-        this.customProperty=[];
-        this.editMode=false;
-        this.openNode(node.node);
-      });
-    },(error)=>{
-      this.toast.error(error);
-      this.saving=false;
-    })
   }
+
+    saveProperty(property: string[]) {
+        this.nodeApi.editNodeProperty(this._node.ref.id, property[0], property[1], this._node.ref.repo).subscribe(() => {
+            this.customProperty = [];
+            this.refreshMeta();
+        }, (error) => {
+            this.toast.error(error);
+            this.saving = false;
+        })
+    }
+
+    private refreshMeta() {
+        this.nodeApi.getNodeMetadata(this._node.ref.id, [RestConstants.ALL], this._node.ref.repo).subscribe((node) => {
+            this.saving = false;
+            this.openNode(node.node);
+        });
+    }
 }

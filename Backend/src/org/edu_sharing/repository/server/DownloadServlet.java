@@ -15,7 +15,9 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.util.TempFileProvider;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -23,16 +25,17 @@ import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.permission.PermissionService;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.*;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -64,7 +67,11 @@ public class DownloadServlet extends HttpServlet{
 
 	private void downloadNode(String nodeId, HttpServletRequest req, HttpServletResponse resp, String fileName, Mode mode) throws IOException {
 		try {
-			if (!NodeServiceHelper.downloadAllowed(nodeId)) {
+			// allow signature based auth from connector to bypass the download/content access
+			logger.debug("Access tool: " + ContextManagementFilter.accessToolType.get());
+			if (!NodeServiceHelper.downloadAllowed(nodeId) &&
+					!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())) {
+				logger.info("Download forbidden for node " + nodeId);
 				resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_FORBIDDEN));
 				return;
 			}
@@ -145,9 +152,8 @@ public class DownloadServlet extends HttpServlet{
 	private static String checkAndGetCollectionRef(String nodeId){
 		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 		if(NodeServiceHelper.hasAspect(ref,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-			String refNodeId = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_ORIGINAL);
-
-			return refNodeId;
+			NodeServiceHelper.validatePermissionRestrictedAccess(ref, CCConstants.PERMISSION_READ_ALL);
+			return NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_ORIGINAL);
 		}
 		return null;
 	}
@@ -212,7 +218,8 @@ public class DownloadServlet extends HttpServlet{
 		NodeService nodeService = NodeServiceFactory.getLocalService();
 		PermissionService permissionService = PermissionServiceFactory.getLocalService();
 
-		ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
+		File file = TempFileProvider.createTempFile("edu.",".zip");
+		FileOutputStream bufferOut = new FileOutputStream(file);
 		ZipOutputStream zos = new ZipOutputStream(bufferOut);
 		zos.setMethod( ZipOutputStream.DEFLATED );
 
@@ -226,13 +233,13 @@ public class DownloadServlet extends HttpServlet{
 						 */
 						boolean isCollectionRef=false;
 						String originalNodeId = checkAndGetCollectionRef(nodeId);
+						TrackingTool.trackActivityOnNode(nodeId,null,TrackingService.EventType.DOWNLOAD_MATERIAL);
 						if(originalNodeId != null){
 							nodeId = originalNodeId;
 							isCollectionRef = true;
 						}
 						String finalNodeId = nodeId;
 
-						TrackingTool.trackActivityOnNode(nodeId,null,TrackingService.EventType.DOWNLOAD_MATERIAL);
                         AuthenticationUtil.RunAsWork work= () ->{
 							try {
 								addMetadataFile(finalNodeId, zos);
@@ -300,7 +307,7 @@ public class DownloadServlet extends HttpServlet{
 				result=runAll.doWork();
 			}
 			if(result) {
-				outputData(resp, zipName, bufferOut);
+				outputData(resp, zipName, file);
 			}
 		}
 		catch(Throwable t){
@@ -336,6 +343,13 @@ public class DownloadServlet extends HttpServlet{
 		resp.setHeader("Content-Length",""+bufferOut.size());
 		resp.getOutputStream().write(bufferOut.toByteArray());
 	}
+
+	private static void outputData(HttpServletResponse resp, String filename, File file) throws IOException {
+		setHeaders(resp, filename);
+		resp.setHeader("Content-Length",""+file.length());
+		IOUtils.copy(new FileInputStream(file),resp.getOutputStream());
+	}
+
 
 	private static void setHeaders(HttpServletResponse resp, String filename) {
 		resp.setHeader("Content-type","application/octet-stream");

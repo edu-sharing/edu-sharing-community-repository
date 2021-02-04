@@ -11,7 +11,6 @@ import java.util.List;
 public class UserSimple extends Authority{
 	private String userName;
 	private UserProfile profile = null;
-	private UserStats stats = null;
     private UserStatus status;
 	private List<Organization> organizations;
 
@@ -52,15 +51,6 @@ public class UserSimple extends Authority{
 	public void setProfile(UserProfile profile) {
 		this.profile = profile;
 	}
-	
-	@JsonProperty("stats")
-	public UserStats getStats() {
-		return stats;
-	}
-	public void setStats(UserStats stats) {
-		this.stats = stats;
-	}
-
 
     public void setStatus(UserStatus status) {
         this.status = status;

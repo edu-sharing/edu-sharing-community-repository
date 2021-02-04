@@ -41,7 +41,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     public static String TRACKING_UPDATE_NODE = "UPDATE " + TRACKING_NODE_TABLE_ID +" SET authority = ? WHERE authority = ?";
     public static String TRACKING_UPDATE_USER = "UPDATE " + TRACKING_USER_TABLE_ID +" SET authority = ? WHERE authority = ?";
 
-    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?,?,?,?)";
+    public static String TRACKING_INSERT_NODE = "insert into " + TRACKING_NODE_TABLE_ID +" (node_id,node_uuid,original_node_uuid,node_version,authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?,?,?,?,?)";
     public static String TRACKING_INSERT_USER = "insert into " + TRACKING_USER_TABLE_ID +" (authority,authority_organization,authority_mediacenter,time,type,data) VALUES (?,?,?,?,?,?)";
     public static String TRACKING_STATISTICS_CUSTOM_GROUPING = "SELECT type,COUNT(*) :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
@@ -99,11 +99,13 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             try {
                 statement.setArray(2,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
             } catch (Exception e) {
+                statement.setArray(2, null);
                 logger.info("Failed to track organizations of user",e);
             }
             try {
                 statement.setArray(3,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
             } catch (Exception e) {
+                statement.setArray(3, null);
                 logger.info("Failed to track mediacenter of user",e);
             }
             statement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
@@ -132,29 +134,37 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             else{
                 version=nodeVersion;
             }
-            return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
+            String originalNodeRef = null;
+            try {
+                if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+                    originalNodeRef = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+                }
+            }catch(Throwable ignored) { }
+        String finalOriginalNodeRef = originalNodeRef;
+        return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
                 statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
                 statement.setString(2, nodeRef.getId());
-                statement.setString(3, version);
-                statement.setString(4, super.getTrackedUsername(null));
+                statement.setString(3, finalOriginalNodeRef);
+                statement.setString(4, version);
+                statement.setString(5, super.getTrackedUsername(null));
                 try {
-                    statement.setArray(5,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
+                    statement.setArray(6,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
                 } catch (Exception e) {
                     logger.info("Failed to track organizations of user",e);
                 }
                 try {
-                    statement.setArray(6,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
+                    statement.setArray(7,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
                 } catch (Exception e) {
                     logger.info("Failed to track mediacenter of user",e);
                 }
-                statement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
-                statement.setString(8, type.name());
+                statement.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+                statement.setString(9, type.name());
                 JSONObject json = buildJson(nodeRef, details, type);
                 PGobject obj = new PGobject();
                 obj.setType("json");
                 if (json != null)
                     obj.setValue(json.toString());
-                statement.setObject(9, obj);
+                statement.setObject(10, obj);
 
                 return true;
             });

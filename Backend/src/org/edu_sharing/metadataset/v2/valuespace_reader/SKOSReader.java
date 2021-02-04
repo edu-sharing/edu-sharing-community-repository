@@ -1,6 +1,7 @@
 package org.edu_sharing.metadataset.v2.valuespace_reader;
 
 import com.google.gson.JsonObject;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -27,7 +28,7 @@ public class SKOSReader extends ValuespaceReader{
     public SKOSReader(String valuespaceUrl) {
         super(valuespaceUrl);
         // e.g. http://localhost:8000/api/v1/curricula/metadatasets
-        Matcher matched = matches("(https?:\\/\\/.*\\/)w3id.org\\/.*\\.json");
+        Matcher matched = matches("(https?:\\/\\/.*\\/)w3id\\.org\\/.*\\.json");
         if(matched.matches()){
             url = valuespaceUrl;
             logger.info("matched SKOS at "+matched.group(1));
@@ -61,9 +62,11 @@ public class SKOSReader extends ValuespaceReader{
         key.setKey(entry.getString("id"));
         String de = entry.getJSONObject("prefLabel").getString("de");
         key.setCaption(de);
+        key.setLocale("de");
         if("en_US".equals(locale)) {
             try {
                 key.setCaption(entry.getJSONObject("prefLabel").getString("en"));
+                key.setLocale("en");
             }catch(JSONException ignored) { }
         }
         // @TODO handle tree structures
@@ -73,7 +76,11 @@ public class SKOSReader extends ValuespaceReader{
 
     private JSONArray fetch() throws IOException, JSONException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpUriRequest request=new HttpGet(url);
+        RequestConfig requestConfig = RequestConfig.custom().
+                setConnectTimeout(30000).
+                build();
+        HttpGet request=new HttpGet(url);
+        request.setConfig(requestConfig);
         CloseableHttpResponse result = httpclient.execute(request);
         String data=StreamUtils.copyToString(result.getEntity().getContent(), StandardCharsets.UTF_8);
         result.close();

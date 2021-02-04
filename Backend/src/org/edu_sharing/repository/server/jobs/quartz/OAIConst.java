@@ -27,6 +27,9 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 public class OAIConst {
 	
 	public static final String PARAM_OAI_BASE_URL = "oai_base_url";
@@ -36,6 +39,7 @@ public class OAIConst {
 	public static final String PARAM_OAI_CATALOG_IDS = "catalogids";
 	public static final String PARAM_RECORDHANDLER = "record_handler";
 	public static final String PARAM_BINARYHANDLER = "binary_handler";
+	public static final String PARAM_PERSISTENTHANDLER = "persistent_handler";
 	public static final String PARAM_XMLDATA = "xml_data";
 	public static final String PARAM_IMPORTERCLASS = "importer_class";
 	public static final String PARAM_USERNAME = "username";
@@ -46,5 +50,10 @@ public class OAIConst {
 
 	public static final String PARAM_NO_VERSION = "no_version";
 
-	
+	public static final String PARAM_FROM = "from";
+	public static final String PARAM_UNTIL = "until";
+
+	public static final String PARAM_PERIOD_IN_DAYS = "period_in_days";
+
+	public static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 }

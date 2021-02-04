@@ -5,6 +5,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.MetadataQueryPreprocessor;
+import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -100,15 +101,18 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
-            String statement = parameter.getStatement(value).replace("${value}", value);
-            return statement;
+            return QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
+                    parameter.getStatement(value),
+                    "${value}", value);
         }
 
         String[] words = value.split(" ");
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         for (String word : words) {
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(word));
-            String statement = parameter.getStatement(value).replace("${value}", word);
+            String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
+                    parameter.getStatement(value),
+                    "${value}", word);
             boolQuery = boolQuery.must(QueryBuilders.wrapperQuery(statement));
 
         }

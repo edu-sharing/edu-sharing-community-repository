@@ -1,5 +1,4 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {Node} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {
@@ -9,6 +8,7 @@ import {
     ListItem,
     RestCollectionService
 } from "../../../core-module/core.module";
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
   selector: 'small-collection',
@@ -31,6 +31,7 @@ export class SmallCollectionComponent{
    * @type {string}
    */
   @Input() titleLabelShort:string;
+  scopeItem = new ListItem('COLLECTION', 'scope');
   @Input() set collectionId(collectionId : string){
     this.collectionService.getCollection(collectionId).subscribe((data:CollectionWrapper)=>{
       this._collection=data.collection;
@@ -42,9 +43,7 @@ export class SmallCollectionComponent{
   constructor(
     private collectionService:RestCollectionService,
     private translate:TranslateService,
+    private nodeHelper: NodeHelperService,
     private config:ConfigurationService
   ) { }
-  public getAttribute(attribute:string){
-    return NodeHelper.getAttribute(this.translate,this.config,this._collection,new ListItem('COLLECTION',attribute));
-  }
 }

@@ -7,7 +7,7 @@ import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {RestSearchService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {RestIamService} from '../../../core-module/core.module';
-import {LinkData} from '../../../core-ui-module/node-helper';
+import {LinkData} from '../../../core-ui-module/node-helper.service';
 
 @Component({
   selector: 'workspace-file-upload-select',

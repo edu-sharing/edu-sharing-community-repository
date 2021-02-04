@@ -23,7 +23,6 @@ import {SessionStorageService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {TranslateService} from "@ngx-translate/core";
-import {NodeHelper} from "../../../core-ui-module/node-helper";
 import {ColorHelper} from '../../../core-module/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../core-module/core.module";
@@ -36,6 +35,7 @@ import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 import {MdsMetadatasets} from '../../../core-module/core.module';
 import {ConfigurationHelper} from '../../../core-module/core.module';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 // component class
 @Component({
@@ -52,12 +52,12 @@ export class CollectionNewComponent {
   public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
   public isLoading = true;
   public showPermissions = false;
-  private currentCollection: EduData.Node;
+  currentCollection: EduData.Node;
   public newCollectionType:string;
   public properties:any;
   public reloadMds:Boolean;
   private hasUserAnyOrgasYet = false;
-  private user : User;
+  user : User;
   public mainnav = true;
   public editPermissionsId: string;
   private permissions: LocalPermissions = null;
@@ -114,6 +114,7 @@ export class CollectionNewComponent {
       private collectionService : RestCollectionService,
       private nodeService : RestNodeService,
       private connector : RestConnectorService,
+      private nodeHelper: NodeHelperService,
       private uiService : UIService,
       private iamService : RestIamService,
       private mediacenterService : RestMediacenterService,
@@ -157,7 +158,7 @@ export class CollectionNewComponent {
           this.route.queryParams.subscribe(params => {
             this.mainnav=params['mainnav']!='false';
           });
-          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
+          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL, '', {count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
             this.editorialGroups=data.groups;
           });
           this.route.params.subscribe(params => {
@@ -206,6 +207,7 @@ export class CollectionNewComponent {
       });
     });
   }
+
     getShareStatus(){
       if(this.permissions || this.originalPermissions){
         let perms=this.permissions || this.originalPermissions;
@@ -231,7 +233,7 @@ export class CollectionNewComponent {
        this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
         this.navigateToCollectionId(this.currentCollection.ref.id);
       },(error:any)=> {
-         NodeHelper.handleNodeError(this.bridge, this.currentCollection.title, error);
+         this.nodeHelper.handleNodeError(this.currentCollection.title, error);
          //this.toast.error(error)
        });
     }
@@ -282,8 +284,24 @@ export class CollectionNewComponent {
         if (id==null) id = this.editId;
         this.navigateToCollectionId(id);
     }
-    setColor(color:string) : void {
+
+    setColor(color: string) : void {
         this.currentCollection.collection.color = color;
+    }
+
+    setColorByDirection(event: KeyboardEvent): void {
+        const rowLength = 6;
+        let index = this.COLORS.indexOf(this.currentCollection.collection.color);
+        switch (event.key) {
+            case 'ArrowUp': index -= rowLength; break;
+            case 'ArrowDown': index += rowLength; break;
+            case 'ArrowLeft': index -= 1; break;
+            case 'ArrowRight': index += 1; break;
+        }
+        if (index >= 0 && index < this.COLORS.length) {
+            this.setColor(this.COLORS[index]);
+            event.preventDefault();
+        }
     }
 
     imageDataChanged(event:any) : void {
@@ -608,7 +626,7 @@ export class CollectionNewComponent {
         this.saveImage(collection);
         return;
     }
-    UIHelper.addToCollection(this.collectionService,this.router,this.bridge,collection,nodes,()=>{
+    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,nodes,()=>{
         this.saveImage(collection);
         return;
     });
@@ -636,6 +654,7 @@ export class CollectionNewComponent {
     }
 
   switchToAuthorFreetext() {
+    this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
     this.authorFreetext=true;
     this.currentCollection.collection.authorFreetext=new AuthorityNamePipe(this.translationService).transform(
         this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ||

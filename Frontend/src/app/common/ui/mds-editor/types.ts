@@ -1,5 +1,6 @@
 import { Type } from '@angular/core';
 import { Sort } from '../../../core-module/core.module';
+import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
@@ -13,7 +14,13 @@ export class UserPresentableError extends Error {
     }
 }
 
-export type EditorMode = 'nodes' | 'search';
+/**
+ * editor mode
+ * nodes: Supports bulk, only returns changed values
+ * search: No bulk, all values returned, Trees sub-children are auto-selected if root is selected
+ * form: No bulk, all values returned
+ */
+export type EditorMode = 'nodes' | 'search' | 'form';
 
 export type ViewRelation = 'suggestions';
 
@@ -24,7 +31,24 @@ export interface Constraints {
 
 export type Values = { [property: string]: string[] };
 
+/** User-selectable Bulk mode per field */
 export type BulkMode = 'no-change' | 'replace';
+
+/** Bulk mode and -behavior of the editor. */
+export type EditorBulkMode =
+    | {
+          isBulk: false;
+      }
+    // The user toggles editing per-field.
+    | {
+          isBulk: true;
+          bulkBehavior: BulkBehavior.Default;
+      }
+    // All fields are replaced.
+    | {
+          isBulk: true;
+          bulkBehavior: BulkBehavior.Replace;
+      };
 
 export type InputStatus = 'VALID' | 'INVALID' | 'DISABLED' | 'PENDING';
 
@@ -64,12 +88,14 @@ export enum MdsWidgetType {
     DefaultValue = 'defaultvalue',
 }
 
+// Entries must be lowercase only.
 export enum NativeWidgetType {
     Preview = 'preview',
     Version = 'version',
     ChildObjects = 'childobjects',
     Maptemplate = 'maptemplate',
     License = 'license',
+    FileUpload = 'fileupload',
     Workflow = 'workflow',
     Author = 'author',
 }

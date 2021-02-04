@@ -16,6 +16,11 @@
         <ngx-monaco-editor class="globalConfig" [options]="codeOptionsGlobal" [(ngModel)]="configGlobal" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
         <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.BASE_CONFIG_HINT' | translate}}</div></mat-hint>
     </div>
+    <h3 class="mat-heading-3 mat-heading-underline">{{'ADMIN.GLOBAL_CONFIG.EXTENSION_CONFIG_TITLE' | translate}}</h3>
+    <div class="monaco-editor">
+        <ngx-monaco-editor [options]="codeOptions" [(ngModel)]="extensionConfig" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
+        <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.EXTENSION_CONFIG_HINT' | translate}}</div></mat-hint>
+    </div>
     <ng-container *ngIf="configDeployment">
         <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.DEPLOYMENT_CONFIG_TITLE' | translate}}</h3>
         <div class="monaco-editor">
@@ -23,10 +28,10 @@
             <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.DEPLOYMENT_CONFIG_HINT' | translate}}</div></mat-hint>
         </div>
     </ng-container>
-    <h3 class="mat-heading-3 mat-heading-underline">{{'ADMIN.GLOBAL_CONFIG.CONFIG_TITLE' | translate}}</h3>
+    <h3 class="mat-heading-3 mat-heading-underline">{{'ADMIN.GLOBAL_CONFIG.SERVER_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
-        <ngx-monaco-editor [options]="codeOptions" [(ngModel)]="config" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
-        <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.CONFIG_HINT' | translate}}</div></mat-hint>
+        <ngx-monaco-editor [options]="codeOptions" [(ngModel)]="serverConfig" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
+        <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.SERVER_CONFIG_HINT' | translate}}</div></mat-hint>
     </div>
     <info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.WARNING' | translate}}</info-message>
     <div class="actions">

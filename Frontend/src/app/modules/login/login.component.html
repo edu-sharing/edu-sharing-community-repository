@@ -9,6 +9,7 @@
 <global-progress *ngIf="isLoading"></global-progress>
 <div *ngIf="!isLoading">
   <card
+    role="main" appSkipTarget="MAIN_CONTENT"
     title="{{ caption | translate }}"
     avatar="assets/images/app-icon.svg"
     subtitle="{{ 'LOGIN.SUBTITLE' | translate }}"
@@ -22,6 +23,7 @@
   >
     <spinner *ngIf="isLoading" class="center"></spinner>
     <div class="login-content" *ngIf="!isLoading">
+      <h1 appTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
       <div class="branding"><img src="assets/images/logo.svg" image-config alt="{{ 'LOGIN.APP_LOGO' | translate }}" /></div>
       <div class="groups">
         <div class="providers-select" *ngIf="showProviders">

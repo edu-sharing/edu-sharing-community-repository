@@ -2,6 +2,7 @@ package org.edu_sharing.metadataset.v2.tools;
 
 import io.swagger.config.ConfigFactory;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -33,6 +34,13 @@ public class MetadataHelper {
 			mdsSet=CCConstants.metadatasetdefault_id;
 
 		return MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet,getLocale());
+	}
+	public static MetadataSetV2 getMetadataset(org.edu_sharing.restservices.shared.NodeRef node) throws Exception{
+		if(node.isHomeRepo()) {
+			return getMetadataset(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node.getId()));
+		} else {
+			return MetadataReaderV2.getMetadataset(ApplicationInfoList.getRepositoryInfoById(node.getRepo()), CCConstants.metadatasetdefault_id, getLocale());
+		}
 	}
 	public static List<MetadataWidget> getWidgetsByNode(NodeRef node) throws Exception{
 		MetadataSetV2 metadata = getMetadataset(node);

@@ -1,12 +1,13 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ConfigurationService, ListItem, Node, NodeList, RestConnectorService, RestConstants, RestNodeService, RestSearchService, SessionStorageService, Store, TemporaryStorageService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {Scope} from "../../../core-ui-module/option-item";
+import {CustomOptions, Scope} from "../../../core-ui-module/option-item";
 import {Toast} from "../../../core-ui-module/toast";
 import {Helper} from "../../../core-module/rest/helper";
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
+import {DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 @Component({
   selector: 'workspace-explorer',
@@ -17,6 +18,7 @@ export class WorkspaceExplorerComponent {
   public readonly SCOPES = Scope;
   @ViewChild('list') list: ListTableComponent;
   public _nodes: Node[] = [];
+  @Input() customOptions: CustomOptions;
   @Input() set nodes(nodes: Node[]) {
     this._nodes = nodes;
   }
@@ -183,7 +185,11 @@ export class WorkspaceExplorerComponent {
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_CREATOR));
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
     if(this.connector.getCurrentLogin() ? this.connector.getCurrentLogin().isAdmin : false){
-        defaultColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+      defaultColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+
+      const repsource = new ListItem("NODE", RestConstants.CCM_PROP_REPLICATIONSOURCEID);
+      repsource.visible = false;
+      defaultColumns.push(repsource);
     }
     let title = new ListItem("NODE", RestConstants.LOM_PROP_TITLE);
     title.visible = false;
@@ -309,7 +315,7 @@ export class WorkspaceExplorerComponent {
       }
     });
   }
-  canDrop = (event:any)=>{
+  canDrop = (event: DropData)=> {
     return event.target.isDirectory;
   }
 

@@ -21,6 +21,7 @@ public class MetadataQueries extends MetadataQueryBase implements Serializable {
 	public void setAllowSearchWithoutCriteria(boolean allowSearchWithoutCriteria) {
 		this.allowSearchWithoutCriteria = allowSearchWithoutCriteria;
 	}
+
 	public List<MetadataQuery> getQueries() {
 		return queries;
 	}

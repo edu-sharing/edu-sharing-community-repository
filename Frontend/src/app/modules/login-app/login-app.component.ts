@@ -20,7 +20,7 @@ import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {PlatformLocation} from '@angular/common';
 
 // possible states this UI component can be in
-enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3};
+enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3}
 
 @Component({
     selector: 'app-login',

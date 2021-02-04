@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
@@ -269,11 +270,15 @@ public class MetadataSetV2 implements Serializable {
 		  for(MetadataWidget widget : found) {
 			  boolean allowed = true;
 			  MetadataCondition cond = widget.getCondition();
-			  if (cond != null && cond.getType().equals(MetadataCondition.CONDITION_TYPE.PROPERTY)) {
-			  	  String[] value=properties.get(CCConstants.getValidGlobalName(cond.getValue()));
-				  boolean empty = isValueEmpty(value);
-
-			  	  allowed=empty==cond.isNegate();
+			  if (cond != null){
+				  if(cond.getType().equals(MetadataCondition.CONDITION_TYPE.PROPERTY)) {
+					  String[] value=properties.get(CCConstants.getValidGlobalName(cond.getValue()));
+					  boolean empty = isValueEmpty(value);
+					  allowed=empty==cond.isNegate();
+				  } else if (cond.getType().equals(MetadataCondition.CONDITION_TYPE.TOOLPERMISSION)) {
+					  boolean hasTp = new ToolPermissionBaseService().hasToolPermission(cond.getValue());
+					  allowed=hasTp!=cond.isNegate();
+				  }
 			  }
 			  if(allowed) {
 				  result.add(widget);

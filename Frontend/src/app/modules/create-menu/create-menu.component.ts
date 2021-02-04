@@ -36,7 +36,7 @@ import { CardService } from '../../core-ui-module/card.service';
 import { CardComponent } from '../../core-ui-module/components/card/card.component';
 import { DropdownComponent } from '../../core-ui-module/components/dropdown/dropdown.component';
 import { DateHelper } from '../../core-ui-module/DateHelper';
-import { LinkData, NodeHelper } from '../../core-ui-module/node-helper';
+import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {
     Constrain,
     DefaultGroups,
@@ -91,7 +91,7 @@ export class CreateMenuComponent {
      */
     @Input() set parent(parent: Node) {
         this._parent = parent;
-        this.showPicker = parent == null || NodeHelper.isNodeCollection(parent);
+        this.showPicker = parent == null || this.nodeHelper.isNodeCollection(parent);
         this.updateOptions();
     }
     /**
@@ -134,6 +134,7 @@ export class CreateMenuComponent {
         private route: ActivatedRoute,
         private optionsService: OptionsHelperService,
         private iam: RestIamService,
+        private nodeHelper: NodeHelperService,
         private event: FrameEventsService,
         private cardService: CardService,
     ) {
@@ -165,6 +166,9 @@ export class CreateMenuComponent {
                 return;
             }
             if (CardComponent.getNumberOfOpenCards() > 0) {
+                return;
+            }
+            if((event.target as HTMLElement)?.tagName === 'INPUT'){
                 return;
             }
             if (event.clipboardData.items.length > 0) {
@@ -212,7 +216,7 @@ export class CreateMenuComponent {
             pasteNodes.group = DefaultGroups.Primary;
             this.options.push(pasteNodes);
         }
-        if (this._parent && NodeHelper.isNodeCollection(this._parent)) {
+        if (this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
             const newCollection = new OptionItem(
                 'OPTIONS.NEW_COLLECTION',
                 'layers',
@@ -227,7 +231,7 @@ export class CreateMenuComponent {
             this.options.push(newCollection);
         }
         if (this.allowBinary) {
-            if(this._parent && NodeHelper.isNodeCollection(this._parent)) {
+            if(this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
                 const search = new OptionItem(
                     'OPTIONS.SEARCH_OBJECT',
                     'redo',
@@ -301,13 +305,19 @@ export class CreateMenuComponent {
             this.options,
             Target.CreateMenu,
         );
+
+        // If the menu was open, we just removed all its items, leaving focus on <body>.
+        setTimeout(() => {
+            this.dropdown?.menu.focusFirstItem()
+        });
     }
+
     public hasUsableOptions() {
         return this.options.some((o) => o.isEnabled);
     }
 
     getParent() {
-        return this._parent && !NodeHelper.isNodeCollection(this._parent)
+        return this._parent && !this.nodeHelper.isNodeCollection(this._parent)
             ? this._parent
             : this.inbox;
     }
@@ -340,8 +350,7 @@ export class CreateMenuComponent {
                 (error: any) => {
                     this.toast.closeModalDialog();
                     if (
-                        NodeHelper.handleNodeError(
-                            this.bridge,
+                        this.nodeHelper.handleNodeError(
                             folder.name,
                             error,
                         ) === RestConstants.DUPLICATE_NODE_RESPONSE
@@ -378,10 +387,11 @@ export class CreateMenuComponent {
     }
 
     afterUpload(nodes: Node[]) {
+        if(nodes == null) {
+            return;
+        }
         if (this.params.reurl) {
-            NodeHelper.addNodeToLms(
-                this.router,
-                this.temporaryStorage,
+            this.nodeHelper.addNodeToLms(
                 nodes[0],
                 this.params.reurl,
             );
@@ -389,25 +399,24 @@ export class CreateMenuComponent {
         this.onCreate.emit(nodes);
     }
 
-    showCreateConnector(connector: Connector) {
+    async showCreateConnector(connector: Connector) {
         this.createConnectorName = '';
         this.createConnectorType = connector;
-        this.iamService.getUser().subscribe(user => {
-            if (
-                user.person.quota.enabled &&
-                user.person.quota.sizeCurrent >= user.person.quota.sizeQuota
-            ) {
-                this.toast.showModalDialog(
-                    'CONNECTOR_QUOTA_REACHED_TITLE',
-                    'CONNECTOR_QUOTA_REACHED_MESSAGE',
-                    DialogButton.getOk(() => {
-                        this.toast.closeModalDialog();
-                    }),
-                    true,
-                );
-                this.createConnectorName = null;
-            }
-        });
+        const user = await this.iamService.getUser().toPromise();
+        if (
+            user.person.quota.enabled &&
+            user.person.quota.sizeCurrent >= user.person.quota.sizeQuota
+        ) {
+            this.toast.showModalDialog(
+                'CONNECTOR_QUOTA_REACHED_TITLE',
+                'CONNECTOR_QUOTA_REACHED_MESSAGE',
+                DialogButton.getOk(() => {
+                    this.toast.closeModalDialog();
+                }),
+                true,
+            );
+            this.createConnectorName = null;
+        }
     }
 
     private openCamera() {
@@ -466,7 +475,7 @@ export class CreateMenuComponent {
     private createConnector(event: any) {
         const name = event.name + '.' + event.type.filetype;
         this.createConnectorName = null;
-        const prop = NodeHelper.propertiesFromConnector(event);
+        const prop = this.nodeHelper.propertiesFromConnector(event);
         let win: any;
         if (!this.bridge.isRunningCordova()) {
             win = window.open('');
@@ -492,8 +501,7 @@ export class CreateMenuComponent {
                 (error: any) => {
                     win.close();
                     if (
-                        NodeHelper.handleNodeError(
-                            this.bridge,
+                        this.nodeHelper.handleNodeError(
                             event.name,
                             error,
                         ) === RestConstants.DUPLICATE_NODE_RESPONSE

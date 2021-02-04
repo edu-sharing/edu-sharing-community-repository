@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.connector;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -69,30 +71,31 @@ public class ConnectorServlet extends HttpServlet  {
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
 		boolean readOnly=true;
+		boolean isCollection;
 		String toolInstanceNodeId = null;
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+		NodeRef nodeRefOriginal = nodeRef;
 		try{
 			MCAlfrescoBaseClient repoClient = null;
 			NodeService nodeService = NodeServiceFactory.getLocalService();
 			PermissionService permissionService = PermissionServiceFactory.getLocalService();
 			// if collection ref, use original node
-			String realNodeId=nodeId;
-			if(Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId)).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-				logger.info("ConnectorServlet detected io reference "+nodeId+", will sent original io node ref to service");
-				nodeId = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.CCM_PROP_IO_ORIGINAL);
+			isCollection = NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+			if(isCollection){
+				nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.CCM_PROP_IO_ORIGINAL));
 			}
 			// for writing, access to the original is required
-			readOnly=!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_WRITE);
+			readOnly=!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRefOriginal.getId(),CCConstants.PERMISSION_WRITE);
 			// check if user has permissions on the real node (i.e. the reference io)
-			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),realNodeId,CCConstants.PERMISSION_READ_ALL)){
+			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_ALL)){
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
-			
-			String toolInstanceNodeRef = nodeService.getProperty(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), nodeId, CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF);
+			// run as system since we're may having redirected to an original io where the user might not have permissions on the original node
+			String toolInstanceNodeRef = (String) NodeServiceHelper.getPropertiesOriginal(nodeRef).get(CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF);
 			if(toolInstanceNodeRef != null) {
 				toolInstanceNodeId = new NodeRef(toolInstanceNodeRef).getId();
 			}
-
 		}catch(Throwable e){
 			logger.error(e.getMessage(),e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
@@ -131,12 +134,10 @@ public class ConnectorServlet extends HttpServlet  {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no connector appinfo registered");
 			return;
 		}
-		
-		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
-		NodeService nodeService=NodeServiceFactory.getLocalService();
+
 		HashMap<String, Object> properties=null;
 		try {
-			properties = nodeService.getProperties(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeId);
+			properties = NodeServiceHelper.getPropertiesOriginal(nodeRef);
 		} catch (Throwable e1) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "node id is invalid or can not be accessed");
 			return;
@@ -145,7 +146,7 @@ public class ConnectorServlet extends HttpServlet  {
 			try{
 				EditLockService editLockService = EditLockServiceFactory.getEditLockService();
 				if(!readOnly)
-					editLockService.lock(nodeRef);
+					editLockService.lock(nodeRefOriginal);
 			}catch( LockedException e){
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "node is locked by another user");
 				return;
@@ -157,6 +158,7 @@ public class ConnectorServlet extends HttpServlet  {
 		
 		try{
 			JSONObject jsonObject = new JSONObject();
+			// connector get's the real node id. API can handle permissions for references this way
 			jsonObject.put("node",nodeId);
 
 			if(connector != null) {

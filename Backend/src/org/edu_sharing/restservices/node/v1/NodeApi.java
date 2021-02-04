@@ -53,6 +53,7 @@ import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -845,7 +846,10 @@ public class NodeApi  {
 	    		children = NodeDao.getWorkflowReceive(repoDao,filter,sortDefinition);
 	    	}
 	    	else if("-to_me_shared_files-".equals(node)){
-				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, filter, propFilter,sortDefinition,skipCount,maxItems));
+				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.All, filter, propFilter,sortDefinition,skipCount,maxItems));
+			}
+			else if("-to_me_shared_files_personal-".equals(node)){
+				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.Private, filter, propFilter,sortDefinition,skipCount,maxItems));
 			}
 	    	else if("-frontpage-".equals(node)){
 				children = NodeDao.getFrontpageNodes(repoDao);

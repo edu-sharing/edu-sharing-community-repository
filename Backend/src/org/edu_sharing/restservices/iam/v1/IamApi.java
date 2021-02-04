@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -29,9 +30,12 @@ import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntry;
 import org.edu_sharing.restservices.iam.v1.model.Preferences;
+import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 import org.edu_sharing.restservices.iam.v1.model.UserEntries;
 import org.edu_sharing.restservices.iam.v1.model.UserEntry;
+import org.edu_sharing.restservices.iam.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
+import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
@@ -127,23 +131,19 @@ public class IamApi  {
     }
     
     @GET
-
-    @Path("/people/{repository}/{person}")    
-    
+    @Path("/people/{repository}/{person}")
     @ApiOperation(
     	value = "Get the user.", 
     	notes = "Get the user. (Not all information are feteched for foreign profiles if current user is not an admin)")
-
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = UserEntry.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserEntry.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
-
     public Response getUser(
     		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
@@ -175,6 +175,33 @@ public class IamApi  {
     		return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
     	}
     }
+
+	@GET
+	@Path("/people/{repository}/{person}/stats")
+	@ApiOperation(
+			value = "Get the user stats.",
+			notes = "Get the user stats (e.g. publicly created material count)")
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserStats.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+	public Response getUserStats(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+			@Context HttpServletRequest req) {
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			PersonDao personDao = PersonDao.getPerson(repoDao, person);
+			return Response.status(Response.Status.OK).entity(personDao.getStats()).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t, ErrorResponse.ErrorResponseLogging.relaxed);
+		}
+	}
     @GET       
     @Path("/people/{repository}/{person}/nodeList/{list}")    
     @ApiOperation(
@@ -344,7 +371,77 @@ public class IamApi  {
 			return ErrorResponse.createResponse(t);
 		}
     }
-    
+
+	@GET
+	@Path("/people/{repository}/{person}/profileSettings")
+	@ApiOperation(
+			value = "Get profileSettings configuration",
+			notes = "Will fail for guest")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ProfileSettings.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getProfileSettings(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "username (or \"-me-\" for current user)", required = true, defaultValue = "-me-") @PathParam("person") String person,
+			@Context HttpServletRequest req) {
+		try {
+			org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			if (service.isGuest())
+				throw new Exception("Not allowed for guest user");
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			PersonDao personDao = PersonDao.getPerson(repoDao, person);
+			ProfileSettings personDaoProfileSettings = personDao.getProfileSettings();
+			return Response.status(Response.Status.OK).entity(personDaoProfileSettings).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+
+	@PUT
+	@Path("/people/{repository}/{person}/profileSettings")
+	@ApiOperation(
+			value = "Set profileSettings Configuration",
+			notes = "Will fail for guest")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response setProfileSettings(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "username (or \"-me-\" for current user)", required = true, defaultValue = "-me-") @PathParam("person") String person,
+			@ApiParam(value = "ProfileSetting Object", required = true) ProfileSettings profileSettings,
+			@Context HttpServletRequest req) {
+		try {
+			org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+			if (service.isGuest())
+				throw new Exception("Not allowed for guest user");
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			PersonDao personDao = PersonDao.getPerson(repoDao, person);
+			personDao.setProfileSettings(profileSettings);
+			return Response.status(Response.Status.OK).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+
+
     @POST
 
     @Path("/people/{repository}/{person}")    
@@ -452,6 +549,44 @@ public class IamApi  {
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
     	}
     }
+
+	@DELETE
+
+	@Path("/people/{repository}/{person}")
+
+	@ApiOperation(
+			value = "Delete the user.",
+			notes = "Delete the user. (admin rights are required.)")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = "OK.", response = Void.class),
+					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+			})
+
+	public Response deleteUser(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "username",required=true) @PathParam("person") String person,
+			@ApiParam(value = "force the deletion (if false then only persons which are previously marked for deletion are getting deleted)",required=false, defaultValue = "false") @QueryParam("force") Boolean force,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			PersonDao personDao = PersonDao.getPerson(repoDao, person);
+
+			personDao.delete(force != null && force);
+
+			return Response.status(Response.Status.OK).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 
     @OPTIONS        
     @Path("/people/{repository}/{person}")
@@ -660,7 +795,8 @@ public class IamApi  {
         		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
         		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
         		@ApiParam(value = "find a specific groupType",required=false) @QueryParam("groupType") String groupType,
-        		@ApiParam(value = "global search context, defaults to true, otherwise just searches for groups within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
+				@ApiParam(value = "find a specific signupMethod for groups (or asterisk for all including one)",required=false) @QueryParam("signupMethod") String signupMethod,
+				@ApiParam(value = "global search context, defaults to true, otherwise just searches for groups within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
         		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
         	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
         	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
@@ -672,6 +808,9 @@ public class IamApi  {
         		if(groupType!=null && !groupType.isEmpty()){
         			props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
         		}
+				if(signupMethod!=null && !signupMethod.isEmpty()){
+					props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD), signupMethod);
+				}
     	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
     	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
     	    					AuthorityType.GROUP,
@@ -894,7 +1033,190 @@ public class IamApi  {
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
     }
 
-    @GET
+	@POST
+	@Path("/groups/{repository}/{group}/signup/config")
+
+	@ApiOperation(
+			value = "set group signup options",
+			notes =" requires admin rights"
+	)
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response signupGroupDetails(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
+			@ApiParam(value = "Details to edit",required=true) GroupSignupDetails details,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			GroupDao.getGroup(repoDao,group).setSignup(details);
+			return Response.status(Response.Status.OK).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@POST
+	@Path("/groups/{repository}/{group}/signup")
+
+	@ApiOperation(
+			value = "let the current user signup to the given group"
+	)
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = GroupSignupResult.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response signupGroup(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
+			@ApiParam(value = "Password for signup (only required if signupMethod == password)",required=false) @QueryParam("password") String password,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			return Response.status(Response.Status.OK).entity(GroupDao.getGroup(repoDao,group).signupUser(password)).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@GET
+	@Path("/groups/{repository}/{group}/signup/list")
+
+	@ApiOperation(
+			value = "list pending users that want to join this group",
+			notes = "Requires admin rights or org administrator on this group"
+	)
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = User[].class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response signupGroupList(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			List<User> persons = GroupDao.getGroup(repoDao, group).signupUserList().stream().map(personDao -> {
+				try {
+					return personDao.asPerson();
+				} catch (DAOException e) {
+					throw new RuntimeException(e);
+				}
+			}).collect(Collectors.toList());
+			return Response.status(Response.Status.OK).entity(persons).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@PUT
+	@Path("/groups/{repository}/{group}/signup/list/{user}")
+
+	@ApiOperation(
+			value = "put the pending user into the group",
+			notes = "Requires admin rights or org administrator on this group"
+	)
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = void.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response confirmSignup(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
+			@ApiParam(value = "ID of user",required=true) @PathParam("user") String user,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			GroupDao.getGroup(repoDao, group).confirmSignup(user);
+			return Response.status(Response.Status.OK).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@DELETE
+	@Path("/groups/{repository}/{group}/signup/list/{user}")
+
+	@ApiOperation(
+			value = "reject the pending user",
+			notes = "Requires admin rights or org administrator on this group"
+	)
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = void.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response rejectSignup(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
+			@ApiParam(value = "ID of user",required=true) @PathParam("user") String user,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			GroupDao.getGroup(repoDao, group).rejectSignup(user);
+			return Response.status(Response.Status.OK).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@GET
 
     @Path("/people/{repository}/{person}/memberships")
 
@@ -1149,6 +1471,7 @@ public class IamApi  {
     		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
     		@ApiParam(value = "global search context, defaults to true, otherwise just searches for users within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
 			@ApiParam(value = "find a specific groupType (does nothing for persons)",required=false) @QueryParam("groupType") String groupType,
+			@ApiParam(value = "find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)",required=false) @QueryParam("signupMethod") String signupMethod,
 			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     		@Context HttpServletRequest req) {
@@ -1157,6 +1480,9 @@ public class IamApi  {
 			HashMap<String, String> props = new HashMap<>();
 			if(groupType!=null && !groupType.isEmpty()){
 				props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
+			}
+			if(signupMethod!=null && !signupMethod.isEmpty()){
+				props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD), signupMethod);
 			}
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
