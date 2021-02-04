@@ -600,8 +600,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
     }
     private openBreadcrumb(position: number) {
+        console.log(position);
         this.searchQuery = null;
-        if (position > 0 || this.path) {
+        if (position > 0) {
             // handled automatically via routing
         } else {
             // TODO: handle with homeRouterLink if possible.
@@ -612,6 +613,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 )
             ) {
                 this.showSelectRoot = true;
+            } else {
+                this.routeTo(this.root);
             }
         }
     }

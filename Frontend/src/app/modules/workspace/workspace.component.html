@@ -46,15 +46,15 @@
   </div>
 <div class="breadcrumbFrame">
     <div class="mobile-move-top">
+        <!--[homeRouterLink]="path ? {
+            routerLink: '.',
+            queryParams: { id: null },
+            queryParamsHandling: 'merge'
+          } : null"-->
         <breadcrumbs *ngIf="isLoggedIn"
           [breadcrumbsAsNode]="path"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.'+root"
-          [homeRouterLink]="path ? {
-            routerLink: '.',
-            queryParams: { id: null },
-            queryParamsHandling: 'merge'
-          } : null"
           [canDrop]="canDropBreadcrumbs"
           (onDrop)="handleDrop($event)"
           (onClick)="openBreadcrumb($event)"
