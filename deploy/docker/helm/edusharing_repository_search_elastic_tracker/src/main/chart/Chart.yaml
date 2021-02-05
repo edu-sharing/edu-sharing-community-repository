@@ -1,0 +1,10 @@
+apiVersion: v2
+
+name: edusharing_repository_search_elastic_tracker
+description: edusharing_repository_search_elastic_tracker
+
+icon: ${chart.icon}
+
+version: ${chart.version}
+appVersion: ${docker.tag}
+kubeVersion: ">= 1.16.0"

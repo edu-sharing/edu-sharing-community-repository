@@ -29,6 +29,7 @@ data:
   REPOSITORY_SERVICE_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
   REPOSITORY_SERVICE_HOME_APPID: {{ .Values.config.home.appid | quote }}
   REPOSITORY_SERVICE_HOME_AUTH: {{ if .Values.config.saml.enabled }}"shibboleth"{{ else }}""{{ end }}
+  REPOSITORY_SERVICE_HOME_PROVIDER: {{ if .Values.config.search.elastic.enabled }}"org.edu_sharing.service.provider.ElasticSearchProvider"{{ else }}""{{ end }}
   REPOSITORY_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
   REPOSITORY_SERVICE_HOST_INTERNAL: {{ include "edusharing_repository_service.name" . | quote }}
   REPOSITORY_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}

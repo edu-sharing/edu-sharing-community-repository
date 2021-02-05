@@ -89,7 +89,7 @@ terminationGracePeriod: 120
 livenessProbe:
 
   failureThreshold: 3
-  initialDelaySeconds: 300
+  initialDelaySeconds: 600
   periodSeconds: 10
   timeoutSeconds: 5
 

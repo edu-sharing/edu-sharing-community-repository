@@ -104,11 +104,29 @@ edusharing_repository_service:
     search:
 
       elastic:
+        enabled: &searchElasticEnabled true
         host: *searchElasticNameOverride
         port: *searchElasticServicePortApi
 
       solr4:
         host: *searchSolr4NameOverride
         port: *searchSolr4ServicePortApi
+
+########################################################################################################################
+
+edusharing_repository_search_elastic_tracker:
+
+  enabled: *searchElasticEnabled
+
+  config:
+
+    repository:
+      host: *serviceNameOverride
+      port: *serviceServicePortApiInternal
+
+    search:
+      elastic:
+        host: *searchElasticNameOverride
+        port: *searchElasticServicePortApi
 
 ########################################################################################################################

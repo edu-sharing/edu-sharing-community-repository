@@ -160,6 +160,7 @@
     <module>edusharing_rendering</module>
     <module>edusharing_rendering_service</module>
     <module>edusharing_repository</module>
+    <module>edusharing_repository_search_elastic_tracker</module>
     <module>edusharing_repository_search_solr4</module>
     <module>edusharing_repository_service</module>
   </modules>

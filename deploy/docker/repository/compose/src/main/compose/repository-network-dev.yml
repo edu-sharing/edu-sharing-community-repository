@@ -12,10 +12,17 @@ services:
     ports:
       - "127.0.0.1:${REPOSITORY_SEARCH_ELASTIC_PORT_HTTP:-8300}:9200"
 
+  repository-search-elastic-tracker:
+    environment:
+      JAVA_AGENT: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000"
+    ports:
+      - "127.0.0.1:${REPOSITORY_SEARCH_ELASTIC_TRACKER_PORT_HTTP:-8400}:8081"
+      - "127.0.0.1:${REPOSITORY_SEARCH_ELASTIC_TRACKER_PORT_JPDA:-8401}:8000"
+
   repository-search-solr4:
     command: ["catalina.sh", "jpda", "run"]
     environment:
-      JPDA_ADDRESS: 0.0.0.0:5005
+      JPDA_ADDRESS: "0.0.0.0:5005"
     ports:
       - "127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_HTTP:-8200}:8080"
       - "127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_JPDA:-8201}:5005"
@@ -23,6 +30,6 @@ services:
   repository-service:
     command: ["catalina.sh", "jpda", "run"]
     environment:
-      JPDA_ADDRESS: 0.0.0.0:5005
+      JPDA_ADDRESS: "0.0.0.0:5005"
     ports:
       - "127.0.0.1:${REPOSITORY_SERVICE_PORT_JPDA:-8101}:5005"

@@ -28,6 +28,17 @@ services:
     volumes:
       - "repository-search-elastic-volume:/usr/share/elasticsearch/data"
 
+  repository-search-elastic-tracker:
+    image: "${docker.image}-repository-search-elastic-tracker:${docker.tag}"
+    environment:
+      JAVA_XMS: "-Xms${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMS:-1g}"
+      JAVA_XMX: "-Xmx${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMX:-1g}"
+      REPOSITORY_SEARCH_ELASTIC_HOST: repository-search-elastic
+      REPOSITORY_SEARCH_ELASTIC_PORT: "9200"
+      REPOSITORY_SERVICE_HOST: repository-service
+      REPOSITORY_SERVICE_PORT: "8080"
+      REPOSITORY_SERVICE_ADMIN_PASS: "${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+
   repository-search-solr4:
     image: "${docker.image}-repository-search-solr4:${docker.tag}"
     environment:
@@ -60,6 +71,7 @@ services:
       REPOSITORY_SERVICE_GUEST_PASS: "${REPOSITORY_SERVICE_GUEST_PASS:-}"
       REPOSITORY_SERVICE_GUEST_USER: "${REPOSITORY_SERVICE_GUEST_USER:-}"
       REPOSITORY_SERVICE_HOME_APPID: "${COMPOSE_PROJECT_NAME:-compose}"
+      REPOSITORY_SERVICE_HOME_PROVIDER: "${REPOSITORY_SERVICE_PROVIDER:-org.edu_sharing.service.provider.ElasticSearchProvider}"
       REPOSITORY_SERVICE_HOST_EXTERNAL: "${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.xip.io}"
       REPOSITORY_SERVICE_HOST_INTERNAL: repository-service
       REPOSITORY_SERVICE_PORT_EXTERNAL: "${REPOSITORY_SERVICE_PORT_HTTP:-8100}"

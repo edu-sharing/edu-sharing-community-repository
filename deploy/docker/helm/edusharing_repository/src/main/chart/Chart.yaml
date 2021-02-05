@@ -29,6 +29,11 @@ dependencies:
     alias: edusharing_repository_search_elastic
     condition: edusharing_repository_search_elastic.enabled
 
+  - name: edusharing_repository_search_elastic_tracker
+    repository: "file://../../../edusharing_repository_search_elastic_tracker/target/chart"
+    version: ${chart.version}
+    condition: edusharing_repository_search_elastic_tracker.enabled
+
   - name: edusharing_repository_search_solr4
     repository: "file://../../../edusharing_repository_search_solr4/target/chart"
     version: ${chart.version}

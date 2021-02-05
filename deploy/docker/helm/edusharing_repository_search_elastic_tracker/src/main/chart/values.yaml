@@ -9,11 +9,6 @@ global:
     istio:
       enabled: false
 
-    storage:
-      data:
-        spec: {}
-#          storageClassName:
-
   image:
     registry: ${docker.registry}
     repository: ${docker.image}
@@ -25,50 +20,43 @@ global:
 # LOCAL
 ########################################################################################################################
 
-nameOverride: edusharing-mariadb
-
-########################################################################################################################
-
-service:
-
-  port:
-    api: 3306
+nameOverride: edusharing-repository-search-elastic-tracker
 
 ########################################################################################################################
 
 config:
 
-  database: mariadb
-  username: mariadb
-  password: mariadb
+  jvm:
+    ram:
+      minPercentage: "95.0"
+      maxPercentage: "95.0"
 
-  extra:
-    mysqld:
-      max_connections: "300"
+  options: ""
+
+  repository:
+    host: edusharing-repository-service
+    port: 8080
+    password: admin
+
+  search:
+
+    elastic:
+      host: edusharing-repository-search-elastic
+      port: 9200
 
 ########################################################################################################################
 
 nodeAffinity: {}
+podAntiAffinity: "" # "soft" or "hard"
 
 tolerations: []
 
 ########################################################################################################################
 
-persistence:
-
-  data:
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 5Gi
-
-########################################################################################################################
-
 podSecurityContext:
 
-  runAsUser: 1001
-  fsGroup: 1001
+  runAsUser: 1000
+  fsGroup: 1000
 
 securityContext:
 
@@ -100,10 +88,10 @@ readinessProbe:
 resources:
 
   limits:
-    cpu: 200m
-    memory: 1Gi
+    cpu: 500m
+    memory: 2Gi
   requests:
-    cpu: 200m
-    memory: 1Gi
+    cpu: 500m
+    memory: 2Gi
 
 ########################################################################################################################

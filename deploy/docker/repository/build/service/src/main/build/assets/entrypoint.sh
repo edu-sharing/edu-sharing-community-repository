@@ -13,6 +13,7 @@ my_bind="${REPOSITORY_SERVICE_BIND:-"0.0.0.0"}"
 
 my_home_appid="${REPOSITORY_SERVICE_HOME_APPID:-local}"
 my_home_auth="${REPOSITORY_SERVICE_HOME_AUTH:-}"
+my_home_provider="${REPOSITORY_SERVICE_HOME_PROVIDER:-}"
 
 my_prot_external="${REPOSITORY_SERVICE_PROT_EXTERNAL:-http}"
 my_host_external="${REPOSITORY_SERVICE_HOST_EXTERNAL:-repository.127.0.0.1.xip.io}"
@@ -41,6 +42,7 @@ repository_database_jdbc="jdbc:${repository_database_prot}://${repository_databa
 
 repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-repository-search-elastic}"
 repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
+repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
 
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-repository-search-solr4}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
@@ -66,6 +68,13 @@ grep -Fq 'clusterServersConfig' tomcat/conf/redisson.yaml && {
 		sleep 3
 	done
 }
+
+until wait-for-it "${repository_search_elastic_host}:${repository_search_elastic_port}" -t 3; do sleep 1; done
+
+until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null "${repository_search_elastic_base}/_cluster/health?wait_for_status=yellow&timeout=3s") -eq 200 ]]; do
+	echo >&2 "Waiting for ${repository_search_elastic_host} ..."
+	sleep 3
+done
 
 until wait-for-it "${repository_database_host}:${repository_database_port}" -t 3; do sleep 1; done
 
@@ -246,6 +255,15 @@ xmlstarlet ed -L \
 			-u '/config/values/logout/destroySession' -v 'false' \
 			tomcat/shared/classes/config/client.config.xml
 	}
+}
+
+[[ -n "${my_home_provider}" ]] && {
+	xmlstarlet ed -L \
+		-d '/properties/entry[@key="remote_provider"]' \
+		-s '/properties' -t elem -n "entry" -v "${my_home_provider}" \
+		--var entry '$prev' \
+		-i '$entry' -t attr -n "key" -v "remote_provider" \
+		tomcat/shared/classes/homeApplication.properties.xml
 }
 
 hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \

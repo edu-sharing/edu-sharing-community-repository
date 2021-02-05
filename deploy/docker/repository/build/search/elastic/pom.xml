@@ -5,17 +5,16 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-deploy-docker-repository-build</artifactId>
+    <artifactId>edu_sharing-community-deploy-docker-repository-build-search</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-deploy-docker-repository-build-search</artifactId>
+  <artifactId>edu_sharing-community-deploy-docker-repository-build-search-elastic</artifactId>
   <packaging>pom</packaging>
 
-  <name>edu_sharing-community-deploy-docker-repository-build-search</name>
+  <name>edu_sharing-community-deploy-docker-repository-build-search-elastic</name>
 
-<modules>  <module>elastic</module>
-    <module>solr4</module>
+<modules>  <module>tracker</module>
   </modules>
 </project>

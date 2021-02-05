@@ -155,6 +155,7 @@ config:
   search:
 
     elastic:
+      enabled: true
       host: edusharing-repository-search-elastic
       port: 9200
 
@@ -211,14 +212,14 @@ livenessProbe:
   server:
 
     failureThreshold: 3
-    initialDelaySeconds: 300
+    initialDelaySeconds: 600
     periodSeconds: 10
     timeoutSeconds: 5
 
   transform:
 
     failureThreshold: 3
-    initialDelaySeconds: 300
+    initialDelaySeconds: 600
     periodSeconds: 10
     timeoutSeconds: 5
 

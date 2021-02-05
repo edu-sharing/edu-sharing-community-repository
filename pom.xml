@@ -77,6 +77,12 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_elastic_tracker</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_solr4</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -112,6 +118,12 @@
         <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
         <version>${community.repository.version}</version>
         <type>amp</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-search-elastic-tracker</artifactId>
+        <version>${community.repository.version}</version>
       </dependency>
 
       <dependency>
