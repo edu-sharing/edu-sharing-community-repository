@@ -1,11 +1,16 @@
 package org.edu_sharing.repository.server.oai;
 
+import com.typesafe.config.Config;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.dspace.xoai.dataprovider.handlers.results.ListItemIdentifiersResult;
 import org.dspace.xoai.dataprovider.model.ItemIdentifier;
+import org.dspace.xoai.dataprovider.repository.RepositoryConfiguration;
+import org.dspace.xoai.model.oaipmh.DeletedRecord;
+import org.dspace.xoai.model.oaipmh.Granularity;
 import org.dspace.xoai.model.oaipmh.OAIPMH;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -45,12 +50,22 @@ public class OaiServlet extends HttpServlet{
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
+            Config config = LightbendConfigLoader.get().getConfig("exporter.oai.identify");
+            int itemsPerPage =  LightbendConfigLoader.get().getInt("exporter.oai.itemsPerPage");
             //oai/provider?verb=GetRecord&metadataPrefix=lom&identifier=3410648a-465e-47ff-87fe-706b89cecd65
-            EduOai oai = new EduOai(MAX_ITEMS_PER_PAGE,
-                    URLTool.getBaseUrl(),
-                    ApplicationInfoList.getHomeRepository().getAppCaption(),
-                    new Mail().getProperties().getProperty("mail.admin"),
-                    new Date(0),
+            RepositoryConfiguration configuration = new RepositoryConfiguration().
+                    withMaxListIdentifiers(itemsPerPage).withMaxListSets(itemsPerPage).
+                    withMaxListRecords(itemsPerPage).withMaxListSets(itemsPerPage).
+                    withAdminEmail(new Mail().getProperties().getProperty("mail.admin")).
+                    withBaseUrl(URLTool.getBaseUrl()).
+                    withGranularity(Granularity.Second).
+                    withDeleteMethod(DeletedRecord.fromValue(config.getString("delete"))).
+                    withEarliestDate(new Date(0)).
+                    withRepositoryName(config.hasPath("name") ? config.getString("name") : ApplicationInfoList.getHomeRepository().getAppCaption()).
+                    withDescription(config.getString("description"));
+
+            EduOai oai = new EduOai(configuration,
+                    LightbendConfigLoader.get().getString("exporter.oai.metadataPrefix"),
                     new Handler());
             Map<String, List<String>> request = mapRequest(req);
             OAIPMH response = oai.handleRequest(request);
@@ -82,11 +97,11 @@ public class OaiServlet extends HttpServlet{
             serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         }
         @Override
-        public ListItemIdentifiersResult getIdentifiers(int from, int length) {
-            return getIdentifiersSolr(from, length,new HashMap<>());
+        public ListItemIdentifiersResult getIdentifiers(int from, int length, String set) {
+            return getIdentifiersSolr(from, length,new HashMap<>(), set);
         }
 
-        private ListItemIdentifiersResult getIdentifiersSolr(int from, int length,Map<String,String[]> searchCriterias){
+        private ListItemIdentifiersResult getIdentifiersSolr(int from, int length,Map<String,String[]> searchCriterias, String set){
             try {
                 SearchToken token=new SearchToken();
                 token.setFrom(from);
@@ -97,7 +112,7 @@ public class OaiServlet extends HttpServlet{
                 token.setContentType(SearchService.ContentType.FILES);
                 SearchResultNodeRef result = SearchServiceFactory.getLocalService().searchV2(
                         MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id),
-                        "oai",
+                        (set == null || set.equals("default") ? "oai" : "oai_" + set),
                         searchCriterias,
                         token);
                 List<ItemIdentifier> refs = result.getData().stream().map((ref) -> new EduItemIdentifier(ref.getNodeId(),getDate(ref))).collect(Collectors.toList());
@@ -111,10 +126,15 @@ public class OaiServlet extends HttpServlet{
         }
 
         @Override
-        public ListItemIdentifiersResult getIdentifiersFrom(int from, int length, Date date) {
+        public List<String> getSets() {
+            return LightbendConfigLoader.get().getStringList("exporter.oai.sets");
+        }
+
+        @Override
+        public ListItemIdentifiersResult getIdentifiersFrom(int from, int length, Date date, String set) {
             HashMap<String, String[]> criterias = new HashMap<>();
             criterias.put("from",new String[]{convertDateSolr(date)});
-            return getIdentifiersSolr(from, length,criterias);
+            return getIdentifiersSolr(from, length,criterias, set);
         }
 
         private String convertDateSolr(Date date) {
@@ -122,17 +142,17 @@ public class OaiServlet extends HttpServlet{
     }
 
         @Override
-        public ListItemIdentifiersResult getIdentifiersUntil(int from, int length, Date date) {
+        public ListItemIdentifiersResult getIdentifiersUntil(int from, int length, Date date, String set) {
             HashMap<String, String[]> criterias = new HashMap<>();
             criterias.put("until",new String[]{convertDateSolr(date)});
-            return getIdentifiersSolr(from, length,criterias);        }
+            return getIdentifiersSolr(from, length,criterias, set);        }
 
         @Override
-        public ListItemIdentifiersResult getIdentifiersFromUntil(int from, int length, Date fromDate, Date untilDate) {
+        public ListItemIdentifiersResult getIdentifiersFromUntil(int from, int length, Date fromDate, Date untilDate, String set) {
             HashMap<String, String[]> criterias = new HashMap<>();
             criterias.put("from",new String[]{convertDateSolr(fromDate)});
             criterias.put("until",new String[]{convertDateSolr(untilDate)});
-            return getIdentifiersSolr(from, length,criterias);
+            return getIdentifiersSolr(from, length, criterias, set);
         }
         private Date getDate(NodeRef ref) {
             return (Date) serviceRegistry.getNodeService().getProperty(new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId()),QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
