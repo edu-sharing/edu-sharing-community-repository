@@ -97,11 +97,20 @@ public class ToolPermissionBaseService {
         /**
          * try to use session cache
          */
-        HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-        Boolean hasToolPerm = (Boolean)session.getAttribute(toolPermission);
+        Boolean hasToolPerm = false;
+        HttpSession session = null;
+        if(Context.getCurrentInstance() != null){
+            session = Context.getCurrentInstance().getRequest().getSession();
+            hasToolPerm = (Boolean)session.getAttribute(toolPermission);
+        }else{
+            renew = true;
+        }
+
         if(hasToolPerm == null || renew){
             hasToolPerm = hasToolPermissionWithoutCache(toolPermission);
-            session.setAttribute(toolPermission, hasToolPerm);
+            if(session != null) {
+                session.setAttribute(toolPermission, hasToolPerm);
+            }
         }
         return hasToolPerm;
     }
