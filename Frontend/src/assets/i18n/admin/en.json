@@ -303,9 +303,9 @@
                 "CONFIRM_UPDATE_TITLE": "Overwrite \"{{ template }}\"?",
                 "CONFIRM_UPDATE_MESSAGE": "Do you want to overwrite the template with the current values?",
                 "CONFIRM_DELETE_BUTTON": "Delete",
-                "CONFIRM_DELETE_TITLE": "Delete \"{{ template }}\"?",
+                "CONFIRM_DELETE_TITLE": "Delete template \"{{ template }}\"?",
                 "CONFIRM_DELETE_MESSAGE": "Do you want to delete the template?",
-                "DELETE_BUTTON": "Delete \"{{ template }}\"",
+                "DELETE_BUTTON": "Delete template \"{{ template }}\"",
                 "CREATE_BUTTON": "Create",
                 "CHOOSE_NAME_TEXT": "Choose a name for the new template.",
                 "CHOOSE_NAME_INPUT_LABEL": "Name"
