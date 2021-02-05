@@ -7,6 +7,7 @@ import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
@@ -168,5 +169,30 @@ public class CMISSearchHelper {
          * https://docs.alfresco.com/5.2/concepts/query-lang-support.html
          */
         public String inTree;
+    }
+
+    public static NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
+
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+
+        SearchParameters sp = new SearchParameters();
+        sp.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
+        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        sp.setPermissionEvaluation(PermissionEvaluationMode.NONE);
+        sp.setMaxItems(10);
+
+        sp.setQuery("SELECT * FROM ccm:iometadata WHERE ccm:replicationsourceid = '"+replicationSourceId+"'");
+        ResultSet resultSet = serviceRegistry.getSearchService().query(sp);
+        logger.info("found "+ resultSet.getNodeRefs().size() +" for:" + replicationSourceId);
+        if(resultSet.getNodeRefs().size() == 0) return null;
+        return resultSet.getNodeRefs().get(0);
+    }
+
+    public static List<NodeRef> getLevel0Collections(String username){
+        Map<String,Object> filter = new HashMap<>();
+        filter.put(CCConstants.CM_PROP_OWNER,username);
+        filter.put(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0,"true");
+        return fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_MAP,filter);
     }
 }

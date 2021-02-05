@@ -23,6 +23,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
@@ -754,18 +755,7 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
-
-        SearchParameters sp = new SearchParameters();
-        sp.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
-        sp.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-        sp.setPermissionEvaluation(PermissionEvaluationMode.NONE);
-        sp.setMaxItems(10);
-
-        sp.setQuery("SELECT * FROM ccm:iometadata WHERE ccm:replicationsourceid = '"+replicationSourceId+"'");
-        ResultSet resultSet = searchService.query(sp);
-        logger.info("found "+ resultSet.getNodeRefs().size() +" for:" + replicationSourceId);
-        if(resultSet.getNodeRefs().size() == 0) return null;
-        return resultSet.getNodeRefs().get(0);
+       return CMISSearchHelper.getNodeRefByReplicationSourceId(replicationSourceId);
     }
 
     @Override

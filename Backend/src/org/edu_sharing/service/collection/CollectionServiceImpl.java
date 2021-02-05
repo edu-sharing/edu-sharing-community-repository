@@ -107,9 +107,11 @@ public class CollectionServiceImpl implements CollectionService{
 			this.appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 			
 			this.authTool = RepoFactory.getAuthenticationToolInstance(appId);
-			
+
 			//fix for running in runas user mode
-			if((AuthenticationUtil.isRunAsUserTheSystemUser() || "admin".equals(AuthenticationUtil.getRunAsUser())) ) {
+			if((AuthenticationUtil.isRunAsUserTheSystemUser()
+					|| "admin".equals(AuthenticationUtil.getRunAsUser()))
+					|| Context.getCurrentInstance().getCurrentInstance() == null) {
 				logger.debug("starting in runas user mode");
 				this.authInfo = new HashMap<String,String>();
 				this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());
