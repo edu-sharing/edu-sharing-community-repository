@@ -99,21 +99,6 @@ Installation
    CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS"
    CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS"
 
-   # only for plugin-cluster
-
-   CATALINA_OPTS="-Dcaches.backupCount=1 $CATALINA_OPTS"
-   CATALINA_OPTS="-Dcaches.readBackupData=true $CATALINA_OPTS"
-   # with multicast-join
-   CATALINA_OPTS="-Dcaches.join=multicast $CATALINA_OPTS"
-   CATALINA_OPTS="-Dcaches.join.multicast.group=[multicast-addr] $CATALINA_OPTS"
-   CATALINA_OPTS="-Dcaches.join.multicast.port=[multicast-port] $CATALINA_OPTS"
-   # with tcpip-join
-   CATALINA_OPTS="-Dcaches.join=tcpip $CATALINA_OPTS"
-   CATALINA_OPTS="-Dcaches.join.tcpip.members=[ipaddr,ipaddr,] $CATALINA_OPTS"
-   # with kubernetes-join
-   CATALINA_OPTS="-Dcaches.join=kubernetes $CATALINA_OPTS"
-   CATALINA_OPTS="-Dcaches.join.kubernetes.dns=[headless-service] $CATALINA_OPTS"
-
    export CATALINA_OPTS
    ```
 
