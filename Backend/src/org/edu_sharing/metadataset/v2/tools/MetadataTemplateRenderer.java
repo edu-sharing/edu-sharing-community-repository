@@ -295,7 +295,7 @@ public class MetadataTemplateRenderer {
 										: null);
 						String url=linkUrl != null ? linkUrl.toString() : "";
 						if(!url.isEmpty()) {
-							if(widget.getLink().equals("email")) {
+							if("email".equals(widget.getLink())) {
 								url = "mailto:" + url;
 							} else if (!url.contains("://")) {
 								url = "http://" + url;
