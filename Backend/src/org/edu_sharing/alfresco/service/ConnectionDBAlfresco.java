@@ -17,6 +17,10 @@ public class ConnectionDBAlfresco {
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	SqlSessionFactory sqlSessionFactoryBean = (SqlSessionFactory)applicationContext.getBean("repoSqlSessionFactory");
 
+	public SqlSessionFactory getSqlSessionFactoryBean() {
+		return sqlSessionFactoryBean;
+	}
+
 	public Connection getConnection() {
 		return sqlSessionFactoryBean.openSession().getConnection();
 	}

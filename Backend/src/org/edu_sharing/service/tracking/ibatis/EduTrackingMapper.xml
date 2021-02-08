@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- mybatis TransactionDao mapper configuration -->
+<mapper namespace="org.edu_sharing.service.tracking.ibatis.EduTrackingMapper">
+    <select id="eduAlteredNodes" parameterType="java.util.Date" resultType="org.edu_sharing.service.tracking.ibatis.NodeResult">
+        select node_uuid as nodeid from edu_tracking_node where time >= #{from} GROUP BY node_uuid
+    </select>
+    <!-- will combine both overall count by type as well as grouped by date for a given max range-->
+    <select id="eduNodeData" resultType="org.edu_sharing.service.tracking.ibatis.NodeData">
+             select null as timestamp, jsonb_object_agg(type, count)::text as counts from (
+                select COUNT(*) as count, type
+                from edu_tracking_node etn
+                where node_uuid = #{id}
+                group by type
+            ) as sub
+        union
+            select timestamp, jsonb_object_agg(type, count)::text as counts from (
+                select TO_CHAR(time,#{format}) as timestamp , COUNT(*) as count, type
+                from edu_tracking_node etn
+                where time >= #{from} and node_uuid = #{id} group by timestamp, type
+            ) as sub
+            group by timestamp
+            order by timestamp
+    </select>
+</mapper>

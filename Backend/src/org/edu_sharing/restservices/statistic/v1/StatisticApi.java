@@ -23,6 +23,8 @@ import org.edu_sharing.restservices.statistic.v1.model.Statistics;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.statistic.StatisticsGlobal;
 
 import io.swagger.annotations.Api;
@@ -32,6 +34,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.ibatis.NodeData;
 
 @Path("/statistic/v1")
 @Api(tags = { "STATISTIC v1" })
@@ -69,7 +72,7 @@ public class StatisticApi {
 	    
 	    @ApiResponses(
 	    	value = { 
-				@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StatisticsGlobal.class), 
+				@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StatisticsGlobal.class),
 		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    	})
@@ -116,6 +119,61 @@ public class StatisticApi {
 			List<TrackingNode> tracks=AuthenticationUtil.runAsSystem(()->
 					TrackingDAO.getNodeStatistics(grouping,new Date(dateFrom),new Date(dateTo),mediacenter,additionalFields,groupField,filters)
 			);
+			return Response.ok().entity(tracks).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@POST
+	@Path("/statistics/nodes/altered")
+	@ApiOperation(value = "get the range of nodes which had tracked actions since a given timestamp",
+			notes = "requires admin"
+	)
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String[].class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getNodesAlteredInRange(@Context HttpServletRequest req,
+									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
+	) {
+		try {
+			if(!AuthorityServiceHelper.isAdmin()){
+				throw new NotAnAdminException();
+			}
+			List<String> tracks=TrackingDAO.getNodesAltered(new Date(dateFrom));
+			return Response.ok().entity(tracks).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@POST
+	@Path("/statistics/nodes/node/{id}")
+	@ApiOperation(value = "get the range of nodes which had tracked actions since a given timestamp",
+			notes = "requires admin"
+	)
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeData[].class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getNodeData(@Context HttpServletRequest req,
+										   @ApiParam(value = "node id to fetch data for", required = true) @PathParam("id") String id,
+										   @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
+	) {
+		try {
+			if(!AuthorityServiceHelper.isAdmin()){
+				throw DAOException.mapping(new NotAnAdminException(), id);
+			}
+			List<NodeData> tracks=TrackingDAO.getNodeData(id, new Date(dateFrom));
 			return Response.ok().entity(tracks).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
