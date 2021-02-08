@@ -814,8 +814,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 			// add all and trim to fix stuff like "ip1, ip2"
 			hostList.addAll(Arrays.stream(splitted).map(String::trim).collect(Collectors.toList()));
 		}
-		
-		return hostList.contains(hostName);
+
+		return hostList.contains("*") || hostList.contains(hostName);
 	}
 
 	public String getProtocol() {
