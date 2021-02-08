@@ -17,6 +17,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
@@ -46,6 +47,9 @@ public class OAILOMExporter {
 	Document doc;
 
 	protected String xmlLanguageAttribute = "language";
+
+	public static String configCatalog = "exporter.oai.lom.identifier.catalog";
+	protected String lomIdentifierCatalog = (LightbendConfigLoader.get().getIsNull(configCatalog)) ? ApplicationInfoList.getHomeRepository().getAppId() : LightbendConfigLoader.get().getString(configCatalog);
 
 	public OAILOMExporter() throws ParserConfigurationException {
 		ApplicationContext context = AlfAppContextGate.getApplicationContext();
@@ -226,12 +230,16 @@ public class OAILOMExporter {
 	public Element createGeneral(Element lom) {
 		//general
 		Element general = createAndAppendElement("general", lom);
-		Element identifier = createAndAppendElement("identifier", general);
-		createAndAppendElement("catalog",identifier, ApplicationInfoList.getHomeRepository().getAppId(), false);
-		createAndAppendElement("entry",identifier, QName.createQName(CCConstants.SYS_PROP_NODE_UID));
-
+		createIdentifier(general);
 		createHandle(general);
 		return general;
+	}
+
+	public Element createIdentifier(Element general){
+		Element identifier = createAndAppendElement("identifier", general);
+		createAndAppendElement("catalog",identifier,lomIdentifierCatalog, false);
+		createAndAppendElement("entry",identifier, QName.createQName(CCConstants.SYS_PROP_NODE_UID));
+		return identifier;
 	}
 
 	public void createEducational(Element lom) {
