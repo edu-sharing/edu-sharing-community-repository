@@ -857,6 +857,7 @@ export class CordovaService {
      let resultPath='';
      try {
        this.makeSurePermission('WRITE_EXTERNAL_STORAGE', (win: any) => {
+           console.log('perm win', win);
 
          // add oauth token if not alreafy in URL
          if ((downloadURL.indexOf('accessToken=') < 0) && (this._oauth != null)) {
@@ -877,6 +878,7 @@ export class CordovaService {
            // Android: resolve redirect (because plugin download can not follow redirect)
            /*console.log("resolving redirects for downloadContent URL ANDROID: " + downloadURL);
            (window as any).CordovaHttpPlugin.head(downloadURL, {}, {}, (response: any) => {
+             */
              this.startContentDownload(downloadURL, fileName,(filePath:string)=>{
                  resultPath=filePath;
                  status=1;
