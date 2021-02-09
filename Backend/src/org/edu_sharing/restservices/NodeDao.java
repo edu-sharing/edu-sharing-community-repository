@@ -1307,7 +1307,9 @@ public class NodeDao {
 	private String getContentVersion(Node data) throws DAOException {
 		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
 			return AuthenticationUtil.runAsSystem(() ->
-					nodeService.getProperty(storeProtocol, storeId, ((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
+					nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
+							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
 			);
 		} else {
 			return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
