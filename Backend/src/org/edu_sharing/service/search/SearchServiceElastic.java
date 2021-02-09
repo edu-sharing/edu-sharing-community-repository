@@ -196,6 +196,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         identifier,
                         nodeId);
                 eduNodeRef.setProperties(props);
+                Map preview = (Map) sourceAsMap.get("preview");
+                if(preview.get("small") != null) {
+                    eduNodeRef.setPreview(
+                            new NodeRefImpl.PreviewImpl((String) preview.get("mimetype"),
+                                    Base64.getDecoder().decode((String) preview.get("small")))
+                    );
+                }
                 eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
                         stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
                

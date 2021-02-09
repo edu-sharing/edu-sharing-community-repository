@@ -201,7 +201,7 @@
                             (appDistinctClick)="onDistinctClick($event, node, 'preview')"
                     >
                         <img *ngIf="node.preview?.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && node.preview && !node.preview.isIcon)"
-                             src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&maxWidth=300&maxHeight=300' : '') : null}}"
+                             [src]="getPreviewSrc(node)"
                              [title]="viewType==0 ? '' : getTitle(node)"
                              (mouseenter)="animateIcon(node,true)"
                              (mouseleave)="animateIcon(node,false)"

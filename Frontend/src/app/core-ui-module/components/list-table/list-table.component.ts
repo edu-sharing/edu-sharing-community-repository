@@ -16,7 +16,7 @@ import {
     Input,
     Output,
     TemplateRef,
-    ViewChild, ViewContainerRef, SimpleChanges, OnChanges, Renderer2,
+    ViewChild, ViewContainerRef, SimpleChanges, OnChanges, Renderer2, Sanitizer,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -55,6 +55,7 @@ import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 import { CustomOptions, OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
 import {NodeHelperService} from '../../node-helper.service';
+import {DomSanitizer} from '@angular/platform-browser';
 
 
 @Component({
@@ -495,6 +496,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         private network: RestNetworkService,
         private connectors: RestConnectorsService,
         private locator: RestLocatorService,
+        private sanitizer: DomSanitizer,
         private route: ActivatedRoute,
         private router: Router,
         private toast: Toast,
@@ -1262,5 +1264,19 @@ export class ListTableComponent implements OnChanges, EventListener {
 
     isSavedSearch(node: Node) {
         return node?.type === RestConstants.CCM_TYPE_SAVED_SEARCH;
+    }
+
+    getPreviewSrc(node: any) {
+        if(!this.isCollection(node) || !node.preview.isIcon) {
+            if(node.preview.data) {
+                return this.sanitizer.bypassSecurityTrustResourceUrl(
+                    'data:' + node.preview.mimetype + ';base64,' + node.preview.data
+                );
+            } else {
+                return node.preview.url +
+                    (this.isHomeNode(node) && this.animateNode != node ? '&crop=true&maxWidth=300&maxHeight=300' : '');
+            }
+        }
+        return null;
     }
 }

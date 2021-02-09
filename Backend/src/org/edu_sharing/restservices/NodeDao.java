@@ -87,6 +87,7 @@ public class NodeDao {
 			CCConstants.PERMISSION_READ_ALL
 	};
 	final List<String> access;
+	private final org.edu_sharing.service.model.NodeRef.Preview previewData;
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
 	 */
@@ -476,6 +477,7 @@ public class NodeDao {
 			}else{
 				this.nodeProps = nodeRef.getProperties();
 			}
+			this.previewData = nodeRef.getPreview();
 			refreshPermissions(nodeRef);
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
@@ -1664,7 +1666,11 @@ public class NodeDao {
 										remoteId!=null ? remoteId : getRef().getId(),
 										this.version,
 										nodeProps);
-			return result;
+		if(previewData != null){
+			result.setMimetype(previewData.getMimetype());
+			result.setData(previewData.getData());
+		}
+		return result;
 	}
 	
 	private String getPreviewImage() {

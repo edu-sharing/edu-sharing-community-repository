@@ -28,6 +28,8 @@ public class Preview  {
   private boolean isIcon;
   private boolean isGenerated;
   private String type;
+  private String mimetype;
+  private byte[] data;
 
   public Preview(){
 	  
@@ -126,5 +128,23 @@ public class Preview  {
 
   public String getType() {
     return type;
+  }
+
+  @JsonProperty
+  public void setMimetype(String mimetype) {
+      this.mimetype = mimetype;
+  }
+
+  public String getMimetype() {
+        return mimetype;
+    }
+
+  @JsonProperty
+  public void setData(byte[] data) {
+    this.data = data;
+  }
+
+  public byte[] getData() {
+    return data;
   }
 }

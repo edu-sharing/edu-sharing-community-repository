@@ -5,6 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface NodeRef {
+
+	interface Preview{
+		String getMimetype();
+		byte[] getData();
+	}
 	
 	public String getRepositoryId();
 	
@@ -25,6 +30,10 @@ public interface NodeRef {
 	public HashMap<String,Object> getProperties();
 	
 	public void setProperties(HashMap<String,Object> properties);
+
+	public void setPreview(Preview preview);
+
+	public Preview getPreview();
 
 	public Map<String,Boolean> getPermissions();
 
