@@ -195,7 +195,7 @@
               >{{ 'PRIVACY_INFORMATION' | translate }}</a
             >
           </div>
-          <button mat-icon-button *ngIf="user && showChat()" class="rocketchat" (click)="openChat()">
+          <button mat-icon-button *ngIf="iam.getCurrentUser() && showChat()" class="rocketchat" (click)="openChat()">
             <i icon="message"></i>
             <div class="mat-button-badge" [class.rocketchat-count-none]="getChatCount() == 0">
               {{ getChatCount() }}
@@ -205,12 +205,12 @@
             mat-button
             class="user clickable"
             #userRef
-            *ngIf="user && _showUser"
+            *ngIf="iam.getCurrentUser() && _showUser"
             [matMenuTriggerFor]="userDropdown.menu"
             title="{{ 'USERMENU' | translate }}"
           >
-            <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
-            <div *ngIf="!isGuest">{{ userName }}</div>
+            <user-avatar [user]="iam.getCurrentUser()" [size]="'xsmall'"></user-avatar>
+            <div *ngIf="!isGuest">{{ iam.getCurrentUser() | authorityName }}</div>
             <div *ngIf="isGuest">{{ 'USER_GUEST' | translate }}</div>
             <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
             <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->

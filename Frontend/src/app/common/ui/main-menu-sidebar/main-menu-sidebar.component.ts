@@ -46,13 +46,11 @@ export class MainMenuSidebarComponent implements OnInit {
 
     // Global state, set on init
     loginInfo: LoginResult;
-    user: IamUser;
-    username: string;
 
     constructor(
         private configService: ConfigurationService,
         private connector: RestConnectorService,
-        private iam: RestIamService,
+        public iam: RestIamService,
         mainMenuEntries: MainMenuEntriesService,
     ) {
         this.entries$ = mainMenuEntries.entries$;
@@ -71,10 +69,6 @@ export class MainMenuSidebarComponent implements OnInit {
 
     async ngOnInit() {
         this.loginInfo = await this.connector.isLoggedIn().toPromise();
-        if (this.loginInfo.isValidLogin) {
-            this.user = await this.iam.getCurrentUserAsync();
-            this.username = await this.getUsername();
-        }
     }
 
     /**
@@ -100,13 +94,5 @@ export class MainMenuSidebarComponent implements OnInit {
     onShowLicenses() {
         this.hide();
         this.showLicenses.emit();
-    }
-
-    private async getUsername() {
-        await this.configService.getAll().toPromise();
-        return ConfigurationHelper.getPersonWithConfigDisplayName(
-            this.user.person,
-            this.configService,
-        );
     }
 }

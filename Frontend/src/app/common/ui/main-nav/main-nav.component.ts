@@ -196,8 +196,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     globalProgress = false;
     showEditProfile: boolean;
     showProfile: boolean;
-    user: IamUser;
-    userName: string;
     _currentScope: string;
     isGuest = false;
     _showUser = false;
@@ -226,7 +224,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     }
 
     constructor(
-        private iam: RestIamService,
+        public iam: RestIamService,
         private connector: RestConnectorService,
         private bridge: BridgeService,
         private event: FrameEventsService,
@@ -268,15 +266,9 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                             this._currentScope !== 'login' && this.showUser;
                         this.refreshNodeStore();
                         this.checkConfig();
-                        const user = await this.iam.getCurrentUserAsync();
-                        this.user = user;
+                        const user = await this.iam.getUser().toPromise();
                         this.canEditProfile = user.editProfile;
-                        this.configService.getAll().subscribe(() => {
-                            this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
-                                this.user.person,
-                                this.configService,
-                            );
-                        });
+                        this.configService.getAll().subscribe(() => {});
                     });
                 });
             });
