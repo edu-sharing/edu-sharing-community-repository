@@ -141,12 +141,14 @@ export class FileChooserComponent implements OnInit{
       return {status:true};
   }
 
-  private selectBreadcrumb(position : number){
-    if(position==0)
+  selectBreadcrumb(position : number) {
+    if(position === this.path.length - 1) {
+      return;
+    } else  if(position === 0) {
       this.viewDirectory(this.homeDirectory);
-    else {
-      this.selectItem(this.path[position - 1]);
-      this.path=this.path.slice(0,position);
+    } else {
+      this.selectItem(this.path[position]);
+      this.path=this.path.slice(0,position + 1);
     }
   }
   private selectItem(event : Node){
