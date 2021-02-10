@@ -290,76 +290,8 @@ public class MimeTypes {
 		{"moodle","file-moodle.svg"},
 		{"scorm","file-scorm.svg"},
 		{"ADL SCORM","file-scorm.svg"}
-	};	
-	
-	public static final int ICONSIZE32 = 32;
-	
-	public static final int ICONSIZE16 = 16;
-	
-	public String getIconUrl(String mimetype,String themeId){
-		return getIconUrl(mimetype,themeId,ICONSIZE16);
-	}
-	
-	public String getIconUrl(String mimetype,String themeId, int iconsize){
-		String result = null;
-		for(int i = 0; i < mimeTypeIconMap.length; i++){
-			if(mimeTypeIconMap[i][0].equals(mimetype)){
-				result = mimeTypeIconMap[i][1];
-			}
-		}
-		
-		if(themeId == null){
-			themeId = CCConstants.THEME_DEFAULT_ID;
-		}
-		
-		if(result == null){
-			result = "document.svg";
-		}
-		
-		if(iconsize == ICONSIZE32){
-			result = getIconPath32(themeId)+result;
-		}else{
-			result = getIconPath16(themeId)+result;
-		}
-		
-		return result;
-	}	
-	
-	private String getIconPath(String themeId){
-		return basePath + "/themes/"+themeId+"/images/common/mime-types/";
-	}
-	
-	private String getIconPath16(String themeId){
-		return getIconPath(themeId)+"16px/";
-	}
-	
-	private String getIconPath32(String themeId){
-		return getIconPath(themeId)+"32px/";
-	}
-	public String getIconUrl(Map<String,Object> properties, String themeId){
-		return getIconUrl(properties, themeId, MimeTypes.ICONSIZE16);
-	}
-	public String getIconUrl(Map<String,Object> properties, String themeId, int size){
-		String iconUrl = null;
-		String technicalFormat = (String)properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);
-		String resourceType = (String)properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
-		String nodeType = (String)properties.get(CCConstants.NODETYPE);
-		String url = (String)properties.get(CCConstants.CCM_PROP_IO_WWWURL);
-		
-		if(nodeType!=null && (nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER))){
-			iconUrl = getIconUrl(nodeType,themeId,size);
-		}else if(technicalFormat != null && technicalFormat.equals("application/zip") && resourceType != null && !resourceType.trim().equals("")){
-			iconUrl =  getIconUrl(resourceType,themeId,size);
-			
-		}else if(url != null && !url.trim().equals("")){
-			iconUrl =  getIconUrl("text/html",themeId,size);
-		}else{
-			iconUrl =  getIconUrl(technicalFormat,themeId,size);
-		}
-		
-		return iconUrl;
-	}
-	
+	};
+
 	public static String getDefaultPreview(HashMap properties, String moduleBaseUrl){
 		String mimeType = (String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
 		if ((mimeType==null) || (mimeType.length()==0)) mimeType = (String) properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);

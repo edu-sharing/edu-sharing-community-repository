@@ -13,11 +13,18 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 
 public class MimeTypesV2 {
+
+
+	public enum PathType{
+		Relative,
+		Absolute
+	}
 	public static final String MIME_DIRECTORY="application/x-directory";
 
 	private static HashMap<String, String> extensionMimeMap;
 	private final ApplicationInfo appInfo;
 	private String theme;
+	private final PathType pathType;
 	public enum Format {
 		Svg("svg"),
 		Png("png");
@@ -79,9 +86,13 @@ public class MimeTypesV2 {
 	public MimeTypesV2() {
 		this(ApplicationInfoList.getHomeRepository());
 	}
-	public MimeTypesV2(ApplicationInfo appInfo){
-		this.appInfo=appInfo;
-		this.theme=Theme.getThemeId();
+	public MimeTypesV2(ApplicationInfo appInfo) {
+		this(appInfo, PathType.Absolute);
+	}
+	public MimeTypesV2(ApplicationInfo appInfo, PathType pathType){
+		this.appInfo = appInfo;
+		this.theme = Theme.getThemeId();
+		this.pathType = pathType;
 		if(theme == null){
 			theme = CCConstants.THEME_DEFAULT_ID;
 		}
@@ -109,6 +120,9 @@ public class MimeTypesV2 {
 		return getBasePath() + "/themes/"+theme+"/";
 	}
 	private String getBasePath(){
+		if(PathType.Relative.equals(this.pathType)){
+			return "/" + appInfo.getWebappname();
+		}
 		if(appInfo.ishomeNode()){
 			// @TODO 5.1 This can be set to dynamic!
 			return URLTool.getBaseUrl(false);

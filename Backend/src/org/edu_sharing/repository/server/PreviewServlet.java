@@ -85,7 +85,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		}
 		return false;
 	}
-	
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		fetchNodeData(req,resp);
@@ -98,11 +98,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	private void fetchNodeData(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		ServletOutputStream op = resp.getOutputStream();
 		String nodeId=null;
-
-		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository(), MimeTypesV2.PathType.Relative);
 		mime.setPreferredFormat(
 				"png".equals(req.getParameter("format")) ?
-				MimeTypesV2.Format.Png : MimeTypesV2.Format.Svg);
+						MimeTypesV2.Format.Png : MimeTypesV2.Format.Svg);
 		boolean isCollection=false;
 
 		final StoreRef storeRef;
@@ -129,7 +128,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			String version = req.getParameter("version");
 			NodeRef nodeRef = new NodeRef(storeRef, nodeId);
 			String nodeType = nodeService.getType(nodeId);
-			
+
 			// check nodetype for security reasons
 			String inNodeId=nodeId;
 			HashMap<String,Object> props = new HashMap<>();
@@ -137,11 +136,11 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				try {
 					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
 					String[] aspectsArray = nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(), nodeId);
-                    List<String> aspects;
+					List<String> aspects;
 					if(aspectsArray == null){
 						aspects = new ArrayList<>();
 					} else {
-						 aspects = Arrays.asList(aspectsArray);
+						aspects = Arrays.asList(aspectsArray);
 					}
 					if (remoteNode || nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
 						if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
@@ -171,21 +170,21 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						//throw new Exception();
 					}
 
-                    // For collections: Fetch the original object for preview
+					// For collections: Fetch the original object for preview
 					if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE) && props.containsKey(CCConstants.CCM_PROP_IO_ORIGINAL)){
-						
+
 						String original = (String) props.get(CCConstants.CCM_PROP_IO_ORIGINAL);
-						
+
 						if(!nodeId.equals(original)){
 							nodeId=(String) props.get(CCConstants.CCM_PROP_IO_ORIGINAL);
 							isCollection=true;
 						}
 					}
-					
+
 					validateScope(req, props);
 					// we need to check permissions and allow or deny access by using the READ_PREVIEW permission
 					validatePermissions(storeRef,inNodeId);
-					
+
 					if (!nodeType.equals(CCConstants.CCM_TYPE_IO)
 							&& !nodeType.equals(CCConstants.CCM_TYPE_MAP)
 							&& !nodeType.equals(CCConstants.CCM_TYPE_SAVED_SEARCH)) {
@@ -199,125 +198,115 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "nodeId is null!");
 				return;
 			}
-			
+
 			if(CCConstants.CCM_TYPE_MAP.equals(nodeType)){
 				if(deliverContentAsSystem(nodeRef, CCConstants.CCM_PROP_MAP_ICON, req, resp))
 					return;
 			}
 
-			if (type != null && type.equals(RESULT_TYPE_MIME_ICON)) {
 
-				ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, QName.createQName(CCConstants.CM_PROP_CONTENT));
-				String mimetype = reader.getMimetype();
+			//get previewurl to find out type (generated/userdefined)
+			//Attention the url of GetPreviewResult of generated/userdefined previews points on this servlet so don't use it
 
-				String iconUrl = new MimeTypes(req.getContextPath()).getIconUrl(mimetype, null);
-				resp.sendRedirect(iconUrl);
-				return;
+			PreviewDetail getPrevResult = null;
+			// check if version is requested and version seems to be NOT the current node version
+			if(version != null && !version.trim().equals("") && !isCollection && !version.equals(props.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION))){
+				HashMap<String, HashMap<String,Object>> versionHistory = nodeService.getVersionHistory(nodeId);
+				if(versionHistory != null){
+					for(Map.Entry<String, HashMap<String,Object>> entry : versionHistory.entrySet()){
+						String tmpVers = (String)entry.getValue().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+						if(version.equals(tmpVers)){
 
-			} else {
-
-				//get previewurl to find out type (generated/userdefined)
-				//Attention the url of GetPreviewResult of generated/userdefined previews points on this servlet so don't use it
-				
-				PreviewDetail getPrevResult = null;
-				// check if version is requested and version seems to be NOT the current node version
-				if(version != null && !version.trim().equals("") && !isCollection && !version.equals(props.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION))){
-					HashMap<String, HashMap<String,Object>> versionHistory = nodeService.getVersionHistory(nodeId);
-					if(versionHistory != null){
-						for(Map.Entry<String, HashMap<String,Object>> entry : versionHistory.entrySet()){
-							String tmpVers = (String)entry.getValue().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
-							if(version.equals(tmpVers)){
-								
-								String vNodeId = (String)entry.getValue().get(CCConstants.SYS_PROP_NODE_UID);
-								System.out.println("vNodeId:"+vNodeId+ " entry key:"+entry.getKey());
-								try {
-									getPrevResult = getPreview(nodeService,VersionService.VERSION_STORE_PROTOCOL, "version2Store", entry.getKey());
-								}catch(InvalidNodeRefException e){
-									// ignoring this error since versioned files don't have a preview
-									// converting it to an other exception so that the mime type handler will take care
-									throw new Exception("Versioned files don't have a preview",e);
-								}
-
+							String vNodeId = (String)entry.getValue().get(CCConstants.SYS_PROP_NODE_UID);
+							System.out.println("vNodeId:"+vNodeId+ " entry key:"+entry.getKey());
+							try {
+								getPrevResult = getPreview(nodeService,VersionService.VERSION_STORE_PROTOCOL, "version2Store", entry.getKey());
+							}catch(InvalidNodeRefException e){
+								// ignoring this error since versioned files don't have a preview
+								// converting it to an other exception so that the mime type handler will take care
+								throw new Exception("Versioned files don't have a preview",e);
 							}
-							
-						}
-					}
-				}
-				final String nodeIdFinal=nodeId;
 
-				if(getPrevResult == null){
-                    // we need to access the actual object as admin
-                    // for collections, this is required
-                    // and since may there is no right to access binary content (but READ_PREVIEW is present and validated before)
-                    getPrevResult = AuthenticationUtil.runAsSystem(() -> getPreview(nodeService,storeRef.getProtocol(), storeRef.getIdentifier(), nodeIdFinal));
-				}
-				
-				if(isCollection){
-					final PreviewDetail getPrevResultFinal=getPrevResult;
-					NodeServiceHelper.validatePermissionRestrictedAccess(new NodeRef(new StoreRef(storeProtocol, storeId), inNodeId), CCConstants.PERMISSION_READ_PREVIEW);
-					if(AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
-						@Override
-						public Boolean doWork() throws IOException  {
-							return loadPreview(req, resp, op, storeRef, nodeIdFinal, nodeService, getPrevResultFinal);
 						}
-					})){
-						return;
+
 					}
 				}
-				else{
-					if(loadPreview(req, resp, op, storeRef, nodeId, nodeService, getPrevResult)){
-						return;
-					}
-				}
-				
-				/**
-				 * generated or userdefined
-				 */
-				if (getPrevResult != null && (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED) || getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED))) {
-					NodeRef prevNodeRef = null;
-					String property = CCConstants.CM_PROP_CONTENT;
-					if (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED)) {
-						prevNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
-						property = CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW;
-					}
-					if (getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED)) {
-						
-						
-						HashMap<String, Object> previewProps = null;
-						final String fnodeId = nodeId;
-						if(isCollection) {
-							prevNodeRef = AuthenticationUtil.runAsSystem(
-									() -> nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,fnodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
-									CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png));
-						}else {
-							prevNodeRef = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
-									CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-						}
-					}
-					if (prevNodeRef != null) {
-						
-						if(isCollection) {
-							NodeRef fprevNodeRef = prevNodeRef;
-							String fproperty = property;
-							boolean result = deliverContentAsSystem(fprevNodeRef, fproperty, req, resp);
-							if(result) {
-								return;
-							}
-							op.close();
-						}else {
-							if(deliverContentAsSystem(prevNodeRef, property, req, resp)) {
-								
-								return;
-							}
-							op.close();
-								
-							
-						}
-						
-					}
-				}
-				
 			}
+			final String nodeIdFinal=nodeId;
+
+			if(getPrevResult == null){
+				// we need to access the actual object as admin
+				// for collections, this is required
+				// and since may there is no right to access binary content (but READ_PREVIEW is present and validated before)
+				getPrevResult = AuthenticationUtil.runAsSystem(() -> getPreview(nodeService,storeRef.getProtocol(), storeRef.getIdentifier(), nodeIdFinal));
+			}
+
+			if(isCollection){
+				final PreviewDetail getPrevResultFinal=getPrevResult;
+				NodeServiceHelper.validatePermissionRestrictedAccess(new NodeRef(new StoreRef(storeProtocol, storeId), inNodeId), CCConstants.PERMISSION_READ_PREVIEW);
+				if(AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
+					@Override
+					public Boolean doWork() throws IOException  {
+						return loadPreview(req, resp, op, storeRef, nodeIdFinal, nodeService, getPrevResultFinal);
+					}
+				})){
+					return;
+				}
+			}
+			else{
+				if(loadPreview(req, resp, op, storeRef, nodeId, nodeService, getPrevResult)){
+					return;
+				}
+			}
+
+			/**
+			 * generated or userdefined
+			 */
+			if (getPrevResult != null && (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED) || getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED))) {
+				NodeRef prevNodeRef = null;
+				String property = CCConstants.CM_PROP_CONTENT;
+				if (getPrevResult.getType().equals(PreviewDetail.TYPE_USERDEFINED)) {
+					prevNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
+					property = CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW;
+				}
+				if (getPrevResult.getType().equals(PreviewDetail.TYPE_GENERATED)) {
+
+
+					HashMap<String, Object> previewProps = null;
+					final String fnodeId = nodeId;
+					if(isCollection) {
+						prevNodeRef = AuthenticationUtil.runAsSystem(
+								() -> nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,fnodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
+										CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png));
+					}else {
+						prevNodeRef = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
+								CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
+					}
+				}
+				if (prevNodeRef != null) {
+
+					if(isCollection) {
+						NodeRef fprevNodeRef = prevNodeRef;
+						String fproperty = property;
+						boolean result = deliverContentAsSystem(fprevNodeRef, fproperty, req, resp);
+						if(result) {
+							return;
+						}
+						op.close();
+					}else {
+						if(deliverContentAsSystem(prevNodeRef, property, req, resp)) {
+
+							return;
+						}
+						op.close();
+
+
+					}
+
+				}
+			}
+
+
 
 		} catch (org.alfresco.repo.security.permissions.AccessDeniedException | RestrictedAccessException e) {
 			resp.sendRedirect(mime.getNoPermissionsPreview());
@@ -400,12 +389,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	 * @throws IOException
 	 */
 	private boolean loadPreview(HttpServletRequest req, HttpServletResponse resp, ServletOutputStream op,StoreRef storeRef, String nodeId,
-			NodeService nodeService, PreviewDetail getPrevResult) throws IOException {
-		
+								NodeService nodeService, PreviewDetail getPrevResult) throws IOException {
+
 		if(getPrevResult == null){
 			return false;
 		}
-		
+
 		/**
 		 * external URL
 		 */
@@ -449,7 +438,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	}
 	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){
 		float quality=DEFAULT_QUALITY;
-		
+
 		int width=0,height=0,maxHeight=0,maxWidth=0;
 		boolean crop=false;
 		boolean hasAnyValue=false;
@@ -457,7 +446,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			quality=Integer.parseInt(req.getParameter("quality"))/100.f;
 			hasAnyValue=true;
 		}catch(Throwable t){}
-		
+
 		try{
 			crop=req.getParameter("crop").equals("true");
 			hasAnyValue=true;
@@ -483,7 +472,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			maxWidth=MAX_IMAGE_SIZE;
 			maxHeight=MAX_IMAGE_SIZE;
 		}
-		
+
 		boolean fromCache=false;
 		if(fullsize || isCacheable(width, height,maxWidth,maxHeight)){
 			File file=PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width,height,maxWidth,maxHeight,false);
@@ -501,7 +490,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		height=Math.min(Math.max(height, 0), MAX_IMAGE_SIZE);
 		maxWidth=Math.min(Math.max(maxWidth, 0), MAX_IMAGE_SIZE);
 		maxHeight=Math.min(Math.max(maxHeight, 0), MAX_IMAGE_SIZE);
-		
+
 		try{
 			// cache optimization, if no other tasks, just return the cached preview
 			if(fromCache && Math.abs(quality-DEFAULT_QUALITY)<0.1){
@@ -509,9 +498,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				byte[] img=StreamUtils.copyToByteArray(in);
 				return new DataInputStream(new ByteArrayInputStream(img));
 			}
-			
+
 			BufferedImage img=ImageIO.read(in);
-			
+
 			try{
 				float aspect=Float.parseFloat(req.getParameter("aspect"));
 				if(aspect>1){
@@ -562,13 +551,13 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					g.drawImage(scaled, (int)( -(scaledWidth-cropped.getWidth())/2),0,(int)scaledWidth, cropped.getHeight(), null);
 				}
 				img=cropped;
-				
+
 			}
 			BufferedImage imgOut=new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 			imgOut.getGraphics().setColor(java.awt.Color.WHITE);
 			imgOut.getGraphics().fillRect(0, 0,imgOut.getWidth(),imgOut.getHeight());
 			imgOut.getGraphics().drawImage(img, 0, 0, null);
-		
+
 			if(!fromCache && (isCacheable(width, height,maxWidth,maxHeight) || fullsize)){
 				// Drop alpha (weird colors in jpg otherwise)
 				ImageIO.write(imgOut, "JPG",PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width, height,maxWidth,maxHeight,true));
@@ -580,13 +569,13 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
 			ByteArrayOutputStream os=new ByteArrayOutputStream();
 			MemoryCacheImageOutputStream imgOutStream = new MemoryCacheImageOutputStream(os);
-		
+
 			writer.setOutput(imgOutStream);
 			writer.write(null,new IIOImage(imgOut,null,null),jpegParams);
 			imgOutStream.close();
 			in.close();
 			return new DataInputStream(new ByteArrayInputStream(os.toByteArray()));
-			
+
 		}
 		catch(Throwable t){
 			return null;
@@ -596,7 +585,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				in.close();
 			} catch (IOException e) {}
 		}
-		
+
 	}
 	private boolean deliverContentAsSystem(NodeRef nodeRef, String contentProp,HttpServletRequest req, HttpServletResponse resp) throws IOException{
 		return AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
@@ -606,14 +595,14 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				ServletOutputStream op = resp.getOutputStream();
 				ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
 						QName.createQName(contentProp));
-				
+
 				if(reader == null){
 					return false;
 				}
-				
+
 				String mimetype = reader.getMimetype();
 
-				
+
 				//resp.setContentLength((int) reader.getContentData().getSize());
 				// resp.setHeader("Content-Disposition",
 				// "attachment; filename=\" preview.png \"");
@@ -640,21 +629,21 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						is=reader.getContentInputStream();
 						in = new DataInputStream(is);
 					}
-					
+
 				}
 				// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
 				if(mimetype.startsWith("image/svg")){
 					mimetype = "image/svg+xml";
 				}
 				resp.setContentType(mimetype);
-				
+
 				resp.setContentLength((int) in.available());
 
-					
+
 				while ((in != null) && ((length = in.read(bbuf)) != -1)) {
 					op.write(bbuf, 0, length);
 				}
-				
+
 				in.close();
 
 				op.flush();
@@ -662,7 +651,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				return true;
 			}
 		});
-		
+
 	}
 
 
