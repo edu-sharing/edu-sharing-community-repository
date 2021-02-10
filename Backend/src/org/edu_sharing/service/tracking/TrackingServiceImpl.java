@@ -85,7 +85,6 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
     private final NodeService nodeService;
-    private final SqlSession session;
 
     public TrackingServiceImpl() {
         ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
@@ -109,18 +108,21 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         try {
             new ConnectionDBAlfresco().getSqlSessionFactoryBean().getConfiguration().addMapper(EduTrackingMapper.class);
         }catch(BindingException ignored) {}
-        session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession();
     }
 
     @Override
     public List<String> getAlteredNodes(java.util.Date from) {
-        return session.getMapper(EduTrackingMapper.class).eduAlteredNodes(from).stream().
-                map(NodeResult::getNodeid).collect(Collectors.toList());
+        try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
+            return session.getMapper(EduTrackingMapper.class).eduAlteredNodes(from).stream().
+                    map(NodeResult::getNodeid).collect(Collectors.toList());
+        }
     }
     @Override
     public List<NodeData> getNodeData(String nodeId, java.util.Date from) {
-        return session.getMapper(EduTrackingMapper.class).
-                eduNodeData(nodeId, "YYYY-MM-DD", from);
+        try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
+            return session.getMapper(EduTrackingMapper.class).
+                    eduNodeData(nodeId, "YYYY-MM-DD", from);
+        }
     }
     @Override
     public boolean trackActivityOnUser(String authorityName, EventType type) {
