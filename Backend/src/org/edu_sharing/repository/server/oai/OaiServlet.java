@@ -2,8 +2,11 @@ package org.edu_sharing.repository.server.oai;
 
 import com.typesafe.config.Config;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.dspace.xoai.dataprovider.exceptions.IdDoesNotExistException;
+import org.dspace.xoai.dataprovider.exceptions.OAIException;
 import org.dspace.xoai.dataprovider.handlers.results.ListItemIdentifiersResult;
 import org.dspace.xoai.dataprovider.model.ItemIdentifier;
 import org.dspace.xoai.dataprovider.repository.RepositoryConfiguration;
@@ -90,18 +93,23 @@ public class OaiServlet extends HttpServlet{
 
     private class Handler implements EduDataHandler {
         private final ServiceRegistry serviceRegistry;
+        private String identifierPrefix;
 
         public Handler(){
 
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+            identifierPrefix = LightbendConfigLoader.get().getString("exporter.oai.identiferPrefix");
+            if(identifierPrefix == null){
+                identifierPrefix = "";
+            }
         }
         @Override
-        public ListItemIdentifiersResult getIdentifiers(int from, int length, String set) {
+        public ListItemIdentifiersResult getIdentifiers(int from, int length, String set) throws OAIException {
             return getIdentifiersSolr(from, length,new HashMap<>(), set);
         }
 
-        private ListItemIdentifiersResult getIdentifiersSolr(int from, int length,Map<String,String[]> searchCriterias, String set){
+        private ListItemIdentifiersResult getIdentifiersSolr(int from, int length,Map<String,String[]> searchCriterias, String set) throws OAIException{
             try {
                 SearchToken token=new SearchToken();
                 token.setFrom(from);
@@ -115,13 +123,13 @@ public class OaiServlet extends HttpServlet{
                         (set == null || set.equals("default") ? "oai" : "oai_" + set),
                         searchCriterias,
                         token);
-                List<ItemIdentifier> refs = result.getData().stream().map((ref) -> new EduItemIdentifier(ref.getNodeId(),getDate(ref))).collect(Collectors.toList());
+                List<ItemIdentifier> refs = result.getData().stream().map((ref) -> new EduItemIdentifier(identifierPrefix + ref.getNodeId(),getDate(ref))).collect(Collectors.toList());
                 logger.info(result.getNodeCount());
                 int delivered=from+result.getData().size();
                 return new ListItemIdentifiersResult(delivered<result.getNodeCount(),refs,result.getNodeCount());
             } catch (Throwable t) {
                 logger.warn(t.getMessage(),t);
-                return null;
+                throw new OAIException(new Exception(t));
             }
         }
 
@@ -131,7 +139,7 @@ public class OaiServlet extends HttpServlet{
         }
 
         @Override
-        public ListItemIdentifiersResult getIdentifiersFrom(int from, int length, Date date, String set) {
+        public ListItemIdentifiersResult getIdentifiersFrom(int from, int length, Date date, String set) throws OAIException {
             HashMap<String, String[]> criterias = new HashMap<>();
             criterias.put("from",new String[]{convertDateSolr(date)});
             return getIdentifiersSolr(from, length,criterias, set);
@@ -142,13 +150,13 @@ public class OaiServlet extends HttpServlet{
     }
 
         @Override
-        public ListItemIdentifiersResult getIdentifiersUntil(int from, int length, Date date, String set) {
+        public ListItemIdentifiersResult getIdentifiersUntil(int from, int length, Date date, String set) throws OAIException {
             HashMap<String, String[]> criterias = new HashMap<>();
             criterias.put("until",new String[]{convertDateSolr(date)});
             return getIdentifiersSolr(from, length,criterias, set);        }
 
         @Override
-        public ListItemIdentifiersResult getIdentifiersFromUntil(int from, int length, Date fromDate, Date untilDate, String set) {
+        public ListItemIdentifiersResult getIdentifiersFromUntil(int from, int length, Date fromDate, Date untilDate, String set) throws OAIException {
             HashMap<String, String[]> criterias = new HashMap<>();
             criterias.put("from",new String[]{convertDateSolr(fromDate)});
             criterias.put("until",new String[]{convertDateSolr(untilDate)});
@@ -159,10 +167,20 @@ public class OaiServlet extends HttpServlet{
         }
 
         @Override
-        public EduItem getItem(String id) {
+        public EduItem getItem(String id) throws IdDoesNotExistException, OAIException{
             ByteArrayOutputStream os=new ByteArrayOutputStream();
-            OAIExporterFactory.getOAILOMExporter().write(os,id);
-            return new EduItem(id,new String(os.toByteArray()));
+            if(!id.startsWith(identifierPrefix)){
+                throw new IdDoesNotExistException("Invalid id, identifierPrefix does not match " + identifierPrefix);
+            }
+            try {
+                String nodeId = id.substring(identifierPrefix.length());
+                OAIExporterFactory.getOAILOMExporter().write(os, nodeId);
+                return new EduItem(id, os.toString());
+            }catch(InvalidNodeRefException e){
+                throw new IdDoesNotExistException(e);
+            }catch(Throwable t){
+                throw new OAIException(new Exception(t));
+            }
         }
     }
 }

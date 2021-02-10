@@ -49,7 +49,7 @@ public class OAILOMExporter {
 	protected String xmlLanguageAttribute = "language";
 
 	public static String configCatalog = "exporter.oai.lom.identifier.catalog";
-	protected String lomIdentifierCatalog = (LightbendConfigLoader.get().getIsNull(configCatalog)) ? ApplicationInfoList.getHomeRepository().getAppId() : LightbendConfigLoader.get().getString(configCatalog);
+	protected String lomIdentifierCatalog = (LightbendConfigLoader.get().hasPath(configCatalog)) ? LightbendConfigLoader.get().getString(configCatalog) : ApplicationInfoList.getHomeRepository().getAppId();
 
 	public OAILOMExporter() throws ParserConfigurationException {
 		ApplicationContext context = AlfAppContextGate.getApplicationContext();
