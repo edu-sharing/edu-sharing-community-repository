@@ -45,7 +45,7 @@
 				<property name="ccm:rating_value">
 					<type>d:double</type>
 				</property>
-				<property name="ccm:rating_Text">
+				<property name="ccm:rating_text">
 					<type>d:text</type>
 				</property>
 			</properties>
