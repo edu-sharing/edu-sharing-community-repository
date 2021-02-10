@@ -15,6 +15,7 @@ import {CsvHelper} from '../../../core-module/csv.helper';
 import {SessionStorageService} from '../../../core-module/rest/services/session-storage.service';
 import {RestConnectorService} from "../../../core-module/rest/services/rest-connector.service";
 import {UIService} from '../../../core-module/rest/services/ui.service';
+import {MdsHelper} from '../../../core-module/rest/mds-helper';
 
 // Charts.js
 declare var Chart: any;
@@ -184,12 +185,7 @@ export class AdminStatisticsComponent {
         private translate: TranslateService,
         private config: ConfigurationService,
       ) {
-      this.columns = [
-          new ListItem('NODE', RestConstants.CM_NAME),
-          new ListItem('NODE', 'counts.VIEW_MATERIAL'),
-          new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),
-          new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
-      ];
+      this.initColumns();
       this.groupedStart = new Date(new Date().getTime() - AdminStatisticsComponent.DEFAULT_OFFSET);
       this.groupedEnd = new Date();
       this.singleStart = new Date(new Date().getTime() - AdminStatisticsComponent.DEFAULT_OFFSET_SINGLE);
@@ -591,4 +587,19 @@ export class AdminStatisticsComponent {
     }
     CsvHelper.download(this.translate.instant('ADMIN.STATISTICS.CSV_FILENAME'), csvHeaders, csvData);
   }
+
+    private initColumns() {
+        const columns: string[] = this.config.instant('admin.statistics.nodeColumns');
+        if(columns) {
+            this.columns = columns.map((c) => new ListItem('NODE', c));
+        } else {
+            this.columns = [new ListItem('NODE', RestConstants.CM_NAME)];
+        }
+        this.columns = this.columns.concat([
+            new ListItem('NODE', 'counts.OVERALL'),
+            new ListItem('NODE', 'counts.VIEW_MATERIAL'),
+            new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),
+            new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
+        ]);
+    }
 }

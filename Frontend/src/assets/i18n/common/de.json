@@ -267,6 +267,7 @@
         "ccm:wf_status": "Status",
         "ccm:eaf_productionyear": "Prod. Jahr",
         "counts": {
+            "OVERALL": "Summe",
             "VIEW_MATERIAL": "Aufrufe",
             "VIEW_MATERIAL_EMBEDDED": "Aufrufe (Remote)",
             "DOWNLOAD_MATERIAL": "Downloads"

@@ -10,12 +10,19 @@ import {Statistics} from "../../../../../core-module/rest/data-object";
 })
 export class ListCountsComponent extends ListWidget {
     static supportedItems = [
+        new ListItem('NODE', 'counts.OVERALL'),
         new ListItem('NODE', 'counts.VIEW_MATERIAL'),
         new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),
         new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
     ];
 
     getCount() {
-        return (this.node as Statistics).counts[this.item.name.split('.')[1]];
+        const counts = (this.node as Statistics).counts;
+        if(this.item.name === 'counts.OVERALL') {
+            return Object.keys(counts).map((c) => counts[c]).reduce((a, b) =>
+                a + b
+            );
+        }
+        return counts[this.item.name.split('.')[1]];
     }
 }

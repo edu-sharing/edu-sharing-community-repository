@@ -247,6 +247,7 @@
         "ccm:wf_status": "status",
         "ccm:eaf_productionyear": "Production year",
         "counts": {
+            "OVERALL": "Summe",
             "VIEW_MATERIAL": "Access",
             "VIEW_MATERIAL_EMBEDDED": "Access (Remote)",
             "DOWNLOAD_MATERIAL": "Downloads"

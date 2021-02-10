@@ -493,13 +493,14 @@ $badgeWidth: 250px;
     .tableList {
         .row {
             position: relative;
+            app-node-url.node-padding > a{
+                // keep spacing for more options item
+                padding-right: 50px;
+            }
             app-node-url > a {
                 display: flex;
                 align-items: center;
                 width: 100%;
-                // keep spacing for more options item
-                padding-right: 50px;
-
                 .column {
                     display: flex;
                     flex-direction: column;
