@@ -125,7 +125,7 @@ public class StatisticApi {
 		}
 	}
 
-	@POST
+	@GET
 	@Path("/statistics/nodes/altered")
 	@ApiOperation(value = "get the range of nodes which had tracked actions since a given timestamp",
 			notes = "requires admin"
@@ -152,7 +152,7 @@ public class StatisticApi {
 		}
 	}
 
-	@POST
+	@GET
 	@Path("/statistics/nodes/node/{id}")
 	@ApiOperation(value = "get the range of nodes which had tracked actions since a given timestamp",
 			notes = "requires admin"
