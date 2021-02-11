@@ -74,7 +74,7 @@
             "TYPE": "Type",
             "REPOTYPE": "Repo-Type",
             "SUBTYPE": "Sub-Type",
-            "REMOVE": "Discover",
+            "REMOVE": "Delete",
             "REMOVE_TITLE": "Delete application",
             "REMOVE_MESSAGE": "If you continue, the application will be deleted with the following information.\nPlease note that this procedure cannot be undone!\n\n{{info}}",
             "EDIT_APP": "{{xml}} edit",

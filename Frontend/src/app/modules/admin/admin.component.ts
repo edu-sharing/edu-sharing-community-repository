@@ -380,7 +380,7 @@ export class AdminComponent {
     this.dialogParameters= {info};
     this.dialogButtons=[
       new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.dialogTitle=null}),
-      new DialogButton('ADMIN.APPLICATIONS.REMOVE',DialogButton.TYPE_PRIMARY,()=> {
+      new DialogButton('ADMIN.APPLICATIONS.REMOVE',DialogButton.TYPE_DANGER,()=> {
         this.dialogTitle=null;
         this.globalProgress=true;
         this.admin.removeApplication(app.id).subscribe(()=> {
