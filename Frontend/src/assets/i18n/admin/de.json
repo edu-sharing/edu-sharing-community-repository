@@ -398,6 +398,13 @@
             "EXPORT_LABEL": "Angezeigte Daten exportieren",
             "EXPORT_PROPERTIES": "Zu exportierende Properties",
             "EXPORT_PROPERTIES_HINT": "z.B.: cm:name, cclom:title, cclom:general_keyword",
+            "GROUP_TEMPLATE_LABEL": "Vorlage auswählen",
+            "GROUPS_ADVANCED": "Erweiterte Optionen",
+            "GROUP_TEMPLATE": {
+                "group_organization": "Zugriffe aufgeteilt nach Organisation des Nutzers",
+                "group_mediacenter": "Zugriffe aufgeteilt nach Medienzentrum des Nutzers",
+                "group_organization_unfold_mediacenter": "Zugriffe aufgeteilt nach Organisation des Nutzers und aufgeteilt nach Medienzentrum"
+            },
             "HEADERS": {
                 "action": "Aktion",
                 "count": "Anzahl",

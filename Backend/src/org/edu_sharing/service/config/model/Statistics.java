@@ -6,4 +6,5 @@ import java.io.Serializable;
 public class Statistics implements Serializable {
     @XmlElement public String[] groups;
     @XmlElement String[] nodeColumns;
+    @XmlElement StatisticsTemplate[] templates;
 }
