@@ -575,6 +575,7 @@ export class OptionsHelperService {
         const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add',(object) =>
             management.nodeShare = this.getObjects(object)
         );
+        inviteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         inviteNode.showAsAction = true;
         inviteNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         inviteNode.permissionsMode = HideMode.Hide;
