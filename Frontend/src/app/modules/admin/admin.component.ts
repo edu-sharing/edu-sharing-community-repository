@@ -54,7 +54,7 @@ type LuceneData = {
     noderef?: string,
     query?: string,
     properties?: string,
-    authorities?: string[],
+    authorities?: Authority[],
     outputMode?: 'view' | 'export',
     exportFormat?: 'json' | 'csv',
 }
