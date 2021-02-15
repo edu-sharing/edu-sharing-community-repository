@@ -39,6 +39,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -1125,6 +1126,7 @@ public class AdminApi {
 			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue = "-all-") @QueryParam("propertyFilter") List<String> propertyFilter,
+			@ApiParam(value = "store, workspace or archive") @QueryParam("store") LuceneStore store,
 			@ApiParam(value = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
 			@Context HttpServletRequest req) {
 
@@ -1142,13 +1144,18 @@ public class AdminApi {
 			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
 			token.setContentType(ContentType.ALL);
 			token.setLuceneString(query);
+			StoreRef storeRef = LuceneStore.Archive.equals(store) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+			if (LuceneStore.Archive.equals(store)) {
+				token.setStoreName(storeRef.getIdentifier());
+				token.setStoreProtocol(storeRef.getProtocol());
+			}
 			token.disableSearchCriterias();
 			token.setAuthorityScope(authorityScope);
 			NodeSearch search = NodeDao.search(repoDao, token, false);
 
 			List<Node> data = new ArrayList<Node>();
 			for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
-				data.add(NodeDao.getNode(repoDao, ref.getId(), filter).asNode());
+				data.add(NodeDao.getNode(repoDao, storeRef.getProtocol(), storeRef.getIdentifier(), ref.getId(), filter).asNode());
 			}
 
 			Pagination pagination = new Pagination();
@@ -1196,6 +1203,7 @@ public class AdminApi {
 			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@ApiParam(value = "properties to fetch, use parent::<property> to include parent property values") @QueryParam("properties") List<String> properties,
+			@ApiParam(value = "store, workspace or archive") @QueryParam("store") LuceneStore store,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1219,6 +1227,11 @@ public class AdminApi {
 				token.setContentType(ContentType.ALL);
 				token.setLuceneString(query);
 				token.disableSearchCriterias();
+				StoreRef storeRef = LuceneStore.Archive.equals(store) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+				if (LuceneStore.Archive.equals(store)) {
+					token.setStoreName(storeRef.getIdentifier());
+					token.setStoreProtocol(storeRef.getProtocol());
+				}
 				NodeSearch search = NodeDao.search(repoDao, token, false);
 				logger.info("page: "+ page +" count:"+search.getCount() +" t:"+Thread.currentThread().getId());
 				page = page + pageSize;
@@ -1226,7 +1239,7 @@ public class AdminApi {
 					haseMore = false;
 				}
 				for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
-					NodeRef alfRef=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,ref.getId());
+					NodeRef alfRef=new NodeRef(storeRef, ref.getId());
 					Map<String, Serializable> props=new HashMap<>();
 					for(String prop : properties){
 						if(prop.startsWith("parent::")){
@@ -1435,5 +1448,10 @@ public class AdminApi {
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
+	}
+
+	public enum LuceneStore {
+		Workspace,
+		Archive
 	}
 }

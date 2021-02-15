@@ -278,6 +278,7 @@
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",
             "MODE": "Modus:",
+            "STORE": "Store (Node-Speicherort):",
             "NODEREF": "UUID der gesuchten Node:",
             "LUCENE_QUERY": "Lucene-Query:",
             "LUCENE_AUTHORITIES": "Suchen als folgende Authorities:",

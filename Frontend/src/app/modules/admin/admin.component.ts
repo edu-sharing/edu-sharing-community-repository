@@ -46,6 +46,19 @@ import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
 
 
+type LuceneData = {
+    mode: 'NODEREF' | 'SOLR',
+    store: 'Workspace' | 'Archive',
+    offset: number,
+    count: number,
+    noderef?: string,
+    query?: string,
+    properties?: string,
+    authorities?: string[],
+    outputMode: 'view' | 'export',
+    exportFormat: 'json' | 'csv',
+}
+
 @Component({
   selector: 'admin-main',
   templateUrl: 'admin.component.html',
@@ -139,7 +152,7 @@ export class AdminComponent {
   public jobCodeOptions = {minimap: {enabled: false}, language: 'json', autoIndent: true, automaticLayout: true };
   public jobClasses:SuggestItem[]=[];
   public jobClassesSuggested:SuggestItem[]=[];
-  public lucene:any={mode:'NODEREF',offset:0,count:100,outputMode:'view'};
+  public lucene:LuceneData={mode:'NODEREF',store:'Workspace',offset:0,count:100,outputMode:'view'};
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -241,7 +254,7 @@ export class AdminComponent {
       propertyFilter:[RestConstants.ALL]
     };
     this.globalProgress=true;
-    this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=> {
+    this.admin.searchLucene(this.lucene.query, this.lucene.store, authorities, request).subscribe((data:NodeList)=> {
       this.globalProgress=false;
       this.luceneNodes=data.nodes;
       this.luceneCount=data.pagination.total;
@@ -980,7 +993,7 @@ export class AdminComponent {
     this.storage.set('admin_lucene',this.lucene);
     this.globalProgress=true;
     const props=this.lucene.properties.split('\n');
-    this.admin.exportLucene(this.lucene.query,props).subscribe((data)=> {
+    this.admin.exportLucene(this.lucene.query, this.lucene.store, props).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
 
