@@ -213,14 +213,20 @@ export class AdminComponent {
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
-    this.admin.startJob(this.job.class,JSON.parse(this.job.params), this.uploadJobsFile).subscribe(()=> {
-        this.globalProgress=false;
-        // this.uploadJobsFile = null;
-        this.toast.toast('ADMIN.JOBS.JOB_STARTED');
-    },(error:any)=> {
-        this.globalProgress=false;
-        this.toast.error(error);
-    });
+    try {
+        this.admin.startJob(this.job.class, JSON.parse(this.job.params), this.uploadJobsFile).subscribe(() => {
+            this.globalProgress = false;
+            // this.uploadJobsFile = null;
+            this.toast.toast('ADMIN.JOBS.JOB_STARTED');
+        }, (error: any) => {
+            this.globalProgress = false;
+            this.toast.error(error);
+        });
+    } catch(e) {
+        console.warn(e);
+        this.toast.error(e);
+        this.globalProgress = false;
+    }
   }
   public debugNode(node:Node) {
     this.nodeInfo=node;

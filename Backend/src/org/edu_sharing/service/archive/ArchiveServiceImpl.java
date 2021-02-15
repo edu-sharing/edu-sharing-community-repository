@@ -54,8 +54,6 @@ public class ArchiveServiceImpl implements ArchiveService  {
 	
 	
 	ApplicationInfo appInfo;
-	AuthenticationTool authTool;
-	HashMap<String,String> authInfo;
 	MCAlfrescoAPIClient client;
 	
 	SearchService searchService;
@@ -72,8 +70,6 @@ public class ArchiveServiceImpl implements ArchiveService  {
 	public ArchiveServiceImpl() {
 		try{
 			this.appInfo = ApplicationInfoList.getHomeRepository();
-			this.authTool = new AuthenticationToolAPI();
-			this.authInfo = this.authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
 			this.client = new MCAlfrescoAPIClient();
 			this.searchService = SearchServiceFactory.getSearchService(this.appInfo.getAppId());
 			this.authorityService = AuthorityServiceFactory.getAuthorityService(this.appInfo.getAppId());

@@ -97,6 +97,7 @@ public class NodeRunner {
     private BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
     private String lucene = null;
+    private StoreRef luceneStore = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
 
     public NodeRunner() {
 	}
@@ -190,9 +191,9 @@ public class NodeRunner {
             }else{
                 logger.info("collection nodes by lucene:"+lucene);
                 if (runAsSystem)
-                    nodes = AuthenticationUtil.runAsSystem(() -> new NodeCollectorLucene(lucene,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE).getNodes());
+                    nodes = AuthenticationUtil.runAsSystem(() -> new NodeCollectorLucene(lucene, luceneStore).getNodes());
                 else
-                    nodes = new NodeCollectorLucene(lucene, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE).getNodes();
+                    nodes = new NodeCollectorLucene(lucene, luceneStore).getNodes();
             }
             Predicate<? super NodeRef> callFilter = (ref) -> {
                 if (filter == null)
@@ -315,6 +316,14 @@ public class NodeRunner {
 
     public void setRecurseMode(RecurseMode recurseMode) {
         this.recurseMode = recurseMode;
+    }
+
+    public void setLuceneStore(StoreRef luceneStore) {
+        this.luceneStore = luceneStore;
+    }
+
+    public StoreRef getLuceneStore() {
+        return luceneStore;
     }
 
     public enum TransactionMode{
