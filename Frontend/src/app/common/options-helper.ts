@@ -3,13 +3,32 @@ import {RestConnectorsService} from '../core-module/rest/services/rest-connector
 import {RestConstants} from '../core-module/rest/rest-constants';
 import {ListTableComponent} from '../core-ui-module/components/list-table/list-table.component';
 import {ActionbarComponent} from './ui/actionbar/actionbar.component';
-import {Constrain, CustomOptions, DefaultGroups, ElementType, HideMode, KeyCombination, OptionItem, Scope, Target} from '../core-ui-module/option-item';
+import {
+    Constrain,
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    HideMode,
+    KeyCombination,
+    OptionItem,
+    Scope,
+    Target
+} from '../core-ui-module/option-item';
 import {UIHelper} from '../core-ui-module/ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
-import {Connector, Filetype, Node, NodesRightMode, NodeWrapper} from '../core-module/rest/data-object';
+import {
+    Connector,
+    Filetype,
+    Node,
+    NodesRightMode,
+    NodeWrapper
+} from '../core-module/rest/data-object';
 import {Helper} from '../core-module/rest/helper';
-import {ClipboardObject, TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
+import {
+    ClipboardObject,
+    TemporaryStorageService
+} from '../core-module/rest/services/temporary-storage.service';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Inject, Injectable, InjectionToken, Optional} from '@angular/core';
@@ -17,7 +36,14 @@ import {CardComponent} from '../core-ui-module/components/card/card.component';
 import {fromEvent, Observable, Subscription} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
-import {ConfigurationService, FrameEventsService, RestCollectionService, RestConnectorService, RestHelper, RestIamService} from '../core-module/core.module';
+import {
+    ConfigurationService,
+    FrameEventsService,
+    RestCollectionService,
+    RestConnectorService,
+    RestHelper,
+    RestIamService
+} from '../core-module/core.module';
 import {MainNavComponent} from './ui/main-nav/main-nav.component';
 import {Toast} from '../core-ui-module/toast';
 import {HttpClient} from '@angular/common/http';
@@ -399,6 +425,7 @@ export class OptionsHelperService {
             this.nodeHelper.addNodeToLms(this.getObjects(object)[0], this.queryParams.reurl)
         );
 
+        applyNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         applyNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
         applyNode.permissionsRightMode = NodesRightMode.Original;
         applyNode.permissionsMode = HideMode.Disable;
