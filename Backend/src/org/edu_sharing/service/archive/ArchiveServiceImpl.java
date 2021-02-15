@@ -192,7 +192,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		
 		
 		try{
-			String newName = new DuplicateFinder().getUniqueValue(client.getChildren(destinationParentId), CCConstants.CM_NAME, name);
+			String newName = new DuplicateFinder().getUniqueValue(destinationParentId, CCConstants.CM_NAME, name);
 			if(!newName.equals(name)){
 				name = newName;
 				nodeService.setProperty(archivedNodeRef, QName.createQName(CCConstants.CM_NAME), name);
