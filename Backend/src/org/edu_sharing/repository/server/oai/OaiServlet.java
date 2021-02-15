@@ -32,6 +32,7 @@ import org.edu_sharing.xoai.EduDataHandler;
 import org.edu_sharing.xoai.EduItem;
 import org.edu_sharing.xoai.EduItemIdentifier;
 import org.edu_sharing.xoai.EduOai;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.ServletException;
@@ -60,10 +61,10 @@ public class OaiServlet extends HttpServlet{
                     withMaxListIdentifiers(itemsPerPage).withMaxListSets(itemsPerPage).
                     withMaxListRecords(itemsPerPage).withMaxListSets(itemsPerPage).
                     withAdminEmail(new Mail().getProperties().getProperty("mail.admin")).
-                    withBaseUrl(URLTool.getBaseUrl()).
-                    withGranularity(Granularity.Second).
+                    withBaseUrl(URLTool.getBaseUrl() + "/eduservlet/oai/provider").
+                    withGranularity(Granularity.valueOf(config.getString("granularity"))).
                     withDeleteMethod(DeletedRecord.fromValue(config.getString("delete"))).
-                    withEarliestDate(new Date(0)).
+                    withEarliestDate(ISODateTimeFormat.dateTimeNoMillis().parseDateTime(config.getString("earliestDate")).toDate()).
                     withRepositoryName(config.hasPath("name") ? config.getString("name") : ApplicationInfoList.getHomeRepository().getAppCaption()).
                     withDescription(config.getString("description"));
 
