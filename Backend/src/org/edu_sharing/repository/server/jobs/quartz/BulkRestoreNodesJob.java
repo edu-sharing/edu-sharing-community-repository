@@ -93,7 +93,11 @@ public class BulkRestoreNodesJob extends AbstractJob{
 		}
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
-			archiveService.restore(Collections.singletonList(ref.getId()), targetFolder);
+			try {
+				archiveService.restore(Collections.singletonList(ref.getId()), targetFolder);
+			} catch(Throwable t){
+				logger.warn("Error restoring " + ref + ":" + t.getMessage(), t);
+			}
 			logger.info("Restored " + ref);
 		});
 		runner.setRunAsSystem(true);
