@@ -55,8 +55,8 @@ type LuceneData = {
     query?: string,
     properties?: string,
     authorities?: string[],
-    outputMode: 'view' | 'export',
-    exportFormat: 'json' | 'csv',
+    outputMode?: 'view' | 'export',
+    exportFormat?: 'json' | 'csv',
 }
 
 @Component({
