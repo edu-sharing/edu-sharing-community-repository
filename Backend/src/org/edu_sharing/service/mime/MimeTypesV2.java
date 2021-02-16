@@ -208,10 +208,13 @@ public class MimeTypesV2 {
 		if(isLtiInstance(nodeType))
 			return "tool_instance";
 		String fallback="file";
-		boolean isLink=properties.containsKey(CCConstants.CCM_PROP_IO_WWWURL);
-		if(isLink)
-			fallback="link";
-		return getTypeFromMimetype(getMimeType(properties),properties,fallback);	
+		boolean isLink=properties.get(CCConstants.CCM_PROP_IO_WWWURL)!=null &&
+				!((String)properties.get(CCConstants.CCM_PROP_IO_WWWURL)).isEmpty();
+		if(isLink){
+			return "link";
+			//fallback="link";
+		}
+		return getTypeFromMimetype(getMimeType(properties),properties,fallback);
 	}
 	public static String getTypeFromMimetype(String mimetype) {
 		return getTypeFromMimetype(mimetype,null,"file");
@@ -219,7 +222,7 @@ public class MimeTypesV2 {
 	private static String getTypeFromMimetype(String mimetype,Map<String,Object> properties,String fallback) {
 	if(mimetype==null)
 		return fallback;
-	
+
 	if(WORD.contains(mimetype))
 		return "file-word";
 	if(EXCEL.contains(mimetype))
