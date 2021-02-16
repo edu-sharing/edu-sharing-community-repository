@@ -241,7 +241,7 @@ export class NodeRenderComponent implements EventListener {
             UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, false);
           }
           else {
-            if(window.history.state?.scope === 'search') {
+            if(window.history.state?.scope === Scope.Search) {
                 this.searchService.reinit = false;
             }
             NodeRenderComponent.close(this.location);
