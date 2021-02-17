@@ -276,6 +276,12 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
                 const value = htmlRef.getAttribute(attribute);
                 if (attribute === 'isextended' || attribute === 'extended') {
                     attribute = 'isExtended';
+                } else if(attribute === 'bottomcaption') {
+                    attribute = 'bottomCaption';
+                } else if(attribute === 'defaultmin') {
+                    attribute = 'defaultMin';
+                } else if(attribute === 'defaultmax') {
+                    attribute = 'defaultMax';
                 }
                 (widget.definition as any)[attribute] = value;
             }
