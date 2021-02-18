@@ -55,6 +55,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
     @Input() mainNav: MainNavComponent;
     @Input() actionbar: ActionbarComponent;
     @Input() optionItems: OptionItem[];
+    @Input() viewType: 0 | 1 | 2;
 
     @Output() clickRow = new EventEmitter<{ node: Node }>();
     @Output() loadMore = new EventEmitter<null>();

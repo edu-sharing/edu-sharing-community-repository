@@ -256,8 +256,28 @@
         </h2>
 
         <!-- COLLECTION CARDS -->
+        <app-custom-node-list-wrapper
+          #listCollections
+          *ngIf="customNodeList"
+          class="no-padding"
+          [isLoading]="isLoading"
+          [viewType]="getCollectionViewType()"
+          (clickRow)="onCollectionsClick($event.node)"
+          [nodes]="collectionContent.collections"
+          [optionItems]="
+                        isAllowedToEditCollection()
+                        ? [createSubCollectionOptionItem]
+                        : []
+                    "
+          [hasMore]="
+                        collectionContent.collections.length <
+                        collectionContent.collectionsPagination.total
+                    "
+          (loadMore)="isRootLevelCollection() ? loadMoreCollections() : null"
+        ></app-custom-node-list-wrapper>
         <listTable
           #listCollections
+          *ngIf="!customNodeList"
           [listClass]="'subcollections'"
           [optionItems]="
                         isAllowedToEditCollection()
@@ -275,7 +295,6 @@
           (clickRow)="onCollectionsClick($event.node)"
           (doubleClickRow)="onCollectionsClick($event)"
           [nodes]="collectionContent.collections"
-          [isLoading]="collectionContent.collectionsLoading"
           [hasMore]="
                         collectionContent.collections.length <
                         collectionContent.collectionsPagination.total
