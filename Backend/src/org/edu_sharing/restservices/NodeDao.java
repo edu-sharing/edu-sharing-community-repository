@@ -1342,7 +1342,7 @@ public class NodeDao {
 			}
 
 		} catch (Exception e) {
-			logger.warn("Cannot check if current User has permision to see email or not  : " + e.getMessage(), e);
+			logger.debug("Cannot check if current User has permision to see email or not  : " + e.getMessage(), e);
 			return false;
 		}
 	}
