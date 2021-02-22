@@ -197,7 +197,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         nodeId);
                 eduNodeRef.setProperties(props);
                 Map preview = (Map) sourceAsMap.get("preview");
-                if(preview.get("small") != null) {
+                if(preview != null && preview.get("small") != null) {
                     eduNodeRef.setPreview(
                             new NodeRefImpl.PreviewImpl((String) preview.get("mimetype"),
                                     Base64.getDecoder().decode((String) preview.get("small")))
