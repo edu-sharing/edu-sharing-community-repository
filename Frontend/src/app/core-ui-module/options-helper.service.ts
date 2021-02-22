@@ -1,8 +1,8 @@
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
-import {ListTableComponent} from '../core-ui-module/components/list-table/list-table.component';
-import {ActionbarComponent} from './ui/actionbar/actionbar.component';
+import {ListTableComponent} from './components/list-table/list-table.component';
+import {ActionbarComponent} from '../common/ui/actionbar/actionbar.component';
 import {
     Constrain,
     CustomOptions,
@@ -13,8 +13,8 @@ import {
     OptionItem,
     Scope,
     Target
-} from '../core-ui-module/option-item';
-import {UIHelper} from '../core-ui-module/ui-helper';
+} from './option-item';
+import {UIHelper} from './ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
 import {
@@ -32,7 +32,7 @@ import {
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Inject, Injectable, InjectionToken, Optional} from '@angular/core';
-import {CardComponent} from '../core-ui-module/components/card/card.component';
+import {CardComponent} from './components/card/card.component';
 import {fromEvent, Observable, Subscription} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
@@ -44,12 +44,12 @@ import {
     RestHelper,
     RestIamService
 } from '../core-module/core.module';
-import {MainNavComponent} from './ui/main-nav/main-nav.component';
-import {Toast} from '../core-ui-module/toast';
+import {MainNavComponent} from '../common/ui/main-nav/main-nav.component';
+import {Toast} from './toast';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {DropdownComponent} from '../core-ui-module/components/dropdown/dropdown.component';
-import {ConfigOptionItem, NodeHelperService} from '../core-ui-module/node-helper.service';
+import {DropdownComponent} from './components/dropdown/dropdown.component';
+import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
 
 
 export class OptionsHelperConfig {

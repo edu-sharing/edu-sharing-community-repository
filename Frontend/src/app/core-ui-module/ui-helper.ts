@@ -20,7 +20,17 @@ import {Toast} from './toast';
 import {RestHelper} from '../core-module/rest/rest-helper';
 import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {UIService} from '../core-module/rest/services/ui.service';
-import {ComponentFactoryResolver, ComponentRef, ElementRef, EmbeddedViewRef, EventEmitter, NgZone, Type, ViewContainerRef,} from '@angular/core';
+import {
+    ComponentFactoryResolver,
+    ComponentRef,
+    ElementRef,
+    EmbeddedViewRef,
+    EventEmitter,
+    Injector,
+    NgZone,
+    Type,
+    ViewContainerRef,
+} from '@angular/core';
 import {RestCollectionService} from '../core-module/rest/services/rest-collection.service';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {FrameEventsService} from '../core-module/rest/services/frame-events.service';
@@ -737,6 +747,7 @@ export class UIHelper {
      * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
      * @param bindings Optional bindings (inputs & outputs) to the given component
      * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
+     * @param injector (to fetch templates for the component)
      */
     public static injectAngularComponent<T>(
         componentFactoryResolver: ComponentFactoryResolver,
@@ -753,7 +764,7 @@ export class UIHelper {
             componentName,
         );
         const component: ComponentRef<T> = viewContainerRef.createComponent(
-            factory,
+            factory
         );
         if (bindings) {
             const instance: { [key: string]: any } = component.instance;

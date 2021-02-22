@@ -14,7 +14,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../common/options-helper';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({

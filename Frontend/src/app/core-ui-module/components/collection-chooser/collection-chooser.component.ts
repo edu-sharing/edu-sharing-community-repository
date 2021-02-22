@@ -63,9 +63,9 @@ export class CollectionChooserComponent implements OnInit {
     );
 
     private hasMoreToLoad: boolean;
-    private columns: ListItem[] = ListItem.getCollectionDefaults();
-    private sortBy: string[];
-    private sortAscending = false;
+    columns: ListItem[] = ListItem.getCollectionDefaults();
+    sortBy: string[];
+    sortAscending = false;
     /**
      * shall more than 5 recent collections be shown
      */
@@ -150,7 +150,7 @@ export class CollectionChooserComponent implements OnInit {
         this.loadMy();
     }
 
-    private drop(event: any) {
+    drop(event: any) {
         if (!this.checkPermissions(event.target)) {
             return;
         }
@@ -165,7 +165,7 @@ export class CollectionChooserComponent implements OnInit {
         return true;
     }
 
-    private hasWritePermissions(node: any) {
+    hasWritePermissions(node: any) {
         if (node.access.indexOf(RestConstants.ACCESS_WRITE) == -1) {
             return { status: false, message: 'NO_WRITE_PERMISSIONS' };
         }
@@ -177,7 +177,7 @@ export class CollectionChooserComponent implements OnInit {
         this.loadMy();
     }
 
-    private clickCollection(node: Node) {
+    clickCollection(node: Node) {
         if (!this.checkPermissions(node)) {
             return;
         }

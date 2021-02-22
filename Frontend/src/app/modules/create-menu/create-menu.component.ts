@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import {
     OptionsHelperService,
     OPTIONS_HELPER_CONFIG,
-} from '../../common/options-helper';
+} from '../../core-ui-module/options-helper.service';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     Connector,

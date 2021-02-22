@@ -70,6 +70,9 @@ import { TitleDirective } from './directives/title.directive';
 import { FallbackTranslationHandler } from './translation';
 import {NodeSourcePipe} from "./pipes/node-source.pipe";
 import {ListCountsComponent} from "./components/list-table/widgets/list-counts/list-counts.component";
+import {CustomNodeListWrapperComponent} from "./components/custom-node-list-wrapper/custom-node-list-wrapper.component";
+import {AppModule} from "../app.module";
+import {OptionsHelperService} from "./options-helper.service";
 
 @NgModule({
     declarations: [
@@ -89,6 +92,7 @@ import {ListCountsComponent} from "./components/list-table/widgets/list-counts/l
         UserTileComponent,
         LinkComponent,
         SpinnerComponent,
+        CustomNodeListWrapperComponent,
         BreadcrumbsComponent,
         SpinnerSmallComponent,
         GlobalProgressComponent,
@@ -151,11 +155,12 @@ import {ListCountsComponent} from "./components/list-table/widgets/list-counts/l
             },
         }),
     ],
-    providers: [Toast, NodeHelperService],
+    providers: [Toast, NodeHelperService, OptionsHelperService],
     exports: [
         TranslateModule,
         ListTableComponent,
         SpinnerComponent,
+        CustomNodeListWrapperComponent,
         BreadcrumbsComponent,
         SpinnerSmallComponent,
         ListOptionItemComponent,

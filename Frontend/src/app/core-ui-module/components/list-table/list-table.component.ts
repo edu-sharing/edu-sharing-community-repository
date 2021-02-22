@@ -24,7 +24,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     OptionsHelperService,
     OPTIONS_HELPER_CONFIG,
-} from '../../../common/options-helper';
+} from '../../options-helper.service';
 import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
 import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';

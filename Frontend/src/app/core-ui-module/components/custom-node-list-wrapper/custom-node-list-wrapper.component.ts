@@ -1,23 +1,26 @@
 import {
     Component,
     ComponentFactoryResolver,
-    ComponentRef,
+    ComponentRef, ContentChild,
     ElementRef,
-    EventEmitter,
+    EventEmitter, Injector,
     Input,
     OnChanges,
     Output,
-    SimpleChange,
+    SimpleChange, SkipSelf, TemplateRef,
     ViewContainerRef,
 } from '@angular/core';
 import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
 import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
 import {
+    ListItem,
     Node,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import {OptionItem} from "../../../core-ui-module/option-item";
+import { UIHelper } from '../../ui-helper';
+import {OptionItem, Scope} from "../../option-item";
+import {DropData} from "../../directives/drag-nodes/drag-nodes";
+import {ListTableComponent} from "../list-table/list-table.component";
 
 export interface CustomNodeListWrapperInterface {
     // Inputs
@@ -48,15 +51,55 @@ export interface CustomNodeListWrapperInterface {
     template: '',
 })
 export class CustomNodeListWrapperComponent implements OnChanges {
+    @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
     @Input() parent: Node;
     @Input() nodes: Node[];
+    @Output() nodesChange =new EventEmitter<Node[]>();
     @Input() hasMore: boolean;
+    @Input() hasHeading = true;
+    @Input() dragDrop = false;
+    @Input() hasIcon: boolean;
+    @Input() orderElements = false;
+    @Input() orderElementsActive = false;
+    @Output() orderElementsActiveChange = new EventEmitter();
+    @Input() columns: ListItem[];
+    @Input() scope: Scope;
+    @Input() createLink = false;
+    @Input() isClickable: boolean;
+    @Input() hasCheckbox: boolean;
     @Input() isLoading: boolean;
+    @Input() canDrop: (arg0: DropData) => boolean = () => true;
+    @Input() canDelete: (node: Node | any) => boolean;
+
+
     @Input() mainNav: MainNavComponent;
     @Input() actionbar: ActionbarComponent;
     @Input() optionItems: OptionItem[];
     @Input() viewType: 0 | 1 | 2;
+    @Input() validatePermissions: (
+        node: Node,
+    ) => {
+        status: boolean;
+        message: string;
+        button?: {
+            click: Function;
+            caption: string;
+            icon: string;
+        };
+    };
+    @Input() sortBy: string;
+    @Input() sortAscending = true;
 
+
+    @Output() onRequestRefresh = new EventEmitter<void>();
+    @Output() onDelete = new EventEmitter();
+    @Output() doubleClickRow = new EventEmitter();
+    @Output() onDrop = new EventEmitter<{
+        target: Node;
+        source: Node[];
+        event: any;
+        type: 'move' | 'copy';
+    }>();
     @Output() clickRow = new EventEmitter<{ node: Node }>();
     @Output() loadMore = new EventEmitter<null>();
     @Output() requestRefresh = new EventEmitter<null>();
@@ -73,7 +116,8 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
         private elementRef: ElementRef,
-    ) {}
+    ) {
+    }
 
     ngOnChanges(changes: { [key: string]: SimpleChange }) {
         if (!this.componentRef) {
@@ -87,6 +131,8 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         if (this.componentRef.instance.ngOnChanges) {
             this.componentRef.instance.ngOnChanges(changes);
         }
+        // attach the template ref
+        this.componentRef.instance.itemContentRef = this.itemContentRef;
     }
 
     /**
@@ -95,6 +141,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
     private init(): void {
         const customNodeListComponent = this.temporaryStorageService.get(
             TemporaryStorageService.CUSTOM_NODE_LIST_COMPONENT,
+            ListTableComponent
         );
         this.componentRef = UIHelper.injectAngularComponent(
             this.componentFactoryResolver,
@@ -102,15 +149,15 @@ export class CustomNodeListWrapperComponent implements OnChanges {
             customNodeListComponent,
             this.elementRef.nativeElement,
             // Input bindings are initialized in `ngOnChanges`.
-            this.getOutputBindings(),
-        );
+            this.getOutputBindings());
     }
 
     /**
      * Creates a simple map of the output bindings defined in this component.
      */
     private getOutputBindings(): { [key: string]: EventEmitter<any> } {
-        const outputBindings: { [key: string]: EventEmitter<any> } = {};
+        const outputBindings: { [key: string]: any } = {};
+        console.log(outputBindings);
         for (const key in this) {
             const value = this[key];
             if (value instanceof EventEmitter) {

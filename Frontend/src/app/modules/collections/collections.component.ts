@@ -46,7 +46,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { Observable } from 'rxjs';
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-helper';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 
@@ -136,7 +136,6 @@ export class CollectionsMainComponent {
     );
     optionsMaterials: OptionItem[];
     tutorialElement: ElementRef;
-    customNodeList = false;
     permissions: Permission[];
     private sortCollections: SortDefault;
     set collectionShare(collectionShare: Node) {
@@ -312,7 +311,6 @@ export class CollectionsMainComponent {
                 (error: any) => RestHelper.goToLogin(this.router, this.config),
             );
         });
-        this.initCustomNodeList();
     }
 
     isMobile() {
@@ -1213,12 +1211,5 @@ export class CollectionsMainComponent {
             this.toast.closeModalDialog();
             this.mainNavRef.refreshNodeStore();
         });
-    }
-
-    private initCustomNodeList(): void {
-        const customNodeListComponent = this.tempStorage.get(
-            TemporaryStorageService.CUSTOM_NODE_LIST_COMPONENT,
-        );
-        this.customNodeList = !!customNodeListComponent;
     }
 }

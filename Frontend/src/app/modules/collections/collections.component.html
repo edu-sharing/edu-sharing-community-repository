@@ -258,27 +258,6 @@
         <!-- COLLECTION CARDS -->
         <app-custom-node-list-wrapper
           #listCollections
-          *ngIf="customNodeList"
-          class="no-padding"
-          [isLoading]="isLoading"
-          [viewType]="getCollectionViewType()"
-          (clickRow)="onCollectionsClick($event.node)"
-          [nodes]="collectionContent.collections"
-          [optionItems]="
-                        isAllowedToEditCollection()
-                        ? [createSubCollectionOptionItem]
-                        : []
-                    "
-          [hasMore]="
-                        collectionContent.collections.length <
-                        collectionContent.collectionsPagination.total
-                    "
-          (loadMore)="isRootLevelCollection() ? loadMoreCollections() : null"
-        ></app-custom-node-list-wrapper>
-        <listTable
-          #listCollections
-          *ngIf="!customNodeList"
-          [listClass]="'subcollections'"
           [optionItems]="
                         isAllowedToEditCollection()
                         ? [createSubCollectionOptionItem]
@@ -302,7 +281,7 @@
           [createLink]="true"
           (loadMore)="isRootLevelCollection() ? loadMoreCollections() : null"
           class="no-padding"
-        ></listTable>
+        ></app-custom-node-list-wrapper>
 
         <!-- when empty at root level -->
         <div
@@ -352,27 +331,6 @@
         </div>
 
         <app-custom-node-list-wrapper
-          *ngIf="customNodeList"
-          [parent]="collectionContent.node"
-          [nodes]="collectionContent.references"
-          [optionItems]="
-                        isUserAllowedToEdit(collectionContent.node)
-                            ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
-                            : []
-                    "
-          [hasMore]="
-                        collectionContent.references.length <
-                        collectionContent.referencesPagination.total
-                    "
-          [isLoading]="collectionContent.referencesLoading"
-          [mainNav]="mainNavRef"
-          [actionbar]="actionbarReferences"
-          (clickRow)="onContentClick($event.node)"
-          (loadMore)="loadMoreReferences()"
-          (requestRefresh)="refreshContent()"
-        ></app-custom-node-list-wrapper>
-        <listTable
-          *ngIf="!customNodeList"
           [parent]="collectionContent.node"
           [optionItems]="
                         isUserAllowedToEdit(collectionContent.node)
@@ -405,7 +363,7 @@
                     "
           (loadMore)="loadMoreReferences()"
           class="no-padding"
-        ></listTable>
+        ></app-custom-node-list-wrapper>
 
         <!-- NO CONTENT NOTICE -->
         <div
