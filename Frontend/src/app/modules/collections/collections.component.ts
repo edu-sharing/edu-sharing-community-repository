@@ -85,7 +85,7 @@ export class CollectionsMainComponent {
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections')
     listCollections: ListTableComponent;
-    @ContentChild('beforeCollectionHeader') beforeCollectionHeaderRef: TemplateRef<any>;
+    @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
 
     viewTypeNodes = ListTableComponent.VIEW_TYPE_GRID;

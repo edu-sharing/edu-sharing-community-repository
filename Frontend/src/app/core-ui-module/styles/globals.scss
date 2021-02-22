@@ -67,17 +67,7 @@
   position: absolute;
 }
 .blurred-image{
-  $blurStrength:25px;
-  position: absolute;
-  left:-$blurStrength;
-  top:-$blurStrength;
-  width:calc(100% + #{$blurStrength*2});
-  height:calc(100% + #{$blurStrength*2});
-  z-index: 0;
-  overflow: hidden;
-  filter: blur($blurStrength);
-  object-fit: cover;
-  opacity: 0.7;
+    @include blurImage();
 }
 .authority-search-input-option{
   >span {

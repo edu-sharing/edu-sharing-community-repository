@@ -63,12 +63,12 @@ button{
     @include materialShadow();
   }
   &.actionbar-all-flat button{
-    background: white !important;
-    color: $primary !important;
+    background: white;
+    color: $primary;
   }
   .more, .actionAlways {
-    background: white !important;
-    color: $primary !important;
+    background: white;
+    color: $primary;
     display:flex;
     width:45px;
     height:45px;
