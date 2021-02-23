@@ -132,7 +132,7 @@
             "PUBLISH_ACTIVE_DIRECTORY": "Alle Materialien in diesem Ordner sind öffentlich im Internet sichtbar",
             "NO_FUZZY": "Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
             "DOI": "Mit Handle versehen",
-            "DOI_INFO": "Ein Handle ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+            "DOI_INFO": "Ein Handle ist ein standardisierter Identifikator, mit dessen Hilfe ein Material global eindeutig identifiziert und wiedergefunden werden kann",
             "PUBLISHING_WARNING_TITLE": "Element wirklich veröffentlichen?",
             "PUBLISHING_WARNING_MESSAGE": "Wenn Sie fortfahren, wird das aktuelle Element für alle Nutzer des Systems freigegeben und kann von jedem aufgerufen werden.\n\nSind Sie sicher, dass Sie das Element öffentlich freigeben möchten?",
             "ERROR_INVALID_TYPE_COMBINATION": "Elemente verschiedener Typen können nicht im Bulk freigegeben werden",
@@ -164,7 +164,7 @@
                 "VERSION_NUMBER": "Versionsnummer",
                 "VERSION_DATE": "Zeitpunkt der Veröffentlichung",
                 "DOI_DISTINCT": "Neuen Handle erzeugen",
-                "DOI_DISTINCT_INFO": "Ein neuer, eindeutiger Handle wird erzeugt. Die einzelnen Versionen haben zukünftig eigenständige Identifier. Beachten Sie, dass nach einmaliger Wahl dieser Option nachträglich keine Handle-Aktualisierung für dieses Element möglich ist",
+                "DOI_DISTINCT_INFO": "Ein neuer, eindeutiger Handle wird erzeugt. Zukünftige Versionen des Objektes haben eigenständige Identifikatoren. Beachten Sie, dass nach einmaliger Wahl dieser Option nachträglich keine aktualisierten Versionen des Elements unter dem gleichen Handle erfolgen können",
                 "DOI_UPDATE": "Bestehenden Handle aktualisieren",
                 "DOI_UPDATE_INFO": "Die neue Version des Elements wird unter der bestehenden, alten Handle-Adresse zukünftig verfügbar gemacht. Die zuvor veröffentlichte Version ist über die Handle-Adresse nicht mehr direkt zugänglich"
             },
