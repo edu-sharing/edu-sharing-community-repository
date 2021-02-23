@@ -121,7 +121,6 @@ export class NodeRenderComponent implements EventListener {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              console.log('state', window.history.state);
               this.list = window.history.state?.nodes;
               this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
@@ -180,6 +179,7 @@ export class NodeRenderComponent implements EventListener {
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
+  currentOptions: OptionItem[];
   sequence: NodeList;
   sequenceParent: Node;
   canScrollLeft = false;
@@ -323,7 +323,9 @@ export class NodeRenderComponent implements EventListener {
 
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.elementType = [ElementType.Node, ElementType.NodeChild];
-    download.isEnabled=this._node.downloadUrl!=null;
+    // declare explicitly so that callback will be overriden
+    download.customEnabledCallback = null;
+    download.isEnabled=this._node.downloadUrl!=null && !this._node.properties?.[RestConstants.CCM_PROP_IO_WWWURL];
     download.showAsAction=true;
     if(this.isCollectionRef()) {
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node) => {
@@ -496,7 +498,7 @@ export class NodeRenderComponent implements EventListener {
     }
   }
 
-    private initOptions(options:OptionItem[]) {
+    private initOptions() {
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObject: this._node,
@@ -504,7 +506,7 @@ export class NodeRenderComponent implements EventListener {
             allObjects: this.list,
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: options
+                addOptions: this.currentOptions
             },
         });
         this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
@@ -534,7 +536,8 @@ export class NodeRenderComponent implements EventListener {
               downloadAll.priority = 35;
               options.splice(1,0,downloadAll);
           }
-          this.initOptions(options);
+          this.currentOptions = options;
+          this.initOptions();
     });
     UIHelper.setTitleNoTranslation(RestHelper.getName(this._node),this.title,this.config);
   }
@@ -542,6 +545,7 @@ export class NodeRenderComponent implements EventListener {
       if(this.downloadButton!=null)
         this.downloadButton.isEnabled=url!=null;
       this.downloadUrl=url;
+      this.initOptions();
   }
 
     private getSequence(onFinish:Function) {
