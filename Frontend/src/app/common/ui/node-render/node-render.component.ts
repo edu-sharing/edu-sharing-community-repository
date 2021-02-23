@@ -1,4 +1,17 @@
-import {ChangeDetectorRef, Component, ComponentFactoryResolver, ElementRef, EventEmitter, HostListener, Input, NgZone, Output, ViewChild, ViewContainerRef} from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    ComponentFactoryResolver,
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Input,
+    NgZone,
+    OnDestroy,
+    Output,
+    ViewChild,
+    ViewContainerRef
+} from '@angular/core';
 import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
@@ -47,6 +60,7 @@ import {ActionbarComponent} from '../actionbar/actionbar.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
 import {RestTrackingService} from "../../../core-module/rest/services/rest-tracking.service";
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {ReplaySubject} from 'rxjs';
 
 declare var jQuery:any;
 declare var window: any;
@@ -64,7 +78,7 @@ declare var window: any;
 })
 
 
-export class NodeRenderComponent implements EventListener {
+export class NodeRenderComponent implements EventListener, OnDestroy {
     @Input() set node(node: Node|string) {
       const id=(node as Node).ref ? (node as Node).ref.id : (node as string);
       jQuery('#nodeRenderContent').html('');
@@ -279,6 +293,7 @@ export class NodeRenderComponent implements EventListener {
     }
     ngOnDestroy() {
         (window as any).ngRender = null;
+        this.optionsHelper.setListener(null);
     }
 
   public switchPosition(pos:number) {
@@ -301,7 +316,6 @@ export class NodeRenderComponent implements EventListener {
     if(this.isLoading) {
         return;
     }
-
     this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
     this.isLoading=true;
     this.node=this._nodeId;
