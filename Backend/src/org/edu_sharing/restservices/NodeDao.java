@@ -115,6 +115,10 @@ public class NodeDao {
 			throws DAOException {
 		return getNode(repoDao, nodeId, new Filter());
 	}
+	public static NodeDao getNode(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef)
+			throws DAOException {
+		return new NodeDao(repoDao, nodeRef, Filter.createShowAllFilter());
+	}
 	
 	/** get node via shared link **/
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId,String token)

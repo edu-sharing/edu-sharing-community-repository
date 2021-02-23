@@ -3,11 +3,11 @@ import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
 import {
-  ConfigurationService,
-  DialogButton, JobDescription,
-  ListItem,
-  RestIamService,
-  RestMediacenterService
+    ConfigurationService,
+    DialogButton, JobDescription,
+    ListItem, NodeListElastic,
+    RestIamService,
+    RestMediacenterService
 } from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
@@ -47,7 +47,7 @@ import {Scope} from '../../core-ui-module/option-item';
 
 
 type LuceneData = {
-    mode: 'NODEREF' | 'SOLR',
+    mode: 'NODEREF' | 'SOLR' | 'ELASTIC',
     store: 'Workspace' | 'Archive',
     offset: number,
     count: number,
@@ -150,6 +150,8 @@ export class AdminComponent {
   public jobsLogLevel:any = [];
   public jobsLogData:any = [];
   public jobCodeOptions = {minimap: {enabled: false}, language: 'json', autoIndent: true, automaticLayout: true };
+  public dslCodeOptions = {minimap: {enabled: false}, language: 'json', autoIndent: true, automaticLayout: true };
+  public elasticResponseCodeOptions = {minimap: {enabled: false}, language: 'json', autoIndent: true, automaticLayout: true, readOnly: true };
   public jobClasses:SuggestItem[]=[];
   public jobClassesSuggested:SuggestItem[]=[];
   public lucene:LuceneData={mode:'NODEREF',store:'Workspace',offset:0,count:100,outputMode:'view'};
@@ -195,8 +197,7 @@ export class AdminComponent {
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
     {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
   ]
-  luceneNodes: Node[];
-  luceneCount: number;
+  searchResponse: NodeList | NodeListElastic;
   searchColumns: ListItem[]=[];
   nodeInfo: Node;
   public selectedTemplate = '';
@@ -239,14 +240,20 @@ export class AdminComponent {
         this.globalProgress=true;
         this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=> {
             this.globalProgress=false;
-            this.luceneNodes=[node.node];
-            this.luceneCount=1;
+            this.searchResponse={
+                nodes: [node.node],
+                pagination: {
+                    from: 0,
+                    count: 1,
+                    total: 1
+                }
+            };
         },(error)=> {
             this.globalProgress=false;
             this.toast.error(error);
         });
     }
-  public searchLucene() {
+  public searchNodes() {
     this.storage.set('admin_lucene',this.lucene);
     const authorities=[];
     if(this.lucene.authorities) {
@@ -260,14 +267,23 @@ export class AdminComponent {
       propertyFilter:[RestConstants.ALL]
     };
     this.globalProgress=true;
-    this.admin.searchLucene(this.lucene.query, this.lucene.store, authorities, request).subscribe((data:NodeList)=> {
-      this.globalProgress=false;
-      this.luceneNodes=data.nodes;
-      this.luceneCount=data.pagination.total;
-    },(error:any)=> {
-      this.globalProgress=false;
-      this.toast.error(error);
-    });
+    if(this.lucene.mode === 'SOLR') {
+        this.admin.searchLucene(this.lucene.query, this.lucene.store, authorities, request).subscribe((data) => {
+            this.globalProgress = false;
+            this.searchResponse = data;
+        }, (error: any) => {
+            this.globalProgress = false;
+            this.toast.error(error);
+        });
+    } else if (this.lucene.mode === 'ELASTIC') {
+        this.admin.searchElastic(this.lucene.query).subscribe((data) => {
+            this.globalProgress = false;
+            this.searchResponse = data;
+        }, (error: any) => {
+            this.globalProgress = false;
+            this.toast.error(error);
+        });
+    }
   }
   public addLuceneAuthority(authority:Authority) {
     if(!this.lucene.authorities)

@@ -1,9 +1,7 @@
 package org.edu_sharing.service.search;
 
-import com.google.gson.Gson;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
-import net.sourceforge.cardme.vcard.exceptions.VCardParseException;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -18,7 +16,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
-import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -29,17 +26,14 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.xcontent.LoggingDeprecationHandler;
-import org.elasticsearch.common.xcontent.NamedXContentRegistry;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.common.xcontent.json.JsonXContent;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.*;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.SearchModule;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
@@ -47,8 +41,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.collapse.CollapseBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -84,6 +76,32 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return hosts.toArray(new HttpHost[0]);
     }
 
+    public SearchResultNodeRefElastic searchDSL(String dsl) throws Throwable {
+        checkClient();
+        SearchRequest searchRequest = new SearchRequest("workspace");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        SearchModule searchModule = new SearchModule(Settings.EMPTY, false, Collections.emptyList());
+        try (XContentParser parser = XContentFactory.xContent(XContentType.JSON).createParser(new NamedXContentRegistry(searchModule
+                .getNamedXContents()), DeprecationHandler.IGNORE_DEPRECATIONS, dsl)) {
+            searchSourceBuilder.parseXContent(parser);
+        }
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchResultNodeRefElastic sr = new SearchResultNodeRefElastic();
+        List<NodeRef> data = new ArrayList<>();
+        sr.setData(data);
+        sr.setElasticResponse(searchResponse);
+        SearchHits hits = searchResponse.getHits();
+        logger.info("result count: "+hits.getTotalHits());
+        sr.setNodeCount((int) hits.getTotalHits().value);
+        Set<String> authorities = getUserAuthorities();
+        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+        for (SearchHit hit : hits) {
+            data.add(transformSearchHit(authorities, user, hit));
+        }
+        return sr;
+    }
     @Override
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
@@ -100,10 +118,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String ngsearchword = (searchword != null) ? searchword[0] : null;
 
 
-        Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
-        if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
-            authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
-
+        Set<String> authorities = getUserAuthorities();
 
 
         SearchResultNodeRef sr = new SearchResultNodeRef();
@@ -166,95 +181,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             long millisPerm = 0;
             for (SearchHit hit : hits) {
-                Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-                Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
-
-                Map nodeRef = (Map) sourceAsMap.get("nodeRef");
-                String nodeId = (String) nodeRef.get("id");
-                Map storeRef = (Map) nodeRef.get("storeRef");
-                String protocol = (String) storeRef.get("protocol");
-                String identifier = (String) storeRef.get("identifier");
-
-                HashMap<String, Object> props = new HashMap<>();
-                for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
-
-                    Serializable value = null;
-                    if(entry.getValue() instanceof ArrayList){
-                        if(((ArrayList) entry.getValue()).size() != 1) {
-                            value = entry.getValue();
-                        } else {
-                            value = (Serializable) ((ArrayList) entry.getValue()).get(0);
-                        }
-                    } else {
-                        value = entry.getValue();
-                    }
-                    props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
-                }
-
-                NodeRef eduNodeRef = new NodeRefImpl(ApplicationInfoList.getHomeRepository().getAppId(),
-                        protocol,
-                        identifier,
-                        nodeId);
-                eduNodeRef.setProperties(props);
-                Map preview = (Map) sourceAsMap.get("preview");
-                if(preview != null && preview.get("small") != null) {
-                    eduNodeRef.setPreview(
-                            new NodeRefImpl.PreviewImpl((String) preview.get("mimetype"),
-                                    Base64.getDecoder().decode((String) preview.get("small")))
-                    );
-                }
-                eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
-                        stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
-               
-                HashMap<String, Boolean> permissions = new HashMap<>();
-                permissions.put(CCConstants.PERMISSION_READ, true);
-
-                long millis = System.currentTimeMillis();
-
-                Map<String,List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
-                String owner = (String)sourceAsMap.get("owner");
-                for(Map.Entry<String,List<String>> entry : permissionsElastic.entrySet()){
-                    if("read".equals(entry.getKey())){
-                        continue;
-                    }
-
-                    if(authorities.stream().anyMatch(s -> entry.getValue().contains(s))
-                            || entry.getValue().contains(user) ){
-                        //get fine grained permissions
-                        PermissionReference pr = permissionModel.getPermissionReference(null,entry.getKey());
-                        Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
-                        for(String perm : PermissionServiceHelper.PERMISSIONS){
-                            for(PermissionReference pRef : granteePermissions){
-                                if(pRef.getName().equals(perm)){
-                                    permissions.put(perm, true);
-                                }
-                            }
-                        }
-                    }
-                }
-                if(user.equals(owner)){
-                    permissions.put(CCConstants.PERMISSION_CC_PUBLISH,true);
-                    PermissionReference pr = permissionModel.getPermissionReference(null,"FullControl");
-                    Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
-                    for(String perm : PermissionServiceHelper.PERMISSIONS){
-                        for(PermissionReference pRef : granteePermissions){
-                            if(pRef.getName().equals(perm)){
-                                permissions.put(perm, true);
-                            }
-                        }
-                    }
-
-                    //Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
-                    //Set<PermissionReference> immediateGranteePermissions = permissionModel.getImmediateGranteePermissions(pr);
-
-                }
-
-
-                eduNodeRef.setPermissions(permissions);
-                long permMillisSingle = (System.currentTimeMillis() - millis);
-                logger.info("finished permission stuff in "+permMillisSingle);
-                millisPerm+=permMillisSingle;
-                data.add(eduNodeRef);
+                data.add(transformSearchHit(authorities, user, hit));
             }
             logger.info("permission stuff took:"+millisPerm);
 
@@ -299,6 +226,103 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         logger.info("returning");
         return sr;
+    }
+
+    private Set<String> getUserAuthorities() {
+        Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
+        if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
+            authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+        return authorities;
+    }
+
+    private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit) {
+        Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+        Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
+
+        Map nodeRef = (Map) sourceAsMap.get("nodeRef");
+        String nodeId = (String) nodeRef.get("id");
+        Map storeRef = (Map) nodeRef.get("storeRef");
+        String protocol = (String) storeRef.get("protocol");
+        String identifier = (String) storeRef.get("identifier");
+
+        HashMap<String, Object> props = new HashMap<>();
+        for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
+
+            Serializable value = null;
+            if(entry.getValue() instanceof ArrayList){
+                if(((ArrayList) entry.getValue()).size() != 1) {
+                    value = entry.getValue();
+                } else {
+                    value = (Serializable) ((ArrayList) entry.getValue()).get(0);
+                }
+            } else {
+                value = entry.getValue();
+            }
+            props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
+        }
+
+        NodeRef eduNodeRef = new NodeRefImpl(ApplicationInfoList.getHomeRepository().getAppId(),
+                protocol,
+                identifier,
+                nodeId);
+        eduNodeRef.setProperties(props);
+        Map preview = (Map) sourceAsMap.get("preview");
+        if(preview != null && preview.get("small") != null) {
+            eduNodeRef.setPreview(
+                    new NodeRefImpl.PreviewImpl((String) preview.get("mimetype"),
+                            Base64.getDecoder().decode((String) preview.get("small")))
+            );
+        }
+        eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
+                stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
+
+        HashMap<String, Boolean> permissions = new HashMap<>();
+        permissions.put(CCConstants.PERMISSION_READ, true);
+
+        long millis = System.currentTimeMillis();
+
+        Map<String,List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
+        String owner = (String)sourceAsMap.get("owner");
+        for(Map.Entry<String,List<String>> entry : permissionsElastic.entrySet()){
+            if("read".equals(entry.getKey())){
+                continue;
+            }
+
+            if(authorities.stream().anyMatch(s -> entry.getValue().contains(s))
+                    || entry.getValue().contains(user) ){
+                //get fine grained permissions
+                PermissionReference pr = permissionModel.getPermissionReference(null,entry.getKey());
+                Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+                for(String perm : PermissionServiceHelper.PERMISSIONS){
+                    for(PermissionReference pRef : granteePermissions){
+                        if(pRef.getName().equals(perm)){
+                            permissions.put(perm, true);
+                        }
+                    }
+                }
+            }
+        }
+        if(user.equals(owner)){
+            permissions.put(CCConstants.PERMISSION_CC_PUBLISH,true);
+            PermissionReference pr = permissionModel.getPermissionReference(null,"FullControl");
+            Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+            for(String perm : PermissionServiceHelper.PERMISSIONS){
+                for(PermissionReference pRef : granteePermissions){
+                    if(pRef.getName().equals(perm)){
+                        permissions.put(perm, true);
+                    }
+                }
+            }
+
+            //Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+            //Set<PermissionReference> immediateGranteePermissions = permissionModel.getImmediateGranteePermissions(pr);
+
+        }
+
+
+        eduNodeRef.setPermissions(permissions);
+        long permMillisSingle = (System.currentTimeMillis() - millis);
+        return eduNodeRef;
     }
 
     enum CONTRIBUTOR_PROP {firstname,lastname,email,url,uid};

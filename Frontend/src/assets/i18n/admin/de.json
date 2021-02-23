@@ -281,6 +281,8 @@
             "STORE": "Store (Node-Speicherort):",
             "NODEREF": "UUID der gesuchten Node:",
             "LUCENE_QUERY": "Lucene-Query:",
+            "DSL_QUERY": "DSL-Query (JSON):",
+            "ELASTIC_RESPONSE": "Elastic-Rückgabe (JSON):",
             "LUCENE_AUTHORITIES": "Suchen als folgende Authorities:",
             "LUCENE_OFFSET": "Start bei:",
             "LUCENE_COUNT": "Anzahl Treffer:",
