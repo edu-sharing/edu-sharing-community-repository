@@ -14,6 +14,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
@@ -68,7 +69,6 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.Authentication;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -1178,7 +1178,7 @@ public class NodeDao {
 		});
 	}
 
-	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy, boolean createHandle) throws DAOException {
+	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy, boolean createHandle, HandleMode handleMode) throws DAOException {
 		
 		try {
 			
@@ -1205,7 +1205,9 @@ public class NodeDao {
 					nodeId, 
 					aces,
 					permissions.isInherited(), 
-					mailText, sendMail, sendCopy,createHandle);
+					mailText, sendMail, sendCopy,
+					createHandle, handleMode
+			);
 			
 			
 		} catch (Throwable t) {

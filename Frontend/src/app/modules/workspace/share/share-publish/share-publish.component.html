@@ -129,6 +129,39 @@
     </div>
     <div class="label-secondary">{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</div>
   </mat-checkbox>
+  <div *ngIf="doiActive" class="handle-mode">
+    <mat-radio-group [(ngModel)]="handleMode">
+      <mat-radio-button
+        value="distinct">
+        <app-multi-line-label>
+          <ng-container slot="label">
+            {{'WORKSPACE.SHARE.PUBLISH.DOI_DISTINCT' | translate}}
+          </ng-container>
+          <ng-container slot="description">
+            {{'WORKSPACE.SHARE.PUBLISH.DOI_DISTINCT_INFO' | translate}}
+          </ng-container>
+        </app-multi-line-label>
+      </mat-radio-button>
+      <mat-radio-button
+        [disabled]="!hasExactOneHandle()"
+        value="update">
+        <app-multi-line-label>
+          <ng-container slot="label">
+            {{'WORKSPACE.SHARE.PUBLISH.DOI_UPDATE' | translate}}
+          </ng-container>
+          <ng-container slot="description">
+            {{'WORKSPACE.SHARE.PUBLISH.DOI_UPDATE_INFO' | translate}}
+          </ng-container>
+        </app-multi-line-label>
+        <!--
+        <h5>
+          <span class="version-comment">{{ node | versionComment }}</span>
+          <span class="version-number">({{ node['properties']['cclom:version'][0] }})</span>
+        </h5>
+        -->
+      </mat-radio-button>
+    </mat-radio-group>
+  </div>
 </div>
 <div class="published-versions-container" *ngIf="shareModeCopy">
   <div class="published-versions">

@@ -2,13 +2,10 @@ package org.edu_sharing.restservices.node.v1;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -29,7 +26,7 @@ import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.dspace.xoai.model.oaipmh.Error;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -63,7 +60,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.json.JSONObject;
 
 @Path("/node/v1")
 @Api(tags = {"NODE v1"})
@@ -2016,6 +2012,7 @@ public class NodeApi  {
     	@ApiParam(value = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
     	@ApiParam(value = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
     	@ApiParam(value = "createHandle",required=false ) @QueryParam("createHandle") Boolean createHandle,
+    	@ApiParam(value = "handleMode",required=false ) @QueryParam("handleMode") HandleMode handleMode,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -2024,7 +2021,8 @@ public class NodeApi  {
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
 	    	if(createHandle == null) createHandle = false;
-	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy,createHandle);
+	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy,
+					createHandle,handleMode==null ? HandleMode.distinct : handleMode);
 	    	
 	    	return Response.status(Response.Status.OK).build();
 	

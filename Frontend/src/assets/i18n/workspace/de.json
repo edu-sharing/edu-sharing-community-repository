@@ -162,7 +162,11 @@
                 "NO_PUBLISH_COPY_PERMISSION": "Sie besitzen keine Berechtigung, eine Kopie zu veröffentlichen",
                 "VERSION_COMMENT": "Versionskommentar",
                 "VERSION_NUMBER": "Versionsnummer",
-                "VERSION_DATE": "Zeitpunkt der Veröffentlichung"
+                "VERSION_DATE": "Zeitpunkt der Veröffentlichung",
+                "DOI_DISTINCT": "Neuen Handle erzeugen",
+                "DOI_DISTINCT_INFO": "Ein neuer, eindeutiger Handle wird erzeugt. Die einzelnen Versionen haben zukünftig eigenständige Identifier. Beachten Sie, dass nach einmaliger Wahl dieser Option nachträglich keine Handle-Aktualisierung für dieses Element möglich ist",
+                "DOI_UPDATE": "Bestehenden Handle aktualisieren",
+                "DOI_UPDATE_INFO": "Die neue Version des Elements wird unter der bestehenden, alten Handle-Adresse zukünftig verfügbar gemacht. Die zuvor veröffentlichte Version ist über die Handle-Adresse nicht mehr direkt zugänglich"
             },
             "STATE": {
                 "PRIVATE": "Privat",

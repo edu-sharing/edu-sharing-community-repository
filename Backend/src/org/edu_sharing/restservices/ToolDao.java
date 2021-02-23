@@ -8,6 +8,7 @@ import java.util.List;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
@@ -44,7 +45,7 @@ public class ToolDao {
 					try {
 						NodeService nodeService = NodeServiceFactory.getNodeService(repoDao.getApplicationInfo().getAppId());
 						String nodeId = nodeService.createNode(companyHomeId, CCConstants.CCM_TYPE_MAP, nodeService.getNameProperty( CCConstants.TOOL_HOMEFOLDER));
-						PermissionServiceFactory.getPermissionService(null).setPermissions(nodeId, new ArrayList<ACE>(), false, null,null, false,false);
+						PermissionServiceFactory.getPermissionService(null).setPermissions(nodeId, new ArrayList<ACE>(), false, null,null, false,false, HandleMode.distinct);
 						return nodeId;
 		}catch(Throwable e) {
 			throw new Exception(e);

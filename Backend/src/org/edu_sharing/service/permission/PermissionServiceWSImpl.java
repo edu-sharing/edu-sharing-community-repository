@@ -32,7 +32,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 
 	@Override
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
-			String _mailText, Boolean _sendMail, Boolean _sendCopy, Boolean createHandle) throws Throwable {
+			String _mailText, Boolean _sendMail, Boolean _sendCopy, Boolean createHandle, HandleMode handleMode) throws Throwable {
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 
 	@Override
 	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy, Boolean createHandle) throws Throwable {
+							   Boolean sendCopy, Boolean createHandle, HandleMode handleMode) throws Throwable {
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import java.sql.SQLException;
 
 import com.typesafe.config.Config;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
@@ -80,6 +81,10 @@ public class HandleService {
 		HSAdapter adapter = HSAdapterFactory.newInstance(id,idIndex,getPrivateKeyBytes(),null);
 		adapter.createHandle(handle, values);
 		return handle;
+	}
+	public String updateHandle(String handle, final HandleValue[] values) throws Exception {
+		// @TODO
+		throw new NotImplementedException("updateHandle");
 	}
 	
 	

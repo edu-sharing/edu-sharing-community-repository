@@ -41,6 +41,7 @@ export class SharePublishComponent implements OnChanges {
   doiActive: boolean;
   doiDisabled: boolean;
   isCopy: boolean;
+  handleMode: 'distinct' | 'update' = 'distinct';
   republish = false;
   private publishedVersions: Node[] = [];
   allPublishedVersions: Node[];
@@ -184,9 +185,8 @@ export class SharePublishComponent implements OnChanges {
           (this.republish && !this.currentVersionPublished() || !this.isCopy)) {
         this.nodeService.publishCopy(this.node.ref.id).subscribe(({node}) => {
           if (this.doiPermission && !this.doiDisabled && this.doiActive) {
-            console.log('create handle');
             this.nodeService.setNodePermissions(node.ref.id,
-                null, false, '', false, true
+                {permissions: [], inherited: this.inherited}, false, '', false, true, this.handleMode
             ).subscribe(() => {
               observer.next(node);
               observer.complete();
@@ -232,6 +232,7 @@ export class SharePublishComponent implements OnChanges {
       }
       virtual.virtual = true;
       this.allPublishedVersions = [virtual].concat(this.publishedVersions);
+      this.handleMode = this.hasExactOneHandle() ? 'update': 'distinct';
     } else {
       this.allPublishedVersions = this.publishedVersions;
     }
@@ -253,6 +254,12 @@ export class SharePublishComponent implements OnChanges {
     this.doiActive = this.republish && this.doiPermission;
     this.updatePublishedVersions();
   }
+
+    hasExactOneHandle() {
+        return new Set(this.allPublishedVersions.filter(
+            (v) => !v.virtual && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]
+        ).map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0])).size === 1;
+    }
 }
 export enum ShareMode {
   Direct = 'direct',

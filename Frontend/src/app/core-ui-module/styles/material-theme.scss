@@ -252,6 +252,9 @@ input.mat-input-element, mat-label, .mat-select-value{
   line-height: 17pt !important;
   font-size: 1rem;
   color: $textMain;
+    > .label-secondary{
+        line-height: normal !important;
+    }
 }
 .mat-flat-button,.mat-raised-button{
   min-height: 36px;
