@@ -21,6 +21,7 @@ import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import {WorkspaceLicenseComponent} from './license/license.component';
 
 
 export enum DialogType {
@@ -40,6 +41,7 @@ export enum DialogType {
 export class WorkspaceManagementDialogsComponent  {
   readonly BulkBehaviour = BulkBehavior;
   @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef : MdsEditorWrapperComponent;
+  @ViewChild(WorkspaceLicenseComponent) licenseComponent : WorkspaceLicenseComponent;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() uploadMultiple = true;
