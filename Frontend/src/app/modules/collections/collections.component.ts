@@ -125,7 +125,14 @@ export class CollectionsMainComponent {
     addMaterialSearchOptionItem = new OptionItem(
         'OPTIONS.SEARCH_OBJECT',
         'redo',
-        () => this.mainNavRef.createMenu.pickMaterialFromSearch(),
+        () => {
+            UIHelper.getCommonParameters(this.route).subscribe(params => {
+                params.addToCollection = this.collectionContent.node.ref.id;
+                this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+                    queryParams: params,
+                });
+            });
+        }
     );
     addMaterialBinaryOptionItem = new OptionItem(
         'OPTIONS.ADD_OBJECT',
