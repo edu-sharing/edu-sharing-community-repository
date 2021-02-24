@@ -1,4 +1,4 @@
-import {Component, OnInit, Input, SimpleChanges, OnChanges} from '@angular/core';
+import {Component, OnInit, Input, SimpleChanges, OnChanges, NgZone} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
 import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';
@@ -11,6 +11,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {NodeHelperService} from '../../../../../core-ui-module/node-helper.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {MdsWidgetValue, Values} from '../../types';
+import {UIHelper} from '../../../../../core-ui-module/ui-helper';
 
 @Component({
     selector: 'app-mds-editor-widget-license',
@@ -35,6 +36,7 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         private connector: RestConnectorService,
         private mainnav: MainNavService,
         private sanitizer: DomSanitizer,
+        private ngZone: NgZone,
         public translate: TranslateService,
         private nodeHelper: NodeHelperService,
         public mdsEditorValues: MdsEditorInstanceService,
@@ -70,6 +72,10 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
     }
     openLicense(): void {
         this.mainnav.getDialogs().nodeLicense = this.mdsEditorValues.nodes$.value;
+        // increase priority to have license in foreground
+        UIHelper.waitForComponent(this.ngZone, this.mainnav.getDialogs(), 'licenseComponent').subscribe(() =>
+            this.mainnav.getDialogs().licenseComponent.priority = 2
+        );
         this.mainnav.getDialogs().onRefresh.first().subscribe((nodes: Node[]) =>
             this.nodes = nodes
         );
