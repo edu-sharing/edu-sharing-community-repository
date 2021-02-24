@@ -39,11 +39,11 @@
         <button mat-button color="primary" (click)="navigateBack()"><i icon="arrow_back"></i></button>
         <h5 class="mat-heading-5">{{currentRoot.title ? currentRoot.title : currentRoot.name}}</h5>
     </div>
-    <listTable
+    <app-custom-node-list-wrapper
         [viewType]="2"
         [hasHeading]="false"
         [optionItems]="[createCollectionOptionItem]"
-    ></listTable>
+    ></app-custom-node-list-wrapper>
     <div class="list-my">
         <app-custom-node-list-wrapper *ngIf="isLoadingMy || listMy.length"
                    [nodes]="listMy"
