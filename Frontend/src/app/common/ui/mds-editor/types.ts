@@ -115,6 +115,7 @@ export interface MdsDefinition {
 export interface MdsView {
     id: string;
     caption: string;
+    isExtended: boolean;
     html: string;
     icon: string;
     rel: ViewRelation;

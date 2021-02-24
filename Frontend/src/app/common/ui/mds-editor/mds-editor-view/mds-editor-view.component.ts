@@ -3,8 +3,8 @@ import {
     Component,
     ComponentFactoryResolver,
     ElementRef,
-    Input,
-    OnInit,
+    Input, OnChanges,
+    OnInit, SimpleChanges,
     Type,
     ViewChild,
     ViewContainerRef,
@@ -41,6 +41,8 @@ import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { MdsEditorWidgetFileUploadComponent } from '../widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
+import {trigger} from '@angular/animations';
+import {UIAnimation} from '../../../../core-module/ui/ui-animation';
 
 export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
@@ -57,8 +59,9 @@ type NativeWidgetClass = {
     selector: 'app-mds-editor-view',
     templateUrl: './mds-editor-view.component.html',
     styleUrls: ['./mds-editor-view.component.scss'],
+    animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_NORMAL))],
 })
-export class MdsEditorViewComponent implements OnInit, AfterViewInit {
+export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges {
     private static readonly nativeWidgets: {
         [widgetType in NativeWidgetType]: NativeWidgetClass;
     } = {
@@ -111,6 +114,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
     isEmbedded: boolean;
 
     private knownWidgetTags: string[];
+    show = true;
 
     constructor(
         private sanitizer: DomSanitizer,
@@ -129,6 +133,11 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit {
         this.html = this.getHtml();
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if(this.view) {
+            this.show = !this.view.isExtended;
+        }
+    }
     ngAfterViewInit(): void {
         // Wait for the change-detection cycle to finish.
         setTimeout(() => this.injectWidgets());

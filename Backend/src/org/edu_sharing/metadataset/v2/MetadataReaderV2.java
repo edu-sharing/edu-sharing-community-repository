@@ -614,6 +614,8 @@ public class MetadataReaderV2 {
 					template.setHtml(translateHtml(i18nPath,value));
 				if(name.equals("hideIfEmpty"))
 					template.setHideIfEmpty(value.equalsIgnoreCase("true"));
+				if(name.equals("extended"))
+					template.setExtended(Boolean.parseBoolean(value));
 			}
 			templates.add(template);
 

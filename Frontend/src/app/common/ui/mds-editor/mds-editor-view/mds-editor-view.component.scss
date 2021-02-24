@@ -1,6 +1,29 @@
+@import "../../../../core-ui-module/styles/variables";
+
 :host {
     display: flex;
     flex-direction: column;
+    width:100%;
+}
+h3{
+    display: flex;
+    align-items: center;
+    background-color: $workspaceMetadataBackground;
+    border-bottom: 1px solid #999;
+    font-weight:bold;
+    padding:5px 10px;
+
+    > span {
+        flex-grow: 1;
+    }
+    > i {
+        top: 0;
+        color: #666;
+        margin-right: 10px;
+    }
+    > button {
+        color: #666;
+    }
 }
 
 .content {
