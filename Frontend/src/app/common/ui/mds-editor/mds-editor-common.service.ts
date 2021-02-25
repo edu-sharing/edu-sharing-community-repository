@@ -83,6 +83,9 @@ export class MdsEditorCommonService {
         if (!areAllEqual(requestedMdsIds)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_MDS_COMBINATION');
         }
+        if(nodes.filter((n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]).length > 0) {
+            throw new UserPresentableError('MDS.ERROR_ELEMENT_TYPE_UNSUPPORTED');
+        }
         return requestedMdsIds[0];
     }
 

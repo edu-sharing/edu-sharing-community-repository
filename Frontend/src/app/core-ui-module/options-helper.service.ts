@@ -983,6 +983,7 @@ export class OptionsHelperService {
             management.nodeSidebarChange.emit(management.nodeSidebar);
 
         });
+        metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         metadataSidebar.scopes = [Scope.WorkspaceList];
         metadataSidebar.constrains = [Constrain.NoBulk];
         metadataSidebar.group = DefaultGroups.Toggles;
