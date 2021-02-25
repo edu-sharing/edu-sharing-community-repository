@@ -115,7 +115,7 @@ public class BulkServiceImpl implements BulkService {
 							propertiesNative
 					));
 			// 2. versioning (use the regular service for proper versioning)
-			NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesNative);
+			NodeServiceFactory.getLocalService().createVersion(existing.getId());
 		}else{
 			String blocked = NodeServiceHelper.getProperty(existing, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED);
 			if (Boolean.parseBoolean(blocked)) {
@@ -129,13 +129,13 @@ public class BulkServiceImpl implements BulkService {
 			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, resetVersion ? CCConstants.VERSION_COMMENT_BULK_CREATE : CCConstants.VERSION_COMMENT_BULK_UPDATE);
 			NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesNative);
 			// version the previous state
-			NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesNative);
+			NodeServiceFactory.getLocalService().createVersion(existing.getId());
 			if(propertiesKeep != null){
 				propertiesKeep = getCleanProps(existing, propertiesKeep);
 				propertiesKeep.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC);
 				NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesKeep);
 				// 2. versioning
-				NodeServiceFactory.getLocalService().createVersion(existing.getId(), propertiesKeep);
+				NodeServiceFactory.getLocalService().createVersion(existing.getId());
 			}
 		}
 		if(aspects != null) {

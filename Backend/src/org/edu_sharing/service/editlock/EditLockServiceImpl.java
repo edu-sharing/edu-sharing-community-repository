@@ -114,7 +114,7 @@ public class EditLockServiceImpl implements EditLockService {
 				public Void doWork() throws Exception {
 					try {
 						MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
-						apiClient.createVersion(finalNodeRef.getId(), null);
+						apiClient.createVersion(finalNodeRef.getId());
 					}catch(Throwable e){
 						logger.error(e.getMessage(), e);
 					}

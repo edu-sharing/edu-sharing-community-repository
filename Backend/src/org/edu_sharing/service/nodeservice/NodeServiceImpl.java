@@ -15,6 +15,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
@@ -902,8 +903,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return parentNodeRef;
 	}
 
-	public void createVersion(String nodeId, HashMap _properties) throws Exception{
-		apiClient.createVersion(nodeId, _properties);
+	public void createVersion(String nodeId) throws Exception{
+		apiClient.createVersion(nodeId);
 	}
 
 	@Override
@@ -1005,32 +1006,37 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return AuthenticationUtil.runAsSystem(() -> {
 				String container = NodeServiceHelper.getContainerId(parent, pattern);
 				NodeRef oldNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-				NodeRef newNode = null;
+				NodeRef newNode;
 				try {
 					newNode = copyNode(nodeId, container, true);
 				} catch (Throwable t) {
 					throw new RuntimeException(t);
 				}
-				policyBehaviourFilter.disableBehaviour(newNode);
-				// replace owner, creator & modifier
-				setPublishedCopyProperties(oldNodeRef, newNode, owner);
-				setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
-				setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
-				setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
-						oldNodeRef);
-				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
-				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
-				for(ChildAssociationRef child : this.getChildAssocs(newNode)){
-					policyBehaviourFilter.disableBehaviour(child.getChildRef());
-					setPublishedCopyProperties(oldNodeRef, child.getChildRef(), owner);
-					policyBehaviourFilter.enableBehaviour(child.getChildRef());
-				}
-				serviceRegistry.getPermissionService().deletePermissions(newNode);
-				setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
-						new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
-						true);
-				policyBehaviourFilter.enableBehaviour(newNode);
-				return newNode.getId();
+				return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+					// disable behaviour so no version data is altered externally
+					policyBehaviourFilter.disableBehaviour(newNode);
+					// replace owner, creator & modifier
+					setPublishedCopyProperties(oldNodeRef, newNode, owner);
+					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
+					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
+					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
+							oldNodeRef);
+					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
+					//deleteVersionHistory(newNode.getId());
+					//createVersion(newNode.getId());
+					for (ChildAssociationRef child : this.getChildAssocs(newNode)) {
+						policyBehaviourFilter.disableBehaviour(child.getChildRef());
+						setPublishedCopyProperties(oldNodeRef, child.getChildRef(), owner);
+						policyBehaviourFilter.enableBehaviour(child.getChildRef());
+					}
+					serviceRegistry.getPermissionService().deletePermissions(newNode);
+					setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
+							new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
+							true);
+					policyBehaviourFilter.enableBehaviour(newNode);
+					return newNode.getId();
+				});
 			});
 		});
 

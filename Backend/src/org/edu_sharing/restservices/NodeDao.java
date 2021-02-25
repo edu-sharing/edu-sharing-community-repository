@@ -101,8 +101,13 @@ public class NodeDao {
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
-			versionLabel=null;
+			versionLabel = null;
 		NodeDao nodeDao=getNode(repoDao,nodeId,Filter.createShowAllFilter());
+
+		// published nodes don't have version histories!
+		if(nodeDao.isPublishedCopy()){
+			versionLabel = null;
+		}
 		if(versionLabel!=null) {
 			nodeDao.version = versionLabel;
 			nodeDao.nodeProps = nodeDao.getNodeHistory().get(nodeDao.version);
@@ -756,8 +761,7 @@ public class NodeDao {
 			this.nodeService.updateNode(nodeId,transformProperties(properties));
 	
 			// 2. versioning
-			this.nodeService.createVersion(nodeId,
-					transformProperties(properties));
+			this.nodeService.createVersion(nodeId);
 	
 			return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
 			
@@ -903,6 +907,10 @@ public class NodeDao {
 
 	private boolean isCollectionReference() {
 		return aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+	}
+
+	private boolean isPublishedCopy() {
+		return getNativeProperties().get(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL) != null;
 	}
 
 	private void fillNodeReference(CollectionReference reference) throws DAOException {

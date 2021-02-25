@@ -275,7 +275,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 								}
 								
 								if(!exists) {
-									new MCAlfrescoAPIClient().createVersion(nodeId,null);
+									new MCAlfrescoAPIClient().createVersion(nodeId);
 								}
 							}
 						}else{

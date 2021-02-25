@@ -2242,25 +2242,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 	}
 
-	public synchronized void createVersion(String nodeId, HashMap _properties) throws Exception {
+	public synchronized void createVersion(String nodeId) throws Exception {
 
-		Map<String, Serializable> properties = null;
-		if (_properties != null) {
-			properties = transformPropMapToStringKeys(_properties);
-		}
 		VersionService versionService = serviceRegistry.getVersionService();
 		NodeRef nodeRef = new NodeRef(storeRef, nodeId);
-
+		Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
 		if (versionService.getVersionHistory(nodeRef) == null) {
 
 			// see https://issues.alfresco.com/jira/browse/ALF-12815
 			// alfresco-4.0.d fix version should start with 1.0 not with 0.1
-			Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
 			transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
-			versionService.createVersion(nodeRef, transFormedProps);
-		} else {
-			versionService.createVersion(nodeRef, transformQNameKeyToString(nodeService.getProperties(nodeRef)));
 		}
+		versionService.createVersion(nodeRef, transFormedProps);
+
 
 	}
 

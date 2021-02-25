@@ -152,6 +152,9 @@
    	 	<property name="policyComponent">
             <ref bean="policyComponent"/>
         </property>
+        <property name="policyBehaviourFilter">
+            <ref bean="policyBehaviourFilter"/>
+        </property>
          <property name="nodeService">
             <ref bean="nodeService" />
         </property>

@@ -95,7 +95,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public void createVersion(String nodeId, HashMap _properties) throws Exception {
+	public void createVersion(String nodeId) throws Exception {
 	}
 
 	@Override

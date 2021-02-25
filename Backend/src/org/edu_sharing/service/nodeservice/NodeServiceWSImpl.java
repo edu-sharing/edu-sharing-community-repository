@@ -92,7 +92,7 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 	}
 	
 	@Override
-	public void createVersion(String nodeId, HashMap _properties) throws Exception {
+	public void createVersion(String nodeId) throws Exception {
 	}
 	
 	@Override

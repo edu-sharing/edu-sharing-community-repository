@@ -520,12 +520,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				 */
 				Map<QName, Serializable> props = nodeService.getProperties(nodeRef);
 				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
-				HashMap<String, Object> vprops = new HashMap<String, Object>();
-				for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
-					vprops.put(entry.getKey().getPrefixString(), entry.getValue());
-				}
 				try {
-					new MCAlfrescoAPIClient().createVersion(_nodeId, vprops);
+					new MCAlfrescoAPIClient().createVersion(_nodeId);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					logger.error(e1.getMessage(), e1);

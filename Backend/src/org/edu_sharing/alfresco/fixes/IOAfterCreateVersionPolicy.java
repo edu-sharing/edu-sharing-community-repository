@@ -1,5 +1,6 @@
 package org.edu_sharing.alfresco.fixes;
 
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.version.VersionServicePolicies;
@@ -31,7 +32,8 @@ public class IOAfterCreateVersionPolicy implements VersionServicePolicies.AfterC
 	 * Policy component
 	 */
 	protected PolicyComponent policyComponent;
-	
+	private BehaviourFilter policyBehaviourFilter;
+
 	/**
 	 * Spring bean init method
 	 */
@@ -42,7 +44,10 @@ public class IOAfterCreateVersionPolicy implements VersionServicePolicies.AfterC
 	
 	@Override
 	public void afterCreateVersion(NodeRef versionableNode, Version version) {
-		
+		/*if(!policyBehaviourFilter.isEnabled(versionableNode)){
+			logger.info("policy filter is currently disabled, do not alter version for node " + versionableNode);
+			return;
+		}*/
 		/**
 		 * usage looks on LOM_PROP_LIFECYCLE_VERSION to find out what has to be rendered. 
 		 * cause this version property is also set by an revert to the reverted Label of the reverted Version.
@@ -60,5 +65,8 @@ public class IOAfterCreateVersionPolicy implements VersionServicePolicies.AfterC
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
 	}
-	
+
+	public void setPolicyBehaviourFilter(BehaviourFilter policyBehaviourFilter) {
+		this.policyBehaviourFilter = policyBehaviourFilter;
+	}
 }

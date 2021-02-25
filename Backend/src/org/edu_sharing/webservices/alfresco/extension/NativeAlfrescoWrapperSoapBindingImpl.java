@@ -1005,7 +1005,7 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 		try {
 					
 			MCAlfrescoAPIClient mcAlfrescoAPIClient = new MCAlfrescoAPIClient();
-			mcAlfrescoAPIClient.createVersion(nodeId, null);
+			mcAlfrescoAPIClient.createVersion(nodeId);
 		
 		} catch(Throwable e) {
 			logger.error(e.getMessage(), e);
