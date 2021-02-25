@@ -150,7 +150,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
-  @Output() onStoredAddToCollection=new EventEmitter();
+  @Output() onStoredAddToCollection=new EventEmitter<{collection: Node, references: Node[]}>();
   _nodeDelete: Node[];
   _nodeMetadata: Node[];
   _nodeSimpleEdit: Node[];
@@ -531,11 +531,12 @@ export class WorkspaceManagementDialogsComponent  {
       this.dialogTitle=null;
     }
     this.toast.showProgressDialog();
-    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list,()=>{
+    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list,(nodes) => {
         this.toast.closeModalDialog();
-       this.onStoredAddToCollection.emit(collection);
-      if(callback)
-        callback();
+        this.onStoredAddToCollection.emit({collection, references: nodes});
+        if(callback) {
+            callback();
+        }
     });
   }
 
