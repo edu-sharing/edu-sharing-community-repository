@@ -40,14 +40,14 @@
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
       [matChipInputAddOnBlur]="false"
       (matChipInputTokenEnd)="onInputTokenEnd($event)"
-      (blur)="blurEvent($event)"
+      (blur)="onBlurInput($event)"
     />
     <button
       matSuffix
       mat-icon-button
       class="mat-button-select-arrow"
       *ngIf="showDropdownArrow"
-      (click)="trigger.openPanel(); $event.stopPropagation()"
+      (click)="toggleAutoCompletePanel(); $event.stopPropagation()"
       [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
     >
       <span class="mat-select-arrow"></span>

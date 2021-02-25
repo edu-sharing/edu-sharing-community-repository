@@ -104,6 +104,32 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         }
     }
 
+    onBlurInput(event: FocusEvent): void {
+        // ignore mat option focus to prevent resetting before selection is done
+        if ((event.relatedTarget as HTMLElement)?.tagName === 'MAT-OPTION') {
+            return;
+        }
+        this.inputControl.setValue(null);
+        if ((event.relatedTarget as HTMLElement)?.tagName === 'MAT-CHIP') {
+            // `matAutocomplete` doesn't seem to close the autocomplete panel when focus goes to
+            // chips, however, navigating the autocomplete options by keyboard doesn't work when the
+            // input doesn't have the focus.
+            //
+            // We don't generally close the panel on blur, so the toggle button doesn't get
+            // confused.
+            this.trigger.closePanel();
+        }
+    }
+
+    toggleAutoCompletePanel(): void {
+        if (this.trigger.panelOpen) {
+            this.trigger.closePanel();
+        } else {
+            this.trigger.openPanel();
+            this.input.nativeElement.focus();
+        }
+    }
+
     remove(toBeRemoved: DisplayValue): void {
         const values: DisplayValue[] = this.chipsControl.value;
         if (values.includes(toBeRemoved)) {
@@ -195,13 +221,5 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
                     ),
             ),
         );
-    }
-
-    blurEvent(event: FocusEvent) {
-        // ignore mat option focus to prevent resetting before selection is done
-        if((event.relatedTarget as HTMLElement)?.tagName === 'MAT-OPTION') {
-            return;
-        }
-        this.inputControl.setValue(null);
     }
 }

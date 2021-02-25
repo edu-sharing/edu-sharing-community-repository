@@ -186,7 +186,7 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
 // https://netbasal.com/advanced-angular-implementing-a-reusable-autocomplete-component-9908c2f04f5
 // TODO: replace with built-in event after upgrade to Angular 10.
 function overlayClickOutside(overlayRef: OverlayRef, origin: HTMLElement) {
-    return fromEvent<MouseEvent>(document, 'click').pipe(
+    return fromEvent<MouseEvent>(document, 'mousedown').pipe(
         filter((event) => {
             const clickTarget = event.target as HTMLElement;
             const notOrigin = !origin.contains(clickTarget);
