@@ -481,7 +481,6 @@ export class ListTableComponent implements OnChanges, EventListener {
     private columnsOriginal: ListItem[];
     columnsVisible: ListItem[];
     currentDragColumn: ListItem;
-    optionsAlways: OptionItem[] = [];
     private repositories: Repository[];
 
     constructor(
@@ -1278,5 +1277,9 @@ export class ListTableComponent implements OnChanges, EventListener {
             }
         }
         return null;
+    }
+
+    getOptionsAlways() {
+        return this._options.filter((o) => o.showAlways);
     }
 }
