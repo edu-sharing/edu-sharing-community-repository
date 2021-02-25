@@ -4,11 +4,13 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.Normalizer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import bsh.StringUtil;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
@@ -29,6 +31,7 @@ import org.alfresco.service.namespace.QNamePattern;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -830,6 +833,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 				if (compare == 0) {
 					if (prop1 instanceof String && prop2 instanceof String) {
+						// normalize umlauts
+						prop1 = StringUtils.stripAccents((String)prop1);
+						prop2 = StringUtils.stripAccents((String)prop2);
 						compare = ((String) prop1).compareToIgnoreCase((String) prop2);
 					} else if (prop1 instanceof Date && prop2 instanceof Date) {
 						compare = ((Date) prop1).compareTo((Date) prop2);
