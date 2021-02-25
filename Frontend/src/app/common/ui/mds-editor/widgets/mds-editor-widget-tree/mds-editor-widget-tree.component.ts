@@ -1,28 +1,25 @@
 import { CdkConnectedOverlay, ConnectedPosition, OverlayRef } from '@angular/cdk/overlay';
-import {AfterViewInit, ApplicationRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import {BehaviorSubject, fromEvent, merge, Observable, ReplaySubject} from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
+import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType } from '../../types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
-import {TranslateService} from '@ngx-translate/core';
-import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
-import {MatButton} from '@angular/material/button';
+import { FocusOrigin } from '@angular/cdk/a11y';
 @Component({
     selector: 'app-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
     styleUrls: ['./mds-editor-widget-tree.component.scss'],
 })
-export class MdsEditorWidgetTreeComponent
-    extends MdsEditorWidgetBase
-    implements OnInit, AfterViewInit, OnDestroy {
+export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements OnInit, OnDestroy {
     @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
-    @ViewChild('input') input: ElementRef<HTMLElement>;
+    @ViewChild('chipList', { read: ElementRef }) chipList: ElementRef<HTMLElement>;
     @ViewChild('treeRef') treeRef: MdsEditorWidgetTreeCoreComponent;
-    @ViewChild('arrowButton') arrowButton: MatButton;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
 
@@ -31,6 +28,11 @@ export class MdsEditorWidgetTreeComponent
     chipsControl: FormControl;
     indeterminateValues$: BehaviorSubject<string[]>;
     overlayIsVisible = false;
+    /**
+     * Briefly set to `true` in situations where the input field might get focus as result of a
+     * user's action, but we don't want to open the overlay.
+     */
+    preventOverlayOpen = false;
     readonly overlayPositions: readonly ConnectedPosition[] = [
         {
             originX: 'center',
@@ -52,11 +54,7 @@ export class MdsEditorWidgetTreeComponent
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-    constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        private applicationRef: ApplicationRef
-    ) {
+    constructor(mdsEditorInstance: MdsEditorInstanceService, translate: TranslateService) {
         super(mdsEditorInstance, translate);
     }
 
@@ -91,21 +89,15 @@ export class MdsEditorWidgetTreeComponent
         );
     }
 
-    ngAfterViewInit(): void {
-        merge(
-            fromEvent(this.input.nativeElement, 'focus'),
-            fromEvent(this.input.nativeElement, 'keyup'),
-            fromEvent(this.input.nativeElement, 'mouseup')
-        ).pipe(takeUntil(this.destroyed$))
-            .subscribe(() => {
-                this.openOverlay();
-            });
-
-    }
-
     ngOnDestroy() {
         this.destroyed$.next(true);
         this.destroyed$.complete();
+    }
+
+    onInputFocusChange(origin: FocusOrigin): void {
+        if (!this.preventOverlayOpen && origin && origin !== 'program') {
+            this.openOverlay();
+        }
     }
 
     revealInTree(value: DisplayValue): void {
@@ -116,25 +108,34 @@ export class MdsEditorWidgetTreeComponent
     }
 
     openOverlay(): void {
-        // Don't interfere with change detection
-        setTimeout(async () => {
-            this.overlayIsVisible = true;
-            setTimeout(() => {
-                this.treeRef.input.nativeElement.focus()
-            });
-            // Wait for overlay
-            setTimeout(() => {
-                overlayClickOutside(
-                    this.overlay.overlayRef,
-                    this.overlay.origin.elementRef.nativeElement,
-                ).subscribe(() => this.closeOverlay());
-            });
+        if (this.overlayIsVisible) {
+            this.treeRef.input.nativeElement.focus();
+            return;
+        }
+        this.overlayIsVisible = true;
+        // Wait for overlay
+        setTimeout(() => {
+            overlayClickOutside(
+                this.overlay.overlayRef,
+                this.overlay.origin.elementRef.nativeElement,
+            ).subscribe(() => this.closeOverlay());
         });
     }
 
     closeOverlay(): void {
         this.overlayIsVisible = false;
-        this.arrowButton.focus();
+        this.preventOverlayOpen = true;
+        setTimeout(() => {
+            this.preventOverlayOpen = false;
+        });
+    }
+
+    toggleOverlay(): void {
+        if (this.overlayIsVisible) {
+            this.closeOverlay();
+        } else {
+            this.openOverlay();
+        }
     }
 
     onOverlayKeydown(event: KeyboardEvent) {
@@ -144,7 +145,7 @@ export class MdsEditorWidgetTreeComponent
         if (event.key === 'Escape') {
             event.stopPropagation();
             this.closeOverlay();
-        } else if (targetInsideHost && event.key === 'Tab') {
+        } else if (event.key === 'Tab') {
             this.closeOverlay();
         } else {
             const wasHandledByTree = this.treeCoreComponent.handleKeydown(event.code);
@@ -157,7 +158,7 @@ export class MdsEditorWidgetTreeComponent
     remove(toBeRemoved: DisplayValue): void {
         const treeNode = this.tree.findById(toBeRemoved.key);
         // old values are may not available in tree, so check for null
-        if(treeNode) {
+        if (treeNode) {
             treeNode.isChecked = false;
             treeNode.isIndeterminate = false;
         }
@@ -170,6 +171,10 @@ export class MdsEditorWidgetTreeComponent
                 this.indeterminateValues$.value.filter((value) => value !== toBeRemoved.key),
             );
         }
+        this.preventOverlayOpen = true;
+        setTimeout(() => {
+            this.preventOverlayOpen = false;
+        });
     }
 
     onValuesChange(values: DisplayValue[]): void {

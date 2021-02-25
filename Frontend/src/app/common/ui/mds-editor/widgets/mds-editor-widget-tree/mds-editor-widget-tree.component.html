@@ -7,7 +7,12 @@
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
 >
-  <mat-chip-list #chipList [formControl]="chipsControl" [attr.aria-labelledby]="container.labelId">
+  <mat-chip-list
+    #chipList
+    [formControl]="chipsControl"
+    [attr.aria-labelledby]="container.labelId"
+    (click)="$event.stopPropagation(); $event.preventDefault()"
+  >
     <mat-chip
       *ngFor="let value of chipsControl.value"
       [selectable]="false"
@@ -15,23 +20,26 @@
       [matTooltip]="value.hint"
       [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
       (click)="revealInTree(value)"
+      (keydown.enter)="revealInTree(value)"
       (removed)="remove(value)"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
     <input
-      #input
       autocomplete="off"
       [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
       [matChipInputFor]="chipList"
+      (click)="openOverlay()"
+      cdkMonitorElementFocus
+      (cdkFocusChange)="onInputFocusChange($event)"
     />
     <button
       matSuffix
       mat-icon-button
       class="mat-button-select-arrow"
-      (click)="input.focus()"
-      #arrowButton
+      (click)="toggleOverlay()"
+      [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
     >
       <span class="mat-select-arrow"></span>
     </button>
@@ -49,6 +57,8 @@
 >
   <div class="suggestion-card">
     <app-mds-editor-widget-tree-core
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="true"
       #treeRef
       [widget]="widget"
       [tree]="tree"
