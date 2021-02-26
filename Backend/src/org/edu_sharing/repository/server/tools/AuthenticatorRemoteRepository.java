@@ -220,6 +220,7 @@ public class AuthenticatorRemoteRepository {
 		}else{
 			String message = (response.getStatusInfo() != null)? response.getStatusInfo().toString() : null;
 			logger.error("remote auth failed:" + response.getStatus()+" "+response.getStatusInfo());
+			logger.error("url called: " + currentWebTarget.getUri().toString());
 			RemoteAuthenticationException e = new RemoteAuthenticationException(response.getStatus(),message);
 			throw e;
 		}
