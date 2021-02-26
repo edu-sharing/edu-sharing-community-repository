@@ -180,7 +180,8 @@ export class NodeHelperService {
    */
   public downloadNode(node:any,version=RestConstants.NODE_VERSION_CURRENT, metadata = false) {
     this.downloadUrl(node.downloadUrl+
-        (version && version!=RestConstants.NODE_VERSION_CURRENT ? '&version='+version : '') + '&metadata='+metadata,node.name);
+        (version && version!=RestConstants.NODE_VERSION_CURRENT ? '&version='+version : '') + '&metadata='+metadata,
+        node.name + (metadata ? '.txt' : ''));
   }
 
 

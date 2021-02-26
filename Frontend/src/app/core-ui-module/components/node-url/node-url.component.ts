@@ -20,8 +20,9 @@ import {NodeHelperService} from '../../node-helper.service';
             [routerLink]="get('routerLink')"
             [state]="getState()"
             [queryParams]="get('queryParams')"
+            queryParamsHandling="merge"
             [attr.aria-label]="node.name"
-        >
+>
             <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
     `,
