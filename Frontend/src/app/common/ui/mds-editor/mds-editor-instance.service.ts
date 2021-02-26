@@ -676,7 +676,8 @@ export class MdsEditorInstanceService implements OnDestroy {
         nodes?: Node[],
         values?: Values,
     ): Promise<void> {
-        if (this.mdsId !== mdsId || this.repository !== repository || this.groupId !== groupId) {
+        if (this.mdsId !== mdsId || this.repository !== repository ||
+            this.groupId !== groupId || !this.mdsDefinition$.value) {
             this.mdsId = mdsId;
             this.repository = repository;
             this.groupId = groupId;

@@ -241,10 +241,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     private handleError(error: any): void {
+        console.error(error);
         if (error instanceof UserPresentableError || error.message) {
             this.toast.error(null, error.message);
         } else {
-            console.error(error);
             this.toast.error(error);
         }
         this.onCancel.emit();
