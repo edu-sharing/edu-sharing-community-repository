@@ -1,4 +1,5 @@
 import { Directive, EventEmitter, Output, HostListener } from '@angular/core';
+import {UIService} from '../../core-module/rest/services/ui.service';
 
 export interface DistinctClickEvent {
     event: MouseEvent;
@@ -35,13 +36,16 @@ export class DistinctClickDirective {
     private pointerupTime: number;
     private pointerType: 'mouse' | 'touch' | 'pen';
 
-    constructor() {}
+    constructor(private uiService: UIService) {}
 
     @HostListener('click', ['$event'])
     onClick(event: MouseEvent) {
         const distinctClickEvent: DistinctClickEvent = { event };
         if (this.clickMatchesPointerup(event)) {
             distinctClickEvent.pointerType = this.pointerType;
+        } else {
+            // fallback for safari 12 / old ios devices
+            distinctClickEvent.pointerType = this.uiService.isMobile() ? 'touch' : 'mouse';
         }
         this.distinctClick.emit(distinctClickEvent);
     }
@@ -50,7 +54,9 @@ export class DistinctClickDirective {
     onPointerup(event: PointerEvent) {
         this.pointerupTarget = event.target;
         this.pointerupTime = new Date().getTime();
-        this.pointerType = event.pointerType as 'mouse' | 'touch' | 'pen';
+        // pointerType fallback to touch for safari 12 / old ios devices
+        this.pointerType = event.pointerType ? (event.pointerType as 'mouse' | 'touch' | 'pen') :
+                        this.uiService.isMobile() ? 'touch' : 'mouse';
     }
 
     private clickMatchesPointerup(clickEvent: MouseEvent): boolean {
