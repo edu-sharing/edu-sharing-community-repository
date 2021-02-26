@@ -83,8 +83,9 @@ public class HandleService {
 		return handle;
 	}
 	public String updateHandle(String handle, final HandleValue[] values) throws Exception {
-		// @TODO
-		throw new NotImplementedException("updateHandle");
+		HSAdapter adapter = HSAdapterFactory.newInstance(id,idIndex,getPrivateKeyBytes(),null);
+		adapter.updateHandleValues(handle, values);
+		return handle;
 	}
 	
 	
