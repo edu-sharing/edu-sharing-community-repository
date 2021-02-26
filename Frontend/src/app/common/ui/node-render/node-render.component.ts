@@ -57,10 +57,12 @@ import {CommentsListComponent} from '../../../modules/management-dialogs/node-co
 import {GlobalContainerComponent} from '../global-container/global-container.component';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
 import {ActionbarComponent} from '../actionbar/actionbar.component';
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
-import {RestTrackingService} from "../../../core-module/rest/services/rest-tracking.service";
+import {
+    OPTIONS_HELPER_CONFIG,
+    OptionsHelperService
+} from '../../../core-ui-module/options-helper.service';
+import {RestTrackingService} from '../../../core-module/rest/services/rest-tracking.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {ReplaySubject} from 'rxjs';
 
 declare var jQuery:any;
 declare var window: any;
