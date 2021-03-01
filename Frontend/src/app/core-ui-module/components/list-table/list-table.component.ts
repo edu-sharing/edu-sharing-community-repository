@@ -1280,6 +1280,6 @@ export class ListTableComponent implements OnChanges, EventListener {
     }
 
     getOptionsAlways() {
-        return this._options.filter((o) => o.showAlways);
+        return this._options?.filter((o) => o.showAlways);
     }
 }
