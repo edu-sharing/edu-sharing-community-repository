@@ -486,7 +486,7 @@ export class ListTableComponent implements OnChanges, EventListener {
     constructor(
         private ui: UIService,
         private translate: TranslateService,
-        private cd: ChangeDetectorRef,
+        private changeDetectorRef: ChangeDetectorRef,
         private nodeHelper: NodeHelperService,
         private config: ConfigurationService,
         private changes: ChangeDetectorRef,
@@ -550,7 +550,7 @@ export class ListTableComponent implements OnChanges, EventListener {
                     .getRepositories()
                     .subscribe((data: NetworkRepositories) => {
                         this.repositories = data.repositories;
-                        this.cd.detectChanges();
+                        this.changeDetectorRef.detectChanges();
                     });
             });
         });

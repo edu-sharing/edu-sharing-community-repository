@@ -1,4 +1,6 @@
 import {
+    ApplicationRef,
+    ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
     ComponentRef, ContentChild,
@@ -125,6 +127,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         }
         // Pass changes to the wrapped custom-node-list component and trigger an
         // update.
+        // tslint:disable-next-line:forin
         for (const key in changes) {
             this.componentRef.instance[key] = changes[key].currentValue;
         }
@@ -133,6 +136,9 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         }
         // attach the template ref
         this.componentRef.instance.itemContentRef = this.itemContentRef;
+
+        // force change detection on list table component
+        this.componentRef.instance.changeDetectorRef?.detectChanges();
     }
 
     /**
