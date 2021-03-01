@@ -111,7 +111,7 @@
                    id="orcid"
                    [(ngModel)]="edit.orcid"
                    [disabled]="editDisabled"
-                   pattern="https?:\/\/orcid.org\/\d{4}(-\d{4}){3}"
+                   pattern="https?:\/\/orcid.org\/\d{4}(-\d{4}){2}((-\d{3}X)|(-\d{4}))"
                    placeholder="http://orcid.org/0000-0000-0000-0000"
             >
             <mat-hint innerHTML="{{'VCARD_HINT.X-ORCID' | translate}}"></mat-hint>
