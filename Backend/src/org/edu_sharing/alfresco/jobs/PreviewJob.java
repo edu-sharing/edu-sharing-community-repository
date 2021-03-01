@@ -243,6 +243,7 @@ public class PreviewJob implements Job {
 									if ((System.currentTimeMillis() > (date.getTime() + latency)) 
 											) {
 										if(lockState.getLockType() == null) {
+											logger.debug("nodeRef:" + entry.getKey() +" runAs:" + creator);
 											extractVideoImageMetadata(entry.getKey(),creator);
 											AuthenticationUtil.runAs(executeActionRunAs, creator);
 											logger.debug("finished action syncronously. nodeRef:" + entry.getKey()
