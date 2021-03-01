@@ -377,6 +377,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             }
             else {
                 this._node=data.node;
+                if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) !== -1) {
+                    this.repository = this._node.properties[RestConstants.CCM_PROP_REMOTEREPOSITORYID]?.[0];
+                }
                 this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
@@ -575,11 +578,17 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             });
         } else {
             this.sequenceParent = this._node;
-            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=> {
+            this.nodeApi.getNodeChildobjects(
+                this._node.aspects.indexOf(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) === -1 ?
+                this.sequenceParent.ref.id : this._node.properties[RestConstants.CCM_PROP_REMOTENODEID]?.[0]
+                ,this.repository).subscribe((data:NodeList)=> {
                 if(data.nodes.length > 0)
                   this.sequence = data;
                   setTimeout(()=>this.setScrollparameters(),100);
                 onFinish();
+            }, error => {
+                    console.error(error);
+                    onFinish();
             });
         }
     }

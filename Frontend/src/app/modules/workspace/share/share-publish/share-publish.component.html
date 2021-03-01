@@ -167,7 +167,7 @@
   <div class="published-versions">
     <h6 class="published-versions mat-heading-6">{{'WORKSPACE.SHARE.PUBLISH.VERSIONS_PUBLISHED' | translate}}</h6>
 
-    <div class="no-versions" *ngIf="!allPublishedVersions?.length">
+    <div class="no-versions" *ngIf="!allPublishedVersions">
       <spinner-small></spinner-small>
     </div>
     <div *ngFor="let v of allPublishedVersions" class="version" [class.version-virtual]="v.virtual">
