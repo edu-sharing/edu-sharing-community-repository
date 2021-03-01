@@ -1,17 +1,21 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.rmi.RemoteException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.MLText;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -26,9 +30,11 @@ import org.edu_sharing.webservices.alfresco.extension.KeyValue;
 import org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper;
 import org.edu_sharing.webservices.alfresco.extension.RepositoryNode;
 import org.edu_sharing.webservices.util.EduWebServiceFactory;
+import org.springframework.context.ApplicationContext;
 
 public class NodeServiceWSImpl extends NodeServiceAdapter {
-	
+
+	private final ServiceRegistry serviceRegistry;
 	ApplicationInfo appInfo;
 	
 	Logger logger = Logger.getLogger(NodeServiceWSImpl.class);
@@ -36,6 +42,8 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 	public NodeServiceWSImpl(String appId) {
 		super(appId);
 		appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	}
 
 	@Override
@@ -109,12 +117,65 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 		NodeEntry entry = (NodeEntry) RepoProxyFactory.getRepoProxy().getMetadata(appId, nodeId, Collections.singletonList(Filter.ALL), null).getEntity();
 		HashMap<String, Object> result = new HashMap<>();
 		for(Map.Entry<String, List<String>> e : entry.getNode().getProperties().entrySet()){
-			if(e.getKey().startsWith("virtual:"))
-			result.put(CCConstants.getValidGlobalName(e.getKey()), ValueTool.toMultivalue(e.getValue().toArray(new String[0])));
+			String globalKey = CCConstants.getValidGlobalName(e.getKey());
+			if(e.getKey().startsWith("virtual:")) {
+				result.put(globalKey, ValueTool.toMultivalue(e.getValue().toArray(new String[0])));
+			} else if (e.getValue() != null && globalKey != null) {
+				result.put(globalKey, e.getValue());
+				if (e.getValue().size() == 1) {
+					result.put(globalKey, e.getValue().get(0));
+				} else {
+					result.put(globalKey, e);
+				}
+				/*PropertyDefinition definition = null;
+				try {
+					definition = serviceRegistry.getDictionaryService().getProperty(QName.createQName(globalKey));
+				}catch (Throwable ignored){ }
+				if(definition != null) {
+					PropertyDefinition finalDefinition = definition;
+					List<Object> data = e.getValue().stream().map((v) ->
+							{
+								try {
+									if (finalDefinition.getDataType().getJavaClassName().equals(MLText.class.getName())) {
+										return v;
+									}
+									return Class.forName(finalDefinition.getDataType().getJavaClassName()).getConstructor(String.class).newInstance(v);
+								} catch (Throwable t) {
+									logger.warn(t);
+									return v;
+								}
+							}
+					).collect(Collectors.toList());
+					if (data.size() == 1) {
+						result.put(globalKey, data.get(0));
+					} else {
+						result.put(globalKey, data);
+					}
+				}*/
+			}
 		}
 		result.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, entry.getNode().getPreview().getUrl());
 		return result;
 	}
+
+	@Override
+	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable {
+		HashMap<String, Object> props = getProperties(storeProtocol, storeId, nodeId);
+		HashMap<String, Object> result = new HashMap<>();
+		props.forEach((key, value) -> {
+			if (Arrays.asList(
+					CCConstants.CM_NAME,
+					CCConstants.CM_PROP_TITLE,
+					CCConstants.LOM_PROP_GENERAL_KEYWORD,
+					CCConstants.LOM_PROP_GENERAL_DESCRIPTION
+			).contains(key)) {
+				result.put(key, value);
+			}
+		});
+		return result;
+	}
+
+
 
 	@Override
 	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable {

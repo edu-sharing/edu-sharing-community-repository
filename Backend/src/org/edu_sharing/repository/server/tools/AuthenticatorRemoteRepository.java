@@ -146,6 +146,8 @@ public class AuthenticatorRemoteRepository {
 			// do not escape the guest, send them as a "plain" user
 			personData = new HashMap<>();
 			personData.put(CCConstants.CM_PROP_PERSON_FIRSTNAME,ApplicationInfoList.getHomeRepository().getAppCaption());
+			personData.put(CCConstants.CM_PROP_PERSON_LASTNAME,"");
+			personData.put(CCConstants.CM_PROP_PERSON_EMAIL,new Mail().getProperties().getProperty("mail.admin"));
 			esuid = username;
 		} else {
 			personData = AuthorityServiceFactory.getLocalService().getUserInfo(username);

@@ -122,6 +122,11 @@ public class NodeServiceAdapter implements NodeService {
 		return new HashMap<String,Object>();
 	}
 
+	@Override
+	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable {
+		return getProperties(storeProtocol, storeId, nodeId);
+	}
+
 	
 	@Override
 	public void addAspect(String nodeId, String aspect) {

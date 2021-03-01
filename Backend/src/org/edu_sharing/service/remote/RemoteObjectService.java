@@ -161,7 +161,7 @@ public class RemoteObjectService {
 		String ROOT_PATH = "/app:company_home/ccm:remote_ios";
 		ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
 		NodeService nsSourceRepo = NodeServiceFactory.getNodeService(sourceRepositoryId);
-		HashMap<String, Object> propsIn = nsSourceRepo.getProperties(null, null, originalNodeId);
+		HashMap<String, Object> propsIn = nsSourceRepo.getPropertiesPersisting(null, null, originalNodeId);
 		if(propsIn == null || propsIn.size() == 0) {
 			throw new Exception("no properties found for source nodeId:" + originalNodeId + ", appId: " + sourceRepositoryId);
 		}

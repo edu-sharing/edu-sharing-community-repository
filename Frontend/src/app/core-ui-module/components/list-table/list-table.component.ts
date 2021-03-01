@@ -660,7 +660,9 @@ export class ListTableComponent implements OnChanges, EventListener {
     }
 
     isDeleted(node: any): boolean {
-        return this.isReference(node) && !node.originalId;
+        return this.isReference(node)
+            && node.aspects.indexOf(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) === -1
+            && !node.originalId;
     }
 
     askCCPublish(event: any, node: Node): void {

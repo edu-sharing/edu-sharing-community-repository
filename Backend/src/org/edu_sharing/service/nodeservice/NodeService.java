@@ -87,6 +87,12 @@ public interface NodeService {
 	 */
 	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
+	/**
+	 * this method is called when a local object has ccm:remoterepositry aspect and the node should be stored localy
+	 * You can define which properties should be copied locally and which should be fetched dynamically by skipping them here
+	 */
+	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable;
+
 	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
 		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);
 	}
