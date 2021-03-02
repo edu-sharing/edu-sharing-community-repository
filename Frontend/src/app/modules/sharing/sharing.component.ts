@@ -105,7 +105,7 @@ export class SharingComponent {
         window.open(url);
 
     }
-    private changeSort(sort:any) {
+    changeSort(sort:any) {
         this.sort=sort;
         this.loadChildren();
     }

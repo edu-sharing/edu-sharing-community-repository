@@ -37,8 +37,8 @@ import {Toast} from "../../../../core-ui-module/toast";
 export class CommentsListComponent  {
   public _node: Node;
   private isGuest: boolean;
-  private user: User;
-  private comments: Comment[];
+  user: User;
+  comments: Comment[];
   private edit: Comment[];
   options: OptionItem[];
 
@@ -79,7 +79,7 @@ export class CommentsListComponent  {
       }
     });
   }
-  private saveEditComment(){
+  saveEditComment(){
     this.onLoading.emit(true);
     this.commentsApi.editComment(this.editComment.ref.id,this.editCommentText.trim()).subscribe(()=>{
       this.onLoading.emit(false);
@@ -91,7 +91,7 @@ export class CommentsListComponent  {
       this.onLoading.emit(false);
     })
   }
-  private getOptions(comment:Comment){
+  getOptions(comment:Comment){
     let options:OptionItem[]=[];
     let isAuthor=this.user && this.user.authorityName==comment.creator.authorityName;
     if(isAuthor){

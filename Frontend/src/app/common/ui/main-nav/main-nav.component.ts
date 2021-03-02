@@ -579,13 +579,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.createMenuTrigger.onMenuClose;
     }
 
-    private clearSearch() {
+    clearSearch() {
         this.searchQuery = '';
         this.searchQueryChange.emit('');
         this.onSearch.emit({ query: '', cleared: true });
     }
 
-    private logout() {
+    logout() {
         this.globalProgress = true;
         this.uiService.handleLogout().subscribe(() => this.finishLogout());
     }
@@ -612,7 +612,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.onSearch.emit({ query: value, cleared: false });
     }
 
-    private openImprint() {
+    openImprint() {
         UIHelper.openUrl(
             this.config.imprintUrl,
             this.bridge,
@@ -620,7 +620,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         );
     }
 
-    private openPrivacy() {
+    openPrivacy() {
         UIHelper.openUrl(
             this.config.privacyInformationUrl,
             this.bridge,

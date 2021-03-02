@@ -180,7 +180,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   private isOpenable: boolean;
   private closeOnBack: boolean;
   public nodeMetadata: Node[];
-  public nodeShare: Node;
+  public nodeShare: Node[];
   public nodeShareLink: Node;
   public nodeWorkflow: Node[];
   public addNodesStream: Node[];
@@ -208,7 +208,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   @ViewChild('actionbar') actionbar: ActionbarComponent;
   isChildobject = false;
     _node : Node;
-    private _nodeId : string;
+    _nodeId : string;
     @Output() onClose=new EventEmitter();
     similarNodeColumns: ListItem[]=[];
 
@@ -247,7 +247,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
   }
-    private close() {
+    close() {
       if(this.isRoute) {
         if(this.closeOnBack) {
           window.close();
@@ -271,7 +271,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
 
-    private showDetails() {
+    showDetails() {
       const rect=document.getElementById('edusharing_rendering_metadata').getBoundingClientRect();
       if(window.scrollY<rect.top) {
           UIHelper.scrollSmooth(rect.top, 1.5);
@@ -588,7 +588,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         }
     }
 
-    private scroll(direction: string) {
+    scroll(direction: string) {
         const element = this.sequencediv.nativeElement;
         const width=window.innerWidth/2;
         UIHelper.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=> {
@@ -621,7 +621,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         return '';
       }
     }
-    private getNodeTitle(node:Node) {
+    getNodeTitle(node:Node) {
         return RestHelper.getTitle(node);
     }
 

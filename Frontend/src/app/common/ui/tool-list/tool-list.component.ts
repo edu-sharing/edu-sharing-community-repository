@@ -6,6 +6,8 @@ import {BrowserModule, DomSanitizer} from '@angular/platform-browser';
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
+import {Node} from '../../../core-module/core.module';
+
 
 @Component({
   selector: 'toolList',

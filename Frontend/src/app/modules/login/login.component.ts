@@ -18,6 +18,7 @@ import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
 import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 
 @Component({
@@ -29,6 +30,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
     ]
 })
 export class LoginComponent implements OnInit {
+    readonly SkipTarget = SkipTarget;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('passwordInput') passwordInput: InputPasswordComponent;

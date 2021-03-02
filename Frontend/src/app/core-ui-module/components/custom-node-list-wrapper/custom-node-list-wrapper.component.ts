@@ -82,14 +82,14 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         node: Node,
     ) => {
         status: boolean;
-        message: string;
+        message?: string;
         button?: {
             click: Function;
             caption: string;
             icon: string;
         };
     };
-    @Input() sortBy: string;
+    @Input() sortBy: string[];
     @Input() sortAscending = true;
 
 

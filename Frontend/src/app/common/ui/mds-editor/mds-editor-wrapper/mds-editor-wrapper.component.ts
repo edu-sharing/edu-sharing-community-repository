@@ -54,7 +54,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() invalidate: boolean;
     @Input() labelNegative = 'CANCEL';
     @Input() labelPositive = 'SAVE';
-    @Input() mode = 'default';
+    @Input() mode: 'search' | 'default' = 'default';
     @Input() nodes: Node[];
     @Input() parentNode: Node;
     @Input() priority = 1;

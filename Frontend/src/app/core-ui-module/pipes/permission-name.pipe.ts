@@ -4,7 +4,7 @@ import {ConfigurationService} from "../../core-module/core.module";
 
 @Pipe({name: 'permissionName'})
 export class PermissionNamePipe implements PipeTransform {
-  transform(permission : any,args:any): string {
+  transform(permission : any,args?:any): string {
     if(args && args['field']){
       let field=args['field'];
       if(field=='secondary'){

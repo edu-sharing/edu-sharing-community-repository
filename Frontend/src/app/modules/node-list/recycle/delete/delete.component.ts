@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import {DialogButton, RestArchiveService} from "../../../../core-module/core.module";
+import {DialogButton, RestArchiveService, Node} from "../../../../core-module/core.module";
 import {TemporaryStorageService} from "../../../../core-module/core.module";
 
 @Component({

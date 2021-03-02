@@ -394,9 +394,9 @@ export class SimpleEditInviteComponent {
     }, error => this.onError.emit(error));
   }
 
-  isInvited(authority: AuthorityProfile) {
+  isInvited(authority: AuthorityProfile): boolean {
     return this.currentPermissions ?
-        this.currentPermissions.find((p) => p.authority.authorityName === authority.authorityName) :
+        !!this.currentPermissions.find((p) => p.authority.authorityName === authority.authorityName) :
         false;
   }
 

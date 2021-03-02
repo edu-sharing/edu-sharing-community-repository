@@ -60,8 +60,8 @@ export class PermissionsAuthoritiesComponent {
   public PRIMARY_AFFILIATIONS= RestConstants.USER_PRIMARY_AFFILIATIONS;
   public list: any[]= [];
   public edit: any;
-  private editDetails: any;
-  private editId: string;
+  editDetails: any;
+  editId: string;
   private offset = 0;
   public columns: ListItem[]= [];
   public addMemberColumns: ListItem[]= [];
@@ -70,7 +70,7 @@ export class PermissionsAuthoritiesComponent {
   public sortAscending = true;
   public loading = true;
   public _searchQuery: string;
-  private manageMemberSearch: string;
+  manageMemberSearch: string;
   public options: CustomOptions= {
     useDefaultOptions: false,
     addOptions: []
@@ -80,13 +80,13 @@ export class PermissionsAuthoritiesComponent {
   private orgs: OrganizationOrganizations;
   public addMembers: any;
   public editGroups: User;
-  private memberOptions: CustomOptions = {
+  memberOptions: CustomOptions = {
     useDefaultOptions: false,
     addOptions: []
   };
   private addToList: any[];
-  private isAdmin = false;
-  private embeddedQuery: string;
+  isAdmin = false;
+  embeddedQuery: string;
   editButtons: DialogButton[];
   memberButtons: DialogButton[];
   signupButtons: DialogButton[];
@@ -111,7 +111,7 @@ export class PermissionsAuthoritiesComponent {
 
   public _mode: ListItemType;
   public addTo: any;
-  private addToSelection: any;
+  addToSelection: any;
   public globalProgress= false;
   @Input() set org(org: Organization){
     this._org = org;
@@ -124,8 +124,8 @@ export class PermissionsAuthoritiesComponent {
   @Output() onSelection = new EventEmitter();
   @Output() setTab = new EventEmitter<number>();
   public editMembers: any;
-  private memberList: Authority[];
-  private selectedMembers: Authority[]= [];
+  memberList: Authority[];
+  selectedMembers: Authority[]= [];
   private memberSugesstions: SuggestItem[];
   private memberListOffset: number;
   // show primary affiliations as list (or free text)
@@ -487,13 +487,13 @@ export class PermissionsAuthoritiesComponent {
     signupRemove.group = DefaultGroups.Delete;
     this.signupActions.addOptions = [signupAdd, signupRemove];
   }
-  private cancelEdit(){
+  cancelEdit(){
     this.edit = null;
   }
-  private cancelAddTo(){
+  cancelAddTo(){
     this.addTo = null;
   }
-  private cancelEditMembers(){
+  cancelEditMembers(){
     this.editMembers = null;
     this.addMembers = null;
     this.editGroups = null;
@@ -740,7 +740,7 @@ export class PermissionsAuthoritiesComponent {
       this.memberListOffset = 0;
       this.searchMembers();
   }
-  private addToSelect() {
+  addToSelect() {
     this.addToList = this.selected;
     this.addToSingle();
   }
@@ -889,7 +889,7 @@ export class PermissionsAuthoritiesComponent {
     this.manageMemberSearch = '';
     this.searchMembers();
   }
-  private updateSelectedMembers(data: Authority[]) {
+  updateSelectedMembers(data: Authority[]) {
     this.selectedMembers = data;
     this.updateButtons();
   }
@@ -936,14 +936,14 @@ export class PermissionsAuthoritiesComponent {
             this.deleteMembership(list,position + 1);
         }, (error: any) => this.toast.error(error));
     }
-  private searchMembers(){
+  searchMembers(){
     this.selectedMembers = [];
     this.memberOptions.addOptions = this.getMemberOptions();
     this.memberList = [];
     this.memberListOffset = 0;
     this.refreshMemberList();
   }
-  private refreshMemberList() {
+  refreshMemberList() {
     if (this.addMembers){
       if (this.org && this.addMembers.authorityName != this.org.authorityName){
         const request: any = {
@@ -1032,10 +1032,10 @@ export class PermissionsAuthoritiesComponent {
       this.refresh();
     });
   }
-  private deselectOrg(){
+  deselectOrg(){
     this.onDeselectOrg.emit();
   }
-  private setOrgTab(){
+  setOrgTab(){
     this.setTab.emit(0);
   }
 

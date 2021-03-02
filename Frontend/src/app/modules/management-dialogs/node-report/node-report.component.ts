@@ -30,7 +30,7 @@ export class NodeReportComponent  {
   public comment: string;
   public email: string;
   public _node: Node;
-  private isGuest: boolean;
+  isGuest: boolean;
   @Input() set node(node: Node){
     this._node = node;
   }

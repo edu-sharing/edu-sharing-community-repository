@@ -31,8 +31,8 @@ export class LoginAppComponent  implements OnInit {
 
     public isLoading=true;
     public disabled=true;
-    private username="";
-    private password="";
+    username="";
+    password="";
     private serverurl = "https://";   
     
     errorURL:string = null;
@@ -101,19 +101,19 @@ export class LoginAppComponent  implements OnInit {
     ngOnInit() {
     }
 
-    private checkConditions() :void  {
+    checkConditions() :void  {
         this.disabled=!this.username;// || !this.password;
         this.updateButtons();
     }
 
-    private buttonLoginBack() : void {
+    buttonLoginBack() : void {
         //window.history.back();
         //window.location.replace(this.cordova.getIndexPath()+"?reset=true");
         this.cordova.restartCordova();
         //(navigator as any).app.loadUrl(this.cordova.getIndexPath()+"?reset=true");
     }
 
-    private login(){
+    login(){
         /*
         // test camera
         this.cordova.getPhotoFromCamera(
@@ -197,7 +197,7 @@ export class LoginAppComponent  implements OnInit {
 
         });
     }
-    private register(){
+    register(){
         if(this.config.register.local){
             this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
         }

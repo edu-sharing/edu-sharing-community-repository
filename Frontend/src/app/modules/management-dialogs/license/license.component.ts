@@ -162,7 +162,7 @@ export class WorkspaceLicenseComponent  {
     private release=false;
     private releaseIndeterminate=false;
     private eduDownload=true;
-    private _ccCountries: Array<{ key: string, name: string }> = [];
+    _ccCountries: Array<{ key: string, name: string }> = [];
 
     private _oerMode=true;
     private constantCountries = [
@@ -341,7 +341,7 @@ export class WorkspaceLicenseComponent  {
         this.contactIndeterminate=contactState=='multi';
     }
 
-    private getLicenseProperty() {
+    getLicenseProperty() {
         let name=this.primaryType;
         if(this.primaryType=='NONE')
             return '';
@@ -366,16 +366,16 @@ export class WorkspaceLicenseComponent  {
 
         return name;
     }
-    private getLicenseName() {
+    getLicenseName() {
         return this.nodeHelper.getLicenseNameByString(this.getLicenseProperty());
     }
-    private getLicenseUrl() {
+    getLicenseUrl() {
         return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
     }
-    private getLicenseUrlVersion(type:string) {
+    getLicenseUrlVersion(type:string) {
         return this.nodeHelper.getLicenseUrlByString(type,this.ccVersion);
     }
-    private getLicenseIcon() {
+    getLicenseIcon() {
         return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());
     }
     private savePermissions(node:Node) {

@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
+import { EventEmitter, Injectable, Input, OnDestroy, Directive } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -53,6 +53,7 @@ export interface InitialValues {
     readonly individualValues?: string[];
 }
 
+@Directive()
 export abstract class MdsEditorWidgetCore {
     @Input() widget: Widget;
     readonly editorMode: EditorMode;

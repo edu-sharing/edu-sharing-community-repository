@@ -134,6 +134,6 @@ Short version works only with `short="always"`.
         {{ node ? node.name : '' }}
       </ng-container>
     </div>
-    <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
+    <div mat-ripple [matRippleTrigger]="trigger.nativeElement" matRippleColor="primary"></div>
   </app-node-url>
 </ng-template>

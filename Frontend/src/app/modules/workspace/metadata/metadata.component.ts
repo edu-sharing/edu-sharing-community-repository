@@ -20,18 +20,18 @@ declare var Chart: any;
 })
 export class WorkspaceMetadataComponent{
   public data: any;
-  private INFO= 'INFO';
-  private PROPERTIES= 'PROPERTIES';
-  private VERSIONS= 'VERSIONS';
-  private tab= this.INFO;
-  private permissions: any;
+  INFO= 'INFO';
+  PROPERTIES= 'PROPERTIES';
+  VERSIONS= 'VERSIONS';
+  tab= this.INFO;
+  permissions: any;
   private usages: Usage[];
-  private usagesCollection: Node[];
+  usagesCollection: Node[];
   private nodeObject: Node;
-  private versions: Version[];
-  private versionsLoading= false;
-  private columns: ListItem[]= [];
-  private columnsCollections: ListItem[]= [];
+  versions: Version[];
+  versionsLoading= false;
+  columns: ListItem[]= [];
+  columnsCollections: ListItem[]= [];
   /*Chart.js*/
   canvas: any;
   ctx: any;
@@ -106,7 +106,7 @@ export class WorkspaceMetadataComponent{
         });
 
     }
-  private isCurrentVersion(version: Version): boolean{
+  isCurrentVersion(version: Version): boolean{
     if (!this.nodeObject)
       return false;
     const prop = this.nodeObject.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION];
@@ -115,23 +115,23 @@ export class WorkspaceMetadataComponent{
 
     return prop[0] == (version.version.major + '.' + version.version.minor);
   }
-  private setTab(tab: string){
+  setTab(tab: string){
     this.tab = tab;
   }
-  private display(version: string= null) {
+  display(version: string= null) {
     this.nodeObject.version = version;
     this.onDisplay.emit(this.nodeObject);
   }
-  private displayNode(node: Node){
+  displayNode(node: Node){
       this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
   }
-  private displayCollection(collection: Node){
+  displayCollection(collection: Node){
       UIHelper.goToCollection(this.router, collection);
   }
   private openPermalink(){
       this.displayNode(this.nodeObject);
   }
-  private displayVersion(version: Version){
+  displayVersion(version: Version){
     if (this.isCurrentVersion(version))
       this.display();
     else
@@ -177,7 +177,7 @@ export class WorkspaceMetadataComponent{
   public close(){
     this.onClose.emit();
   }
-  private edit(){
+  edit(){
     this.onEditMetadata.emit(this.nodeObject);
   }
   constructor(private translate: TranslateService,
@@ -192,13 +192,13 @@ export class WorkspaceMetadataComponent{
       this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
       this.columnsCollections.push(new ListItem('COLLECTION', 'title'));
   }
-  private restoreVersion(restore: Version) {
+  restoreVersion(restore: Version) {
     this.onRestore.emit({version: restore, node: this.nodeObject});
   }
   canRevert(){
     return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
   }
-  private isAnimated(){
+  isAnimated(){
     return this.nodeHelper.hasAnimatedPreview(this.nodeObject);
   }
   private formatPermissions(login: IamUser, permissions: NodePermissions): any{

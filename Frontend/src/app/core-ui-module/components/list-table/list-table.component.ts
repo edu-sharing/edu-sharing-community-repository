@@ -106,9 +106,9 @@ import {DomSanitizer} from '@angular/platform-browser';
  * A provider to render multiple Nodes as a list
  */
 export class ListTableComponent implements OnChanges, EventListener {
-    public static VIEW_TYPE_LIST = 0;
-    public static VIEW_TYPE_GRID = 1;
-    public static VIEW_TYPE_GRID_SMALL = 2;
+    public static readonly VIEW_TYPE_LIST = 0;
+    public static readonly VIEW_TYPE_GRID = 1;
+    public static readonly VIEW_TYPE_GRID_SMALL = 2;
 
     @ViewChild('drag') drag: ElementRef;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
@@ -234,7 +234,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         node: Node,
     ) => {
         status: boolean;
-        message: string;
+        message?: string;
         button?: {
             click: Function;
             caption: string;
@@ -772,7 +772,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         this.isNodesDragSource = false;
     }
 
-    onNodesDrop({ event, nodes, dropAction }: DropData, target: Node) {
+    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
         if (dropAction === 'link') {
             throw new Error('dropAction "link" is not allowed');
         }
@@ -1167,7 +1167,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         return this.nodeHelper.getLRMIProperty(data, item);
     }
 
-    private getSelectedPos(selected: Node): number {
+    getSelectedPos(selected: Node): number {
         if (!this.selectedNodes || !this.selectedNodes.length) {
             return -1;
         }
@@ -1177,14 +1177,14 @@ export class ListTableComponent implements OnChanges, EventListener {
         );
     }
 
-    private optionIsValid(optionItem: OptionItem, node: Node): boolean {
+    optionIsValid(optionItem: OptionItem, node: Node): boolean {
         if (optionItem.enabledCallback) {
             return optionItem.enabledCallback(node);
         }
         return optionItem.isEnabled;
     }
 
-    private optionIsShown(optionItem: OptionItem, node: Node): boolean {
+    optionIsShown(optionItem: OptionItem, node: Node): boolean {
         if (optionItem.showCallback) {
             return optionItem.showCallback(node);
         }

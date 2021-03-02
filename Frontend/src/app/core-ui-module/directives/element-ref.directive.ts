@@ -12,7 +12,11 @@ import { Directive, ElementRef } from '@angular/core';
     exportAs: 'appElementRef',
 })
 export class ElementRefDirective<T> extends ElementRef<T> {
-    constructor(elementRef: ElementRef<T>) {
+    get nativeElement(): T {
+        return this.elementRef.nativeElement;
+    }
+
+    constructor(private elementRef: ElementRef<T>) {
         super(elementRef.nativeElement);
     }
 }

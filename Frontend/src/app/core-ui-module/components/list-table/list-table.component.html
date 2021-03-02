@@ -70,16 +70,16 @@
         >
           <!-- FIXME: This should be a pushbutton if and only if it is clickable, otherwise a
           non-interactive element, e.g., span. -->
-          <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item, j==0, $event.target)">
+          <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item, j==0, $any($event.target))">
             <ng-container *ngIf="!item.label">{{item.type+"."+item.name | translate}}</ng-container>
             <ng-container *ngIf="item.label">{{item.label}}</ng-container>
           </a>
-          <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,j==0, $event.target)" aria-hidden="true">
+          <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,j==0, $any($event.target))" aria-hidden="true">
             <a class="" *ngIf="sortBy==item.name && sortAscending"><i icon="arrow_drop_up"></i></a>
             <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon="arrow_drop_down"></i></a>
           </div>
         </div>
-        <div *ngFor="let option of optionsAlways"  class="more moreAlways" > </div>
+        <div *ngFor="let option of getOptionsAlways()"  class="more moreAlways" > </div>
         <div class="more-header" *ngIf="_options && _options.length">&nbsp;</div>
         <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
              (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
@@ -207,7 +207,7 @@
             >
               <img *ngIf="node.preview?.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && node.preview && !node.preview.isIcon)"
                    [src]="getPreviewSrc(node)"
-                   [title]="viewType==0 ? '' : getTitle(node)"
+                   [title]="getTitle(node)"
                    (mouseenter)="animateIcon(node,true)"
                    (mouseleave)="animateIcon(node,false)"
                    [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
@@ -271,7 +271,7 @@
               <button mat-icon-button
                       [disabled]="!optionIsValid(option, node)"
                       (click)="optionIsShown(option, node) ? callOption(option,node) : null">
-                <i icon="{{option.icon}}" aria="true"></i>
+                <i icon="{{option.icon}}" [aria]="true"></i>
               </button>
             </div>
           </ng-container>

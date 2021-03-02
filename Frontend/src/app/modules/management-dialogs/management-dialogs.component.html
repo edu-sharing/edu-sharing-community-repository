@@ -4,7 +4,7 @@
   (onLoading)="globalProgress=$event"
   (onCancel)="closeLicense()"
   (openContributor)="nodeContributor=$event[0]"
-  (onDone)="updateLicense($event)"
+  (onDone)="updateLicense($any($event))"
 ></workspace-license>
 <add-stream
   *ngIf="addNodesStream"
@@ -66,7 +66,7 @@
                  (onClose)="closeShare()"
 ></workspace-share>
 <node-info *ngIf="nodeDebug"
-           [node]="nodeDebug"
+           [node]="$any(nodeDebug)"
            (onClose)="closeDebug()"
 ></node-info>
 <card
@@ -78,7 +78,7 @@
         class="qr"
         width="xlarge"
         height="xxxlarge">
-    <qrcode [qrdata]="qr.data" elementType="img" margin="2" width="512" errorCorrectionLevel="M"></qrcode>
+    <qrcode [qrdata]="qr.data" elementType="img" [margin]="2" [width]="512" errorCorrectionLevel="M"></qrcode>
 </card>
 <card
     *ngIf="_nodeDelete"
@@ -173,7 +173,7 @@
      [parentNode]="metadataParent"
      [bulkBehaviour]="_nodeFromUpload ? BulkBehaviour.Replace : BulkBehaviour.Default"
      (onCancel)="closeEditor(false)"
-     (onDone)="closeEditor(true,$event)"
+     (onDone)="closeEditor(true,$any($event))"
      (openLicense)="nodeLicense=_nodeMetadata;editorPending=true;"
      (openTemplate)="nodeTemplate=_nodeMetadata[0]"
      (openContributor)="nodeContributor=_nodeMetadata[0];editorPending=true;"

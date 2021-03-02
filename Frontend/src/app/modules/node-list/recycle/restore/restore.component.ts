@@ -26,10 +26,10 @@ export class RecycleRestoreComponent {
   private chooseDirectory(): void {
     this.showFileChooser = new Boolean(true);
   }
-  private closeFolder(){
+  closeFolder(){
     this.showFileChooser = false;
   }
-  private folderSelected(event: Node[]){
+  folderSelected(event: Node[]){
     const nodes: any[] = [];
     for (const result of this.results.results){
       if ((result.restoreStatus as any) === 1) {

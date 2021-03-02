@@ -48,7 +48,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() fileIsOver = false;
   @Input() addToCollection:Node[];
   @Output() addToCollectionChange = new EventEmitter();
-  @Input() filesToUpload : Node[];
+  @Input() filesToUpload : FileList;
   @Output() filesToUploadChange = new EventEmitter();
   @Input() parent : Node;
   @Output() showLtiToolsChange = new EventEmitter();
@@ -172,8 +172,8 @@ export class WorkspaceManagementDialogsComponent  {
   public dialogCancelable:boolean;
   public dialogNode:Node|Node[];
   public dialogButtons:DialogButton[];
-  private currentLtiTool: Node;
-  private ltiToolRefresh: Boolean;
+  currentLtiTool: Node;
+  ltiToolRefresh: Boolean;
   @Input() nodeDeleteOnCancel: boolean;
   @Output() nodeDeleteOnCancelChange = new EventEmitter();
   private nodeLicenseOnUpload = false;
@@ -267,7 +267,7 @@ export class WorkspaceManagementDialogsComponent  {
     private router:Router,
   ){
    }
- private closeLtiToolConfig(){
+ closeLtiToolConfig(){
     this.ltiToolConfig=null;
     this.ltiToolRefresh=new Boolean();
  }
@@ -385,7 +385,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.toast.closeModalDialog();
       });
   }
- private openLtiConfig(event:Node){
+ openLtiConfig(event:Node){
    this.ltiToolConfig=event;
  }
  public closeUploadSelect(){
@@ -403,11 +403,11 @@ export class WorkspaceManagementDialogsComponent  {
        this.onRefresh.emit([node]);
    }
   }
-  private closeLtiTools() {
+  closeLtiTools() {
     this.showLtiTools = false;
     this.showLtiToolsChange.emit(false);
   }
-  private closeLicense() {
+  closeLicense() {
     if(this.nodeLicenseOnUpload){
       this.showMetadataAfterUpload(this.nodeLicense);
     }
@@ -437,7 +437,7 @@ export class WorkspaceManagementDialogsComponent  {
               this.closeEditor(true);
           });
   }
-  private closeEditor(refresh:boolean,nodes: Node[]=null){
+  closeEditor(refresh:boolean,nodes: Node[]=null){
       if (this.nodeDeleteOnCancel && nodes == null) {
           this.nodeDeleteOnCancel = false;
           this.deleteNodes(this._nodeMetadata);
@@ -502,7 +502,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeVariant=null;
         this.nodeVariantChange.emit(null);
     }
-  private cancelAddToCollection(){
+  cancelAddToCollection(){
     this.dialogTitle=null;
     this.addToCollection=null;
     this.addToCollectionChange.emit(null);
@@ -595,7 +595,7 @@ export class WorkspaceManagementDialogsComponent  {
                 },
             );
     }
-    private restoreVersion(restore:{version: Version,node: Node}) {
+    restoreVersion(restore:{version: Version,node: Node}) {
         this.toast.showConfigurableDialog({
             title: 'WORKSPACE.METADATA.RESTORE_TITLE',
             message: 'WORKSPACE.METADATA.RESTORE_MESSAGE',

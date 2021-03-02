@@ -33,7 +33,7 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
      * user's action, but we don't want to open the overlay.
      */
     preventOverlayOpen = false;
-    readonly overlayPositions: readonly ConnectedPosition[] = [
+    readonly overlayPositions: ConnectedPosition[] = [
         {
             originX: 'center',
             originY: 'bottom',

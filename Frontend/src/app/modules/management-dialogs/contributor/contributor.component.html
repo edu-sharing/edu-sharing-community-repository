@@ -2,7 +2,7 @@
       [node]="_node"
       width="small"
       height="large"
-      priority="2"
+      [priority]="2"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
@@ -32,7 +32,7 @@
 </card>
 <card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
       subtitle="{{'WORKSPACE.CONTRIBUTOR.TYPE.'+editScopeNew.toUpperCase() | translate}}"
-      priority="3"
+      [priority]="3"
       (onCancel)="cancel()"
       [buttons]="editButtons"
       *ngIf="edit"
@@ -213,7 +213,7 @@
       </div>
       <div class="calendar">
         <calendar label="{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}"
-                  isResettable="true"
+                  [isResettable]="true"
                   [(date)]="date"
                   [disabled]="editDisabled"
         ></calendar>

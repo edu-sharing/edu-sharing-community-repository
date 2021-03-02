@@ -13,7 +13,7 @@ export class ListCollectionInfoComponent extends ListWidget {
         new ListItem('COLLECTION', 'scope')
     ]
 
-    constructor(private nodeHelper: NodeHelperService) {
+    constructor(public nodeHelper: NodeHelperService) {
         super();
     }
 

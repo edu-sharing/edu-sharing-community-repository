@@ -29,6 +29,7 @@ import { FormControl } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MatTabGroup } from '@angular/material/tabs';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
     selector: 'app-search',
@@ -39,6 +40,7 @@ import { MatTabGroup } from '@angular/material/tabs';
 })
 export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
+    readonly SkipTarget = SkipTarget;
 
     @ViewChild('mdsMobile') mdsMobileRef: MdsEditorWrapperComponent;
     @ViewChild('mdsDesktop') mdsDesktopRef: MdsEditorWrapperComponent;
@@ -100,22 +102,22 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private viewToggle: OptionItem;
     // Max items to fetch at all (afterwards no more infinite scroll)
     private static MAX_ITEMS_COUNT = 2000;
-    private repositoryIds: any[] = [];
-    private mdsSets: MdsInfo[];
-    private _mdsId: string;
+    repositoryIds: any[] = [];
+    mdsSets: MdsInfo[];
+    _mdsId: string;
     private isSearching = false;
     isSearchingCollections = false;
-    private groupedRepositories: Repository[];
+    groupedRepositories: Repository[];
     private enabledRepositories: string[];
     // we only initalize the banner once to prevent flickering
     private bannerInitalized = false;
     currentValues: Values;
     private currentMdsSet: MdsDefinition;
-    private mdsActions: OptionItem[];
-    private mdsButtons: DialogButton[];
-    private currentSavedSearch: Node;
+    mdsActions: OptionItem[];
+    mdsButtons: DialogButton[];
+    currentSavedSearch: Node;
     private login: LoginResult;
-    private savedSearchOwn = true;
+    savedSearchOwn = true;
     private nodeDisplayed: Node;
     customOptions: CustomOptions = {
         useDefaultOptions: true
@@ -295,7 +297,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         //this.getSearch(null,true);
     }
 
-    applyParameters(props: { [property: string]: string[] } = null) {
+    applyParameters(props: Values = null) {
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
         this.currentValues = props;
@@ -965,7 +967,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    private getSourceIcon(repo: Repository) {
+    getSourceIcon(repo: Repository) {
         return this.nodeHelper.getSourceIconRepoPath(repo);
     }
 
@@ -1103,7 +1105,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             );
     }
 
-    private getSourceIconPath(path: string) {
+    getSourceIconPath(path: string) {
         return this.nodeHelper.getSourceIconPath(path);
     }
 
@@ -1170,11 +1172,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mdsButtons = DialogButton.fromOptionItem([searchAction]);
     }
 
-    private closeSaveSearchDialog() {
+    closeSaveSearchDialog() {
         this.saveSearchDialog = false;
     }
 
-    private saveSearch(name: string, replace = false) {
+    saveSearch(name: string, replace = false) {
         this.search
             .saveSearch(
                 name,
@@ -1250,13 +1252,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         return criterias;
     }
 
-    private loadSavedSearchNode(node: Node) {
+    loadSavedSearchNode(node: Node) {
         this.extendedSearchSelectedTab.setValue(0);
         UIHelper.routeToSearchNode(this.router, this.searchService.reurl, node);
         this.currentSavedSearch = node;
     }
 
-    private goToSaveSearchWorkspace() {
+    goToSaveSearchWorkspace() {
         this.nodeApi
             .getNodeMetadata(RestConstants.SAVED_SEARCH)
             .subscribe((data: NodeWrapper) => {
@@ -1269,7 +1271,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             });
     }
 
-    private loadSavedSearch() {
+    loadSavedSearch() {
         if (!this.isGuest) {
             this.savedSearch = [];
             this.savedSearchLoading = true;

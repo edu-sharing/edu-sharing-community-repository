@@ -30,7 +30,7 @@ export class AdminFrontpageComponent {
   modes = ["collection","rating","views","downloads"];
   conditionTypes = ["TOOLPERMISSION"];
   timespans = ["days_30","days_100","all"];
-  private form: FormGroup;
+  form: FormGroup;
   previewNodes: Node[];
   previewColumns: ListItem[]=[];
   previewError: string;

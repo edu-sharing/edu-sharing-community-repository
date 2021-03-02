@@ -75,7 +75,7 @@
   </div>
   <div
     role="main"
-    appSkipTarget="MAIN_CONTENT"
+    [appSkipTarget]="SkipTarget.MainContent"
     class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}"
   >
     <h1 appTitle class="cdk-visually-hidden">{{ 'ADMIN.TITLE' | translate }}</h1>
@@ -89,7 +89,7 @@
       <div class="heading">{{'ADMIN.INFO.SYSTEM_CHECKS' | translate}}</div>
       <div class="checks">
         <div class="reload"><i class="material-icons clickable" (click)="runChecks()">refresh</i></div>
-        <div *ngFor="let check of getChecks(systemChecks);let ok=false;" class="check"
+        <div *ngFor="let check of getChecks(systemChecks)" class="check"
              [class.check-fail]="check.status=='FAIL'"
              [class.check-ok]="check.status=='OK'"
              [class.check-info]="check.status=='INFO'"
@@ -116,7 +116,7 @@
       <div class="checks-toolpermissions">
         <div class="reload"><i class="material-icons clickable" (click)="runTpChecks()">refresh</i></div>
         <div class="info">{{('ADMIN.INFO.TP_CHECK.INFO') | translate }}</div>
-        <div *ngFor="let check of getChecks(tpChecks);let ok=false;" class="check"
+        <div *ngFor="let check of getChecks(tpChecks)" class="check"
              [class.check-fail]="check.status=='FAIL'"
              [class.check-ok]="check.status=='OK'"
              [class.check-info]="check.status=='INFO'"
@@ -730,7 +730,7 @@
       <div *ngIf="lucene.mode === 'ELASTIC' && searchResponse" class="elastic-response">
           <label for="elasticResponse">{{'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
           <ngx-monaco-editor [options]="elasticResponseCodeOptions"
-                             [ngModel]="searchResponse?.elasticResponse"
+                             [ngModel]="$any(searchResponse)?.elasticResponse"
                              [ngModelOptions]="{standalone: true}"
                              id="elasticResponse"
           ></ngx-monaco-editor>

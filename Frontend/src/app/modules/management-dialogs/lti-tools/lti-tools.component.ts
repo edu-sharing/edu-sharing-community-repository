@@ -103,11 +103,11 @@ export class WorkspaceLtiToolsComponent  {
     });
   }
 
-  private createLtiObject(node: Node) {
+  createLtiObject(node: Node) {
     this.onCreateLtiObject.emit(node);
   }
 
-  private doRefresh() {
+  doRefresh() {
     this.search();
     if(this._currentTool){
       this.nodeService.getNodeMetadata(this._currentTool.ref.id,[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{

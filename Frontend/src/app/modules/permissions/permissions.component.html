@@ -9,12 +9,12 @@
   ></main-nav>
   <div
     role="main"
-    appSkipTarget="MAIN_CONTENT"
+    [appSkipTarget]="SkipTarget.MainContent"
   >
     <h1 appTitle class="cdk-visually-hidden">{{ 'PERMISSIONS.TITLE' | translate }}</h1>
     <mat-tab-group
       mat-stretch-tabs
-      color="dark"
+      [color]="$any('dark')"
       [selectedIndex]="tab"
       (selectedIndexChange)="setTab($event)"
     >

@@ -8,7 +8,7 @@
 >
   <div
     *ngIf="formArray"
-    [formGroup]="formArray"
+    [formGroup]="$any(formArray)"
     class="checkboxes-group"
     [class]="mode"
   >

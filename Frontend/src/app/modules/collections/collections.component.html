@@ -28,7 +28,7 @@
   role="navigation"
   [attr.aria-label]="'NAV.COLLECTIONS' | translate"
   mat-stretch-tabs
-  color="dark"
+  [color]="$any('dark')"
   [(selectedIndex)]="tabSelectedIndex"
   *ngIf="showTabs()"
   class="scrollWithBanner"
@@ -214,7 +214,7 @@
     </section>
     <div
       role="main"
-      appSkipTarget="MAIN_CONTENT"
+      [appSkipTarget]="SkipTarget.MainContent"
       class="collections-master-div"
       [class.collections-master-div-notabs]="!showTabs()"
     >
@@ -368,7 +368,8 @@
           [canDelete]="canDelete"
           (onDelete)="deleteReference($event)"
           [createLink]="true"
-          [(nodes)]="collectionContent.references"
+          [nodes]="$any(collectionContent.references)"
+          (nodesChange)="collectionContent.references = $any($event)"
           [isLoading]="collectionContent.referencesLoading"
           [hasMore]="
                         collectionContent.references.length <

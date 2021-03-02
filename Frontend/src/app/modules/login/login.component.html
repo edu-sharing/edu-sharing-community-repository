@@ -9,7 +9,7 @@
 <global-progress *ngIf="isLoading"></global-progress>
 <div *ngIf="!isLoading">
   <card
-    role="main" appSkipTarget="MAIN_CONTENT"
+    role="main" [appSkipTarget]="SkipTarget.MainContent"
     title="{{ caption | translate }}"
     avatar="assets/images/app-icon.svg"
     subtitle="{{ 'LOGIN.SUBTITLE' | translate }}"
@@ -79,7 +79,7 @@
                 id="password"
                 label="{{ 'LOGIN.PASSWORD' | translate }}"
                 floatLabel="always"
-                required="true"
+                [required]="true"
                 (keydown.enter)="login()"
                 [(value)]="password"
               ></input-password>

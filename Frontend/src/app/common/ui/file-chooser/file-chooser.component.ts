@@ -23,9 +23,9 @@ export class FileChooserComponent implements OnInit{
   public selectedFiles : Node[] = [];
   private hasMoreToLoad : boolean;
   public _collections = false;
-  private viewType = 0;
+  viewType = 0;
   public searchMode: boolean;
-  private searchQuery : string;
+  searchQuery : string;
   buttons: DialogButton[];
   subtitle: string;
 
@@ -33,8 +33,8 @@ export class FileChooserComponent implements OnInit{
     this.initialize();
   }
   public list : Node[];
-  private icon : any = null;
-  private hasHeading = true;
+  icon : any = null;
+  hasHeading = true;
   public _pickDirectory : boolean;
   private offset = 0;
   private homeDirectory =RestConstants.USERHOME;
@@ -98,8 +98,8 @@ export class FileChooserComponent implements OnInit{
    */
   @Input() filter : string[] = [];
   @Input() priority = 0;
-  private sortBy : string;
-  private sortAscending=true;
+  sortBy : string;
+  sortAscending=true;
   /**
    * Fired when an element is choosen, a Node Array will be send as a result
    * If mode is set to directory or collection, the array will always contain 1 element
@@ -112,7 +112,7 @@ export class FileChooserComponent implements OnInit{
    */
   @Output() onCancel = new EventEmitter();
 
-  private columns : ListItem[]=[];
+  columns : ListItem[]=[];
 
   constructor(private connector : RestConnectorService,
               private iam : RestIamService,
@@ -125,7 +125,7 @@ export class FileChooserComponent implements OnInit{
     this.sortBy=this.columns[0].name;
     this.updateButtons();
   }
-  private onSelection(node : Node[]){
+  onSelection(node : Node[]){
     this.selectedFiles=node;
   }
   private initialize() {
@@ -134,7 +134,7 @@ export class FileChooserComponent implements OnInit{
     this.viewDirectory(this.homeDirectory);
 
   }
-  private hasWritePermissions(node:any){
+  hasWritePermissions(node:any){
       if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){
           return {status:false,message:'NO_WRITE_PERMISSIONS'};
       }
@@ -151,7 +151,7 @@ export class FileChooserComponent implements OnInit{
       this.path=this.path.slice(0,position + 1);
     }
   }
-  private selectItem(event : Node){
+  selectItem(event : Node){
     if(event.isDirectory || this._collections) {
       if(this.searchMode){
         this.selectedFiles=[event];
@@ -167,7 +167,7 @@ export class FileChooserComponent implements OnInit{
     else{
     }
   }
-  private search(){
+  search(){
     this.viewDirectory(this.homeDirectory);
   }
   private viewDirectory(directory: string,reset=true) {
@@ -213,7 +213,7 @@ export class FileChooserComponent implements OnInit{
         .subscribe((list: NodeList) => this.showList(list.nodes));
     }
   }
-  private loadMore(){
+  loadMore(){
     if(!this.hasMoreToLoad)
       return;
 
@@ -225,7 +225,7 @@ export class FileChooserComponent implements OnInit{
       .subscribe((list : NodeList) => this.addToList(list.nodes));
     */
   }
-  private setSorting(data:any){
+  setSorting(data:any){
     this.sortBy=data.sortBy;
     this.sortAscending=data.sortAscending;
     this.list=null;

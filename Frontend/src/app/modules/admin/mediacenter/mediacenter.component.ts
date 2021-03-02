@@ -18,6 +18,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {CustomOptions, ElementType, OptionItem} from '../../../core-ui-module/option-item';
 import {MdsComponent} from '../../../common/ui/mds/mds.component';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
+import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
 
 // Charts.js
 declare var Chart: any;
@@ -28,6 +29,7 @@ declare var Chart: any;
     styleUrls: ['mediacenter.component.scss']
 })
 export class AdminMediacenterComponent {
+    readonly AuthoritySearchMode = AuthoritySearchMode;
     @ViewChild('mediacenterMds') mediacenterMds: MdsComponent;
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];

@@ -31,7 +31,7 @@
     mat-button
     color="primary"
     class="more button-icon"
-    aria-label="{{'OPTIONS.SHOW_ALL_OPTIONS' | translate}}"
+    [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
     [matMenuTriggerFor]="dropdownRef.menu"
     *ngIf="canShowDropdown()"
   >

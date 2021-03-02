@@ -40,12 +40,12 @@ export class OerComponent {
   public MATERIALS=1;
   public TOOLS=2;
   private TYPE_COUNT=3;
-  private columns:ListItem[][]=[];
+  columns:ListItem[][]=[];
   private options: OptionItem[][]=[];
   private displayedNode: Node;
   public currentQuery: string;
   public loading:boolean[]=[];
-  private showMore:boolean[]=[];
+  showMore:boolean[]=[];
   public hasMore:boolean[]=[];
   private offsets:number[]=[];
   public nodes:Node[][]=[];
@@ -113,10 +113,10 @@ export class OerComponent {
 
     setInterval(()=>this.updateHasMore(),1000);
    }
-   private goToCollections() {
+   goToCollections() {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{mainnav:true}});
    }
-  private goToSearch() {
+  goToSearch() {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'search']);
   }
   public routeSearch(query=this.currentQuery) {
@@ -203,11 +203,11 @@ export class OerComponent {
      );
 
    }
-   private toggleMore(mode:number) {
+   toggleMore(mode:number) {
     this.showMore[mode]=!this.showMore[mode];
     this.routeSearch();
    }
-   private loadMore(mode:number) {
+   loadMore(mode:number) {
 
    }
    private openNode(node: Node){
@@ -215,7 +215,7 @@ export class OerComponent {
           {queryParams: (this.nodeHelper.getNodeLink('queryParams', node) as any)}
       );
    }
-   private updateOptions(mode:number,node:Node=null) {
+   updateOptions(mode:number,node:Node=null) {
      this.options[mode]=[];
      if(mode==this.MATERIALS) {
        this.options[mode].push(new OptionItem('INFORMATION', 'info_outline', (node: Node) => this.openNode(node)));

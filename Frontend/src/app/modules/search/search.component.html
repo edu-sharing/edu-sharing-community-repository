@@ -110,7 +110,7 @@
             [mode]="'search'"
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
-            (onDone)="applyParameters($event)">
+            (onDone)="applyParameters($any($event))">
       </app-mds-editor-wrapper>
   </card>
   <div class="sidenav-container">
@@ -155,7 +155,7 @@
             [mode]="'search'"
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
-            (onDone)="applyParameters($event)"
+            (onDone)="applyParameters($any($event))"
           >
           </app-mds-editor-wrapper>
           <div class="mdsSelect" *ngIf="initalized">
@@ -214,7 +214,6 @@
               [isLoading]="savedSearchLoading"
               [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
               [columns]="savedSearchColumns"
-              (onUpdateOptions)="refreshListOptions()"
               (clickRow)="loadSavedSearchNode($event.node)"
             ></listTable>
             <div
@@ -239,7 +238,7 @@
     <div class="content-with-footer">
         <div
             role="main"
-            appSkipTarget="MAIN_CONTENT"
+            [appSkipTarget]="SkipTarget.MainContent"
             class="content_wrapper"
             [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
             [class.contentSidenav]="searchService.sidenavOpened"

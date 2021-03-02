@@ -73,7 +73,7 @@
   <workspace-explorer class="explorer"
                       #explorer
                       role="main"
-                      appSkipTarget="MAIN_CONTENT"
+                      [appSkipTarget]="SkipTarget.MainContent"
                       appCreateContextMenu
                       *ngIf="root!='RECYCLE'"
                       [current]="currentFolder"

@@ -113,7 +113,7 @@ export class BreadcrumbsComponent {
         }
     }
 
-    onNodesDrop({ event, nodes, dropAction }: DropData, target: Node) {
+    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
         if (dropAction === 'link') {
             throw new Error('dropAction "link" is not allowed');
         }

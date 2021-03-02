@@ -7,6 +7,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { UIHelper } from '../../ui-helper';
+import { FloatLabelType } from '@angular/material/form-field';
 
 @Component({
     selector: 'input-password',
@@ -20,7 +21,7 @@ export class InputPasswordComponent {
     @Input() inputClass = '';
     @Input() hint = '';
     @Input() label = '';
-    @Input() floatLabel = 'auto';
+    @Input() floatLabel: FloatLabelType = 'auto';
     @Input() displayStrength = false;
     @Input() placeholder = '';
     @Input() set value(_value: string) {

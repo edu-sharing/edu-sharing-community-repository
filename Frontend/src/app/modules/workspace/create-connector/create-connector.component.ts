@@ -40,7 +40,7 @@ export class WorkspaceCreateConnector  {
         new DialogButton('CREATE', DialogButton.TYPE_PRIMARY, () => this.create()),
     ];
   }
-  private getType() {
+  getType() {
     return this._connector.filetypes[this.type];
   }
 }

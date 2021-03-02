@@ -6,7 +6,7 @@
 ></main-nav>
 <div
   role="main"
-  appSkipTarget="MAIN_CONTENT"
+  [appSkipTarget]="SkipTarget.MainContent"
   class="collections-master-div"
   [class.collections-master-div-mainnav]="mainnav"
 >
@@ -103,7 +103,7 @@
                   class="image-upload-field-input">
               </div>
               <div class="button-icon">
-                  <button mat-fab color="white" (click)="file.click()"
+                  <button mat-fab [color]="$any('white')" (click)="file.click()"
                     [matTooltip]="'collectionNew_uploadCollectionImage' | translate"
                     [attr.aria-label]="'collectionNew_uploadCollectionImage' | translate"
                   >
@@ -111,7 +111,7 @@
                   </button>
                   <button
                     mat-fab
-                    color="white"
+                    [color]="$any('white')"
                     *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (click)="deleteImage()"
                     [matTooltip]="'collectionNew_deleteCollectionImage' | translate"
                     [attr.aria-label]="'collectionNew_deleteCollectionImage' | translate"
@@ -267,9 +267,9 @@
         </div>
         <listTable
           *ngIf="editorialGroups.length!=0 && shareToAll"
-          [nodes]="editorialGroups"
+          [nodes]="$any(editorialGroups)"
           [columns]="editorialColumns"
-          [selectedNodes]="editorialGroupsSelected"
+          [selectedNodes]="$any(editorialGroupsSelected)"
           [hasCheckbox]="true"
           [hasIcon]="true"
           [hasHeading]="false"

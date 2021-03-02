@@ -52,7 +52,7 @@ export class WorkspaceShareComponent {
     @Input() sendMessages = true;
     @Input() sendToApi = true;
     @Input() currentPermissions: LocalPermissions = null;
-    @Input() set nodes(nodes: []) {
+    @Input() set nodes(nodes: Node[]) {
         this.setNodes(nodes);
     }
     @Input() set nodeId(node: string) {
@@ -163,17 +163,17 @@ export class WorkspaceShareComponent {
         ),
     ];
 
-    private currentType = [
+    currentType = [
         RestConstants.ACCESS_CONSUMER,
         RestConstants.ACCESS_CC_PUBLISH,
     ];
     inherited: boolean;
-    private notifyUsers = true;
-    private notifyMessage: string;
-    private inherit: Permission[] = [];
+    notifyUsers = true;
+    notifyMessage: string;
+    inherit: Permission[] = [];
     permissions: Permission[] = [];
     private originalPermissions: LocalPermissions[];
-    private showChooseType = false;
+    showChooseType = false;
     private showChooseTypeList: Permission;
 
     constructor(
@@ -501,7 +501,7 @@ export class WorkspaceShareComponent {
         saveButton.name = 'SAVE';// this.tab == 0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY';
     }
 
-    private chooseType() {
+    chooseType() {
         this.showChooseType = true;
     }
 
@@ -509,7 +509,7 @@ export class WorkspaceShareComponent {
         this.showChooseTypeList = p;
     }
 
-    private removePermission(p: Permission) {
+    removePermission(p: Permission) {
         if (this.isDeleted(p))
             this.deletedPermissions.splice(
                 this.deletedPermissions.indexOf(p.authority.authorityName),
@@ -524,7 +524,7 @@ export class WorkspaceShareComponent {
     */
     }
 
-    private setType(type: any) {
+    setType(type: any) {
         this.currentType = type.permissions;
         if (type.wasMain) this.showChooseType = false;
         for (let permission of this.newPermissions) {
@@ -582,7 +582,7 @@ export class WorkspaceShareComponent {
         this.searchStr = '';
     }
 
-    private isNewPermission(p: Permission) {
+    isNewPermission(p: Permission) {
         if (
             !this.originalPermissions?.length ||
             !this.originalPermissions[0].permissions
@@ -672,7 +672,7 @@ export class WorkspaceShareComponent {
         )
         .subscribe((has: boolean) => (this.publishPermission = has));
   }
-    private updatePermissionInfo() {
+    updatePermissionInfo() {
         let type: string[];
         for (let permission of this.newPermissions) {
             if (type && !Helper.arrayEquals(type, permission.permissions)) {
@@ -826,7 +826,7 @@ export class WorkspaceShareComponent {
         });
     }
 
-    private setInitialState() {
+    setInitialState() {
         this.initialState = this.getState();
     }
 

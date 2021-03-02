@@ -12,7 +12,7 @@
           <input matInput required autofocus name="username" id="username" (ngModelChange)="checkConditions()" [(ngModel)]="username"/>
         </mat-form-field>
         <div>
-          <input-password label="{{'LOGIN.PASSWORD' | translate}}" id="password" required (valueChange)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
+          <input-password label="{{'LOGIN.PASSWORD' | translate}}" id="password" [required]="true" (valueChange)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
         </div>
       </form>
       <div class="register" *ngIf="config.register.local || config.register.registerUrl">

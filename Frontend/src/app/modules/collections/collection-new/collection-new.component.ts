@@ -36,6 +36,9 @@ import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 import {MdsMetadatasets} from '../../../core-module/core.module';
 import {ConfigurationHelper} from '../../../core-module/core.module';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import { SkipTarget } from '../../../common/ui/skip-nav/skip-nav.service';
+
+type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
 // component class
 @Component({
@@ -44,6 +47,7 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
   styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
+  readonly SkipTarget = SkipTarget;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('mds') mds : MdsComponent;
   @ViewChild('share') shareRef : WorkspaceShareComponent;
@@ -60,7 +64,7 @@ export class CollectionNewComponent {
   user : User;
   public mainnav = true;
   public editPermissionsId: string;
-  private permissions: LocalPermissions = null;
+  permissions: LocalPermissions = null;
   public canInvite: boolean;
   public shareToAll: boolean;
   public createEditorial = false;
@@ -72,24 +76,24 @@ export class CollectionNewComponent {
   public editorialGroups:Group[]=[];
   public editorialGroupsSelected:Group[]=[];
   public editorialColumns:ListItem[]=[new ListItem("GROUP",RestConstants.AUTHORITY_DISPLAYNAME)];
-  private imageData:any = null;
+  imageData:any = null;
   private imageFile:File = null;
-  private STEP_NEW = 'NEW';
-  private STEP_GENERAL = 'GENERAL';
-  private STEP_METADATA = 'METADATA';
-  private STEP_PERMISSIONS = 'PERMISSIONS';
+  readonly STEP_NEW = 'NEW';
+  readonly STEP_GENERAL = 'GENERAL';
+  readonly STEP_METADATA = 'METADATA';
+  readonly STEP_PERMISSIONS = 'PERMISSIONS';
   private STEP_SETTINGS = 'SETTINGS';
-  private STEP_EDITORIAL_GROUPS = 'EDITORIAL_GROUPS';
-  private STEP_ICONS={
+  readonly STEP_EDITORIAL_GROUPS = 'EDITORIAL_GROUPS';
+  STEP_ICONS: { [step in Step]?: string }={
     GENERAL:'edit',
     METADATA:'info_outline',
     PERMISSIONS:'group_add',
     SETTINGS:'settings',
     EDITORIAL_GROUPS:'star'
   };
-  public newCollectionStep=this.STEP_NEW;
+  public newCollectionStep: Step = this.STEP_NEW;
   public editPermissionsDummy: EduData.Node;
-  private availableSteps: string[];
+  availableSteps: Step[];
   private parentCollection: EduData.Node;
   private originalPermissions: LocalPermissions;
   private permissionsInfo: any;
@@ -99,7 +103,7 @@ export class CollectionNewComponent {
   buttons: DialogButton[];
   authorFreetext=false;
   authorFreetextAllowed=false;
-  private mdsSet: string;
+  mdsSet: string;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -238,7 +242,7 @@ export class CollectionNewComponent {
          //this.toast.error(error)
        });
     }
-    private setPermissions(permissions : any){
+    setPermissions(permissions : any){
       if(permissions) {
         this.permissionsInfo = permissions;
         this.permissions = permissions.permissions;
@@ -254,7 +258,7 @@ export class CollectionNewComponent {
       }
       this.showPermissions=false;
     }
-    private editPermissions(){
+    editPermissions(){
       if(this.permissions==null && !this.editId) {
         this.permissions = new LocalPermissions();
       }
@@ -290,10 +294,10 @@ export class CollectionNewComponent {
         this.currentCollection.collection.color = color;
     }
 
-    setColorByDirection(event: KeyboardEvent): void {
+    setColorByDirection(event: Event): void {
         const rowLength = 6;
         let index = this.COLORS.indexOf(this.currentCollection.collection.color);
-        switch (event.key) {
+        switch ((event as KeyboardEvent).key) {
             case 'ArrowUp': index -= rowLength; break;
             case 'ArrowDown': index += rowLength; break;
             case 'ArrowLeft': index -= 1; break;
@@ -420,8 +424,8 @@ export class CollectionNewComponent {
       this.updateAvailableSteps();
       this.goToNextStep();
     }
-    public getAvailableSteps():string[] {
-      let steps:string[]=[];
+    public getAvailableSteps(): Step[] {
+      let steps: Step[] = [];
       steps.push(this.STEP_GENERAL);
       if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
         steps.push(this.STEP_METADATA);

@@ -165,14 +165,24 @@ export class CollectionChooserComponent implements OnInit {
         return true;
     }
 
-    hasWritePermissions(node: any) {
+    hasWritePermissions(
+        node: Node,
+    ): {
+        status: boolean;
+        message?: string;
+        button?: {
+            click: Function;
+            caption: string;
+            icon: string;
+        };
+    } {
         if (node.access.indexOf(RestConstants.ACCESS_WRITE) == -1) {
             return { status: false, message: 'NO_WRITE_PERMISSIONS' };
         }
         return { status: true };
     }
 
-    private goIntoCollection(node: Node) {
+    goIntoCollection(node: Node) {
         this.currentRoot = node;
         this.loadMy();
     }

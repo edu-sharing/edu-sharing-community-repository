@@ -44,6 +44,7 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 
 type LuceneData = {
@@ -69,6 +70,7 @@ type LuceneData = {
 })
 export class AdminComponent {
   readonly SCOPES = Scope;
+  readonly SkipTarget = SkipTarget;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -171,11 +173,11 @@ export class AdminComponent {
   public xmlAppProperties:any;
   public xmlAppAdditionalPropertyName:string;
   public xmlAppAdditionalPropertyValue:string;
-  private parentNode: Node;
-  private parentCollection: Node;
-  private parentCollectionType = 'root';
+  parentNode: Node;
+  parentCollection: Node;
+  parentCollectionType = 'root';
   public catalina : string;
-  private oaiClasses: string[];
+  oaiClasses: string[];
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
@@ -185,14 +187,14 @@ export class AdminComponent {
 
   buttons:any[]=[];
   availableJobs: JobDescription[];
-  private excelFile: File;
-  private collectionsFile: File;
-  private uploadTempFile: File;
-  private uploadJobsFile: File;
-  private uploadOaiFile: File;
+  excelFile: File;
+  collectionsFile: File;
+  uploadTempFile: File;
+  uploadJobsFile: File;
+  uploadOaiFile: File;
   public xmlAppKeys: string[];
   public currentApp: string;
-  private currentAppXml: string;
+  currentAppXml: string;
   public editableXmls=[
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
     {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
@@ -616,7 +618,7 @@ export class AdminComponent {
     });
   }
 
-  private refreshCatalina() {
+  refreshCatalina() {
     this.admin.getCatalina().subscribe((data:string[])=> {
       this.catalina=data.reverse().join('\n');
       this.setCatalinaPosition();
@@ -766,7 +768,7 @@ export class AdminComponent {
             return log;
         return log.slice(0,200);
     }
-    private cancelJob(job:any) {
+    cancelJob(job:any) {
       this.dialogTitle='ADMIN.JOBS.CANCEL_TITLE';
       this.dialogMessage='ADMIN.JOBS.CANCEL_MESSAGE';
       this.dialogButtons=DialogButton.getYesNo(()=> {
@@ -783,7 +785,7 @@ export class AdminComponent {
           });
       });
     }
-    private reloadJobStatus() {
+    reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs)=> {
             this.jobs=jobs;
             this.updateJobLogs();
@@ -796,7 +798,7 @@ export class AdminComponent {
       v.splice(2,v.length-2);
       return v.join('.');
     }
-  private runTpChecks() {
+  runTpChecks() {
     const checks = [
         RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
@@ -815,7 +817,7 @@ export class AdminComponent {
     });
 
   }
-  private runChecks() {
+  runChecks() {
         this.systemChecks=[];
 
         // check versions render service
@@ -958,7 +960,7 @@ export class AdminComponent {
         });
     }
 
-    private updateJobLogs() {
+    updateJobLogs() {
       this.jobsLogData=[];
       let i=0;
       if(this.jobs) {
