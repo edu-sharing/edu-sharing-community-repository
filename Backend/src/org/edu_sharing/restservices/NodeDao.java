@@ -2003,7 +2003,7 @@ public class NodeDao {
 	public NodeDao createFork(String sourceId) throws DAOException {
 		try {
 			NodeDao sourceDao = NodeDao.getNode(repoDao, sourceId);
-			String[] source = new String[]{nodeId};
+			String[] source = new String[]{sourceId};
 			RunAsWork<NodeDao> work = () -> {
 				try {
 					org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(source[0], nodeId, false);
