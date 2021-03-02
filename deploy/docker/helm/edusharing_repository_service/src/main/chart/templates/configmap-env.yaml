@@ -12,6 +12,13 @@ data:
     -Dcaches.backupCount={{ .Values.config.cluster.backupCount }}
     -Dcaches.readBackupData={{ .Values.config.cluster.readBackupData }}
     -Dhazelcast.graceful.shutdown.max.wait={{ .Values.terminationGracePeriod }}
+    -Dcom.sun.management.jmxremote
+    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.port=7199
+    -Dcom.sun.management.jmxremote.ssl=false
+    {{- if .Values.metrics.enabled }}
+    -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
+    {{- end }}
   REPOSITORY_CACHE_HOST: {{ .Values.config.cache.host | quote }}
   REPOSITORY_CACHE_PORT: {{ .Values.config.cache.port | quote }}
   REPOSITORY_DATABASE_DRIV: {{ .Values.config.database.driver | quote }}

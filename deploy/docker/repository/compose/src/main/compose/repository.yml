@@ -21,32 +21,57 @@ services:
   repository-search-elastic:
     image: "${docker.image}-elasticsearch:${docker.tag}"
     environment:
-      ES_JAVA_OPTS: "-Xms${REPOSITORY_SEARCH_ELASTIC_JAVA_XMS:-1g} -Xmx${REPOSITORY_SEARCH_ELASTIC_JAVA_XMX:-1g}"
+      ES_JAVA_OPTS: >-
+        -Xms${REPOSITORY_SEARCH_ELASTIC_JAVA_XMS:-1g}
+        -Xmx${REPOSITORY_SEARCH_ELASTIC_JAVA_XMX:-1g}
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.port=7199
+        -Dcom.sun.management.jmxremote.ssl=false
       discovery.type: "single-node"
+      cluster.routing.allocation.disk.threshold_enabled: "false"
     expose:
+      - "7199"
       - "9300"
     volumes:
       - "repository-search-elastic-volume:/usr/share/elasticsearch/data"
 
   repository-search-elastic-tracker:
     image: "${docker.image}-repository-search-elastic-tracker:${docker.tag}"
+    command:
+      - -Xms${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMS:-1g}
+      - -Xmx${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMX:-1g}
+      - -Dcom.sun.management.jmxremote
+      - -Dcom.sun.management.jmxremote.authenticate=false
+      - -Dcom.sun.management.jmxremote.port=7199
+      - -Dcom.sun.management.jmxremote.ssl=false
     environment:
-      JAVA_XMS: "-Xms${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMS:-1g}"
-      JAVA_XMX: "-Xmx${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMX:-1g}"
       REPOSITORY_SEARCH_ELASTIC_HOST: repository-search-elastic
       REPOSITORY_SEARCH_ELASTIC_PORT: "9200"
       REPOSITORY_SERVICE_HOST: repository-service
       REPOSITORY_SERVICE_PORT: "8080"
       REPOSITORY_SERVICE_ADMIN_PASS: "${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+    expose:
+      - "7199"
 
   repository-search-solr4:
     image: "${docker.image}-repository-search-solr4:${docker.tag}"
     environment:
-      CATALINA_OPTS: "-Xms${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-1g} -Xmx${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-1g}"
+      CATALINA_OPTS: >-
+        -Xms${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-1g}
+        -Xmx${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-1g}
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.port=7199
+        -Dcom.sun.management.jmxremote.ssl=false
+        -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
       REPOSITORY_SEARCH_SOLR4_HOST: repository-search-solr4
       REPOSITORY_SEARCH_SOLR4_PORT: "8080"
       REPOSITORY_SERVICE_HOST: repository-service
       REPOSITORY_SERVICE_PORT: "8080"
+    expose:
+      - "7199"
+      - "9090"
     volumes:
       - "repository-search-solr4-volume:/opt/alfresco/alf_data"
     depends_on:
@@ -55,7 +80,16 @@ services:
   repository-service:
     image: "${docker.image}-repository-service:${docker.tag}"
     environment:
-      CATALINA_OPTS: "-Xms${REPOSITORY_SERVICE_JAVA_XMS:-1g} -Xmx${REPOSITORY_SERVICE_JAVA_XMX:-1g} -Dcaches.join=tcpip -Dcaches.join.tcpip.members=repository-service_1"
+      CATALINA_OPTS: >-
+        -Xms${REPOSITORY_SERVICE_JAVA_XMS:-1g}
+        -Xmx${REPOSITORY_SERVICE_JAVA_XMX:-1g}
+        -Dcaches.join=tcpip
+        -Dcaches.join.tcpip.members=repository-service_1
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.port=7199
+        -Dcom.sun.management.jmxremote.ssl=false
+        -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
       REPOSITORY_CACHE_HOST: repository-cache
       REPOSITORY_CACHE_PORT: "6379"
       REPOSITORY_DATABASE_HOST: repository-database
@@ -86,7 +120,9 @@ services:
       REPOSITORY_TRANSFORM_HOST: repository-transform
       REPOSITORY_TRANSFORM_PORT: "8100"
     expose:
+      - "7199"
       - "8080"
+      - "9090"
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}:8081"
     volumes:

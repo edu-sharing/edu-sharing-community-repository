@@ -40,6 +40,7 @@
                 edu_sharing-community-repository-backend-tomcat,
                 edu_sharing-community-repository-config,
                 edu_sharing-community-repository-webapp,
+                jmx_prometheus_javaagent,
                 postgresql,
                 redisson-all,
                 redisson-tomcat-7
@@ -175,6 +176,11 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-webapp</artifactId>
       <type>war</type>
+    </dependency>
+
+    <dependency>
+      <groupId>io.prometheus.jmx</groupId>
+      <artifactId>jmx_prometheus_javaagent</artifactId>
     </dependency>
 
     <dependency>

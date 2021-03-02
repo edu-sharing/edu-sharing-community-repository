@@ -1,4 +1,4 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:${elasticsearch.server.version}
+FROM ${docker.from.elasticsearch.server}
 
 ########################################################################################################################
 

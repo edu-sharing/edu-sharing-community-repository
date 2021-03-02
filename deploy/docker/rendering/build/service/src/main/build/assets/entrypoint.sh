@@ -46,12 +46,22 @@ until wait-for-it "${rendering_cache_host}:${rendering_cache_port}" -t 3; do sle
 
 until wait-for-it "${rendering_database_host}:${rendering_database_port}" -t 3; do sleep 1; done
 
-until mysql -h"${rendering_database_host}" -P"${rendering_database_port}" \
-	-u"${rendering_database_user}" -p"${rendering_database_pass}" \
-	"${rendering_database_name}" <<<'SELECT 1' &>/dev/null; do
-	echo >&2 "Waiting for ${rendering_database_host} ..."
-	sleep 3
-done
+[[ "${rendering_database_driv}" == "mysql" ]] && {
+	until mysql -h"${rendering_database_host}" -P"${rendering_database_port}" \
+		-u"${rendering_database_user}" -p"${rendering_database_pass}" \
+		"${rendering_database_name}" <<<'SELECT 1' &>/dev/null; do
+		echo >&2 "Waiting for ${rendering_database_host} ..."
+		sleep 3
+	done
+}
+
+[[ "${rendering_database_driv}" == "pgsql" ]] && {
+	until PGPASSWORD="${rendering_database_pass}" \
+		psql -h "${rendering_database_host}" -p "${rendering_database_port}" -U "${rendering_database_user}" -d "${rendering_database_name}" -c '\q'; do
+		echo >&2 "Waiting for ${rendering_database_host} ..."
+		sleep 3
+	done
+}
 
 until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
 
@@ -73,7 +83,7 @@ sed -i 's|^\(\s*\)[#]*ServerName.*|\1ServerName '"${my_host_external}"'|' /etc/a
 sed -i 's|^\(\s*\)[#]*ServerName.*|\1ServerName '"${my_host_internal}"'|' /etc/apache2/sites-available/internal.conf
 
 sed -i 's|^[;\s]*session\.save_handler.*|session.save_handler = '"${rendering_cache_type}"'|' "${PHP_INI_DIR}/php.ini"
-echo "session.save_path = \"${rendering_cache_prot}${rendering_cache_host}:${rendering_cache_port}${rendering_cache_opts}\"" >> "${PHP_INI_DIR}/php.ini"
+echo "session.save_path = \"${rendering_cache_prot}${rendering_cache_host}:${rendering_cache_port}${rendering_cache_opts}\"" >>"${PHP_INI_DIR}/php.ini"
 
 ########################################################################################################################
 

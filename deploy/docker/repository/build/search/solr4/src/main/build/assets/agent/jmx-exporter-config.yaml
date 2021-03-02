@@ -1,0 +1,266 @@
+---
+lowercaseOutputLabelNames: true
+lowercaseOutputName: true
+whitelistObjectNames: ["Catalina:*"]
+rules:
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Cache><>cumulative_evictions:'
+    name: solr_cache_eviction_total
+    help: solr_cache_eviction_total
+    type: COUNTER
+    labels:
+      core: "$1"
+      cache: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Cache><>cumulative_hitratio:'
+    name: solr_cache_hit_ratio_total
+    help: solr_cache_hit_ratio_total
+    type: COUNTER
+    labels:
+      core: "$1"
+      cache: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Cache><>cumulative_hits:'
+    name: solr_cache_hit_total
+    help: solr_cache_hit_total
+    type: COUNTER
+    labels:
+      core: "$1"
+      cache: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Cache><>cumulative_inserts:'
+    name: solr_cache_insert_total
+    help: solr_cache_insert_total
+    type: COUNTER
+    labels:
+      core: "$1"
+      cache: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Cache><>cumulative_lookups:'
+    name: solr_cache_lookup_total
+    help: solr_cache_lookup_total
+    type: COUNTER
+    labels:
+      core: "$1"
+      cache: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Cache><>size:'
+    name: solr_cache_size_kb
+    help: solr_cache_size_kb
+    type: GAUGE
+    labels:
+      core: "$1"
+      cache: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Handler><>errors:'
+    name: solr_handler_request_error_total
+    help: solr_handler_request_error_total
+    type: COUNTER
+    labels:
+      core: "$1"
+      handler: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Handler><>(\d+)thPcRequestTime:'
+    name: solr_handler_request_milliseconds
+    help: solr_handler_request_milliseconds
+    type: GAUGE
+    labels:
+      core: "$1"
+      handler: "$2"
+      quantile: "0.$4"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Handler><>requests:'
+    name: solr_handler_request_milliseconds_count
+    help: solr_handler_request_milliseconds_count
+    type: COUNTER
+    labels:
+      core: "$1"
+      handler: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Handler><>totalTime:'
+    name: solr_handler_request_milliseconds_sum
+    help: solr_handler_request_milliseconds_sum
+    type: COUNTER
+    labels:
+      core: "$1"
+      handler: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Handler><>timeouts:'
+    name: solr_handler_request_timeout_total
+    help: solr_handler_request_timeout_total
+    type: COUNTER
+    labels:
+      core: "$1"
+      handler: "$2"
+  - pattern: 'solr/(.+)<type=org\.apache\.solr\.highlight\.(.+), id=(.+)><>requests:'
+    name: solr_highlight_request_total
+    help: solr_highlight_request_total
+    type: COUNTER
+    labels:
+      core: "$1"
+      highlight: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Searcher><>numDocs:'
+    name: solr_searcher_doc_current
+    help: solr_searcher_doc_current
+    type: GAUGE
+    labels:
+      core: "$1"
+      searcher: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Searcher><>deletedDocs:'
+    name: solr_searcher_doc_deleted
+    help: solr_searcher_doc_deleted
+    type: GAUGE
+    labels:
+      core: "$1"
+      searcher: "$2"
+  - pattern: 'solr/(.+)<type=(.+), id=(.+)Searcher><>maxDoc:'
+    name: solr_searcher_doc_max
+    help: solr_searcher_doc_max
+    type: GAUGE
+    labels:
+      core: "$1"
+      searcher: "$2"
+  - pattern: 'Catalina<type=StringCache><>accessCount:'
+    name: tomcat_cache_access_total
+    help: tomcat_cache_access_total
+    type: COUNTER
+  - pattern: 'Catalina<type=StringCache><>hitCount:'
+    name: tomcat_cache_hit_total
+    help: tomcat_cache_hit_total
+    type: COUNTER
+  - pattern: 'Catalina<type=ThreadPool, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>connectionCount:'
+    name: tomcat_connections_current_connections
+    help: tomcat_connections_current_connections
+    type: GAUGE
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<type=ThreadPool, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>keepAliveCount:'
+    name: tomcat_connections_keepalive_current_connections
+    help: tomcat_connections_keepalive_current_connections
+    type: GAUGE
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>errorCount:'
+    name: tomcat_global_error_total
+    help: tomcat_global_error_total
+    type: COUNTER
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>bytesReceived:'
+    name: tomcat_global_received_bytes_total
+    help: tomcat_global_received_bytes_total
+    type: COUNTER
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>maxTime:'
+    name: tomcat_global_request_max_milliseconds
+    help: tomcat_global_request_max_milliseconds
+    type: GAUGE
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>requestCount:'
+    name: tomcat_global_request_milliseconds_count
+    help: tomcat_global_request_milliseconds_count
+    type: COUNTER
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>processingTime:'
+    name: tomcat_global_request_milliseconds_sum
+    help: tomcat_global_request_milliseconds_sum
+    type: COUNTER
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>bytesSent:'
+    name: tomcat_global_sent_bytes_total
+    help: tomcat_global_sent_bytes_total
+    type: COUNTER
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<j2eeType=Servlet, name=(.+), WebModule=(.+), J2EEApplication=none, J2EEServer=none><>errorCount:'
+    name: tomcat_servlet_error_total
+    help: tomcat_servlet_error_total
+    type: COUNTER
+    labels:
+      servlet: "$1"
+      module: "$2"
+  - pattern: 'Catalina<j2eeType=Servlet, name=(.+), WebModule=(.+), J2EEApplication=none, J2EEServer=none><>maxTime:'
+    name: tomcat_servlet_request_max_milliseconds
+    help: tomcat_servlet_request_max_milliseconds
+    type: GAUGE
+    labels:
+      servlet: "$1"
+      module: "$2"
+  - pattern: 'Catalina<j2eeType=Servlet, name=(.+), WebModule=(.+), J2EEApplication=none, J2EEServer=none><>requestCount:'
+    name: tomcat_servlet_request_milliseconds_count
+    help: tomcat_servlet_request_milliseconds_count
+    type: COUNTER
+    labels:
+      servlet: "$1"
+      module: "$2"
+  - pattern: 'Catalina<j2eeType=Servlet, name=(.+), WebModule=(.+), J2EEApplication=none, J2EEServer=none><>processingTime:'
+    name: tomcat_servlet_request_milliseconds_sum
+    help: tomcat_servlet_request_milliseconds_sum
+    type: COUNTER
+    labels:
+      servlet: "$1"
+      module: "$2"
+  - pattern: 'Catalina<type=Manager, context=(.+), host=(.+)><>activeSessions:'
+    name: tomcat_sessions_active_current_sessions
+    help: tomcat_sessions_active_current_sessions
+    type: GAUGE
+    labels:
+      context: "$1"
+      host: "$2"
+  - pattern: 'Catalina<type=Manager, context=(.+), host=(.+)><>maxActive:'
+    name: tomcat_sessions_active_max_sessions
+    help: tomcat_sessions_active_max_sessions
+    type: GAUGE
+    labels:
+      context: "$1"
+      host: "$2"
+  - pattern: 'Catalina<type=Manager, context=(.+), host=(.+)><>sessionAverageAliveTime:'
+    name: tomcat_sessions_alive_average_seconds
+    help: tomcat_sessions_alive_average_seconds
+    type: GAUGE
+    labels:
+      context: "$1"
+      host: "$2"
+  - pattern: 'Catalina<type=Manager, context=(.+), host=(.+)><>sessionMaxAliveTime:'
+    name: tomcat_sessions_alive_max_seconds
+    help: tomcat_sessions_alive_max_seconds
+    type: GAUGE
+    labels:
+      context: "$1"
+      host: "$2"
+  - pattern: 'Catalina<type=Manager, context=(.+), host=(.+)><>sessionCounter:'
+    name: tomcat_sessions_created_sessions_total
+    help: tomcat_sessions_created_sessions_total
+    type: COUNTER
+    labels:
+      context: "$1"
+      host: "$2"
+  - pattern: 'Catalina<type=Manager, context=(.+), host=(.+)><>expiredSessions:'
+    name: tomcat_sessions_expired_sessions_total
+    help: tomcat_sessions_expired_sessions_total
+    type: COUNTER
+    labels:
+      context: "$1"
+      host: "$2"
+  - pattern: 'Catalina<type=Manager, context=(.+), host=(.+)><>rejectedSessions:'
+    name: tomcat_sessions_rejected_sessions_total
+    help: tomcat_sessions_rejected_sessions_total
+    type: COUNTER
+    labels:
+      context: "$1"
+      host: "$2"
+  - pattern: 'Catalina<type=ThreadPool, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>currentThreadsBusy:'
+    name: tomcat_threads_busy_threads
+    help: tomcat_threads_busy_threads
+    type: GAUGE
+    labels:
+      protocol: "$1"
+      port: "$4"
+  - pattern: 'Catalina<type=ThreadPool, name=\"(\w+)-(\w+)-(\d+\.\d+\.\d+\.\d+)-(\d+)\"><>currentThreadCount:'
+    name: tomcat_threads_current_threads
+    help: tomcat_threads_current_threads
+    type: GAUGE
+    labels:
+      protocol: "$1"
+      port: "$4"

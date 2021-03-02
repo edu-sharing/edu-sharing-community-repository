@@ -33,7 +33,7 @@ spec:
     - destination:
         host: {{ include "edusharing_rendering_service.name" $ }}
         port:
-          number: {{ .Values.service.port.api.external }}
+          number: {{ $.Values.service.port.api.external }}
   {{- end }}
 {{- end }}
 {{- end }}

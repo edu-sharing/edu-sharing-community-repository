@@ -13,9 +13,10 @@ spec:
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.global.cluster.istio.enabled }}
-        sidecar.istio.io/inject: "true"
-        {{- end }}
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8081"
+        prometheus.io/scrape: {{ .Values.metrics.enabled | quote }}
+        sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       containers:
       - name: {{ include "edusharing_repository_search_elastic_tracker.name" . }}
@@ -29,6 +30,8 @@ spec:
         ports:
         - name: mgmt
           containerPort: 8081
+        - name: jmx
+          containerPort: 7199
         {{- with .Values.livenessProbe }}
         livenessProbe:
           httpGet:

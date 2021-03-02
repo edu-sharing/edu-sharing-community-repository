@@ -32,7 +32,10 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <includeArtifactIds>alfresco-solr4-distribution</includeArtifactIds>
+              <includeArtifactIds>
+                alfresco-solr4-distribution,
+                jmx_prometheus_javaagent
+              </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/artifacts</outputDirectory>
             </configuration>
           </execution>
@@ -90,6 +93,11 @@
       <groupId>org.alfresco</groupId>
       <artifactId>alfresco-solr4-distribution</artifactId>
       <type>zip</type>
+    </dependency>
+
+    <dependency>
+      <groupId>io.prometheus.jmx</groupId>
+      <artifactId>jmx_prometheus_javaagent</artifactId>
     </dependency>
 
   </dependencies>

@@ -7,6 +7,13 @@ data:
   CATALINA_OPTS: >-
     -XX:MinRAMPercentage={{ .Values.config.jvm.ram.minPercentage }}
     -XX:MaxRAMPercentage={{ .Values.config.jvm.ram.maxPercentage }}
+    -Dcom.sun.management.jmxremote
+    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.port=7199
+    -Dcom.sun.management.jmxremote.ssl=false
+    {{- if .Values.metrics.enabled }}
+    -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
+    {{- end }}
   REPOSITORY_SEARCH_SOLR4_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
   REPOSITORY_SEARCH_SOLR4_HOST: {{ include "edusharing_repository_search_solr4.name" . | quote }}
   REPOSITORY_SEARCH_SOLR4_PORT: {{ .Values.service.port.api | quote }}

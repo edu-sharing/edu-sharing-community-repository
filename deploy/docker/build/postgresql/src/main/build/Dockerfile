@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/postgresql:${postgresql.server.version}
+FROM ${docker.from.postgresql.server}
 
 ########################################################################################################################
 

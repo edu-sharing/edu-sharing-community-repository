@@ -14,9 +14,10 @@ spec:
       labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.global.cluster.istio.enabled }}
-        sidecar.istio.io/inject: "true"
-        {{- end }}
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "9090"
+        prometheus.io/scrape: {{ .Values.metrics.enabled | quote }}
+        sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       initContainers:
       - name: {{ include "edusharing_repository_search_solr4.name" . }}-init-permission
@@ -43,6 +44,12 @@ spec:
         ports:
         - name: api
           containerPort: 8080
+        - name: jmx
+          containerPort: 7199
+        {{- if .Values.metrics.enabled }}
+        - name: metric
+          containerPort: 9090
+        {{- end }}
         volumeMounts:
         - name: data
           mountPath: /usr/local/alfresco/alf_data

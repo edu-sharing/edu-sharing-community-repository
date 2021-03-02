@@ -6,7 +6,7 @@ metadata:
   name: {{ include "edusharing_repository_service.name" . }}
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
 spec:
-  selector: {{ .Values.global.cluster.istio.gateway.selector | nindent 4 }}
+  selector: {{ toYaml .Values.global.cluster.istio.gateway.selector | nindent 4 }}
   servers:
   - port:
       number: 80

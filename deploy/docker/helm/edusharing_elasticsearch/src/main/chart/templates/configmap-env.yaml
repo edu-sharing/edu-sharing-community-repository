@@ -7,6 +7,10 @@ data:
   ES_JAVA_OPTS: >-
     -XX:MinRAMPercentage={{ .Values.config.jvm.ram.minPercentage }}
     -XX:MaxRAMPercentage={{ .Values.config.jvm.ram.maxPercentage }}
+    -Dcom.sun.management.jmxremote
+    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.port=7199
+    -Dcom.sun.management.jmxremote.ssl=false
   {{- if .Release.IsInstall }}
   cluster.initial_master_nodes: "{{ range $i := until (.Values.replicaCount | int) }}{{ include "edusharing_elasticsearch.name" $ }}-{{ $i }},{{ end }}"
   {{- end }}

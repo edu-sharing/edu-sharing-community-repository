@@ -1,0 +1,18 @@
+{{- if .Values.global.cluster.prometheus.enabled }}
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" -}}
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: {{ include "edusharing.name" . }}
+  labels: {{ include "edusharing.labels" . | nindent 4 }}
+spec:
+  additionalScrapeConfigs:
+    name: {{ include "edusharing.name" . }}-prometheus
+    key:  additionalScrapeConfigs
+  retention: {{ .Values.global.cluster.prometheus.retention }}
+  scrapeInterval: {{ .Values.global.cluster.prometheus.scrapeInterval }}
+  scrapeTimeout: {{ .Values.global.cluster.prometheus.scrapeTimeout }}
+  serviceAccountName: {{ include "edusharing.name" . }}-prometheus
+  serviceMonitorSelector: {}
+{{- end }}
+{{- end }}

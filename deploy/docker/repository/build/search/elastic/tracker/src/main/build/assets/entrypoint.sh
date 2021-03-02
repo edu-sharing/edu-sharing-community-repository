@@ -57,4 +57,4 @@ grep -q '^[#]*\s*management\.server\.address=' "application.properties" || echo 
 
 ########################################################################################################################
 
-exec "java" "-jar" "tracker.jar" "${JAVA_XMS}" "${JAVA_XMX}" "${JAVA_AGENT}" "$@"
+exec "java" "-jar" "tracker.jar" "${JAVA_OPTS:-}" "$@"

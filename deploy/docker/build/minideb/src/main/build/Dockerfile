@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/minideb:${minideb.server.version}
+FROM ${docker.from.minideb}
 
 ########################################################################################################################
 

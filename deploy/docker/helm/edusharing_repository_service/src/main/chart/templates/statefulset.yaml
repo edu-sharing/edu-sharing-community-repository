@@ -24,9 +24,10 @@ spec:
         {{- end }}
         {{- end }}
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.global.cluster.istio.enabled }}
-        sidecar.istio.io/inject: "true"
-        {{- end }}
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "9090"
+        prometheus.io/scrape: {{ .Values.metrics.enabled | quote }}
+        sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       initContainers:
       - name: {{ include "edusharing_repository_service.name" . }}-init-permission
@@ -63,6 +64,12 @@ spec:
           containerPort: 8081
         - name: gossip
           containerPort: 5701
+        - name: jmx
+          containerPort: 7199
+        {{- if .Values.metrics.enabled }}
+        - name: metric
+          containerPort: 9090
+        {{- end }}
         volumeMounts:
         - name: share
           mountPath: /opt/alfresco/alf_data

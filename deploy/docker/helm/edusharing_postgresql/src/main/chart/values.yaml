@@ -82,7 +82,7 @@ terminationGracePeriod: 120
 livenessProbe:
 
   failureThreshold: 3
-  initialDelaySeconds: 600
+  initialDelaySeconds: 900
   periodSeconds: 10
   timeoutSeconds: 5
 
@@ -104,5 +104,21 @@ resources:
   requests:
     cpu: 200m
     memory: 1Gi
+
+########################################################################################################################
+
+metrics:
+
+  enabled: true
+
+  resources:
+    limits:
+      cpu: 100m
+      memory: 100Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+
+  securityContext: {}
 
 ########################################################################################################################

@@ -1,4 +1,4 @@
-FROM docker.io/php:${rendering.php.version}-apache
+FROM ${docker.from.apache.server}
 
 ########################################################################################################################
 
@@ -16,9 +16,11 @@ RUN set -eux \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        libpq-dev \
         libxml2-dev \
         libzip-dev \
         mariadb-client \
+        postgresql-client \
         wait-for-it \
         xmlstarlet \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
@@ -31,7 +33,7 @@ RUN set -eux \
     && docker-php-ext-install -j$(nproc) zip \
     && docker-php-ext-install -j$(nproc) sockets \
     && docker-php-ext-install -j$(nproc) mysqli \
-    && docker-php-ext-install -j$(nproc) pdo pdo_mysql \
+    && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql \
     && docker-php-ext-enable opcache \
     && a2enmod rewrite \
     && a2enmod headers \

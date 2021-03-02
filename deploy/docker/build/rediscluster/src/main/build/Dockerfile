@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/redis-cluster:${redis.server.version}
+FROM ${docker.from.rediscluster.server}
 
 ########################################################################################################################
 

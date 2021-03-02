@@ -22,6 +22,21 @@
     <docker.registry>community.docker.edu-sharing.com</docker.registry>
     <docker.verbose>true</docker.verbose>
 
+    <docker.from.apache.exporter>docker.io/motork/apache_exporter:latest</docker.from.apache.exporter>
+    <docker.from.apache.server>docker.io/php:${rendering.php.version}-apache</docker.from.apache.server>
+    <docker.from.elasticsearch.exporter>docker.io/justwatch/elasticsearch_exporter:1.1.0</docker.from.elasticsearch.exporter>
+    <docker.from.elasticsearch.server>docker.elastic.co/elasticsearch/elasticsearch:7.8.0</docker.from.elasticsearch.server>
+    <docker.from.mariadb.exporter>docker.io/prom/mysqld-exporter:v0.12.1</docker.from.mariadb.exporter>
+    <docker.from.mariadb.server>docker.io/bitnami/mariadb:10.4</docker.from.mariadb.server>
+    <docker.from.minideb>docker.io/bitnami/minideb:buster</docker.from.minideb>
+    <docker.from.openjdk>docker.io/openjdk:8-jdk-buster</docker.from.openjdk>
+    <docker.from.postgresql.exporter>docker.io/wrouesnel/postgres_exporter:v0.8.0</docker.from.postgresql.exporter>
+    <docker.from.postgresql.server>docker.io/bitnami/postgresql:12</docker.from.postgresql.server>
+    <docker.from.redis.exporter>docker.io/oliver006/redis_exporter:v1.17.1</docker.from.redis.exporter>
+    <docker.from.redis.server>docker.io/bitnami/redis:6.0.9</docker.from.redis.server>
+    <docker.from.rediscluster.server>docker.io/bitnami/redis-cluster:6.0.9</docker.from.rediscluster.server>
+    <docker.from.tomcat>docker.io/tomcat:${repository.tomcat.version}-jdk8</docker.from.tomcat>
+
   </properties>
 
   <build>

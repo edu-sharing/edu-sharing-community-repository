@@ -4,9 +4,13 @@ metadata:
   name: {{ include "edusharing_repository_search_elastic_tracker.name" . }}-env
   labels: {{ include "edusharing_repository_search_elastic_tracker.labels" . | nindent 4 }}
 data:
-  JAVA_AGENT: ""
-  JAVA_XMS: "-XX:MinRAMPercentage={{ .Values.config.jvm.ram.minPercentage }}"
-  JAVA_XMX: "-XX:MaxRAMPercentage={{ .Values.config.jvm.ram.maxPercentage }}"
+  JAVA_OPTS: >-
+    -XX:MinRAMPercentage={{ .Values.config.jvm.ram.minPercentage }}
+    -XX:MaxRAMPercentage={{ .Values.config.jvm.ram.maxPercentage }}
+    -Dcom.sun.management.jmxremote
+    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.port=7199
+    -Dcom.sun.management.jmxremote.ssl=false
   REPOSITORY_SEARCH_ELASTIC_HOST: {{ .Values.config.search.elastic.host | quote }}
   REPOSITORY_SEARCH_ELASTIC_PORT: {{ .Values.config.search.elastic.port | quote }}
   REPOSITORY_SEARCH_ELASTIC_TRACKER_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}

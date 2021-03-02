@@ -212,14 +212,14 @@ livenessProbe:
   server:
 
     failureThreshold: 3
-    initialDelaySeconds: 600
+    initialDelaySeconds: 900
     periodSeconds: 10
     timeoutSeconds: 5
 
   transform:
 
     failureThreshold: 3
-    initialDelaySeconds: 600
+    initialDelaySeconds: 900
     periodSeconds: 10
     timeoutSeconds: 5
 
@@ -262,5 +262,11 @@ resources:
     requests:
       cpu: 100m
       memory: 1Gi
+
+########################################################################################################################
+
+metrics:
+
+  enabled: true
 
 ########################################################################################################################

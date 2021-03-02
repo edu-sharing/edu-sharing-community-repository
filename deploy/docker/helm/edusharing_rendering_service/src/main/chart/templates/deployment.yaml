@@ -13,10 +13,10 @@ spec:
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.global.cluster.istio.enabled }}
-        sidecar.istio.io/inject: "true"
-        traffic.sidecar.istio.io/excludeOutboundPorts: "3306"
-        {{- end }}
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "9117"
+        prometheus.io/scrape: {{ .Values.metrics.enabled | quote }}
+        sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       initContainers:
       - name: {{ include "edusharing_rendering_service.name" . }}-init-permission
@@ -77,6 +77,23 @@ spec:
         {{- with .Values.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
+      {{- if .Values.metrics.enabled }}
+      - name: {{ include "edusharing_rendering_service.name" . }}-metrics
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-apache_exporter:{{ .Values.global.image.tag }}
+        args:
+        - --scrape_uri=http://127.0.0.1:8080/server-status/?auto
+        - --telemetry.address={{ if .Values.global.cluster.istio.enabled }}127.0.0.1{{ end }}:9117
+        - --telemetry.endpoint=/metrics
+        ports:
+        - name: metric
+          containerPort: 9117
+        {{- with .Values.metrics.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.metrics.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       {{- with .Values.global.image.pullSecrets }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
       {{- end }}

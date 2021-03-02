@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/mariadb:${mariadb.server.version}
+FROM ${docker.from.mariadb.server}
 
 ########################################################################################################################
 

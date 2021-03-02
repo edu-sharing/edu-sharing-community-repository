@@ -1,0 +1,17 @@
+{{- if .Values.global.cluster.prometheus.enabled }}
+{{- if .Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1" -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "edusharing.name" . }}-prometheus
+  labels: {{ include "edusharing.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "edusharing.name" . }}-prometheus
+subjects:
+- kind: ServiceAccount
+  name: {{ include "edusharing.name" . }}-prometheus
+  namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}

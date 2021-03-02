@@ -1,5 +1,5 @@
 
-FROM docker.io/tomcat:${repository.tomcat.version}-jdk8
+FROM ${docker.from.tomcat}
 
 
 RUN set -eux \
@@ -48,6 +48,9 @@ RUN set -eux \
     && mkdir -p tomcat/shared/lib \
     && mkdir -p tomcat/logs \
     && touch tomcat/logs/catalina.out
+
+COPY --chown=worker:worker artifacts/jmx_prometheus_javaagent-${repository.prometheus.jmx.version}.jar tomcat/agent/jmx_prometheus_javaagent.jar
+COPY --chown=worker:worker assets/agent/jmx-exporter-config.yaml tomcat/agent/
 
 COPY --chown=worker:worker artifacts/postgresql-${repository.postgresql.client.version}.jar tomcat/lib/
 COPY --chown=worker:worker artifacts/redisson-all-${repository.redis.client.version}.jar tomcat/lib/

@@ -1,4 +1,4 @@
-FROM docker.io/tomcat:${repository.tomcat.version}-jdk8
+FROM ${docker.from.tomcat}
 
 ########################################################################################################################
 
@@ -35,6 +35,9 @@ RUN set -eux \
 USER worker
 
 ### Tomcat #############################################################################################################
+
+COPY --chown=worker:worker artifacts/jmx_prometheus_javaagent-${repository.prometheus.jmx.version}.jar tomcat/agent/jmx_prometheus_javaagent.jar
+COPY --chown=worker:worker assets/agent/jmx-exporter-config.yaml tomcat/agent/
 
 COPY --chown=worker:worker assets/tomcat/logging.properties tomcat/conf/logging.properties
 
