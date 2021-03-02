@@ -97,7 +97,6 @@ public class NodeDao {
 	private RepositoryDao remoteRepository;
 
 	private String version;
-	private AuthorityService authorityService;
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
@@ -476,7 +475,6 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
-			this.authorityService= AuthorityServiceFactory.getAuthorityService(repoDao.getId());
 			/**
 			 * call getProperties on demand
 			 */
@@ -1353,7 +1351,7 @@ public class NodeDao {
 			if (this.isCurrentUserAdminOrSameUserAsUserName(userName)) // if is ADMIN or sameUser, don't need to countinue;
 				return true;
 			else {
-				Map<String, Serializable> profileSettings = authorityService.getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
+				Map<String, Serializable> profileSettings = AuthorityServiceFactory.getLocalService().getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
 				boolean isEmailPublic = false;
 				if (profileSettings.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL)) {
 					isEmailPublic = (boolean) profileSettings.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
