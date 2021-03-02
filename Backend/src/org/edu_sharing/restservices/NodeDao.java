@@ -916,6 +916,10 @@ public class NodeDao {
 	private void fillNodeReference(CollectionReference reference) throws DAOException {
 		final String originalId = getReferenceOriginalId();
 		reference.setOriginalId(originalId);
+		// not supported and used by remote repositories
+		if(isFromRemoteRepository()){
+			return;
+		}
 		try {
 			reference.setAccessOriginal(NodeDao.getNode(repoDao, originalId).asNode(false).getAccess());
 		} catch (Throwable t) {
@@ -1034,7 +1038,9 @@ public class NodeDao {
 		content.setVersion(getContentVersion(data));
 		content.setUrl(getContentUrl());
 
-		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+		if(isFromRemoteRepository()){
+			// @TODO: not available here
+		} else if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
 			content.setHash(AuthenticationUtil.runAsSystem(() ->
 					nodeService.getContentHash(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
 							((CollectionReference) data).getOriginalId(),this.version,org.alfresco.model.ContentModel.PROP_CONTENT.toString())
@@ -1403,7 +1409,7 @@ public class NodeDao {
 	}
 
 	private String getContentVersion(Node data) throws DAOException {
-		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null && !isFromRemoteRepository()){
 			return AuthenticationUtil.runAsSystem(() ->
 					nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
 							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
@@ -1662,7 +1668,7 @@ public class NodeDao {
 	}
 
 	private String getSize(Node data) {
-		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
+		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null && !isFromRemoteRepository()){
 			return AuthenticationUtil.runAsSystem(() ->
 					nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
 					((CollectionReference) data).getOriginalId(), CCConstants.LOM_PROP_TECHNICAL_SIZE));

@@ -33,6 +33,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.tracking.NodeTrackingDetails;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -124,9 +125,9 @@ public class RenderingApi {
 			@Context HttpServletRequest req){
 
 		try {
-			
-			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getDetailsSnippetWithParameters(repository, node, nodeVersion, displayMode, parameters, req);
+			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+			if(remote != null) {
+				return RepoProxyFactory.getRepoProxy().getDetailsSnippetWithParameters(remote.getRepository(), remote.getNodeId(), nodeVersion, displayMode, parameters, req);
 			}
 			
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);

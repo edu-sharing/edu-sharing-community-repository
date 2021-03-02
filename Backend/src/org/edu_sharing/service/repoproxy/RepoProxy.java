@@ -31,11 +31,43 @@ public interface RepoProxy {
 
 	Response getValuesV2(String repository, String mdsId, SuggestionParam suggestionParam, HttpServletRequest req) throws Throwable;
 
+	/**
+	 * Whenever possible, prefer to use the method with nodeId to also find out if it is a local node pointing to a remote
+	 * @param repoId
+	 * @return
+	 */
+	@Deprecated
 	boolean myTurn(String repoId);
-	
+	RemoteRepoDetails myTurn(String repoId, String nodeId);
+
 	public HashMap<String, String> remoteAuth(ApplicationInfo repoInfo, String username, boolean validate) throws Throwable;
 
 	Response prepareUsage(String repository, String node, HttpServletRequest req) throws Throwable;
 
 	Response getMetadata(String repository, String node, List<String> propertyFilter, HttpServletRequest req) throws Throwable;
+
+	public static class RemoteRepoDetails {
+		private String repository,nodeId;
+
+		public RemoteRepoDetails(String repository, String nodeId) {
+			this.repository = repository;
+			this.nodeId = nodeId;
+		}
+
+		public String getRepository() {
+			return repository;
+		}
+
+		public void setRepository(String repository) {
+			this.repository = repository;
+		}
+
+		public String getNodeId() {
+			return nodeId;
+		}
+
+		public void setNodeId(String nodeId) {
+			this.nodeId = nodeId;
+		}
+	}
 }

@@ -477,7 +477,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         this.updateCompletionState();
         // to lower case because of remote repos wrong mapping
-        return (this.getGroup(this.mdsDefinition$.value, groupId).rendering.toLowerCase() as EditorType);
+        return (this.getGroup(this.mdsDefinition$.value, groupId).rendering?.toLowerCase() as EditorType);
     }
 
     async initWithoutNodes(
@@ -501,7 +501,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         this.updateCompletionState();
         // to lower case because of remote repos wrong mapping
-        return (this.getGroup(this.mdsDefinition$.value, groupId).rendering.toLowerCase() as EditorType);
+        return (this.getGroup(this.mdsDefinition$.value, groupId).rendering?.toLowerCase() as EditorType);
     }
 
     async clearValues(): Promise<void> {

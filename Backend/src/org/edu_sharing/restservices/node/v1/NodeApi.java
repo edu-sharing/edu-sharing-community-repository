@@ -48,6 +48,7 @@ import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
@@ -319,8 +320,9 @@ public class NodeApi  {
 		@Context HttpServletRequest req) {
     	
     	try {
-			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getMetadata(repository, node, propertyFilter, req);
+			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+			if(remote != null) {
+				return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), propertyFilter, req);
 			}
     		Filter filter = new Filter(propertyFilter);
     		
@@ -816,8 +818,9 @@ public class NodeApi  {
 		@Context HttpServletRequest req) {
 
     	try {
-			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getChildren(repository, node, maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
+			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+			if(remote != null) {
+				return RepoProxyFactory.getRepoProxy().getChildren(remote.getRepository(), remote.getNodeId(), maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
 			}
 
     		Filter propFilter = new Filter(propertyFilter);
