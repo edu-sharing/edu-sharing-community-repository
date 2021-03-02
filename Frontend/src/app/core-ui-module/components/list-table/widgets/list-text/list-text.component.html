@@ -77,6 +77,7 @@
   >
     <img
       src="{{ node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'url' } }}"
+      (error)="$event.target.style.display = 'none'"
       alt="{{
         'REPOSITORIES.' +
           (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
