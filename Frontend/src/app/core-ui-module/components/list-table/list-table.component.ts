@@ -1274,8 +1274,13 @@ export class ListTableComponent implements OnChanges, EventListener {
                     'data:' + node.preview.mimetype + ';base64,' + node.preview.data
                 );
             } else {
-                return node.preview.url +
-                    (this.isHomeNode(node) && this.animateNode != node ? '&crop=true&maxWidth=300&maxHeight=300' : '');
+                return node.preview.url + (
+                    ((
+                        this.isHomeNode(node) ||
+                        RestNetworkService.getRepository(node)?.repositoryType === RestConstants.REPOSITORY_TYPE_ALFRESCO
+                    ) &&
+                        this.animateNode !== node) ? '&crop=true&maxWidth=300&maxHeight=300' : ''
+                );
             }
         }
         return null;
