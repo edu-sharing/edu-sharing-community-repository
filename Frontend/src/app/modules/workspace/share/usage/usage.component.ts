@@ -42,9 +42,14 @@ export class WorkspaceUsageComponent  {
 
         let info = usage.usageXmlParams;
         if(info && info.general.referencedInName!=null) {
+            const typeStr = 'WORKSPACE.SHARE.USAGE_SUBTYPE.'+info.general.referencedInType.toUpperCase();
+            let type = this.translation.instant(typeStr);
+            if(type === typeStr) {
+                type =  info.general.referencedInType;
+            }
             return this.translation.instant('WORKSPACE.SHARE.USAGE_INFO',{
                 instance: info.general.referencedInInstance,
-                type: this.translation.instant('WORKSPACE.SHARE.USAGE_SUBTYPE.'+info.general.referencedInType.toUpperCase()),
+                type,
                 name: info.general.referencedInName
             });
         }

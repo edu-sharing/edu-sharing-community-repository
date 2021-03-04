@@ -182,6 +182,7 @@
             },
             "USAGE_TYPE": {
                 "MOODLE": "Moodle-Kurse",
+                "ILIAS": "Ilias-Kurse",
                 "COLLECTION": "Sammlungen",
                 "UNKNOWN": "Andere / Unbekannt"
             },
