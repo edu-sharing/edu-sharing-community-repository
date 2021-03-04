@@ -6,6 +6,7 @@ import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -16,6 +17,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -259,6 +261,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 value = entry.getValue();
             }
             props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
+        }
+
+        org.alfresco.service.cmr.repository.NodeRef alfNodeRef = new  org.alfresco.service.cmr.repository.NodeRef(new StoreRef(protocol,identifier),nodeId);
+        String contentUrl = URLTool.getNgRenderNodeUrl(nodeId,null);
+        contentUrl = URLTool.addOAuthAccessToken(contentUrl);
+        props.put(CCConstants.CONTENTURL, contentUrl);
+
+        if(sourceAsMap.get("content") != null) {
+            props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null));
         }
 
         NodeRef eduNodeRef = new NodeRefImpl(ApplicationInfoList.getHomeRepository().getAppId(),
