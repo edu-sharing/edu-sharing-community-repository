@@ -1027,7 +1027,11 @@ public class NodeDao {
 			return null;
 		License license=new License();
 		license.setIcon(new LicenseService().getIconUrl((String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)));
-		license.setUrl(new LicenseService().getLicenseUrl((String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),(String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE)));
+		license.setUrl(new LicenseService().getLicenseUrl(
+				(String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),
+				(String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE),
+				(String) nodeProps.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)
+		));
 		return license;
 	}
 
