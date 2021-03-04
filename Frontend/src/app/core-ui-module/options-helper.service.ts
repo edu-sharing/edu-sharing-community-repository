@@ -557,6 +557,12 @@ export class OptionsHelperService {
         bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
+        bookmarkNode.customShowCallback = (nodes) => {
+            if(nodes) {
+                return nodes.every((n) => this.nodeHelper.referenceOriginalExists(n));
+            }
+            return true;
+        };
 
         const createNodeVariant = new OptionItem('OPTIONS.VARIANT', 'call_split', (object) =>
             management.nodeVariant =  this.getObjects(object)[0]
@@ -655,7 +661,10 @@ export class OptionsHelperService {
             }
             for (const item of nodes) {
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
-                if(item.downloadUrl != null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL]) {
+                if(item.downloadUrl != null && item.properties &&
+                    !item.properties[RestConstants.CCM_PROP_IO_WWWURL] &&
+                    this.nodeHelper.referenceOriginalExists(item)
+                ) {
                     return true;
                 }
             }
