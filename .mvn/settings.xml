@@ -1,4 +1,3 @@
-
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
@@ -17,35 +16,25 @@
   <servers>
 
     <server>
-      <id>edu-sharing.community.helm</id>
-      <username>${env.MAVEN_REPO_USER}</username>
-      <password>${env.MAVEN_REPO_PASS}</password>
+      <id>deploy.releases</id>
+      <username>${env.MAVEN_USERNAME}</username>
+      <password>${env.MAVEN_PASSWORD}</password>
     </server>
     <server>
-      <id>edu-sharing.community.releases</id>
-      <username>${env.MAVEN_REPO_USER}</username>
-      <password>${env.MAVEN_REPO_PASS}</password>
-    </server>
-    <server>
-      <id>edu-sharing.community.snapshots</id>
-      <username>${env.MAVEN_REPO_USER}</username>
-      <password>${env.MAVEN_REPO_PASS}</password>
-    </server>
-    <server>
-      <id>community.docker.edu-sharing.com</id>
-      <username>${env.MAVEN_REPO_USER}</username>
-      <password>${env.MAVEN_REPO_PASS}</password>
+      <id>deploy.snapshots</id>
+      <username>${env.MAVEN_USERNAME}</username>
+      <password>${env.MAVEN_PASSWORD}</password>
     </server>
 
     <server>
-      <id>edu-sharing.plugin.remote.releases</id>
-      <username>${env.MAVEN_REPO_USER}</username>
-      <password>${env.MAVEN_REPO_PASS}</password>
+      <id>plugin.remote.releases</id>
+      <username>${env.EDUSHARING_USERNAME}</username>
+      <password>${env.EDUSHARING_PASSWORD}</password>
     </server>
     <server>
-      <id>edu-sharing.plugin.remote.snapshots</id>
-      <username>${env.MAVEN_REPO_USER}</username>
-      <password>${env.MAVEN_REPO_PASS}</password>
+      <id>plugin.remote.snapshots</id>
+      <username>${env.EDUSHARING_USERNAME}</username>
+      <password>${env.EDUSHARING_PASSWORD}</password>
     </server>
 
   </servers>

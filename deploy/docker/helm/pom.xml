@@ -16,18 +16,22 @@
   <name>edu_sharing-community-deploy-docker-helm</name>
 
   <properties>
-    <chart.icon>
+    
+    <helm.chart.icon>
       https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Edu-sharing_Logo.svg/200px-Edu-sharing_Logo.svg.png
-    </chart.icon>
+    </helm.chart.icon>
     <!--suppress UnresolvedMavenProperty -->
-    <chart.version>${git.closest.tag.name}</chart.version>
-    <helm.repository.url>https://artifacts.edu-sharing.com/repository/community-helm/</helm.repository.url>
-    <helm.repository.type>NEXUS</helm.repository.type>
+    <helm.chart.version>${git.closest.tag.name}</helm.chart.version>
+
+    <helm.registry>https://artifacts.edu-sharing.com/repository/community-helm/</helm.registry>
+    <helm.type>NEXUS</helm.type>
     <!--suppress UnresolvedMavenProperty -->
-    <helm.repository.user>${env.MAVEN_REPO_USER}</helm.repository.user>
+    <helm.username>${env.HELM_USERNAME}</helm.username>
     <!--suppress UnresolvedMavenProperty -->
-    <helm.repository.pass>${env.MAVEN_REPO_PASS}</helm.repository.pass>
+    <helm.password>${env.HELM_PASSWORD}</helm.password>
+
     <helm.version>3.4.1</helm.version>
+    
   </properties>
 
   <build>
@@ -99,24 +103,24 @@
           <artifactId>helm-maven-plugin</artifactId>
           <configuration>
             <chartDirectory>${project.build.directory}/chart</chartDirectory>
-            <chartVersion>${chart.version}</chartVersion>
+            <chartVersion>${helm.chart.version}</chartVersion>
             <appVersion>${docker.tag}</appVersion>
             <helmVersion>${helm.version}</helmVersion>
             <lintStrict>true</lintStrict>
             <addDefaultRepo>false</addDefaultRepo>
             <uploadRepoStable>
-              <name>edu-sharing.community.helm</name>
-              <url>${helm.repository.url}</url>
-              <type>${helm.repository.type}</type>
-              <username>${helm.repository.user}</username>
-              <password>${helm.repository.pass}</password>
+              <name>helm.releases</name>
+              <url>${helm.registry}</url>
+              <type>${helm.type}</type>
+              <username>${helm.username}</username>
+              <password>${helm.password}</password>
             </uploadRepoStable>
             <uploadRepoSnapshot>
-              <name>edu-sharing.community.helm</name>
-              <url>${helm.repository.url}</url>
-              <type>${helm.repository.type}</type>
-              <username>${helm.repository.user}</username>
-              <password>${helm.repository.pass}</password>
+              <name>helm.snapshots</name>
+              <url>${helm.registry}</url>
+              <type>${helm.type}</type>
+              <username>${helm.username}</username>
+              <password>${helm.password}</password>
             </uploadRepoSnapshot>
           </configuration>
         </plugin>
@@ -144,7 +148,7 @@
       <properties>
 
         <!--suppress UnresolvedMavenProperty -->
-        <chart.version>${git.closest.tag.name}+${build.timestamp}</chart.version>
+        <helm.chart.version>${git.closest.tag.name}+${build.timestamp}</helm.chart.version>
 
       </properties>
 

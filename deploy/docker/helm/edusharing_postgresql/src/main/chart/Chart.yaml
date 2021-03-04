@@ -3,8 +3,8 @@ apiVersion: v2
 name: edusharing_postgresql
 description: edusharing_postgresql
 
-icon: ${chart.icon}
+icon: ${helm.chart.icon}
 
-version: ${chart.version}
+version: ${helm.chart.version}
 appVersion: ${docker.tag}
 kubeVersion: ">= 1.16.0"

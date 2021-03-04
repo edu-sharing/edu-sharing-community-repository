@@ -3,8 +3,8 @@ apiVersion: v2
 name: edusharing_repository_service
 description: edusharing_repository_service
 
-icon: ${chart.icon}
+icon: ${helm.chart.icon}
 
-version: ${chart.version}
+version: ${helm.chart.version}
 appVersion: ${docker.tag}
 kubeVersion: ">= 1.16.0"

@@ -17,9 +17,15 @@
 
   <properties>
 
+    <docker.registry>community.docker.edu-sharing.com</docker.registry>
+    <!--suppress UnresolvedMavenProperty -->
+    <docker.username>${env.DOCKER_USERNAME}</docker.username>
+    <!--suppress UnresolvedMavenProperty -->
+    <docker.password>${env.DOCKER_PASSWORD}</docker.password>
+
     <docker.image>community/edusharing</docker.image>
     <docker.tag>${project.version}</docker.tag>
-    <docker.registry>community.docker.edu-sharing.com</docker.registry>
+
     <docker.verbose>true</docker.verbose>
 
     <docker.from.apache.exporter>docker.io/motork/apache_exporter:latest</docker.from.apache.exporter>
@@ -49,6 +55,12 @@
           <groupId>io.fabric8</groupId>
           <artifactId>docker-maven-plugin</artifactId>
           <configuration>
+            <authConfig>
+              <push>
+                <username>${docker.username}</username>
+                <password>${docker.password}</password>
+              </push>
+            </authConfig>
             <images>
               <image>
                 <registry>${docker.registry}</registry>
