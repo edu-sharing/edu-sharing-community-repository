@@ -58,7 +58,6 @@ export class AdminMediacenterComponent {
         useDefaultOptions: false
     };
     currentTab = 0;
-    mediacenterMdsReload = new Boolean(true);
     isAdmin: boolean;
     hasManagePermissions: boolean;
     public mediacentersFile: File;
@@ -80,12 +79,9 @@ export class AdminMediacenterComponent {
         this.isAdmin = this.connector.getCurrentLogin().isAdmin;
         this.hasManagePermissions = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_MEDIACENTER_MANAGE);
         this.refresh();
-        this.groupColumns = [
-            new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
-            new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE)
-        ];
         this.mdsService.getSet().subscribe((mds) => {
             this.nodeColumns = MdsHelper.getColumns(this.translate, mds, 'mediacenterManaged');
+            this.groupColumns = MdsHelper.getColumns(this.translate, mds, 'mediacenterGroups');
         });
         const remove = new OptionItem('ADMIN.MEDIACENTER.GROUPS.REMOVE', 'delete', (authority: Group) => {
             this.toast.showModalDialog('ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE', 'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
@@ -114,7 +110,7 @@ export class AdminMediacenterComponent {
             this.mediacenterNodesOffset = 0;
             this.mediacenterNodesTotal = 0;
             this.mediacenterNodes = [];
-            this.mediacenterMdsReload = new Boolean(true);
+            this.mediacenterMds.loadMds();
             // done via mds
             // this.loadMediacenterNodes();
 

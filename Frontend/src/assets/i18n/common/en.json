@@ -384,6 +384,7 @@
     "AUTHORITY_TYPE_ORG": "Organisation",
     "GROUP": {
         "displayName": "group name",
+        "authorityName": "system name",
         "groupEmail": "e-mail",
         "groupType": "type",
         "scopeType": "Sichtbarkeit"

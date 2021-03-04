@@ -140,7 +140,7 @@
             [node]="node"
             [nodes]="_nodes"
             [scope]="scope"
-            [class.node-padding]="_options && _options.length>1"
+            [class.node-padding]="_options && _options.length>0"
             [unclickable]="!createLink">
             <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
             <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">

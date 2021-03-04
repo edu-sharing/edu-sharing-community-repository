@@ -846,6 +846,7 @@
 			</group>
 			<group>
 				<id>mediacenter_filter</id>
+				<rendering>angular</rendering>
 				<views>
 					<view>mediacenter_filter</view>
 				</views>
@@ -901,6 +902,13 @@
 					<column>cclom:title</column>
 					<column>ccm:replicationsourceid</column>
 					<column>ccm:replicationsource</column>
+				</columns>
+			</list>
+			<list>
+				<id>mediacenterGroups</id>
+				<columns>
+					<column>displayName</column>
+					<column>groupType</column>
 				</columns>
 			</list>
 		</lists>

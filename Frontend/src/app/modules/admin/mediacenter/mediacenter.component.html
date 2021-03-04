@@ -105,14 +105,15 @@
             <mat-tab label="{{'ADMIN.MEDIACENTER.NODES.TITLE' | translate}}">
                 <div class="nodes">
                     <!--h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.NODES.DESCRIPTION' | translate}}</h6-->
-                    <mds
+                    <app-mds-editor-wrapper
                         #mediacenterMds
                         [embedded]="true"
                         mode="search"
-                        [invalidate]="mediacenterMdsReload"
+                        editorMode="search"
+                        [currentValues]="{}"
                         (onMdsLoaded)="searchMediaCenterNodes()"
                         groupId="mediacenter_filter"
-                        ></mds>
+                        ></app-mds-editor-wrapper>
                     <mat-form-field class="searchword">
                         <mat-label>{{'ADMIN.MEDIACENTER.NODES.SEARCHWORD' | translate}}</mat-label>
                         <input matInput [disabled]="!isAdmin" [(ngModel)]="mediacenterNodesSearchWord">

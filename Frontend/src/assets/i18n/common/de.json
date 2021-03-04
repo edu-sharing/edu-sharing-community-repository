@@ -450,6 +450,7 @@
     "AUTHORITY_TYPE_ORG": "Organisation",
     "GROUP": {
         "displayName": "Gruppenname",
+        "authorityName": "Systemname",
         "groupEmail": "E-Mail",
         "groupType": "Typ",
         "scopeType": "Sichtbarkeit"
