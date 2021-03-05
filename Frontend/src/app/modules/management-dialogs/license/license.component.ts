@@ -120,7 +120,6 @@ export class WorkspaceLicenseComponent  {
         private iamApi : RestIamService,
         private toast : Toast,
         private nodeApi : RestNodeService) {
-        this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
         this.translateLicenceCountries(this.constantCountries);
         this.updateButtons();
         this.iamApi.getUser().subscribe(() => {});
@@ -459,11 +458,6 @@ export class WorkspaceLicenseComponent  {
                 }
             }
         });
-    }
-    allowDOI() {
-        if(!this.getNodes() || this.getNodes().length!=1)
-            return false;
-        return this.doiPermission && this.release;
     }
     setCCBy() {
         this.type='CC_BY';
