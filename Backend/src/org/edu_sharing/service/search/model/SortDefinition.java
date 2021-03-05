@@ -120,7 +120,7 @@ public class SortDefinition implements Serializable {
 			if(sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {
 				searchSourceBuilder.sort(new ScoreSortBuilder().order(sortOrder));
 			} else {
-				searchSourceBuilder.sort("properties." + sortDefintionEntry.getProperty(), sortOrder);
+				searchSourceBuilder.sort("properties." + sortDefintionEntry.getProperty()+".keyword", sortOrder);
 			}
 		}
 	}
