@@ -1103,8 +1103,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			} catch (Exception e) {
 				logger.error("sql error while creating handle id", e);
 				// DEBUG ONLY
-				handle = "test/" + Math.random();
-				//throw new RuntimeException("Handle service throwed an error: " + e.getMessage(), e);
+				//handle = "test/" + Math.random();
+				throw new RuntimeException("Handle service throwed an error: " + e.getMessage(), e);
 			}
 		} else {
 			if(currentHandle == null){
