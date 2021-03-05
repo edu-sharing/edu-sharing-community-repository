@@ -178,7 +178,7 @@ persistence:
 ########################################################################################################################
 
 nodeAffinity: {}
-podAntiAffinity: "" # "soft" or "hard"
+podAntiAffinity: "soft"
 
 tolerations: []
 
@@ -191,17 +191,9 @@ podSecurityContext:
 
 securityContext:
 
-  server:
-
-    capabilities:
-      drop:
-      - ALL
-
-  transform:
-
-    capabilities:
-      drop:
-      - ALL
+  capabilities:
+    drop:
+    - ALL
 
 ########################################################################################################################
 
@@ -209,64 +201,68 @@ terminationGracePeriod: 120
 
 livenessProbe:
 
-  server:
-
-    failureThreshold: 3
-    initialDelaySeconds: 900
-    periodSeconds: 10
-    timeoutSeconds: 5
-
-  transform:
-
-    failureThreshold: 3
-    initialDelaySeconds: 900
-    periodSeconds: 10
-    timeoutSeconds: 5
+  failureThreshold: 3
+  initialDelaySeconds: 1200
+  periodSeconds: 10
+  timeoutSeconds: 5
 
 readinessProbe:
 
-  server:
-
-    failureThreshold: 1
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    successThreshold: 1
-    timeoutSeconds: 5
-
-  transform:
-
-    failureThreshold: 1
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    successThreshold: 1
-    timeoutSeconds: 5
+  failureThreshold: 1
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
 
 ########################################################################################################################
 
 resources:
 
-  server:
-
-    limits:
-      cpu: 1000m
-      memory: 4Gi
-    requests:
-      cpu: 1000m
-      memory: 4Gi
-
-  transform:
-
-    limits:
-      cpu: 100m
-      memory: 1Gi
-    requests:
-      cpu: 100m
-      memory: 1Gi
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 4Gi
 
 ########################################################################################################################
 
 metrics:
 
   enabled: true
+
+########################################################################################################################
+
+transform:
+
+  securityContext:
+
+    capabilities:
+      drop:
+        - ALL
+
+  livenessProbe:
+
+    failureThreshold: 3
+    initialDelaySeconds: 1200
+    periodSeconds: 10
+    timeoutSeconds: 5
+
+  readinessProbe:
+
+    failureThreshold: 1
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  resources:
+
+    limits:
+      cpu: 100m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 1Gi
 
 ########################################################################################################################

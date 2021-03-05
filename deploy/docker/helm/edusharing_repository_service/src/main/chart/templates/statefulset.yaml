@@ -91,7 +91,7 @@ spec:
           mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/classes/saml
         {{- end }}
         {{- end }}
-        {{- with .Values.livenessProbe.server }}
+        {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:
             port: api-internal
@@ -100,7 +100,7 @@ spec:
           periodSeconds: {{ .periodSeconds }}
           timeoutSeconds: {{ .timeoutSeconds }}
         {{- end }}
-        {{- with .Values.readinessProbe.server }}
+        {{- with .Values.readinessProbe }}
         readinessProbe:
           httpGet:
             path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ add1 .timeoutSeconds }}
@@ -116,10 +116,10 @@ spec:
           successThreshold: {{ .successThreshold }}
           timeoutSeconds: {{ .timeoutSeconds }}
         {{- end }}
-        {{- with .Values.resources.server }}
+        {{- with .Values.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.securityContext.server }}
+        {{- with .Values.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
       - name: {{ include "edusharing_repository_service.name" . }}-transform
@@ -131,7 +131,7 @@ spec:
         ports:
         - name: api
           containerPort: 8100
-        {{- with .Values.livenessProbe.transform }}
+        {{- with .Values.transform.livenessProbe }}
         livenessProbe:
           exec:
             command:
@@ -145,20 +145,24 @@ spec:
           successThreshold: 1
           timeoutSeconds: {{ .timeoutSeconds }}
         {{- end }}
-        {{- with .Values.readinessProbe.transforme }}
+        {{- with .Values.transform.readinessProbe }}
         readinessProbe:
-          tcpSocket:
-            port: api
+          exec:
+            command:
+            - "/bin/bash"
+            - "-ec"
+            - |
+              unoconv -n -c 'socket,host=127.0.0.1,port=8100,tcpNoDelay=1;urp;StarOffice.ComponentContext' --stdout -f html /etc/hostname >/dev/null
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
           periodSeconds: {{ .periodSeconds }}
           successThreshold: {{ .successThreshold }}
           timeoutSeconds: {{ .timeoutSeconds }}
         {{- end }}
-        {{- with .Values.resources.transform }}
+        {{- with .Values.transform.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.securityContext.transform }}
+        {{- with .Values.transform.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
       {{- with .Values.global.image.pullSecrets }}

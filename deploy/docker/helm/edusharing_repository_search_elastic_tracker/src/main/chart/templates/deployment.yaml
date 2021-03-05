@@ -71,25 +71,7 @@ spec:
       {{ with .Values.terminationGracePeriod }}
       terminationGracePeriodSeconds: {{ . }}
       {{- end }}
-      {{- if or .Values.nodeAffinity .Values.podAntiAffinity }}
+      {{- with .Values.nodeAffinity }}
       affinity:
-        {{- with .Values.nodeAffinity }}
         nodeAffinity: {{ toYaml . | nindent 10 }}
-        {{- end }}
-        {{- if .Values.podAntiAffinity }}
-        podAntiAffinity:
-          {{- if eq .Values.podAntiAffinity "hard" }}
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - topologyKey: kubernetes.io/hostname
-            labelSelector:
-              matchLabels: {{ include "edusharing_repository_search_elastic_tracker.labels.instance" . | nindent 16 }}
-          {{- else if eq .Values.podAntiAffinity "soft" }}
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 1
-            podAffinityTerm:
-              topologyKey: kubernetes.io/hostname
-              labelSelector:
-                matchLabels: {{ include "edusharing_repository_search_elastic_tracker.labels.instance" . | nindent 18 }}
-          {{- end }}
-        {{- end }}
       {{- end }}

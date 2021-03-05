@@ -6,7 +6,6 @@ services:
     command: [ "dockerd-entrypoint.sh" ]
 
 variables:
-  DOCKER_BUILD_TIMESTAMP: "false"
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_TLS_CERTDIR: ""

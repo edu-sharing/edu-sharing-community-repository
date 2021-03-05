@@ -49,7 +49,7 @@ config:
 ########################################################################################################################
 
 nodeAffinity: {}
-podAntiAffinity: "" # [soft|hard]
+podAntiAffinity: "soft"
 
 tolerations: []
 
@@ -87,7 +87,7 @@ terminationGracePeriod: 120
 livenessProbe:
 
   failureThreshold: 3
-  initialDelaySeconds: 900
+  initialDelaySeconds: 1200
   periodSeconds: 10
   timeoutSeconds: 5
 
