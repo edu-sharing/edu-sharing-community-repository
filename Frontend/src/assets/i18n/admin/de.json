@@ -376,6 +376,7 @@
         },
         "STATISTICS": {
             "NO_DATA": "Keine Daten für den gewählten Zeitraum",
+            "CSV_FILENAME": "Statistiken",
             "GROUPED": "Nach Zeitraum",
             "SINGLE": "Einzelauswertung",
             "NODES": "Nach Objekt",

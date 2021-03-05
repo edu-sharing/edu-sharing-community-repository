@@ -572,22 +572,24 @@ export class AdminStatisticsComponent implements OnInit{
             case 1: {
                 // grouped / folded data
                 csvHeaders = this.customGroupRows.map((h) => {
-                    return this.customGroupLabels[h] || h;
+                    return this.customGroupLabels?.[h] || h;
                 });
                 csvData = this.customGroupData.map((c: any) => {
                     c[this.customGroup] = c.displayValue;
+                    console.log(c);
                     for (const key of this.customGroupRows) {
                         if (key === 'action' || key === 'count' || key === this.customGroup) {
                             continue;
                         }
-                        c[key] = c.entry.groups[this.customUnfold][key];
+                        c[this.customGroupLabels?.[key] || key] = c.entry.groups[c.action]?.[this.customUnfold]?.[key];
                     }
                     return c;
                 });
+                console.log(csvHeaders, csvData);
                 break;
             }
             case 2: {
-                let properties = this.exportProperties.split('\n').map((e) => e.trim());
+                const properties = this.exportProperties.split('\n').map((e) => e.trim());
                 this.storage.set('admin_statistics_properties', this.exportProperties);
                 csvHeaders = properties.concat(Helper.uniqueArray(this.nodes.map((n) => Object.keys(n.counts)).reduce((a: any, b: any) => a.concat(b))));
                 csvData = this.nodes.map((n) => {
