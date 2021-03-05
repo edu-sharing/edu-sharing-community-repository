@@ -9,6 +9,9 @@ services:
   repository-search-elastic:
     image: "${docker.registry}/${docker.image}-elasticsearch:${docker.tag}"
 
+  repository-search-elastic-tracker:
+    image: "${docker.registry}/${docker.image}-repository-search-elastic-tracker:${docker.tag}"
+
   repository-search-solr4:
     image: "${docker.registry}/${docker.image}-repository-search-solr4:${docker.tag}"
 
