@@ -14,6 +14,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface NodeService {
@@ -178,8 +179,9 @@ public interface NodeService {
 
 	/**
 	 * create a published copy of the node
+	 * if handle mode is set, a handle should also be generated
 	 */
-	String publishCopy(String nodeId) throws Throwable;
+	String publishCopy(String nodeId, HandleMode handleMode) throws Throwable;
 
 	/**
 	 * Get all published copies of this node

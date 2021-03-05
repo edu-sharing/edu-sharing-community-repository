@@ -1198,7 +1198,7 @@ public class NodeDao {
 		});
 	}
 
-	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy, boolean createHandle, HandleMode handleMode) throws DAOException {
+	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy) throws DAOException {
 		
 		try {
 			
@@ -1225,8 +1225,7 @@ public class NodeDao {
 					nodeId, 
 					aces,
 					permissions.isInherited(), 
-					mailText, sendMail, sendCopy,
-					createHandle, handleMode
+					mailText, sendMail, sendCopy
 			);
 			
 			
@@ -2055,9 +2054,9 @@ public class NodeDao {
 		}
 	}
 
-	public NodeDao publishCopy() throws DAOException {
+	public NodeDao publishCopy(HandleMode handleMode) throws DAOException {
 		try {
-			return NodeDao.getNode(repoDao, nodeService.publishCopy(nodeId), Filter.createShowAllFilter());
+			return NodeDao.getNode(repoDao, nodeService.publishCopy(nodeId, handleMode), Filter.createShowAllFilter());
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}

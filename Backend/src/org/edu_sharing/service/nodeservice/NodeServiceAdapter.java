@@ -20,6 +20,7 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.extensions.surf.util.URLEncoder;
 
@@ -366,7 +367,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String publishCopy(String nodeId) throws Throwable {
+	public String publishCopy(String nodeId, HandleMode handleMode) throws Throwable {
 		throw new NotImplementedException("publishCopy");
 	}
 

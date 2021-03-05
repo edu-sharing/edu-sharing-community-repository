@@ -103,10 +103,6 @@ export class WorkspaceLicenseComponent  {
                 this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
                     this.permissions = permissions.permissions.localPermissions;
                     this.readPermissions(i==this.getNodes()?.length);
-                    if(this.getNodes()?.length==1) {
-                        this.doiActive = this.nodeHelper.isDOIActive(node, permissions.permissions.localPermissions.permissions);
-                        this.doiDisabled = this.doiActive;
-                    }
                 });
             }
         }, error => {
@@ -141,9 +137,6 @@ export class WorkspaceLicenseComponent  {
     @Input() embedded = false;
     _primaryType='';
     _properties: any;
-    private doiPermission: boolean;
-    private doiActive: boolean;
-    private doiDisabled: boolean;
     buttons: DialogButton[];
     public ccShare='';
     ccCommercial='';
@@ -414,7 +407,7 @@ export class WorkspaceLicenseComponent  {
             this.permissions.permissions.push(perm);
         }
         const permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.permissions.inherited);
-        this.nodeApi.setNodePermissions(node.ref.id,permissions,false,'',false,this.allowDOI() && this.doiPermission && this.doiActive && this.release).subscribe(()=> {
+        this.nodeApi.setNodePermissions(node.ref.id,permissions,false,'',false).subscribe(()=> {
         },(error:any)=>this.toast.error(error));
     }
     private readPermissions(last:boolean) {
@@ -535,14 +528,12 @@ export class WorkspaceLicenseComponent  {
                     'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
                     DialogButton.getYesNo(cancel, ()=> {
                         this.release=true;
-                        this.doiActive=true;
                         this.toast.closeModalDialog();
                     }),true,cancel);
 
 
                 return;
             }
-            this.doiActive=true;
         }
     }
 

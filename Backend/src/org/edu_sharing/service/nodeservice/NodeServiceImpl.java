@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import bsh.StringUtil;
 import com.typesafe.config.Config;
@@ -22,6 +23,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
@@ -36,6 +38,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -51,11 +54,14 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.version.VersionTool;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
@@ -993,7 +999,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public String publishCopy(String nodeId) throws Throwable {
+	public String publishCopy(String nodeId, HandleMode handleMode) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
 		if(PermissionServiceFactory.getLocalService().hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,
 				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
@@ -1014,6 +1020,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
 			// permissions are checked beforehand,
 			return AuthenticationUtil.runAsSystem(() -> {
+				String currentVersion = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+				List<String> currentCopies = getPublishedCopies(nodeId);
+				if(currentCopies.stream().anyMatch((c) -> currentVersion.equals(getProperty(
+						StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.LOM_PROP_LIFECYCLE_VERSION
+				)))) {
+					throw new IllegalArgumentException("The version " + currentVersion + " is already published!");
+				}
 				String container = NodeServiceHelper.getContainerId(parent, pattern);
 				NodeRef oldNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 				NodeRef newNode;
@@ -1044,11 +1057,101 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
 							new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
 							true);
+					if(handleMode != null) {
+						createHandle(newNode, currentCopies, handleMode);
+					}
+
 					policyBehaviourFilter.enableBehaviour(newNode);
 					return newNode.getId();
 				});
 			});
 		});
+
+	}
+
+
+	public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleMode handleMode) throws Exception {
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);;
+		String currentHandle = null;
+		// fetch the last given handle from the currently existing copies
+		if(handleMode.equals(HandleMode.update) && publishedCopies.size() > 0 ){
+			Set<String> handles = publishedCopies.stream().filter((c) ->
+					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) != null
+			).map((c) ->
+					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID)
+			).distinct().collect(Collectors.toSet());
+			if(handles.size() != 1){
+				throw new IllegalStateException("Multiple handles found but handleMode " + handleMode + " was requested");
+			}
+			currentHandle = handles.iterator().next();
+		}
+
+		HandleService handleService = null;
+		String handle = null;
+
+		Map<QName, Serializable> publishedProps = new HashMap<QName, Serializable>();
+
+		if(handleMode.equals(HandleMode.distinct)) {
+			try {
+				handleService = new HandleService();
+				/**
+				 * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
+				 */
+				handleService.handleServiceAvailable();
+				handle = handleService.generateHandle();
+
+			} catch (Exception e) {
+				logger.error("sql error while creating handle id", e);
+				// DEBUG ONLY
+				handle = "test/" + Math.random();
+				//throw new RuntimeException("Handle service throwed an error: " + e.getMessage(), e);
+			}
+		} else {
+			if(currentHandle == null){
+				throw new IllegalArgumentException("Handle Mode " + handleMode + " requested but no handle assigned yet");
+			}
+			handle = currentHandle;
+		}
+
+
+		publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
+
+		if (handle != null) {
+			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
+		}
+
+		if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
+			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
+		} else {
+			for (Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
+				nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
+			}
+		}
+
+		/**
+		 * create version for the published node
+		 * NO: NOT NEEDED ANYMORE!
+		 * The version is implicitly correct because a copied node has exact ONE version!
+		 *
+		 */
+				/*
+				Map<QName, Serializable> props = nodeService.getProperties(nodeRef);
+				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
+				try {
+					new MCAlfrescoAPIClient().createVersion(_nodeId);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					logger.error(e1.getMessage(), e1);
+				}*/
+		if (handleService != null && handle != null) {
+			String contentLink = URLTool.getNgRenderNodeUrl(nodeRef.getId(), null);
+			if (handleMode.equals(HandleMode.distinct)) {
+				//handleService.createHandle(handle, handleService.getDefautValues(contentLink));
+			} else if (handleMode.equals(HandleMode.update)) {
+				//handleService.updateHandle(handle, handleService.getDefautValues(contentLink));
+			}
+
+		}
 
 	}
 

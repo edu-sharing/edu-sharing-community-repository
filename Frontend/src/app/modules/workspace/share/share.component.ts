@@ -816,7 +816,6 @@ export class WorkspaceShareComponent {
             this.notifyUsers && this.sendMessages,
             this.notifyMessage,
             false,
-            false, // handle will always be created via publish component
         ).subscribe(() => {
             observer.next();
             observer.complete();

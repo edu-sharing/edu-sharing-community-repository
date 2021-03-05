@@ -199,12 +199,13 @@ public class NodeApi  {
 	public Response publishCopy(
 			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@ApiParam(value = "handle mode, if a handle should be created. Skip this parameter if you don't want an handle",required=false ) @QueryParam("handleMode") HandleMode handleMode,
 			@Context HttpServletRequest req) {
 
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			NodeDao published = nodeDao.publishCopy();
+			NodeDao published = nodeDao.publishCopy(handleMode);
 			NodeEntry response = new NodeEntry();
 			response.setNode(published.asNode());
 
@@ -2014,8 +2015,6 @@ public class NodeApi  {
     	@ApiParam(value = "mailtext",required=false ) @QueryParam("mailtext")  String mailText,
     	@ApiParam(value = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
     	@ApiParam(value = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
-    	@ApiParam(value = "createHandle",required=false ) @QueryParam("createHandle") Boolean createHandle,
-    	@ApiParam(value = "handleMode",required=false ) @QueryParam("handleMode") HandleMode handleMode,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -2023,9 +2022,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	if(createHandle == null) createHandle = false;
-	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy,
-					createHandle,handleMode==null ? HandleMode.distinct : handleMode);
+	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy);
 	    	
 	    	return Response.status(Response.Status.OK).build();
 	

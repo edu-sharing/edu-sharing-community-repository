@@ -53,6 +53,7 @@ import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -113,7 +114,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendCopy
 	 */
 	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy, Boolean createHandle, HandleMode handleMode) throws Throwable {
+			Boolean sendCopy) throws Throwable {
 
 		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 		ACL currentACL = repoClient.getPermissions(nodeId);
@@ -190,7 +191,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				authPermissions.put(toAdd.getAuthority(), permissions);
 			}
 			addPermissions(nodeId, authPermissions, inheritPermissions, mailText,
-					sendMail, sendCopy,createHandle, handleMode);
+					sendMail, sendCopy);
 		}
 
 		if (acesToUpdate.size() > 0) {
@@ -218,17 +219,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
 		}
 
-
-		if(createHandle) {
-
-			/**
-			 * no transaction cause of
-			 * org.hibernate.HibernateException: connnection proxy not usable after transaction completion
-			 *
-			 * problem is when handle service fails
-			 */
-			createHandle(AuthorityType.EVERYONE,nodeId, handleMode);
-		}
 		if(nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))){
 			CollectionServiceFactory.getCollectionService(appInfo.getAppId()).updateScope(nodeRef, aces);
 		}
@@ -273,7 +263,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	@Override
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
-							   String _mailText, Boolean _sendMail, Boolean _sendCopy, Boolean createHandle, HandleMode handleMode) throws Throwable {
+							   String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
 
 		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
 
@@ -446,100 +436,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return new ArrayList<>(data);
 
 	}
-
-	public void createHandle(AuthorityType authorityType, String _nodeId, HandleMode handleMode) throws Exception {
-
-
-		if (AuthorityType.EVERYONE.equals(authorityType)) {
-
-			String version = (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,_nodeId),
-					QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION) );
-
-			String currentHandle =  (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,_nodeId),
-					QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) );
-
-			/**
-			 * only create a new handle when version changed
-			 */
-			if(currentHandle != null && currentHandle.endsWith(version)) {
-				return;
-			}
-
-			String newVersion = new VersionTool().incrementVersion(version);
-
-			HandleService handleService = null;
-			String handle = null;
-
-
-			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
-				NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, _nodeId);
-
-				if(handleMode.equals(HandleMode.distinct)) {
-					try {
-						handleService = new HandleService();
-						/**
-						 * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
-						 */
-						handleService.handleServiceAvailable();
-						handle = handleService.generateHandle();
-
-						// debug only
-						/*
-						handle = "test" + Math.random();
-						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
-						if(true)
-							return;
-						 */
-
-					} catch (Exception e) {
-						logger.error("sql error while creating handle id", e);
-						return;
-					}
-				} else {
-					handle = currentHandle;
-				}
-
-
-				Map<QName, Serializable> publishedProps = new HashMap<QName, Serializable>();
-				publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
-
-				if (handle != null) {
-					publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
-				}
-
-				if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
-					nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
-				} else {
-					for (Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
-						nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
-					}
-				}
-
-				/**
-				 * create version for the published node
-				 */
-				Map<QName, Serializable> props = nodeService.getProperties(nodeRef);
-				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
-				try {
-					new MCAlfrescoAPIClient().createVersion(_nodeId);
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					logger.error(e1.getMessage(), e1);
-				}
-				if (handleService != null && handle != null) {
-					String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion);
-					if (handleMode.equals(HandleMode.distinct)) {
-						handleService.createHandle(handle, handleService.getDefautValues(contentLink));
-					} else if (handleMode.equals(HandleMode.update)) {
-						handleService.updateHandle(handle, handleService.getDefautValues(contentLink));
-					}
-
-				}
-			}
-		}
-	}
-	
-	
 
 	@Override
 	public List<Notify> getNotifyList(final String nodeId) throws Throwable {
