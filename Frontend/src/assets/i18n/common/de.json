@@ -144,7 +144,7 @@
         "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "Statistiken zu Nutzer-Logins (Login, Logout) dieses Repositories anzeigen",
         "TOOLPERMISSION_MEDIACENTER_MANAGE": "Ändern der Basisdaten (Anschrift, Kataloge) von Medienzentren, bei welchen der Nutzer Administrator ist",
         "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- & Audiodateien dürfen in Sammlungen beliebig zugeschnitten gespeichert werden",
-        "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Erlaubnis zum Ändern des Ersteller-Namens einer Sammlung (gilt nur für Medienzentren-Sammlungen)",
+        "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Erlaubnis zum Ändern des Ersteller-Namens einer Sammlung",
         "TOOLPERMISSION_RATE": "Die Berechtigung zum Bewerten von Materialien",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",

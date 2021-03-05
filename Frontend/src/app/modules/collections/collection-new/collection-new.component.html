@@ -178,7 +178,9 @@
                       <mat-label id="collection-new-author-freetext-label">
                         {{'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}
                       </mat-label>
-                      <input #authorFreetextInput matInput [(ngModel)]="currentCollection.collection.authorFreetext">
+                      <input #authorFreetextInput matInput
+                             [disabled]="!authorFreetextAllowed"
+                             [(ngModel)]="currentCollection.collection.authorFreetext">
                   </mat-form-field>
                   <button
                     mat-icon-button
