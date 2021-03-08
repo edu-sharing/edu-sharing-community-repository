@@ -233,7 +233,7 @@ export class OptionsHelperService {
     /**
      * refresh all bound components with available menu options
      */
-    refreshComponents() {
+    refreshComponents(refreshGlobalListOptions = true) {
         if(this.subscriptions?.length){
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
@@ -254,7 +254,9 @@ export class OptionsHelperService {
 
         this.globalOptions = this.getAvailableOptions(Target.Actionbar);
         if (this.list) {
-            this.list.options = this.getAvailableOptions(Target.List);
+            if(refreshGlobalListOptions) {
+                this.list.options = this.getAvailableOptions(Target.List);
+            }
             this.list.dropdownOptions = this.getAvailableOptions(Target.ListDropdown);
         }
         if(this.dropdown) {
@@ -280,10 +282,19 @@ export class OptionsHelperService {
         return true;
     }
 
-    private getAvailableOptions(target: Target) {
-        let objects: Node[]|any[];
+    private getAvailableOptions(target: Target, objects: Node[] = null) {
         if (target === Target.List) {
-            objects = this.data.allObjects && this.data.allObjects.length ? [this.data.allObjects[0]] : null;
+            if(objects == null) {
+                // fetch ALL options of ALL items inside list
+                // the callback handlers will later decide for the individual node
+                if (this.data.allObjects?.length) {
+                    const allOptions: OptionItem[] = [].concat.apply([], (this.data.allObjects as Node[]).map(
+                        (n: Node|any) => this.getAvailableOptions(Target.List,[n])
+                    ) );
+                    return allOptions.filter((o1) => allOptions.some((o2) => o1.name === o2.name));
+                }
+                objects = this.data.allObjects.length ? [this.data.allObjects[0]] : null;
+            }
         } else if (target === Target.Actionbar) {
             objects = this.data.selectedObjects || (this.data.activeObjects);
         } else if (target === Target.ListDropdown) {

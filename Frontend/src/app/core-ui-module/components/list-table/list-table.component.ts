@@ -1204,7 +1204,8 @@ export class ListTableComponent implements OnChanges, EventListener {
             onDelete: nodes => this.removeNodes(nodes.error, nodes.objects),
         });
         this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
-        this.optionsHelper.refreshComponents();
+        // only refresh global if no node was given
+        this.optionsHelper.refreshComponents(!node);
     }
 
     removeNodes(error: boolean, objects: Node[] | any[]) {
