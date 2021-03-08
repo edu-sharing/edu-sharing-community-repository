@@ -75,6 +75,7 @@ export class CollectionNewComponent {
   public editId: any;
   public editorialGroups:Group[]=[];
   public editorialGroupsSelected:Group[]=[];
+  public editorialPublic = true;
   public editorialColumns:ListItem[]=[new ListItem("GROUP",RestConstants.AUTHORITY_DISPLAYNAME)];
   imageData:any = null;
   private imageFile:File = null;
@@ -176,6 +177,9 @@ export class CollectionNewComponent {
                   this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
                     this.mdsSet = node.node.metadataset;
                     this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
+                    this.editorialPublic=perm.permissions.localPermissions?.permissions?.some(
+                        (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
+                    );;
                     this.editId=id;
                     this.currentCollection = data.collection;
                     // cleanup irrelevant data
@@ -571,13 +575,15 @@ export class CollectionNewComponent {
   }
 
   private getEditorialGroupPermissions() {
-    let permissions=new LocalPermissions();
+    const permissions=new LocalPermissions();
     permissions.permissions=[];
-    let pub=RestHelper.getAllAuthoritiesPermission();
-    pub.permissions=[RestConstants.PERMISSION_CONSUMER];
-    permissions.permissions.push(pub);
-    for(let group of this.editorialGroupsSelected){
-      let perm=new Permission();
+    if(this.editorialPublic) {
+        const pub=RestHelper.getAllAuthoritiesPermission();
+        pub.permissions = [RestConstants.PERMISSION_CONSUMER];
+        permissions.permissions.push(pub);
+    }
+    for(const group of this.editorialGroupsSelected){
+      const perm=new Permission();
       perm.authority={authorityName:group.authorityName,authorityType:group.authorityType};
       perm.permissions=[RestConstants.PERMISSION_COORDINATOR];
       permissions.permissions.push(perm);

@@ -238,7 +238,7 @@
         [subtitle]="currentCollection.title"
         [isCancelable]="false"
         modal="auto"
-        width="xsmall"
+        width="large"
         height="xlarge"
         [buttons]="buttons"
         class="collection-metadata">
@@ -253,19 +253,20 @@
       </div>
   </card>
   <card *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS"
-          title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
-          [subtitle]="currentCollection.title"
-          [isCancelable]="false"
-          modal="auto"
-          width="xsmall"
-          height="xlarge"
-          [buttons]="buttons"
-          class="collection-metadata">
-    <div class="card-content">
+        title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
+        [subtitle]="currentCollection.title"
+        [isCancelable]="false"
+        modal="auto"
+        width="large"
+        height="xxlarge"
+        [buttons]="buttons"
+        class="collection-metadata">
+    <div class="editorial-group">
+      <div class="editorial-list">
         <div class="noGroups" *ngIf="editorialGroups.length==0">{{'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate}}</div>
         <div class="noPermission" *ngIf="!shareToAll">
-            <h4>{{'TOOLPERMISSION_ERROR_HEADER' | translate}}</h4>
-            <h5>{{'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate}}</h5>
+          <h4>{{'TOOLPERMISSION_ERROR_HEADER' | translate}}</h4>
+          <h5>{{'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate}}</h5>
         </div>
         <listTable
           *ngIf="editorialGroups.length!=0 && shareToAll"
@@ -279,6 +280,19 @@
           [icon]="'star'"
         ></listTable>
       </div>
+      <div class="editorial-public">
+        <mat-slide-toggle [(ngModel)]="editorialPublic">
+          <app-multi-line-label>
+            <ng-container slot="label">
+              {{'COLLECTIONS.EDITORIAL_PUBLIC' | translate}}
+            </ng-container>
+            <ng-container slot="description">
+              {{'COLLECTIONS.EDITORIAL_PUBLIC_INFO' | translate}}
+            </ng-container>
+          </app-multi-line-label>
+        </mat-slide-toggle>
+      </div>
+    </div>
   </card>
   <card *ngIf="newCollectionStep==STEP_PERMISSIONS"
         title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"

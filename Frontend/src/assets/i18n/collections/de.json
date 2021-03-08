@@ -12,6 +12,8 @@
         "CUSTOM_ORDER": "Festgelegte Reihenfolge",
         "PERMISSIONS": "Eingeladen:",
         "DETAILS": "Sammlungsdetails",
+        "EDITORIAL_PUBLIC": "Öffentlich sichtbar",
+        "EDITORIAL_PUBLIC_INFO": "Die redaktionelle Sammlung ist für alle Nutzer und ggf. Gäste sichtbar",
         "STEP": {
             "GENERAL": "Titel, Bild, Beschreibung und Farbe",
             "METADATA": "Weitere Informationen",

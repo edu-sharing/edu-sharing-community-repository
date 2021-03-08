@@ -450,7 +450,23 @@ input[type="radio"] {
     padding: 8px 0px 8px 20px;
     color: #FFFFFF;
 }
+.editorial-group {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    .editorial-list {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    .editorial-public {
+        padding: $cardPadding $cardPadding 20px $cardPadding;
+        background-color: $cardLightBackground;
 
+        ::ng-deep .mat-slide-toggle {
+            height: auto;
+        }
+    }
+}
 @media screen and (max-width: $mobileWidth+$mobileStage*3){
   .card-high{
     top:15%;
