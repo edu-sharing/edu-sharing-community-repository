@@ -405,11 +405,13 @@ export class AdminStatisticsComponent implements OnInit{
         }
         this.nodes = [];
         this.nodesLoading = true;
-        this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'Node', this.getMediacenter()).subscribe((data) => {
+        const group = this.config.instant('admin.statistics.nodeGroup');
+        this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'Node',
+            this.getMediacenter(), group ?[group] : null).subscribe((data) => {
             this.nodesLoading = false;
             this.nodesNoData = data.length === 0;
             this.nodes = data.map((stat) => {
-                (stat.node as any).counts = stat.counts;
+                (stat.node as any).counts = stat;
                 return stat.node;
             });
         });

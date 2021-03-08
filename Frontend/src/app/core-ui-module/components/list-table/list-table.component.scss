@@ -325,7 +325,7 @@ $badgeWidth: 250px;
         .node_counts_view_material,
         .node_counts_view_material_embedded,
         .node_counts_download_material {
-            width: 80px;
+            width: 160px;
         }
 
         .user_firstName,
@@ -719,6 +719,14 @@ $badgeWidth: 250px;
     max-height: 1.5em;
     overflow: hidden;
     flex-grow: 1;
+}
+.node_counts_view_material,
+.node_counts_download_material,
+.node_counts_view_material_embedded,
+.node_counts_overall{
+    .rowInner{
+        max-height: unset;
+    }
 }
 a.rowInner {
     color: $textMain;
