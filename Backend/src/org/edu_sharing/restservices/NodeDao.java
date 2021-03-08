@@ -1310,14 +1310,17 @@ public class NodeDao {
 
 	private String getContentVersion(Node data) throws DAOException {
 		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null){
-			return AuthenticationUtil.runAsSystem(() ->
-					nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
-							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-							((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
-			);
-		} else {
-			return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+			try {
+				return AuthenticationUtil.runAsSystem(() ->
+						nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
+								StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+								((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
+				);
+			}catch(Throwable t){
+				logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
+			}
 		}
+		return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 	}
 
 	private String getContentUrl() {
