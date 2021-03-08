@@ -38,10 +38,9 @@ export class ListCountsComponent extends ListWidget {
             if(counts.groups[i1]) {
                 const i2 = Object.keys(counts.groups[i1])[0];
                 if (counts.groups?.[i1]?.[i2]) {
-                    result += '\n' + Object.keys(counts.groups?.[i1]?.[i2]).map((group) =>
+                    result = Object.keys(counts.groups?.[i1]?.[i2]).map((group) =>
                         (group || '-') + ': ' + this.getCountSingle(counts.groups?.[i1]?.[i2][group])
-                    ).join('\n');
-                    result = result.trim();
+                    ).join('\n').trim();
                 }
             }
         }
