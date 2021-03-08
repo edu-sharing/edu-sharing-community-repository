@@ -1,20 +1,27 @@
 package org.edu_sharing.service.search.model;
 
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
+import org.alfresco.service.cmr.search.SearchParameters;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.util.Pair;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.ScoreSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.context.ApplicationContext;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.namespace.QName;
-import org.alfresco.util.Pair;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.search.model.SortDefinition.SortDefinitionEntry;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.ScoreSortBuilder;
-import org.elasticsearch.search.sort.SortOrder;
-
 
 public class SortDefinition implements Serializable {
+
+	transient ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	transient ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	
 	List<SortDefinitionEntry> sortDefinitionEntries = new ArrayList<SortDefinitionEntry>();
 
@@ -120,7 +127,18 @@ public class SortDefinition implements Serializable {
 			if(sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {
 				searchSourceBuilder.sort(new ScoreSortBuilder().order(sortOrder));
 			} else {
-				searchSourceBuilder.sort("properties." + sortDefintionEntry.getProperty()+".keyword", sortOrder);
+
+				boolean addKeywordSuffix = false;
+				String property = CCConstants.getValidGlobalName(sortDefintionEntry.getProperty());
+				if(property != null){
+					PropertyDefinition propDef = serviceRegistry.getDictionaryService().getProperty(QName.createQName(property));
+					if(DataTypeDefinition.TEXT.equals(propDef.getDataType().getName())
+							|| DataTypeDefinition.MLTEXT.equals(propDef.getDataType().getName()) ){
+						addKeywordSuffix = true;
+					}
+				}
+				String name = "properties." + sortDefintionEntry.getProperty() + ((addKeywordSuffix) ? ".keyword" :"" );
+				searchSourceBuilder.sort(name, sortOrder);
 			}
 		}
 	}
