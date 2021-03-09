@@ -1,5 +1,5 @@
 
-<div #drag class="dragBadge" [style.top]="(id*-9999999)+'px'"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
+<div #drag class="dragBadge" [style.top]="(id*-9999999)+'px'" aria-hidden="true"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
 <button
   #menuTrigger="matMenuTrigger"
   mat-button
@@ -79,7 +79,7 @@
             <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon="arrow_drop_down"></i></a>
           </div>
         </div>
-        <div *ngFor="let option of getOptionsAlways()"  class="more moreAlways" > </div>
+        <div *ngFor="let option of getOptionsAlways(null)"  class="more moreAlways" > </div>
         <div class="more-header" *ngIf="_options && _options.length">&nbsp;</div>
         <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
              (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
@@ -266,9 +266,9 @@
           </app-node-url>
           <ng-container *ngIf="viewType !== 0">
             <div *ngFor="let option of getOptionsAlways()"
-                 class="more moreAlways column"
-                 [style.opacity]="optionIsShown(option,node) ? 1 : 0">
+                 class="more moreAlways column">
               <button mat-icon-button
+                      [class.display-none]="!optionIsShown(option, node)"
                       [disabled]="!optionIsValid(option, node)"
                       (click)="optionIsShown(option, node) ? callOption(option,node) : null">
                 <i icon="{{option.icon}}" [aria]="true"></i>

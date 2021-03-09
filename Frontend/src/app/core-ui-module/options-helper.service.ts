@@ -233,7 +233,7 @@ export class OptionsHelperService {
     /**
      * refresh all bound components with available menu options
      */
-    refreshComponents(refreshGlobalListOptions = true) {
+    refreshComponents(refreshListOptions = true) {
         if(this.subscriptions?.length){
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
@@ -254,9 +254,7 @@ export class OptionsHelperService {
 
         this.globalOptions = this.getAvailableOptions(Target.Actionbar);
         if (this.list) {
-            if(refreshGlobalListOptions) {
-                this.list.options = this.getAvailableOptions(Target.List);
-            }
+            this.list.options = this.getAvailableOptions(Target.List);
             this.list.dropdownOptions = this.getAvailableOptions(Target.ListDropdown);
         }
         if(this.dropdown) {
@@ -287,13 +285,7 @@ export class OptionsHelperService {
             if(objects == null) {
                 // fetch ALL options of ALL items inside list
                 // the callback handlers will later decide for the individual node
-                if (this.data.allObjects?.length) {
-                    const allOptions: OptionItem[] = [].concat.apply([], (this.data.allObjects as Node[]).map(
-                        (n: Node|any) => this.getAvailableOptions(Target.List,[n])
-                    ) );
-                    return allOptions.filter((o1) => allOptions.some((o2) => o1.name === o2.name));
-                }
-                objects = this.data.allObjects.length ? [this.data.allObjects[0]] : null;
+                objects = null;
             }
         } else if (target === Target.Actionbar) {
             objects = this.data.selectedObjects || (this.data.activeObjects);
@@ -1264,7 +1256,16 @@ export class OptionsHelperService {
      * @param objects
      */
     public filterOptions(options: OptionItem[], target: Target, objects: Node[]|any = null) {
-        options = this.handleCallbackStates(options, target, objects);
+        if(target === Target.List) {
+            /*let optionsAlways = options.filter((o) => o.showAlways);
+            const optionsOthers = options.filter((o) => !o.showAlways);
+            optionsAlways = this.handleCallbackStates(options, target, objects);
+            options = optionsAlways.concat(optionsOthers);*/
+            // attach the show callbacks
+            this.handleCallbacks(options, target);
+        } else {
+            options = this.handleCallbackStates(options, target, objects);
+        }
         options = this.sortOptionsByGroup(options);
         return options;
     }

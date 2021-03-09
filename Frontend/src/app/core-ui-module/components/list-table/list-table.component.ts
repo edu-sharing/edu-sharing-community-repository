@@ -1089,7 +1089,8 @@ export class ListTableComponent implements OnChanges, EventListener {
             }
         }
         // Short delay to let onUpdateOptions handler run and angular menu get the correct data from start.
-        setTimeout(() => this.menuTrigger.openMenu());
+        this.changeDetectorRef.detectChanges();
+        this.menuTrigger.openMenu();
     }
 
     doubleClick(node: Node): void {
@@ -1205,7 +1206,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         });
         this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
         // only refresh global if no node was given
-        this.optionsHelper.refreshComponents(!node);
+        this.optionsHelper.refreshComponents();
     }
 
     removeNodes(error: boolean, objects: Node[] | any[]) {
