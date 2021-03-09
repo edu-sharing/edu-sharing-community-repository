@@ -30,13 +30,18 @@ public class ToolPermissionBaseService {
     protected static Map<String,String> toolPermissionNodeCache = new HashMap<>();
 
     protected boolean isAdmin(){
-        Set<String> testUsetAuthorities = serviceRegistry.getAuthorityService().getAuthorities();
-        for (String testAuth : testUsetAuthorities) {
-            if (testAuth.equals("GROUP_ALFRESCO_ADMINISTRATORS")) {
-                return true;
+        try {
+            Set<String> testUsetAuthorities = serviceRegistry.getAuthorityService().getAuthorities();
+            for (String testAuth : testUsetAuthorities) {
+                if (testAuth.equals("GROUP_ALFRESCO_ADMINISTRATORS")) {
+                    return true;
+                }
             }
+            return AuthenticationUtil.isRunAsUserTheSystemUser();
+        }catch(AuthenticationCredentialsNotFoundException ignored){
+            // may causes missing security context exceptions
+            return false;
         }
-        return AuthenticationUtil.isRunAsUserTheSystemUser();
     }
 
     private boolean hasToolPermissionWithoutCache(String toolPermission) {
