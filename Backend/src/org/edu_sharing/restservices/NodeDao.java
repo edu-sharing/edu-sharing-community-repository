@@ -4,16 +4,20 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sf.acegisecurity.context.ContextHolder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -69,6 +73,8 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -553,21 +559,13 @@ public class NodeDao {
 	) throws DAOException {
 
         NodeEntries result=new NodeEntries();
-        List<Node> nodes=new ArrayList<>();
-        for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
-        	try {
-				NodeDao nodeDao = NodeDao.getNode(repoDao, children.get(i).getId(), propFilter);
-				if(transform != null){
-					nodeDao = transform.apply(nodeDao);
-				}
-				nodes.add(nodeDao.asNode());
-			}
-        	catch(DAOMissingException daoException){
-        		logger.warn("Missing node " + children.get(i).getId()+" tryed to fetch, skipping fetch", daoException);
-			}
-        }
+        List<NodeRef> slice = new ArrayList<>();
 
-        Pagination pagination=new Pagination();
+		for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
+			slice.add(children.get(i));
+        }
+		List<Node> nodes = convertToRest(repoDao, slice, propFilter, transform);
+		Pagination pagination=new Pagination();
         pagination.setFrom(skipCount);
         pagination.setCount(nodes.size());
         pagination.setTotal(children.size());
@@ -575,6 +573,44 @@ public class NodeDao {
         result.setNodes(nodes);
         return result;
     }
+    public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform){
+		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
+		final Context context = Context.getCurrentInstance();
+		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		List<Node> nodes = null;
+		java.util.Collection<Callable<Node>> tasks = list.stream().map(
+				(nodeRef) -> (Callable<Node>) () -> AuthenticationUtil.runAs(() -> {
+						try {
+							Context.setInstance(context);
+							NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
+							if (transform != null) {
+								nodeDao = transform.apply(nodeDao);
+							}
+							return nodeDao.asNode();
+						} catch (DAOMissingException daoException) {
+							logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
+							return null;
+						} finally {
+							Context.release();
+						}
+					}, user)
+			).collect(Collectors.toList());
+		try {
+			nodes = executor.invokeAll(tasks).stream()
+					.filter(Objects::nonNull)
+					.map((f) -> {
+						try {
+							return f.get();
+						} catch (InterruptedException|ExecutionException e) {
+							throw new RuntimeException(e);
+						}
+					}).filter(Objects::nonNull).collect(Collectors.toList());
+			executor.shutdown();
+			return nodes;
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
     public static List<NodeRef> sortApiNodeRefs(RepositoryDao repoDao, List<NodeRef> refList, List<String> filter, SortDefinition sortDefinition) {
         return NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(NodeDao.convertApiNodeRef(refList), filter, sortDefinition));
