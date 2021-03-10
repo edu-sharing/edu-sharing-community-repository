@@ -170,6 +170,9 @@ $badgeWidth: 250px;
             @include removeDefaultFocus();
         }
         &.cdk-keyboard-focused {
+            button:focus {
+                @include setGlobalKeyboardFocus();
+            }
             .cardList, .cardSmallList {
                 app-list-option-item >div:focus,
                 .row:focus,
@@ -177,7 +180,6 @@ $badgeWidth: 250px;
                     @include setGlobalKeyboardFocus();
                 }
             }
-
             .tableList {
                 .row:focus,
                 .row a:focus {
@@ -353,6 +355,9 @@ $badgeWidth: 250px;
     width: 50px;
     height: 50px;
     padding: 0 !important;
+    // > button.cdk-keyboard-focused {
+    //     @include setGlobalKeyboardFocus();
+    // }
 }
 .moreOpen {
     position: absolute;
