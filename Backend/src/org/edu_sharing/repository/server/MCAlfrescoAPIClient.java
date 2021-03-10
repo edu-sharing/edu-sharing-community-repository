@@ -1190,7 +1190,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					if (cachedModTime != null && orginalModTime != null && cachedModTime.longValue() == orginalModTime.longValue() && !refreshThumbnail) {
 						return propsFromCache;
 					} else {
-						logger.info("CACHE modified Date changed! refreshing:" + nodeRef.getId() + " cachedModTime:" + cachedModTime + " orginalModTime:"
+						logger.debug("CACHE modified Date changed! refreshing:" + nodeRef.getId() + " cachedModTime:" + cachedModTime + " orginalModTime:"
 								+ orginalModTime + " refreshThumbnail:" + refreshThumbnail);
 					}
 					
