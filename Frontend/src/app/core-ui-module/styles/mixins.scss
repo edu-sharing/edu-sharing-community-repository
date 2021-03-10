@@ -83,19 +83,19 @@
     box-shadow: none !important;
   }
 }
-@mixin setGlobalKeyboardFocus($mode: 'outline'){
+@mixin setGlobalKeyboardFocus($mode: 'outline') {
     //respect element border radius
     @include removeDefaultFocus();
     @if $mode=='outline' {
-        outline: 2px solid darken($focusColor, 10%);
+        outline: $focusWidth solid $focusColor;
         outline-offset: 2px;
     } @else if $mode=='border' {
-        border:2px solid darken($focusColor, 10%);
+        border: $focusWidth solid $focusColor;
     }
 }
 @mixin setGlobalDashedFocus(){
   @include removeDefaultFocus();
-  outline: 2px dashed $focusColor;
+  outline: $focusWidth dashed $focusColor;
 }
 
 @mixin focusShadow($dark:true, $strength:0.1){

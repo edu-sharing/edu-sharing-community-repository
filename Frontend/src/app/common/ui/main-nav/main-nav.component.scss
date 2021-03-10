@@ -89,6 +89,10 @@ user-profile {
     &[disabled] .barIcon {
         display: none;
     }
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus();
+        outline-offset: -5px;
+    }
 }
 .menuButtonOuter {
     height: 100%;
@@ -204,18 +208,23 @@ user-profile {
             color: $workspaceTopBarInputText;
             border: none !important;
             -webkit-appearance: none;
-        }
-        input:focus {
-            box-shadow: none !important;
-            border-radius: 0;
-            outline: 2px solid #fff;
+            &:focus {
+                border-radius: 0;
+                &:not(.cdk-keyboard-focused) {
+                    @include setGlobalFocus();
+                }
+                &.cdk-keyboard-focused {
+                    transition: none;
+                    @include setGlobalKeyboardFocus();
+                }
+            }
         }
         >button {
             position: absolute;
             top: 0;
             right: 0;
             height: 40px;
-            border-radius: 0;
+            border-radius: 0 2px 2px 0;
             color: $workspaceTopBarInputText;
             background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
         }
@@ -238,9 +247,6 @@ user-profile {
     position: relative;
 }
 
-.topBar .topBarSearch input:focus {
-    @include setGlobalInsetFocus();
-}
 .searchIcon,
 .searchClearIcon {
     font-size: 22px !important;
