@@ -178,7 +178,7 @@ public class AdminServiceImpl implements AdminService  {
 		ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
 		HashMap<String, Object> props=new HashMap<>();
 		props.put(CCConstants.CM_NAME,name);
-		String nodeId=NodeServiceFactory.getLocalService().createNodeBasic(tpService.getEdu_SharingToolPermissionsFolder(),CCConstants.CCM_TYPE_TOOLPERMISSION,props);
+		String nodeId=NodeServiceFactory.getLocalService().createNodeBasic(tpService.getEdu_SharingToolPermissionsFolder().getId(),CCConstants.CCM_TYPE_TOOLPERMISSION,props);
 		PermissionServiceFactory.getLocalService().setPermissionInherit(nodeId,false);
 		return nodeId;
 	}
