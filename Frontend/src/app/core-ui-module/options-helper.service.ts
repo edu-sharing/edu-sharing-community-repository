@@ -247,7 +247,7 @@ export class OptionsHelperService {
                     this.list.updateNodes(nodes);
                 }
             }));
-            this.subscriptions.push(this.mainNav.management.onDelete.subscribe(
+            this.subscriptions.push(this.mainNav.management?.onDelete?.subscribe(
                 (result: { objects: any; count: number; error: boolean; }) => this.listener.onDelete(result)
             ));
         }
