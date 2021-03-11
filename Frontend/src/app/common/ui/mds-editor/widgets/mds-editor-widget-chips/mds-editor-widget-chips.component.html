@@ -53,8 +53,21 @@
       <span class="mat-select-arrow"></span>
     </button>
   </mat-chip-list>
-  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
-    <mat-option *ngFor="let value of filteredValues | async" [value]="value">
+  <mat-autocomplete
+    #auto="matAutocomplete"
+    (optionSelected)="selected($event)"
+    (optionActivated)="showTooltip($any($event.option)?.tooltip)"
+  >
+    <mat-option
+      *ngFor="let value of filteredValues | async"
+      [value]="value"
+      appCheckTextOverflow=".mat-option-text"
+      #text="appCheckTextOverflow"
+      #tooltip="matTooltip"
+      #option="matOption"
+      [matTooltip]="text.hasTextOverflow() ? value.label : null"
+      [appRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
+    >
       <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
     </mat-option>
   </mat-autocomplete>

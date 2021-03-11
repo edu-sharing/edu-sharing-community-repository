@@ -196,6 +196,7 @@ import { TranslationLoader } from './translation-loader';
         ListBaseComponent,
         TitleDirective,
         SafeHtmlPipe,
+        ElementRefDirective,
     ],
 })
 export class CoreUiModule {}

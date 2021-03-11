@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import {filter, skip} from 'rxjs/operators';
+import { MatTooltip } from '@angular/material/tooltip';
+import { skip } from 'rxjs/operators';
 import { MdsWidgetValue } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
@@ -14,6 +15,15 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
 
     values: Promise<MdsWidgetValue[]>;
     formControl: FormControl;
+
+    readonly showTooltip = (() => {
+        let previousTooltip: MatTooltip;
+        return (tooltip?: MatTooltip) => {
+            previousTooltip?.hide();
+            tooltip?.show();
+            previousTooltip = tooltip;
+        };
+    })();
 
     ngOnInit() {
         this.formControl = new FormControl(null, this.getStandardValidators());
@@ -33,7 +43,12 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
         }
         // skip first because the form will always fire a value on init
         this.formControl.valueChanges.pipe(skip(1)).subscribe((value) => {
-            this.setValue(value ?[value.id] : [null]);
+            this.setValue(value ? [value.id] : [null]);
         });
+    }
+
+    onActiveDescendantChanges(elementId: string) {
+        const element = document.getElementById(elementId);
+        this.showTooltip((element as any)?.tooltip);
     }
 }

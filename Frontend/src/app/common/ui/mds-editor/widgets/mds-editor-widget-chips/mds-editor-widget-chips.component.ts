@@ -7,6 +7,7 @@ import {
     MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import {
@@ -40,6 +41,15 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     filteredValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
     showDropdownArrow: boolean;
+
+    readonly showTooltip = (() => {
+        let previousTooltip: MatTooltip;
+        return (tooltip?: MatTooltip) => {
+            previousTooltip?.hide();
+            tooltip?.show();
+            previousTooltip = tooltip;
+        };
+    })();
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
