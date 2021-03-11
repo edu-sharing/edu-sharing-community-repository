@@ -15,9 +15,10 @@
       [selectable]="false"
       (click)="add(value)"
       (keydown.enter)="add(value)"
+      [matTooltip]="'MDS.FILTER_FOR' | translate: { value: value.caption, count: value.count }"
     >
       <mat-icon>add</mat-icon>
-      {{ value.caption }}<span class="count">({{value.count}})</span>
+      {{ value.caption }}<span class="count">({{ value.count }})</span>
     </mat-chip>
   </mat-chip-list>
 </app-mds-editor-widget-container>
