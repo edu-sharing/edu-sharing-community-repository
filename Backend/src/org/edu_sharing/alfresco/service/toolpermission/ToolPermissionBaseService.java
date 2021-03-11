@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.springframework.context.ApplicationContext;
@@ -246,16 +245,6 @@ public class ToolPermissionBaseService {
             toolPermissionNodeCache.put(toolPermission, nodeId);
             return nodeId;
         }
-    }
-
-    public boolean hasToolPermissionForConnector(String connectorId){
-        AuthenticationToolAPI authTool = new AuthenticationToolAPI();
-        String scope=authTool.getScope();
-        if(scope==null)
-            scope="";
-        else
-            scope="_"+scope;
-        return hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX + connectorId+scope);
     }
 
     protected NodeRef createToolpermission(String toolPermission) throws Throwable {

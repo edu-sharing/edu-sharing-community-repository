@@ -1,7 +1,5 @@
 package org.edu_sharing.repository.client.tools;
 
-import org.edu_sharing.restservices.RestConstants;
-
 import java.util.*;
 
 public class CCConstants {

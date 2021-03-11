@@ -44,6 +44,16 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 		}
 	}
 
+	public boolean hasToolPermissionForConnector(String connectorId){
+		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+		String scope=authTool.getScope();
+		if(scope==null)
+			scope="";
+		else
+			scope="_"+scope;
+		return hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX + connectorId+scope);
+	}
+
 	public void init(){
 		try {
 			initToolPermissions(getAllPredefinedToolPermissions());
