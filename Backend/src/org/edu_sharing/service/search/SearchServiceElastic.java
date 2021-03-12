@@ -132,15 +132,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
-            BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
-            audienceQueryBuilder.minimumShouldMatch(1);
-            for (String a : authorities) {
-                audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", a));
-            }
-            String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", user));
-            audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
-            QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(audienceQueryBuilder);
+            QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getAuthorityQueryBuilder());
 
             for(String facette : searchToken.getFacettes()){
                 searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
@@ -182,6 +174,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             logger.info("result count: "+hits.getTotalHits());
 
             long millisPerm = 0;
+            String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
             for (SearchHit hit : hits) {
                 data.add(transformSearchHit(authorities, user, hit));
             }
@@ -230,7 +223,24 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private Set<String> getUserAuthorities() {
+    public static QueryBuilder getAuthorityQueryBuilder(){
+        ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        Set<String> authorities = getUserAuthorities();
+        BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
+        audienceQueryBuilder.minimumShouldMatch(1);
+        for (String a : authorities) {
+            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", a));
+        }
+        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+        audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", user));
+        audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
+        return audienceQueryBuilder;
+    }
+
+    public static Set<String> getUserAuthorities() {
+        ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
         if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);

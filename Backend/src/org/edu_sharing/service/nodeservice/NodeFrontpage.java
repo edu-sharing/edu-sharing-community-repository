@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -52,13 +53,19 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.ScriptSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -299,7 +306,7 @@ public class NodeFrontpage {
         }
     }
 
-    public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
+    public Collection<NodeRef> getNodesForCurrentUserAndConfig2() throws Throwable {
         RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
         if(config.mode.equals(RepositoryConfig.Frontpage.Mode.collection)){
             if(config.collection==null){
@@ -364,5 +371,86 @@ public class NodeFrontpage {
             return randoms;
         }
         return result;
+    }
+
+    public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
+        //collection: erstmal so lassen
+        RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
+        if(config.mode.equals(RepositoryConfig.Frontpage.Mode.collection)){
+            if(config.collection==null){
+                throw new RuntimeException("Frontpage mode "+RepositoryConfig.Frontpage.Mode.collection+" requires a collection id to be defined");
+            }
+            // only return io's
+            SortDefinition sortDefinition=new SortDefinition();
+            sortDefinition.addSortDefinitionEntry(
+                    new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
+            return CollectionServiceFactory.getLocalService().getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
+        }
+        //initElastic rasuschmeißen (frontpage_cache nicht mehr benötigt)
+        initElastic();
+        //audience filter wie in searchV2
+        BoolQueryBuilder query = QueryBuilders.boolQuery();
+        query.must(SearchServiceElastic.getAuthorityQueryBuilder());
+        query.must(QueryBuilders.termQuery("type","ccm:io"));
+        query.must(QueryBuilders.termQuery("nodeRef.storeRef.protocol","workspace"));
+
+        //Toolpermission check auf queries : @TODO überlegen wie der check mit elastic gehen könnte
+        if(config.queries!=null && !config.queries.isEmpty()) {
+            // filter all queries with matching toolpermissions, than concat them via "must"
+            config.queries.stream().filter((q)->{
+                if(q.condition.type.equals(RepositoryConfig.Condition.Type.TOOLPERMISSION)){
+                    // should return true if query is launching
+                    // so toolpermission == true && negate ? false : true -> toolpermission!=negate
+                    return ToolPermissionServiceFactory.getInstance().hasToolPermission(q.condition.value)!=q.condition.negate;
+                }
+                return false;
+            }).forEach((q)-> {
+                //die config queries in den extensions überprüfen und ggf auf hautp index anpassen
+                query.must(QueryBuilders.wrapperQuery(QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.replacerFromSyntax(MetadataReaderV2.QUERY_SYNTAX_DSL))));
+            });
+        }
+
+
+        InputStream is = NodeFrontpage.class.getClassLoader().getResourceAsStream("frontpage-ratings.properties");
+        String sortingScript = IOUtils.toString(is, StandardCharsets.UTF_8.name());
+        logger.info("loaded script:"+sortingScript);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(query);
+
+        Map<String,Object> params = new HashMap<>();
+        params.put("mode",config.mode);
+        if(RepositoryConfig.Frontpage.Timespan.days_30.equals(config.timespan)){
+            params.put("history",1);
+        }else if(RepositoryConfig.Frontpage.Timespan.days_100.equals(config.timespan)){
+            params.put("history",3);
+        }
+        Script script = new Script(Script.DEFAULT_SCRIPT_TYPE, "painless", sortingScript,Collections.emptyMap(),params);
+        searchSourceBuilder.sort(SortBuilders.scriptSort(script, ScriptSortBuilder.ScriptSortType.NUMBER));
+
+        //wie gehabt
+        searchSourceBuilder.size(config.totalCount);
+        searchSourceBuilder.from(0);
+        SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
+        searchRequest.indices("workspace");
+        SearchResponse searchResult = client.search(searchRequest,RequestOptions.DEFAULT);
+        List<NodeRef> result=new ArrayList<>();
+        for(SearchHit hit : searchResult.getHits().getHits()){
+            if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),hit.getId(),CCConstants.PERMISSION_READ)){
+                Map nodeRef = (Map) hit.getSourceAsMap().get("nodeRef");
+                String nodeId = (String) nodeRef.get("id");
+                result.add(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
+            }
+        }
+        if(config.displayCount<config.totalCount) {
+            Set<NodeRef> randoms = new HashSet<>();
+            // grab a random count of elements (equals displayCount) of the whole array
+            while (randoms.size() < config.displayCount && randoms.size()<result.size()) {
+                randoms.add(result.get(new Random().nextInt(result.size())));
+            }
+            return randoms;
+        }
+        return result;
+
     }
 }
