@@ -79,7 +79,7 @@
             <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon="arrow_drop_down"></i></a>
           </div>
         </div>
-        <div *ngFor="let option of getOptionsAlways()"  class="more moreAlways" > </div>
+        <!--<div *ngFor="let option of getOptionsAlways()"  class="more moreAlways" > </div>-->
         <div class="more-header" *ngIf="_options && _options.length">&nbsp;</div>
         <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
              (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
