@@ -3,6 +3,7 @@
     <button mat-button (click)="cancel()"><i icon="close"></i></button>
 </div>
 <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadLatest()">
+  <ng-container *ngTemplateOutlet="beforeRecentRef; context: { $implicit: currentRoot }"></ng-container>
     <div *ngIf="!currentRoot">
         <h5 class="mat-heading-5">{{'COLLECTION_CHOOSER.ADD_TO_RECENT_COLLECTION' | translate}}</h5>
         <div class="search">
