@@ -152,7 +152,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 		// child object: inherit all props from parent
 		if(nodeDao.getAspectsNative().contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
-			Map<String, Object> props = nodeDao.getNativeProperties();
+			Map<String, Object> propsChild = nodeDao.getNativeProperties();
 			String parentRef = nodeService.getPrimaryParent(nodeId);
 			HashMap<String,Object> propsParent =
 					nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,
@@ -162,8 +162,10 @@ public class RenderingServiceImpl implements RenderingService{
 			for(String prop : CCConstants.CHILDOBJECT_IGNORED_PARENT_PROPERTIES)
 				propsParent.remove(prop);
 			// override it with the props from the child
-			for(Map.Entry<String,Object> entry : props.entrySet()){
-				propsParent.put(entry.getKey(),entry.getValue());
+			for(Map.Entry<String,Object> entry : propsChild.entrySet()){
+				if(entry.getValue() != null && !entry.getValue().toString().isEmpty()) {
+					propsParent.put(entry.getKey(), entry.getValue());
+				}
 			}
 			nodeDao.setNativeProperties(propsParent);
 		}

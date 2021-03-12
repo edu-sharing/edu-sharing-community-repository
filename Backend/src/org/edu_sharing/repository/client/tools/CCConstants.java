@@ -498,7 +498,6 @@ public class CCConstants {
 
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
     		CCConstants.CM_NAME,
-			CCConstants.LOM_PROP_GENERAL_TITLE,
 			CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, // Materialart
 			CCConstants.CCM_PROP_IO_WWWURL,
 			CCConstants.ALFRESCO_MIMETYPE,
