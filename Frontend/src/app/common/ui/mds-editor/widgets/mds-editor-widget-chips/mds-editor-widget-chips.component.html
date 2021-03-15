@@ -19,12 +19,9 @@
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
-      [matTooltip]="
-        (widget.observeIsDisabled() | async) === false &&
-        (indeterminateValues$ | async)?.includes(value.key)
-          ? ('MDS.INDETERMINATE_NOTICE' | translate)
-          : value.label
-      "
+      appCheckTextOverflow=".mat-chip-label"
+      #text="appCheckTextOverflow"
+      [matTooltip]="getTooltip(value, text.hasTextOverflow())"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>

@@ -166,6 +166,19 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         this.removeFromIndeterminateValues(value.key);
     }
 
+    getTooltip(value: DisplayValue, hasTextOverflow: boolean): string | null {
+        const shouldShowIndeterminateNotice =
+            this.widget.getStatus() !== 'DISABLED' &&
+            this.widget.getIndeterminateValues()?.includes(value.key);
+        if (shouldShowIndeterminateNotice) {
+            return this.translate.instant('MDS.INDETERMINATE_NOTICE', { value: value.label });
+        } else if (hasTextOverflow) {
+            return value.label;
+        } else {
+            return null;
+        }
+    }
+
     private removeFromIndeterminateValues(key: string): void {
         const indeterminateValues = this.indeterminateValues$.value;
         if (key && indeterminateValues?.includes(key)) {
