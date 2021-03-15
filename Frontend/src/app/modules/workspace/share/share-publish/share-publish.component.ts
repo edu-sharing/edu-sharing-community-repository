@@ -104,7 +104,7 @@ export class SharePublishComponent implements OnChanges {
     private refresh() {
         this.doiActive = this.nodeHelper.isDOIActive(this.node, this.permissions);
         this.doiDisabled = this.doiActive;
-        const prop = this.node.properties[RestConstants.CCM_PROP_PUBLISHED_MODE]?.[0];
+        const prop = this.node?.properties?.[RestConstants.CCM_PROP_PUBLISHED_MODE]?.[0];
         if(prop === ShareMode.Copy) {
             this.shareModeCopy = true;
             this.isCopy = true;
@@ -215,14 +215,16 @@ export class SharePublishComponent implements OnChanges {
     updatePublishedVersions() {
         if(!this.isCopy && this.shareModeCopy
             || this.republish) {
-            const virtual = Helper.deepCopy(this.node);
-            virtual.properties[RestConstants.CCM_PROP_PUBLISHED_DATE + '_LONG'] = [new Date().getTime()];
-            if(this.doiActive && !this.doiDisabled && this.doiPermission) {
-                virtual.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID] = [true];
+            if(this.node?.properties) {
+                const virtual = Helper.deepCopy(this.node);
+                virtual.properties[RestConstants.CCM_PROP_PUBLISHED_DATE + '_LONG'] = [new Date().getTime()];
+                if (this.doiActive && !this.doiDisabled && this.doiPermission) {
+                    virtual.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID] = [true];
+                }
+                virtual.virtual = true;
+                this.allPublishedVersions = [virtual].concat(this.publishedVersions);
+                this.handleMode = this.hasExactOneHandle() ? 'update' : 'distinct';
             }
-            virtual.virtual = true;
-            this.allPublishedVersions = [virtual].concat(this.publishedVersions);
-            this.handleMode = this.hasExactOneHandle() ? 'update': 'distinct';
         } else {
             this.allPublishedVersions = this.publishedVersions;
         }

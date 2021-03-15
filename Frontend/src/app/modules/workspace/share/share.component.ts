@@ -630,11 +630,11 @@ export class WorkspaceShareComponent {
                     }
                 })
             });
-            if(!this.sendToApi) {
-                return;
-            }
             Observable.forkJoin(actions).subscribe(
                 () => {
+                    if(!this.sendToApi) {
+                        return;
+                    }
                     this.updateUsages(
                         RestHelper.copyPermissions(
                             Helper.deepCopy(this.permissions),
