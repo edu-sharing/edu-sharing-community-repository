@@ -217,7 +217,7 @@ export class SharePublishComponent implements OnChanges {
             || this.republish) {
             const virtual = Helper.deepCopy(this.node);
             virtual.properties[RestConstants.CCM_PROP_PUBLISHED_DATE + '_LONG'] = [new Date().getTime()];
-            if(this.doiActive && !this.doiDisabled) {
+            if(this.doiActive && !this.doiDisabled && this.doiPermission) {
                 virtual.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID] = [true];
             }
             virtual.virtual = true;
