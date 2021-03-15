@@ -1071,7 +1071,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 
 	public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleMode handleMode) throws Exception {
-		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);;
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
+		HandleService handleService = null;
+		try {
+			handleService = new HandleService();
+			/**
+			 * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
+			 */
+			handleService.handleServiceAvailable();
+		} catch (Exception e) {
+			// DEBUG ONLY
+			//handle = "test/" + Math.random();
+			throw new RuntimeException("Handle service throwed an error: " + e.getMessage(), e);
+		}
 		String currentHandle = null;
 		// fetch the last given handle from the currently existing copies
 		if(handleMode.equals(HandleMode.update) && publishedCopies.size() > 0 ){
@@ -1086,25 +1098,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			currentHandle = handles.iterator().next();
 		}
 
-		HandleService handleService = null;
 		String handle = null;
 
 		Map<QName, Serializable> publishedProps = new HashMap<QName, Serializable>();
 
 		if(handleMode.equals(HandleMode.distinct)) {
 			try {
-				handleService = new HandleService();
-				/**
-				 * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
-				 */
-				handleService.handleServiceAvailable();
 				handle = handleService.generateHandle();
 
 			} catch (Exception e) {
 				logger.error("sql error while creating handle id", e);
 				// DEBUG ONLY
 				//handle = "test/" + Math.random();
-				throw new RuntimeException("Handle service throwed an error: " + e.getMessage(), e);
+				throw new RuntimeException("Handle generation throwed an error: " + e.getMessage(), e);
 			}
 		} else {
 			if(currentHandle == null){
@@ -1143,12 +1149,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					// TODO Auto-generated catch block
 					logger.error(e1.getMessage(), e1);
 				}*/
-		if (handleService != null && handle != null) {
+		if (handle != null) {
 			String contentLink = URLTool.getNgRenderNodeUrl(nodeRef.getId(), null);
 			if (handleMode.equals(HandleMode.distinct)) {
-				//handleService.createHandle(handle, handleService.getDefautValues(contentLink));
+				logger.info("Create handle " + handle + ", " + contentLink);
+				handleService.createHandle(handle, handleService.getDefautValues(contentLink));
 			} else if (handleMode.equals(HandleMode.update)) {
-				//handleService.updateHandle(handle, handleService.getDefautValues(contentLink));
+				logger.info("Update handle " + handle + ", " + contentLink);
+				handleService.updateHandle(handle, handleService.getDefautValues(contentLink));
 			}
 
 		}
