@@ -1,4 +1,13 @@
-import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
+import {
+    Component,
+    Input,
+    EventEmitter,
+    Output,
+    ViewChild,
+    ElementRef,
+    HostListener,
+    ContentChild, TemplateRef
+} from '@angular/core';
 import {DialogButton, LocalPermissions, NodeVersions, RestConnectorService, RestNodeService, Version} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../core-module/core.module";
@@ -42,6 +51,7 @@ export class WorkspaceManagementDialogsComponent  {
   readonly BulkBehaviour = BulkBehavior;
   @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef : MdsEditorWrapperComponent;
   @ViewChild(WorkspaceLicenseComponent) licenseComponent : WorkspaceLicenseComponent;
+  @ContentChild('collectionChooserBeforeRecent') collectionChooserBeforeRecentRef: TemplateRef<any>;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() uploadMultiple = true;
