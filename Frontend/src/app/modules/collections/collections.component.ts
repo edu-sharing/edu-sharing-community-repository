@@ -922,6 +922,8 @@ export class CollectionsMainComponent {
                 },
             );
         }
+        this.createSubCollectionOptionItem.name = 'OPTIONS.' +
+            (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
     }
 
     closeDialog() {
