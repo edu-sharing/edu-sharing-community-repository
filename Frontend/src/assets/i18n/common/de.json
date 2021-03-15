@@ -580,6 +580,7 @@
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
         "NEW_COLLECTION": "Neue Sammlung",
+        "NEW_SUB_COLLECTION": "Neue Untersammlung",
         "LINK_MAP": "Verlinkung erstellen",
         "TOGGLE_SHARED_TO_ME": "Freigaben-Empfänger umschalten",
         "SWITCH_TO_LIST_VIEW": "Zur Listenansicht wechseln",

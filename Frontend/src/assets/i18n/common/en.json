@@ -545,6 +545,7 @@
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
+        "NEW_SUB_COLLECTION": "Add subcollection",
         "LINK_MAP": "Create link",
         "TOGGLE_SHARED_TO_ME": "Toggle share receiver",
         "SWITCH_TO_LIST_VIEW": "Switch to list view",
