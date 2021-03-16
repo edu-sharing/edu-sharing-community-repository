@@ -5,6 +5,8 @@ import { DialogButton } from '../../../../../core-module/core.module';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import {number} from '@storybook/addon-knobs';
+import {DateHelper} from '../../../../../core-ui-module/DateHelper';
 
 @Component({
     selector: 'app-mds-editor-widget-text',
@@ -27,7 +29,10 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     }
 
     ngOnInit(): void {
-        const initialValue = this.getInitialValue();
+        let initialValue = this.getInitialValue();
+        if(this.widget.definition.type === 'date') {
+            initialValue = initialValue.map((v) => DateHelper.formatDateByPattern(v,'y-M-d'));
+        }
         this.formControl = new FormControl(initialValue[0] ?? null, this.getValidators());
         this.formControl.valueChanges
             .filter((value) => value !== null)
