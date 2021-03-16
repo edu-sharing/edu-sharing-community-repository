@@ -104,15 +104,18 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         return sr;
     }
-    public BoolQueryBuilder getReadPermissionsQuery(){
+    public BoolQueryBuilder getPermissionsQuery(String field){
         Set<String> authorities = getUserAuthorities();
         BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
         audienceQueryBuilder.minimumShouldMatch(1);
         for (String a : authorities) {
-            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", a));
+            audienceQueryBuilder.should(QueryBuilders.matchQuery(field, a));
         }
+        return audienceQueryBuilder;
+    }
+    public BoolQueryBuilder getReadPermissionsQuery(){
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-        audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", user));
+        BoolQueryBuilder audienceQueryBuilder = getPermissionsQuery("permissions.read");
         audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
         return audienceQueryBuilder;
     }
@@ -146,6 +149,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
             QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
+            if(searchToken.getPermissions() != null){
+                for(String permission : searchToken.getPermissions()){
+                    queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
+                }
+            }
 
             for(String facette : searchToken.getFacettes()){
                 searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));

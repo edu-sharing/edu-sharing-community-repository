@@ -40,6 +40,7 @@ public class SearchToken implements Serializable {
 
 	private ContentType contentType;
 	private MetadataQueries queries;
+	private List<String> permissions;
 
 	public ContentType getContentType(){
 		if(contentType==null)
@@ -219,5 +220,17 @@ public class SearchToken implements Serializable {
 	public List<String> getAuthorityScope() {
 		return authorityScope;
 	}
-	
+
+	/**
+	 * Filter for permissions by the current user
+	 * Only materials with ALL permissions provided here will be shown for the current user
+	 * Note: Only supported via ElasticSearch!
+	 */
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
+    }
+
+    public List<String> getPermissions() {
+        return permissions;
+    }
 }
