@@ -149,6 +149,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- SAML
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/saml/*</url-pattern>
@@ -157,6 +158,7 @@
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/shibboleth</url-pattern>
     </filter-mapping>
+     SAML -->
 
     <filter-mapping>
         <filter-name>DisableCacheFilter</filter-name>
