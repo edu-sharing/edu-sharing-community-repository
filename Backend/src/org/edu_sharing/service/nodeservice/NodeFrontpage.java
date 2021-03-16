@@ -57,9 +57,7 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.ScriptSortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.sort.*;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -411,7 +409,8 @@ public class NodeFrontpage {
         }
 
 
-        InputStream is = NodeFrontpage.class.getClassLoader().getResourceAsStream("frontpage-ratings.properties");
+        //InputStream is = NodeFrontpage.class.getClassLoader().getResourceAsStream("frontpage-ratings.properties");
+        InputStream is = NodeFrontpage.class.getClassLoader().getResource("frontpage-ratings.properties").openStream();
         String sortingScript = IOUtils.toString(is, StandardCharsets.UTF_8.name());
         logger.info("loaded script:"+sortingScript);
 
@@ -426,7 +425,10 @@ public class NodeFrontpage {
             params.put("history",3);
         }
         Script script = new Script(Script.DEFAULT_SCRIPT_TYPE, "painless", sortingScript,Collections.emptyMap(),params);
-        searchSourceBuilder.sort(SortBuilders.scriptSort(script, ScriptSortBuilder.ScriptSortType.NUMBER));
+        ScriptSortBuilder sb = SortBuilders.scriptSort(script, ScriptSortBuilder.ScriptSortType.NUMBER).order(SortOrder.DESC);
+        sb.sortMode(SortMode.MAX);
+        searchSourceBuilder.sort(sb);
+
 
         //wie gehabt
         searchSourceBuilder.size(config.totalCount);
@@ -436,6 +438,7 @@ public class NodeFrontpage {
         SearchResponse searchResult = client.search(searchRequest,RequestOptions.DEFAULT);
         List<NodeRef> result=new ArrayList<>();
         for(SearchHit hit : searchResult.getHits().getHits()){
+            logger.info("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));
             if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),hit.getId(),CCConstants.PERMISSION_READ)){
                 Map nodeRef = (Map) hit.getSourceAsMap().get("nodeRef");
                 String nodeId = (String) nodeRef.get("id");
