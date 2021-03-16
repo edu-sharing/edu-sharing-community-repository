@@ -13,12 +13,14 @@
          <param-name>rootPath</param-name>
          <param-value>/app:company_home</param-value>
    </context-param>
+    <!-- SAML
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
             /WEB-INF/securityContext.xml
         </param-value>
     </context-param>
+    SAML -->
 
    
    <filter>
@@ -126,10 +128,12 @@
         <filter-class>org.edu_sharing.repository.server.DisableCacheFilter</filter-class>
     </filter>
 
+    <!-- SAML
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
+    SAML -->
 
     <filter>
         <filter-name>SameSiteCookieFilter</filter-name>
@@ -141,6 +145,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- SAML
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/saml/*</url-pattern>
@@ -149,6 +154,7 @@
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/shibboleth</url-pattern>
     </filter-mapping>
+     SAML -->
 
     <filter-mapping>
         <filter-name>DisableCacheFilter</filter-name>
@@ -162,22 +168,22 @@
     <filter-mapping>
       <filter-name>REST Origin Filter</filter-name>
       <url-pattern>/rest/*</url-pattern>
-   </filter-mapping> 
-   
+   </filter-mapping>
+
     <filter-mapping>
       <filter-name>REST Origin Filter</filter-name>
       <url-pattern>/oauth2/*</url-pattern>
-   </filter-mapping> 
+   </filter-mapping>
 
     <filter-mapping>
       <filter-name>Edu Context Management Filter</filter-name>
       <url-pattern>/webdav/*</url-pattern>
-   </filter-mapping> 
+   </filter-mapping>
    <filter-mapping>
       <filter-name>Edu WebDAV Authentication Filter</filter-name>
       <url-pattern>/webdav/*</url-pattern>
    </filter-mapping>
-    
+
    <!-- Filter Mapping Edu Context Management Filter-->
    <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
@@ -790,9 +796,12 @@
 	<listener>
 	 	<listener-class>org.edu_sharing.repository.server.authentication.SessionListener</listener-class>
 	 </listener>
+
+    <!-- SAML
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+    SAML -->
 
       <!-- Angular Dynamic routing, added by Torsten 2016-11-02 -->
 	<servlet>
