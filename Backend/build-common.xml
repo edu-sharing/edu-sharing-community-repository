@@ -115,13 +115,16 @@
 			<param name="source-file-param" value="${config.dir}/ccmail.properties.xml"/>
 			<param name="to-file-param" value="${webserver.home}/shared/classes/ccmail.properties.xml"/>
 		</antcall>
-		
+
 		<copy todir="${webserver.home}/webapps/${webapp.name}/WEB-INF/lib">
 			<fileset dir="lib" includes="log4j-1.2.8.jar, commons-logging-1.0.4.jar, cas-client-core-3.2.1.jar">
 			</fileset>
 		</copy>
 		<copy file="${config.dir}/web.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/web.xml" />
-		<copy file="${config.dir}/securityContext.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/securityContext.xml" />
+		<antcall target="copy-file-if-not-exist">
+			<param name="source-file-param" value="${config.dir}/securityContext.xml"/>
+			<param name="to-file-param" value="${app.server.deploy.dir}/${webapp.name}/WEB-INF/securityContext.xml"/>
+		</antcall>
 		<copy file="${config.dir}/context.xml" tofile="${app.server.deploy.dir}/${webapp.name}/META-INF/context.xml" />
 		<copy file="${output.dir}/ddc.properties" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/classes/ddc.properties" />
 	
@@ -150,7 +153,6 @@
 			<echo>current extension is active will overwrite</echo>
 				
 			<copy failonerror="false" overwrite="true" file="${extensions.path}${extension-name}/config/web.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/web.xml" />
-  		<copy failonerror="false" overwrite="true" file="${extensions.path}${extension-name}/config/securityContext.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/securityContext.xml" />
 
 			<copy failonerror="false" todir="${app.server.tomcat.webapps.ccsearch.lib}">
 						<fileset dir="${extensions.path}${extension-name}/lib" includes="*.jar"></fileset>
