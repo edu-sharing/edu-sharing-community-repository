@@ -104,6 +104,18 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         return sr;
     }
+    public BoolQueryBuilder getReadPermissionsQuery(){
+        Set<String> authorities = getUserAuthorities();
+        BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
+        audienceQueryBuilder.minimumShouldMatch(1);
+        for (String a : authorities) {
+            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", a));
+        }
+        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+        audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", user));
+        audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
+        return audienceQueryBuilder;
+    }
     @Override
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
@@ -121,6 +133,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         Set<String> authorities = getUserAuthorities();
+        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
 
 
         SearchResultNodeRef sr = new SearchResultNodeRef();
@@ -132,15 +145,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
-            BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
-            audienceQueryBuilder.minimumShouldMatch(1);
-            for (String a : authorities) {
-                audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", a));
-            }
-            String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", user));
-            audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
-            QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(audienceQueryBuilder);
+            QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
 
             for(String facette : searchToken.getFacettes()){
                 searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
@@ -473,7 +478,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 map((k) -> new SearchVCard(k.toString())).
                 collect(Collectors.toCollection(HashSet::new));
     }
-
+    public RestHighLevelClient getClient() throws IOException {
+        checkClient();
+        return client;
+    }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(RequestOptions.DEFAULT)){
              client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
