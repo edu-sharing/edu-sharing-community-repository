@@ -1,12 +1,12 @@
-import { EventEmitter, Injectable, Input, OnDestroy, Directive } from '@angular/core';
+import { Directive, EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
-    ConfigurationService,
     Node,
     RestConnectorService,
-    RestConstants, RestLocatorService,
+    RestConstants,
+    RestLocatorService,
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
@@ -15,8 +15,8 @@ import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorCommonService } from './mds-editor-common.service';
 import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
 import {
-    EditorBulkMode,
     BulkMode,
+    EditorBulkMode,
     EditorMode,
     EditorType,
     InputStatus,
@@ -68,8 +68,6 @@ export abstract class MdsEditorWidgetCore {
     }
 }
 
-
-
 /**
  * Manages state for an MDS editor instance.
  *
@@ -102,34 +100,37 @@ export class MdsEditorInstanceService implements OnDestroy {
         ) {
             this.replaceVariables();
         }
+
         /**
          * replace variables from client.config inside parameters of the widget
          */
         private async replaceVariables() {
-            if(this.variables != null) {
+            if (this.variables != null) {
                 for (const field of ['caption', 'placeholder', 'icon', 'defaultvalue']) {
-                    (this.definition as any)[field] =
-                        this.replaceVariableString((this.definition as any)[field],
-                        this.variables);
+                    (this.definition as any)[field] = this.replaceVariableString(
+                        (this.definition as any)[field],
+                        this.variables,
+                    );
                 }
             }
         }
-        private replaceVariableString(string: string, variables: string[]) {
-            if (!string || !string.match('\\${.+}')) {
-                return string;
+
+        private replaceVariableString(str: string, variables: string[]) {
+            if (!str || !str.match('\\${.+}')) {
+                return str;
             }
-            for (let key in variables) {
-                if ('${' + key + '}' == string) {
+            for (const key in variables) {
+                if ('${' + key + '}' === str) {
                     return variables[key];
                 }
             }
             console.warn(
                 'mds declared variable ' +
-                string +
-                ', but it was not found in the config variables. List of known variables below',
+                    str +
+                    ', but it was not found in the config variables. List of known variables below',
             );
             console.warn(variables);
-            return string;
+            return str;
         }
 
         initWithNodes(nodes: Node[]): void {
@@ -478,7 +479,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         this.updateCompletionState();
         // to lower case because of remote repos wrong mapping
-        return (this.getGroup(this.mdsDefinition$.value, groupId).rendering?.toLowerCase() as EditorType);
+        return this.getGroup(
+            this.mdsDefinition$.value,
+            groupId,
+        ).rendering?.toLowerCase() as EditorType;
     }
 
     async initWithoutNodes(
@@ -502,7 +506,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
         this.updateCompletionState();
         // to lower case because of remote repos wrong mapping
-        return (this.getGroup(this.mdsDefinition$.value, groupId).rendering?.toLowerCase() as EditorType);
+        return this.getGroup(
+            this.mdsDefinition$.value,
+            groupId,
+        ).rendering?.toLowerCase() as EditorType;
     }
 
     async clearValues(): Promise<void> {
@@ -510,7 +517,13 @@ export class MdsEditorInstanceService implements OnDestroy {
         // outside the component. Therefore, we have to reload and redraw everything here.
         //
         // TODO: Handle values in a way that allows dynamic updates.
-        await this.initMds(this.groupId, this.mdsId, this.repository, this.nodes$.value, this.values$.value);
+        await this.initMds(
+            this.groupId,
+            this.mdsId,
+            this.repository,
+            this.nodes$.value,
+            this.values$.value,
+        );
         for (const widget of this.widgets.value) {
             widget.initWithValues();
         }
@@ -570,7 +583,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             // one.
             for (let i = 0; i < this.widgets.value.length; i++) {
                 const index = (i + this.lastScrolledIntoViewIndex + 1) % this.widgets.value.length;
-                const hasJustBeenScrolledIntoView = this.widgets.value[index].showMissingRequired(true);
+                const hasJustBeenScrolledIntoView = this.widgets.value[index].showMissingRequired(
+                    true,
+                );
                 if (hasJustBeenScrolledIntoView) {
                     this.lastScrolledIntoViewIndex = index;
                     break;
@@ -579,8 +594,8 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
     }
 
-    async save(): Promise<Node[]|Values> {
-        if(!this.nodes$.value) {
+    async save(): Promise<Node[] | Values> {
+        if (!this.nodes$.value) {
             return this.getValues();
         }
         const newValues = await this.getNodeValuePairs();
@@ -677,8 +692,12 @@ export class MdsEditorInstanceService implements OnDestroy {
         nodes?: Node[],
         values?: Values,
     ): Promise<void> {
-        if (this.mdsId !== mdsId || this.repository !== repository ||
-            this.groupId !== groupId || !this.mdsDefinition$.value) {
+        if (
+            this.mdsId !== mdsId ||
+            this.repository !== repository ||
+            this.groupId !== groupId ||
+            !this.mdsDefinition$.value
+        ) {
             this.mdsId = mdsId;
             this.repository = repository;
             this.groupId = groupId;
@@ -756,7 +775,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     widgetDefinition,
                     view.id,
                     view.rel,
-                    variables
+                    variables,
                 );
                 result.push(widget);
             }
@@ -794,7 +813,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     (node) => widget.condition.negate === !node.properties[widget.condition.value],
                 );
             } else if (values) {
-                return widget.condition.negate === !values[widget.condition.value]
+                return widget.condition.negate === !values[widget.condition.value];
             } else {
                 return true;
             }
@@ -877,11 +896,13 @@ export class MdsEditorInstanceService implements OnDestroy {
      * (e.g when some metadata has changed outside of the current context)
      */
     updateNodes(nodes: Node[]) {
-        this.nodes$.next(this.nodes$.value.map((n1) => {
-            return nodes.find((n2) =>
-                n1.ref.id === n2.ref.id && n1.ref.repo === n2.ref.repo
-            ) || n1;
-        }));
+        this.nodes$.next(
+            this.nodes$.value.map((n1) => {
+                return (
+                    nodes.find((n2) => n1.ref.id === n2.ref.id && n1.ref.repo === n2.ref.repo) || n1
+                );
+            }),
+        );
     }
 
     resetWidgets() {
