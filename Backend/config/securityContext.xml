@@ -14,11 +14,7 @@
 
     <!-- Secured pages with SAML as entry point -->
     <security:http entry-point-ref="samlEntryPoint" use-expressions="false">
-
-        <!-- REMOVE THIS COMMENTS TO ACTIVATE SSO-AUTOLOGIN
         <security:intercept-url pattern="/shibboleth" access="IS_AUTHENTICATED_FULLY"/>
-        -->
-
         <security:custom-filter before="FIRST" ref="metadataGeneratorFilter"/>
         <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
     </security:http>
@@ -75,6 +71,18 @@
 
     <!-- Central storage of cryptographic keys -->
     <bean id="keyManager" class="org.springframework.security.saml.key.EmptyKeyManager"/>
+    <!--
+    <bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
+        <constructor-arg value="classpath:saml.jks"/>
+        <constructor-arg type="java.lang.String" value="secret_for_keystore"/>
+        <constructor-arg>
+            <map>
+                <entry key="saml" value="secret_for_keypair"/>
+            </map>
+        </constructor-arg>
+        <constructor-arg type="java.lang.String" value="saml"/>
+    </bean>
+    -->
 
     <!-- Entry point to initialize authentication, default values taken from properties file -->
     <bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
