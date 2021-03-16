@@ -53,7 +53,6 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
             );
 
             AggregationBuilder aggregation = AggregationBuilders.terms("type").field("type");
-            logger.info(path);
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             searchSourceBuilder.query(queryBuilder);
@@ -61,7 +60,6 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
             searchSourceBuilder.size(0);
             searchRequest.source(searchSourceBuilder);
             SearchResponse result = esClient.search(searchRequest, RequestOptions.DEFAULT);
-            logger.info(result.getAggregations());
             ParsedStringTerms types = result.getAggregations().get("type");
             for(Terms.Bucket bucket : types.getBuckets()){
                 if(bucket.getKeyAsString().equals("ccm:io")){
