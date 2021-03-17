@@ -163,7 +163,6 @@ export class CustomNodeListWrapperComponent implements OnChanges {
      */
     private getOutputBindings(): { [key: string]: EventEmitter<any> } {
         const outputBindings: { [key: string]: any } = {};
-        console.log(outputBindings);
         for (const key in this) {
             const value = this[key];
             if (value instanceof EventEmitter) {

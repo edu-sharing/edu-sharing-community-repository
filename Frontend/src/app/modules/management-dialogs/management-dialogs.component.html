@@ -144,7 +144,11 @@
   (onDrop)="addToCollectionList($event.target,$event.source,false)"
   (onCreateCollection)="addToCollectionCreate($event)"
   (onChoose)="addToCollectionList($event)"
-></collection-chooser>
+>
+  <ng-template #beforeRecent let-currentRoot>
+    <ng-container *ngTemplateOutlet="collectionChooserBeforeRecentRef; context: { $implicit: currentRoot }"></ng-container>
+  </ng-template>
+</collection-chooser>
 <workspace-lti-tools *ngIf="showLtiTools"
                      [refresh]="ltiToolRefresh"
                      [(currentTool)]="currentLtiTool"

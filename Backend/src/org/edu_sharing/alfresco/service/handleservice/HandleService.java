@@ -12,6 +12,7 @@ import com.typesafe.config.Config;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.ibatis.session.SqlSession;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 
@@ -234,12 +235,8 @@ public class HandleService {
 	}
 	
 	private static boolean handleIdExists(String id) throws SQLException{
-		Connection con = null;
-		PreparedStatement statement = null;
-		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
-		try{			
-			con = dbAlf.getConnection();
-			statement = con.prepareStatement(HANDLE_QUERY_EXISTS);
+		try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
+			PreparedStatement statement = session.getConnection().prepareStatement(HANDLE_QUERY_EXISTS);
 			id = StringEscapeUtils.escapeSql(id);
 			statement.setString(1, id);
 			java.sql.ResultSet resultSet = statement.executeQuery();
@@ -248,26 +245,18 @@ public class HandleService {
 			}else {
 				return false;
 			}
-		}finally {
-			dbAlf.cleanUp(con, statement);
 		}
 	}
 	
 	private static void insertHandleId(String id) throws SQLException{
-		Connection con = null;
-		PreparedStatement statement = null;
-		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
-		try{			
-			con = dbAlf.getConnection();
-			statement = con.prepareStatement(HANDLE_INSERT);
-			
+		try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
+
+			PreparedStatement statement = session.getConnection().prepareStatement(HANDLE_INSERT);
 			id = StringEscapeUtils.escapeSql(id);
 			statement.setString(1, id);
-			
+
 			statement.executeUpdate();
-			con.commit();
-		}finally {
-			dbAlf.cleanUp(con, statement);
+			statement.getConnection().commit();
 		}
 	}
 }

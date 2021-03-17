@@ -545,6 +545,7 @@
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
+        "NEW_SUB_COLLECTION": "Add subcollection",
         "LINK_MAP": "Create link",
         "TOGGLE_SHARED_TO_ME": "Toggle share receiver",
         "SWITCH_TO_LIST_VIEW": "Switch to list view",
@@ -586,7 +587,7 @@
         "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
         "REQUIRED_MESSAGE": "Field is required",
         "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing",
-        "INDETERMINATE_NOTICE": "Click on the value in order to add it to all elements, or remove it in order to delete it from all elements (when \"replace\" is selected).",
+        "INDETERMINATE_NOTICE": "Click on the chip in order to add the value \"{{ value }}\" to all elements, or remove it in order to delete it from all elements.",
         "SHOW_OPTIONS_BUTTON": "Show options",
         "FILTER_FOR": "Filter for \"{{value}}\" ({{count}} matching element(s))"
     },

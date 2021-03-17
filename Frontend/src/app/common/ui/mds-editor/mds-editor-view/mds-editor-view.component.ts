@@ -155,6 +155,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges 
     }
 
     private injectWidgets(): void {
+        this.mdsEditorInstance.resetWidgets();
         const elements = this.container.nativeElement.getElementsByTagName('*');
         for (const element of Array.from(elements)) {
             const tagName = element.localName;

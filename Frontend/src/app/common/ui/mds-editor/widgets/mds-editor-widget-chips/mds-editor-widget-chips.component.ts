@@ -9,7 +9,7 @@ import {
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable, of } from 'rxjs';
 import {
     debounceTime,
     distinctUntilChanged,
@@ -146,13 +146,13 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
         this.removeFromIndeterminateValues(toBeRemoved.key);
+        this.preventAutocompleteOpen();
     }
 
     selected(event: MatAutocompleteSelectedEvent) {
         this.add(event.option.value);
         this.input.nativeElement.value = '';
         this.inputControl.setValue(null);
-        setTimeout(() => this.trigger.openPanel());
     }
 
     focus() {
@@ -164,6 +164,19 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             this.chipsControl.setValue([...this.chipsControl.value, value]);
         }
         this.removeFromIndeterminateValues(value.key);
+    }
+
+    getTooltip(value: DisplayValue, hasTextOverflow: boolean): string | null {
+        const shouldShowIndeterminateNotice =
+            this.widget.getStatus() !== 'DISABLED' &&
+            this.widget.getIndeterminateValues()?.includes(value.key);
+        if (shouldShowIndeterminateNotice) {
+            return this.translate.instant('MDS.INDETERMINATE_NOTICE', { value: value.label });
+        } else if (hasTextOverflow) {
+            return value.label;
+        } else {
+            return null;
+        }
     }
 
     private removeFromIndeterminateValues(key: string): void {
@@ -231,5 +244,14 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
                     ),
             ),
         );
+    }
+
+    private preventAutocompleteOpen() {
+        const filteredValuesBak = this.filteredValues;
+        this.filteredValues = of([]);
+        setTimeout(() => {
+            this.trigger.closePanel();
+            this.filteredValues = filteredValuesBak;
+        });
     }
 }

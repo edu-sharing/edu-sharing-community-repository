@@ -267,7 +267,7 @@ public class ShibbolethServlet extends HttpServlet {
 	 private String getShibValue(String attName, HttpServletRequest req){
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication.isAuthenticated()) {
+            if (authentication != null && authentication.isAuthenticated()) {
             	Object credential = authentication.getCredentials();
             	if(credential instanceof SAMLCredential) {
             		 SAMLCredential samlCredential = (SAMLCredential) credential;

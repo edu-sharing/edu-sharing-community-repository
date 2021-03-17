@@ -2,6 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogButton } from '../../../../../core-module/core.module';
+import { DateHelper } from '../../../../../core-ui-module/DateHelper';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
@@ -27,7 +28,10 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
     }
 
     ngOnInit(): void {
-        const initialValue = this.getInitialValue();
+        let initialValue = this.getInitialValue();
+        if (this.widget.definition.type === 'date') {
+            initialValue = initialValue.map((v) => DateHelper.formatDateByPattern(v, 'y-M-d'));
+        }
         this.formControl = new FormControl(initialValue[0] ?? null, this.getValidators());
         this.formControl.valueChanges
             .filter((value) => value !== null)

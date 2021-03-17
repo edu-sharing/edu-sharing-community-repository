@@ -610,7 +610,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
         return updatedNodes;
     }
-    getIsValid(){
+    getIsValid() {
         return this.isValid$.value;
     }
     async getValues(node?: Node): Promise<Values> {
@@ -882,6 +882,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                 n1.ref.id === n2.ref.id && n1.ref.repo === n2.ref.repo
             ) || n1;
         }));
+    }
+
+    resetWidgets() {
+        this.nativeWidgets = [];
     }
 }
 

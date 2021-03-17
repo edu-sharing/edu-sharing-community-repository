@@ -1267,6 +1267,9 @@ public class NodeApi  {
 		 if(info.getTitle()==null) {
 			 title = info.getPage();
 		 }
+		 if(title == null || title.trim().isEmpty()){
+		 	title = url[0];
+		 }
 	    properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(title)});
 	    properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),new String[]{title});
 	    if(info.getDescription()!=null)

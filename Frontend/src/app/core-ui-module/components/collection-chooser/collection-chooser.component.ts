@@ -1,10 +1,10 @@
 import {
-    Component,
+    Component, ContentChild,
     EventEmitter,
     HostListener,
     Input,
     OnInit,
-    Output,
+    Output, TemplateRef,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -29,6 +29,7 @@ import { OptionItem } from '../../option-item';
     styleUrls: ['collection-chooser.component.scss'],
 })
 export class CollectionChooserComponent implements OnInit {
+    @ContentChild('beforeRecent') beforeRecentRef: TemplateRef<any>;
     /**
      * The caption of the dialog, will be translated automatically
      */

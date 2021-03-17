@@ -157,7 +157,6 @@ export class CollectionNewComponent {
             if(this.createMediacenter)
               this.mediacenter=mediacenters[0];
           });
-          this.createMediacenter=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM);
           this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 
           this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);

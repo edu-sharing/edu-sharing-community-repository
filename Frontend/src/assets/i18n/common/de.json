@@ -580,6 +580,7 @@
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
         "NEW_COLLECTION": "Neue Sammlung",
+        "NEW_SUB_COLLECTION": "Neue Untersammlung",
         "LINK_MAP": "Verlinkung erstellen",
         "TOGGLE_SHARED_TO_ME": "Freigaben-Empfänger umschalten",
         "SWITCH_TO_LIST_VIEW": "Zur Listenansicht wechseln",
@@ -621,7 +622,7 @@
         "CONFIRM_DISCARD_MESSAGE": "Dialog schließen, ohne die Änderungen zu speichern?",
         "REQUIRED_MESSAGE": "Pflichtfeld",
         "REQUIRED_FOR_PUBLISH_MESSAGE": "Für die Veröffentlichung erforderliches Feld",
-        "INDETERMINATE_NOTICE": "Klicken Sie auf den Wert, um ihn allen Elementen hinzuzufügen, oder entfernen Sie ihn, um ihn aus allen Elementen zu löschen (wenn \"Ersetzen\" ausgewählt ist).",
+        "INDETERMINATE_NOTICE": "Klicken sie auf die Marke, um allen Elementen den Wert \"{{ value }}\" hinzuzufügen, oder entfernen Sie sie, um ihn aus allen Elementen zu löschen.",
         "SHOW_OPTIONS_BUTTON": "Zeige Auswahlmöglichkeiten",
         "FILTER_FOR": "Nach \"{{value}}\" filtern ({{count}} passende(s) Element(e))"
     },
