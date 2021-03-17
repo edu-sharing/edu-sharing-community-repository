@@ -372,7 +372,6 @@ public class NodeFrontpage {
     }
 
     public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
-        //collection: erstmal so lassen
         RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
         if(config.mode.equals(RepositoryConfig.Frontpage.Mode.collection)){
             if(config.collection==null){
@@ -386,13 +385,12 @@ public class NodeFrontpage {
         }
         //initElastic rasuschmeißen (frontpage_cache nicht mehr benötigt)
         initElastic();
-        //audience filter wie in searchV2
+
         BoolQueryBuilder query = QueryBuilders.boolQuery();
         query.must(SearchServiceElastic.getAuthorityQueryBuilder());
         query.must(QueryBuilders.termQuery("type","ccm:io"));
         query.must(QueryBuilders.termQuery("nodeRef.storeRef.protocol","workspace"));
 
-        //Toolpermission check auf queries : @TODO überlegen wie der check mit elastic gehen könnte
         if(config.queries!=null && !config.queries.isEmpty()) {
             // filter all queries with matching toolpermissions, than concat them via "must"
             config.queries.stream().filter((q)->{
@@ -403,7 +401,7 @@ public class NodeFrontpage {
                 }
                 return false;
             }).forEach((q)-> {
-                //die config queries in den extensions überprüfen und ggf auf hautp index anpassen
+                //@TODO check config queries in extensions and fit for new index
                 query.must(QueryBuilders.wrapperQuery(QueryUtils.replaceCommonQueryParams(q.query,QueryUtils.replacerFromSyntax(MetadataReaderV2.QUERY_SYNTAX_DSL))));
             });
         }
@@ -412,7 +410,6 @@ public class NodeFrontpage {
         //InputStream is = NodeFrontpage.class.getClassLoader().getResourceAsStream("frontpage-ratings.properties");
         InputStream is = NodeFrontpage.class.getClassLoader().getResource("frontpage-ratings.properties").openStream();
         String sortingScript = IOUtils.toString(is, StandardCharsets.UTF_8.name());
-        logger.info("loaded script:"+sortingScript);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(query);
@@ -420,9 +417,9 @@ public class NodeFrontpage {
         Map<String,Object> params = new HashMap<>();
         params.put("mode",config.mode);
         if(RepositoryConfig.Frontpage.Timespan.days_30.equals(config.timespan)){
-            params.put("history",1);
+            params.put("history",30);
         }else if(RepositoryConfig.Frontpage.Timespan.days_100.equals(config.timespan)){
-            params.put("history",3);
+            params.put("history",100);
         }
         Script script = new Script(Script.DEFAULT_SCRIPT_TYPE, "painless", sortingScript,Collections.emptyMap(),params);
         ScriptSortBuilder sb = SortBuilders.scriptSort(script, ScriptSortBuilder.ScriptSortType.NUMBER).order(SortOrder.DESC);
@@ -430,7 +427,6 @@ public class NodeFrontpage {
         searchSourceBuilder.sort(sb);
 
 
-        //wie gehabt
         searchSourceBuilder.size(config.totalCount);
         searchSourceBuilder.from(0);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
