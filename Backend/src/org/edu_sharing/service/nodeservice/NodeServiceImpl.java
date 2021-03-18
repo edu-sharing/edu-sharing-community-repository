@@ -1150,7 +1150,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					logger.error(e1.getMessage(), e1);
 				}*/
 		if (handle != null) {
-			String contentLink = URLTool.getNgRenderNodeUrl(nodeRef.getId(), null);
+			String contentLink = URLTool.getNgRenderNodeUrl(nodeRef.getId(), null, false);
 			if (handleMode.equals(HandleMode.distinct)) {
 				logger.info("Create handle " + handle + ", " + contentLink);
 				handleService.createHandle(handle, handleService.getDefautValues(contentLink));
