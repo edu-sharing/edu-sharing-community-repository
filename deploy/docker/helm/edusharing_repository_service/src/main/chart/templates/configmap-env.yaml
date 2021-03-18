@@ -40,9 +40,14 @@ data:
   REPOSITORY_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
   REPOSITORY_SERVICE_HOST_INTERNAL: {{ include "edusharing_repository_service.name" . | quote }}
   REPOSITORY_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}
+  REPOSITORY_SERVICE_POOL_EXTERNAL: {{ .Values.config.connector.external.threads | quote }}
+  REPOSITORY_SERVICE_POOL_INTERNAL: {{ .Values.config.connector.internal.threads | quote }}
   REPOSITORY_SERVICE_PORT_EXTERNAL: {{ if .Values.ingress.tls }}"443"{{ else }}"80"{{ end }}
   REPOSITORY_SERVICE_PORT_INTERNAL: {{ .Values.service.port.api.internal | quote }}
   REPOSITORY_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}
+  REPOSITORY_SERVICE_SESSION_TIMEOUT: {{ .Values.config.session.timeout | quote }}
+  REPOSITORY_SERVICE_WAIT_EXTERNAL: {{ .Values.config.connector.external.timeout | quote }}
+  REPOSITORY_SERVICE_WAIT_INTERNAL: {{ .Values.config.connector.internal.timeout | quote }}
   REPOSITORY_SMTP_AUTH: {{ .Values.config.smtp.auth | quote }}
   REPOSITORY_SMTP_FROM: {{ .Values.config.smtp.from | quote }}
   REPOSITORY_SMTP_HOST: {{ .Values.config.smtp.host | quote }}

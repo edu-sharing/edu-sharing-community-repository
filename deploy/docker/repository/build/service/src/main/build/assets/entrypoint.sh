@@ -21,9 +21,15 @@ my_port_external="${REPOSITORY_SERVICE_PORT_EXTERNAL:-8100}"
 my_path_external="${REPOSITORY_SERVICE_PATH_EXTERNAL:-/edu-sharing}"
 my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}${my_path_external}"
 my_auth_external="${my_base_external}/services/authentication"
+my_pool_external="${REPOSITORY_SERVICE_POOL_EXTERNAL:-200}"
+my_wait_external="${REPOSITORY_SERVICE_WAIT_EXTERNAL:-2000}"
 
 my_host_internal="${REPOSITORY_SERVICE_HOST_INTERNAL:-repository-service}"
 my_port_internal="${REPOSITORY_SERVICE_PORT_INTERNAL:-8080}"
+my_pool_internal="${REPOSITORY_SERVICE_POOL_INTERNAL:-200}"
+my_wait_internal="${REPOSITORY_SERVICE_WAIT_INTERNAL:-20000}"
+
+my_session_timeout="${REPOSITORY_SERVICE_SESSION_TIMEOUT:-60}"
 
 repository_cache_host="${REPOSITORY_CACHE_HOST:-repository-cache}"
 repository_cache_port="${REPOSITORY_CACHE_PORT:-6379}"
@@ -110,8 +116,9 @@ xmlstarlet ed -L \
 	-i '$internal' -t attr -n "scheme" -v "http" \
 	-i '$internal' -t attr -n "proxyName" -v "${my_host_internal}" \
 	-i '$internal' -t attr -n "proxyPort" -v "${my_port_internal}" \
-	-i '$internal' -t attr -n "protocol" -v "HTTP/1.1" \
-	-i '$internal' -t attr -n "connectionTimeout" -v "20000" \
+	-i '$internal' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11Protocol" \
+	-i '$internal' -t attr -n "connectionTimeout" -v "${my_wait_internal}" \
+	-i '$internal' -t attr -n "maxThreads" -v "${my_pool_internal}" \
 	-s '/Server/Service[@name="Catalina"]' -t elem -n 'Connector' -v '' \
 	--var external '$prev' \
 	-i '$external' -t attr -n "address" -v "${my_bind}" \
@@ -119,9 +126,15 @@ xmlstarlet ed -L \
 	-i '$external' -t attr -n "scheme" -v "${my_prot_external}" \
 	-i '$external' -t attr -n "proxyName" -v "${my_host_external}" \
 	-i '$external' -t attr -n "proxyPort" -v "${my_port_external}" \
-	-i '$external' -t attr -n "protocol" -v "HTTP/1.1" \
-	-i '$external' -t attr -n "connectionTimeout" -v "20000" \
+	-i '$external' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11Protocol" \
+	-i '$external' -t attr -n "connectionTimeout" -v "${my_wait_external}" \
+	-i '$external' -t attr -n "maxThreads" -v "${my_pool_external}" \
 	tomcat/conf/server.xml
+
+xmlstarlet ed -L \
+  -N x="http://java.sun.com/xml/ns/javaee" \
+	-u '/x:web-app/x:session-config/x:session-timeout' -v "${my_session_timeout}" \
+	tomcat/webapps/edu-sharing/WEB-INF/web.xml
 
 ### Tomcat shared ######################################################################################################
 
@@ -241,6 +254,8 @@ xmlstarlet ed -L \
 		tomcat/shared/classes/homeApplication.properties.xml
 
 	[[ "${my_home_auth}" == "shibboleth" ]] && {
+		sed -i -r 's|<!--\s*SAML||g' tomcat/webapps/edu-sharing/WEB-INF/web.xml
+		sed -i -r 's|SAML\s*-->||g'  tomcat/webapps/edu-sharing/WEB-INF/web.xml
 		xmlstarlet ed -L \
 			-s '/config/values' -t elem -n 'loginUrl' -v '' \
 			-d '/config/values/loginUrl[position() != 1]' \

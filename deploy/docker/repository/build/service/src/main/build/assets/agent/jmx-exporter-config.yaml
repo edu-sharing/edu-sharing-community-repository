@@ -1,8 +1,30 @@
 ---
 lowercaseOutputLabelNames: true
 lowercaseOutputName: true
-whitelistObjectNames: ["Catalina:*"]
+blacklistObjectNames: ["org.apache.logging.log4j2:*"]
 rules:
+  - pattern: 'Alfresco<type=CacheStatistics, name=(.+)><>(.*)Count:'
+    name: alfresco_cache_$2_total
+    help: alfresco_cache_$2_total
+    type: COUNTER
+    labels:
+      cache: "$1"
+  - pattern: 'Alfresco<type=CacheStatistics, name=(.+)><>(.*)Time:'
+    name: alfresco_cache_$2_sum
+    help: alfresco_cache_$2_sum
+    type: COUNTER
+    labels:
+      cache: "$1"
+  - pattern: 'Alfresco<type=CacheStatistics, name=(.+)><>(.*)Ratio:'
+    name: alfresco_cache_$2_ratio
+    help: alfresco_cache_$2_ratio
+    type: GAUGE
+    labels:
+      cache: "$1"
+  - pattern: 'Alfresco<type=DataSource><>(.*)Connections:'
+    name: alfresco_datasource_$2_connection
+    help: alfresco_datasource_$2_connection
+    type: GAUGE
   - pattern: 'Catalina<type=StringCache><>accessCount:'
     name: tomcat_cache_access_total
     help: tomcat_cache_access_total

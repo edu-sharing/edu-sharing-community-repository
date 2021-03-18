@@ -112,6 +112,16 @@ config:
     backupCount: 1
     readBackupData: true
 
+  connector:
+
+    external:
+      threads: 200
+      timeout: 2000
+
+    internal:
+      threads: 200
+      timeout: 20000
+
   database:
     driver: org.postgresql.Driver
     host: edusharing-repository-postgresql
@@ -163,6 +173,9 @@ config:
       host: edusharing-repository-search-solr4
       port: 8080
 
+  session:
+    timeout: 60
+
 ########################################################################################################################
 
 persistence:
@@ -188,6 +201,9 @@ podSecurityContext:
 
   runAsUser: 1000
   fsGroup: 1000
+#  sysctls:
+#  - name: net.core.somaxconn
+#    value: "10000"
 
 securityContext:
 

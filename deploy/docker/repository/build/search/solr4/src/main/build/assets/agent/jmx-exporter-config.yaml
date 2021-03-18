@@ -1,7 +1,7 @@
 ---
 lowercaseOutputLabelNames: true
 lowercaseOutputName: true
-whitelistObjectNames: ["Catalina:*"]
+blacklistObjectNames: ["org.apache.logging.log4j2:*"]
 rules:
   - pattern: 'solr/(.+)<type=(.+), id=(.+)Cache><>cumulative_evictions:'
     name: solr_cache_eviction_total
@@ -11,9 +11,9 @@ rules:
       core: "$1"
       cache: "$2"
   - pattern: 'solr/(.+)<type=(.+), id=(.+)Cache><>cumulative_hitratio:'
-    name: solr_cache_hit_ratio_total
-    help: solr_cache_hit_ratio_total
-    type: COUNTER
+    name: solr_cache_hit_ratio
+    help: solr_cache_hit_ratio
+    type: GAUGE
     labels:
       core: "$1"
       cache: "$2"
