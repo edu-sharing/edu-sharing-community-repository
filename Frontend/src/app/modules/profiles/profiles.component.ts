@@ -230,6 +230,7 @@ export class ProfilesComponent {
   }
   public aboutEdit() {
     this.userEdit=Helper.deepCopy(this.user);
+    this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
     this.editAbout = true;
   }
 
