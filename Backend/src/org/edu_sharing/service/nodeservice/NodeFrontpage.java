@@ -50,6 +50,8 @@ public class NodeFrontpage {
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
+    SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
+
     public NodeFrontpage(){
     }
 
@@ -103,12 +105,9 @@ public class NodeFrontpage {
         searchSourceBuilder.query(query);
 
         Map<String,Object> params = new HashMap<>();
-        params.put("mode",config.mode);
-        if(RepositoryConfig.Frontpage.Timespan.days_30.equals(config.timespan)){
-            params.put("history",30);
-        }else if(RepositoryConfig.Frontpage.Timespan.days_100.equals(config.timespan)){
-            params.put("history",100);
-        }
+
+        params.put("fields",getFieldNames(config.timespan,config.mode));
+
         Script script = new Script(Script.DEFAULT_SCRIPT_TYPE, "painless", sortingScript,Collections.emptyMap(),params);
         ScriptSortBuilder sb = SortBuilders.scriptSort(script, ScriptSortBuilder.ScriptSortType.NUMBER).order(SortOrder.DESC);
         sb.sortMode(SortMode.MAX);
@@ -139,5 +138,40 @@ public class NodeFrontpage {
         }
         return result;
 
+    }
+
+    private List<String> getFieldNames(RepositoryConfig.Frontpage.Timespan timespan, RepositoryConfig.Frontpage.Mode mode){
+        List<String> result = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        Integer days = 0;
+        if(RepositoryConfig.Frontpage.Timespan.days_30.equals(timespan)){
+            days = 30;
+        }else if(RepositoryConfig.Frontpage.Timespan.days_100.equals(timespan)){
+            days = 100;
+        }
+
+        String prefix = "";
+        if(RepositoryConfig.Frontpage.Mode.rating.equals(mode) ){
+           prefix = "rating_";
+        }else if(RepositoryConfig.Frontpage.Mode.views.equals(mode)){
+            prefix = "statistic_VIEW_MATERIAL_";
+        }else if(RepositoryConfig.Frontpage.Mode.downloads.equals(mode)){
+            prefix = "statistic_DOWNLOAD_MATERIAL_";
+        }
+
+        if(RepositoryConfig.Frontpage.Timespan.all.equals(timespan)){
+            String fieldName = prefix + "null";
+            result.add(fieldName);
+        }else {
+            for (int i = 0; i < days; i++) {
+                if(i > 0){
+                    cal.add(Calendar.DAY_OF_YEAR, -1);
+                }
+                String dateStr = sdfDate.format(cal.getTime());
+                String fieldName = prefix + dateStr;
+                result.add(fieldName);
+            }
+        }
+        return result;
     }
 }
