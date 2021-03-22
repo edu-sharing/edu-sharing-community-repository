@@ -41,6 +41,7 @@ public class VCardTool {
 	}
 	public static String hashMap2VCard(HashMap<String,String> map){
 		
+		String uid = getValid(map.get(CCConstants.VCARD_URN_UID));
 		String surname = getValid(map.get(CCConstants.VCARD_SURNAME));
 		String givenname = getValid(map.get(CCConstants.VCARD_GIVENNAME));
 		String city = getValid(map.get(CCConstants.VCARD_CITY));
@@ -58,7 +59,8 @@ public class VCardTool {
 		
 		String vCard = "BEGIN:VCARD\n"
 		      + "VERSION:3.0\n"
-		      + "N:" + surname+";"+givenname + "\n" 
+		      + "UID:urn:uuid:" + uid + "\n"
+		      + "N:" + surname+";"+givenname + "\n"
 		      + "FN:" + givenname+" "+surname + "\n"
 		      + "ORG:" + org + "\n"
 		      + "URL:" + url + "\n"
