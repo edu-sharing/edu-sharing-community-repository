@@ -245,6 +245,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 	
 @Override	
 public EduGroup getEduGroup(String authority){
+		if(!authority.startsWith(PermissionService.GROUP_PREFIX)){
+			authority = PermissionService.GROUP_PREFIX + authority;
+		}
 		NodeRef nodeRef = authorityService.getAuthorityNodeRef(authority);
 		if(nodeRef == null){
 			return null;
