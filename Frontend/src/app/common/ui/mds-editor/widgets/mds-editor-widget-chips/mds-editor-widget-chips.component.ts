@@ -9,7 +9,7 @@ import {
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, from, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import {
     debounceTime,
     distinctUntilChanged,
@@ -38,9 +38,11 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
     inputControl = new FormControl();
     chipsControl: FormControl;
-    filteredValues: Observable<DisplayValue[]>;
+    autocompleteValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
     showDropdownArrow: boolean;
+
+    private autocompleteIsInhibited = new BehaviorSubject(false);
 
     readonly showTooltip = (() => {
         let previousTooltip: MatTooltip;
@@ -86,7 +88,11 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges ||
             this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges
         ) {
-            this.filteredValues = this.subscribeForSuggestionUpdates();
+            const filteredValues = this.subscribeForSuggestionUpdates();
+            this.autocompleteValues = combineLatest([
+                filteredValues,
+                this.autocompleteIsInhibited,
+            ]).pipe(map(([values, inhibit]) => (inhibit ? null : values)));
         }
         this.showDropdownArrow =
             this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
@@ -146,7 +152,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
         this.removeFromIndeterminateValues(toBeRemoved.key);
-        this.preventAutocompleteOpen();
+        this.inhibitAutocomplete();
     }
 
     selected(event: MatAutocompleteSelectedEvent) {
@@ -246,12 +252,11 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         );
     }
 
-    private preventAutocompleteOpen() {
-        const filteredValuesBak = this.filteredValues;
-        this.filteredValues = of([]);
+    private inhibitAutocomplete() {
+        this.autocompleteIsInhibited.next(true);
         setTimeout(() => {
             this.trigger.closePanel();
-            this.filteredValues = filteredValuesBak;
+            this.autocompleteIsInhibited.next(false);
         });
     }
 }

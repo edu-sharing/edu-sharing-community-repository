@@ -56,7 +56,7 @@
     (optionActivated)="showTooltip($any($event.option)?.tooltip)"
   >
     <mat-option
-      *ngFor="let value of filteredValues | async"
+      *ngFor="let value of autocompleteValues | async"
       [value]="value"
       appCheckTextOverflow=".mat-option-text"
       #text="appCheckTextOverflow"
