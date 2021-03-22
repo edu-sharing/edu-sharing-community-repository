@@ -67,10 +67,17 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 
 
 public class CollectionServiceImpl implements CollectionService{
+
+	public static CollectionService build(String appId) {
+		CollectionServiceConfig config = (CollectionServiceConfig) ApplicationContextFactory.getApplicationContext().getBean("collectionServiceConfig");
+		return new CollectionServiceImpl(appId, config.getPattern(), config.getPath());
+	}
+
 
 	Logger logger = Logger.getLogger(CollectionServiceImpl.class);
 	
@@ -510,7 +517,7 @@ public class CollectionServiceImpl implements CollectionService{
 		
 		return collection;
 	}
-    private void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
+    protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
         String path=serviceRegistry.getNodeService().getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService());
         SearchParameters params=new ESSearchParameters();
         params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
