@@ -2,6 +2,8 @@ package org.edu_sharing.metadataset.v2;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService;
@@ -272,9 +274,23 @@ public class MetadataSetV2 implements Serializable {
 			  MetadataCondition cond = widget.getCondition();
 			  if (cond != null){
 				  if(cond.getType().equals(MetadataCondition.CONDITION_TYPE.PROPERTY)) {
-					  String[] value=properties.get(CCConstants.getValidGlobalName(cond.getValue()));
-					  boolean empty = isValueEmpty(value);
-					  allowed=empty==cond.isNegate();
+				  	  // properties are already local names
+					  String[] value=properties.get(cond.getValue());
+					  if(cond.getPattern() != null){
+					  	// regex pattern check
+					  	if(value!=null && value.length > 0 && value[0] != null) {
+							Pattern pattern = Pattern.compile(cond.getPattern());
+							Matcher matcher = pattern.matcher(value[0]);
+							allowed = matcher.matches() == cond.isNegate();
+						} else {
+					  		// no value, so fallback to "false"
+					  		allowed = cond.isNegate();
+						}
+					  } else {
+					  	// primitive isEmpty check
+						  boolean empty = isValueEmpty(value);
+						  allowed = empty == cond.isNegate();
+					  }
 				  } else if (cond.getType().equals(MetadataCondition.CONDITION_TYPE.TOOLPERMISSION)) {
 					  boolean hasTp = new ToolPermissionBaseService().hasToolPermission(cond.getValue());
 					  allowed=hasTp!=cond.isNegate();

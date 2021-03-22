@@ -16,6 +16,9 @@ public class WidgetV2 {
 	public static class Condition{
 		private String value,type;
 		private boolean negate;
+		private boolean dynamic;
+		private String pattern;
+
 		@JsonProperty
 		public String getValue() {
 			return value;
@@ -38,6 +41,22 @@ public class WidgetV2 {
 			this.negate = negate;
 		}
 
+		@JsonProperty
+		public void setDynamic(boolean dynamic) {
+			this.dynamic = dynamic;
+		}
+
+		public boolean getDynamic() {
+			return dynamic;
+		}
+
+		public void setPattern(String pattern) {
+			this.pattern = pattern;
+		}
+
+		public String getPattern() {
+			return pattern;
+		}
 	}
 	public static class Subwidget{
     			private String id;
@@ -101,6 +120,8 @@ public class WidgetV2 {
 				this.condition.setValue(widget.getCondition().getValue());
 				this.condition.setType(widget.getCondition().getType().name());
 				this.condition.setNegate(widget.getCondition().isNegate());
+				this.condition.setDynamic(widget.getCondition().isDynamic());
+				this.condition.setPattern(widget.getCondition().getPattern());
 			}
 			if(widget.getValues()!=null){
 				this.hasValues = true;

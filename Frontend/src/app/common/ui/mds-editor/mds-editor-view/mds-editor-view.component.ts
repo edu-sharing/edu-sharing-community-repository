@@ -10,7 +10,7 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Node } from '../../../../core-module/core.module';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
@@ -48,7 +48,7 @@ export interface NativeWidget {
     hasChanges: BehaviorSubject<boolean>;
     onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
     getValues?: (values: Values, node: Node) => Promise<Values>;
-    getStatus?: () => InputStatus;
+    status?: Observable<InputStatus>;
     focus?: () => void;
 }
 type NativeWidgetClass = {

@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
 import { Values } from '../../types';
+import { map } from 'rxjs/operators/map';
 
 @Component({
     selector: 'app-mds-editor-widget-file-upload',
@@ -13,11 +14,14 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
         requiresNode: false,
         supportsBulk: false,
     };
-    selectedFiles: File[];
+    selectedFiles = new BehaviorSubject<File[]>(null);
     hasChanges = new BehaviorSubject<boolean>(false);
     isFileOver = false;
     supportsDrop = true;
     link: string;
+    status = this.selectedFiles.pipe(
+        map((selectedFiles) => (selectedFiles?.length || this.link ? 'VALID' : 'INVALID')),
+    );
 
     @Output() onSetLink = new EventEmitter<string>();
 
@@ -33,23 +37,20 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
         if (this.link) {
             return;
         }
-        this.selectedFiles = [];
+        const selectedFiles = [];
         for (let i = 0; i < fileList.length; i++) {
-            this.selectedFiles.push(fileList.item(i));
+            selectedFiles.push(fileList.item(i));
         }
+        this.selectedFiles.next(selectedFiles);
     }
 
     filesSelected(files: Event) {
         this.setFilesByFileList((files.target as HTMLInputElement).files);
     }
 
-    getStatus() {
-        return this.selectedFiles?.length || this.link ? 'VALID' : 'INVALID';
-    }
-
     async getValues(values: Values) {
-        if (this.selectedFiles?.length) {
-            const file = this.selectedFiles[0];
+        if (this.selectedFiles.value?.length) {
+            const file = this.selectedFiles.value[0];
             const base64 = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
