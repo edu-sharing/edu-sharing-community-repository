@@ -382,6 +382,7 @@ small-collection{
 }
 .sidenavNoRepositories{
     top:$mainnavHeight+65px;
+    // This brakes when the site has a custom header, that adds to the page height.
     height: calc(100% - #{$mainnavHeight} - 65px - 70px);
     &.no-mainnav{
         top:65px;
