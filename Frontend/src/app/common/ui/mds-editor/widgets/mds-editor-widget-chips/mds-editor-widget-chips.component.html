@@ -26,29 +26,30 @@
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
-    <input
-      #input
-      #trigger="matAutocompleteTrigger"
-      autocomplete="off"
-      [formControl]="inputControl"
-      [matAutocomplete]="auto"
-      [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
-      [matChipInputFor]="chipList"
-      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-      [matChipInputAddOnBlur]="false"
-      (matChipInputTokenEnd)="onInputTokenEnd($event)"
-      (blur)="onBlurInput($event)"
-    />
-    <button
-      matSuffix
-      mat-icon-button
-      class="mat-button-select-arrow"
-      *ngIf="showDropdownArrow"
-      (click)="toggleAutoCompletePanel(); $event.stopPropagation()"
-      [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
-    >
-      <span class="mat-select-arrow"></span>
-    </button>
+    <div class="input-wrapper">
+      <input
+        #input
+        #trigger="matAutocompleteTrigger"
+        autocomplete="off"
+        [formControl]="inputControl"
+        [matAutocomplete]="auto"
+        [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
+        [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="false"
+        (matChipInputTokenEnd)="onInputTokenEnd($event)"
+        (blur)="onBlurInput($event)"
+      />
+      <button
+        mat-icon-button
+        class="mat-button-select-arrow"
+        *ngIf="showDropdownArrow"
+        (click)="toggleAutoCompletePanel(); $event.stopPropagation()"
+        [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
+      >
+        <span class="mat-select-arrow"></span>
+      </button>
+    </div>
   </mat-chip-list>
   <mat-autocomplete
     #auto="matAutocomplete"
