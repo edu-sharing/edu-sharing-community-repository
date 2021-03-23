@@ -6,6 +6,15 @@
     scroll-margin-top: 50px;
 }
 
+.ripple-container {
+    margin: -10px -50px;
+    padding: 10px 50px;
+    & ::ng-deep .mat-ripple-element {
+        background-color: $primaryLight;
+        z-index: -1;
+    }
+}
+
 .mat-form-field {
     width: 100%;
 }
