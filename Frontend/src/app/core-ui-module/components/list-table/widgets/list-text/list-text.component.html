@@ -78,15 +78,16 @@
     <img
       src="{{ $any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'url' } }}"
       (error)="$any($event.target).style.display = 'none'"
-      alt="{{
-        'REPOSITORIES.' +
-          ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-          | translate
-            : {
-                fallback:
-                  ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-              }
-      }}"
+      [alt]="
+      ('NODE.ccm:replicationsource' | translate) +
+      ': ' +
+      ('REPOSITORIES.' +
+        ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
+        | translate
+          : {
+              fallback: ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
+            })
+    "
     />
   </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">

@@ -56,6 +56,8 @@ import { CustomOptions, OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
 import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
+import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
+import {NodeTitlePipe} from '../../../common/ui/node-title.pipe';
 
 
 @Component({
@@ -1290,5 +1292,12 @@ export class ListTableComponent implements OnChanges, EventListener {
 
     getOptionsAlways() {
         return this._options?.filter((o) => o.showAlways);
+    }
+
+    getPrimaryTitle(node: Node) {
+        if([RestConstants.CM_PROP_TITLE, RestConstants.LOM_PROP_TITLE].indexOf(this.columnsVisible[0].name) !== -1){
+            return new NodeTitlePipe(this.translate).transform(node);
+        }
+        return node.name;
     }
 }
