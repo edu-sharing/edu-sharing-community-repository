@@ -152,7 +152,7 @@ public class NodeFrontpage {
 
         String prefix = "";
         if(RepositoryConfig.Frontpage.Mode.rating.equals(mode) ){
-           prefix = "rating_";
+           prefix = "statistic_RATING_";
         }else if(RepositoryConfig.Frontpage.Mode.views.equals(mode)){
             prefix = "statistic_VIEW_MATERIAL_";
         }else if(RepositoryConfig.Frontpage.Mode.downloads.equals(mode)){
