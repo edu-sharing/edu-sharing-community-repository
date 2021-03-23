@@ -393,6 +393,9 @@ mat-label.mat-label-standalone{
       );
       color: $textLight;
     }
+    &.cdk-keyboard-focused {
+      @include setGlobalKeyboardFocus();
+    }
     .mat-chip-remove {
       // align somewhat townwards for better centering
       line-height: 1.05;
