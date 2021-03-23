@@ -9,7 +9,7 @@
 .ripple-container {
     margin: -10px -50px;
     padding: 10px 50px;
-    & ::ng-deep .mat-ripple-element {
+    & > ::ng-deep .mat-ripple-element {
         background-color: $primaryLight;
         z-index: -1;
     }
