@@ -966,7 +966,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             !widget.getHasUnsavedDefault()
         ) {
             return null;
-        } else if (!widget.meetsDynamicCondition) {
+        } else if (!widget.meetsDynamicCondition.value) {
             return null;
         } else if (!this.editorBulkMode.isBulk) {
             return widget.getValue();
