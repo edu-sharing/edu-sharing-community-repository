@@ -463,7 +463,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };
-            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName('collections')[0],data,250);
+            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName('collections')[0],data, { delay: 250 });
         },(error)=> {
             domContainer.parentElement.removeChild(domContainer);
         });

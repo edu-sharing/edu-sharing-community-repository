@@ -181,13 +181,17 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         const elements = this.container.nativeElement.getElementsByTagName('*');
         for (const element of Array.from(elements)) {
             const tagName = element.localName;
-            const widget = this.mdsEditorInstance.getWidgetByTagName(tagName, this.view.id);
+            const widgets = this.mdsEditorInstance.getWidgetsByTagName(tagName, this.view.id);
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
-                this.injectNativeWidget(widget, widgetName, element);
+                for (const widget of widgets) {
+                    this.injectNativeWidget(widget, widgetName, element);
+                }
             } else {
-                if (widget) {
-                    this.injectWidget(widget, element);
+                if (widgets.length >= 1) {
+                    for (const widget of widgets) {
+                        this.injectWidget(widget, element);
+                    }
                 } else if (this.knownWidgetTags.includes(tagName)) {
                     // The widget is defined, but was disabled due to unmet conditions.
                     continue;
@@ -241,6 +245,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     widgetName,
                     reason: constraintViolation,
                 },
+                { replace: false },
             );
             return;
         }
@@ -253,6 +258,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 widgetName,
                 widget,
             },
+            { replace: false },
         );
         this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance, this.view.id);
     }
@@ -271,6 +277,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     widgetName: widget.definition.caption,
                     reason: `Widget for type ${widget.definition.type} is not implemented`,
                 },
+                { replace: false },
             );
             return;
         } else if (WidgetComponent === null) {
@@ -284,6 +291,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             {
                 widget,
             },
+            { replace: false },
         );
     }
 
