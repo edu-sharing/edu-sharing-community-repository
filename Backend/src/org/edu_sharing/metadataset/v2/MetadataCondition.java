@@ -65,6 +65,8 @@ public class MetadataCondition implements Serializable {
         MetadataCondition that = (MetadataCondition) o;
         return negate == that.negate &&
                 Objects.equals(value, that.value) &&
+                Objects.equals(dynamic, that.dynamic) &&
+                Objects.equals(pattern, that.pattern) &&
                 type == that.type;
     }
 }
