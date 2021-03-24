@@ -78,6 +78,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
+    @ViewChild('sidenav') sidenavRef: ElementRef;
+    @ViewChild('sidenavApply') sidenavApplyRef: ElementRef;
 
     toolPermissions: string[];
     searchFail: boolean = false;
@@ -181,6 +183,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     ngOnInit() {
         setTimeout(() => {
             this.tutorialElement = this.mainNavRef.search;
+            this.handleScroll();
         });
         this.searchService.clear();
         this.initalized = true;
@@ -315,9 +318,22 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     @HostListener('window:scroll', ['$event'])
-    handleScroll(event: Event) {
+    @HostListener('window:touchmove', ['$event'])
+    @HostListener('window:resize', ['$event'])
+    handleScroll(event: Event = null) {
+        // calculate height of filter part individually
+        // required since banners, footer etc. can cause wrong heights and overflows
         this.searchService.offset =
             window.pageYOffset || document.documentElement.scrollTop;
+        if(this.sidenavRef?.nativeElement && this.sidenavApplyRef?.nativeElement) {
+            console.log(this.sidenavApplyRef.nativeElement.getBoundingClientRect(),
+                (parseFloat(this.sidenavApplyRef.nativeElement.getBoundingClientRect().top) -
+                    parseFloat(this.sidenavRef.nativeElement.style.top)) + 'px'
+            );
+            this.sidenavRef.nativeElement.style.height =
+                (parseFloat(this.sidenavApplyRef.nativeElement.getBoundingClientRect().top) -
+                    parseFloat(this.sidenavRef.nativeElement.style.top)) + 'px';
+        }
     }
 
     setRepository(repository: string) {
@@ -768,7 +784,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.mdsMobileRef.loadMds();
             });
         }
-        //this.routeSearch();
+        // recalculate the filter layout
+        setTimeout((() => this.handleScroll()));
     }
 
     private updateHasMore() {
