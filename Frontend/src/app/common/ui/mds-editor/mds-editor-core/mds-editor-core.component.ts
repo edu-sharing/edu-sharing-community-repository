@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../types';
+import {CardComponent} from '../../../../core-ui-module/components/card/card.component';
 
 @Component({
     selector: 'app-mds-editor-core',
@@ -10,6 +11,10 @@ import { EditorMode, MdsView } from '../types';
     styleUrls: ['./mds-editor-core.component.scss'],
 })
 export class MdsEditorCoreComponent {
+    /**
+     * reference to the card component it is embedded in (if any)
+     */
+    @Input('card') card: CardComponent;
     views: MdsView[];
     suggestionsViews: MdsView[];
     hasExtendedWidgets$: Observable<boolean>;

@@ -1,4 +1,5 @@
 <card
+  #card
   height="xlarge"
   width="large"
   [title]="title"
@@ -14,5 +15,5 @@
     [maximum]="totalProperties"
     (showMissing)="onShowMissing()"
   ></app-input-fill-progress>
-  <app-mds-editor-core></app-mds-editor-core>
+  <app-mds-editor-core [card]="card"></app-mds-editor-core>
 </card>

@@ -13,6 +13,11 @@ import { ReplaySubject, Observable } from 'rxjs';
     styleUrls: ['./mds-editor-card.component.scss'],
 })
 export class MdsEditorCardComponent implements OnInit, OnDestroy {
+
+    constructor(private mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {
+        this.mdsEditorInstance.isEmbedded = false;
+    }
+    public static JUMPMARK_POSTFIX = '_header';
     @Input() title: string;
     @Input() priority = 0;
     @Output() cancel = new EventEmitter();
@@ -30,10 +35,6 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
     totalProperties: FillTypeStatus;
 
     private readonly destroyed = new ReplaySubject<void>(1);
-
-    constructor(private mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {
-        this.mdsEditorInstance.isEmbedded = false;
-    }
 
     ngOnInit(): void {
         this.nodes = this.mdsEditorInstance.nodes$.value;
@@ -83,7 +84,7 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
         return this.mdsEditorInstance.activeViews.pipe(
             map((activeViews) =>
                 activeViews.map(
-                    (view) => new CardJumpmark(view.id + '_header', view.caption, view.icon),
+                    (view) => new CardJumpmark(view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX, view.caption, view.icon),
                 ),
             ),
         );

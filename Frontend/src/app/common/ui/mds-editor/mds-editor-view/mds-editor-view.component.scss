@@ -32,4 +32,12 @@ h3 {
 .content {
     display: flex;
     flex-direction: column;
+    opacity: 1;
+    transition: all $transitionNormal;
+    &.content-hidden{
+        overflow: hidden;
+        margin: 0;
+        height: 0;
+        opacity: 0;
+    }
 }

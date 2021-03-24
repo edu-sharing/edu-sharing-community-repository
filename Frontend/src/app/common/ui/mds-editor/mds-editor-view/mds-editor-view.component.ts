@@ -48,6 +48,8 @@ import { MdsEditorWidgetFileUploadComponent } from '../widgets/mds-editor-widget
 import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { takeUntil, map } from 'rxjs/operators';
+import {MdsEditorCoreComponent} from '../mds-editor-core/mds-editor-core.component';
+import {MdsEditorCardComponent} from '../mds-editor-card/mds-editor-card.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -118,6 +120,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
 
     @HostBinding('class.hide') isHidden: boolean;
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
+    @Input() core: MdsEditorCoreComponent;
     @Input() view: MdsView;
     html: SafeHtml;
     isEmbedded: boolean;
@@ -340,6 +343,19 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             }
         }
         return null;
+    }
+
+    toggleShow() {
+        if(this.show) {
+            this.show = false;
+        } else {
+            setTimeout(() =>
+                this.core.card?.scrollSmooth(this.core.card?.jumpmarks.filter(
+                    (j) => j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX)[0]
+                )
+            );
+            this.show = true;
+        }
     }
 }
 
