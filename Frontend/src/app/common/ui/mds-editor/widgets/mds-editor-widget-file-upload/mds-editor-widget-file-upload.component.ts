@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Values } from '../../types';
 import { map } from 'rxjs/operators/map';
 
@@ -9,7 +9,7 @@ import { map } from 'rxjs/operators/map';
     templateUrl: './mds-editor-widget-file-upload.component.html',
     styleUrls: ['./mds-editor-widget-file-upload.component.scss'],
 })
-export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget {
+export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: false,
         supportsBulk: false,

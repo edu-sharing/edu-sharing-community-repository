@@ -13,7 +13,7 @@ import {
 import { SearchService } from '../../../modules/search/search.service';
 import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorCommonService } from './mds-editor-common.service';
-import { NativeWidget } from './mds-editor-view/mds-editor-view.component';
+import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
 import {
     BulkMode,
     EditorBulkMode,
@@ -41,7 +41,21 @@ export interface CompletionStatusEntry {
 }
 
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
+
 type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
+
+/**
+ * NativeWidget and Widget
+ */
+interface GeneralWidget {
+    status: Observable<InputStatus>;
+    viewId: string;
+}
+
+// TODO: use this object for data properties and register it with the component.
+interface NativeWidget extends GeneralWidget {
+    component: NativeWidgetComponent;
+}
 
 export interface InitialValues {
     /** Values that are initially present in all nodes. */
@@ -76,7 +90,7 @@ export abstract class MdsEditorWidgetCore {
  */
 @Injectable()
 export class MdsEditorInstanceService implements OnDestroy {
-    static Widget = class {
+    static Widget = class implements GeneralWidget {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
         readonly status = new BehaviorSubject<InputStatus>(null);
         readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
@@ -452,6 +466,8 @@ export class MdsEditorInstanceService implements OnDestroy {
     /** Fires when all widgets have been injected. */
     mdsInflated = new ReplaySubject<void>(1);
     suggestions$ = new BehaviorSubject<Suggestions>(null);
+    /** Views that have at least one widget, that is not hidden due to dynamic conditions. */
+    activeViews = new ReplaySubject<MdsView[]>(1);
 
     /**
      * Active widgets.
@@ -553,6 +569,11 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }),
             )
             .subscribe(this.completionStatus$);
+        activeWidgets.pipe(
+            map((widgets) =>
+                this.views.filter((view) => widgets.some((widget) => widget.viewId === view.id)),
+            ),
+        ).subscribe(this.activeViews);
     }
 
     ngOnDestroy() {
@@ -713,11 +734,11 @@ export class MdsEditorInstanceService implements OnDestroy {
         const newValues = await this.getNodeValuePairs();
         let updatedNodes: Node[];
         const versionWidget: MdsEditorWidgetVersionComponent = this.nativeWidgets.value.find(
-            (w) => w instanceof MdsEditorWidgetVersionComponent,
-        ) as MdsEditorWidgetVersionComponent;
+            (w) => w.component instanceof MdsEditorWidgetVersionComponent,
+        )?.component as MdsEditorWidgetVersionComponent;
         for (const widget of this.nativeWidgets.value) {
-            if (widget.onSaveNode) {
-                await widget.onSaveNode(this.nodes$.value);
+            if (widget.component.onSaveNode) {
+                await widget.component.onSaveNode(this.nodes$.value);
             }
         }
         if (versionWidget) {
@@ -774,21 +795,26 @@ export class MdsEditorInstanceService implements OnDestroy {
         // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
         // `getValues()`.
         for (const widget of this.nativeWidgets.value) {
-            values = widget.getValues ? await widget.getValues(values, node) : values;
+            values = widget.component.getValues
+                ? await widget.component.getValues(values, node)
+                : values;
         }
 
         return values;
     }
 
-    registerNativeWidget(nativeWidget: NativeWidget): void {
-        this.nativeWidgets.value.push(nativeWidget);
-        nativeWidget.hasChanges.subscribe(() => {
+    registerNativeWidget(component: NativeWidgetComponent, viewId: string): void {
+        this.nativeWidgets.next([
+            ...this.nativeWidgets.value,
+            { component, viewId, status: component.status ?? of('VALID') },
+        ]);
+        component.hasChanges.subscribe(() => {
             if (this.isDestroyed) {
                 console.warn(
                     'Native widget is pushing state after having been destroyed:',
-                    nativeWidget,
+                    component,
                 );
-                nativeWidget.hasChanges.complete();
+                component.hasChanges.complete();
                 return;
             }
             this.updateHasChanges();
@@ -844,7 +870,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 widget.getStatus() !== 'DISABLED',
         );
         const someNativeWidgetsHaveChanges = this.nativeWidgets.value.some(
-            (w) => w.hasChanges.value,
+            (w) => w.component.hasChanges.value,
         );
         this.hasUserChanges$.next(someWidgetsHaveUserChanges || someNativeWidgetsHaveChanges);
         this.hasProgrammaticChanges$.next(someWidgetsHaveProgrammaticChanges);

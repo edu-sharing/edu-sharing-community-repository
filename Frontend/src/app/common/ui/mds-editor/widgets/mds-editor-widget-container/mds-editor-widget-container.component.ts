@@ -23,7 +23,7 @@ import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { BulkBehavior } from '../../../mds/mds.component';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { BulkMode, EditorBulkMode, InputStatus, RequiredMode } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
@@ -99,7 +99,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
     @ViewChild(MatRipple) ripple: MatRipple;
 
     @Input() widget: Widget;
-    @Input() injectedView: MdsEditorWidgetBase | NativeWidget;
+    @Input() injectedView: MdsEditorWidgetBase | NativeWidgetComponent;
     @Input() valueType: ValueType;
     @Input() label: string | boolean;
     @Input() control: AbstractControl;
