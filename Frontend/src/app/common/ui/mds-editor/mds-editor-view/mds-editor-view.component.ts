@@ -184,11 +184,12 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             const widgets = this.mdsEditorInstance.getWidgetsByTagName(tagName, this.view.id);
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
-                for (const widget of widgets) {
-                    this.injectNativeWidget(widget, widgetName, element);
-                }
+                // Native widgets don't support dynamic conditions yet and don't necessarily have a
+                // `widget` object.
+                this.injectNativeWidget(widgets[0], widgetName, element);
             } else {
                 if (widgets.length >= 1) {
+                    // Possibly inject multiple widgets to allow dynamic switching via conditions.
                     for (const widget of widgets) {
                         this.injectWidget(widget, element);
                     }
