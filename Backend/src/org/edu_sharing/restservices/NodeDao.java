@@ -129,7 +129,7 @@ public class NodeDao {
 			throws DAOException {
 		return new NodeDao(repoDao, nodeRef, Filter.createShowAllFilter());
 	}
-	
+
 	/** get node via shared link **/
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId,String token)
 			throws DAOException {
@@ -1449,14 +1449,17 @@ public class NodeDao {
 
 	private String getContentVersion(Node data) throws DAOException {
 		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null && !isFromRemoteRepository()){
-			return AuthenticationUtil.runAsSystem(() ->
-					nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
-							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-							((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
-			);
-		} else {
-			return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+			try {
+				return AuthenticationUtil.runAsSystem(() ->
+						nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
+								StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+								((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
+				);
+			}catch(Throwable t){
+				logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
+			}
 		}
+		return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 	}
 
 	private String getContentUrl() {

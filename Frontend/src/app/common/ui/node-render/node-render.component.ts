@@ -382,7 +382,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             else {
                 this._node=data.node;
                 this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
-                const finish = (set:Metadataset = null) => {
+                const finish = (set:Mds = null) => {
                     this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
                     this.mds = set;
 
