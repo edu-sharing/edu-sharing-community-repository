@@ -933,7 +933,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     private getWidgetsForView(availableWidgets: MdsWidget[], view: MdsView): MdsWidget[] {
         return (
             availableWidgets
-                .filter((widget) => view.html.includes(widget.id))
+                .filter((widget) => new RegExp(`<${widget.id}[> ]`).test(view.html))
                 .filter(
                     // We want either...
                     (widget) =>
