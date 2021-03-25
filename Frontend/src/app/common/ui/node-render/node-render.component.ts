@@ -324,11 +324,15 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   }
   viewParent() {
       this.isChildobject=false;
-      this.node=this.sequenceParent;
+      this.router.navigate(['./'], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
+              childobject_id: null
+          }});
   }
   viewChildobject(node:Node,pos:number) {
         this.isChildobject=true;
-        this.node=node;
+        this.router.navigate(['./'], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
+            childobject_id: node.ref.id
+        }});
   }
   private loadNode() {
     if(!this._node) {
