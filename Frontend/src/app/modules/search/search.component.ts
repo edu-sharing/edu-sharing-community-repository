@@ -80,6 +80,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
     @ViewChild('sidenav') sidenavRef: ElementRef;
     @ViewChild('sidenavApply') sidenavApplyRef: ElementRef;
+    @ViewChild('collections') collectionsRef: ElementRef;
 
     toolPermissions: string[];
     searchFail: boolean = false;
@@ -102,7 +103,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     };
     isGuest = false;
     mainnav = true;
-    hasMoreCollections = false;
     queryId = RestConstants.DEFAULT_QUERY_NAME;
     groupResults = false;
     actionOptions: OptionItem[] = [];
@@ -240,7 +240,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.searchService.collectionsColumns.push(
                     new ListItem('COLLECTION', 'scope'),
                 );
-                setInterval(() => this.updateHasMore(), 1000);
                 this.connector
                     .hasToolPermission(
                         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
@@ -788,11 +787,25 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         setTimeout((() => this.handleScroll()));
     }
 
-    private updateHasMore() {
-        try {
-            this.hasMoreCollections =
-                document.getElementById('collections').scrollHeight > 90 + 40;
-        } catch (e) {}
+    getHasMoreCollections(): boolean {
+        return this.collectionsPerRow() < this.searchService.searchResultCollections.length;
+    }
+
+    getSearchResultCollections(): Node[] {
+        if (this.collectionsMore) {
+            return this.searchService.searchResultCollections;
+        } else {
+            return this.searchService.searchResultCollections.slice(0, this.collectionsPerRow());
+        }
+    }
+
+    private collectionsPerRow(): number {
+        return Math.floor(
+            (
+                this.collectionsRef?.nativeElement.clientWidth
+                - 20 // container padding
+            ) / 212 // 200px cards width + 2 * 6px cards padding
+        );
     }
 
     private checkFail() {
