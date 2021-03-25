@@ -129,7 +129,7 @@ public class NodeDao {
 			throws DAOException {
 		return new NodeDao(repoDao, nodeRef, Filter.createShowAllFilter());
 	}
-	
+
 	/** get node via shared link **/
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId,String token)
 			throws DAOException {
@@ -520,6 +520,8 @@ public class NodeDao {
 					HashMap<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
 							null, null, (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
 					nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_UID);
+					nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
+					nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
 					this.nodeProps.putAll(nodePropsReplace);
 				}catch(Throwable t){
 					logger.warn("Error while fetching properties for node id "+getId()+": Node is a remote node and calling remote "+(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)+" failed",t);
@@ -1447,14 +1449,17 @@ public class NodeDao {
 
 	private String getContentVersion(Node data) throws DAOException {
 		if(data instanceof CollectionReference && ((CollectionReference) data).getOriginalId() != null && !isFromRemoteRepository()){
-			return AuthenticationUtil.runAsSystem(() ->
-					nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
-							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-							((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
-			);
-		} else {
-			return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+			try {
+				return AuthenticationUtil.runAsSystem(() ->
+						nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,
+								StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+								((CollectionReference) data).getOriginalId(), CCConstants.CM_PROP_VERSIONABLELABEL)
+				);
+			}catch(Throwable t){
+				logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
+			}
 		}
+		return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 	}
 
 	private String getContentUrl() {

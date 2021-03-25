@@ -1,17 +1,22 @@
-@import "../../../../core-ui-module/styles/variables";
+@import '../../../../core-ui-module/styles/variables';
 
 :host {
     display: flex;
     flex-direction: column;
-    width:100%;
+    width: 100%;
+    &.hidden {
+        visibility: hidden;
+        height: 0;
+        margin: 0;
+    }
 }
-h3{
+h3 {
     display: flex;
     align-items: center;
     background-color: $workspaceMetadataBackground;
     border-bottom: 1px solid #999;
-    font-weight:bold;
-    padding:5px 10px;
+    font-weight: bold;
+    padding: 5px 10px;
 
     > span {
         flex-grow: 1;
@@ -29,4 +34,12 @@ h3{
 .content {
     display: flex;
     flex-direction: column;
+    opacity: 1;
+    transition: all $transitionNormal;
+    &.content-hidden{
+        overflow: hidden;
+        margin: 0;
+        height: 0;
+        opacity: 0;
+    }
 }

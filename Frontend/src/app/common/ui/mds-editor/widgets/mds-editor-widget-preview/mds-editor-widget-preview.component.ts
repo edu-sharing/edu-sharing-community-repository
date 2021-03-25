@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
+import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {FileChangeEvent} from '@angular/compiler-cli/src/perform_watch';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
@@ -12,7 +12,7 @@ import {Node} from '../../../../../core-module/rest/data-object';
     templateUrl: './mds-editor-widget-preview.component.html',
     styleUrls: ['./mds-editor-widget-preview.component.scss'],
 })
-export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidget {
+export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: true,
         supportsBulk: false,

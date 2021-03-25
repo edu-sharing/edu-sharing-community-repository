@@ -89,7 +89,6 @@
     <div
       *ngIf="!reorderDialog"
       class="list-container"
-      [attr.role]="viewType === 0 ? 'rowgroup' : null"
       [class.cardContainer]="viewType==1 || viewType==2"
       [class.tableList]="viewType == 0"
       [class.cardList]="viewType == 1"
@@ -104,6 +103,7 @@
       </div>
       <div *ngFor="let node of _nodes; let i = index"
            class="rowFrame item-container item"
+           [attr.role]="viewType === 0 ? 'rowgroup' : null"
            [class.order-animation]="orderElementsActive"
            [class.nodeCollection]="isCollection(node)"
            [class.selected]="getSelectedPos(node)!=-1"
@@ -112,7 +112,6 @@
            [class.hover]="dragHover==node"
       >
         <div class="row node-row"
-             [attr.role]="viewType === 0 ? 'row' : null"
              [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
              [class.noPermissions]="noPermissions(node)"
              [style.backgroundColor]="getBackgroundColor(node)"
@@ -133,11 +132,13 @@
              (nodesDrop)="onNodesDrop($event, node)"
              [attr.tabindex]="createLink ? null : 0"
              (keyup.enter)="doubleClick(node)"
-             [attr.aria-label]="node.name"
+             [attr.aria-label]="getPrimaryTitle(node)"
         >
           <!-- custom data binding from outside -->
           <app-node-url
             [node]="node"
+            [listTable]="this"
+            [role]="viewType === 0 ? 'row' : null"
             [nodes]="_nodes"
             [scope]="scope"
             [class.node-padding]="_options && _options.length>0"
@@ -175,7 +176,7 @@
                 [ngModel]="getSelectedPos(node)!=-1"
                 (change)="onCheckboxClick(node)"
                 (click)="$event.stopPropagation()"
-                aria-label="{{ 'SELECT' | translate:{element: node.name} }}">
+                aria-label="{{ 'SELECT' | translate:{element: getPrimaryTitle(node)} }}">
                 &nbsp;
               </mat-checkbox>
             </div>

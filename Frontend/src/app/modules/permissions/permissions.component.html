@@ -1,4 +1,4 @@
-<ng-container *ngIf="!disabled">
+<ng-container *ngIf="!disabled || isAdmin">
   <main-nav #mainNav
             [title]="'PERMISSIONS.TITLE'"
             [currentScope]="'permissions'"

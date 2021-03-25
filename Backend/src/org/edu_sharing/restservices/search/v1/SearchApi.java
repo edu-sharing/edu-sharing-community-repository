@@ -82,6 +82,7 @@ public class SearchApi {
 
 			SearchToken token = new SearchToken();
 			token.setFacettes(parameters.getFacettes());
+			token.setPermissions(parameters.getPermissions());
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 			token.setFrom(skipCount != null ? skipCount : 0);
 			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);

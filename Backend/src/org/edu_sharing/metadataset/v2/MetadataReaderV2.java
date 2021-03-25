@@ -498,7 +498,9 @@ public class MetadataReaderV2 {
 		return widgets;
 	}
 	private MetadataCondition getCondition(Node node,String id){
-		boolean negate=false;
+		boolean negate = false;
+		boolean dynamic = false;
+		String pattern = null;
 		NamedNodeMap attr = node.getAttributes();
 		CONDITION_TYPE type=CONDITION_TYPE.PROPERTY;
 		if(attr!=null && attr.getNamedItem("type")!=null) {
@@ -514,7 +516,13 @@ public class MetadataReaderV2 {
 		if(attr!=null && attr.getNamedItem("negate")!=null && attr.getNamedItem("negate").getTextContent().equalsIgnoreCase("true")) {
 			negate=true;
 		}
-		return new MetadataCondition(node.getTextContent(),type,negate);
+		if(attr!=null && attr.getNamedItem("dynamic")!=null && attr.getNamedItem("dynamic").getTextContent().equalsIgnoreCase("true")) {
+			dynamic=true;
+		}
+		if(attr!=null && attr.getNamedItem("pattern")!=null) {
+			pattern=attr.getNamedItem("pattern").getTextContent();
+		}
+		return new MetadataCondition(node.getTextContent(),type,negate,dynamic,pattern);
 	}
 	private List<MetadataKey> getValuespace(String value,MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
 		if(value.startsWith("http://") || value.startsWith("https://")){

@@ -1,6 +1,6 @@
 import {Component, OnInit, Input, SimpleChanges, OnChanges, NgZone} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
+import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';
 import {RestConstants} from '../../../../../core-module/rest/rest-constants';
 import {MainNavService} from '../../../../services/main-nav.service';
@@ -18,7 +18,7 @@ import {UIHelper} from '../../../../../core-ui-module/ui-helper';
     templateUrl: './mds-editor-widget-license.component.html',
     styleUrls: ['./mds-editor-widget-license.component.scss'],
 })
-export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase implements OnInit, OnChanges, NativeWidget {
+export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase implements OnInit, OnChanges, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: false,
         supportsBulk: true,

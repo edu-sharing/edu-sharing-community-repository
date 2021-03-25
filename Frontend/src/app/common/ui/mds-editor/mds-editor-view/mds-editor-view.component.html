@@ -1,12 +1,12 @@
 <h3 *ngIf="!isEmbedded && view.caption" id="{{ view.id }}_header" class="heading">
   <i class="material-icons">{{ view.icon }}</i>
   <span>{{ view.caption }}</span>
-  <button *ngIf="view.isExtended" mat-icon-button (click)="show = !show">
+  <button *ngIf="view.isExtended" mat-icon-button (click)="toggleShow()">
     <i [icon]="'keyboard_arrow_' + (show ? 'up' : 'down')"></i>
   </button>
 </h3>
 <div class="content" #container
-     [class.display-none]="!show"
+     [class.content-hidden]="!show"
      [innerHTML]="html"
      [@openOverlay]="show"
 ></div>

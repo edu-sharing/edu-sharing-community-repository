@@ -33,7 +33,7 @@ import {
     EventType,
     FrameEventsService,
     ListItem,
-    LoginResult,
+    LoginResult, Mds, Metadataset,
     Node,
     NodeList,
     RestConnectorService,
@@ -201,7 +201,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   canScrollRight = false;
   private queryParams: Params;
   public similarNodes: Node[];
-  mds: any;
+  mds: Mds;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -324,11 +324,15 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   }
   viewParent() {
       this.isChildobject=false;
-      this.node=this.sequenceParent;
+      this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
+              childobject_id: null
+          }});
   }
   viewChildobject(node:Node,pos:number) {
         this.isChildobject=true;
-        this.node=node;
+        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
+            childobject_id: node.ref.id
+        }});
   }
   private loadNode() {
     if(!this._node) {
@@ -378,20 +382,26 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             else {
                 this._node=data.node;
                 this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
+                const finish = (set:Mds = null) => {
+                    this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
+                    this.mds = set;
+
+                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                    this.postprocessHtml();
+                    this.addCollections();
+                    this.addVideoControls();
+                    this.linkSearchableWidgets();
+                    this.addComments();
+                    this.loadNode();
+                    this.loadSimilarNodes();
+                    this.isLoading = false;
+                };
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
-                        this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
-                        this.mds = set;
-
-                        jQuery('#nodeRenderContent').html(data.detailsSnippet);
-                        this.postprocessHtml();
-                        this.addCollections();
-                        this.addVideoControls();
-                        this.linkSearchableWidgets();
-                        this.addComments();
-                        this.loadNode();
-                        this.loadSimilarNodes();
-                        this.isLoading = false;
+                        finish(set);
+                    },(error) => {
+                        console.warn('mds fetch error', error);
+                        finish();
                     });
                 });
             }
@@ -463,7 +473,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };
-            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName('collections')[0],data,250);
+            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName('collections')[0],data, { delay: 250 });
         },(error)=> {
             domContainer.parentElement.removeChild(domContainer);
         });

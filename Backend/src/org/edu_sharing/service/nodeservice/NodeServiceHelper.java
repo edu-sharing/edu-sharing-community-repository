@@ -26,6 +26,7 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.NodeTool;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -426,6 +427,26 @@ public class NodeServiceHelper {
 			else
 				target.put(property, arr[0]);
 		}
+	}
+
+	public static List<NodeRef> getParentPath(NodeRef target){
+		List<NodeRef> path = new ArrayList<>();
+		NodeRef currentNode = target;
+		while(currentNode != null){
+			String parent=null;
+			try {
+				parent = NodeServiceFactory.getLocalService().getPrimaryParent(currentNode.getId());
+			}catch(Exception e){
+			}
+			if(parent != null){
+				currentNode = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parent);
+				path.add(currentNode);
+			} else {
+				currentNode = null;
+			}
+		}
+		Collections.reverse(path);
+		return path;
 	}
 
 	public static void copyProperty(NodeRef sourceNode, NodeRef targetNode, String property) {

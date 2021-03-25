@@ -179,9 +179,11 @@ export interface MdsWidgetValue {
 export type MdsWidgetFacetValue = MdsWidgetValue & { count?: string };
 
 export interface MdsWidgetCondition {
+    dynamic: boolean;
     type: 'PROPERTY' | 'TOOLPERMISSION';
     value: string;
     negate: boolean;
+    pattern?: string;
 }
 
 export type Suggestions = { [property: string]: MdsWidgetValue[] };

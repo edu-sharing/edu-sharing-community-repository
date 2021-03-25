@@ -1909,6 +1909,7 @@ public class CCConstants {
 	/**
 	 * VCARD
 	 */
+	public final static String VCARD_URN_UID = "VCARD_URN_UID";
 	public final static String VCARD_GIVENNAME = "VCARD_GIVENNAME";
 	public final static String VCARD_SURNAME = "VCARD_SURNAME";
 	public final static String VCARD_ORG = "VCARD_ORG";

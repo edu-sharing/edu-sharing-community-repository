@@ -104,6 +104,21 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         return sr;
     }
+    public BoolQueryBuilder getPermissionsQuery(String field){
+        Set<String> authorities = getUserAuthorities();
+        BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
+        audienceQueryBuilder.minimumShouldMatch(1);
+        for (String a : authorities) {
+            audienceQueryBuilder.should(QueryBuilders.matchQuery(field, a));
+        }
+        return audienceQueryBuilder;
+    }
+    public BoolQueryBuilder getReadPermissionsQuery(){
+        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+        BoolQueryBuilder audienceQueryBuilder = getPermissionsQuery("permissions.read");
+        audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
+        return audienceQueryBuilder;
+    }
     @Override
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
@@ -121,6 +136,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         Set<String> authorities = getUserAuthorities();
+        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
 
 
         SearchResultNodeRef sr = new SearchResultNodeRef();
@@ -132,7 +148,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
-            QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getAuthorityQueryBuilder());
+            QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
+            if(searchToken.getPermissions() != null){
+                for(String permission : searchToken.getPermissions()){
+                    queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
+                }
+            }
 
             for(String facette : searchToken.getFacettes()){
                 searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
@@ -174,7 +195,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
             logger.info("result count: "+hits.getTotalHits());
 
             long millisPerm = 0;
-            String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
             for (SearchHit hit : hits) {
                 data.add(transformSearchHit(authorities, user, hit));
             }
@@ -223,24 +243,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    public static QueryBuilder getAuthorityQueryBuilder(){
-        ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
-        ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-        Set<String> authorities = getUserAuthorities();
-        BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
-        audienceQueryBuilder.minimumShouldMatch(1);
-        for (String a : authorities) {
-            audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", a));
-        }
-        String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
-        audienceQueryBuilder.should(QueryBuilders.matchQuery("permissions.read", user));
-        audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
-        return audienceQueryBuilder;
-    }
-
-    public static Set<String> getUserAuthorities() {
-        ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
-        ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+    private Set<String> getUserAuthorities() {
         Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
         if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
@@ -483,7 +486,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 map((k) -> new SearchVCard(k.toString())).
                 collect(Collectors.toCollection(HashSet::new));
     }
-
+    public RestHighLevelClient getClient() throws IOException {
+        checkClient();
+        return client;
+    }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(RequestOptions.DEFAULT)){
              client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));

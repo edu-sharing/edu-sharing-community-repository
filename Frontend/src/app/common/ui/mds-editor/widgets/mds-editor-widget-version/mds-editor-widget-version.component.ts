@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
+import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {BehaviorSubject} from 'rxjs';
 
 @Component({
@@ -7,7 +7,7 @@ import {BehaviorSubject} from 'rxjs';
     templateUrl: './mds-editor-widget-version.component.html',
     styleUrls: ['./mds-editor-widget-version.component.scss'],
 })
-export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidget {
+export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: true,
         supportsBulk: false,

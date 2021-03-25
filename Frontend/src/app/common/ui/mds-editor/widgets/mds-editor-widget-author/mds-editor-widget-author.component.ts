@@ -7,7 +7,7 @@ import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { VCard } from '../../../../../core-module/ui/VCard';
 import { MainNavService } from '../../../../services/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Values } from '../../types';
 
 export interface AuthorData {
@@ -20,7 +20,7 @@ export interface AuthorData {
     templateUrl: './mds-editor-widget-author.component.html',
     styleUrls: ['./mds-editor-widget-author.component.scss'],
 })
-export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidget {
+export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: false,
         supportsBulk: false,

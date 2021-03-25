@@ -11,7 +11,36 @@ import { GlobalContainerComponent } from '../../common/ui/global-container/globa
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
 import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { CollectionWrapper, ConfigurationHelper, ConfigurationService, DialogButton, ListItem, LoginResult, MdsInfo, MdsMetadatasets, NetworkRepositories, Node, NodeList, NodeWrapper, Repository, RestCollectionService, RestConnectorService, RestConstants, RestHelper, RestIamService, RestMdsService, RestNetworkService, RestNodeService, RestSearchService, SearchList, SessionStorageService, SortItem, TemporaryStorageService, UIService } from '../../core-module/core.module';
+import {
+    CollectionWrapper,
+    ConfigurationHelper,
+    ConfigurationService,
+    DialogButton,
+    ListItem,
+    LoginResult,
+    MdsInfo,
+    MdsMetadatasets,
+    NetworkRepositories,
+    Node,
+    NodeList,
+    NodeWrapper,
+    Repository,
+    RestCollectionService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestMdsService,
+    RestNetworkService,
+    RestNodeService,
+    RestSearchService,
+    SearchList,
+    SearchRequestCriteria,
+    SessionStorageService,
+    SortItem,
+    TemporaryStorageService,
+    UIService
+} from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
@@ -49,6 +78,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
+    @ViewChild('sidenav') sidenavRef: ElementRef;
+    @ViewChild('sidenavApply') sidenavApplyRef: ElementRef;
 
     toolPermissions: string[];
     searchFail: boolean = false;
@@ -152,6 +183,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     ngOnInit() {
         setTimeout(() => {
             this.tutorialElement = this.mainNavRef.search;
+            this.handleScroll();
         });
         this.searchService.clear();
         this.initalized = true;
@@ -286,9 +318,22 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     @HostListener('window:scroll', ['$event'])
-    handleScroll(event: Event) {
+    @HostListener('window:touchmove', ['$event'])
+    @HostListener('window:resize', ['$event'])
+    handleScroll(event: Event = null) {
+        // calculate height of filter part individually
+        // required since banners, footer etc. can cause wrong heights and overflows
         this.searchService.offset =
             window.pageYOffset || document.documentElement.scrollTop;
+        if(this.sidenavRef?.nativeElement && this.sidenavApplyRef?.nativeElement) {
+            console.log(this.sidenavApplyRef.nativeElement.getBoundingClientRect(),
+                (parseFloat(this.sidenavApplyRef.nativeElement.getBoundingClientRect().top) -
+                    parseFloat(this.sidenavRef.nativeElement.style.top)) + 'px'
+            );
+            this.sidenavRef.nativeElement.style.height =
+                (parseFloat(this.sidenavApplyRef.nativeElement.getBoundingClientRect().top) -
+                    parseFloat(this.sidenavRef.nativeElement.style.top)) + 'px';
+        }
     }
 
     setRepository(repository: string) {
@@ -479,9 +524,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
 
-        let criterias: any[] = this.getCriterias(this.currentValues, searchString);
+        const criterias = this.getCriterias(this.currentValues, searchString);
 
-        let repos =
+        const repos =
             this.currentRepository == RestConstants.ALL
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
@@ -495,11 +540,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             ) {
                 this.isSearchingCollections = true;
                 this.search
-                    .search(
-                        this.getCriterias(this.currentValues, searchString, false),
-                        [],
-                        {
-                            sortBy: [
+                    .searchWithBody(
+                      {criterias: this.getCriterias(this.currentValues, searchString, false), facettes: []},
+                        {sortBy: [
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
                                 RestConstants.CM_MODIFIED_DATE,
@@ -741,7 +784,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.mdsMobileRef.loadMds();
             });
         }
-        //this.routeSearch();
+        // recalculate the filter layout
+        setTimeout((() => this.handleScroll()));
     }
 
     private updateHasMore() {
@@ -977,7 +1021,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private searchRepository(
         repos: any[],
-        criterias: any,
+        criterias: SearchRequestCriteria[],
         init: boolean,
         position = 0,
         count = 0,
@@ -1025,8 +1069,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         let properties = [RestConstants.ALL];
         const request = {
-            sortBy: sortBy,
-            sortAscending: sortAscending,
+            sortBy,
+            sortAscending,
             count:
                 this.currentRepository == RestConstants.ALL &&
                 !this.groupResults
@@ -1041,6 +1085,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             offset: this.searchService.skipcount[position],
             propertyFilter: [properties],
         };
+        let permissions;
+        if(this.applyMode){
+            permissions = [RestConstants.ACCESS_CC_PUBLISH];
+        }
         let facettes;
         try {
             facettes = MdsHelper.getUsedWidgets(this.currentMdsSet, 'search_suggestions').map((w: any) => w.id);
@@ -1050,9 +1098,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         let queryRequest =
         this.search
-            .search(
-                criterias,
-                facettes,
+            .searchWithBody(
+                {criterias, facettes, permissions},
                 request,
                 RestConstants.CONTENT_TYPE_FILES,
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,
@@ -1234,7 +1281,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         searchString = this.searchService.searchTerm,
         addAll = true,
     ) {
-        let criterias: any = [];
+        let criterias: SearchRequestCriteria[] = [];
         if (searchString)
             criterias.push({
                 property: RestConstants.PRIMARY_SEARCH_CRITERIA,
