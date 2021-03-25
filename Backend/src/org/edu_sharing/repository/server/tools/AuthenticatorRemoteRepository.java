@@ -88,7 +88,7 @@ public class AuthenticatorRemoteRepository {
 	 * authenticates at remote app with actual local userdata, if fails an guest ticket and the exception message will be returned 
 	 * @return AuthenticatorRemoteAppResult
 	 */
-	public AuthenticatorRemoteAppResult getAuthInfoForApp(String username, ApplicationInfo remoteAppInfo, float remoteVersion) throws Throwable{
+	public AuthenticatorRemoteAppResult getAuthInfoForApp(String username, ApplicationInfo remoteAppInfo) throws Throwable{
 
 		HashMap<String, String> resultAuthInfo = new HashMap<String, String>();
 		MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
@@ -97,7 +97,7 @@ public class AuthenticatorRemoteRepository {
 		if(remoteAppInfo.getString("forced_user",null)!=null){
 			logger.info("forced_user is set for remote, will authenticate as the specified user");
 			try{
-				authToken = remoteAuth(remoteAppInfo.getAppId(), remoteAppInfo.getString("forced_user",null), remoteVersion);
+				authToken = remoteAuth(remoteAppInfo.getAppId(), remoteAppInfo.getString("forced_user",null));
 			}catch(Exception e){
 				logger.info("Remote repository "+remoteAppInfo.getAppId()+" auth failed (check the remote repo log for more details) "+e.getMessage());
 				throw e;
@@ -105,7 +105,7 @@ public class AuthenticatorRemoteRepository {
 		} else {
 			logger.info("getting userinfo for" + username);
 			try {
-				authToken = remoteAuth(remoteAppInfo.getAppId(), username, remoteVersion);
+				authToken = remoteAuth(remoteAppInfo.getAppId(), username);
 			}catch(Exception e){
 				logger.info("REMOTE REPOSITORY AUTH FAILED: "+e.getMessage());
 				throw e;
@@ -121,15 +121,15 @@ public class AuthenticatorRemoteRepository {
 		return result;
 	}
 
-	private AuthenticationToken remoteAuth(String appId, String username, float remoteVersion) throws Exception{
-		if(remoteVersion <= 5.1){
+	private AuthenticationToken remoteAuth(String appId, String username) throws Exception{
+		ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
+		if((Float)appInfoRemoteApp.getCache().get(ApplicationInfo.CacheKey.RemoteAlfrescoVersion) <= 5.1){
 			logger.info("Detected repository " + appId + " has version <= 5.1, using legacy SOAP authentication");
 			return remoteAuthSoap(appId, username);
 		}
 		String localAppId = ApplicationInfoList.getHomeRepository().getAppId();
 		logger.info("startSession remoteApplicationId:"+appId +" localAppId:"+localAppId);
 
-		ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
 
 		HashMap<String,String> personMapping = new HashMap<>(ssoAuthorityMapper.getMappingConfig().getPersonMapping());
 		String remoteUserid = ApplicationInfoList.getRepositoryInfoById(appId).getString(ApplicationInfo.REMOTE_USERID, null);

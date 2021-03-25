@@ -27,16 +27,15 @@
  */
 package org.edu_sharing.repository.server.tools;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.MimeTypes;
 
 public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
@@ -335,6 +334,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	private String validatorRegexCMName = "([\\\"\\*\\\\\\\\\\>\\<\\?\\/\\:\\|'\\r\\n])";
 
 	private String cookieAttributes;
+	private Map<CacheKey, Serializable> cache = new HashMap<>();
 
 	public ApplicationInfo(String _appFile) throws Exception{
 		if(_appFile == null) throw new Exception("Application Filename was null!");
@@ -930,5 +930,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public String getAuthByAppUserWhitelist() {
 		return authByAppUserWhitelist;
+	}
+
+	public Map<CacheKey, Serializable> getCache() {
+		return cache;
+	}
+	public enum CacheKey{
+		RemoteAlfrescoVersion
 	}
 }
