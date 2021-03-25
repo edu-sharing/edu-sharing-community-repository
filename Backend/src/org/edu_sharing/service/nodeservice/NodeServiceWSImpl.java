@@ -125,7 +125,7 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 				if (e.getValue().size() == 1) {
 					result.put(globalKey, e.getValue().get(0));
 				} else {
-					result.put(globalKey, e);
+					result.put(globalKey, e.getValue());
 				}
 				/*PropertyDefinition definition = null;
 				try {

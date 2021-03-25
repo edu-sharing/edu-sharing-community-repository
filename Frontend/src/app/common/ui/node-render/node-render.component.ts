@@ -33,7 +33,7 @@ import {
     EventType,
     FrameEventsService,
     ListItem,
-    LoginResult,
+    LoginResult, Metadataset,
     Node,
     NodeList,
     RestConnectorService,
@@ -201,7 +201,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   canScrollRight = false;
   private queryParams: Params;
   public similarNodes: Node[];
-  mds: any;
+  mds: Metadataset;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -378,20 +378,26 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             else {
                 this._node=data.node;
                 this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
+                const finish = (set:Metadataset = null) => {
+                    this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
+                    this.mds = set;
+
+                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                    this.postprocessHtml();
+                    this.addCollections();
+                    this.addVideoControls();
+                    this.linkSearchableWidgets();
+                    this.addComments();
+                    this.loadNode();
+                    this.loadSimilarNodes();
+                    this.isLoading = false;
+                };
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
-                        this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
-                        this.mds = set;
-
-                        jQuery('#nodeRenderContent').html(data.detailsSnippet);
-                        this.postprocessHtml();
-                        this.addCollections();
-                        this.addVideoControls();
-                        this.linkSearchableWidgets();
-                        this.addComments();
-                        this.loadNode();
-                        this.loadSimilarNodes();
-                        this.isLoading = false;
+                        finish(set);
+                    },(error) => {
+                        console.warn('mds fetch error', error);
+                        finish();
                     });
                 });
             }
