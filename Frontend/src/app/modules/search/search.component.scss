@@ -113,7 +113,6 @@ $sidenavTopBaseOffset:110px;
 .collections{
     min-height: $listCardSmallHeight+10px;
     max-height: $listCardSmallHeight+10px;
-    overflow: hidden;
     margin-bottom:25px;
 }
 .collectionsMore{
@@ -400,7 +399,6 @@ small-collection{
     min-height: 1000px;
     display: inline-block;
     width: 100%;
-    overflow-x: hidden;
     &.no-mainnav{
         margin-top: 130px;
     }

@@ -433,8 +433,21 @@ $badgeWidth: 250px;
 .row .column.row_1 {
     color: $textMain;
 }
-.list .rowFrame:hover {
+.list .tableList .rowFrame:hover {
     background-color: $itemSelectedBackground;
+}
+.list .cardList .rowFrame,
+.list .cardSmallList .rowFrame {
+    position: relative;
+    transition:
+        z-index $transitionNormal step-start,
+        transform $transitionNormal,
+        box-shadow $transitionNormal;
+    &:hover {
+        transform: translateY(-10px);
+        @include materialShadowMediumLarge();
+        z-index: 10;
+    }
 }
 
 .list .filled-in:checked + label:after {
@@ -983,7 +996,7 @@ a.rowInner {
 // `no-padding` for the `listtable` component, which will align cards' borders
 // with the component's borders.
 :host:not(.no-padding) .cardContainer {
-    padding: 0 10px;
+    padding: 10px;
 }
 @media all and (min-width: ($mobileWidth)) {
     :host.no-padding .cardContainer {
