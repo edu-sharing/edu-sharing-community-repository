@@ -33,7 +33,7 @@ import {
     EventType,
     FrameEventsService,
     ListItem,
-    LoginResult, Metadataset,
+    LoginResult, Mds, Metadataset,
     Node,
     NodeList,
     RestConnectorService,
@@ -201,7 +201,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   canScrollRight = false;
   private queryParams: Params;
   public similarNodes: Node[];
-  mds: Metadataset;
+  mds: Mds;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
