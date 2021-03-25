@@ -59,9 +59,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     Logger logger = Logger.getLogger(SearchServiceElastic.class);
 
-    ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+    static ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
 
-    ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+    static ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
     PermissionModel permissionModel = (PermissionModel)alfApplicationContext.getBean("permissionsModelDAO");
 
@@ -104,7 +104,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         return sr;
     }
-    public BoolQueryBuilder getPermissionsQuery(String field){
+    public static BoolQueryBuilder getPermissionsQuery(String field){
         Set<String> authorities = getUserAuthorities();
         BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
         audienceQueryBuilder.minimumShouldMatch(1);
@@ -113,7 +113,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         return audienceQueryBuilder;
     }
-    public BoolQueryBuilder getReadPermissionsQuery(){
+    public static BoolQueryBuilder getReadPermissionsQuery(){
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         BoolQueryBuilder audienceQueryBuilder = getPermissionsQuery("permissions.read");
         audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
@@ -243,7 +243,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private Set<String> getUserAuthorities() {
+    private static Set<String> getUserAuthorities() {
         Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
         if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);

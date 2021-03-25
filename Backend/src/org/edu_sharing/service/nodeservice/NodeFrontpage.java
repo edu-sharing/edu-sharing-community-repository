@@ -77,7 +77,7 @@ public class NodeFrontpage {
         checkClient();
 
         BoolQueryBuilder query = QueryBuilders.boolQuery();
-        query.must(SearchServiceElastic.getAuthorityQueryBuilder());
+        query.must(SearchServiceElastic.getReadPermissionsQuery());
         query.must(QueryBuilders.termQuery("type","ccm:io"));
         query.must(QueryBuilders.termQuery("nodeRef.storeRef.protocol","workspace"));
 
