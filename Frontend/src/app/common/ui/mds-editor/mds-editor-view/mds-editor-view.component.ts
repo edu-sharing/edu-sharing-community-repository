@@ -1,22 +1,27 @@
+import { trigger } from '@angular/animations';
 import {
     AfterViewInit,
     Component,
     ComponentFactoryResolver,
     ElementRef,
+    HostBinding,
     Input,
     OnChanges,
+    OnDestroy,
     OnInit,
     SimpleChanges,
     Type,
     ViewChild,
     ViewContainerRef,
-    OnDestroy,
-    HostBinding,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
+import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { MdsEditorCardComponent } from '../mds-editor-card/mds-editor-card.component';
+import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import {
     Constraints,
@@ -34,6 +39,7 @@ import { MdsEditorWidgetChildobjectsComponent } from '../widgets/mds-editor-widg
 import { MdsEditorWidgetChipsComponent } from '../widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
 import { MdsEditorWidgetDurationComponent } from '../widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
 import { MdsEditorWidgetErrorComponent } from '../widgets/mds-editor-widget-error/mds-editor-widget-error.component';
+import { MdsEditorWidgetFileUploadComponent } from '../widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 import { MdsEditorWidgetLicenseComponent } from '../widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 import { MdsEditorWidgetLinkComponent } from '../widgets/mds-editor-widget-link/mds-editor-widget-link.component';
 import { MdsEditorWidgetPreviewComponent } from '../widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
@@ -44,12 +50,6 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import { MdsEditorWidgetFileUploadComponent } from '../widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
-import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
-import { takeUntil, map } from 'rxjs/operators';
-import {MdsEditorCoreComponent} from '../mds-editor-core/mds-editor-core.component';
-import {MdsEditorCardComponent} from '../mds-editor-card/mds-editor-card.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -118,7 +118,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetSuggestionChipsComponent,
     };
 
-    @HostBinding('class.hide') isHidden: boolean;
+    @HostBinding('class.hidden') isHidden: boolean;
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
     @Input() core: MdsEditorCoreComponent;
     @Input() view: MdsView;
@@ -347,13 +347,15 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     toggleShow() {
-        if(this.show) {
+        if (this.show) {
             this.show = false;
         } else {
             setTimeout(() =>
-                this.core.card?.scrollSmooth(this.core.card?.jumpmarks.filter(
-                    (j) => j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX)[0]
-                )
+                this.core.card?.scrollSmooth(
+                    this.core.card?.jumpmarks.filter(
+                        (j) => j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
+                    )[0],
+                ),
             );
             this.show = true;
         }

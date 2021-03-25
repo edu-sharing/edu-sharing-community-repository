@@ -4,8 +4,10 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    &.hide {
-        display: none;
+    &.hidden {
+        visibility: hidden;
+        height: 0;
+        margin: 0;
     }
 }
 h3 {
