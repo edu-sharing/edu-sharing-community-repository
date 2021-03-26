@@ -20,6 +20,10 @@ a, a:hover, a:visited, a:active {
   border-radius: 2px;
   padding:2px;
   z-index: 5;
+  border: none;
+  &.cdk-keyboard-focused {
+    @include setGlobalKeyboardFocus();
+  }
 }
 .next{
   left:auto;

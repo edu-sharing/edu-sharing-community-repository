@@ -15,8 +15,8 @@
   </div>
 </div>
 <div *ngIf="getPosition()!=-1">
-  <div tabindex="0" class="previous clickable" *ngIf="canSwitchBack()" (click)="switchPosition(getPosition()-1)" (keyup.enter)="switchPosition(getPosition()-1)"><i icon="keyboard_arrow_left" [aria]="true"></i></div>
-  <div tabindex="0" class="next clickable" *ngIf="canSwitchForward()" (click)="switchPosition(getPosition()+1)" (keyup.enter)="switchPosition(getPosition()+1)"><i icon="keyboard_arrow_right" [aria]="true"></i></div>
+  <button class="previous" *ngIf="canSwitchBack()" cdkMonitorElementFocus (click)="switchPosition(getPosition()-1)"><i icon="keyboard_arrow_left" [aria]="true"></i></button>
+  <button class="next" *ngIf="canSwitchForward()" cdkMonitorElementFocus (click)="switchPosition(getPosition()+1)"><i icon="keyboard_arrow_right" [aria]="true"></i></button>
 </div>
 <div class="alignWithBanner">
   <div id="nodeRenderContentWrapper">
