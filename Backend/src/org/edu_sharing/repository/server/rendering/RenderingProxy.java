@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.rendering;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
@@ -10,13 +11,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 
+import com.benfante.jslideshare.App;
+import io.swagger.client.model.RenderingDetailsEntry;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
@@ -32,6 +37,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.*;
+import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.tracking.NodeTrackingDetails;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -204,7 +210,7 @@ public class RenderingProxy extends HttpServlet {
 		return contentUrl;
 	}
 
-	private String handleUserParameter(ApplicationInfo homeRep, String rep_id, String usernameDecrypted, String value)
+	private String handleUserParameter(ApplicationInfo homeRep, String rep_id, String usernameDecrypted, String value, String nodeId)
 			throws RenderingException {
 		Encryption encryptionTool = new Encryption("RSA");
 		if (homeRep.getAppId().equals(rep_id)) {
@@ -232,7 +238,7 @@ public class RenderingProxy extends HttpServlet {
 				/**
 				 * make sure that the remote user exists
 				 */
-				if (RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
+				if (RepoProxyFactory.getRepoProxy().myTurn(rep_id, nodeId) != null) {
 					try {
                         RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo, localUsername,false);
 					} catch (Throwable t) {
@@ -290,7 +296,7 @@ public class RenderingProxy extends HttpServlet {
 			}
 			String value = parameter.getValue();
 			if (parameter.getKey().equals("u")) {
-				value = handleUserParameter(homeRep, rep_id, usernameDecrypted, value);
+				value = handleUserParameter(homeRep, rep_id, usernameDecrypted, value, nodeId);
 			}
 			contentUrl = UrlTool.setParam(contentUrl, parameter.getKey(), URLEncoder.encode(value, "UTF-8"));
 		}
@@ -313,10 +319,22 @@ public class RenderingProxy extends HttpServlet {
 			String nodeId, String usernameDecrypted, String finalContentUrl, Usage usage,
 			RenderingServiceOptions options) throws RenderingException {
 		RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
+		RepoProxy.RemoteRepoDetails remoteRepo = RepoProxyFactory.getRepoProxy().myTurn(homeRep.getAppId(), nodeId);
+		if(RepoProxyFactory.getRepoProxy().myTurn(homeRep.getAppId(), nodeId) != null){
+			try {
+				Response remoteResult = RepoProxyFactory.getRepoProxy().getDetailsSnippetWithParameters(remoteRepo.getRepository(), remoteRepo.getNodeId(), getVersion(req), options.displayMode, null, req);
+				RenderingDetailsEntry entity = (RenderingDetailsEntry) remoteResult.getEntity();
+				resp.getOutputStream().write(entity.getDetailsSnippet().getBytes(StandardCharsets.UTF_8));
+				return;
+			} catch (Throwable throwable) {
+				logger.error("Remote repo rendering failed: " + throwable.getMessage());
+				throw new RuntimeException(throwable);
+			}
+		}
 		// @todo 5.1 should version inline be transfered?
 		try {
 			RenderingServiceData renderData = service.getData(homeRep, nodeId, null, usernameDecrypted, options);
-			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes("UTF-8"));
+			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes(StandardCharsets.UTF_8));
 			// track inline / lms
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
 				NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
