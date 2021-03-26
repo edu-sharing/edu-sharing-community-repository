@@ -1,9 +1,5 @@
 package org.edu_sharing.service.mediacenter;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.*;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -11,7 +7,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
@@ -20,6 +15,7 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.apache.cxf.common.util.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.alfresco.service.OrganisationService;
@@ -29,10 +25,18 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.util.CSVTool;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.context.ApplicationContext;
+
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.*;
 
 public class MediacenterServiceImpl implements MediacenterService {
 
@@ -691,7 +695,8 @@ public class MediacenterServiceImpl implements MediacenterService {
         List<String> allMediacenterIds = getAllMediacenterIds();
 
         for (String mediacenterId : allMediacenterIds) {
-            String mediacenterName = "GROUP_" + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mediacenterId;
+            String mediacenterProxyName = "GROUP_" + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mediacenterId;
+            String mediacenterGroupName  = "GROUP_" + AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + mediacenterId;
             List<String> nodesAdd = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodes(mediacenterId, from, until);
             logger.info(mediacenterId + " found new nodes: " + nodesAdd.size() + " for period: " + from + " - " + until);
 
@@ -701,21 +706,23 @@ public class MediacenterServiceImpl implements MediacenterService {
                     logger.warn("no node found in repo for:" + replicationsourceId);
                     continue;
                 }
-                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterName,
+                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
                         CCConstants.PERMISSION_CC_PUBLISH);
-                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterName,
+                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
                         CCConstants.PERMISSION_CONSUMER);
 
                 if(!hasPublishPermission || !hasConsumerPermission){
                     serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
                         policyBehaviourFilter.disableBehaviour(nodeRef);
-                        logger.info(mediacenterName + " add consumer and publish permission for " + nodeRef);
-                        permissionService.setPermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CONSUMER, true);
-                        permissionService.setPermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CC_PUBLISH, true);
+                        logger.info(mediacenterProxyName + " add consumer and publish permission for " + nodeRef);
+                        permissionService.setPermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CONSUMER, true);
+                        permissionService.setPermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CC_PUBLISH, true);
                         policyBehaviourFilter.enableBehaviour(nodeRef);
                         return null;
                     });
                 }
+
+                fixMediacenterStatus(nodeRef,mediacenterGroupName,true);
             }
 
 
@@ -727,16 +734,16 @@ public class MediacenterServiceImpl implements MediacenterService {
                     logger.warn("no node found in repo for:" + replicationsourceId);
                     continue;
                 }
-                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterName,
+                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
                         CCConstants.PERMISSION_CC_PUBLISH);
-                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterName,
+                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
                         CCConstants.PERMISSION_CONSUMER);
 
                 if(hasPublishPermission){
                     serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
                         policyBehaviourFilter.disableBehaviour(nodeRef);
-                        logger.info(mediacenterName + " remove publish permission for " + nodeRef);
-                        permissionService.deletePermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CC_PUBLISH);
+                        logger.info(mediacenterProxyName + " remove publish permission for " + nodeRef);
+                        permissionService.deletePermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CC_PUBLISH);
                         policyBehaviourFilter.enableBehaviour(nodeRef);
                         return null;
                     });
@@ -744,14 +751,56 @@ public class MediacenterServiceImpl implements MediacenterService {
                 if(hasConsumerPermission){
                     serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
                         policyBehaviourFilter.disableBehaviour(nodeRef);
-                        logger.info(mediacenterName + " remove consumer permission for " + nodeRef);
-                        permissionService.deletePermission(nodeRef, mediacenterName, CCConstants.PERMISSION_CONSUMER);
+                        logger.info(mediacenterProxyName + " remove consumer permission for " + nodeRef);
+                        permissionService.deletePermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CONSUMER);
                         policyBehaviourFilter.enableBehaviour(nodeRef);
                         return null;
                     });
                 }
+
+               fixMediacenterStatus(nodeRef,mediacenterGroupName,false);
             }
         }
+    }
+
+    private void fixMediacenterStatus(NodeRef nodeRef, String mediacenterGroupName, Boolean activated){
+
+        QName prop = QName.createQName(CCConstants.CCM_PROP_IO_MEDIACENTER);
+        List<String> mcStatusList = (List<String>)nodeService.getProperty(nodeRef, prop);
+
+        JSONObject jo = new JSONObject();
+        jo.put("name",mediacenterGroupName);
+        jo.put("activated",activated.toString());
+
+        ArrayList<String> mcStatusListNew = new ArrayList<>();
+
+        if(mcStatusList == null){
+            mcStatusListNew.add(jo.toJSONString());
+        }else if(mcStatusList.stream().anyMatch(o -> o.contains(mediacenterGroupName))){
+            mcStatusList.stream().map(o -> {
+                try {
+                    return ((JSONObject)new JSONParser().parse(o)).get("name").equals(mediacenterGroupName) ? jo.toJSONString() : o;
+                } catch (ParseException e) {
+                    logger.error(e.getMessage());
+                    return o;
+                }
+            });
+        }else{
+            mcStatusListNew.addAll(mcStatusList);
+            mcStatusListNew.add(jo.toJSONString());
+        }
+
+        if(mcStatusList == null || CollectionUtils.diff(mcStatusListNew,mcStatusList).size() > 0){
+            serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                policyBehaviourFilter.disableBehaviour(nodeRef);
+                logger.info("updateing mediacenter status for " + nodeRef+" mediacenter:"+mediacenterGroupName+" activated:"+activated);
+                nodeService.setProperty(nodeRef, prop, mcStatusListNew);
+                policyBehaviourFilter.enableBehaviour(nodeRef);
+                return null;
+            });
+            new RepositoryCache().remove(nodeRef.getId());
+        }
+
     }
 
     private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
