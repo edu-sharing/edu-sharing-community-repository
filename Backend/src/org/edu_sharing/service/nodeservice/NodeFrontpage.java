@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
@@ -48,6 +49,8 @@ public class NodeFrontpage {
     private RestHighLevelClient client;
     private HashMap<String, Date> APPLY_DATES;
 
+    SearchServiceElastic searchServiceElastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
+
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
@@ -77,7 +80,7 @@ public class NodeFrontpage {
         checkClient();
 
         BoolQueryBuilder query = QueryBuilders.boolQuery();
-        query.must(SearchServiceElastic.getReadPermissionsQuery());
+        query.must(searchServiceElastic.getReadPermissionsQuery());
         query.must(QueryBuilders.termQuery("type","ccm:io"));
         query.must(QueryBuilders.termQuery("nodeRef.storeRef.protocol","workspace"));
 
