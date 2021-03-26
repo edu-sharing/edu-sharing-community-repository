@@ -132,6 +132,7 @@ public class RenderingProxy extends HttpServlet {
 
 			SignatureVerifier.Result result = new SignatureVerifier().verify(app_id, sig, signed, ts);
 			if(result.getStatuscode() != HttpServletResponse.SC_OK){
+				logger.warn("Signature failed for app " + app_id + ": " + result.getMessage() + " (" + result.getStatuscode()+")");
 				throw new RenderingException(result.getStatuscode(),result.getMessage(),RenderingException.I18N.encryption);
 			}
 		}else{
