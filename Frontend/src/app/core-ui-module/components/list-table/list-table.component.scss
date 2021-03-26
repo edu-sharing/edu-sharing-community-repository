@@ -433,21 +433,41 @@ $badgeWidth: 250px;
 .row .column.row_1 {
     color: $textMain;
 }
-.list .tableList .rowFrame:hover {
-    background-color: $itemSelectedBackground;
-}
-.list .cardList .rowFrame,
-.list .cardSmallList .rowFrame {
-    position: relative;
-    transition:
-        z-index $transitionNormal step-start,
-        transform $transitionNormal,
-        box-shadow $transitionNormal;
-    &:hover {
-        transform: translateY(-10px);
-        @include materialShadowMediumLarge();
-        z-index: 10;
+
+@mixin hoverHighlightColor {
+    .rowFrame:hover {
+        background-color: $itemSelectedBackground;
     }
+}
+
+@mixin hoverHighlightFloat {
+    .rowFrame { 
+        position: relative;
+        transition:
+            z-index $transitionNormal step-start,
+            transform $transitionNormal,
+            box-shadow $transitionNormal;
+        &:hover {
+            transform: translateY(-10px);
+            @include materialShadowMediumLarge();
+            z-index: 10;
+        }
+    }
+}
+
+.list .tableList{
+    @include hoverHighlightColor();
+}
+.list .cardList {
+    @media (max-width: $mobileWidth) {
+        @include hoverHighlightColor();
+    }
+    @media (min-width: #{$mobileWidth + 1}) {
+        @include hoverHighlightFloat();
+    }
+}
+.list .cardSmallList {
+    @include hoverHighlightFloat();
 }
 
 .list .filled-in:checked + label:after {

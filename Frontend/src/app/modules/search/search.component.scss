@@ -111,13 +111,7 @@ $sidenavTopBaseOffset:110px;
     }
 }
 .collections{
-    min-height: $listCardSmallHeight+10px;
-    max-height: $listCardSmallHeight+10px;
     margin-bottom:25px;
-}
-.collectionsMore{
-    min-height: auto;
-    max-height: none;
 }
 .switchToCollections a, .switchToSearch a{
     padding: 5px;

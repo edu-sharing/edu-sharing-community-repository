@@ -256,17 +256,17 @@
                             {{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})
                           </h2>
                           <button
-                            *ngIf="hasMoreCollections"
+                            *ngIf="getHasMoreCollections()"
                             mat-button
                             color="primary"
                             class="toggle"
                             (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</button>
                           </div>
                     </div>
-                    <div class="collections" [class.collectionsMore]="collectionsMore" id="collections">
+                    <div #collections class="collections">
                         <listTable
                                 class="collections"
-                                [nodes]="searchService.searchResultCollections"
+                                [nodes]="getSearchResultCollections()"
                                 [columns]="searchService.collectionsColumns"
                                 [hasIcon]="true"
                                 [dragDrop]="false"
