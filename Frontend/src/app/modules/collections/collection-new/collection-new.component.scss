@@ -271,6 +271,7 @@ $imagePath: '../../../../assets/images/collections/';
 }
 
 .collection-new-preview-infoarea {
+  position: relative;
   min-height: 120px;
   padding: 16px;
   color: #fff;
@@ -282,8 +283,19 @@ $imagePath: '../../../../assets/images/collections/';
     background-color: transparent;
   }
 }
+.collection-new-bg{
+    position: absolute;
+    width: 100%;
+    height: calc(100% - 150px);
+    left: 0;
+    top: 0;
+    background-color: rgba(0,0,0,0.15);
+}
 .dark-color{
   color:#000;
+  .collection-new-bg{
+      background-color: rgba(255,255,255,0.15);
+  }
   @include placeholder {
     color: #333;
   }

@@ -276,7 +276,10 @@ section {
     @include materialShadow();
 }
 .collections-header-textarea{
-    background-color: rgba(0,0,0,0.1);
+    background-color: rgba(0,0,0,0.15);
+    &.collections-header-textarea-bright{
+        background-color: rgba(255, 255, 255, 0.15);
+    }
     .collection-label,.collection-metadata{
         margin-top:18px;
         padding-top: 18px;
