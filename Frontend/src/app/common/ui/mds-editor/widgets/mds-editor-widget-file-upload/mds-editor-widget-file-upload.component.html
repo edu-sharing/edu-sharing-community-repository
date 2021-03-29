@@ -26,7 +26,7 @@
   <div class="seperator-line uppercase">{{ 'WORKSPACE.SELECT_ORG' | translate}}</div>
   <div class="link">
     <div class="link-info">
-      <mat-form-field>
+      <mat-form-field floatLabel="always">
         <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate}}</mat-label>
         <input matInput [(ngModel)]="link" (keyup.enter)="setLink()" [disabled]="!!selectedFiles.value" placeholder="http://">
       </mat-form-field>

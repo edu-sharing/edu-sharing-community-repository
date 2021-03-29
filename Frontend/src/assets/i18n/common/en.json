@@ -589,7 +589,8 @@
         "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing",
         "INDETERMINATE_NOTICE": "Click on the chip in order to add the value \"{{ value }}\" to all elements, or remove it in order to delete it from all elements.",
         "SHOW_OPTIONS_BUTTON": "Show options",
-        "FILTER_FOR": "Filter for \"{{value}}\" ({{count}} matching element(s))"
+        "FILTER_FOR": "Filter for \"{{value}}\" ({{count}} matching element(s))",
+        "OPEN_CLOSE_EXTENDED": "Open/close view"
     },
 
      "SIMPLE_EDIT": {
