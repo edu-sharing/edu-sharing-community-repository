@@ -310,10 +310,6 @@ export class WorkspaceExplorerComponent {
 
     private setSearchQuery(query: any) {
         setTimeout(()=> {
-            if (this.showLoading) {
-                setTimeout(() => this.setSearchQuery(query), 10);
-                return;
-            }
             if (query && query.query) {
                 this._searchQuery = query.query;
                 this._node=query.node;

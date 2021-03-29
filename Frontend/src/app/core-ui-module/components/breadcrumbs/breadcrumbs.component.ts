@@ -65,6 +65,7 @@ export class BreadcrumbsComponent {
     @Input() set breadcrumbsAsNode(nodes: Node[]) {
         if (nodes == null) return;
         this.nodes = nodes;
+        this.addSearch();
     }
     /**
      * Set the breadcrumb main id.
@@ -75,6 +76,7 @@ export class BreadcrumbsComponent {
         if (id == null) return;
         this.node.getNodeParents(id).subscribe((nodes) => {
             this.nodes = nodes.nodes.reverse();
+            this.addSearch();
         });
     }
 
