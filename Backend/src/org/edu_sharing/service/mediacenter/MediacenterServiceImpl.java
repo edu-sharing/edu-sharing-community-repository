@@ -37,6 +37,7 @@ import org.springframework.context.ApplicationContext;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MediacenterServiceImpl implements MediacenterService {
 
@@ -777,14 +778,15 @@ public class MediacenterServiceImpl implements MediacenterService {
         if(mcStatusList == null){
             mcStatusListNew.add(jo.toJSONString());
         }else if(mcStatusList.stream().anyMatch(o -> o.contains(mediacenterGroupName))){
-            mcStatusList.stream().map(o -> {
+            logger.info("merging mediacenter status list for:" + nodeRef);
+            mcStatusListNew.addAll(mcStatusList.stream().map(o -> {
                 try {
                     return ((JSONObject)new JSONParser().parse(o)).get("name").equals(mediacenterGroupName) ? jo.toJSONString() : o;
                 } catch (ParseException e) {
                     logger.error(e.getMessage());
                     return o;
                 }
-            });
+            }).collect(Collectors.toList()));
         }else{
             mcStatusListNew.addAll(mcStatusList);
             mcStatusListNew.add(jo.toJSONString());
