@@ -100,6 +100,10 @@ public class ShibbolethServlet extends HttpServlet {
 		HashMap<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
 
 		redirectUrl = (String)req.getSession().getAttribute(NgServlet.PREVIOUS_ANGULAR_URL);
+		// prefer the login url since it will intercept the regular angular url
+		if(req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL) != null){
+			redirectUrl = (String) req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL);
+		}
 
 		if (validAuthInfo != null ) {
 			if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(headerUserName)) {
