@@ -8,6 +8,7 @@
         visibility: hidden;
         height: 0;
         margin: 0;
+        overflow: hidden;
     }
 }
 h3 {
@@ -16,8 +17,9 @@ h3 {
     background-color: $workspaceMetadataBackground;
     border-bottom: 1px solid #999;
     font-weight: bold;
+    height: 40px;
     padding: 5px 10px;
-
+    font-size: 110%;
     > span {
         flex-grow: 1;
     }
@@ -27,7 +29,11 @@ h3 {
         margin-right: 10px;
     }
     > button {
+        border-radius: 50%;
         color: #666;
+        height: 40px;
+        width: 40px;
+        min-width: 40px;
     }
 }
 

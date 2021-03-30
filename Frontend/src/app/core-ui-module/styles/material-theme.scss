@@ -181,13 +181,28 @@ mat-button-toggle-group{
 .mat-form-field-appearance-outline .mat-form-field-outline-thick{
   color:$primaryMediumLight;
 }
+.mat-form-field-dark{
+    input,textarea {
+        caret-color: $primaryDark;
+    }
+    .mat-form-field-outline,
+    .mat-form-field-label{
+        color: rgba(0,0,0,0.6);
+    }
+    &.mat-focused{
+        .mat-form-field-outline,
+        .mat-form-field-label{
+            color: rgba(0,0,0,0.7);
+        }
+    }
+}
 .mat-form-field-bright{
   input,textarea {
     caret-color: $primaryLight;
   }
   .mat-form-field-outline,
   .mat-form-field-label{
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.6);
   }
   &.mat-focused{
     .mat-form-field-outline,

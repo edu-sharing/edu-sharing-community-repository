@@ -203,9 +203,7 @@ public class MetadataTemplateRenderer {
 							value += "<img src='" +
 									// @TODO 5.1 This can be set to dynamic!
 									license.getIconUrl(licenseName, false) +
-									"'>";
-							if (link != null)
-								value += "</a>";
+									"' alt=\"\">";
 						}
 						String name = getLicenseName(licenseName, properties);
 						String group = getLicenseGroup(licenseName, properties);
@@ -215,6 +213,9 @@ public class MetadataTemplateRenderer {
 							}else if(renderingMode.equals(RenderingMode.TEXT)){
 								value += name;
 							}
+						}
+						if (renderingMode.equals(RenderingMode.HTML) && link != null) {
+							value += "</a>";
 						}
 						if(group != null && !group.equals(name)) {
 							if(renderingMode.equals(RenderingMode.HTML)) {

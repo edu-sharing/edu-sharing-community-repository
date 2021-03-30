@@ -43,7 +43,7 @@ public class RemoteObjectService {
 				try {
 					ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
 					if (is3dPartyRepository(repInfo)) {
-						logger.info("repository " + repInfo.getAppId() + "is not HomeNode and No Alfresco");
+						logger.info("repository " + repInfo.getAppId() + " is not HomeNode and No Alfresco");
 
 						MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 
@@ -60,20 +60,20 @@ public class RemoteObjectService {
 						String remoteObjectNodeId = null;
 						if (remoteObjectProps == null) {
 							logger.info("found no remote object for remote node id:" + nodeId + " creating new one");
-							// RemoteObject erstellen als admin
-							remoteObjectProps = new HashMap<String, Object>();
+							// create RemoteObject as system
+							remoteObjectProps = new HashMap<>();
 							remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, nodeId);
 							remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE,
 									repInfo.getRepositoryType());
 							remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
 
-							remoteObjectNodeId = mcAlfrescoBaseClient.createNode(remoteObjectFolderId,
+							remoteObjectNodeId = NodeServiceFactory.getLocalService().createNodeBasic(remoteObjectFolderId,
 									CCConstants.CCM_TYPE_REMOTEOBJECT, remoteObjectProps);
 							NodeService nodeService = NodeServiceFactory.getNodeService(repInfo.getAppId());
 							InputStream content = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,
 									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
 									null,CCConstants.CM_PROP_CONTENT);
-							HashMap<String, Object> properties = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,
+							HashMap<String, Object> properties = nodeService.getPropertiesPersisting(StoreRef.PROTOCOL_WORKSPACE,
 									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
 							if (content != null) {
 								// Store content from remote repo in node

@@ -276,6 +276,37 @@ public class SearchServiceElastic extends SearchServiceImpl {
             props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
         }
 
+        List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");
+        int childIOCount = 0;
+        int usageCount = 0;
+        int commentCount = 0;
+        if(children != null) {
+            for (Map<String, Serializable> child : children) {
+                String type = (String)child.get("type");
+                List<String> aspects = (List<String>)child.get("aspects");
+                if(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(type)
+                        && aspects.contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){
+                    childIOCount++;
+                }
+                if(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_USAGE).equals(type)){
+                    usageCount++;
+                }
+                if(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COMMENT).equals(type)){
+                    commentCount++;
+                }
+            }
+        }
+        if(childIOCount > 0){
+            props.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT,childIOCount);
+        }
+        if(usageCount > 0){
+            props.put(CCConstants.VIRT_PROP_USAGECOUNT,usageCount);
+        }
+        if(commentCount > 0){
+            props.put(CCConstants.VIRT_PROP_COMMENTCOUNT,commentCount);
+        }
+
+
         org.alfresco.service.cmr.repository.NodeRef alfNodeRef = new  org.alfresco.service.cmr.repository.NodeRef(new StoreRef(protocol,identifier),nodeId);
         String contentUrl = URLTool.getNgRenderNodeUrl(nodeId,null);
         contentUrl = URLTool.addOAuthAccessToken(contentUrl);

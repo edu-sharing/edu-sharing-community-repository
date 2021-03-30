@@ -16,10 +16,14 @@ a, a:hover, a:visited, a:active {
   position: fixed;
   left: 0;
   top: 50%;
-  background: rgba(0,0,0,.1);
+  background: #585858;
   border-radius: 2px;
   padding:2px;
   z-index: 5;
+  border: none;
+  &.cdk-keyboard-focused {
+    @include setGlobalKeyboardFocus();
+  }
 }
 .next{
   left:auto;
@@ -103,7 +107,7 @@ a, a:hover, a:visited, a:active {
 }
 
 #nodeRenderContentWrapper {
-  background: #666;
+  background: #ebebeb;
   position: absolute;
   top:$mainnavHeight;
   width:100%;
@@ -124,7 +128,7 @@ a, a:hover, a:visited, a:active {
   position:relative;
   white-space: nowrap;
   .itemTitle {
-    color: #fff;
+    color: #585858;
     display: inline-block;
     width: 100px;
     text-overflow: ellipsis;

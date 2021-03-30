@@ -663,7 +663,6 @@
 			</template>
 			<template>
 				<id>collection_editorial</id>
-				<caption>collection_editorial</caption>
 				<html><![CDATA[
 					<ccm:educationaltypicalagerange>
 					<ccm:taxonid>

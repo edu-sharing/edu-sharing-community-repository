@@ -26,23 +26,26 @@
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
-    <input
-      autocomplete="off"
-      [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
-      [matChipInputFor]="chipList"
-      (click)="openOverlay()"
-      cdkMonitorElementFocus
-      (cdkFocusChange)="onInputFocusChange($event)"
-    />
-    <button
-      matSuffix
-      mat-icon-button
-      class="mat-button-select-arrow"
-      (click)="toggleOverlay()"
-      [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
-    >
-      <span class="mat-select-arrow"></span>
-    </button>
+    <div class="input-wrapper">
+      <input
+        autocomplete="off"
+        [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
+        [matChipInputFor]="chipList"
+        (click)="openOverlay()"
+        cdkMonitorElementFocus
+        (cdkFocusChange)="onInputFocusChange($event)"
+      />
+      <button
+        matSuffix
+        mat-icon-button
+        class="mat-button-select-arrow"
+        (click)="toggleOverlay()"
+        [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
+        (keydown.tab)="chipList._allowFocusEscape()"
+      >
+        <span class="mat-select-arrow"></span>
+      </button>
+    </div>
   </mat-chip-list>
 </app-mds-editor-widget-container>
 

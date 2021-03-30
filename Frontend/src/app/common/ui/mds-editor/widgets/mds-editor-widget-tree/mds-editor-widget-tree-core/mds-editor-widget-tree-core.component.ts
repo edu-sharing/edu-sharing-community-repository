@@ -19,12 +19,15 @@ import { MdsWidgetType } from '../../../types';
 import { DisplayValue } from '../../DisplayValues';
 import { Tree, TreeNode } from '../tree';
 
+let nextUniqueId = 0;
+
 @Component({
     selector: 'app-mds-editor-widget-tree-core',
     templateUrl: './mds-editor-widget-tree-core.component.html',
     styleUrls: ['./mds-editor-widget-tree-core.component.scss'],
 })
 export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDestroy {
+    readonly uid = `app-mds-editor-widget-tree-core-${nextUniqueId++}`;
     @ViewChild('input') input: ElementRef;
     @Input() widget: Widget;
     @Input() tree: Tree;
@@ -116,7 +119,10 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
                 }
                 return true;
             } else if (keyCode === 'ArrowRight') {
-                if (!this.treeControl.isExpanded(this.selectedNode)) {
+                if (
+                    this.selectedNode.children?.length > 0 &&
+                    !this.treeControl.isExpanded(this.selectedNode)
+                ) {
                     this.treeControl.expand(this.selectedNode);
                 }
                 return true;
@@ -159,7 +165,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     }
 
     getCheckboxId(node: TreeNode): string {
-        return `${node.id}_checkbox`;
+        return `${node.uid}-checkbox`;
     }
 
     hasCheckedAncestor(node: TreeNode): boolean {

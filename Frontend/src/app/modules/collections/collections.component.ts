@@ -38,7 +38,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
-import { ColorHelper } from '../../core-module/ui/color-helper';
+import {ColorHelper, PreferredColor} from '../../core-module/ui/color-helper';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
@@ -468,9 +468,7 @@ export class CollectionsMainComponent {
 
     isBrightColor() {
         return (
-            ColorHelper.getColorBrightness(
-                this.collectionContent.node.collection.color,
-            ) > ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS
+            ColorHelper.getPreferredColor(this.collectionContent.node.collection.color) === PreferredColor.White
         );
     }
 

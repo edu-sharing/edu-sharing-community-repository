@@ -46,7 +46,7 @@ import {
     UIService,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { ColorHelper } from '../../../core-module/ui/color-helper';
+import {ColorHelper, PreferredColor} from '../../../core-module/ui/color-helper';
 import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
@@ -587,8 +587,7 @@ export class ListTableComponent implements OnChanges, EventListener {
             return true;
         }
         return (
-            ColorHelper.getColorBrightness(color) >
-            ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS
+            ColorHelper.getPreferredColor(color) === PreferredColor.White
         );
     }
 

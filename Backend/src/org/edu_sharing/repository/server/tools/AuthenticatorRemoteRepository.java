@@ -170,7 +170,6 @@ public class AuthenticatorRemoteRepository {
 		String globalGroups = null;
 
 		AuthorityService authorityService = serviceRegistry.getAuthorityService();
-		logger.info(serviceRegistry.getAuthenticationService().getCurrentUserName());
 		Set<String> authoritiesForUser = authorityService.getAuthorities();
 		for(String authority : authoritiesForUser){
 			NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);
