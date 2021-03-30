@@ -92,7 +92,7 @@ public class RenderingProxy extends HttpServlet {
 		req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 
 		// will throw if the usage is invalid
-		Usage usage = validateUsage(req, nodeId, parentId);
+		Usage usage = validateUsage(req, nodeId, parentId, usernameDecrypted);
 
 		try {
 			updateUserRemoteRoles(req);
@@ -315,12 +315,12 @@ public class RenderingProxy extends HttpServlet {
 		return contentUrl;
 	}
 
-	private void render(ApplicationInfo homeRep, HttpServletRequest req, HttpServletResponse resp,
-			String nodeId, String usernameDecrypted, String finalContentUrl, Usage usage,
+	private void render(ApplicationInfo repoInfo, HttpServletRequest req, HttpServletResponse resp,
+			String nodeId, String usernameDecrypted, Usage usage,
 			RenderingServiceOptions options) throws RenderingException {
-		RenderingService service = RenderingServiceFactory.getRenderingService(homeRep.getAppId());
-		RepoProxy.RemoteRepoDetails remoteRepo = RepoProxyFactory.getRepoProxy().myTurn(homeRep.getAppId(), nodeId);
-		if(RepoProxyFactory.getRepoProxy().myTurn(homeRep.getAppId(), nodeId) != null){
+		RenderingService service = RenderingServiceFactory.getRenderingService(repoInfo.getAppId());
+		RepoProxy.RemoteRepoDetails remoteRepo = RepoProxyFactory.getRepoProxy().myTurn(repoInfo.getAppId(), nodeId);
+		if(RepoProxyFactory.getRepoProxy().myTurn(repoInfo.getAppId(), nodeId) != null){
 			try {
 				Response remoteResult = RepoProxyFactory.getRepoProxy().getDetailsSnippetWithParameters(remoteRepo.getRepository(), remoteRepo.getNodeId(), getVersion(req), options.displayMode, null, req);
 				RenderingDetailsEntry entity = (RenderingDetailsEntry) remoteResult.getEntity();
@@ -331,9 +331,14 @@ public class RenderingProxy extends HttpServlet {
 				throw new RuntimeException(throwable);
 			}
 		}
+
 		// @todo 5.1 should version inline be transfered?
 		try {
-			RenderingServiceData renderData = service.getData(homeRep, nodeId, null, usernameDecrypted, options);
+			String contentUrl = getContentUrl(repoInfo, repoInfo.getAppId(), repoInfo);
+			String finalContentUrl = populateContentUrlParameters(contentUrl, getParameters(req), repoInfo, repoInfo.getAppId(),
+					usernameDecrypted, nodeId);
+
+			RenderingServiceData renderData = service.getData(repoInfo, nodeId, null, usernameDecrypted, options);
 			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes(StandardCharsets.UTF_8));
 			// track inline / lms
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
@@ -367,17 +372,12 @@ public class RenderingProxy extends HttpServlet {
 
 	private void queryRendering(HttpServletRequest req, HttpServletResponse resp, String nodeId, Usage usage,
 			ApplicationInfo repoInfo) throws Exception {
-		String rep_id = req.getParameter("rep_id");
-		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
 		String usernameDecrypted = getDecryptedUsername(req);
-		String contentUrl = getContentUrl(homeRep, rep_id, repoInfo);
-		String finalContentUrl = populateContentUrlParameters(contentUrl, getParameters(req), homeRep, rep_id,
-				usernameDecrypted, nodeId);
 		// it is a trusted app who requested and signature was verified, so we can
 		// render the node
 		RenderingServiceOptions options = RenderingServiceOptions.fromRequestParameters(req);
 		runAsSystem(() -> {
-			render(homeRep, req, resp, nodeId, usernameDecrypted, finalContentUrl, usage, options);
+			render(repoInfo, req, resp, nodeId, usernameDecrypted, usage, options);
 		});
 	}
 
@@ -455,7 +455,7 @@ public class RenderingProxy extends HttpServlet {
 		resp.sendRedirect(urlWindow);
 	}
 
-	private Usage validateUsage(HttpServletRequest req, String nodeId, String parentId) throws RenderingException {
+	private Usage validateUsage(HttpServletRequest req, String nodeId, String parentId, String usernameDecrypted) throws RenderingException {
 		String ts=req.getParameter("ts");
 		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(req.getParameter("app_id"));
 		ApplicationInfo repoInfo = ApplicationInfoList.getRepositoryInfoById(req.getParameter("rep_id"));
@@ -466,6 +466,7 @@ public class RenderingProxy extends HttpServlet {
 			try {
 				Usage usage = null;
 				if(repoInfo != null && !ApplicationInfoList.getHomeRepository().getAppId().equals(repoInfo.getAppId())){
+					/*
 					Usage2ServiceLocator locator = new Usage2ServiceLocator();
 					locator.setusage2EndpointAddress(repoInfo.getWebServiceHotUrl());
 					Usage2 u2 = locator.getusage2();
@@ -486,6 +487,28 @@ public class RenderingProxy extends HttpServlet {
 						usage.setUsageVersion(u2r.getUsageVersion());
 						usage.setUsageXmlParams(u2r.getUsageXmlParams());
 					}
+					 */
+					// TODO: remote repos usages currently not available, permission will be checked
+					boolean hasPermission = false;
+					try {
+						hasPermission = AuthenticationUtil.runAs(() -> {
+							try {
+								RepoProxyFactory.getRepoProxy().getMetadata(repoInfo.getAppId(), req.getParameter("obj_id"), new ArrayList<>(), null);
+								// when no error occurs, the permission is valid
+								return true;
+							} catch (Throwable t) {
+								logger.info(t);
+							}
+							return false;
+						}, usernameDecrypted);
+
+					}catch(Throwable t){
+						logger.info("Could not fetch permissions: " + t.getMessage(), t);
+					}
+					if(!hasPermission) {
+						throw new RenderingException(HttpServletResponse.SC_UNAUTHORIZED, "Remote repository does not allow access to  " + nodeId, RenderingException.I18N.usage_missing);
+					}
+					return null;
 				}else {
 					usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), parentId, req.getParameter("resource_id"));
 				}
