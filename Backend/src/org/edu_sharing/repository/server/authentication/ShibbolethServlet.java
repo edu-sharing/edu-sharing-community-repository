@@ -90,6 +90,13 @@ public class ShibbolethServlet extends HttpServlet {
 
 		}
 
+		Map<String, String> additionalAttributesMapping = null;
+		try {
+			additionalAttributesMapping = (Map<String, String>)eduApplicationContext.getBean("additionalAttributesMapping");
+		}catch(NoSuchBeanDefinitionException e) {
+
+		}
+
 		String headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
 		if (req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
@@ -144,7 +151,16 @@ public class ShibbolethServlet extends HttpServlet {
 				for(String ssoKey : additionalAttributes) {
 					String val = getShibValue(ssoKey, req);
 					if(val != null && !val.trim().isEmpty()) {
-						ssoMap.put(ssoKey, getShibValue(ssoKey,req));
+						ssoMap.put(ssoKey, val);
+					}
+				}
+			}
+
+			if(additionalAttributesMapping != null) {
+				for(String ssoKey : additionalAttributesMapping.keySet()) {
+					String val = getShibValue(ssoKey, req);
+					if(val != null && !val.trim().isEmpty()) {
+						ssoMap.put(additionalAttributesMapping.get(ssoKey), val);
 					}
 				}
 			}
