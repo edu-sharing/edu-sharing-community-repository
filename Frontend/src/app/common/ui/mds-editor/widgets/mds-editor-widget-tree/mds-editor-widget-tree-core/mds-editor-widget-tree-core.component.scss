@@ -21,21 +21,26 @@
         }
     }
     li,
-    ul {
-        margin-top: 0;
-        margin-bottom: 0;
-        list-style-type: none;
-    }
-    ul {
-        padding-inline-start: 40px;
-    }
-    .mat-tree-node.selected {
-        background-color: rgba(0, 0, 0, 0.04);
+    .mat-nested-tree-node,
+    .mat-tree-node {
+        display: flex;
+        flex-direction: column;
+        align-items: normal;
+        .item {
+            display: flex;
+            align-items: center;
+            &.selected {
+                background-color: rgba(0, 0, 0, 0.04);
+            }
+        }
+        .children-group {
+            padding-inline-start: 40px;
+        }
     }
 }
 
 [hidden] {
-    display: none;
+    display: none !important;
 }
 
 :host ::ng-deep {
