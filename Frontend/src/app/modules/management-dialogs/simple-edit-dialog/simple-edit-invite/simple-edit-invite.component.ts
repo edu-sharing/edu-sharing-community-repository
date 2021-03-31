@@ -81,7 +81,10 @@ export class SimpleEditInviteComponent {
       private toast : Toast,
   ) {
     this.configService.get('simpleEdit.organization.groupTypes',
-        [RestConstants.GROUP_TYPE_ADMINISTRATORS]).subscribe((data) => this.organizationGroups = data);
+        [RestConstants.GROUP_TYPE_ADMINISTRATORS]).subscribe((data) =>
+        // only display non-empty groups
+        this.organizationGroups = data.filter((d: string) => !!d)
+  );
     this.configService.get('simpleEdit.globalGroups',
         {groups: [RestConstants.AUTHORITY_EVERYONE]}).subscribe((data) => {
       this.loadGlobalGroups(data);
@@ -226,19 +229,24 @@ export class SimpleEditInviteComponent {
           Observable.forkJoin(
               this.organizations.map((o) => {
                 return new Observable<Org>((observer) => {
-                  Observable.forkJoin(this.organizationGroups.map((g) =>
-                      this.iamApi.getSubgroupByType(o.organization.authorityName, g)
-                  )).subscribe(groups => {
-                    groups.forEach((g) => {
-                      o.groups[g.group.profile.groupType] = g.group;
+                  if(this.organizationGroups?.length) {
+                    Observable.forkJoin(this.organizationGroups.map((g) =>
+                        this.iamApi.getSubgroupByType(o.organization.authorityName, g)
+                    )).subscribe(groups => {
+                      groups.forEach((g) => {
+                        o.groups[g.group.profile.groupType] = g.group;
+                      });
+                      observer.next(o);
+                      observer.complete();
+                    }, error => {
+                      console.warn('Some group roles could not be found', error)
+                      observer.next(o);
+                      observer.complete();
                     });
+                  } else {
                     observer.next(o);
                     observer.complete();
-                  }, error => {
-                    console.warn('Some group roles could not be found', error)
-                    observer.next(o);
-                    observer.complete();
-                  });
+                  }
                 });
               })).subscribe((o) => {
             this.organizations = o;
@@ -254,7 +262,7 @@ export class SimpleEditInviteComponent {
   }
 
   private loadGlobalGroups(config: SimpleEditGroupConfig[]) {
-    let groupConfigs = config.filter((g) =>
+    const groupConfigs = config.filter((g) =>
       !g.toolpermission || this.connector.hasToolPermissionInstant(g.toolpermission)
     );
     let groups: string[];
@@ -262,7 +270,7 @@ export class SimpleEditInviteComponent {
       console.warn('Invalid config for simple edit / global groups. No matching entry was found');
       groups = [];
     } else {
-      groups = groupConfigs[0].groups;
+      groups = groupConfigs[0].groups || [];
     }
     this.globalGroups = [];
     // filter group everyone and handle it seperately
