@@ -325,10 +325,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.offset =
             window.pageYOffset || document.documentElement.scrollTop;
         if(this.sidenavRef?.nativeElement && this.sidenavApplyRef?.nativeElement) {
-            console.log(this.sidenavApplyRef.nativeElement.getBoundingClientRect(),
-                (parseFloat(this.sidenavApplyRef.nativeElement.getBoundingClientRect().top) -
-                    parseFloat(this.sidenavRef.nativeElement.style.top)) + 'px'
-            );
             this.sidenavRef.nativeElement.style.height =
                 (parseFloat(this.sidenavApplyRef.nativeElement.getBoundingClientRect().top) -
                     parseFloat(this.sidenavRef.nativeElement.style.top)) + 'px';
@@ -346,7 +342,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.extendedSearchUsed = true;
         this.currentValues = props;
         this.updateGroupedRepositories();
-        this.routeSearchParameters(props);
         if (
             UIHelper.evaluateMediaQuery(
                 UIConstants.MEDIA_QUERY_MAX_WIDTH,
@@ -355,6 +350,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
             this.searchService.sidenavOpened = false;
         }
+        this.routeSearchParameters(props);
         //this.getSearch(null,true,props);
     }
 
