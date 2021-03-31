@@ -65,6 +65,7 @@ export class AdminFrontpageComponent {
     this.form = this.formBuilder.group({
       totalCount : ['',[Validators.required,Validators.min(1),Validators.pattern("[0-9]*")]],
       displayCount : ['',[Validators.required,,Validators.min(1),Validators.pattern("[0-9]*")]],
+      timespan : ['',[Validators.required,,Validators.min(1),Validators.pattern("[0-9]*")]]
     }, { validator: [
         ValidateForm
       ]
@@ -72,7 +73,7 @@ export class AdminFrontpageComponent {
     this.mdsService.getSet().subscribe((set)=>{
       this.previewColumns=MdsHelper.getColumns(this.translate, set,'search');
     });
-    this.adminService.getToolpermissions().subscribe(toolpermissions => 
+    this.adminService.getToolpermissions().subscribe(toolpermissions =>
       this.toolpermissions = Object.keys(toolpermissions)
     );
     this.update();
@@ -81,6 +82,7 @@ export class AdminFrontpageComponent {
   save() {
     this.config.frontpage.displayCount=this.form.get('displayCount').value;
     this.config.frontpage.totalCount=this.form.get('totalCount').value;
+    this.config.frontpage.timespan=this.form.get('timespan').value;
     this.loading=true;
     this.adminService.updateRepositoryConfig(this.config).subscribe(()=>{
       this.update();
@@ -93,6 +95,7 @@ export class AdminFrontpageComponent {
       this.config=config;
       this.form.get('displayCount').setValue(this.config.frontpage.displayCount);
       this.form.get('totalCount').setValue(this.config.frontpage.totalCount);
+      this.form.get('timespan').setValue(this.config.frontpage.timespan);
       this.loading=false;
       if(this.config.frontpage.collection){
         this.collectionService.getCollection(this.config.frontpage.collection).subscribe((c)=>{

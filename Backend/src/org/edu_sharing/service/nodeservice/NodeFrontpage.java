@@ -109,7 +109,7 @@ public class NodeFrontpage {
 
         Map<String,Object> params = new HashMap<>();
 
-        params.put("fields",getFieldNames(config.timespan,config.mode));
+        params.put("fields",getFieldNames(config));
 
         Script script = new Script(Script.DEFAULT_SCRIPT_TYPE, "painless", sortingScript,Collections.emptyMap(),params);
         ScriptSortBuilder sb = SortBuilders.scriptSort(script, ScriptSortBuilder.ScriptSortType.NUMBER).order(SortOrder.DESC);
@@ -143,30 +143,24 @@ public class NodeFrontpage {
 
     }
 
-    private List<String> getFieldNames(RepositoryConfig.Frontpage.Timespan timespan, RepositoryConfig.Frontpage.Mode mode){
+    private List<String> getFieldNames(RepositoryConfig.Frontpage config){
         List<String> result = new ArrayList<>();
         Calendar cal = Calendar.getInstance();
-        Integer days = 0;
-        if(RepositoryConfig.Frontpage.Timespan.days_30.equals(timespan)){
-            days = 30;
-        }else if(RepositoryConfig.Frontpage.Timespan.days_100.equals(timespan)){
-            days = 100;
-        }
 
         String prefix = "";
-        if(RepositoryConfig.Frontpage.Mode.rating.equals(mode) ){
+        if(RepositoryConfig.Frontpage.Mode.rating.equals(config.mode) ){
            prefix = "statistic_RATING_";
-        }else if(RepositoryConfig.Frontpage.Mode.views.equals(mode)){
+        }else if(RepositoryConfig.Frontpage.Mode.views.equals(config.mode)){
             prefix = "statistic_VIEW_MATERIAL_";
-        }else if(RepositoryConfig.Frontpage.Mode.downloads.equals(mode)){
+        }else if(RepositoryConfig.Frontpage.Mode.downloads.equals(config.mode)){
             prefix = "statistic_DOWNLOAD_MATERIAL_";
         }
 
-        if(RepositoryConfig.Frontpage.Timespan.all.equals(timespan)){
+        if(config.timespanAll == true){
             String fieldName = prefix + "null";
             result.add(fieldName);
         }else {
-            for (int i = 0; i < days; i++) {
+            for (int i = 0; i < config.timespan; i++) {
                 if(i > 0){
                     cal.add(Calendar.DAY_OF_YEAR, -1);
                 }
