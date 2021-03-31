@@ -28,7 +28,7 @@ interface Action {
 
 @Injectable()
 export class Toast {
-    private static readonly TOAST_SERVICE: 'TOASTY' | 'MAT_SNACKBAR' = 'TOASTY';
+    private static readonly TOAST_SERVICE: 'TOASTY' | 'MAT_SNACKBAR' = 'MAT_SNACKBAR';
     private static readonly TOAST_DURATION = 8000;
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 
