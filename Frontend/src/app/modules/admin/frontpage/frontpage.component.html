@@ -33,7 +33,7 @@
           <mat-form-field *ngIf="config.frontpage.mode !== 'collection'">
             <mat-checkbox
               [checked]="config.frontpage.timespanAll"
-              (change)="config.frontpage.timespanAll = $event.checked">
+              (change)="config.frontpage.timespanAll = $event.checked" style="margin-bottom:10px;display:inline-block;">
               {{'ADMIN.FRONTPAGE.TIMESPAN.all' | translate}}
             </mat-checkbox>
             <mat-hint>{{'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate}}</mat-hint>
