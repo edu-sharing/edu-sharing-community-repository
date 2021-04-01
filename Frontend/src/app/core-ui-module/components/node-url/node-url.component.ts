@@ -11,7 +11,6 @@ import {ListTableComponent} from '../list-table/list-table.component';
     template: `
         <ng-template #content><ng-content></ng-content></ng-template>
         <a *ngIf="unclickable"
-           [attr.role]="role"
            matRipple matRippleColor="primary"
         >
             <ng-container *ngTemplateOutlet="content"></ng-container>
@@ -23,7 +22,6 @@ import {ListTableComponent} from '../list-table/list-table.component';
             [state]="getState()"
             [queryParams]="get('queryParams')"
             queryParamsHandling="merge"
-            [attr.role]="role"
             [attr.aria-label]="listTable?.getPrimaryTitle(node) || node.name"
             [attr.aria-describedby]="ariaDescribedby"
 >
@@ -38,10 +36,6 @@ export class NodeUrlComponent {
     @Input() nodes: Node[];
     @Input() scope: string;
     @Input() unclickable: boolean;
-    /**
-     * aria role
-     */
-    @Input() role: string;
     @Input('aria-describedby') ariaDescribedby: string;
 
     constructor(private nodeHelper: NodeHelperService) {}

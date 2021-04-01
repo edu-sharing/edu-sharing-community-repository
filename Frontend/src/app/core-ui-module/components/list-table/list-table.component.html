@@ -138,7 +138,7 @@
           <app-node-url
             [node]="node"
             [listTable]="this"
-            [role]="viewType === 0 ? 'row' : null"
+            [attr.role]="viewType === 0 ? 'row' : null"
             [nodes]="_nodes"
             [scope]="scope"
             [class.node-padding]="_options && _options.length>0"
