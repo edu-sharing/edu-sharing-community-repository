@@ -25,6 +25,7 @@ import {ListTableComponent} from '../list-table/list-table.component';
             queryParamsHandling="merge"
             [attr.role]="role"
             [attr.aria-label]="listTable?.getPrimaryTitle(node) || node.name"
+            [attr.aria-describedby]="ariaDescribedby"
 >
             <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
@@ -41,6 +42,7 @@ export class NodeUrlComponent {
      * aria role
      */
     @Input() role: string;
+    @Input('aria-describedby') ariaDescribedby: string;
 
     constructor(private nodeHelper: NodeHelperService) {}
 

@@ -36,7 +36,7 @@
 <div [className]="listClass + ' list list-type-'+(viewType == 0 ? 'table' : 'card')"
      cdkMonitorSubtreeFocus
      infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)"
-     [attr.role]="viewType === 0 ? 'table' : null">
+     [attr.role]="viewType === 0 ? 'table' : 'list'">
   <div class="rowgroup">
     <div *ngIf="hasHeading && viewType==0"
          class="headingGroup"
@@ -54,7 +54,7 @@
       <sort-dropdown #sortDropdown class="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
       <button *ngIf="sortDropdown?.menu" #sortDropdownMenuTrigger [matMenuTriggerFor]="sortDropdown.menu" class="cdk-visually-hidden" aria-hidden="true" tabindex="-1"></button>
 
-      <div class="heading" [attr.role]="viewType === 0 ? 'row' : null">
+      <div class="heading" role="row">
         <div *ngIf="hasCheckbox"
              class="checkbox">
           <mat-checkbox *ngIf="_nodes && _nodes.length"
@@ -63,10 +63,10 @@
                         aria-label="{{'LIST_TABLE.TOGGLE_ALL' | translate}}">&nbsp;</mat-checkbox>
         </div>
         <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
-        <div class="icon" *ngIf="hasIcon" [attr.role]="viewType === 0 ? 'columnheader' : null" attr.aria-label="{{'LIST_TABLE.DUMMY_ICON_LABEL' | translate}}">&nbsp;</div>
+        <div class="icon" *ngIf="hasIcon" role="columnheader" attr.aria-label="{{'LIST_TABLE.DUMMY_ICON_LABEL' | translate}}">&nbsp;</div>
         <div *ngFor="let item of columnsVisible;let j = index"
              class="{{getItemCssClass(item)}} row_{{j+1}}"
-             [attr.role]="viewType === 0 ? 'columnheader' : null"
+             role="columnheader"
         >
           <!-- FIXME: This should be a pushbutton if and only if it is clickable, otherwise a
           non-interactive element, e.g., span. -->
@@ -103,7 +103,7 @@
       </div>
       <div *ngFor="let node of _nodes; let i = index"
            class="rowFrame item-container item"
-           [attr.role]="viewType === 0 ? 'rowgroup' : null"
+           [attr.role]="viewType === 0 ? 'rowgroup' : 'listitem'"
            [class.order-animation]="orderElementsActive"
            [class.nodeCollection]="isCollection(node)"
            [class.selected]="getSelectedPos(node)!=-1"
@@ -142,7 +142,9 @@
             [nodes]="_nodes"
             [scope]="scope"
             [class.node-padding]="_options && _options.length>0"
-            [unclickable]="!createLink">
+            [unclickable]="!createLink"
+            [aria-describedby]="getDescribedBy(node)"
+          >
             <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
             <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
               <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
@@ -212,7 +214,7 @@
                    (mouseenter)="animateIcon(node,true)"
                    (mouseleave)="animateIcon(node,false)"
                    [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-                   alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title || node.name}}"
+                   alt=""
               />
               <div class="previewCollectionContainer" *ngIf="isCollection(node) && (!node.preview || node.preview.isIcon) && viewType != 2">
                 <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
@@ -248,6 +250,7 @@
               </div>
             </div>
             <div *ngFor="let item of columnsVisible;let j = index"
+                 [id]="getRowId(node, j)"
                  class="column {{getItemCssClass(item)}} row_{{j+1}}"
                  [attr.role]="viewType === 0 ? 'cell' : null"
                  [class.clickable]="isClickable">

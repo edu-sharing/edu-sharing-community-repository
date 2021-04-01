@@ -1299,4 +1299,15 @@ export class ListTableComponent implements OnChanges, EventListener {
         }
         return node.name;
     }
+
+    getRowId(node: Node, rowIndex: number): string {
+        return `list-table-node-${node.ref.id}-row-${rowIndex + 1}`;
+    }
+
+    getDescribedBy(node: Node): string {
+        return this.columnsVisible
+            .map((_, index) => this.getRowId(node, index))
+            .filter((_, index) => index > 0)
+            .join(' ');
+    }
 }
