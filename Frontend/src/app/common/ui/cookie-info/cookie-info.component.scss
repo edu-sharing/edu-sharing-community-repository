@@ -19,9 +19,21 @@
     white-space: pre-line;
   }
   .more{
-    text-decoration: underline;
     flex-grow: 1;
     margin-right: 5px;
+    button {
+      text-decoration: underline;
+      border: none;
+      background: none;
+      padding: 0;
+      &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus();
+      }
+    }
+  }
+  .cdk-keyboard-focused,
+  .more button.cdk-keyboard-focused {
+    outline-color: $textOnPrimary;
   }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*3)) {

@@ -321,6 +321,7 @@
         }
     },
     "COOKIE_INFO": {
+        "REGION_LABEL": "Cookie-Hinweis",
         "DESCRIPTION": "edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren und diese Seite verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
         "MORE_LINK": "Weitere Informationen",
         "DIALOG_TITLE": "Cookies",
