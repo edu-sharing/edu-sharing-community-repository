@@ -83,7 +83,8 @@
       </div>
       <div class="statsBackground">
         <div class="stats">
-          <div>
+          <div [class.stat-link]="isVisible()"
+               [routerLink]=" isVisible()? ['/' + ROUTER_PREFIX + 'workspace'] : []">
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS' | translate}}
             </div>
@@ -91,7 +92,9 @@
               {{ userStats.nodeCount }}
             </div>
           </div>
-          <div>
+          <div [class.stat-link]="isVisible()"
+               [routerLink]=" isVisible() ? ['/' + ROUTER_PREFIX + 'collections'] : []"
+               [queryParams]="isVisible() ? { scope: 'MY' } : {}">
             <div class="stat">
               {{'PROFILES.STATS.COLLECTIONS' | translate}}
             </div>
@@ -99,7 +102,8 @@
               {{ userStats.collectionCount }}
             </div>
           </div>
-          <div>
+          <div [class.stat-link]="isVisible()"
+               [routerLink]=" isVisible() ? ['/' + ROUTER_PREFIX + 'workspace'] : []">
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS_CC' | translate}}
             </div>
