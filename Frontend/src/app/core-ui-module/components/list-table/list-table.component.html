@@ -210,7 +210,6 @@
             >
               <img *ngIf="node.preview?.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && node.preview && !node.preview.isIcon)"
                    [src]="getPreviewSrc(node)"
-                   [title]="getTitle(node)"
                    (mouseenter)="animateIcon(node,true)"
                    (mouseleave)="animateIcon(node,false)"
                    [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
