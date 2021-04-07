@@ -343,7 +343,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 				String permText = "";
 				for (String perm : permissions) {
-
+					if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
+						// do not show some permission infos in safe invitations since they don't make sense
+						if(Arrays.asList(CCConstants.PERMISSION_CC_PUBLISH).contains(perm)){
+							continue;
+						}
+					}
 					String i18nPerm = I18nServer
 							.getTranslationDefaultResourcebundle(I18nServer.getPermissionCaption(perm), "en_EN");
 					String i18nPermDesc = I18nServer.getTranslationDefaultResourcebundle(

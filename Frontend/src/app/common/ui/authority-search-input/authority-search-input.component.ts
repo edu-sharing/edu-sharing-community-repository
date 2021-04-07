@@ -6,7 +6,7 @@ import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
-    Group,
+    Group, RestConnectorService,
     RestConstants,
     RestIamService,
     RestOrganizationService,
@@ -59,6 +59,7 @@ export class AuthoritySearchInputComponent {
     constructor(
         private iam: RestIamService,
         private organization: RestOrganizationService,
+        private restConnector: RestConnectorService,
         private namePipe: PermissionNamePipe,
     ) {
         this.suggestionGroups$ = this.input.valueChanges.pipe(
@@ -92,7 +93,7 @@ export class AuthoritySearchInputComponent {
 
     getSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
         if (inputValue.length < 2) {
-            if (this.showRecent) {
+            if (this.showRecent && this.restConnector.getCurrentLogin()?.currentScope == null) {
                 return this.getRecentSuggestions();
             } else {
                 return of(null);
