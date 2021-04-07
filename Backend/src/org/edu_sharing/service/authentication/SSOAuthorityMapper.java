@@ -27,6 +27,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -315,6 +316,15 @@ public class SSOAuthorityMapper {
 					if(isHashUserName()) {
 						personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
 					}
+
+					if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+						String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+						//if configured initialize with active status
+						if (personActiveStatus != null) {
+							personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), personActiveStatus);
+						}
+					}
+
 
 					personService.createPerson(personProperties);
 				} else if (updateUser) {
