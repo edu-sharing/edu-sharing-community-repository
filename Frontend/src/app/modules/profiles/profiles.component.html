@@ -83,8 +83,8 @@
       </div>
       <div class="statsBackground">
         <div class="stats">
-          <div [class.stat-link]="isVisible()"
-               [routerLink]=" isVisible()? ['/' + ROUTER_PREFIX + 'workspace'] : []">
+          <div [class.stat-link]="canActivateLinks()"
+               [routerLink]=" canActivateLinks()? ['/' + ROUTER_PREFIX + 'workspace'] : []">
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS' | translate}}
             </div>
@@ -92,9 +92,9 @@
               {{ userStats.nodeCount }}
             </div>
           </div>
-          <div [class.stat-link]="isVisible()"
-               [routerLink]=" isVisible() ? ['/' + ROUTER_PREFIX + 'collections'] : []"
-               [queryParams]="isVisible() ? { scope: 'MY' } : {}">
+          <div [class.stat-link]="canActivateLinks()"
+               [routerLink]=" canActivateLinks() ? ['/' + ROUTER_PREFIX + 'collections'] : []"
+               [queryParams]="canActivateLinks() ? { scope: 'MY' } : {}">
             <div class="stat">
               {{'PROFILES.STATS.COLLECTIONS' | translate}}
             </div>
@@ -102,8 +102,8 @@
               {{ userStats.collectionCount }}
             </div>
           </div>
-          <div [class.stat-link]="isVisible()"
-               [routerLink]=" isVisible() ? ['/' + ROUTER_PREFIX + 'workspace'] : []">
+          <div [class.stat-link]="canActivateLinks()"
+               [routerLink]=" canActivateLinks() ? ['/' + ROUTER_PREFIX + 'workspace'] : []">
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS_CC' | translate}}
             </div>

@@ -250,9 +250,9 @@ export class ProfilesComponent {
   }
 
     /**
-     * method check if user has permissions to show the link
+     * Check if USER has permissions to activate the Links in statistics section
      */
-    public isVisible(): boolean {
+    public canActivateLinks(): boolean {
         return this.isMe && this.hasAccessWorkspace;
     }
 
