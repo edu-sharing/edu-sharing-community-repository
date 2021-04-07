@@ -512,7 +512,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             .pipe(
                 map(
                     ([hasUserChanges, hasProgrammaticChanges, isValid]) =>
-                        (hasUserChanges || hasProgrammaticChanges) && isValid,
+                        (this.editorMode === 'nodes' ? (hasUserChanges || hasProgrammaticChanges) : true) && isValid,
                 ),
             )
             .subscribe(this.canSave$);
