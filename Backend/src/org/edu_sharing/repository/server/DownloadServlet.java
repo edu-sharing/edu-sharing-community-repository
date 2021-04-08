@@ -31,6 +31,8 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -326,12 +328,16 @@ public class DownloadServlet extends HttpServlet{
 	}
 
 	private static MetadataTemplateRenderer getMetadataRenderer(NodeRef nodeRef) throws Throwable {
+		// inherit the props so childobjects will get all properties
+		// only local nodes are supported right now
+		NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), nodeRef.getId());
+		HashMap<String, Object> props = nodeDao.getInheritedPropertiesFromParent();
 		MetadataTemplateRenderer render = new MetadataTemplateRenderer(
 				MetadataHelper.getMetadataset(nodeRef),
 				nodeRef
 				, AuthenticationUtil.getFullyAuthenticatedUser(),
 				MetadataTemplateRenderer.convertProps(
-						NodeServiceHelper.getProperties(nodeRef)
+						props
 				)
 		);
 		render.setRenderingMode(MetadataTemplateRenderer.RenderingMode.TEXT);

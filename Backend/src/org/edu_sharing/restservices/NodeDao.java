@@ -2095,6 +2095,31 @@ public class NodeDao {
 		}
 	}
 
+	/**
+	 * If the NodeDao is a child, then all properties including inherited are returned
+	 * otherwise, the own properties are returned
+	 */
+	public HashMap<String, Object> getInheritedPropertiesFromParent() throws Throwable {
+		if(getAspectsNative().contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
+			Map<String, Object> propsChild = getNativeProperties();
+			String parentRef = NodeServiceFactory.getLocalService().getPrimaryParent(getRef().getId());
+			HashMap<String,Object> propsParent =
+					NodeServiceHelper.getProperties(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentRef));
+			// ignore some technical properties, like mimetypes etc.
+			for(String prop : CCConstants.CHILDOBJECT_IGNORED_PARENT_PROPERTIES)
+				propsParent.remove(prop);
+			// override it with the props from the child
+			for(Map.Entry<String,Object> entry : propsChild.entrySet()){
+				if(entry.getValue() != null && !entry.getValue().toString().isEmpty()) {
+					propsParent.put(entry.getKey(), entry.getValue());
+				}
+			}
+			return propsParent;
+		} else {
+			return getNativeProperties();
+		}
+	}
+
 	public NodeDao publishCopy(HandleMode handleMode) throws DAOException {
 		try {
 			return NodeDao.getNode(repoDao, nodeService.publishCopy(nodeId, handleMode), Filter.createShowAllFilter());
