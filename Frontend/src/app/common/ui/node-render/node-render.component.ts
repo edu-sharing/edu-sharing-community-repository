@@ -407,8 +407,18 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             }
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
-        },(error:any)=> {
-            this.toast.error(error);
+        },(error)=> {
+            console.log(error.error.error);
+            if(error?.error?.error === 'org.edu_sharing.restservices.DAOMissingException') {
+                this.toast.error(null, 'TOAST.RENDER_NOT_FOUND', null, null, null, {
+                    link: {
+                        caption: 'BACK',
+                        callback: () => this.close()
+                    }
+                })
+            } else {
+                this.toast.error(error);
+            }
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
         })

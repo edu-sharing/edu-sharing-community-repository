@@ -108,7 +108,7 @@ export class Toast {
         translationParameters: any = null,
         dialogTitle = '',
         dialogMessage = '',
-        customAction: any = null,
+        customAction: CustomAction = null,
     ): void {
         const parsingResult = this.parseErrorObject({
             errorObject,
