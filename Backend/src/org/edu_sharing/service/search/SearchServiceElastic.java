@@ -104,8 +104,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         return sr;
     }
+
     public BoolQueryBuilder getPermissionsQuery(String field){
         Set<String> authorities = getUserAuthorities();
+        return getPermissionsQuery(field,authorities);
+    }
+    public BoolQueryBuilder getPermissionsQuery(String field, Set<String> authorities){
         BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
         audienceQueryBuilder.minimumShouldMatch(1);
         for (String a : authorities) {
@@ -148,7 +152,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
-            QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
+            QueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
+                    ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
+                    : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
             if(searchToken.getPermissions() != null){
                 for(String permission : searchToken.getPermissions()){
                     queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
