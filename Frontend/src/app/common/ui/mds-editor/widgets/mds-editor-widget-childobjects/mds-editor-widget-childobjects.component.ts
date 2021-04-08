@@ -118,10 +118,11 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         const edit = this._edit ?? this._editLicense;
         // keep any existing license data
         if(props) {
+            console.log(props, edit);
+            if (!edit.child.properties) {
+                edit.child.properties = edit.properties;
+            }
             if (this._edit) {
-                if (!edit.child.properties) {
-                    edit.child.properties = edit.properties;
-                }
                 for (const key of Object.keys(props)) {
                     edit.child.properties[key] = props[key];
                 }
