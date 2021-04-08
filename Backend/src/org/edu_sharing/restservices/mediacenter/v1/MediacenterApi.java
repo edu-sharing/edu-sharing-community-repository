@@ -17,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.alfresco.repo.security.permissions.impl.acegi.WrappedList;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -30,14 +31,7 @@ import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResul
 import org.edu_sharing.restservices.mediacenter.v1.model.OrganisationsImportResult;
 import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
-import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Group;
-import org.edu_sharing.restservices.shared.Mediacenter;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeSearch;
-import org.edu_sharing.restservices.shared.Pagination;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -238,9 +232,6 @@ public class MediacenterApi {
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-			String query = MetadataSearchHelper.getLuceneString( "mediacenter_filter", MetadataSearchHelper.convertCriterias(parameters.getCriterias()));
-			logger.debug(query);
-			searchToken.setLuceneString(query);
 
 			String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter);
 			if(authorityScope == null){
@@ -248,12 +239,23 @@ public class MediacenterApi {
 			}
 
 			searchToken.setAuthorityScope(Arrays.asList(new String[] {authorityScope}));
-			
-    		NodeSearch search = NodeDao.search(repoDao,searchToken);
-    		List<Node> data = new ArrayList<Node>();
-	    	for (NodeRef ref : search.getResult()) {
-	    		data.add(NodeDao.getNode(repoDao, ref.getId(),filter).asNode());
-	    	}
+			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, MdsDaoV2.DEFAULT);
+
+			searchToken.setFacettes(new ArrayList<>());
+			NodeSearch search = NodeDao.searchV2(repoDao,mdsDao,"mediacenter_filter", parameters.getCriterias() ,searchToken,Filter.createShowAllFilter());
+
+			List<Node> data = null;
+			if(search.getNodes().size() < search.getResult().size()){
+				//searched repo deliveres only nodeRefs by query time
+				data = NodeDao.convertToRest(repoDao, search.getResult(), filter, null);
+			}else{
+				//searched repo delivered properties by query time
+				data = search.getNodes();
+				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
+			}
+
+			//List<Node> data = search.getNodes();
+
 	    	Pagination pagination = new Pagination();
 	    	pagination.setFrom(search.getSkip());
 	    	pagination.setCount(data.size());
