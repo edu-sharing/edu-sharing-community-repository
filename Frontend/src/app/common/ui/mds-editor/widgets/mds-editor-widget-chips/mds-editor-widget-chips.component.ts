@@ -121,28 +121,32 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     }
 
     onBlurInput(event: FocusEvent): void {
+        const tag = (event.relatedTarget as HTMLElement)?.tagName;
         // ignore mat option focus to prevent resetting before selection is done
-        if ((event.relatedTarget as HTMLElement)?.tagName === 'MAT-OPTION') {
+        if (tag === 'MAT-OPTION' || event.relatedTarget === this.input.nativeElement) {
             return;
         }
         this.inputControl.setValue(null);
-        if ((event.relatedTarget as HTMLElement)?.tagName === 'MAT-CHIP') {
+        if (tag === 'MAT-CHIP' || tag === 'INPUT' || tag === 'BUTTON') {
             // `matAutocomplete` doesn't seem to close the autocomplete panel when focus goes to
             // chips, however, navigating the autocomplete options by keyboard doesn't work when the
             // input doesn't have the focus.
             //
             // We don't generally close the panel on blur, so the toggle button doesn't get
             // confused.
+            // Also, we need to close the list when an other element (e.g. a tree input) gets focus
             this.trigger.closePanel();
         }
     }
 
     toggleAutoCompletePanel(): void {
+        // use set timeout because otherwise multiple panels stay open cause of stopPropagation
+        // see https://stackoverflow.com/questions/50491195/open-matautocomplete-with-open-openpanel-method
         if (this.trigger.panelOpen) {
-            this.trigger.closePanel();
+            setTimeout(() => this.trigger.closePanel());
         } else {
-            this.trigger.openPanel();
-            this.input.nativeElement.focus();
+            // this.input.nativeElement.focus();
+            setTimeout(() => this.trigger.openPanel());
         }
     }
 

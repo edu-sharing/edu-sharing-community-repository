@@ -44,7 +44,7 @@
         mat-icon-button
         class="mat-button-select-arrow"
         *ngIf="showDropdownArrow"
-        (click)="toggleAutoCompletePanel(); $event.stopPropagation()"
+        (click)="toggleAutoCompletePanel()"
         [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
         (keydown.tab)="chipList._allowFocusEscape()"
       >
