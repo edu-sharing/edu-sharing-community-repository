@@ -337,7 +337,6 @@ export class AdminMediacenterComponent {
     private resetMediacenterNodes() {
         this.mediacenterNodes = null;
         this.mediacenterNodesTotal = 0;
-        this.mediacenterNodesOffset = 0;
         this.hasMoreMediacenterNodes = true
     }
 }
