@@ -73,6 +73,7 @@ import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { FallbackTranslationHandler } from './translation';
 import { TranslationLoader } from './translation-loader';
+import {VCardNamePipe} from './pipes/vcard-name.pipe';
 
 @NgModule({
     declarations: [
@@ -101,6 +102,7 @@ import { TranslationLoader } from './translation-loader';
         InputPasswordComponent,
         InfiniteScrollDirective,
         AuthorityNamePipe,
+        VCardNamePipe,
         NodePersonNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
@@ -180,6 +182,7 @@ import { TranslationLoader } from './translation-loader';
         InfiniteScrollDirective,
         ToastyModule,
         AuthorityNamePipe,
+        VCardNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
         NodeUrlComponent,

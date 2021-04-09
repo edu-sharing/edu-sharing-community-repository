@@ -97,7 +97,7 @@
   </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
     <span class="cdk-visually-hidden">{{ 'NODE.' + item.name | translate }}:</span>
-    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
+    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1">
       {{
       $any(node).properties ?
         ($any(node).properties[item.name + '_DISPLAYNAME']
@@ -109,6 +109,9 @@
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
       {{ $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | formatDate) : '' }}
+    </ng-container>
+     <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
+      {{ $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | vcardName) : '' }}
     </ng-container>
   </span>
 </ng-container>
