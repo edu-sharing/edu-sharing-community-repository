@@ -326,13 +326,16 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       this.isChildobject=false;
       this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
               childobject_id: null
-          }});
+          },
+          replaceUrl: true});
   }
   viewChildobject(node:Node,pos:number) {
         this.isChildobject=true;
         this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
-            childobject_id: node.ref.id
-        }});
+                childobject_id: node.ref.id
+            },
+            replaceUrl: true});
+
   }
   private loadNode() {
     if(!this._node) {
