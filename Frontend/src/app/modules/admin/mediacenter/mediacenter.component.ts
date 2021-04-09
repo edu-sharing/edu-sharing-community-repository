@@ -91,7 +91,9 @@ export class AdminMediacenterComponent {
                 }), true, () => this.toast.closeModalDialog(), {name: authority.profile.displayName});
         });
         remove.elementType = [ElementType.Group];
-        this.groupActions.addOptions = [remove];
+        if(this.isAdmin) {
+            this.groupActions.addOptions = [remove];
+        }
     }
 
 
