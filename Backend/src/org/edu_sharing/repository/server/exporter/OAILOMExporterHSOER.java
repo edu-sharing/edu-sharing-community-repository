@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.exporter;
 
+import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.MLText;
@@ -64,23 +65,19 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
         Element contributeEle = null;
         Serializable contributer = nodeService.getProperty(nodeRef, contributerProp);
         if (contributer != null || role.equals("Provider")) {
-            boolean hasValidEls = false;
             List<String> contrib = null;
+            List<String> contributerClean = null;
             //sometimes there are empty values in list
             if (contributer instanceof List) {
-                contrib = (List) contributer;
-                for (String cont : contrib) {
-                    if (cont != null && !cont.trim().equals(""))
-                        hasValidEls = true;
-                }
+                contributerClean = prepareContributer((List) contributer);
+            } else {
+                contributerClean = new ArrayList<>();
             }
 
             // Hack for "Herkunft" : shall be metametadata - Provider
-            if (!hasValidEls && role.equals("Provider")) {
+            if (contributerClean.size() == 0 && role.equals("Provider")) {
                 String university = (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_UNIVERSITY));
                 if (university != null && !university.isEmpty()) {
-                    if (contrib == null)
-                        contrib = new ArrayList<String>();
                     try {
                         Map<String, MetadataKey> valuesAsMap = MetadataHelper.getLocalDefaultMetadataset().findWidget("ccm:university").getValuesAsMap();
                         for(MetadataKey metadataKey : valuesAsMap.values()){
@@ -90,8 +87,7 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                                 map.put(CCConstants.VCARD_ORG,metadataKey.getCaption());
                                 map.put(CCConstants.VCARD_URL,"https://"+university);
 
-                                contrib.add( VCardTool.hashMap2VCard(map));
-                                hasValidEls = true;
+                                contributerClean.add( VCardTool.hashMap2VCard(map));
                             }
                         }
                     } catch (Throwable e) {
@@ -100,23 +96,18 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                 }
             }
 
-            if (hasValidEls) {
+            if (contributerClean.size() > 0) {
                 contributeEle = createAndAppendElement("contribute", eleParent);
                 createAndAppendElementSrcVal("role", contributeEle, role, nsLOM);
-                Element centityEle = null;
-                for (Object lval : contrib) {
-                    centityEle = createAndAppendElement("centity", contributeEle);
+                for (Object lval : contributerClean) {
+                    Element centityEle = createAndAppendElement("centity", contributeEle);
                     // ## Add URL fields for ORCID/GND-ID resp. ROR/Wikidata-URL
-
-                    ArrayList<HashMap<String, Object>> hashMaps = VCardConverter.vcardToHashMap((String) lval);
-                    if(hashMaps.size() > 0){
-                        HashMap<String, Object> map = hashMaps.iterator().next();
-                        Map<String,String> newMap = map.entrySet().stream()
-                                .collect(Collectors.toMap(Map.Entry::getKey, e -> (String)e.getValue()));
-                        newMap.remove(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE);
-                        String val = VCardTool.hashMap2VCard(new HashMap(newMap));
-                        this.createAndAppendElement("vcard", centityEle, val, true);
-                    }
+                    String val=VCardConverter.cleanupVcard((String)lval, (vcard) -> {
+                        Optional<ExtendedType> contributeDate = vcard.getExtendedTypes().stream().filter((type) -> CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE.equals(type.getExtendedName())).findFirst();
+                        contributeDate.ifPresent(vcard::removeExtendedType);
+                        return vcard;
+                    }).get(0);
+                    this.createAndAppendElement("vcard", centityEle, val, true);
                 }
             }
         }

@@ -10,14 +10,18 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.acegisecurity.context.ContextHolder;
+import net.sourceforge.cardme.vcard.types.EmailType;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -33,10 +37,6 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ImageTool;
-import org.edu_sharing.repository.server.tools.NameSpaceTool;
-import org.edu_sharing.repository.server.tools.XApiTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
@@ -1389,6 +1389,10 @@ public class NodeDao {
 	 */
 	private boolean checkUserHasPermissionToSeeMail(String userName) {
 		try {
+			if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterMetadataEmail") &&
+					(access== null || !access.contains(CCConstants.PERMISSION_WRITE))){
+				return false;
+			}
 			if (this.isCurrentUserAdminOrSameUserAsUserName(userName)) // if is ADMIN or sameUser, don't need to countinue;
 				return true;
 			else {
@@ -1660,9 +1664,19 @@ public class NodeDao {
 		}
 
 		HashMap<String,String[]> properties = new HashMap<String,String[]>();
+		if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterVCardEmail")) {
+			List<String> cleanup = new ArrayList<>();
+			for (Entry<String, Object> entry : props.entrySet()) {
+				if (CCConstants.getLifecycleContributerPropsMap().containsValue(entry.getKey()) || CCConstants.getMetadataContributerPropsMap().containsValue(entry.getKey())) {
+					if (access == null || !access.contains(CCConstants.PERMISSION_WRITE)) {
+						entry.setValue(VCardConverter.removeEMails(StringUtils.join(ValueTool.getMultivalue(entry.getValue().toString()), "\n")));
+						cleanup.add(entry.getKey() + CCConstants.VCARD_EMAIL);
+					}
+				}
+			}
+			cleanup.forEach(props::remove);
+		}
 		for (Entry<String, Object> entry : props.entrySet()) {
-
-			List<String> values = getPropertyValues(entry.getValue());
 
 			String shortPropName = NameSpaceTool.transformToShortQName(entry.getKey());
 
@@ -1673,6 +1687,8 @@ public class NodeDao {
 						&& !filter.getProperties().contains(shortPropName)){
 					continue;
 				}
+				List<String> values = getPropertyValues(entry.getValue());
+
 				if(props.containsKey(entry.getKey()+ CCConstants.LONG_DATE_SUFFIX)){
 					values = getPropertyValues(props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
 					properties.put(shortPropName, values.toArray(new String[values.size()]));

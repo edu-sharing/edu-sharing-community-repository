@@ -28,15 +28,22 @@
 package org.edu_sharing.repository.server.tools;
 
 import net.sourceforge.cardme.engine.VCardEngine;
+import net.sourceforge.cardme.io.VCardWriter;
 import net.sourceforge.cardme.vcard.VCard;
+import net.sourceforge.cardme.vcard.VCardImpl;
+import net.sourceforge.cardme.vcard.exceptions.VCardBuildException;
 import net.sourceforge.cardme.vcard.types.AdrType;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.StringTool;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class VCardConverter {
 
@@ -120,6 +127,48 @@ public class VCardConverter {
 		if(data.containsKey(prefix+CCConstants.VCARD_ORG))
 			return (String) data.get(prefix+CCConstants.VCARD_ORG);
 		return null;
+	}
+
+
+	public static String removeEMails(String vcardString){
+		return StringUtils.join(cleanupVcard(vcardString, (vcard) -> {
+			if(vcard.getEmails() != null) {
+				vcard.getEmails().forEach(vcard::removeEmail);
+			}
+			return vcard;
+		}), CCConstants.MULTIVALUE_SEPARATOR);
+	}
+
+	/**
+	 * removes all given vcard props in the given vcard string (can be multi value)
+	 * useful to remove sensible data (e.g. email)
+	 */
+	public static List<String> cleanupVcard(String vcardString, Function<VCard, VCard> cleanup ){
+		try{
+			VCardEngine engine = new VCardEngine();
+			// unfortunately, the multi vcard string method is only private, so we need to make it accessible
+			Method method = engine.getClass().getDeclaredMethod("parseManyInOneVCard", String.class);
+			method.setAccessible(true);
+			return ((List<VCard>) method.invoke(engine, vcardString)).stream().map(cleanup).map((vCard) -> {
+				VCardWriter writer = new VCardWriter();
+				writer.setVCard(vCard);
+				try {
+					return writer.buildVCardString();
+				} catch (VCardBuildException e) {
+					throw new RuntimeException(e);
+				}
+			}).collect(Collectors.toList());
+		}catch(Throwable t){
+			logger.warn("Could not cleanup VCard, reading failed: " + t.getMessage(), t);
+			// return empty vcard, not the original vcard, since otherwise we might expose private data
+			VCardWriter writer = new VCardWriter();
+			writer.setVCard(new VCardImpl());
+			try {
+				return Collections.singletonList(writer.buildVCardString());
+			} catch (VCardBuildException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 	public static ArrayList<HashMap<String,Object>> vcardToHashMap(String vcardString){
 		return vcardToHashMap("", vcardString);
