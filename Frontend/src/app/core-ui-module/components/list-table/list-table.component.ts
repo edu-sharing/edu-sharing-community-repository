@@ -794,8 +794,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         }
         if (event.pointerType === 'touch' || event.pointerType === 'pen') {
             this.doubleClickRow.emit(node);
-        }
-        if (!this.selectOnClick) {
+        } else  if (!this.selectOnClick) {
             // Propagate event
             this.clickRowSender(node, region);
             this.refreshAvailableOptions(node);
