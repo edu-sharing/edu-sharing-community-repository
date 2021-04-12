@@ -50,6 +50,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
@@ -919,6 +920,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 
+	}
+
+	@Override
+	public void removeAllPermissions(String nodeId) throws Exception {
+		permissionService.deletePermissions(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
 	}
 
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception {
