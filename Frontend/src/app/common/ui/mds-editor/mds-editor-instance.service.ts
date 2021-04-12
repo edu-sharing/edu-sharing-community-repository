@@ -187,14 +187,13 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.variables != null) {
                 for (const field of ['caption', 'placeholder', 'icon', 'defaultvalue']) {
                     (this.definition as any)[field] = this.replaceVariableString(
-                        (this.definition as any)[field],
-                        this.variables,
+                        (this.definition as any)[field]
                     );
                 }
             }
         }
 
-        private replaceVariableString(str: string, variables: string[]) {
+        private replaceVariableString(str: string, variables: string[] = this.variables)  {
             if (!str || !str.match('\\${.+}')) {
                 return str;
             }
@@ -236,7 +235,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                this.initialValues = { jointValues: values?.[this.definition.id] || [] };
+                this.initialValues = { jointValues: values?.[this.definition.id] ||
+                        (this.definition.defaultvalue ? [this.definition.defaultvalue] : []) };
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
