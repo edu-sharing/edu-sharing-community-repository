@@ -384,6 +384,7 @@
             "VERSION": "Version",
             "LOCALE": "Rechtsordnung",
             "RELEASE_WITHOUT_LICENSE": "Um ein Objekt freizugeben muss eine Lizenz definiert werden",
+            "RELEASE_WITHOUT_AUTHOR":  "Um ein Objekt freizugeben muss der Autor nicht leer sein",
             "CUSTOM_RIGHTS": "GNU GPL oder andere Lizenzen...",
             "RELEASE": "Objekt mit dieser Lizenz veröffentlichen",
             "RELEASE_MULTI": "{{count}} Objekte mit dieser Lizenz veröffentlichen",

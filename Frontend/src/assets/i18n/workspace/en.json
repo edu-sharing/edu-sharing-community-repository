@@ -376,6 +376,7 @@
             "VERSION": "version",
             "LOCALE": "locale",
             "RELEASE_WITHOUT_LICENSE": "In order to release an object you need to select a license",
+            "RELEASE_WITHOUT_AUTHOR": "In order to release an object, author cannot be empty",
             "CUSTOM_RIGHTS": "GNU GPL or other licenses...",
             "RELEASE": "Release object under this license",
             "RELEASE_MULTI": "Release {{count}} objects under this license",
