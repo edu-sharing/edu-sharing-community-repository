@@ -912,7 +912,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			boolean downloadAllowed = downloadAllowed(nodeRef.getId(),commonLicenseKey,(String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 
 			if ((propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null || propsCopy.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION)!=null) && downloadAllowed) {
-				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId(),null));
+				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId(),null, true));
 			}
 
 			String commonLicensekey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
@@ -3618,7 +3618,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				
 				props.put(CCConstants.CONTENTURL, contentUrl);
 				if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && contentUrl != null) {
-					props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(nodeId,version.getVersionLabel()));
+					props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(nodeId,version.getVersionLabel(), true));
 				}
 
 				// thumbnail take the current thumbnail cause subobjects
