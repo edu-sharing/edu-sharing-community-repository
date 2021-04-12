@@ -319,7 +319,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         props.put(CCConstants.CONTENTURL, contentUrl);
 
         if(sourceAsMap.get("content") != null) {
-            props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null));
+            props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null, true));
         }
 
         NodeRef eduNodeRef = new NodeRefImpl(ApplicationInfoList.getHomeRepository().getAppId(),
