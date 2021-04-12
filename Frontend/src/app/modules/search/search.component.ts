@@ -312,6 +312,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
         this.destroyed$.next();
         this.destroyed$.complete();
     }
@@ -605,9 +606,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         };
         this.router.navigate(
             [UIConstants.ROUTER_PREFIX + 'render', node.ref.id],
-            { queryParams: queryParams, state: {
-                nodes: this.searchService.searchResult,
-                scope: 'search'
+            { queryParams: queryParams,
+                state: {
+                    scope: 'search'
                 }
             },
         );

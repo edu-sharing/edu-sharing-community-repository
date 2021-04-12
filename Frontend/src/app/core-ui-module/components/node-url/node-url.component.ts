@@ -42,7 +42,6 @@ export class NodeUrlComponent {
 
     getState() {
         return {
-            nodes: this.nodes,
             scope: this.scope,
         };
     }
