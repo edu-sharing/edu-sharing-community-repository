@@ -281,7 +281,7 @@ public class OAILOMExporter {
 		if(format!=null) {
 			technical = createAndAppendElement("technical", lom);
 			createAndAppendElement("format", technical, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
-			createAndAppendElement("location", technical, URLTool.getDownloadServletUrl(nodeRef.getId(), null));
+			createAndAppendElement("location", technical, URLTool.getDownloadServletUrl(nodeRef.getId(), null, false));
 		}
 		// second is text/html for rendering
 		technical = createAndAppendElement("technical", lom);
