@@ -16,7 +16,7 @@ import {
     Input,
     Output,
     TemplateRef,
-    ViewChild, ViewContainerRef, SimpleChanges, OnChanges, Renderer2, Sanitizer, OnDestroy,
+    ViewChild, ViewContainerRef, SimpleChanges, OnChanges, Renderer2, Sanitizer,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -107,7 +107,7 @@ import {NodeTitlePipe} from '../../../common/ui/node-title.pipe';
 /**
  * A provider to render multiple Nodes as a list
  */
-export class ListTableComponent implements OnChanges, EventListener, OnDestroy {
+export class ListTableComponent implements OnChanges, EventListener {
     public static readonly VIEW_TYPE_LIST = 0;
     public static readonly VIEW_TYPE_GRID = 1;
     public static readonly VIEW_TYPE_GRID_SMALL = 2;
