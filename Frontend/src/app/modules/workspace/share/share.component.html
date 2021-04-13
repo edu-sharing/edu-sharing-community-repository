@@ -113,6 +113,18 @@
             </app-multi-line-label>
           </mat-radio-button>
         </mat-radio-group>
+        <div class="publish-bulk">
+          <mat-slide-toggle [(ngModel)]="bulkInvite" [disabled]="!publishPermission">
+            <app-multi-line-label>
+              <ng-container slot="label">
+                {{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate}}
+              </ng-container>
+              <ng-container slot="description">
+                {{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO_MULTIPLE' | translate}}
+              </ng-container>
+            </app-multi-line-label>
+          </mat-slide-toggle>
+        </div>
       </div>
     </mat-tab>
     <mat-tab *ngIf="_nodes && _nodes.length === 1" class="tabContent">

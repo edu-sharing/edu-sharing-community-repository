@@ -158,6 +158,7 @@
                 "MODE_OFF_INFO": "The element is not publicly accessible and can be accessed only by invited users",
                 "MODE_DIRECT": "Share publicly",
                 "MODE_DIRECT_INFO": "The element is released publicly. If the current element is deleted, the publication will be invalid.\nIf changes are made to the element, they will directly affect the publication.",
+                "MODE_DIRECT_INFO_MULTIPLE": "The elements are released publicly.",
                 "MODE_COPY": "Publish as a copy",
                 "MODE_COPY_INFO": "A copy of the item is created. This will be stored in the central area for published content and made publicly available.\nChanges to or a deletion of the original has no influence on the published copy.\nOnly the editorial team can subsequently control the publication. Multiple versions can be published in the same time.",
                 "NO_PUBLISH_COPY_PERMISSION": "You do not have permission to publish a copy.",

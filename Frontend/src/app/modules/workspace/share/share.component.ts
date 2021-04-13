@@ -127,6 +127,7 @@ export class WorkspaceShareComponent {
     newPermissions: Permission[] = [];
     inheritAccessDenied = false;
     bulkMode = 'extend';
+    bulkInvite = false;
     owner: Permission;
     publishEnabled: Permission;
     linkEnabled: Permission;
@@ -602,6 +603,11 @@ export class WorkspaceShareComponent {
                 return new Observable((observer: Observer<void>) => {
                     let permissions: Permission[] = Helper.deepCopy(this.permissions);
                     if (this.isBulk()) {
+                        if(this.bulkInvite) {
+                            const permission = RestHelper.getAllAuthoritiesPermission()
+                            permission.permissions = [RestConstants.ACCESS_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
+                            permissions.push(permission);
+                        }
                         // keep inherit state of original node
                         inherit = this.originalPermissions[i].inherited;
                         if (this.bulkMode === 'extend') {
