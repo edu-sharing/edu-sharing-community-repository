@@ -10,4 +10,7 @@ mat-form-field {
 .input-wrapper {
     display: flex;
     flex-grow: 1;
+    > authority-search-input {
+        width: 100%;
+    }
 }
