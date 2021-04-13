@@ -15,10 +15,11 @@
 <form (ngSubmit)="onSubmit()">
   <mat-form-field class="authority-search-input" floatLabel="always">
     <i matPrefix [icon]="inputIcon" *ngIf="inputIcon"></i>
-    <mat-label>{{ placeholder | translate }}</mat-label>
+    <mat-label>{{ label || placeholder | translate }}</mat-label>
     <input
       type="text"
       matInput
+      #inputElement
       [matAutocomplete]="autoGroup"
       placeholder="{{ placeholder | translate }}"
       name="authoritySearch"

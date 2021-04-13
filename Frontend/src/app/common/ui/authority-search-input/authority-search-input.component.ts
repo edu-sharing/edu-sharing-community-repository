@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete/autocomplete';
 import { forkJoin, Observable, of } from 'rxjs';
@@ -26,6 +26,8 @@ interface SuggestionGroup {
     styleUrls: ['authority-search-input.component.scss'],
 })
 export class AuthoritySearchInputComponent {
+    @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
+
     @Input() globalSearchAllowed = false;
     /**
      * Do allow any entered authority (not recommended for general use)
@@ -49,10 +51,14 @@ export class AuthoritySearchInputComponent {
     }
     @Input() maxSuggestions = 10;
     @Input() inputIcon = 'search';
+    /**
+     * label, if unset, placeholder will be used
+     */
+    @Input() label: string;
     @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
     @Input() hint = '';
 
-    @Output() onChooseAuthority = new EventEmitter();
+    @Output() onChooseAuthority = new EventEmitter<Authority|any>();
 
     input = new FormControl('');
     suggestionGroups$: Observable<SuggestionGroup[]>;
