@@ -15,6 +15,8 @@ import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -234,6 +236,25 @@ public class MediacenterApi {
 				//searched repo delivered properties by query time
 				data = search.getNodes();
 				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
+			}
+
+			for(Node node : data){
+				String newValue = null;
+				String[] mediacenters = node.getProperties().get("ccm:mediacenter");
+				if(mediacenters != null) {
+					for (String mzStatus : mediacenters) {
+						try {
+							JSONObject o = (JSONObject) new JSONParser().parse(mzStatus.trim());
+							String mzName = (String) o.get("name");
+							if (mzName.contains(mediacenter)) {
+								newValue = (String) o.get("activated");
+							}
+						}catch(Exception e){
+							logger.error(e.getMessage());
+						}
+					}
+				}
+				node.getProperties().put("ccm:mediacenter",new String[]{newValue});
 			}
 
 	    	Pagination pagination = new Pagination();

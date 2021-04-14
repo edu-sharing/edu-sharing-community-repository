@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search;
 
+import com.google.gson.Gson;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -14,6 +15,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
@@ -270,6 +272,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
 
             Serializable value = null;
+            /**
+             * @TODO: transform to ValueTool.toMultivalue
+             */
             if(entry.getValue() instanceof ArrayList){
                 if(((ArrayList) entry.getValue()).size() != 1) {
                     value = entry.getValue();
@@ -278,6 +283,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             } else {
                 value = entry.getValue();
+            }
+            if(entry.getKey().equals("ccm:mediacenter")){
+                List<Map<String,Object>> mediacenterStatus = (List<Map<String,Object>>)entry.getValue();
+                ArrayList<String> result = new ArrayList<>();
+                for(Map<String,Object> mcSt: mediacenterStatus){
+                    Gson gson = new Gson();
+                    String json = gson.toJson(mcSt);
+                    result.add(json);
+                }
+                value = ValueTool.toMultivalue(result.toArray(new String[result.size()]));
             }
             props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
         }
