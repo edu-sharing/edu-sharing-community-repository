@@ -698,6 +698,7 @@ public class MediacenterServiceImpl implements MediacenterService {
         for (String mediacenterId : allMediacenterIds) {
             String mediacenterProxyName = "GROUP_" + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mediacenterId;
             String mediacenterGroupName  = "GROUP_" + AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + mediacenterId;
+            String mediacenterAdminGroup = getMediacenterAdminGroup(mediacenterGroupName);
             List<String> nodesAdd = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodes(mediacenterId, from, until);
             logger.info(mediacenterId + " found new nodes: " + nodesAdd.size() + " for period: " + from + " - " + until);
 
@@ -711,17 +712,34 @@ public class MediacenterServiceImpl implements MediacenterService {
                         CCConstants.PERMISSION_CC_PUBLISH);
                 boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
                         CCConstants.PERMISSION_CONSUMER);
+                boolean hasPublishPermissionAdmin = hasPermissionSet(nodeRef,mediacenterAdminGroup,
+                        CCConstants.PERMISSION_CC_PUBLISH);
+                boolean hasConsumerPermissionAdmin = hasPermissionSet(nodeRef,mediacenterAdminGroup,
+                        CCConstants.PERMISSION_CONSUMER);
 
-                if(!hasPublishPermission || !hasConsumerPermission){
-                    serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
-                        policyBehaviourFilter.disableBehaviour(nodeRef);
-                        logger.info(mediacenterProxyName + " add consumer and publish permission for " + nodeRef);
+
+                serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                    policyBehaviourFilter.disableBehaviour(nodeRef);
+                    if(!hasPublishPermission){
+                        logger.info(mediacenterProxyName + " add publish permission for " + nodeRef);
                         permissionService.setPermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CONSUMER, true);
+                    }
+                    if(!hasConsumerPermission){
+                        logger.info(mediacenterProxyName + " add consumer permission for " + nodeRef);
                         permissionService.setPermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CC_PUBLISH, true);
-                        policyBehaviourFilter.enableBehaviour(nodeRef);
-                        return null;
-                    });
-                }
+                    }
+                    if(!hasPublishPermissionAdmin){
+                        logger.info(mediacenterAdminGroup + " add publish permission for " + nodeRef);
+                        permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CC_PUBLISH, true);
+                    }
+                    if(!hasConsumerPermissionAdmin){
+                        logger.info(mediacenterAdminGroup + " add consumer permission for " + nodeRef);
+                        permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CONSUMER, true);
+                    }
+                    policyBehaviourFilter.enableBehaviour(nodeRef);
+                    return null;
+                });
+
 
                 fixMediacenterStatus(nodeRef,mediacenterGroupName,true);
             }
