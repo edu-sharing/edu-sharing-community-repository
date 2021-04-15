@@ -758,6 +758,11 @@ public class MediacenterServiceImpl implements MediacenterService {
                 boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
                         CCConstants.PERMISSION_CONSUMER);
 
+                boolean hasPublishPermissionAdmin = hasPermissionSet(nodeRef,mediacenterAdminGroup,
+                        CCConstants.PERMISSION_CC_PUBLISH);
+                boolean hasConsumerPermissionAdmin = hasPermissionSet(nodeRef,mediacenterAdminGroup,
+                        CCConstants.PERMISSION_CONSUMER);
+
                 if(hasPublishPermission){
                     serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
                         policyBehaviourFilter.disableBehaviour(nodeRef);
@@ -775,6 +780,15 @@ public class MediacenterServiceImpl implements MediacenterService {
                         policyBehaviourFilter.enableBehaviour(nodeRef);
                         return null;
                     });
+                }
+
+                if(!hasPublishPermissionAdmin){
+                    logger.info(mediacenterAdminGroup + " add publish permission for " + nodeRef);
+                    permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CC_PUBLISH, true);
+                }
+                if(!hasConsumerPermissionAdmin){
+                    logger.info(mediacenterAdminGroup + " add consumer permission for " + nodeRef);
+                    permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CONSUMER, true);
                 }
 
                fixMediacenterStatus(nodeRef,mediacenterGroupName,false);
