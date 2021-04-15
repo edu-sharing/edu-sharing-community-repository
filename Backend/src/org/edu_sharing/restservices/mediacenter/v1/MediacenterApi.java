@@ -215,6 +215,11 @@ public class MediacenterApi {
 			SearchToken searchToken=new SearchToken();
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
+
+			if(!sortProperties.isEmpty() && sortProperties.get(0).equals("ccm:mediacenter")){
+				sortProperties.set(0,"ccm:mediacenter_sort."+mediacenter+".activated.keyword");
+			}
+
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 
 			String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterAdminGroup(mediacenter);
