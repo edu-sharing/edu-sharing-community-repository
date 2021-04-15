@@ -810,7 +810,6 @@ public class MediacenterServiceImpl implements MediacenterService {
         if(mcStatusList == null){
             mcStatusListNew.add(jo.toJSONString());
         }else if(mcStatusList.stream().anyMatch(o -> o.contains(mediacenterGroupName))){
-            logger.info("merging mediacenter status list for:" + nodeRef);
             mcStatusListNew.addAll(mcStatusList.stream().map(o -> {
                 try {
                     return ((JSONObject)new JSONParser().parse(o)).get("name").equals(mediacenterGroupName) ? jo.toJSONString() : o;
