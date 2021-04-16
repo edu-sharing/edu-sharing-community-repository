@@ -20,16 +20,21 @@ import {
 } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
-import { DisplayValue } from '../DisplayValues';
+import {DisplayValue, DisplayValues} from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import {AuthoritySearchInputComponent} from '../../../authority-search-input/authority-search-input.component';
+import {Authority, AuthorityProfile, Group} from '../../../../../core-module/rest/data-object';
+import {AuthorityNamePipe} from '../../../../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityAffiliationPipe} from '../../../../../core-ui-module/pipes/authority-affiliation.pipe';
+import {async} from '@angular/core/testing';
 
 @Component({
-    selector: 'app-mds-editor-widget-chips',
-    templateUrl: './mds-editor-widget-chips.component.html',
-    styleUrls: ['./mds-editor-widget-chips.component.scss'],
+    selector: 'app-mds-editor-widget-authority',
+    templateUrl: './mds-editor-widget-authority.component.html',
+    styleUrls: ['./mds-editor-widget-authority.component.scss'],
 })
-export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implements OnInit {
-    @ViewChild('input') input: ElementRef<HTMLInputElement>;
+export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase implements OnInit {
+    @ViewChild('authoritySearchInputComponent') authoritySearchInputComponent: AuthoritySearchInputComponent;
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
     trigger: MatAutocompleteTrigger;
     @ViewChild('auto') matAutocomplete: MatAutocomplete;
@@ -66,77 +71,25 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             [
                 ...this.widget.getInitialValues().jointValues,
                 ...(this.widget.getInitialValues().individualValues ?? []),
-            ].map((value) => this.toDisplayValues(value)),
-            this.getStandardValidators(),
+            ].filter((value) => !!value).map((value: string) => ({
+                    key: value,
+                    label: value,
+                }) as DisplayValue),
+            this.getStandardValidators()
         );
         this.indeterminateValues$ = new BehaviorSubject(
             this.widget.getInitialValues().individualValues,
         );
-        if (
-            this.widget.definition.type === MdsWidgetType.MultiValueBadges ||
-            this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges
-        ) {
-            this.widget.definition.bottomCaption =
-                this.widget.definition.bottomCaption ??
-                this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER');
-            this.changeDetectorRef.detectChanges();
-        }
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
-        if (
-            this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges ||
-            this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges
-        ) {
-            const filteredValues = this.subscribeForSuggestionUpdates();
-            this.autocompleteValues = combineLatest([
-                filteredValues,
-                this.autocompleteIsInhibited,
-            ]).pipe(map(([values, inhibit]) => (inhibit ? null : values)));
-        }
-        this.showDropdownArrow =
-            this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
-            !!this.widget.definition.values;
 
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
         this.widget.addValue.subscribe((value: MdsWidgetValue) =>
-            this.add(this.toDisplayValues(value)),
+            this.chipsControl.setValue([...this.chipsControl.value, value])
         );
-    }
-
-    onInputTokenEnd(event: MatChipInputEvent): void {
-        if (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges) {
-            return;
-        }
-        const input = event.input;
-        const value = (event.value || '').trim();
-        if (value) {
-            this.add(this.toDisplayValues(value));
-        }
-        if (input) {
-            input.value = '';
-        }
-    }
-
-    onBlurInput(event: FocusEvent): void {
-        const tag = (event.relatedTarget as HTMLElement)?.tagName;
-        // ignore mat option focus to prevent resetting before selection is done
-        if (tag === 'MAT-OPTION' || event.relatedTarget === this.input.nativeElement) {
-            return;
-        }
-        this.inputControl.setValue(null);
-        if (tag === 'MAT-CHIP' || tag === 'INPUT' || tag === 'BUTTON') {
-            // `matAutocomplete` doesn't seem to close the autocomplete panel when focus goes to
-            // chips, however, navigating the autocomplete options by keyboard doesn't work when the
-            // input doesn't have the focus.
-            //
-            // We don't generally close the panel on blur, so the toggle button doesn't get
-            // confused.
-            // Also, we need to close the list when an other element (e.g. a tree input) gets focus
-            this.trigger.closePanel();
-        }
     }
 
     toggleAutoCompletePanel(): void {
@@ -155,25 +108,26 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
-        this.removeFromIndeterminateValues(toBeRemoved.key);
         this.inhibitAutocomplete();
     }
 
-    selected(event: MatAutocompleteSelectedEvent) {
-        this.add(event.option.value);
-        this.input.nativeElement.value = '';
-        this.inputControl.setValue(null);
-    }
-
     focus() {
-        this.input?.nativeElement?.focus();
+        this.authoritySearchInputComponent?.inputElement?.nativeElement?.focus();
     }
 
-    add(value: DisplayValue): void {
-        if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
-            this.chipsControl.setValue([...this.chipsControl.value, value]);
+    add(value: Authority|string): void {
+        if(value instanceof String) {
+            console.warn('Authority widget does currently not support state handling');
+        } else {
+            const displayValue: DisplayValue = {
+                label: new AuthorityNamePipe(this.translate).transform(value),
+                hint: new AuthorityAffiliationPipe(this.translate).transform(value),
+                key: (value as Authority).authorityName
+            };
+            if (!this.chipsControl.value.some((v: DisplayValue) => v.key === displayValue.key)) {
+                this.chipsControl.setValue([...this.chipsControl.value, displayValue]);
+            }
         }
-        this.removeFromIndeterminateValues(value.key);
     }
 
     getTooltip(value: DisplayValue, hasTextOverflow: boolean): string | null {
@@ -187,38 +141,6 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         } else {
             return null;
         }
-    }
-
-    private removeFromIndeterminateValues(key: string): void {
-        const indeterminateValues = this.indeterminateValues$.value;
-        if (key && indeterminateValues?.includes(key)) {
-            indeterminateValues.splice(indeterminateValues.indexOf(key), 1);
-            this.indeterminateValues$.next(indeterminateValues);
-        }
-    }
-
-    private subscribeForSuggestionUpdates(): Observable<DisplayValue[]> {
-        // Combine observables to update suggestions when either the input field or currently
-        // selected values change.
-        return combineLatest([
-            this.inputControl.valueChanges.pipe(
-                startWith(null as string),
-                filter(
-                    (value: string | null | DisplayValue) =>
-                        typeof value === 'string' || value === null,
-                ),
-                debounceTime(200),
-                distinctUntilChanged(),
-            ) as Observable<string | null>,
-            this.chipsControl.valueChanges.pipe(
-                startWith(this.chipsControl.value),
-                distinctUntilChanged(),
-            ),
-        ]).pipe(
-            switchMap(([filterString, selectedValues]) =>
-                this.filter(filterString, selectedValues),
-            ),
-        );
     }
 
     private toDisplayValues(value: MdsWidgetValue | string): DisplayValue {

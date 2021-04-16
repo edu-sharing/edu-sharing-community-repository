@@ -794,8 +794,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         }
         if (event.pointerType === 'touch' || event.pointerType === 'pen') {
             this.doubleClickRow.emit(node);
-        }
-        if (!this.selectOnClick) {
+        } else  if (!this.selectOnClick) {
             // Propagate event
             this.clickRowSender(node, region);
             this.refreshAvailableOptions(node);
@@ -1298,5 +1297,16 @@ export class ListTableComponent implements OnChanges, EventListener {
             return new NodeTitlePipe(this.translate).transform(node);
         }
         return node.name;
+    }
+
+    getRowId(node: Node|any, rowIndex: number): string {
+        return `list-table-node-${node.ref?.id || node.authorityName}-row-${rowIndex + 1}`;
+    }
+
+    getDescribedBy(node: Node): string {
+        return this.columnsVisible
+            .map((_, index) => this.getRowId(node, index))
+            .filter((_, index) => index > 0)
+            .join(' ');
     }
 }

@@ -31,6 +31,7 @@ import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 })
 export class LoginComponent implements OnInit {
     readonly SkipTarget = SkipTarget;
+    readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('passwordInput') passwordInput: InputPasswordComponent;
@@ -230,15 +231,6 @@ export class LoginComponent implements OnInit {
 
     openLoginUrl() {
         window.location.href = this.loginUrl;
-    }
-
-    recoverPassword() {
-        if (this.config.register.local) {
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'register', 'request']);
-        }
-        else {
-            window.location.href = this.config.register.recoverUrl;
-        }
     }
 
     register() {

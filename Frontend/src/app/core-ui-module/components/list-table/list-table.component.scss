@@ -341,6 +341,10 @@ $badgeWidth: 250px;
             word-break: break-all;
         }
 
+        .group_authorityname{
+            width: 180px;
+        }
+
         .user_email {
             width: 180px;
             word-break: break-all;
@@ -441,7 +445,7 @@ $badgeWidth: 250px;
 }
 
 @mixin hoverHighlightFloat {
-    .rowFrame { 
+    .rowFrame {
         position: relative;
         transition:
             z-index $transitionNormal step-start,

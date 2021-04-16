@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.node.v1;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -2202,14 +2203,14 @@ public class NodeApi  {
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    	@ApiParam(value = "property",required=true ) @QueryParam("property")  String property,
-	    	@ApiParam(value = "value",required=false ) @QueryParam("value")  String value,
+	    	@ApiParam(value = "value",required=false ) @QueryParam("value")  List<String> value,
 			@Context HttpServletRequest req) {
 	    
 	    	try {
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setProperty(property, value);
+		    	nodeDao.setProperty(property, (Serializable) value);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (DAOValidationException t) {

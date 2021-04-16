@@ -1,5 +1,5 @@
 
-import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Component, ViewChild, HostListener, ElementRef, OnDestroy} from '@angular/core';
 import 'rxjs/add/operator/map';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
@@ -33,7 +33,7 @@ import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 
 
-export class OerComponent {
+export class OerComponent implements OnDestroy{
   readonly SCOPES = Scope;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public COLLECTIONS=0;
@@ -113,7 +113,11 @@ export class OerComponent {
 
     setInterval(()=>this.updateHasMore(),1000);
    }
-   goToCollections() {
+   ngOnDestroy() {
+       this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes[this.MATERIALS]);
+   }
+
+    goToCollections() {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{mainnav:true}});
    }
   goToSearch() {
@@ -210,8 +214,8 @@ export class OerComponent {
    loadMore(mode:number) {
 
    }
-   private openNode(node: Node){
-      this.router.navigate([this.nodeHelper.getNodeLink('routerLink', node)],
+   private openNode(node: Node) {
+       this.router.navigate([this.nodeHelper.getNodeLink('routerLink', node)],
           {queryParams: (this.nodeHelper.getNodeLink('queryParams', node) as any)}
       );
    }

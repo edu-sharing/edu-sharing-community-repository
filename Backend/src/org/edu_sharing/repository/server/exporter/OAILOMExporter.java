@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.exporter;
 import java.io.*;
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,13 +21,13 @@ import org.apache.xml.serialize.XMLSerializer;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.ISO8601DateFormat;
 import org.w3c.dom.Document;
@@ -280,7 +281,7 @@ public class OAILOMExporter {
 		if(format!=null) {
 			technical = createAndAppendElement("technical", lom);
 			createAndAppendElement("format", technical, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
-			createAndAppendElement("location", technical, URLTool.getDownloadServletUrl(nodeRef.getId(), null));
+			createAndAppendElement("location", technical, URLTool.getDownloadServletUrl(nodeRef.getId(), null, false));
 		}
 		// second is text/html for rendering
 		technical = createAndAppendElement("technical", lom);
@@ -352,6 +353,27 @@ public class OAILOMExporter {
 		if(titleStrEle != null)titleStrEle.setAttribute(xmlLanguageAttribute, nodeLanguage.getLanguage());
 	}
 
+
+	public String cleanupVCardEMail(String vCard){
+		if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterVCardEmail") &&
+				!PermissionServiceHelper.hasPermission(nodeRef, CCConstants.PERMISSION_WRITE)) {
+			return VCardConverter.removeEMails(vCard);
+		}
+		return vCard;
+	}
+
+	protected List<String> prepareContributer(List<String> contrib){
+		if(contrib instanceof List) {
+			return contrib.stream().
+					//sometimes there are empty values in list
+							filter((c) -> c != null && !c.trim().isEmpty()).
+					// validate email ppolicy
+							map(this::cleanupVCardEMail)
+					.collect(Collectors.toList());
+		}
+		return new ArrayList<>();
+	}
+
 	/**
 	 * @param eleParent "lifeCycle" or "metaMetadata"
 	 * @param contributerProp
@@ -362,21 +384,13 @@ public class OAILOMExporter {
 
 		Element eleContribute = null;
 		if(contributer != null && contributer instanceof List){
+			List contributerClean = prepareContributer((List) contributer);
 			
-			//sometimes there are empty values in list
-			List<String> contrib = (List)contributer;
-			boolean hasValidEls = false;
-			for(String cont : contrib){
-				if(cont != null && !cont.trim().equals("")){
-					hasValidEls = true;
-				}
-			}
-			
-			if(hasValidEls){
+			if(contributerClean.size() > 0){
 				eleContribute = createAndAppendElement("contribute",eleParent);
 				Element eleRole = createAndAppendElement("role",eleContribute);
 				createAndAppendElement("value",eleRole,role);
-				Element eleEntity = createAndAppendElement("entity",eleContribute,contributerProp,true);
+				createAndAppendElement("entity", eleContribute, (Serializable) contributerClean,true);
 			}
 			
 		}

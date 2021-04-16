@@ -97,8 +97,10 @@ public class BulkEditNodesJob extends AbstractJob{
 		ReplaceMapping,
 		@JobFieldDescription(description = "Currently Unsupported")
 		Append,
-		@JobFieldDescription(description = "Remove the property")
-		Remove
+		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed.")
+		Remove,
+		@JobFieldDescription(description = "Remove Duplicates in multivalue properties.")
+		RemoveDuplicates
 	};
 
 	@Override
@@ -137,6 +139,10 @@ public class BulkEditNodesJob extends AbstractJob{
 			replaceToken = prepareParam(context, "replaceToken", true);
 		}
 
+		if(mode.equals(Mode.Remove)){
+			searchToken = prepareParam(context, "searchToken", true);
+		}
+
 		lucene =prepareParam(context, "lucene", false);
 
 		startFolder =prepareParam(context, "startFolder", true);
@@ -172,7 +178,28 @@ public class BulkEditNodesJob extends AbstractJob{
 				nodeService.setProperty(nodeRef,QName.createQName(property),value);
 			}
 			else if(mode.equals(Mode.Remove)){
-				nodeService.removeProperty(nodeRef,QName.createQName(property));
+				if(searchToken != null){
+					Serializable current = nodeService.getProperty(nodeRef,QName.createQName(property));
+					if(current != null){
+						boolean remove = false;
+						if(current instanceof String){
+							if(searchToken.equals((String)current)){
+								remove = true;
+							}
+						}else if(current instanceof List){
+							for(Object o : (List)current){
+								if(searchToken.equals(0)){
+									remove = true;
+								}
+							}
+						}
+						if(remove){
+							nodeService.removeProperty(nodeRef, QName.createQName(property));
+						}
+					}
+				}else {
+					nodeService.removeProperty(nodeRef, QName.createQName(property));
+				}
 			} else if(mode.equals(Mode.ReplaceToken) || mode.equals(Mode.ReplaceMapping)) {
 				Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
 				if (current != null) {
@@ -188,6 +215,13 @@ public class BulkEditNodesJob extends AbstractJob{
 						}).collect(Collectors.toList()));
 					} else {
 						logger.info("Can not replace property " + property + "for node " + nodeRef + ": current data is not of type String/List");
+					}
+				}
+			} else if(mode.equals(Mode.RemoveDuplicates)){
+				Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+				if (current != null && current instanceof List) {
+					if(((List)current).stream().distinct().count() != ((List)current).size()){
+						nodeService.setProperty(nodeRef,QName.createQName(property),(Serializable) ((List)current).stream().distinct().collect(Collectors.toList()));
 					}
 				}
 			} else {

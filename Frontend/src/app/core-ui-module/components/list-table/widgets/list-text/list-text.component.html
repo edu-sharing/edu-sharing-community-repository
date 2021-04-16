@@ -39,27 +39,32 @@
     *ngSwitchCase="'mediatype'"
     [matTooltip]="showFieldTooltip ? ('NODE.mediatype' | translate) : null"
   >
+    <span class="cdk-visually-hidden">{{ 'NODE.mediatype' | translate }}:</span>
     {{ 'MEDIATYPE.' + $any(node).mediatype | translate }}
   </span>
   <span *ngSwitchCase="'size'" [matTooltip]="showFieldTooltip ? ('NODE.size' | translate) : null">
+    <span class="cdk-visually-hidden">{{ 'NODE.size' | translate }}:</span>
     {{ $any(node).size | formatSize }}
   </span>
   <span
     *ngSwitchCase="'dimensions'"
     [matTooltip]="showFieldTooltip ? ('NODE.dimensions' | translate) : null"
   >
+    <span class="cdk-visually-hidden">{{ 'NODE.dimensions' | translate }}:</span>
     {{ $any(node) | NodeImageSize }}
   </span>
   <span
     *ngSwitchCase="'cm:creator'"
     [matTooltip]="showFieldTooltip ? ('NODE.cm:creator' | translate) : null"
   >
+    <span class="cdk-visually-hidden">{{ 'NODE.cm:creator' | translate }}:</span>
     {{ $any(node).createdBy | nodePersonName }}
   </span>
   <span
     *ngSwitchCase="'cm:modifier'"
     [matTooltip]="showFieldTooltip ? ('NODE.cm:modifier' | translate) : null"
   >
+    <span class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
     {{ $any(node).modifiedBy | nodePersonName }}
   </span>
   <span
@@ -91,7 +96,8 @@
     />
   </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
-    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
+    <span class="cdk-visually-hidden">{{ 'NODE.' + item.name | translate }}:</span>
+    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1">
       {{
       $any(node).properties ?
         ($any(node).properties[item.name + '_DISPLAYNAME']
@@ -103,6 +109,9 @@
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
       {{ $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | formatDate) : '' }}
+    </ng-container>
+     <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
+      {{ $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | vcardName) : '' }}
     </ng-container>
   </span>
 </ng-container>

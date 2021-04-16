@@ -41,8 +41,6 @@ export class AdminMediacenterComponent {
     addGroup: Group;
     mediacenterGroups: IamGroup[];
     mediacenterNodes: Node[];
-    mediacenterNodesMax = 20;
-    mediacenterNodesOffset = 0;
     mediacenterNodesTotal = 0;
     mediacenterNodesSearchWord='';
     hasMoreMediacenterNodes = true;
@@ -91,7 +89,9 @@ export class AdminMediacenterComponent {
                 }), true, () => this.toast.closeModalDialog(), {name: authority.profile.displayName});
         });
         remove.elementType = [ElementType.Group];
-        this.groupActions.addOptions = [remove];
+        if(this.isAdmin) {
+            this.groupActions.addOptions = [remove];
+        }
     }
 
 
@@ -107,7 +107,6 @@ export class AdminMediacenterComponent {
                 this.mediacenterGroups = groups;
             });
 
-            this.mediacenterNodesOffset = 0;
             this.mediacenterNodesTotal = 0;
             this.mediacenterNodes = [];
             this.mediacenterMds.loadMds();
@@ -123,8 +122,8 @@ export class AdminMediacenterComponent {
         }
         if (this.currentMediacenter) {
             const licensedNodeReq: RequestObject = {
-                offset: this.mediacenterNodesOffset,
-                count: this.mediacenterNodesMax,
+                offset: this.mediacenterNodes.length,
+                count: this.mediacenterNodes?.length ? 500 : null,
                 propertyFilter: [RestConstants.ALL],
                 sortBy: [this.mediacenterNodesSort.sortBy],
                 sortAscending: [this.mediacenterNodesSort.sortAscending]
@@ -149,18 +148,13 @@ export class AdminMediacenterComponent {
             this.mediacenterService.getLicensedNodes(this.currentMediacenter.authorityName, criterias,
                 RestConstants.HOME_REPOSITORY, licensedNodeReq).subscribe((data) => {
                 this.mediacenterNodesTotal = data.pagination.total;
-                if (this.mediacenterNodesTotal < (this.mediacenterNodesOffset + this.mediacenterNodesMax)) {
-                    this.hasMoreMediacenterNodes = false;
-                } else {
-                    this.mediacenterNodesOffset = data.pagination.from + this.mediacenterNodesMax;
-                }
                 if (this.mediacenterNodes == null
                     || (this.mediacenterNodesSearchWord != null && this.mediacenterNodesSearchWord.trim().length > 0)) {
                     this.mediacenterNodes = data.nodes;
                 } else {
-
                     this.mediacenterNodes = this.mediacenterNodes.concat(data.nodes);
                 }
+                this.hasMoreMediacenterNodes = this.mediacenterNodes.length < this.mediacenterNodesTotal;
                 this.isLoadingMediacenterNodes=false;
             });
 
@@ -169,7 +163,6 @@ export class AdminMediacenterComponent {
 
     searchMediaCenterNodes() {
         this.hasMoreMediacenterNodes = true;
-        this.mediacenterNodesOffset = 0;
         this.mediacenterNodes = [];
         this.loadMediacenterNodes()
     }
@@ -344,7 +337,6 @@ export class AdminMediacenterComponent {
     private resetMediacenterNodes() {
         this.mediacenterNodes = null;
         this.mediacenterNodesTotal = 0;
-        this.mediacenterNodesOffset = 0;
         this.hasMoreMediacenterNodes = true
     }
 }

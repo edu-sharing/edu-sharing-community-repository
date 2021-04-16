@@ -132,9 +132,11 @@ public class SortDefinition implements Serializable {
 				String property = CCConstants.getValidGlobalName(sortDefintionEntry.getProperty());
 				if(property != null){
 					PropertyDefinition propDef = serviceRegistry.getDictionaryService().getProperty(QName.createQName(property));
-					if(DataTypeDefinition.TEXT.equals(propDef.getDataType().getName())
-							|| DataTypeDefinition.MLTEXT.equals(propDef.getDataType().getName()) ){
-						addKeywordSuffix = true;
+					if(propDef != null) {
+						if (DataTypeDefinition.TEXT.equals(propDef.getDataType().getName())
+								|| DataTypeDefinition.MLTEXT.equals(propDef.getDataType().getName())) {
+							addKeywordSuffix = true;
+						}
 					}
 				}
 				String name = "properties." + sortDefintionEntry.getProperty() + ((addKeywordSuffix) ? ".keyword" :"" );

@@ -41,6 +41,7 @@ export class MdsEditorCoreComponent {
             this.suggestionsViews = [];
             await tick();
         }
+        this.mdsEditorInstance.resetWidgets();
         this.views = this.mdsEditorInstance.views.filter((view) => !view.rel);
         this.suggestionsViews = this.mdsEditorInstance.views.filter(
             (view) => view.rel === 'suggestions',

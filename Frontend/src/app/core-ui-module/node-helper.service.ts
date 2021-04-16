@@ -383,7 +383,7 @@ export class NodeHelperService {
             return false;
           if(c.toolpermission && !this.connector.hasToolPermissionInstant(c.toolpermission))
             return false;
-          if (!c.multiple && nodes && nodes.length > 1)
+          if (c.multiple!=null && !c.multiple && nodes && nodes.length > 1)
             return false;
           return true;
         };

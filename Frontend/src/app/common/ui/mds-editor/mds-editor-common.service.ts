@@ -103,10 +103,10 @@ export class MdsEditorCommonService {
         if(node.mediatype == 'folder-link') {
             nodeGroup = MdsType.MapRef;
         }
-        if (node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
+        if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
             nodeGroup = MdsType.IoChildObject;
         }
-        if (node.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
+        if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
             nodeGroup = MdsType.ToolDefinition;
         }
         if (node.type === RestConstants.CCM_TYPE_TOOL_INSTANCE) {

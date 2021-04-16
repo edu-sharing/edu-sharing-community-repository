@@ -1,4 +1,6 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
+  <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
+  ></tutorial>
   <main-nav #mainNav
     [hidden]="!mainnav"
     [title]="'SEARCH.TITLE'"
@@ -13,8 +15,6 @@
     (onSearch)="routeAndClearSearch($event)"
     (onCreate)="list.addVirtualNodes($event)"
   ></main-nav>
-  <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
-  ></tutorial>
 
   <div class="rowRepositories scrollWithBanner" [class.no-mainnav]="!mainnav" *ngIf="repositories && repositories.length>2">
       <div class="mobile-move-top row tab-group row-dark">

@@ -40,6 +40,9 @@ powered-by{
     a{
       text-transform: uppercase;
       font-size: $fontSizeXSmall;
+      &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus();
+      }
     }
   }
 }

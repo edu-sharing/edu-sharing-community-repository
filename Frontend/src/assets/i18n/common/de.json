@@ -321,6 +321,7 @@
         }
     },
     "COOKIE_INFO": {
+        "REGION_LABEL": "Cookie-Hinweis",
         "DESCRIPTION": "edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren und diese Seite verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
         "MORE_LINK": "Weitere Informationen",
         "DIALOG_TITLE": "Cookies",
@@ -709,6 +710,7 @@
         "NODE_LOCKED": "Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
         "FIELD_REQUIRED": "Das Feld {{ name }} muss ausgefüllt sein",
         "NO_CONNECTION": "Instabile Internetverbindung, Inhalt konnte nicht geladen werden. Bitte später erneut versuchen",
+        "RENDER_NOT_FOUND": "Das angeforderte Element wurde gelöscht oder existiert nicht",
         "DOWNLOAD_STARTED": "Download von {{name}} wurde gestartet",
         "DOWNLOAD_FINISHED_ANDROID": "Download von {{name}} abgeschlossen.<br />Sie finden das Element im Download-Ordner des Gerätes",
         "DOWNLOAD_FINISHED_IOS": "Download von {{name}} abgeschlossen.<br />Sie finden das Element in der Dateien-App",
