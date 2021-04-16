@@ -98,7 +98,9 @@ public class BulkEditNodesJob extends AbstractJob{
 		@JobFieldDescription(description = "Currently Unsupported")
 		Append,
 		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed.")
-		Remove
+		Remove,
+		@JobFieldDescription(description = "Remove Duplicates in multivalue properties.")
+		RemoveDuplicates
 	};
 
 	@Override
@@ -213,6 +215,13 @@ public class BulkEditNodesJob extends AbstractJob{
 						}).collect(Collectors.toList()));
 					} else {
 						logger.info("Can not replace property " + property + "for node " + nodeRef + ": current data is not of type String/List");
+					}
+				}
+			} else if(mode.equals(Mode.RemoveDuplicates)){
+				Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+				if (current != null && current instanceof List) {
+					if(((List)current).stream().distinct().count() != ((List)current).size()){
+						nodeService.setProperty(nodeRef,QName.createQName(property),(Serializable) ((List)current).stream().distinct().collect(Collectors.toList()));
 					}
 				}
 			} else {
