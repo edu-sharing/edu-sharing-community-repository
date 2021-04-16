@@ -2052,7 +2052,7 @@ public class NodeDao {
 		nodeService.setOwner( this.getId(), username);
 	}
 
-	public void setProperty(String property, String value) {
+	public void setProperty(String property, Serializable value) {
 		if(value==null){
 			nodeService.removeProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property);
 		}else {
