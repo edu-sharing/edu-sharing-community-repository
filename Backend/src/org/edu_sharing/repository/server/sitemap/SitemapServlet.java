@@ -105,7 +105,7 @@ public class SitemapServlet extends HttpServlet{
         NodeService nodeService = NodeServiceFactory.getLocalService();
 
         SearchToken token=new SearchToken();
-        if(type.equals("collection"))
+        if("collection".equals(type))
             token.setContentType(SearchService.ContentType.COLLECTIONS);
         else
             token.setContentType(SearchService.ContentType.FILES);
