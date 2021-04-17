@@ -1678,6 +1678,10 @@ public class NodeDao {
 		}
 		for (Entry<String, Object> entry : props.entrySet()) {
 
+			if(entry.getKey() == null) {
+				logger.info(nodeId+" null property has value "+entry.getValue());
+				continue;
+			}
 			String shortPropName = NameSpaceTool.transformToShortQName(entry.getKey());
 
 			if(shortPropName != null){
