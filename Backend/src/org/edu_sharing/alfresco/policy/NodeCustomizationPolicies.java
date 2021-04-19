@@ -471,8 +471,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			// refresh all collection io's metadata
 			// run as admin to refresh all, see ESPUB-633
 			AuthenticationUtil.runAsSystem(()-> {
-				ResultSet result = fetchCollectionReferences(nodeRef);
-				for (NodeRef ref : result.getNodeRefs()) {
+				List<NodeRef> result = fetchCollectionReferencesByCmis(nodeRef);
+				for (NodeRef ref : result) {
 					Map<QName, Serializable> originalProperties = nodeService.getProperties(ref);
 					// security check: make sure we have an object which really matches the solr query
 					if (!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !originalProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())) {
