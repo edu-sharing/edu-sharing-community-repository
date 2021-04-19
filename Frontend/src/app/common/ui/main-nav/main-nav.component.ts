@@ -770,6 +770,12 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             );
             this.userMenuOptions.push(boomarkOption);
         // }
+        const accessibilityOptions = new OptionItem(
+            'OPTIONS.ACCESSIBILITY',
+            'accessibility',
+            () => this.mainnavService.getAccessibility().visible = true,
+        );
+        this.userMenuOptions.push(accessibilityOptions);
         for (const option of this.getConfigMenuHelpOptions()) {
             this.userMenuOptions.push(option);
         }
