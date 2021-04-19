@@ -445,7 +445,23 @@
     "ACCESSIBILITY": {
         "LASTMODIFIED": "Letztes Änderungsdatum",
         "AUTHOR": "Autor",
-        "SOURCE": "Quelle"
+        "SOURCE": "Quelle",
+        "TITLE": "Barrierefreiheit",
+        "SUBTITLE": "Optionen für barrierefreie Nutzung",
+        "ENTRY_MESSAGE": "Um persönliche Bedürfnisse zu berücksichtigen, können nachfolgend einige Einstellungen für die Verwendung unserer Anwendung gesetzt werden.",
+        "TOAST_TITLE": "Statusmeldungen",
+        "TOAST_MESSAGE": "Statusmeldungen zeigen an, ob das System korrekt arbeitet. Bspw. lässt sich so erkennen, ob ein Inhalt oder Änderungen korrekt gespeichert wurden.",
+        "TOAST_TYPE": {
+            "IMPORTANT": "Nur wichtige anzeigen",
+            "ALL": "Alle anzeigen"
+        },
+        "TOAST_DURATION_SECONDS": "{{seconds}} Sekunden",
+        "TOAST_DURATION_INFINITE": "Nicht ausblenden",
+        "TOAST_DURATION_INFINITE_INFO": "Statusmeldungen werden nicht automatisch ausgeblendet und müssen manuell geschlossen werden",
+        "TOAST_DURATION_TITLE": "Anzeigedauer",
+        "TOAST_DURATION_MESSAGE": "Statusmeldungen können automatisch nach einer festgelegten Zeit verschwinden oder durch klicken manuell geschlossen werden.",
+        "SAVED": "Einstellungen wurden gespeichert.",
+        "DISMISS_TOAST": "Ausblenden"
     },
     "AUTHORITY_TYPE_GROUP": "Gruppe",
     "AUTHORITY_TYPE_ORG": "Organisation",
@@ -587,7 +603,8 @@
         "SWITCH_TO_LIST_VIEW": "Zur Listenansicht wechseln",
         "SWITCH_TO_CARDS_VIEW": "Zur Kachelansicht wechseln",
         "LIST_SETTINGS": "Liste konfigurieren",
-        "METADATA_SIDEBAR": "Materialinformationen"
+        "METADATA_SIDEBAR": "Materialinformationen",
+        "ACCESSIBILITY": "Barrierefreiheit"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",

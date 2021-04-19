@@ -74,6 +74,7 @@ import { Toast } from './toast';
 import { FallbackTranslationHandler } from './translation';
 import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
+import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 
 @NgModule({
     declarations: [
@@ -107,6 +108,7 @@ import {VCardNamePipe} from './pipes/vcard-name.pipe';
         AuthorityColorPipe,
         NodeDatePipe,
         NodeUrlComponent,
+        ToastMessageComponent,
         FormatSizePipe,
         KeysPipe,
         ReplaceCharsPipe,
