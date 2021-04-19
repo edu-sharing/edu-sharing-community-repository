@@ -38,6 +38,7 @@ export class EmbedComponent implements EventListener {
                 private ngZone:NgZone,
                 private route:ActivatedRoute,
                 private event : FrameEventsService) {
+        (window as any).ngEmbed = this;
         // disable the cookie info when in embedded context
         this.mainNavService.getCookieInfo().show = false;
         this.event.addListener(this);

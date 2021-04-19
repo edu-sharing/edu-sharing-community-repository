@@ -50,6 +50,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {MdsEditorWidgetAuthorityComponent} from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -102,6 +103,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetChipsComponent,
+        [MdsWidgetType.MultiValueAuthorityBadges]: MdsEditorWidgetAuthorityComponent,
         [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
         [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,
         [MdsWidgetType.Range]: MdsEditorWidgetSliderComponent,
@@ -180,7 +182,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     private injectWidgets(): void {
-        this.mdsEditorInstance.resetWidgets();
+        console.log('inject', this.view.id);
+        //this.mdsEditorInstance.resetWidgets();
         const elements = this.container.nativeElement.getElementsByTagName('*');
         for (const element of Array.from(elements)) {
             const tagName = element.localName;
@@ -320,6 +323,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 const value = htmlRef.getAttribute(attribute);
                 if (attribute === 'isextended' || attribute === 'extended') {
                     attribute = 'isExtended';
+                } else if (attribute === 'isrequired' || attribute === 'required') {
+                    attribute = 'isRequired';
                 } else if (attribute === 'bottomcaption') {
                     attribute = 'bottomCaption';
                 } else if (attribute === 'defaultmin') {

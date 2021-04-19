@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { Values } from '../../types';
+import {InputStatus, Values} from '../../types';
 import { map } from 'rxjs/operators/map';
 
 @Component({
@@ -18,10 +18,15 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidgetC
     hasChanges = new BehaviorSubject<boolean>(false);
     isFileOver = false;
     supportsDrop = true;
-    link: string;
-    status = this.selectedFiles.pipe(
-        map((selectedFiles) => (selectedFiles?.length || this.link ? 'VALID' : 'INVALID')),
-    );
+    _link: string;
+    get link() {
+        return this._link;
+    }
+    set link(link: string) {
+        this._link = link;
+        this.update();
+    }
+    status = new BehaviorSubject<InputStatus>('INVALID');
 
     @Output() onSetLink = new EventEmitter<string>();
 
@@ -42,6 +47,7 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidgetC
             selectedFiles.push(fileList.item(i));
         }
         this.selectedFiles.next(selectedFiles);
+        this.update();
     }
 
     filesSelected(files: Event) {
@@ -63,5 +69,10 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidgetC
             values['fileupload-link'] = [this.link];
         }
         return values;
+    }
+
+    private update() {
+        this.hasChanges.next(!!this.selectedFiles.value?.length || !!this._link);
+        this.status.next(this.hasChanges.value ? 'VALID' : 'INVALID');
     }
 }

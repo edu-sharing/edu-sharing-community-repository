@@ -136,7 +136,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              this.list = window.history.state?.nodes;
+              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
               this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
@@ -326,13 +326,16 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       this.isChildobject=false;
       this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
               childobject_id: null
-          }});
+          },
+          replaceUrl: true});
   }
   viewChildobject(node:Node,pos:number) {
         this.isChildobject=true;
         this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
-            childobject_id: node.ref.id
-        }});
+                childobject_id: node.ref.id
+            },
+            replaceUrl: true});
+
   }
   private loadNode() {
     if(!this._node) {
@@ -407,8 +410,18 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             }
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
-        },(error:any)=> {
-            this.toast.error(error);
+        },(error)=> {
+            console.log(error.error.error);
+            if(error?.error?.error === 'org.edu_sharing.restservices.DAOMissingException') {
+                this.toast.error(null, 'TOAST.RENDER_NOT_FOUND', null, null, null, {
+                    link: {
+                        caption: 'BACK',
+                        callback: () => this.close()
+                    }
+                })
+            } else {
+                this.toast.error(error);
+            }
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
         })

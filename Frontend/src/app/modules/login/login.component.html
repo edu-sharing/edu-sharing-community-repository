@@ -84,7 +84,18 @@
                 [(value)]="password"
               ></input-password>
               <div class="forgot-password" *ngIf="config.register.local || config.register.recoverUrl">
-                <a (click)="recoverPassword()" (keyup.enter)="recoverPassword()" class="focus-underline" tabindex="0">
+                <a
+                  *ngIf="config.register.local"
+                  cdkMonitorElementFocus
+                  [routerLink]="['/' + ROUTER_PREFIX + 'register', 'request']"
+                >
+                  {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
+                </a>
+                <a
+                  *ngIf="!config.register.local"
+                  [href]="config.register.recoverUrl"
+                  cdkMonitorElementFocus
+                >
                   {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
                 </a>
               </div>

@@ -255,6 +255,7 @@
 
     },
     "COOKIE_INFO": {
+        "REGION_LABEL": "Cookie notice",
         "DESCRIPTION": "edu-sharing uses cookies to improve the user-friendliness of the site.\nIf you continue to use it, we'll assume you are ok with that.",
         "MORE_LINK": "find out more",
         "DIALOG_TITLE": "Cookies",
@@ -675,6 +676,7 @@
     },
     "TOAST": {
         "NODE_LOCKED": "The document is currently used by an other user and can not be opened",
+        "RENDER_NOT_FOUND": "The requested element is deleted or does not exist",
         "FIELD_REQUIRED": "The field {{ name }} is required",
         "API_FORBIDDEN": "No permissions to access this content",
         "API_FORBIDDEN_LOGIN": "Please login to access this section"

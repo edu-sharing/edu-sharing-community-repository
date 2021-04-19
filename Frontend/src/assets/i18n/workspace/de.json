@@ -157,6 +157,7 @@
                 "MODE_OFF_INFO": "Das Element ist nicht öffentlich zugänglich und kann nur von eingelandenen Benutzern abgerufen werden",
                 "MODE_DIRECT": "Öffentlich freigeben",
                 "MODE_DIRECT_INFO": "Das Element wird öffentlich freigegeben. Wird das aktuelle Element gelöscht, ist die Veröffentlichung ungültig.\nBei Veränderungen des Elements wirken sich diese direkt auf die Veröffentlichung aus.",
+                "MODE_DIRECT_INFO_MULTIPLE": "Die Elemente werden öffentlich freigegeben.",
                 "MODE_COPY": "Als Kopie veröffentlichen",
                 "MODE_COPY_INFO": "Vom Element wird eine Kopie erzeugt. Diese wird im zentralen Bereich für veröffentliche Inhalte abgelegt und öffentlich verfügbar gemacht.\nÄnderungen an oder eine Löschung des Originals hat keinen Einfluss auf die veröffentlichte Kopie.\nNur die Redaktion kann die Veröffentlichung nachträglich steuern. Es können mehrere Versionen parallel veröffentlicht werden.",
                 "NO_PUBLISH_COPY_PERMISSION": "Sie besitzen keine Berechtigung, eine Kopie zu veröffentlichen",

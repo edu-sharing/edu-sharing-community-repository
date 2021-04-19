@@ -79,6 +79,7 @@ export enum MdsWidgetType {
     MultiValueBadges = 'multivalueBadges',
     MultiValueFixedBadges = 'multivalueFixedBadges',
     MultiValueSuggestBadges = 'multivalueSuggestBadges',
+    MultiValueAuthorityBadges = 'multivalueAuthorityBadges',
     Singleoption = 'singleoption',
     Slider = 'slider',
     Range = 'range',

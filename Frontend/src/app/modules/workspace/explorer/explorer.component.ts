@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
 import {ConfigurationService, ListItem, Node, NodeList, RestConnectorService, RestConstants, RestNodeService, RestSearchService, SessionStorageService, Store, TemporaryStorageService} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {CustomOptions, Scope} from '../../../core-ui-module/option-item';
@@ -15,7 +15,7 @@ import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_v
     templateUrl: 'explorer.component.html',
     styleUrls: ['explorer.component.scss']
 })
-export class WorkspaceExplorerComponent {
+export class WorkspaceExplorerComponent implements OnDestroy {
     public readonly SCOPES = Scope;
     @ViewChild('list') list: ListTableComponent;
     public _nodes: Node[] = [];
@@ -138,6 +138,9 @@ export class WorkspaceExplorerComponent {
         }
     }
 
+    ngOnDestroy(): void {
+        this.temporaryStorage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this._nodes);
+    }
     private handleError(error: any) {
         if (error.status == 404)
             this.toast.error(null, 'WORKSPACE.TOAST.NOT_FOUND', {id: this._node.ref.id})
@@ -166,7 +169,7 @@ export class WorkspaceExplorerComponent {
         private connector : RestConnectorService,
         private translate : TranslateService,
         private storage : SessionStorageService,
-        temporaryStorage : TemporaryStorageService,
+        private temporaryStorage : TemporaryStorageService,
         private config : ConfigurationService,
         private search : RestSearchService,
         private toast : Toast,

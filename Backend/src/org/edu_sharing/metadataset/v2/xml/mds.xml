@@ -1084,5 +1084,11 @@
 					<multiplejoin>OR</multiplejoin>
 				</property>
 			</query>
+			<query join="AND" id="mediacenter_filter">
+				<basequery>{"term":{"type":"ccm:io"}}</basequery>
+				<property name="ngsearchword">
+					<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.ccm.replicationsourceid":{"value":"*${value}*"}}}]}}</statement>
+				</property>
+			</query>
 		</queries>
 </metadataset>

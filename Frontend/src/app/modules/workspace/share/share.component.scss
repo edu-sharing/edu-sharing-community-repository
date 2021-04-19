@@ -105,6 +105,14 @@ a.active{
     justify-content: center;
   }
 }
+.publish-bulk{
+    margin-top: 20px;
+    margin-left: -$cardPadding;
+    width:calc(100% + #{$cardPadding*2});
+    padding:20px $cardPadding;
+    background-color: $actionDialogBackground;
+}
+/*
 .publish{
   margin-top: 20px;
   padding:20px $cardPadding;
@@ -148,7 +156,7 @@ a.active{
       margin-right: 10px;
     }
   }
-}
+}*/
 .bulk-config{
   padding:20px $cardPadding;
   .mat-heading-4{
