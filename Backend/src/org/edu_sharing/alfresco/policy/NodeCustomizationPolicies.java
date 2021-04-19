@@ -473,25 +473,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			AuthenticationUtil.runAsSystem(()-> {
 				List<NodeRef> result = fetchCollectionReferencesByCmis(nodeRef);
 				for (NodeRef ref : result) {
-					Map<QName, Serializable> originalProperties = nodeService.getProperties(ref);
-					// security check: make sure we have an object which really matches the solr query
-					if (!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !originalProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())) {
-						logger.warn("Solr query for node " + nodeRef.getId() + " returned node " + ref.getId() + ", but it's metadata do not match");
-						continue;
-					}
-					Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
-					props.addAll(Arrays.asList(LICENSE_PROPS));
-					props.addAll(MetadataReaderV2.getWidgetsByNode(ref,"de_DE").stream().
-							map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
-							collect(Collectors.toList()));
-					for (QName prop : after.keySet()) {
-						// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
-						if (props.contains(prop.toString()) && propertyEquals(before.get(prop), originalProperties.get(prop))) {
-							originalProperties.put(prop, after.get(prop));
-						}
-					}
-					nodeService.setProperties(ref, originalProperties);
-					new RepositoryCache().remove(ref.getId());
+					syncCollectionRefProps(nodeRef,ref, before, after,true, nodeService);
 				}
 				return null;
 			});
@@ -532,6 +514,35 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		}
 
 	}
+
+	public static void syncCollectionRefProps(NodeRef nodeRef, NodeRef ref, Map<QName, Serializable> before, Map<QName, Serializable> after, boolean checkRefPropsForCustomization, NodeService nodeService) throws Exception {
+			Map<QName, Serializable> ioColRefProperties = nodeService.getProperties(ref);
+			// security check: make sure we have an object which really matches the solr query
+			if (!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) || !ioColRefProperties.get(QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)).equals(nodeRef.getId())) {
+				logger.warn("CMIS query for node " + nodeRef.getId() + " returned node " + ref.getId() + ", but it's metadata do not match");
+				return;
+			}
+			Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
+			props.addAll(Arrays.asList(LICENSE_PROPS));
+			props.addAll(MetadataReaderV2.getWidgetsByNode(ref,"de_DE").stream().
+					map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
+					collect(Collectors.toList()));
+			for (QName prop : after.keySet()) {
+				// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
+				if (props.contains(prop.toString())) {
+					if(checkRefPropsForCustomization){
+						if(propertyEquals(before.get(prop), ioColRefProperties.get(prop))){
+							ioColRefProperties.put(prop, after.get(prop));
+						}
+					}else{
+						ioColRefProperties.put(prop, after.get(prop));
+					}
+				}
+			}
+			nodeService.setProperties(ref, ioColRefProperties);
+			new RepositoryCache().remove(ref.getId());
+	}
+
 	private static String propertyToString(Object p){
 		if(p == null){
 			return "";
@@ -584,7 +595,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		return searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, query);
 	}
 
-	public List<NodeRef> fetchCollectionReferencesByCmis(NodeRef nodeRef){
+	public static List<NodeRef> fetchCollectionReferencesByCmis(NodeRef nodeRef){
 		Map<String,Object> map = new HashMap<>();
 		map.put(CCConstants.CCM_PROP_IO_ORIGINAL,nodeRef.getId());
 
