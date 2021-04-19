@@ -982,11 +982,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable{
-		throw new NotImplementedException("getPropertiesDynamic may not be called for the local repository");
+		throw new NotImplementedException("getPropertiesDynamic may not be called for the local repository (was the remote repo removed?)");
 	}
 	@Override
 	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable{
-		throw new NotImplementedException("getPropertiesPersisting may not be called for the local repository");
+		throw new NotImplementedException("getPropertiesPersisting may not be called for the local repository (was the remote repo removed?)");
 	}
 
 	@Override

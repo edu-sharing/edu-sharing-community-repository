@@ -1048,7 +1048,11 @@ public class NodeDao {
 		String remoteObjectRepositoryId = (String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
 		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY) && remoteObjectRepositoryId != null){
 			remote.setId((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-			remote.setRepository(RepositoryDao.getRepository(remoteObjectRepositoryId).asRepo());
+			try {
+				remote.setRepository(RepositoryDao.getRepository(remoteObjectRepositoryId).asRepo());
+			}catch(DAOMissingException e){
+				logger.warn("Repository " + remoteObjectRepositoryId + " is not present anymore: " + e.getMessage());
+			}
 		} else if(remoteId!=null){
 			remote.setId(remoteId);
 			remote.setRepository(remoteRepository.asRepo());
