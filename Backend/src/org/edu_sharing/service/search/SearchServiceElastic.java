@@ -8,12 +8,14 @@ import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -268,6 +270,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String protocol = (String) storeRef.get("protocol");
         String identifier = (String) storeRef.get("identifier");
 
+        String metadataSet = (String)properties.get(CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+        MetadataSetV2 mds = null;
+        try{ mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),metadataSet);} catch (Exception e){logger.error(e.getMessage());};
+
         HashMap<String, Object> props = new HashMap<>();
         for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
 
@@ -295,6 +301,25 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 value = ValueTool.toMultivalue(result.toArray(new String[result.size()]));
             }
             props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
+
+            /**
+             * metadataset translation
+             */
+            try{
+                MetadataWidget widget = mds.findWidget(entry.getKey());
+                if(widget != null) {
+                    Map<String, MetadataKey> map = widget.getValuesAsMap();
+                    if (!map.isEmpty()) {
+                        String[] keys = ValueTool.getMultivalue((String) entry.getValue());
+                        String[] values = new String[keys.length];
+                        for (int i = 0; i < keys.length; i++)
+                            values[i] = map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
+                        props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values, CCConstants.MULTIVALUE_SEPARATOR));
+                    }
+                }
+            }catch(Throwable t){
+            }
+
         }
 
         List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");
