@@ -23,7 +23,7 @@
     <p id="toastDurationDescription">{{'ACCESSIBILITY.TOAST_DURATION_MESSAGE' | translate}}</p>
     <mat-radio-group id="toastDuration"
                      [(ngModel)]="toastDuration"
-                     aria-describedby="toastModeDescription"
+                     aria-describedby="toastDurationDescription"
                      [disabled]="toastDuration === null">
       <mat-radio-button [value]="TOAST_DURATION.Seconds_3">{{'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate:{seconds: 3} }}</mat-radio-button>
       <mat-radio-button [value]="TOAST_DURATION.Seconds_5">{{'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate:{seconds: 5} }}</mat-radio-button>
