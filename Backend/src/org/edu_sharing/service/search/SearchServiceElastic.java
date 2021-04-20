@@ -271,10 +271,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String identifier = (String) storeRef.get("identifier");
 
         String metadataSet = (String)properties.get(CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-        MetadataSetV2 mds = null;
-        try{ mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),metadataSet);} catch (Exception e){logger.error(e.getMessage());};
 
         HashMap<String, Object> props = new HashMap<>();
+
+        MetadataSetV2 mds = null;
+        try{mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),metadataSet);}catch(Exception e){};
+
         for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
 
             Serializable value = null;
@@ -305,21 +307,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
             /**
              * metadataset translation
              */
-            try{
-                MetadataWidget widget = mds.findWidget(entry.getKey());
-                if(widget != null) {
-                    Map<String, MetadataKey> map = widget.getValuesAsMap();
-                    if (!map.isEmpty()) {
-                        String[] keys = ValueTool.getMultivalue((String) entry.getValue());
-                        String[] values = new String[keys.length];
-                        for (int i = 0; i < keys.length; i++)
-                            values[i] = map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
-                        props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values, CCConstants.MULTIVALUE_SEPARATOR));
-                    }
-                }
-            }catch(Throwable t){
+            String[] displayNames = MetadataHelper.getDisplayNames(mds, entry.getKey(), entry.getValue());
+            if(displayNames != null){
+                props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
             }
-
         }
 
         List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");

@@ -1,7 +1,11 @@
 package org.edu_sharing.restservices.mediacenter.v1;
 
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.mediacenter.v1.model.McOrgConnectResult;
@@ -260,6 +264,13 @@ public class MediacenterApi {
 					}
 				}
 				node.getProperties().put("ccm:mediacenter",new String[]{newValue});
+
+				MetadataSetV2 mds = null;
+				try{mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), node.getProperties().get("cm:edu_metadataset")[0]);}catch(Exception e){};
+				String[] displayNames = MetadataHelper.getDisplayNames(mds, "ccm:mediacenter", newValue);
+				if(displayNames != null){
+					node.getProperties().put("ccm:mediacenter"+ CCConstants.DISPLAYNAME_SUFFIX,displayNames);
+				}
 			}
 
 	    	Pagination pagination = new Pagination();
