@@ -193,7 +193,10 @@ public class URLTool{
 		return getNgComponentsUrl()+"error/"+errorId;
 	}
 	public static String getNgComponentsUrl(){
-		return getBaseUrl(true)+"/components/";
+		return getNgComponentsUrl(true);
+	}
+	public static String getNgComponentsUrl(boolean dynamic){
+		return getBaseUrl(dynamic)+"/components/";
 	}
     public static String getNgAssetsUrl(){
         return getBaseUrl(false)+"/assets/";
@@ -374,7 +377,7 @@ public class URLTool{
 	 * @return
 	 */
 	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic, String repository) {
-		String ngComponentsUrl =  getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.equals("-1") && !version.trim().isEmpty() ? "/"+version : "");
+		String ngComponentsUrl =  getNgComponentsUrl(dynamic)+"render/"+nodeId+(version!=null && !version.equals("-1") && !version.trim().isEmpty() ? "/"+version : "");
 		if(repository != null) {
 			ngComponentsUrl+="?repository="+repository;
 		}
