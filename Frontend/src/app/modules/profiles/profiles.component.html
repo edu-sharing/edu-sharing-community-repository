@@ -161,7 +161,7 @@
             <input matInput
                    id="gnduri"
                    [(ngModel)]="userEdit.profile.vcard.gnduri"
-                   pattern="https?://d-nb.info\/gnd\/\d+"
+                   pattern="https?:\/\/d-nb.info\/gnd\/(\d|x|X)+"
                    placeholder="http://d-nb.info/gnd/0000000000"
             >
             <mat-hint innerHTML="{{'VCARD_HINT.X-GND-URI' | translate}}"></mat-hint>
