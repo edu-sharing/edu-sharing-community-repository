@@ -633,15 +633,16 @@ export class PermissionsAuthoritiesComponent {
       this.updateOptions();
     });
     if (this._mode === 'ORG') {
-      this.organization.getOrganizations(query, false, request).subscribe((orgs: OrganizationOrganizations) => {
+        // as non-admin, search only own orgs since these are the once with access
+      this.organization.getOrganizations(query, !this.isAdmin, request).subscribe((orgs: OrganizationOrganizations) => {
         this.offset += this.connector.numberPerRequest;
         for (const org of orgs.organizations) {
           if (org.administrationAccess) {
             this.list.push(org);
           }
-          // org endpoint does not support proper pagination, so check if result was empty
-          this.hasMore = orgs.organizations.length > 0;
         }
+        // org endpoint does not support proper pagination, so check if result was empty
+        this.hasMore = orgs.organizations.length > 0;
         this.loading = false;
         this.updateOptions();
       });
