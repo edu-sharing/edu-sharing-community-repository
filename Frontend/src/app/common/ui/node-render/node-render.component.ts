@@ -63,6 +63,7 @@ import {
 } from '../../../core-ui-module/options-helper.service';
 import {RestTrackingService} from '../../../core-module/rest/services/rest-tracking.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {CardComponent} from '../../../core-ui-module/components/card/card.component';
 
 declare var jQuery:any;
 declare var window: any;
@@ -232,6 +233,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   handleKeyboardEvent(event: KeyboardEvent) {
     if(this.nodeMetadata!=null) {
       return;
+    }
+    if(CardComponent.getNumberOfOpenCards() > 0){
+        return;
     }
     if (event.code == 'ArrowLeft' && this.canSwitchBack()) {
       this.switchPosition(this.getPosition() - 1);
