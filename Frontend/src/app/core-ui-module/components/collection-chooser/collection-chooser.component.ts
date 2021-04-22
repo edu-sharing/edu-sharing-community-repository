@@ -71,6 +71,7 @@ export class CollectionChooserComponent implements OnInit {
      * shall more than 5 recent collections be shown
      */
     showMore = false;
+    canCreate = false;
 
     constructor(
         private connector: RestConnectorService,
@@ -83,6 +84,7 @@ export class CollectionChooserComponent implements OnInit {
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
         this.sortBy = [RestConstants.CM_MODIFIED_DATE];
+        this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS).subscribe((tp) => this.canCreate = tp);
     }
 
     ngOnInit(): void {
