@@ -129,7 +129,7 @@ public class ActionObserver {
 						//observer removes action when node exists check fails. this can happen when transaction is not commited already.
 						boolean checkExists = true;
 						if(entry.getValue().stream().anyMatch(a -> (a.getParameterValue(ACTION_OBSERVER_ADD_DATE) != null
-								&& (new Date().getTime() - ((Date)a.getParameterValue(ACTION_OBSERVER_ADD_DATE)).getTime()) < 600000))){
+								&& (new Date().getTime() - ((Date)a.getParameterValue(ACTION_OBSERVER_ADD_DATE)).getTime()) < 1200000))){
 							checkExists = false;
 						}
 
