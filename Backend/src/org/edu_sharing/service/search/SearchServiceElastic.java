@@ -165,8 +165,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
 
-            for(String facette : searchToken.getFacettes()){
-                searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
+            if(searchToken.getFacettes() != null) {
+                for (String facette : searchToken.getFacettes()) {
+                    searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
+                }
             }
 
             /**
