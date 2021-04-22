@@ -214,11 +214,12 @@ public class SSOAuthorityMapper {
 
 		String appId = ssoAttributes.get(PARAM_APP_ID);
 		ApplicationInfo appInfo = (appId != null) ? ApplicationInfoList.getRepositoryInfoById(appId) : null;
-
+		boolean whitelistedUser = false;
 		if(SSO_TYPE_AuthByApp.equals(ssoType)) {
 			String userWhiteList = appInfo.getAuthByAppUserWhitelist();
 			if(userWhiteList != null && !userWhiteList.trim().equals("")){
 				List<String> userList = Arrays.asList(userWhiteList.split(","));
+				whitelistedUser = true;
 				if(!userList.contains(tmpUserName)){
 					throw new AuthenticationException(AuthenticationExceptionMessages.NOT_IN_WHITELIST);
 				}
@@ -247,6 +248,13 @@ public class SSOAuthorityMapper {
 			boolean hashGroupNames = isHashGroupNames();
 			boolean updateMemberships = isUpdateMemberships();
 
+			if (whitelistedUser) {
+				createUser = false;
+				updateUser = false;
+				createGroups = false;
+				hashGroupNames = false;
+				updateMemberships = false;
+			}
 
 			/**
 			 * SSO_TYPE_AuthByApp: need the Application type to
