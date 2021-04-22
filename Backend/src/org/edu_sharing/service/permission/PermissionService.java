@@ -68,8 +68,10 @@ public interface PermissionService {
 	public void addPermissions(String nodeId, ACE[] aces) throws Exception;
 	
 	public void removePermissions(String nodeId, ACE[] aces) throws Exception;
-	
-	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception;
+
+    void removeAllPermissions(String nodeId) throws Exception;
+
+    public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception;
 
     StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck);
 

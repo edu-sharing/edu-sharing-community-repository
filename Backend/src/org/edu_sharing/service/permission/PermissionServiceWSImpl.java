@@ -181,6 +181,11 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
+	public void removeAllPermissions(String nodeId) throws Exception {
+
+	}
+
+	@Override
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception {
 	}
 

@@ -49,7 +49,6 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
-
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
@@ -333,7 +332,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 				String permText = "";
 				for (String perm : permissions) {
-
+					if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
+						// do not show some permission infos in safe invitations since they don't make sense
+						if(Arrays.asList(CCConstants.PERMISSION_CC_PUBLISH).contains(perm)){
+							continue;
+						}
+					}
 					String i18nPerm = I18nServer
 							.getTranslationDefaultResourcebundle(I18nServer.getPermissionCaption(perm), "en_EN");
 					String i18nPermDesc = I18nServer.getTranslationDefaultResourcebundle(
@@ -463,7 +467,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		Gson gson = new Gson();
 		List<String> jsonHistory = (List<String>)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
-		
+
 		List<Notify> notifyList = new ArrayList<Notify>();
 		if(jsonHistory != null) {
 			for(String json : jsonHistory) {
@@ -819,6 +823,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 
+	}
+
+	@Override
+	public void removeAllPermissions(String nodeId) throws Exception {
+		permissionService.deletePermissions(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
 	}
 
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception {
@@ -1380,7 +1389,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void createNotifyObject(final String nodeId, final String user, final String action) {
 
 		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-		
+
 		if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
 			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY), null);
 		}

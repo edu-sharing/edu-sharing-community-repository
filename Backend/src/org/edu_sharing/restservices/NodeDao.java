@@ -2076,6 +2076,9 @@ public class NodeDao {
 							new org.alfresco.service.cmr.repository.NodeRef(storeProtocol, storeId, source[0]));
 					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
 					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+					permissionService.removeAllPermissions(newNode.getId());
+					// re-activate inherition
+					permissionService.setPermissions(newNode.getId(), null, true);
 					return new NodeDao(repoDao, newNode.getId());
 				} catch (Throwable throwable) {
 					throw new RuntimeException(throwable);
