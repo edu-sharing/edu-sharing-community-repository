@@ -18,9 +18,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
-import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.springframework.context.ApplicationContext;
 
 import java.util.*;
@@ -114,12 +112,12 @@ public class RatingServiceImpl implements RatingService {
      * @return
      */
     @Override
-    public AccumulatedRatings getAccumulatedRatings(String nodeId, Date after){
+    public RatingDetails getAccumulatedRatings(String nodeId, Date after){
         if(after==null) {
             try {
-                AccumulatedRatings accumulated = EduSharingRatingCache.get(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+                RatingsCache accumulated = EduSharingRatingCache.get(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
                 if (accumulated != null) {
-                    return accumulated;
+                    return cacheToDetail(accumulated);
                 }
             }catch(ClassCastException e){
                 // ignore
@@ -131,16 +129,16 @@ public class RatingServiceImpl implements RatingService {
         //@TODO: Duplicated call for getRatings
         Rating userRating = this.getRatingForUser(nodeId);
 
-        AccumulatedRatings accumulated = new AccumulatedRatings();
-        accumulated.setOverall(new AccumulatedRatings.RatingData(ratings.stream().map(Rating::getRating).reduce((a, b)->a+b).orElse(0.),ratings.size()));
-        accumulated.setUser(userRating==null ? 0 : userRating.getRating());
-        HashMap<String, AccumulatedRatings.RatingData> affiliation = new HashMap<>();
+        RatingsCache accumulated = new RatingsCache();
+        accumulated.setOverall(new RatingsCache.RatingData(ratings.stream().map(Rating::getRating).reduce((a, b)->a+b).orElse(0.),ratings.size()));
+        accumulated.setUsers(new HashMap<>(ratings.stream().collect(Collectors.toMap(Rating::getAuthority, Rating::getRating))));
+        HashMap<String, RatingsCache.RatingData> affiliation = new HashMap<>();
         // collect counts for each affiliation group
         ratings.forEach((r)->{
             String authorityAffiliation= (String)authorityService.getAuthorityProperty(r.getAuthority(), CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
             if(authorityAffiliation==null)
                 authorityAffiliation="none";
-            AccumulatedRatings.RatingData entry = affiliation.getOrDefault(authorityAffiliation, new AccumulatedRatings.RatingData(0,0));
+            RatingsCache.RatingData entry = affiliation.getOrDefault(authorityAffiliation, new RatingsCache.RatingData(0,0));
             entry.setCount(entry.getCount()+1);
             entry.setSum(entry.getSum()+r.getRating());
             affiliation.put(authorityAffiliation,entry);
@@ -149,7 +147,17 @@ public class RatingServiceImpl implements RatingService {
         if(after==null){
             EduSharingRatingCache.put(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),accumulated);
         }
-        return accumulated;
+        return cacheToDetail(accumulated);
+    }
+
+    private RatingDetails cacheToDetail(RatingsCache cache) {
+        RatingDetails details = new RatingDetails();
+        details.setAffiliation(cache.getAffiliation());
+        details.setOverall(cache.getOverall());
+        if(cache.getUsers() != null && cache.getUsers().containsKey(AuthenticationUtil.getFullyAuthenticatedUser())) {
+            details.setUser(cache.getUsers().get(AuthenticationUtil.getFullyAuthenticatedUser()));
+        }
+        return details;
     }
 
     private void checkPreconditions(String nodeId) throws Exception {
