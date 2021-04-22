@@ -51,6 +51,7 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -1000,7 +1001,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
-		filterGuestAuthority(searchQuery);
+		if(!AuthorityServiceHelper.isAdmin()) {
+			// allow the access to the guest user for admin
+			filterGuestAuthority(searchQuery);
+		}
 
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
