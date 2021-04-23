@@ -244,12 +244,11 @@ export class PermissionsAuthoritiesComponent {
               private organization: RestOrganizationService,
               private connector: RestConnectorService,
               private iam: RestIamService) {
-    this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
-      this.connector.isLoggedIn().subscribe(() => {
-        this.isAdmin = data.canCreate;
-        this.updateOptions();
-        this.updateButtons();
-      });
+      this.isAdmin = this.connector.getCurrentLogin()?.isAdmin;
+      this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
+      this.updateOptions();
+      this.updateButtons();
+
     });
   }
   private search(){

@@ -13,6 +13,7 @@
   >
     <h1 appTitle class="cdk-visually-hidden">{{ 'PERMISSIONS.TITLE' | translate }}</h1>
     <mat-tab-group
+      *ngIf="!isLoading"
       mat-stretch-tabs
       [color]="$any('dark')"
       [selectedIndex]="tab"
