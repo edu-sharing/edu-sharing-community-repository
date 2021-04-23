@@ -90,7 +90,7 @@ export class MainMenuEntriesService {
             icon: 'event',
             target: { type: 'path', path: 'stream' },
             scope: 'stream',
-            isVisible: () => this.config.stream?.enabled,
+            isVisible: () => this.config.stream?.enabled && !this.loginInfo.isGuest,
         },
         {
             name: 'SIDEBAR.LOGIN',
