@@ -18,6 +18,7 @@ import {UIService} from '../../../core-module/rest/services/ui.service';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
+import {ListCountsComponent} from "../../../core-ui-module/components/list-table/widgets/list-counts/list-counts.component";
 
 // Charts.js
 declare var Chart: any;
@@ -540,7 +541,6 @@ export class AdminStatisticsComponent implements OnInit{
     }
 
     getGroupKey(element: any, key: string) {
-        console.log(element, key);
         const data = element.entry?.groups?.[element.action]?.[key];
         return data ? Object.keys(data)[0] : null;
     }
@@ -592,15 +592,19 @@ export class AdminStatisticsComponent implements OnInit{
                 break;
             }
             case 2: {
+                // counts by node including custom properties
                 const properties = this.exportProperties.split('\n').map((e) => e.trim());
                 this.storage.set('admin_statistics_properties', this.exportProperties);
-                csvHeaders = properties.concat(Helper.uniqueArray(this.nodes.map((n) => Object.keys(n.counts)).reduce((a: any, b: any) => a.concat(b))));
+                //csvHeaders = properties.concat(Helper.uniqueArray(this.nodes.map((n) => Object.keys(n.counts)).reduce((a: any, b: any) => a.concat(b))));
+                const countHeaders = ['OVERALL', 'VIEW_MATERIAL', 'VIEW_MATERIAL_EMBEDDED', 'DOWNLOAD_MATERIAL'];
+                csvHeaders = properties.concat(countHeaders);
                 csvData = this.nodes.map((n) => {
                     const c: any = {};
+                    console.log(Object.keys(n.counts));
                     for (const prop of properties) {
                         c[prop] = n.properties ? n.properties[prop] : n.ref.id;
-                        for (const key of Object.keys(n.counts)) {
-                            c[key] = n.counts[key];
+                        for(const idx of countHeaders) {
+                            c[idx] = ListCountsComponent.getCount(n, idx);
                         }
                     }
                     return c;
