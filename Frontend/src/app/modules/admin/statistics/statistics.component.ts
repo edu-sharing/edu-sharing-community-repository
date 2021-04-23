@@ -613,12 +613,17 @@ export class AdminStatisticsComponent implements OnInit{
             }
             case 3: {
                 csvHeaders = this.singleDataRows; // .map((s) => this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s));
+                console.log(this.singleData);
                 csvData = this.singleData.map((data: any) => {
                     const c: any = Helper.deepCopy(data);
                     // c.action = this.translate.instant('ADMIN.STATISTICS.ACTIONS.' + data.action);
                     c.authority = data.authority.hash.substring(0, 8);
                     c.authority_organization = data.authority.organization.map((m: any) => new AuthorityNamePipe(this.translate).transform((m)));
                     c.authority_mediacenter = data.authority.mediacenter.map((m: any) => new AuthorityNamePipe(this.translate).transform((m)));
+                    const mainGroup = data.entry.groups[Object.keys(data.entry.groups)[0]];
+                    for(const additional of Object.keys(mainGroup)) {
+                        c[additional] = Object.keys(mainGroup[additional])[0];
+                    }
                     return c;
                 });
                 break;
