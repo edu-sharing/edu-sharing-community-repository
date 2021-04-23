@@ -227,6 +227,7 @@ export class AdminStatisticsComponent implements OnInit{
             }
         ]).toPromise();
         this.currentTemplate = this.groupModeTemplates[0];
+        this.applyTemplate(this.currentTemplate, false);
         // e.g. ['school']
         this.additionalGroups = await this.config.get('admin.statistics.groups', []).toPromise();
         this.customGroups = ['authority_organization', 'authority_mediacenter'].concat(this.additionalGroups);
@@ -637,10 +638,12 @@ export class AdminStatisticsComponent implements OnInit{
         ]);
     }
 
-    applyTemplate(template: GroupTemplate) {
+    applyTemplate(template: GroupTemplate, refresh = true) {
         this._customGroup = template.group;
         this._customUnfold = template.unfold ?? '';
         this._customGroupMode = template.type ?? 'NODES';
-        this.refreshCustomGroups();
+        if (refresh) {
+            this.refreshCustomGroups();
+        }
     }
 }
