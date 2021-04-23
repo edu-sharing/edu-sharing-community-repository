@@ -32,6 +32,7 @@ export class PermissionsMainComponent {
   selected: Organization[];
   public isAdmin = false;
   public disabled = false;
+  public isLoading = true;
   TABS = ["ORG","GROUP","USER","DELETE"];
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -52,6 +53,7 @@ export class PermissionsMainComponent {
             else{
                 this.goToLogin();
             }
+            this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
         }, (error: any) => this.goToLogin());
         this.config.get("hideMainMenu").subscribe((data:string[])=>{
