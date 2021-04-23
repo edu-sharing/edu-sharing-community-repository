@@ -72,6 +72,7 @@ import { CheckTextOverflowDirective } from './common/directives/check-text-overf
 import { RegisterCustomPropertyDirective } from './common/directives/register-custom-property.directive';
 import { OnAttributeChangeDirective } from './common/directives/on-attribute-change.directive';
 import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
+import { extensionDeclarations } from './extension/extension-declarations';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -137,6 +138,7 @@ import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widget
         CheckTextOverflowDirective,
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
+        extensionDeclarations,
     ],
     imports: [
         IMPORTS,
