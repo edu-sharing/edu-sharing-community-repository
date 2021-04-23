@@ -37,6 +37,7 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {ListItemType} from '../../../core-module/ui/list-item';
+import {VCard} from "../../../core-module/ui/VCard";
 
 @Component({
   selector: 'permissions-authorities',
@@ -565,6 +566,7 @@ export class PermissionsAuthoritiesComponent {
     }
     else{
       const editStore = Helper.deepCopy(this.edit);
+      editStore.profile.vcard = this.edit.profile.vcard.copy();
       editStore.profile.sizeQuota *= 1024 * 1024;
       this.globalProgress = true;
       if (this.editId == null){
@@ -713,7 +715,7 @@ export class PermissionsAuthoritiesComponent {
     }
     else if (this._mode == 'USER'){
       this.iam.getUser(list[0].authorityName).subscribe((user) => {
-          this.edit = Helper.deepCopy(user.person);
+          this.edit = user.person;
           this.edit.profile.sizeQuota = user.person.quota.sizeQuota / 1024 / 1024;
           this.editId = this.edit.authorityName;
           this.primaryAffiliationList = this.edit.profile.primaryAffiliation ? this.PRIMARY_AFFILIATIONS.indexOf(this.edit.profile.primaryAffiliation) != -1 : true;
