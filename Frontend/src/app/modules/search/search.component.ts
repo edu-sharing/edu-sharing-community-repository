@@ -333,9 +333,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setRepository(repository: string) {
-        this.routeSearch(this.searchService.searchTerm, repository, null, null);
-        //this.currentRepository=repository;
-        //this.getSearch(null,true);
+        this.routeSearch(null, repository, null, {});
     }
 
     applyParameters(props: Values = null) {
