@@ -41,6 +41,7 @@
         <h5 class="mat-heading-5">{{currentRoot.title ? currentRoot.title : currentRoot.name}}</h5>
     </div>
     <app-custom-node-list-wrapper
+        *ngIf="canCreate"
         [viewType]="2"
         [hasHeading]="false"
         [optionItems]="[createCollectionOptionItem]"

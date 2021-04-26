@@ -5,27 +5,11 @@ import io.swagger.annotations.ApiModel;
 import java.io.Serializable;
 import java.util.HashMap;
 
-@ApiModel
-public class AccumulatedRatings implements Serializable {
+public class RatingBase implements Serializable {
+
     private RatingData overall;
-    private double user;
     private HashMap<String, RatingData> affiliation;
 
-    public RatingData getOverall() {
-        return overall;
-    }
-
-    public void setOverall(RatingData overall) {
-        this.overall = overall;
-    }
-
-    public double getUser() {
-        return user;
-    }
-
-    public void setUser(double user) {
-        this.user = user;
-    }
 
     public void setAffiliation(HashMap<String, RatingData> affiliation) {
         this.affiliation = affiliation;
@@ -33,6 +17,14 @@ public class AccumulatedRatings implements Serializable {
 
     public HashMap<String, RatingData> getAffiliation() {
         return affiliation;
+    }
+
+    public RatingData getOverall() {
+        return overall;
+    }
+
+    public void setOverall(RatingData overall) {
+        this.overall = overall;
     }
 
     @ApiModel

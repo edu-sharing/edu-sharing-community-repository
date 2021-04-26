@@ -31,6 +31,7 @@ import { Routes } from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
+import { extensionRoutes } from '../extension/extension-routes';
 
 @Component({
     selector: 'router',
@@ -144,6 +145,9 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
 // Due to ahead of time, we need to create all routes manually.
 export const ROUTES: Routes = [
+    // overrides and additional routes
+    ...extensionRoutes,
+
     // global
     { path: '', component: StartupComponent },
     { path: UIConstants.ROUTER_PREFIX + 'app', component: LoginAppComponent },

@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search;
 
+import com.google.gson.Gson;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -7,13 +8,16 @@ import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
@@ -161,8 +165,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
 
-            for(String facette : searchToken.getFacettes()){
-                searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
+            if(searchToken.getFacettes() != null) {
+                for (String facette : searchToken.getFacettes()) {
+                    searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
+                }
             }
 
             /**
@@ -183,7 +189,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.from(searchToken.getFrom());
             searchSourceBuilder.size(searchToken.getMaxResult());
             searchSourceBuilder.trackTotalHits(true);
-            searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
+            if(searchToken.getSortDefinition() != null) {
+                searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
+            }
 
 
 
@@ -266,10 +274,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String protocol = (String) storeRef.get("protocol");
         String identifier = (String) storeRef.get("identifier");
 
+        String metadataSet = (String)properties.get(CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+
         HashMap<String, Object> props = new HashMap<>();
+
+        MetadataSetV2 mds = null;
+        try{mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),metadataSet);}catch(Exception e){};
+
         for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
 
             Serializable value = null;
+            /**
+             * @TODO: transform to ValueTool.toMultivalue
+             */
             if(entry.getValue() instanceof ArrayList){
                 if(((ArrayList) entry.getValue()).size() != 1) {
                     value = entry.getValue();
@@ -279,7 +296,25 @@ public class SearchServiceElastic extends SearchServiceImpl {
             } else {
                 value = entry.getValue();
             }
+            if(entry.getKey().equals("ccm:mediacenter")){
+                List<Map<String,Object>> mediacenterStatus = (List<Map<String,Object>>)entry.getValue();
+                ArrayList<String> result = new ArrayList<>();
+                for(Map<String,Object> mcSt: mediacenterStatus){
+                    Gson gson = new Gson();
+                    String json = gson.toJson(mcSt);
+                    result.add(json);
+                }
+                value = ValueTool.toMultivalue(result.toArray(new String[result.size()]));
+            }
             props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
+
+            /**
+             * metadataset translation
+             */
+            String[] displayNames = MetadataHelper.getDisplayNames(mds, entry.getKey(), entry.getValue());
+            if(displayNames != null){
+                props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
+            }
         }
 
         List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");

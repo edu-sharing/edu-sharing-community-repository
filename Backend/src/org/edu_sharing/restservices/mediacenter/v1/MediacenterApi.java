@@ -1,28 +1,10 @@
 package org.edu_sharing.restservices.mediacenter.v1;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
-import org.alfresco.repo.security.permissions.impl.acegi.WrappedList;
+import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
@@ -37,12 +19,18 @@ import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/mediacenter/v1")
 @Api(tags = {"MEDIACENTER v1"})
@@ -231,11 +219,16 @@ public class MediacenterApi {
 			SearchToken searchToken=new SearchToken();
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
+
+			if(!sortProperties.isEmpty() && sortProperties.get(0).equals("ccm:mediacenter")){
+				sortProperties.set(0,"ccm:mediacenter_sort."+mediacenter+".activated.keyword");
+			}
+
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 
-			String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter);
+			String authorityScope = MediacenterServiceFactory.getLocalService().getMediacenterAdminGroup(mediacenter);
 			if(authorityScope == null){
-				throw new Exception("No mediacenter proxy group found.");
+				throw new Exception("No mediacenter admin group found.");
 			}
 
 			searchToken.setAuthorityScope(Arrays.asList(new String[] {authorityScope}));
@@ -254,7 +247,31 @@ public class MediacenterApi {
 				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
 			}
 
-			//List<Node> data = search.getNodes();
+			for(Node node : data){
+				String newValue = null;
+				String[] mediacenters = node.getProperties().get("ccm:mediacenter");
+				if(mediacenters != null) {
+					for (String mzStatus : mediacenters) {
+						try {
+							JSONObject o = (JSONObject) new JSONParser().parse(mzStatus.trim());
+							String mzName = (String) o.get("name");
+							if (mzName.contains(mediacenter)) {
+								newValue = (String) o.get("activated");
+							}
+						}catch(Exception e){
+							logger.error(e.getMessage());
+						}
+					}
+				}
+				node.getProperties().put("ccm:mediacenter",new String[]{newValue});
+
+				MetadataSetV2 mds = null;
+				try{mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), node.getProperties().get("cm:edu_metadataset")[0]);}catch(Exception e){};
+				String[] displayNames = MetadataHelper.getDisplayNames(mds, "ccm:mediacenter", newValue);
+				if(displayNames != null){
+					node.getProperties().put("ccm:mediacenter"+ CCConstants.DISPLAYNAME_SUFFIX,displayNames);
+				}
+			}
 
 	    	Pagination pagination = new Pagination();
 	    	pagination.setFrom(search.getSkip());

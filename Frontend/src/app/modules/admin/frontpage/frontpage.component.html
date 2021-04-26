@@ -28,13 +28,17 @@
                     <input matInput id="collection" [(ngModel)]="collectionName" [ngModelOptions]="{standalone: true}" type="text" readonly="true">
                 </mat-form-field>
             </div>
-            <mat-form-field *ngIf="config.frontpage.mode !== 'collection'">
-                <mat-label>{{'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate}}</mat-label>
-                <mat-hint>{{'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate}}</mat-hint>
-                <mat-select id="timespan" [(ngModel)]="config.frontpage.timespan" [ngModelOptions]="{standalone: true}">
-                    <mat-option *ngFor="let timespan of timespans" [value]="timespan">{{'ADMIN.FRONTPAGE.TIMESPAN.'+timespan | translate}}</mat-option>
-                </mat-select>
-            </mat-form-field>
+
+
+          <mat-form-field *ngIf="config.frontpage.mode !== 'collection'">
+            <mat-checkbox
+              [checked]="config.frontpage.timespanAll"
+              (change)="config.frontpage.timespanAll = $event.checked" style="margin-bottom:10px;display:inline-block;">
+              {{'ADMIN.FRONTPAGE.TIMESPAN.all' | translate}}
+            </mat-checkbox>
+            <mat-hint>{{'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate}}</mat-hint>
+            <input [hidden]="config.frontpage.timespanAll === true" matInput id="timespan" type="number" formControlName="timespan" [(ngModel)]="config.frontpage.timespan">
+          </mat-form-field>
         </div>
         <div class="group" *ngIf="config.frontpage.mode === 'collection'">
             <div class="select-collection"><button mat-raised-button color="primary"

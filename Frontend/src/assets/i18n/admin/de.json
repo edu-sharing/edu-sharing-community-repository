@@ -357,7 +357,6 @@
                 "ConvertMultivalueToSinglevalueJob": "Eine Property von Multivalue in Singlevalue konvertieren",
                 "BulkEditNodesJob": "Bulk-Bearbeitung von einer Property für mehrere Nodes",
                 "BulkDeleteNodesJob": "Bulk-Löschen für mehrere Nodes (z.B. für größe Ordner)",
-                "UpdateFrontpageCacheJob": "Baut den Cache für die Startseite neu auf",
                 "BulkDeleteAuthoritiesJob": "Gruppen & Organisationen im Bulk löschen",
                 "CheckLinkJob": "Prüft, ob das Ziel eines Links noch existiert und setzt den Status"
             }

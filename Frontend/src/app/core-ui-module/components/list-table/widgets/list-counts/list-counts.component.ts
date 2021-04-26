@@ -17,33 +17,37 @@ export class ListCountsComponent extends ListWidget {
         new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
     ];
 
-    getId() {
-        return this.item.name.split('.')[1];
-    }
-    getCountSingle(group: number = null) {
-        const counts = (this.node as Statistics).counts;
-        if(this.item.name === 'counts.OVERALL') {
+    static getCountSingle(node: Statistics, id: string, group: number = null) {
+        const counts = node.counts;
+        if(id === 'OVERALL') {
             return Object.keys(counts.counts).map((c) => (group ? group : counts.counts[c])).reduce((a, b) =>
                 a + b
             );
         }
-        return (group ? group : counts.counts[this.getId()]) || 0;
+        return (group ? group : counts.counts[id]) || 0;
     }
-
-    getCount() {
-        const counts = (this.node as Statistics).counts;
-        let result = this.getCountSingle();
+    static getCount(node: Statistics, id: string) {
+        const counts = node.counts;
+        let result = this.getCountSingle(node, id);
         if(Object.keys(counts.groups)?.length > 0) {
-            const i1= this.getId();
+            const i1= id;
             if(counts.groups[i1]) {
                 const i2 = Object.keys(counts.groups[i1])[0];
                 if (counts.groups?.[i1]?.[i2]) {
                     result = Object.keys(counts.groups?.[i1]?.[i2]).map((group) =>
-                        (group || '-') + ': ' + this.getCountSingle(counts.groups?.[i1]?.[i2][group])
+                        (group || '-') + ': ' + this.getCountSingle(node, id, counts.groups?.[i1]?.[i2][group])
                     ).join('\n').trim();
                 }
             }
         }
         return result;
+    }
+
+    getId() {
+        return this.item.name.split('.')[1];
+    }
+
+    getCount() {
+        return ListCountsComponent.getCount(this.node as Statistics, this.getId());
     }
 }

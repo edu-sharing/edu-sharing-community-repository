@@ -1,5 +1,6 @@
 package org.edu_sharing.service.collection;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.internal.localstore.Bucket;
@@ -43,7 +44,9 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
     @Override
     protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
         try {
-            String path = StringUtils.join(NodeServiceHelper.getParentPath(nodeRef).stream().map(NodeRef::getId).collect(Collectors.toList()), '/');
+            String path = AuthenticationUtil.runAsSystem(() ->
+                    StringUtils.join(NodeServiceHelper.getParentPath(nodeRef).stream().map(NodeRef::getId).collect(Collectors.toList()), '/')
+            );
             QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(
                 searchServiceElastic.getReadPermissionsQuery()
             ).must(

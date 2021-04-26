@@ -464,11 +464,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.nodeDisplayed = event;
             this.nodeDisplayedVersion = event.version;
             */
+            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.currentNodes);
             this.currentNode = list[0];
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
                 {
                     state: {
-                        nodes: this.currentNodes,
                         scope: 'workspace'
                     }
                 }

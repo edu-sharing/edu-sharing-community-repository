@@ -28,6 +28,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -35,7 +36,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.nodeservice.RecurseMode;
+import org.edu_sharing.service.provider.Provider;
 import org.edu_sharing.service.util.CSVTool;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -44,9 +47,11 @@ import org.springframework.context.ApplicationContext;
 import java.io.BufferedReader;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -87,6 +92,8 @@ public class BulkEditNodesJob extends AbstractJob{
 	@JobFieldDescription(file = true, description = "Mapping list (csv with oldValue + newValue headers), only if mode == ReplaceMapping")
 	private String data;
 	private CSVTool.CSVResult csv;
+	@JobFieldDescription(description = "classname, if mode == Custom. Must be a subclass of java.util.function.Consumer<NodeRef>")
+	private String customClass;
 
 	private enum Mode{
 		@JobFieldDescription(description = "Replace a property with a fixed string")
@@ -97,8 +104,12 @@ public class BulkEditNodesJob extends AbstractJob{
 		ReplaceMapping,
 		@JobFieldDescription(description = "Currently Unsupported")
 		Append,
-		@JobFieldDescription(description = "Remove the property")
-		Remove
+		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed.")
+		Remove,
+		@JobFieldDescription(description = "Remove Duplicates in multivalue properties.")
+		RemoveDuplicates,
+		@JobFieldDescription(description = "Use a class that implements custom handling. defined by customClass param")
+		Custom
 	};
 
 	@Override
@@ -112,19 +123,21 @@ public class BulkEditNodesJob extends AbstractJob{
 
 		try {
 			mode = Mode.valueOf((String) context.getJobDetail().getJobDataMap().get("mode"));
-		}catch(Throwable t){
-			throw new IllegalArgumentException("Missing or invalid value for required parameter 'mode'",t);
+		} catch (Throwable t) {
+			throw new IllegalArgumentException("Missing or invalid value for required parameter 'mode'", t);
 		}
 
-		property = prepareParam(context, "property", true);
-		property = CCConstants.getValidGlobalName(property);
+		if(!mode.equals(Mode.Custom)) {
+			property = prepareParam(context, "property", true);
+			property = CCConstants.getValidGlobalName(property);
+		}
 
 		copy = prepareParam(context, "copy", false);
-		if(copy!=null){
-			copy=CCConstants.getValidGlobalName(copy);
+		if (copy != null) {
+			copy = CCConstants.getValidGlobalName(copy);
 		}
 		value = prepareParam(context, "value", false);
-		if(mode.equals(Mode.Replace)) {
+		if (mode.equals(Mode.Replace)) {
 			if (copy == null && value == null) {
 				throwMissingParam("'value' or 'copy'");
 			}
@@ -132,68 +145,113 @@ public class BulkEditNodesJob extends AbstractJob{
 				throw new IllegalArgumentException("Only one of parameters 'value' and 'copy' may be set");
 			}
 		}
-		if(mode.equals(Mode.ReplaceToken)){
+		if (mode.equals(Mode.ReplaceToken)) {
 			searchToken = prepareParam(context, "searchToken", true);
 			replaceToken = prepareParam(context, "replaceToken", true);
 		}
 
-		lucene =prepareParam(context, "lucene", false);
+		if (mode.equals(Mode.Remove)) {
+			searchToken = prepareParam(context, "searchToken", true);
+		}
 
-		startFolder =prepareParam(context, "startFolder", true);
+		lucene = prepareParam(context, "lucene", false);
+
+		startFolder = prepareParam(context, "startFolder", true);
 		try {
 			types = Arrays.stream(((String) context.getJobDetail().getJobDataMap().get("types")).
 					split(",")).map(String::trim).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList());
-		}catch(Throwable t){}
-		if(types==null || types.isEmpty()) {
+		} catch (Throwable t) {
+		}
+		if (types == null || types.isEmpty()) {
 			throwMissingParam("types");
 		}
 		recurseMode = RecurseMode.Folders;
 		try {
-			if(context.getJobDetail().getJobDataMap().get("recurseMode") != null) {
+			if (context.getJobDetail().getJobDataMap().get("recurseMode") != null) {
 				recurseMode = RecurseMode.valueOf((String) context.getJobDetail().getJobDataMap().get("recurseMode"));
 			}
-		}catch(Throwable t){
-			throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'",t);
+		} catch (Throwable t) {
+			throw new IllegalArgumentException("Missing or invalid value for parameter 'recurseMode'", t);
 		}
 		data = (String) context.getJobDetail().getJobDataMap().get(JobHandler.FILE_DATA);
-		if(mode.equals(Mode.ReplaceMapping)){
+		if (mode.equals(Mode.ReplaceMapping)) {
 			csv = readCSVMapping(data);
 		}
 
 		NodeRunner runner = new NodeRunner();
-		runner.setTask((ref)->{
-			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
-			logger.info("Bulk edit metadata for node "+ref.getId());
-			if(copy!=null){
-				value=nodeService.getProperty(nodeRef,QName.createQName(copy));
+
+		if (mode.equals(Mode.Custom)) {
+			customClass = prepareParam(context, "customClass", true);
+			Class clazz = null;
+			try {
+				clazz = Class.forName(customClass);
+				Consumer<NodeRef> consumer = (Consumer<NodeRef>) clazz.getConstructor(new Class[]{}).newInstance(new Object[]{});
+				runner.setTask(consumer);
+			} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+				throw new JobExecutionException(e);
 			}
-			if(mode.equals(Mode.Replace)){
-				nodeService.setProperty(nodeRef,QName.createQName(property),value);
-			}
-			else if(mode.equals(Mode.Remove)){
-				nodeService.removeProperty(nodeRef,QName.createQName(property));
-			} else if(mode.equals(Mode.ReplaceToken) || mode.equals(Mode.ReplaceMapping)) {
-				Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
-				if (current != null) {
-					if (current instanceof String) {
-						nodeService.setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
-					} else if (current instanceof List) {
-						nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
-							if(v instanceof String){
-								return processPropertyValue((String) v);
-							} else {
-								return v;
-							}
-						}).collect(Collectors.toList()));
-					} else {
-						logger.info("Can not replace property " + property + "for node " + nodeRef + ": current data is not of type String/List");
-					}
+		}else{
+			runner.setTask((ref) -> {
+				org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
+				logger.info("Bulk edit metadata for node " + ref.getId());
+				if (copy != null) {
+					value = nodeService.getProperty(nodeRef, QName.createQName(copy));
 				}
-			} else {
-				throw new IllegalArgumentException("Mode " + mode + " is currently not supported");
-			}
-		});
+				if (mode.equals(Mode.Replace)) {
+					nodeService.setProperty(nodeRef, QName.createQName(property), value);
+				} else if (mode.equals(Mode.Remove)) {
+					if (searchToken != null) {
+						Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+						if (current != null) {
+							boolean remove = false;
+							if (current instanceof String) {
+								if (searchToken.equals((String) current)) {
+									remove = true;
+								}
+							} else if (current instanceof List) {
+								for (Object o : (List) current) {
+									if (searchToken.equals(0)) {
+										remove = true;
+									}
+								}
+							}
+							if (remove) {
+								nodeService.removeProperty(nodeRef, QName.createQName(property));
+							}
+						}
+					} else {
+						nodeService.removeProperty(nodeRef, QName.createQName(property));
+					}
+				} else if (mode.equals(Mode.ReplaceToken) || mode.equals(Mode.ReplaceMapping)) {
+					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+					if (current != null) {
+						if (current instanceof String) {
+							nodeService.setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
+						} else if (current instanceof List) {
+							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
+								if (v instanceof String) {
+									return processPropertyValue((String) v);
+								} else {
+									return v;
+								}
+							}).collect(Collectors.toList()));
+						} else {
+							logger.info("Can not replace property " + property + "for node " + nodeRef + ": current data is not of type String/List");
+						}
+					}
+				} else if (mode.equals(Mode.RemoveDuplicates)) {
+					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+					if (current != null && current instanceof List) {
+						if (((List) current).stream().distinct().count() != ((List) current).size()) {
+							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().distinct().collect(Collectors.toList()));
+						}
+					}
+				} else {
+					throw new IllegalArgumentException("Mode " + mode + " is currently not supported");
+				}
+			});
+		}
 		runner.setTypes(types);
 		runner.setRunAsSystem(true);
 		runner.setThreaded(false);
