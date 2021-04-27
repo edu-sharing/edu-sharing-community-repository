@@ -878,7 +878,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			nodeID = getProperty(store.getProtocol(), store.getIdentifier(), nodeID, CCConstants.CCM_PROP_IO_ORIGINAL);
 		}
 		apiClient.writeContent(store, nodeID, content, mimetype, _encoding, property);
-		RenderingTool.buildRenderingCache(nodeID);
+		if(property == null || property.equals(ContentModel.PROP_CONTENT.toString())) {
+			RenderingTool.buildRenderingCache(nodeID);
+		}
 	}
 	
 	@Override
