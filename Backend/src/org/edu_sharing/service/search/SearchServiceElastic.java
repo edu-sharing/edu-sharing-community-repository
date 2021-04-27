@@ -564,6 +564,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(RequestOptions.DEFAULT)){
+             if(client != null){
+                 try {
+                     client.close();
+                 }catch (Exception e){
+                     logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
+                 }
+             }
              client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }
