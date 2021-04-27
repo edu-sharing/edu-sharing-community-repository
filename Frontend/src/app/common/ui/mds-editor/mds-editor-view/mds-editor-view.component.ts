@@ -1,6 +1,6 @@
 import { trigger } from '@angular/animations';
 import {
-    AfterViewInit,
+    AfterViewInit, ApplicationRef,
     Component,
     ComponentFactoryResolver,
     ElementRef,
@@ -135,6 +135,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         private sanitizer: DomSanitizer,
         private factoryResolver: ComponentFactoryResolver,
         private containerRef: ViewContainerRef,
+        private applicationRef: ApplicationRef,
         private mdsEditorInstance: MdsEditorInstanceService,
     ) {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
@@ -152,6 +153,17 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 map((activeViews) => activeViews.some((view) => view.id === this.view.id)),
             )
             .subscribe((isActive) => (this.isHidden = !isActive));
+        this.core.card?.onScrollToJumpmark
+            .pipe(
+                takeUntil(this.destroyed),
+            )
+            .subscribe(async (j) => {
+                if(j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX && !this.show) {
+                    this.show = true;
+                    await this.applicationRef.tick();
+                    this.core.card.scrollSmooth(j);
+                }
+            });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
