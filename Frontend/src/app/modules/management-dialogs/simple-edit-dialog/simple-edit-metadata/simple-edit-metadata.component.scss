@@ -1,7 +1,7 @@
 @import "../../../../core-ui-module/styles/variables";
 
 ::ng-deep{
-    app-mds-editor-view h3{
+    .mds-simple-editor app-mds-editor-view h3{
         display: none !important;
     }
 }
