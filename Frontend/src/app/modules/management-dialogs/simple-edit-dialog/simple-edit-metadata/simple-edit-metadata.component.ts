@@ -37,6 +37,17 @@ export class SimpleEditMetadataComponent {
         return this.mds.mdsEditorInstance.getHasUserChanges();
     }
 
+    /**
+     * validate the form data
+     * return true if data is valid, false otherwise
+     */
+    validate() {
+        if(!this.mds.mdsEditorInstance.getIsValid()) {
+            this.mds.mdsEditorInstance.showMissingRequiredWidgets();
+            return false;
+        }
+        return true;
+    }
     save(): Observable<void> {
         if (!this.isDirty()) {
             // emit null so that next and complete get's called
