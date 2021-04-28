@@ -14,12 +14,14 @@ public interface MediacenterService {
 	/**
 	 * adjustment of licenses for mediacenters on nodes given by an {@link MediacenterLicenseProvider}
 	 * does a full sync, compares LicensProvider nodes with local nodes and adds or removes permission
+	 *
+	 * @deprecated
 	 */
 	public void manageNodeLicenses();
 
 	/**
 	 * adjustment of licenses for mediacenters on nodes given by an {@link MediacenterLicenseProvider}
-	 * instead of full sync done by {@link #manageNodeLicenses()} manageNodeLicenses}
+	 * full sync done by using null for from/until
 	 * this method only get's changes of {@link MediacenterLicenseProvider}
 	 * @param from
 	 * @param until
