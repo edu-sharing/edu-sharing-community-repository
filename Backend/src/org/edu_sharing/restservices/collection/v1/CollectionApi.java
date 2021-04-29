@@ -4,7 +4,6 @@ import io.swagger.annotations.*;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.xpath.operations.Bool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;
@@ -335,6 +334,39 @@ public class CollectionApi {
     		return ErrorResponse.createResponse(t);
     	}
 	}
+	@GET
+	@Path("/collections/{repository}/{collection}/children/proposals")
+	@ApiOperation(value = "Get proposed objects for collection (requires edit permissions on collection).")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ReferenceEntries.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+
+	public Response getCollectionsProposals(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "ID of parent collection", required = true) @PathParam("collection") String parentId,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			ReferenceEntries response = new ReferenceEntries();
+			List<CollectionReference> references = new ArrayList<>();
+			CollectionBaseEntries base = CollectionDao.getCollectionsProposals(repoDao, parentId);
+			for(Node item : base.getEntries()) {
+				references.add((CollectionReference) item);
+			}
+			response.setReferences(references);
+			response.setPagination(base.getPagination());
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 
 	@GET
 	@Path("/collections/{repository}/{collection}/children/collections")
@@ -477,6 +509,7 @@ public class CollectionApi {
 			@ApiParam(value = "ID of node", required = true) @PathParam("node") String nodeId,
 			@ApiParam(value = "ID of source repository", required=false ) @QueryParam("sourceRepo")  String sourceRepo,
 			@ApiParam(value = "Allow that a node that already is inside the collection can be added again", required=false, defaultValue = "false") @QueryParam("allowDuplicate")  Boolean allowDuplicate,
+			@ApiParam(value = "Mark this node only as a suggestion (not really adding but just marking it). This can also be used for collections where you don't have permissions", required=false, defaultValue = "false") @QueryParam("asSuggestion")  Boolean asSuggestion,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -491,13 +524,12 @@ public class CollectionApi {
 			}
             NodeEntry entry=new NodeEntry();
 
-            if(sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId())){
-				entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo, allowDuplicate != null && allowDuplicate).asNode());
-            }else {
-                entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId, null, allowDuplicate != null && allowDuplicate).asNode());
-            }
-
-
+			sourceRepo = sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId()) ? sourceRepo : null;
+			if(asSuggestion != null && asSuggestion) {
+				CollectionDao.proposeForCollection(repoDao, collectionId, nodeId, sourceRepo);
+			} else {
+				entry.setNode(CollectionDao.addToCollection(repoDao, collectionId, nodeId, sourceRepo, allowDuplicate != null && allowDuplicate).asNode());
+			}
             return Response.status(Response.Status.OK).entity(entry).build();
 
     	} catch (Throwable t) {

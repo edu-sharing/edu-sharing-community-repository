@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.google.gson.Gson;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
@@ -17,9 +18,12 @@ import org.edu_sharing.restservices.collection.v1.model.CollectionBaseEntries;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.collection.CollectionServiceImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -255,7 +259,46 @@ public class CollectionDao {
 		}
 			
 	}
-	
+
+
+	public static CollectionBaseEntries getCollectionsProposals(RepositoryDao repoDao, String parentId) throws DAOException {
+		try {
+			if (PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.PERMISSION_WRITE)) {
+				throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_WRITE + " on collection " + parentId);
+			}
+			List<NodeRef> nodes = CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					getChildrenProposal(parentId);
+
+			//NodeDao.convertAlfrescoNodeRef(repoDao,children)
+			List<Node> sorted = NodeDao.convertToRest(repoDao,
+					NodeDao.convertAlfrescoNodeRef(repoDao, nodes),
+					Filter.createShowAllFilter(),
+					null,
+					(e) -> {
+						if(e.exception instanceof DAOSecurityException) {
+							NodeDao.createEmptyDummy(e.nodeRef);
+						}
+						throw new RuntimeException(e.exception);
+					}
+			);
+			CollectionBaseEntries entries = new CollectionBaseEntries();
+			entries.setEntries(sorted);
+			return entries;
+		} catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+
+	public static synchronized void proposeForCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId) throws DAOException {
+		try {
+
+			CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					proposeForCollection(collectionId,nodeId,sourceRepositoryId);
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
+
 	public static synchronized NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId, boolean allowDuplicate) throws DAOException {
 		try {
 

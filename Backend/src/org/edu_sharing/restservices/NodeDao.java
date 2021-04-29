@@ -55,7 +55,6 @@ import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
-import org.edu_sharing.service.rating.RatingsCache;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
@@ -398,6 +397,20 @@ public class NodeDao {
 			throw DAOException.mapping(e);
 		}
 	}
+
+	/**
+	 * create an empty, Node dummy interface
+	 *
+	 * @param nodeRef
+	 * @return
+	 */
+	public static Node createEmptyDummy(NodeRef nodeRef) {
+		Node node = new Node();
+		node.setRef(nodeRef);
+		node.setName(nodeRef.getId());
+		return node;
+	}
+
 	public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facettes) throws DAOException {
 		try {
 			if(!CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SAVED_SEARCH).equals(getType())){
@@ -561,7 +574,7 @@ public class NodeDao {
 		for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
 			slice.add(children.get(i));
         }
-		List<Node> nodes = convertToRest(repoDao, slice, propFilter, transform);
+		List<Node> nodes = convertToRest(repoDao, slice, propFilter, transform, null);
 		Pagination pagination=new Pagination();
         pagination.setFrom(skipCount);
         pagination.setCount(nodes.size());
@@ -570,7 +583,16 @@ public class NodeDao {
         result.setNodes(nodes);
         return result;
     }
-    public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform){
+    public static class RestConvertException {
+		public DAOException exception;
+		public NodeRef nodeRef;
+
+		public RestConvertException(DAOException exception, NodeRef nodeRef) {
+			this.exception = exception;
+			this.nodeRef = nodeRef;
+		}
+	}
+    public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform, Function<RestConvertException, Node> exceptionHandler){
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		final Context context = Context.getCurrentInstance();
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -587,6 +609,12 @@ public class NodeDao {
 						} catch (DAOMissingException daoException) {
 							logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
 							return null;
+						} catch(DAOException e){
+							if(exceptionHandler != null){
+								return exceptionHandler.apply(new RestConvertException(e, nodeRef));
+							} else {
+								throw e;
+							}
 						} finally {
 							Context.release();
 						}

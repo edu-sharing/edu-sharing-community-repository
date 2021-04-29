@@ -197,6 +197,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_CONFIGOBJECT = "{http://www.campuscontent.de/model/1.0}configobject";
 
+	public final static String CCM_TYPE_COLLECTION_PROPOSAL = "{http://www.campuscontent.de/model/1.0}collection_proposal";
+
 	public final static String CCM_TYPE_SAVED_SEARCH = "{http://www.campuscontent.de/model/1.0}saved_search";
 
 	public final static String CCM_TYPE_COMMENT = "{http://www.campuscontent.de/model/1.0}comment";
@@ -462,6 +464,10 @@ public class CCConstants {
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPSOURCE = "{http://www.campuscontent.de/model/1.0}groupSource";
 
+	public final static String CCM_PROP_COLLECTION_PROPOSAL_TARGET = "{http://www.campuscontent.de/model/1.0}collection_proposal_target";
+	public final static String CCM_PROP_COLLECTION_PROPOSAL_STATUS = "{http://www.campuscontent.de/model/1.0}collection_proposal_status";
+	public final static String CCM_PROP_COLLECTION_PROPOSAL_COMMENT = "{http://www.campuscontent.de/model/1.0}collection_proposal_comment";
+
 	public final static String CCM_PROP_MEDIACENTER_ID = "{http://www.campuscontent.de/model/1.0}mediacenterId";
 	public final static String CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION = "{http://www.campuscontent.de/model/1.0}mediacenterDistrictAbbreviation";
 	public final static String CCM_PROP_MEDIACENTER_MAIN_URL = "{http://www.campuscontent.de/model/1.0}mediacenterMainUrl";
@@ -506,7 +512,12 @@ public class CCConstants {
 	);
     public static final String AUTHORITY_DELETED_USER = "DELETED_USER";
 
-    public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
+	public enum PROPOSAL_STATUS {
+		ACCEPTED,
+		DECLINED
+	};
+
+	public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";
 	public static String CCM_WF_STATUS_VALUE_HASFLAWS="300_hasflaws";
 	public static String CCM_WF_STATUS_VALUE_CHECKED="400_checked";
@@ -851,6 +862,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX = "TOOLPERMISSION_REPOSITORY_";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER = "TOOLPERMISSION_COLLECTION_CHANGE_OWNER";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL = "TOOLPERMISSION_COLLECTION_PROPOSAL";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL = "TOOLPERMISSION_COLLECTION_EDITORIAL";
 

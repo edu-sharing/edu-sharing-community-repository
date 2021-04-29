@@ -1,6 +1,7 @@
 package org.edu_sharing.service.collection;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,6 +48,7 @@ import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -274,20 +276,58 @@ public class CollectionServiceImpl implements CollectionService{
 			throw e;
 		}
 	}
+
+	@Override
+	public List<NodeRef> getChildrenProposal(String parentId) {
+		return NodeServiceFactory.getLocalService().getChildrenChildAssociationRefType(parentId, CCConstants.CCM_TYPE_COLLECTION_PROPOSAL).stream().map((proposal) ->
+			new NodeRef(NodeServiceHelper.getProperty(proposal.getChildRef(), CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET))
+		).collect(Collectors.toList());
+	}
+
+	@Override
+	public void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
+			throws DuplicateNodeException, Throwable {
+		String finalId = mapNodeId(originalNodeId, sourceRepositoryId);
+
+		/*
+		if(!PermissionServiceHelper.isNodePublic(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId))) {
+			throw new IllegalArgumentException("Suggested node is required to be publicly accessible");
+		}
+		*/
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL);
+		if(!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), CCConstants.PERMISSION_READ)){
+			throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_READ + " permissions for collection " + collectionId);
+		}
+		if(!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId), CCConstants.PERMISSION_CC_PUBLISH)){
+			throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_CC_PUBLISH + " permissions for collection " + collectionId);
+		}
+		AuthenticationUtil.runAsSystem(() -> {
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId);
+			if(getChildrenProposal(collectionId).contains(nodeRef)){
+				throw new DuplicateNodeException("Node id " + nodeRef.getId() + " is already proposed for this collection");
+			}
+			HashMap<String, Serializable> props = new HashMap<>();
+			props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId));
+			return NodeServiceFactory.getLocalService().createNodeBasic(collectionId, CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, props);
+		});
+	}
+
+	public String mapNodeId(String originalNodeId, String sourceRepositoryId) throws Throwable {
+		if(sourceRepositoryId != null) {
+			ApplicationInfo rep = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
+			if (rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())) {
+				return originalNodeId;
+			}
+			return new RemoteObjectService().getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
+		}
+		return originalNodeId;
+	}
 	
 	@Override
 	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate)
 			throws DuplicateNodeException, Throwable {
-		if(sourceRepositoryId != null) {
-			ApplicationInfo rep = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
-			if (rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())) {
-				return addToCollection(collectionId, originalNodeId, allowDuplicate);
-			}
-			String nodeId = new RemoteObjectService().getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
-			return this.addToCollection(collectionId, nodeId, allowDuplicate);
-		} else {
-			return addToCollection(collectionId, originalNodeId, allowDuplicate);
-		}
+		originalNodeId = mapNodeId(originalNodeId, sourceRepositoryId);
+		return addToCollection(collectionId, originalNodeId, allowDuplicate);
 	}
 
 	@Override

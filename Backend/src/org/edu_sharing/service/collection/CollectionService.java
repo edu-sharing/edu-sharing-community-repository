@@ -18,9 +18,14 @@ public interface CollectionService {
 	public void update(Collection collection);
 	
 	public void remove(String collectionId);
-	
-	
-	/**
+
+
+    List<NodeRef> getChildrenProposal(String parentId);
+
+    void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
+            throws DuplicateNodeException, Throwable;
+
+    /**
 	 * /**
 	 * creates an refObject
 	 * adds Usage to Original IO (lms=repo,course=sammlungsid,resourceId=refIoId, nodeId=originalIOId
