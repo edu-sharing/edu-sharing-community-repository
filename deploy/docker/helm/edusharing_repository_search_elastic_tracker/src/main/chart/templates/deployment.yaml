@@ -32,6 +32,10 @@ spec:
           containerPort: 8081
         - name: jmx
           containerPort: 7199
+        {{- if .Values.config.jvm.debug }}
+        - name: jpda
+          containerPort: 5005
+        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           httpGet:

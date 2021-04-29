@@ -52,6 +52,9 @@ spec:
       - name: {{ include "edusharing_repository_service.name" . }}-server
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-repository-service:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        {{- if .Values.config.jvm.debug }}
+        args: [ "catalina.sh", "jpda", "run" ]
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ include "edusharing_repository_service.name" . }}-env
@@ -66,6 +69,10 @@ spec:
           containerPort: 5701
         - name: jmx
           containerPort: 7199
+        {{- if .Values.config.jvm.debug }}
+        - name: jpda
+          containerPort: 5005
+        {{- end }}
         {{- if .Values.metrics.enabled }}
         - name: metric
           containerPort: 9090

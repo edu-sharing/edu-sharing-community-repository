@@ -43,6 +43,7 @@ service:
 config:
 
   jvm:
+    debug: false
     ram:
       minPercentage: "75.0"
       maxPercentage: "75.0"

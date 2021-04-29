@@ -26,7 +26,7 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender
+          chown -R www-data:www-data /var/cache/esrender
         volumeMounts:
         - name: share
           mountPath: /var/cache/esrender

@@ -27,6 +27,7 @@ nameOverride: edusharing-repository-search-elastic-tracker
 config:
 
   jvm:
+    debug: false
     ram:
       minPercentage: "95.0"
       maxPercentage: "95.0"

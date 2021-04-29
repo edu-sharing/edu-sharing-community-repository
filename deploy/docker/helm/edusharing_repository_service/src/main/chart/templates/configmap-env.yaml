@@ -19,6 +19,7 @@ data:
     {{- if .Values.metrics.enabled }}
     -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
     {{- end }}
+  JPDA_ADDRESS: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1:5005"{{ else }}"0.0.0.0:5005"{{ end }}
   REPOSITORY_CACHE_HOST: {{ .Values.config.cache.host | quote }}
   REPOSITORY_CACHE_PORT: {{ .Values.config.cache.port | quote }}
   REPOSITORY_DATABASE_DRIV: {{ .Values.config.database.driver | quote }}
