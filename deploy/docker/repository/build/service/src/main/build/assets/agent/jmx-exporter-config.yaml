@@ -180,3 +180,38 @@ rules:
     labels:
       protocol: "$1"
       port: "$4"
+  - pattern: 'com.hazelcast<instance=(.*), name=(.+), type=HazelcastInstance><>(.*)Count:'
+    name: hazelcast_$3_total
+    help: hazelcast_$3_total
+    type: COUNTER
+    labels:
+      instance: "$1"
+      name: "$2"
+  - pattern: 'com.hazelcast<instance=(.*), name=(.+), type=HazelcastInstance><>running:'
+    name: hazelcast_up
+    help: hazelcast_up
+    type: GAUGE
+    labels:
+      instance: "$1"
+      name: "$2"
+  - pattern: 'com.hazelcast<name=(.*), instance=(.+), type=I(.*)><>local(.*)Count:'
+    name: hazelcast_$3_$4_total
+    help: hazelcast_$3_$4_total
+    type: COUNTER
+    labels:
+      name: "$1"
+      instance: "$2"
+  - pattern: 'com.hazelcast<name=(.*), instance=(.+), type=I(.*)><>localHits:'
+    name: hazelcast_$3_hits_total
+    help: hazelcast_$3_hits_total
+    type: COUNTER
+    labels:
+      name: "$1"
+      instance: "$2"
+  - pattern: 'com.hazelcast<name=(.*), instance=(.+), type=I(.*)><>size:'
+    name: hazelcast_$3_entries
+    help: hazelcast_$3_entries
+    type: GAUGE
+    labels:
+      name: "$1"
+      instance: "$2"
