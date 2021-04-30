@@ -102,12 +102,21 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                 for (Object lval : contributerClean) {
                     Element centityEle = createAndAppendElement("centity", contributeEle);
                     // ## Add URL fields for ORCID/GND-ID resp. ROR/Wikidata-URL
-                    String val=VCardConverter.cleanupVcard((String)lval, (vcard) -> {
-                        Optional<ExtendedType> contributeDate = vcard.getExtendedTypes().stream().filter((type) -> CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE.equals(type.getExtendedName())).findFirst();
-                        contributeDate.ifPresent(vcard::removeExtendedType);
-                        return vcard;
-                    }).get(0);
-                    this.createAndAppendElement("vcard", centityEle, val, true);
+                    if(lval != null) {
+                         List<String> l = VCardConverter.cleanupVcard((String) lval, (vcard) -> {
+                            Optional<ExtendedType> contributeDate = (vcard.getExtendedTypes() == null)? null : vcard.getExtendedTypes().
+                                    stream().
+                                    filter((type) -> CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE.equals(type.getExtendedName())).
+                                    findFirst();
+                            if(contributeDate != null) contributeDate.ifPresent(vcard::removeExtendedType);
+                            return vcard;
+                        });
+                         if(l != null) {
+                             String val = l.get(0);
+                             this.createAndAppendElement("vcard", centityEle, val, true);
+                         }
+                    }
+
                 }
             }
         }
