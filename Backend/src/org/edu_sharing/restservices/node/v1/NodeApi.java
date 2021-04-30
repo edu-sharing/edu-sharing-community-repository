@@ -2210,7 +2210,7 @@ public class NodeApi  {
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setProperty(property, (Serializable) value);
+		    	nodeDao.setProperty(property, value == null || value.size() != 1? (Serializable) value : value.get(0));
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (DAOValidationException t) {

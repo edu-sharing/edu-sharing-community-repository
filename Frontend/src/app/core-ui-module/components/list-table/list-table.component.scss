@@ -55,7 +55,6 @@ $previewHeight: 160px;
 .moreAlways {
     transition: $transitionNormal all;
     opacity: 1;
-    color: $primary !important;
 }
 .disabled {
     color: $textVeryLight !important;
@@ -374,12 +373,6 @@ $badgeWidth: 250px;
     padding: 0 5px;
     vertical-align: middle;
     color: $textLight;
-    &.more {
-        color: $primary;
-        > button {
-            color: unset;
-        }
-    }
 }
 .heading > div {
     align-self: flex-end;
@@ -512,11 +505,25 @@ $badgeWidth: 250px;
     background-color: #fff;
 }
 
-.cardList .row {
-    display: flex;
-    flex-direction: column;
-    > a{
-        flex-grow: 1;
+.cardList {
+    .item_with_label.column {
+        .rowInner {
+            max-height: 2.5em;
+        }
+        ::ng-deep app-list-base {
+            label {
+                display: flex;
+                font-size: $fontSizeXSmall;
+            }
+        }
+    }
+    .row {
+        display: flex;
+        flex-direction: column;
+
+        > a {
+            flex-grow: 1;
+        }
     }
 }
 

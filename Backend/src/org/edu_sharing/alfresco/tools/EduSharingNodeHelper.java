@@ -38,6 +38,7 @@ public class EduSharingNodeHelper {
 	                CCConstants.CCM_TYPE_USAGE.equals(type) ||
 	                CCConstants.CCM_TYPE_COMMENT.equals(type) ||
 	                CCConstants.CCM_TYPE_COLLECTION_FEEDBACK.equals(type) ||
+	                CCConstants.CCM_TYPE_COLLECTION_PROPOSAL.equals(type) ||
 	                CCConstants.CM_TYPE_THUMBNAIL.equals(type)) {
 	            return true;
 	        }

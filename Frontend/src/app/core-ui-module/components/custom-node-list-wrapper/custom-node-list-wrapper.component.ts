@@ -20,7 +20,7 @@ import {
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { UIHelper } from '../../ui-helper';
-import {OptionItem, Scope} from "../../option-item";
+import {CustomOptions, OptionItem, Scope} from '../../option-item';
 import {DropData} from "../../directives/drag-nodes/drag-nodes";
 import {ListTableComponent} from "../list-table/list-table.component";
 
@@ -77,6 +77,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
     @Input() mainNav: MainNavComponent;
     @Input() actionbar: ActionbarComponent;
     @Input() optionItems: OptionItem[];
+    @Input() customOptions: CustomOptions;
     @Input() viewType: 0 | 1 | 2;
     @Input() validatePermissions: (
         node: Node,
@@ -139,6 +140,9 @@ export class CustomNodeListWrapperComponent implements OnChanges {
 
         // force change detection on list table component
         this.componentRef.instance.changeDetectorRef?.detectChanges();
+    }
+    getListTable(): ListTableComponent {
+        return this.componentRef.instance;
     }
 
     /**

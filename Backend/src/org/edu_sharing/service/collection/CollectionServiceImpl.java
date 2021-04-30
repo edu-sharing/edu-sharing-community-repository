@@ -2,19 +2,17 @@ package org.edu_sharing.service.collection;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -278,10 +276,14 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 
 	@Override
-	public List<NodeRef> getChildrenProposal(String parentId) {
-		return NodeServiceFactory.getLocalService().getChildrenChildAssociationRefType(parentId, CCConstants.CCM_TYPE_COLLECTION_PROPOSAL).stream().map((proposal) ->
-			new NodeRef(NodeServiceHelper.getProperty(proposal.getChildRef(), CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET))
-		).collect(Collectors.toList());
+	public List<AssociationRef> getChildrenProposal(String parentId) throws Exception {
+		if (!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.PERMISSION_WRITE)) {
+			throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_WRITE + " on collection " + parentId);
+		}
+		return NodeServiceFactory.getLocalService().getChildrenChildAssociationRefType(parentId, CCConstants.CCM_TYPE_COLLECTION_PROPOSAL).stream().map((proposal) -> {
+			NodeRef target = new NodeRef(NodeServiceHelper.getProperty(proposal.getChildRef(), CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET));
+			return new AssociationRef(proposal.getChildRef(), ContentModel.ASSOC_ORIGINAL, target);
+		}).collect(Collectors.toList());
 	}
 
 	@Override
@@ -303,12 +305,22 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 		AuthenticationUtil.runAsSystem(() -> {
 			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId);
-			if(getChildrenProposal(collectionId).contains(nodeRef)){
+			if(getChildren(collectionId, null, new SortDefinition(), Collections.singletonList("files")).stream().anyMatch((ref) ->
+					nodeRef.getId().equals(NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_ORIGINAL))
+			)){
+				throw new DuplicateNodeException("Node id " + nodeRef.getId() + " is already in this collection");
+			}
+			if(getChildrenProposal(collectionId).stream().anyMatch((assoc) -> assoc.getTargetRef().equals(nodeRef))){
 				throw new DuplicateNodeException("Node id " + nodeRef.getId() + " is already proposed for this collection");
 			}
 			HashMap<String, Serializable> props = new HashMap<>();
+			props.put(CCConstants.CM_NAME, NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME));
 			props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId));
-			return NodeServiceFactory.getLocalService().createNodeBasic(collectionId, CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, props);
+			props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, CCConstants.PROPOSAL_STATUS.PENDING);
+			return NodeServiceFactory.getLocalService().createNodeBasic(collectionId,
+					CCConstants.CCM_TYPE_COLLECTION_PROPOSAL,
+					props
+			);
 		});
 	}
 

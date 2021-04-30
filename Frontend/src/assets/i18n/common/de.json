@@ -273,6 +273,10 @@
             "DOWNLOAD_MATERIAL": "Downloads"
         }
     },
+    "NODE_PROPOSAL": {
+        "cm:created": "Zeitpunkt des Vorschlags",
+        "cm:creator": "Vorgeschlagen von"
+    },
     "LICENSE": {
         "TITLE_OF_WORK": "Titel",
         "LINK_AUTHOR": "Link zum Autor",
@@ -553,6 +557,8 @@
         "COLLECTION_PIN": "Sammlung pinnen",
         "COLLECTION_FEEDBACK": "Feedback...",
         "COLLECTION_FEEDBACK_VIEW": "Feedback ansehen",
+        "COLLECTION_PROPOSAL_ACCEPT": "Vorschlag bestätigen",
+        "COLLECTION_PROPOSAL_DECLINE": "Vorschlag ablehnen",
         "OPEN": "Öffnen",
         "DOWNLOAD": "Herunterladen",
         "DOWNLOAD_ALL": "Zip herunterladen",

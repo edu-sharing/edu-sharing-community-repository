@@ -69,6 +69,7 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -117,7 +118,7 @@ public class NodeDao {
 	}
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
-		return getNode(repoDao, nodeId, new Filter());
+		return getNode(repoDao, nodeId, Filter.createShowAllFilter());
 	}
 	public static NodeDao getNode(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef)
 			throws DAOException {
@@ -350,7 +351,7 @@ public class NodeDao {
 	
 	public static final String archiveStoreProtocol = "archive";
 	public static final String archiveStoreId = "SpacesStore";
-	
+
 	private NodeDao(RepositoryDao repoDao, String nodeId) throws Throwable {
 		this(repoDao,nodeId,new Filter());
 	}
@@ -404,10 +405,18 @@ public class NodeDao {
 	 * @param nodeRef
 	 * @return
 	 */
-	public static Node createEmptyDummy(NodeRef nodeRef) {
-		Node node = new Node();
+	public static <T extends Node> T createEmptyDummy(Class<T> clazz, NodeRef nodeRef) throws IllegalAccessException, InstantiationException {
+		T node = clazz.newInstance();
 		node.setRef(nodeRef);
 		node.setName(nodeRef.getId());
+		node.setPreview(new Preview());
+		// allow fetching as admin to properly resolve the url
+		AuthenticationUtil.runAsSystem(() -> {
+			node.getPreview().setUrl(
+					URLTool.getPreviewServletUrl(nodeRef.getId(), StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier())
+			);
+			return null;
+		});
 		return node;
 	}
 
@@ -574,7 +583,7 @@ public class NodeDao {
 		for(int i=skipCount;i<Math.min(children.size(),(long)skipCount+maxItems);i++){
 			slice.add(children.get(i));
         }
-		List<Node> nodes = convertToRest(repoDao, slice, propFilter, transform, null);
+		List<Node> nodes = convertToRest(repoDao, slice, propFilter, transform);
 		Pagination pagination=new Pagination();
         pagination.setFrom(skipCount);
         pagination.setCount(nodes.size());
@@ -583,16 +592,7 @@ public class NodeDao {
         result.setNodes(nodes);
         return result;
     }
-    public static class RestConvertException {
-		public DAOException exception;
-		public NodeRef nodeRef;
-
-		public RestConvertException(DAOException exception, NodeRef nodeRef) {
-			this.exception = exception;
-			this.nodeRef = nodeRef;
-		}
-	}
-    public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform, Function<RestConvertException, Node> exceptionHandler){
+    public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform){
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		final Context context = Context.getCurrentInstance();
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -609,12 +609,6 @@ public class NodeDao {
 						} catch (DAOMissingException daoException) {
 							logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
 							return null;
-						} catch(DAOException e){
-							if(exceptionHandler != null){
-								return exceptionHandler.apply(new RestConvertException(e, nodeRef));
-							} else {
-								throw e;
-							}
 						} finally {
 							Context.release();
 						}
@@ -1013,7 +1007,7 @@ public class NodeDao {
 		return originalId;
 	}
 
-	private void fillNodeObject(Node data) throws DAOException {
+	public <T extends Node> void fillNodeObject(T data) throws DAOException {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
 		data.setRemote(getRemote());

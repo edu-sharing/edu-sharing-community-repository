@@ -25,10 +25,18 @@ import {
     TemporaryStorageService,
     UIService,
     CollectionReference,
-    CollectionFeedback, NodesRightMode, Permission, MdsMetadatasets, ConfigurationHelper, RestNetworkService, SortDefault, RequestObject,
+    CollectionFeedback,
+    NodesRightMode,
+    Permission,
+    MdsMetadatasets,
+    ConfigurationHelper,
+    RestNetworkService,
+    SortDefault,
+    RequestObject,
+    AbstractList, ProposalNode,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
-import {DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
+import {CustomOptions, DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
 import { NodeRenderComponent } from '../../common/ui/node-render/node-render.component';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
@@ -50,6 +58,12 @@ import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {MainNavService} from '../../common/services/main-nav.service';
+import {
+    ManagementEvent,
+    ManagementEventType
+} from '../management-dialogs/management-dialogs.component';
+import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/custom-node-list-wrapper/custom-node-list-wrapper.component';
 
 // component class
 @Component({
@@ -85,8 +99,8 @@ export class CollectionsMainComponent {
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
-    @ViewChild('listCollections')
-    listCollections: ListTableComponent;
+    @ViewChild('listCollections') listCollections: ListTableComponent;
+    @ViewChild('listReferences') listReferences: CustomNodeListWrapperComponent;
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
 
@@ -144,6 +158,12 @@ export class CollectionsMainComponent {
         },
     );
     optionsMaterials: OptionItem[];
+    collectionProposals: AbstractList<ProposalNode>;
+    proposalColumns = [
+        new ListItem('NODE', RestConstants.CM_PROP_TITLE),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: true}),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: true}),
+    ];
     tutorialElement: ElementRef;
     permissions: Permission[];
     private sortCollections: SortDefault;
@@ -245,6 +265,7 @@ export class CollectionsMainComponent {
         private collectionService: RestCollectionService,
         private nodeHelper: NodeHelperService,
         private nodeService: RestNodeService,
+        private mainNavService: MainNavService,
         private networkService: RestNetworkService,
         private organizationService: RestOrganizationService,
         private iamService: RestIamService,
@@ -322,6 +343,15 @@ export class CollectionsMainComponent {
                 (error: any) => RestHelper.goToLogin(this.router, this.config),
             );
         });
+        this.mainNavService.getDialogs().onEvent.subscribe((event: ManagementEvent) => {
+            console.log(event, this.collectionContent.node);
+            if(event.event === ManagementEventType.AddCollectionNodes){
+                if(event.data.collection.ref.id === this.collectionContent.node.ref.id) {
+                    console.log('add virtual', event.data.references)
+                    this.listReferences.getListTable().addVirtualNodes(event.data.references);
+                }
+            }
+        })
     }
 
     isMobile() {
@@ -665,6 +695,7 @@ export class CollectionsMainComponent {
             return;
         }
         this.isLoading = true;
+        this.collectionProposals = null;
         GlobalContainerComponent.finishPreloading();
 
         // set correct scope
@@ -698,6 +729,16 @@ export class CollectionsMainComponent {
                     if (this.isRootLevelCollection()) {
                         this.finishCollectionLoading(callback);
                         return;
+                    }
+                    if(this.isAllowedToEditCollection()) {
+                        this.collectionService.
+                            getCollectionProposals(this.collectionContent.node.ref.id).subscribe((proposals) => {
+                            proposals.nodes = proposals.nodes.map((p) => {
+                                    p.proposalCollection = this.collectionContent.node;
+                                    return p;
+                            });
+                            this.collectionProposals = proposals;
+                        })
                     }
                     const requestRefs = Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
                     requestRefs.count = null;

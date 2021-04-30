@@ -513,6 +513,7 @@ public class CCConstants {
     public static final String AUTHORITY_DELETED_USER = "DELETED_USER";
 
 	public enum PROPOSAL_STATUS {
+		PENDING,
 		ACCEPTED,
 		DECLINED
 	};

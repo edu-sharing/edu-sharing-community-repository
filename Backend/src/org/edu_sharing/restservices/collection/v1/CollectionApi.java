@@ -9,6 +9,8 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.collection.v1.model.*;
+import org.edu_sharing.restservices.node.v1.model.AbstractEntries;
+import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
@@ -338,7 +340,7 @@ public class CollectionApi {
 	@Path("/collections/{repository}/{collection}/children/proposals")
 	@ApiOperation(value = "Get proposed objects for collection (requires edit permissions on collection).")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ReferenceEntries.class),
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = AbstractEntries.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -349,19 +351,13 @@ public class CollectionApi {
 	public Response getCollectionsProposals(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of parent collection", required = true) @PathParam("collection") String parentId,
+			@ApiParam(value = "Only show elements with given status", required = true) @QueryParam("status") CCConstants.PROPOSAL_STATUS status,
 			@Context HttpServletRequest req) {
 
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			ReferenceEntries response = new ReferenceEntries();
-			List<CollectionReference> references = new ArrayList<>();
-			CollectionBaseEntries base = CollectionDao.getCollectionsProposals(repoDao, parentId);
-			for(Node item : base.getEntries()) {
-				references.add((CollectionReference) item);
-			}
-			response.setReferences(references);
-			response.setPagination(base.getPagination());
-			return Response.status(Response.Status.OK).entity(response).build();
+			AbstractEntries<NodeProposal> base = CollectionDao.getCollectionsProposals(repoDao, parentId, status);
+			return Response.status(Response.Status.OK).entity(base).build();
 
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

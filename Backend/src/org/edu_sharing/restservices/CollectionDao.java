@@ -7,15 +7,20 @@ import java.util.stream.Collectors;
 import com.google.gson.Gson;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionBaseEntries;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
+import org.edu_sharing.restservices.collection.v1.model.NodeProposal;
+import org.edu_sharing.restservices.node.v1.model.AbstractEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -130,8 +135,7 @@ public class CollectionDao {
 					(dao) -> {
 						dao.fetchCounts = fetchCounts;
 						return dao;
-					})
-			;
+					});
 			Pagination pagination = sorted.getPagination();
 			for (Node child : sorted.getNodes()) {
 
@@ -261,28 +265,39 @@ public class CollectionDao {
 	}
 
 
-	public static CollectionBaseEntries getCollectionsProposals(RepositoryDao repoDao, String parentId) throws DAOException {
+	public static AbstractEntries<NodeProposal> getCollectionsProposals(RepositoryDao repoDao, String parentId, CCConstants.PROPOSAL_STATUS filterStatus) throws DAOException {
 		try {
-			if (PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.PERMISSION_WRITE)) {
-				throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_WRITE + " on collection " + parentId);
-			}
-			List<NodeRef> nodes = CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
-					getChildrenProposal(parentId);
+			List<NodeProposal> proposals = new ArrayList<>();
 
-			//NodeDao.convertAlfrescoNodeRef(repoDao,children)
-			List<Node> sorted = NodeDao.convertToRest(repoDao,
-					NodeDao.convertAlfrescoNodeRef(repoDao, nodes),
-					Filter.createShowAllFilter(),
-					null,
-					(e) -> {
-						if(e.exception instanceof DAOSecurityException) {
-							NodeDao.createEmptyDummy(e.nodeRef);
-						}
-						throw new RuntimeException(e.exception);
-					}
-			);
-			CollectionBaseEntries entries = new CollectionBaseEntries();
-			entries.setEntries(sorted);
+			for(AssociationRef ref : CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					getChildrenProposal(parentId)) {
+				NodeProposal proposal = new NodeProposal();
+				String status = NodeServiceHelper.getProperty(ref.getSourceRef(), CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS);
+				CCConstants.PROPOSAL_STATUS enumStatus = CCConstants.PROPOSAL_STATUS.PENDING;
+				if(status != null){
+					enumStatus = CCConstants.PROPOSAL_STATUS.valueOf(status);
+				}
+				if(!Objects.equals(filterStatus, enumStatus)){
+					continue;
+				}
+				try {
+					NodeDao original = NodeDao.getNode(repoDao, ref.getTargetRef().getId());
+					original.fillNodeObject(proposal);
+					proposal.setAccessible(true);
+				} catch(DAOSecurityException e){
+					proposal = NodeDao.createEmptyDummy(NodeProposal.class,
+							new org.edu_sharing.restservices.shared.NodeRef(repoDao.getId(),ref.getTargetRef().getId())
+					);
+					proposal.setName(NodeServiceHelper.getProperty(ref.getSourceRef(), CCConstants.CM_NAME));
+					proposal.setAccessible(false);
+				}
+				proposal.setStatus(enumStatus);
+				proposal.setProposal(NodeDao.getNode(repoDao, ref.getSourceRef().getId()).asNode());
+				proposals.add(proposal);
+			}
+			AbstractEntries<NodeProposal> entries = new AbstractEntries<>();
+			entries.setNodes(proposals);
+			entries.setPagination(new Pagination(proposals));
 			return entries;
 		} catch(Throwable t){
 			throw DAOException.mapping(t);

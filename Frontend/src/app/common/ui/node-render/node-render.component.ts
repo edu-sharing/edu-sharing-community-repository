@@ -35,7 +35,7 @@ import {
     ListItem,
     LoginResult, Mds, Metadataset,
     Node,
-    NodeList,
+    NodeList, NodeRef, ProposalNode,
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
@@ -395,6 +395,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
+                    this.handleProposal();
                     this.addCollections();
                     this.addVideoControls();
                     this.linkSearchableWidgets();
@@ -704,5 +705,16 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
     private getMdsId() {
         return this._node.metadataset ? this._node.metadataset : RestConstants.DEFAULT;
+    }
+
+    private async handleProposal() {
+        if(this.queryParams.proposal && this.queryParams.proposalCollection) {
+            (this._node as ProposalNode).proposal = (await this.nodeApi.getNodeMetadata(
+                this.queryParams.proposal, [RestConstants.ALL]).toPromise()
+            ).node;
+            (this._node as ProposalNode).proposalCollection = new Node(this.queryParams.proposalCollection);
+            // access is granted when we can fetch the node
+            (this._node as ProposalNode).accessible = true;
+        }
     }
 }

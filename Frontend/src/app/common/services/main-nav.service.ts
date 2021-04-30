@@ -38,7 +38,6 @@ export class MainNavService {
 
     private subscribeChanges() {
         this.managementDialogs.signupGroupChange.subscribe((value: boolean) => {
-            console.log(this.route);
             this.router.navigate([], {
                 relativeTo: this.route,
                 queryParamsHandling: 'merge',

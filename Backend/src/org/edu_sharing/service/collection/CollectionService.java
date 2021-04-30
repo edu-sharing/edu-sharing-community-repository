@@ -4,11 +4,11 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.ACE;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.spring.ApplicationContextFactory;
 
 public interface CollectionService {
 
@@ -20,7 +20,7 @@ public interface CollectionService {
 	public void remove(String collectionId);
 
 
-    List<NodeRef> getChildrenProposal(String parentId);
+    List<AssociationRef> getChildrenProposal(String parentId) throws InsufficientPermissionException, Exception;
 
     void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
             throws DuplicateNodeException, Throwable;

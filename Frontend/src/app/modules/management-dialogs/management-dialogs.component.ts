@@ -8,7 +8,16 @@ import {
     HostListener,
     ContentChild, TemplateRef
 } from '@angular/core';
-import {DialogButton, LocalPermissions, NodeVersions, RestConnectorService, RestNodeService, Version} from "../../core-module/core.module";
+import {
+    CollectionProposalStatus,
+    DialogButton,
+    LocalPermissions,
+    NodeProperties,
+    NodeVersions, ProposalNode,
+    RestConnectorService,
+    RestNodeService,
+    Version
+} from '../../core-module/core.module';
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../core-module/core.module";
 import {Toast} from "../../core-ui-module/toast";
@@ -31,11 +40,19 @@ import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {WorkspaceLicenseComponent} from './license/license.component';
+import {ErrorProcessingService} from '../../core-ui-module/error.processing';
 
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
     Mds = 'Mds'
+}
+export enum ManagementEventType {
+    AddCollectionNodes,
+}
+export interface ManagementEvent {
+    event: ManagementEventType,
+    data?: any
 }
 @Component({
   selector: 'workspace-management',
@@ -66,6 +83,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeLicenseChange = new EventEmitter();
   @Input() addPinnedCollection: Node;
   @Output() addPinnedCollectionChange = new EventEmitter();
+  @Output() onEvent = new EventEmitter<ManagementEvent>();
   @Input() linkMap: Node;
   @Output() linkMapChange = new EventEmitter<Node>();
   @Input() set nodeImportUnblock (nodeImportUnblock: Node[]) {
@@ -272,6 +290,7 @@ export class WorkspaceManagementDialogsComponent  {
     private connector:RestConnectorService,
     private searchService:RestSearchService,
     private toast:Toast,
+    private errorProcessing:ErrorProcessingService,
     private nodeHelper: NodeHelperService,
     private bridge:BridgeService,
     private router:Router,
@@ -290,7 +309,6 @@ export class WorkspaceManagementDialogsComponent  {
      this.toast.showProgressDialog();
      Observable.forkJoin(this.nodeShare.map((n) => this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
          .subscribe((nodes: NodeWrapper[]) => {
-             console.log(nodes);
              this.onRefresh.emit(nodes.map(n => n.node));
              this.nodeShare = null
              this.nodeShareChange.emit(null);
@@ -654,7 +672,6 @@ export class WorkspaceManagementDialogsComponent  {
     }
 
     closeSimpleEdit(saved: boolean, nodes: Node[] = null) {
-      console.log('close simple', saved);
         if (saved && this._nodeFromUpload) {
             this.onUploadFilesProcessed.emit(nodes);
         } else if(!saved && this.nodeDeleteOnCancel) {
@@ -699,5 +716,44 @@ export class WorkspaceManagementDialogsComponent  {
     private setNodeDeleteOnCancel(nodeDeleteOnCancel: boolean) {
         this.nodeDeleteOnCancel = nodeDeleteOnCancel;
         this.nodeDeleteOnCancelChange.emit(nodeDeleteOnCancel);
+    }
+
+    declineProposals(nodes: ProposalNode[]) {
+        this.errorProcessing.handleRestRequest(
+            Observable.forkJoin(nodes.map((n) =>
+                this.nodeService.editNodeProperty(n.proposal.ref.id,
+                    RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
+                    ('DECLINED' as CollectionProposalStatus))
+            ))).then(() => {
+                this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.DECLINED');
+                this.onDelete.emit({objects: nodes, error: false, count: nodes.length});
+            });
+    }
+
+    addProposalsToCollection(nodes: ProposalNode[]) {
+        this.errorProcessing.handleRestRequest(
+        Observable.forkJoin(nodes.map((n) =>
+            this.nodeService.editNodeProperty(n.proposal.ref.id,
+                RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
+                ('ACCEPTED' as CollectionProposalStatus))
+
+        ))).then(() => {
+            this.errorProcessing.handleRestRequest(Observable.forkJoin(nodes.map((n) =>
+                this.collectionService.addNodeToCollection(n.proposalCollection.ref.id,
+                    n.ref.id,
+                    n.ref.repo)
+            ))).then((results) => {
+                this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.ACCEPTED');
+                this.onDelete.emit({objects: nodes, error: false, count: nodes.length});
+                this.onRefresh.emit();
+                this.onEvent.emit({
+                    event: ManagementEventType.AddCollectionNodes,
+                    data: {
+                        collection: nodes[0].proposalCollection,
+                        references: results.map((r) => r.node)
+                    }
+                });
+            })
+        });
     }
 }

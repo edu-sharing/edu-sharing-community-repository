@@ -74,6 +74,7 @@ import { Toast } from './toast';
 import { FallbackTranslationHandler } from './translation';
 import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
+import {ErrorProcessingService} from './error.processing';
 
 @NgModule({
     declarations: [
@@ -158,7 +159,11 @@ import {VCardNamePipe} from './pipes/vcard-name.pipe';
             },
         }),
     ],
-    providers: [Toast, NodeHelperService, OptionsHelperService],
+    providers: [
+        Toast,
+        ErrorProcessingService,
+        NodeHelperService,
+        OptionsHelperService],
     exports: [
         TranslateModule,
         ListTableComponent,
