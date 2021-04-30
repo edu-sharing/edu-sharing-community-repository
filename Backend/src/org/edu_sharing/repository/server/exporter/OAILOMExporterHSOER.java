@@ -369,20 +369,20 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
     @Override
     public void createClassification(Element lom) {
         List<String> taxonIds = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));
-        List<String> classificationKeyword = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
-        if(taxonIds != null || classificationKeyword != null){
+       // List<String> classificationKeyword = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
+        if(taxonIds != null){
             Element classification = createAndAppendElement("classification", lom);
             Element purpose = createAndAppendElement("purpose", classification);
             createAndAppendElement("source", purpose,"LOMv1.0");
             createAndAppendElement("value", purpose,"discipline");
 
-            if(classificationKeyword != null) {
+           /* if(classificationKeyword != null) {
                 for(String kw : classificationKeyword) {
                     Element keyword = createAndAppendElement("keyword", classification);
                     Element kwStrEle = createAndAppendElement("string", keyword,kw);
                     if(kwStrEle != null)kwStrEle.setAttribute(xmlLanguageAttribute, "de");
                 }
-            }
+            }*/
 
             if(taxonIds != null) {
 
