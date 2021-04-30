@@ -405,7 +405,7 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                             }
                         }
                         //2. remove those taxonid's that are contained by other list
-                        Set<String> toRemove = new HashSet<>();
+                        /*Set<String> toRemove = new HashSet<>();
                         for(String key : taxonIdsWithPath.keySet()){
                             for(Map.Entry<String,List<String>> entry : taxonIdsWithPath.entrySet()){
                                 if(!entry.getKey().equals(key) && entry.getValue().contains(key)){
@@ -414,7 +414,8 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                             }
                         }
                         Map<String,List<String>> result = taxonIdsWithPath.entrySet().stream().filter(e -> !toRemove.contains(e.getKey())).collect(Collectors.toMap(e-> e.getKey(), e->e.getValue()));
-
+                        */
+                        Map<String,List<String>> result = taxonIdsWithPath;
                         //3. print the result as xml
                         for(List<String> path : result.values()){
                             Element taxonPath = createAndAppendElement("taxonPath", classification);
