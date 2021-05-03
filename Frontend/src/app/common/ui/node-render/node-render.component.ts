@@ -348,7 +348,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
-    download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
+    download.elementType = OptionsHelperService.DownloadElementTypes;
     // declare explicitly so that callback will be overriden
     download.customEnabledCallback = null;
     download.isEnabled=this._node.downloadUrl!=null && !this._node.properties?.[RestConstants.CCM_PROP_IO_WWWURL];
@@ -392,7 +392,6 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 const finish = (set:Mds = null) => {
                     this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
                     this.mds = set;
-
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
                     this.handleProposal();
@@ -715,6 +714,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             (this._node as ProposalNode).proposalCollection = new Node(this.queryParams.proposalCollection);
             // access is granted when we can fetch the node
             (this._node as ProposalNode).accessible = true;
+            this.optionsHelper.refreshComponents();
         }
     }
 }

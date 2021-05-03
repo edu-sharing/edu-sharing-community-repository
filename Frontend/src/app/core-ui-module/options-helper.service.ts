@@ -22,7 +22,8 @@ import {
     Filetype,
     Node,
     NodesRightMode,
-    NodeWrapper, ProposalNode
+    NodeWrapper,
+    ProposalNode
 } from '../core-module/rest/data-object';
 import {Helper} from '../core-module/rest/helper';
 import {
@@ -59,6 +60,7 @@ export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('Op
 
 @Injectable()
 export class OptionsHelperService {
+    static DownloadElementTypes = [ElementType.Node, ElementType.NodeChild, ElementType.NodeProposal, ElementType.NodePublishedCopy];
     private static subscriptionUp: Subscription;
     private static subscriptionDown: Subscription;
     private appleCmd: boolean;
@@ -532,6 +534,7 @@ export class OptionsHelperService {
         editConnectorNode.customShowCallback = (nodes) => {
             return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
         }
+        editConnectorNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodeProposal];
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
         editConnectorNode.constrains = [Constrain.Files, Constrain.NoBulk];
@@ -676,7 +679,7 @@ export class OptionsHelperService {
         const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
             this.nodeHelper.downloadNodes(this.getObjects(object))
         );
-        downloadNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
+        downloadNode.elementType = OptionsHelperService.DownloadElementTypes;
         downloadNode.constrains = [Constrain.Files];
         downloadNode.group = DefaultGroups.View;
         downloadNode.priority = 40;
