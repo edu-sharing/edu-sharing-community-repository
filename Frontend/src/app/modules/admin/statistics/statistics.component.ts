@@ -237,7 +237,6 @@ export class AdminStatisticsComponent implements OnInit{
         }
         this.nodesPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
         this.userPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER);
-        this.storage.get('admin_statistics_properties', 'cm:name\ncclom:general_title\ncclom:general_keyword').subscribe((p) => this.exportProperties = p);
         this.finishedPreload = true;
         this.refresh();
     }
@@ -639,6 +638,10 @@ export class AdminStatisticsComponent implements OnInit{
         } else {
             this.columns = [new ListItem('NODE', RestConstants.CM_NAME)];
         }
+        this.storage.get('admin_statistics_properties', this.columns.map((c) => c.name).join('\n'))
+            .subscribe((p) => this.exportProperties = p);
+
+
         this.columns = this.columns.concat([
             new ListItem('NODE', 'counts.OVERALL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL'),
