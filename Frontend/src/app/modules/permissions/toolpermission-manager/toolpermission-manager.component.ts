@@ -69,6 +69,7 @@ export class ToolpermissionManagerComponent {
     ]},
     {name:"COLLECTIONS",icon:"layers",permissions:[
         RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+        RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL,
         RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
         RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM,
         RestConstants.TOOLPERMISSION_COLLECTION_PINNING,

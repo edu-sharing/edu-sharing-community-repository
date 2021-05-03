@@ -505,7 +505,7 @@ public class CollectionApi {
 			@ApiParam(value = "ID of node", required = true) @PathParam("node") String nodeId,
 			@ApiParam(value = "ID of source repository", required=false ) @QueryParam("sourceRepo")  String sourceRepo,
 			@ApiParam(value = "Allow that a node that already is inside the collection can be added again", required=false, defaultValue = "false") @QueryParam("allowDuplicate")  Boolean allowDuplicate,
-			@ApiParam(value = "Mark this node only as a suggestion (not really adding but just marking it). This can also be used for collections where you don't have permissions", required=false, defaultValue = "false") @QueryParam("asSuggestion")  Boolean asSuggestion,
+			@ApiParam(value = "Mark this node only as a proposal (not really adding but just marking it). This can also be used for collections where you don't have permissions", required=false, defaultValue = "false") @QueryParam("asProposal")  Boolean asProposal,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -521,7 +521,7 @@ public class CollectionApi {
             NodeEntry entry=new NodeEntry();
 
 			sourceRepo = sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId()) ? sourceRepo : null;
-			if(asSuggestion != null && asSuggestion) {
+			if(asProposal != null && asProposal) {
 				CollectionDao.proposeForCollection(repoDao, collectionId, nodeId, sourceRepo);
 			} else {
 				entry.setNode(CollectionDao.addToCollection(repoDao, collectionId, nodeId, sourceRepo, allowDuplicate != null && allowDuplicate).asNode());

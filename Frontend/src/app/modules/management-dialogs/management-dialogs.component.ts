@@ -103,7 +103,6 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeDeleteTitle='WORKSPACE.DELETE_TITLE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
         this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
         this.nodeDeleteMessageParams = {name:RestHelper.getName(nodeDelete[0])};
-        this.dialogNode=nodeDelete;
         this.nodeDeleteButtons=DialogButton.getCancel(()=> {this._nodeDelete = null});
         this.nodeDeleteButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_DANGER,()=>{this.deleteConfirmed(nodeDelete)}));
       if(nodeDelete.length === 1) {
@@ -194,12 +193,6 @@ export class WorkspaceManagementDialogsComponent  {
   public metadataParent: Node;
   public ltiToolConfig : Node;
   public ltiObject: Node;
-  public dialogTitle:string;
-  public dialogMessage:string;
-  public dialogMessageParameters:any;
-  public dialogCancelable:boolean;
-  public dialogNode:Node|Node[];
-  public dialogButtons:DialogButton[];
   currentLtiTool: Node;
   ltiToolRefresh: Boolean;
   @Input() nodeDeleteOnCancel: boolean;
@@ -338,7 +331,6 @@ export class WorkspaceManagementDialogsComponent  {
             }
             return;
         }
-        this.dialogTitle=null;
         this.toast.showProgressDialog();
         let callback;
         if(this.nodeDeleteBlockStatus) {
@@ -531,7 +523,6 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeVariantChange.emit(null);
     }
   cancelAddToCollection(){
-    this.dialogTitle=null;
     this.addToCollection=null;
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
@@ -542,31 +533,46 @@ export class WorkspaceManagementDialogsComponent  {
       this.addToCollection=null;
       this.addToCollectionChange.emit(null);
   }
-  public addToCollectionList(collection:Node,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
-    if(!force && (collection.collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
-      this.dialogTitle='DIALOG.COLLECTION_SHARE_PUBLIC';
-      this.dialogMessage='DIALOG.COLLECTION_SHARE_PUBLIC_INFO';
-      this.dialogCancelable=true;
-      this.dialogMessageParameters={collection:RestHelper.getTitle(collection)};
-      this.dialogButtons=DialogButton.getNextCancel(()=>{this.dialogTitle=null},()=>{
-        this.addToCollectionList(collection,list,close,callback,true);
-      });
-      return;
-    }
-    if(close)
-      this.cancelAddToCollection();
-    else{
-      this.dialogTitle=null;
-    }
-    this.toast.showProgressDialog();
-    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list,(nodes) => {
-        this.toast.closeModalDialog();
-        this.onStoredAddToCollection.emit({collection, references: nodes});
-        if(callback) {
-            callback();
+    public addToCollectionList(collection:Node,list:Node[]=this.addToCollection,close=true,callback:() => void =null, asProposal = false,force=false){
+        if(!force) {
+            if ((collection.access.indexOf(RestConstants.ACCESS_WRITE) === -1)) {
+                this.toast.showConfigurableDialog({
+                    title: 'DIALOG.COLLECTION_PROPSE',
+                    message: 'DIALOG.COLLECTION_PROPSE_INFO',
+                    messageParameters: {collection: RestHelper.getTitle(collection)},
+                    buttons: DialogButton.getNextCancel(() => this.toast.closeModalDialog(), () => {
+                        this.toast.closeModalDialog();
+                        this.addToCollectionList(collection, list, close, callback, true, true);
+                    })
+                });
+                return;
+            } else if ((collection.collection.scope !== RestConstants.COLLECTIONSCOPE_MY)) {
+                this.toast.showConfigurableDialog({
+                    title: 'DIALOG.COLLECTION_SHARE_PUBLIC',
+                    message: 'DIALOG.COLLECTION_SHARE_PUBLIC_INFO',
+                    messageParameters: {collection: RestHelper.getTitle(collection)},
+                    buttons: DialogButton.getNextCancel(() => this.toast.closeModalDialog(), () => {
+                        this.toast.closeModalDialog();
+                        this.addToCollectionList(collection, list, close, callback, asProposal, true);
+                    })
+                });
+                return;
+            }
         }
-    });
-  }
+        if(close)
+            this.cancelAddToCollection();
+        else {
+            this.toast.closeModalDialog();
+        }
+        this.toast.showProgressDialog();
+        UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list, asProposal,(nodes) => {
+            this.toast.closeModalDialog();
+            this.onStoredAddToCollection.emit({collection, references: nodes});
+            if(callback) {
+                callback();
+            }
+        });
+    }
 
     private showMetadataAfterUpload(event: Node[]) {
         const dialog = this.config.instant('upload.postDialog', DialogType.SimpleEdit);

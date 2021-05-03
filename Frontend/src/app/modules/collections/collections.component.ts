@@ -533,6 +533,7 @@ export class CollectionsMainComponent {
                 this.bridge,
                 event.target,
                 event.source,
+                false,
                 nodes => {
                     if (event.type === 'copy') {
                         this.toast.closeModalDialog();
@@ -572,6 +573,7 @@ export class CollectionsMainComponent {
             this.bridge,
             this.collectionContent.node,
             nodes,
+            false,
             refNodes => {
                 this.refreshContent();
                 this.toast.closeModalDialog();

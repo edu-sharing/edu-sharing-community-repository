@@ -636,7 +636,7 @@ export class CollectionNewComponent {
         this.saveImage(collection);
         return;
     }
-    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,nodes,()=>{
+    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,nodes, false,()=>{
         this.saveImage(collection);
         return;
     });

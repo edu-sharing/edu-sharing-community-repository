@@ -85,7 +85,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         status: boolean;
         message?: string;
         button?: {
-            click: Function;
+            click: () => void;
             caption: string;
             icon: string;
         };
