@@ -21,6 +21,7 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -1344,7 +1345,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
 		property = NameSpaceTool.transformToLongQName(property);
-		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);
+		QName prop = QName.createQName(property);
+		PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
+		if(propertyDefinition == null){
+			logger.error("property" + property + " is not defined in content model");
+			return;
+		}
+
+		if(!propertyDefinition.isMultiValued() && value instanceof Collection){
+			value = (Serializable)((Collection)value).stream().iterator().next();
+		}
+
+		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), prop,value);
 	}
 
 	@Override

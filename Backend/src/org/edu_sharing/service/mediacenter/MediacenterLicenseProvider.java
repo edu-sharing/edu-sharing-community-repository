@@ -29,4 +29,12 @@ public interface MediacenterLicenseProvider {
      * @return
      */
     public List<String> getNodesLicenseRemoved(String mediacenter, Date from, Date until);
+
+    default public String getSet(){
+        return "commercial";
+    }
+
+    default public String getCatalogId(){
+        return "default";
+    }
 }

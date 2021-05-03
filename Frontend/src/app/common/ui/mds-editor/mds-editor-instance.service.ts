@@ -1,6 +1,6 @@
 import { Directive, EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject, from } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 import {
     Node,
@@ -187,13 +187,13 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.variables != null) {
                 for (const field of ['caption', 'placeholder', 'icon', 'defaultvalue']) {
                     (this.definition as any)[field] = this.replaceVariableString(
-                        (this.definition as any)[field]
+                        (this.definition as any)[field],
                     );
                 }
             }
         }
 
-        private replaceVariableString(str: string, variables: string[] = this.variables)  {
+        private replaceVariableString(str: string, variables: string[] = this.variables) {
             if (!str || !str.match('\\${.+}')) {
                 return str;
             }
@@ -235,8 +235,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                this.initialValues = { jointValues: values?.[this.definition.id] ||
-                        (this.definition.defaultvalue ? [this.definition.defaultvalue] : []) };
+                this.initialValues = {
+                    jointValues:
+                        values?.[this.definition.id] ||
+                        (this.definition.defaultvalue ? [this.definition.defaultvalue] : []),
+                };
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
@@ -468,6 +471,8 @@ export class MdsEditorInstanceService implements OnDestroy {
     suggestions$ = new BehaviorSubject<Suggestions>(null);
     /** Views that have at least one widget, that is not hidden due to dynamic conditions. */
     activeViews = new ReplaySubject<MdsView[]>(1);
+    /** Updated widget values, not considering nodes. */
+    readonly values: Observable<{ [id: string]: string[] }>;
 
     /**
      * Active widgets.
@@ -512,7 +517,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             .pipe(
                 map(
                     ([hasUserChanges, hasProgrammaticChanges, isValid]) =>
-                        (this.editorMode === 'nodes' ? (hasUserChanges || hasProgrammaticChanges) : true) && isValid,
+                        (this.editorMode === 'nodes'
+                            ? hasUserChanges || hasProgrammaticChanges
+                            : true) && isValid,
                 ),
             )
             .subscribe(this.canSave$);
@@ -569,11 +576,54 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }),
             )
             .subscribe(this.completionStatus$);
-        activeWidgets.pipe(
-            map((widgets) =>
-                this.views.filter((view) => widgets.some((widget) => widget.viewId === view.id)),
+        activeWidgets
+            .pipe(
+                map((widgets) =>
+                    this.views.filter((view) =>
+                        widgets.some((widget) => widget.viewId === view.id),
+                    ),
+                ),
+            )
+            .subscribe(this.activeViews);
+        this.values = activeWidgets.pipe(
+            switchMap((widgets) =>
+                // FIXME: The mappings below are a bit hacky. We take take the raw `value`
+                // observable for regular widgets and the `hasChanges` observable for native widgets
+                // and extract the actual values later in the pipe.
+                //
+                // TODO: Provide observables for the mapped values by the widgets themselves, so
+                // they can be trivially combined here.
+                combineLatest([
+                    // regular widgets
+                    combineLatest(
+                        widgets
+                            .filter(
+                                (widget): widget is Widget =>
+                                    widget instanceof MdsEditorInstanceService.Widget,
+                            )
+                            .filter((widget) => widget.meetsDynamicCondition.value)
+                            .map((widget) => widget.observeValue().pipe(map((value) => widget))),
+                    ).pipe(map((regularWidgets) => this.mapWidgetValues(regularWidgets))),
+                    // native widgets
+                    ...widgets
+                        .filter(
+                            (widget): widget is NativeWidget =>
+                                'component' in widget && !!widget.component.getValues,
+                        )
+                        .map((nativeWidget) =>
+                            nativeWidget.component.hasChanges.pipe(
+                                switchMap((hasChanges) =>
+                                    from(nativeWidget.component.getValues({}, null)),
+                                ),
+                            ),
+                        ),
+                ]),
             ),
-        ).subscribe(this.activeViews);
+            map((values) =>
+                values.reduce((acc, v) => ({ ...acc, ...v }), {} as { [id: string]: string[] }),
+            ),
+            shareReplay(),
+        );
     }
 
     ngOnDestroy() {
@@ -770,7 +820,21 @@ export class MdsEditorInstanceService implements OnDestroy {
             return null;
         }
 
-        let values = this.widgets.value
+        let values = this.mapWidgetValues(this.widgets.value, node);
+        // Native widgets don't necessarily match their ID and relevant property or even affect
+        // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
+        // `getValues()`.
+        for (const widget of this.nativeWidgets.value) {
+            values = widget.component.getValues
+                ? await widget.component.getValues(values, node)
+                : values;
+        }
+
+        return values;
+    }
+
+    private mapWidgetValues(widgets: Widget[], node?: Node): { [id: string]: string[] } {
+        return widgets
             .filter((widget) => widget.relation === null)
             .reduce((acc, widget) => {
                 const property = widget.definition.id;
@@ -791,16 +855,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
                 return acc;
             }, {} as { [key: string]: string[] });
-        // Native widgets don't necessarily match their ID and relevant property or even affect
-        // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
-        // `getValues()`.
-        for (const widget of this.nativeWidgets.value) {
-            values = widget.component.getValues
-                ? await widget.component.getValues(values, node)
-                : values;
-        }
-
-        return values;
     }
 
     registerNativeWidget(component: NativeWidgetComponent, viewId: string): void {
