@@ -269,9 +269,10 @@
         "ccm:eaf_productionyear": "Prod. Jahr",
         "counts": {
             "OVERALL": "Summe",
-            "VIEW_MATERIAL": "Aufrufe",
-            "VIEW_MATERIAL_EMBEDDED": "Aufrufe (Remote)",
-            "DOWNLOAD_MATERIAL": "Downloads"
+            "VIEW_MATERIAL": "Seitenaufrufe",
+            "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
+            "DOWNLOAD_MATERIAL": "Downloads",
+            "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
     },
     "NODE_PROPOSAL": {

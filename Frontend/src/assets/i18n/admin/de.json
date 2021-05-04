@@ -380,10 +380,10 @@
             "SINGLE": "Einzelauswertung",
             "NODES": "Nach Objekt",
             "CUSTOM_GROUPS": "Nach Kriterium",
-            "VIEWS": "Objekt-Aufrufe",
-            "VIEWS_EMBEDDED": "Objekt-Ansichten (Remote)",
-            "DOWNLOADS": "Objekt-Downloads",
-            "VIEWS_PLAY_MEDIA": "Medien-Wiedergaben",
+            "VIEWS": "Seitenaufrufe",
+            "VIEWS_EMBEDDED": "Einbettungen",
+            "DOWNLOADS": "Downloads",
+            "VIEWS_PLAY_MEDIA": "Wiedergaben",
             "USER_LOGINS": "Benutzer-Logins",
             "GROUP_BY": "Gruppieren nach",
             "FROM": "Start-Zeit",
@@ -410,7 +410,7 @@
             },
             "HEADERS": {
                 "action": "Aktion",
-                "count": "Anzahl",
+                "count": "Summe",
                 "node": "Element",
                 "authority": "Nutzer/Session",
                 "authority_organization": "Organisation",
@@ -423,10 +423,10 @@
                 "LOGIN_USER_OAUTH_REFRESH_TOKEN": "Login (OAuth)",
                 "LOGOUT_USER_REGULAR": "Logout",
                 "LOGOUT_USER_TIMEOUT": "Logout (Timeout)",
-                "VIEW_MATERIAL": "Material angesehen",
-                "VIEW_MATERIAL_PLAY_MEDIA": "Material abgespielt",
-                "VIEW_MATERIAL_EMBEDDED": "Material angesehen (Remote)",
-                "DOWNLOAD_MATERIAL": "Material heruntergeladen"
+                "VIEW_MATERIAL": "Seitenaufrufe",
+                "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben",
+                "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
+                "DOWNLOAD_MATERIAL": "Downloads"
             }
         },
         "MEDIACENTER": {
