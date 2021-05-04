@@ -516,6 +516,7 @@
             "COLLECTION_HINT": "Select the collection whose materials you want to display on the home page",
             "CHOOSE_COLLECTION": "Select collection",
             "TIMESPAN_LABEL": "Time span",
+            "TIMESPAN_DAYS": "days",
             "TIMESPAN_HINT": "For which time range should the data be evaluated",
             "TIMESPAN": {
                 "days_30": "Last 30 days",
