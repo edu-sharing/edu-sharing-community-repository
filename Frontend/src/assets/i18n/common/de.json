@@ -271,7 +271,7 @@
             "VIEW_MATERIAL": "Seitenaufrufe",
             "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
             "DOWNLOAD_MATERIAL": "Downloads",
-            "PLAY_MATERIAL": "Wiedergaben"
+            "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
     },
     "LICENSE": {

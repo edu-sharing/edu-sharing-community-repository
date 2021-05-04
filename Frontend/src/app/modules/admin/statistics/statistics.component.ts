@@ -647,6 +647,7 @@ export class AdminStatisticsComponent implements OnInit{
             new ListItem('NODE', 'counts.VIEW_MATERIAL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),
             new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
+            new ListItem('NODE', 'counts.VIEW_MATERIAL_PLAY_MEDIA'),
         ]);
     }
 

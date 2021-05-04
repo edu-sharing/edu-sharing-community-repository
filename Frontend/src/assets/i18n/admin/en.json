@@ -405,7 +405,7 @@
             },
             "HEADERS": {
                 "action": "Action",
-                "count": "Number",
+                "count": "Sum",
                 "node": "Element",
                 "authority": "User/Session",
                 "authority_organization": "Organisation",
@@ -418,10 +418,10 @@
                 "LOGIN_USER_OAUTH_REFRESH_TOKEN": "Login (OAuth)",
                 "LOGOUT_USER_REGULAR": "Logout",
                 "LOGOUT_USER_TIMEOUT": "Logout (Timeout)",
-                "VIEW_MATERIAL": "Material viewed",
-                "VIEW_MATERIAL_PLAY_MEDIA": "Material played",
-                "VIEW_MATERIAL_EMBEDDED": "Material viewed (Remote)",
-                "DOWNLOAD_MATERIAL": "Material downloaded"
+                "VIEW_MATERIAL": "Views",
+                "VIEW_MATERIAL_PLAY_MEDIA": "Plays",
+                "VIEW_MATERIAL_EMBEDDED": "Embeddings",
+                "DOWNLOAD_MATERIAL": "Downloads"
             }
         },
         "MEDIACENTER": {
