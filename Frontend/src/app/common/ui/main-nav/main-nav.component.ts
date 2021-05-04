@@ -565,7 +565,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return this.create.allowed && !this.connector.getCurrentLogin().isGuest;
+        return this.create.allowed && !this.connector.getCurrentLogin()?.isGuest;
     }
 
     openCreateMenu(x: number, y: number) {
@@ -668,7 +668,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     private showLicenseAgreement() {
         if (
             !this.config.licenseAgreement ||
-            this.connector.getCurrentLogin().isGuest ||
+            this.connector.getCurrentLogin()?.isGuest ||
             !this.connector.getCurrentLogin().isValidLogin
         ) {
             this.startTutorial();
@@ -721,7 +721,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     private updateUserOptions() {
         this.userMenuOptions = [];
-        if (!this.connector.getCurrentLogin().isGuest) {
+        if (!this.connector.getCurrentLogin()?.isGuest) {
             this.userMenuOptions.push(
                 new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
                     this.openProfile(),
@@ -736,7 +736,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 );
             }
         }
-        if (this.connector.getCurrentLogin().isGuest) {
+        if (this.connector.getCurrentLogin()?.isGuest) {
             if (this.config.loginOptions) {
                 for (const login of this.config.loginOptions) {
                     this.userMenuOptions.push(
@@ -804,7 +804,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         }
         this.userMenuOptions.push(option);
 
-        if (!this.connector.getCurrentLogin().isGuest) {
+        if (!this.connector.getCurrentLogin()?.isGuest) {
             this.userMenuOptions.push(
                 new OptionItem('LOGOUT', 'undo', () => this.logout()),
             );
@@ -919,7 +919,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     private showTimeout() {
         return (
             !this.bridge.isRunningCordova() &&
-            !this.connector.getCurrentLogin().isGuest &&
+            !this.connector.getCurrentLogin()?.isGuest &&
             this.timeIsValid &&
             this.timeout !== '' &&
             (this.isSafe() ||
