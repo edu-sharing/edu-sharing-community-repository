@@ -203,6 +203,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   private queryParams: Params;
   public similarNodes: Node[];
   mds: Mds;
+  isDestroyed = false;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -266,7 +267,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             }
             NodeRenderComponent.close(this.location);
             // use a timeout to let the browser try to go back in history first
-            setTimeout(()=>this.mainNavRef.toggleMenuSidebar(),250);
+            setTimeout(()=> {
+                if(!this.isDestroyed) {
+                    this.mainNavRef.toggleMenuSidebar();
+                }
+            },250);
           }
         }
       }
@@ -300,6 +305,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     ngOnDestroy() {
         (window as any).ngRender = null;
         this.optionsHelper.setListener(null);
+        this.isDestroyed = true;
     }
 
   public switchPosition(pos:number) {
