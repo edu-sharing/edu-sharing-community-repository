@@ -236,6 +236,10 @@ export class OptionsHelperService {
      * refresh all bound components with available menu options
      */
     refreshComponents(refreshListOptions = true) {
+        if(this.data == null) {
+            console.warn('options helper refresh called but no data previously bound');
+            return;
+        }
         if(this.subscriptions?.length){
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
