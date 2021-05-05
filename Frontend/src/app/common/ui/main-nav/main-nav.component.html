@@ -122,7 +122,7 @@
           </button>
         </ng-container>
       </div>
-      <div class="timeout" *ngIf="isSafe() && timeout">
+      <div class="timeout" *ngIf="isSafe() && timeout && !mainMenuSidebar?.show">
         <i icon iconId="av_timer"></i>
         {{ timeout }}
       </div>
