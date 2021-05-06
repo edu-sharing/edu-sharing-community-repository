@@ -4,6 +4,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.internal.localstore.Bucket;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.spring.ApplicationContextFactory;
@@ -50,9 +51,11 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
             QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(
                 searchServiceElastic.getReadPermissionsQuery()
             ).must(
-                    QueryBuilders.matchQuery("nodeRef.storeRef.protocol","workspace")
+                QueryBuilders.matchQuery("nodeRef.storeRef.protocol","workspace")
             ).must(
                 QueryBuilders.wildcardQuery("fullpath", path + "/*")
+            ).mustNot(
+                QueryBuilders.matchQuery("aspects", CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))
             );
 
             AggregationBuilder aggregation = AggregationBuilders.terms("type").field("type");
