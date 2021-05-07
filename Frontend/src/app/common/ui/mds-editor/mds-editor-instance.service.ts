@@ -1022,10 +1022,15 @@ export class MdsEditorInstanceService implements OnDestroy {
                 return true;
             }
         } else if (widget.condition.type === 'TOOLPERMISSION') {
-            return (
+            const result = (
                 widget.condition.negate ===
                 !this.restConnector.hasToolPermissionInstant(widget.condition.value)
             );
+            if(!result) {
+                // tslint:disable-next-line:no-console
+                console.info('hide widget ' + widget.id + ' because toolpermission ' + widget.condition.value + ' condition not matched');
+            }
+            return result;
         }
         throw new Error(`Unsupported condition type: ${widget.condition.type}`);
     }
