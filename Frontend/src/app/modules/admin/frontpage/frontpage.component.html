@@ -1,4 +1,3 @@
-<global-progress *ngIf="loading"></global-progress>
 <info-message *ngIf="!(configService.get('frontpage.enabled', true) | async)" class="info-disabled">
   {{'ADMIN.FRONTPAGE.DISABLED' | translate }}
 </info-message>

@@ -24,12 +24,10 @@ declare var Chart:any;
 })
 export class AdminFrontpageComponent {
   @Output() onOpenNode = new EventEmitter();
-  loading=true;
   previewLoading=true;
   config: any;
   modes = ['collection','rating','views','downloads'];
   conditionTypes = ['TOOLPERMISSION'];
-  timespans = ['days_30','days_100','all'];
   form: FormGroup;
   previewNodes: Node[];
   previewColumns: ListItem[]=[];
@@ -89,30 +87,46 @@ export class AdminFrontpageComponent {
     for (const key of Object.keys(this.form.value)) {
         this.config.frontpage[key] = this.form.value[key];
     }
-    this.loading=true;
+    this.toast.showProgressDialog();
     this.adminService.updateRepositoryConfig(this.config).subscribe(()=> {
       this.update();
       this.toast.toast('ADMIN.FRONTPAGE.SAVED');
     });
   }
 
-  private update() {
-    this.adminService.getRepositoryConfig().subscribe((config)=> {
-      this.config=config;
-      const values = this.form.value;
-      for(const key of Object.keys(values)) {
-        values[key] = this.config.frontpage[key] || undefined;
-      }
-      this.form.setValue(values);
-      this.loading=false;
-      if(this.config.frontpage.collection) {
-        this.collectionService.getCollection(this.config.frontpage.collection).subscribe((c)=> {
-          this.collectionName=c.collection.title;
-        });
-      }
-    });
-    this.updatePreviews();
-  }
+    private async update() {
+        try {
+            this.config = await this.adminService.getRepositoryConfig().toPromise();
+            const values = this.form.value;
+            for (const key of Object.keys(values)) {
+                values[key] = this.config.frontpage[key];
+            }
+            this.form.setValue(values);
+            this.toast.closeModalDialog();
+            if (this.config.frontpage.collection) {
+                this.collectionService.getCollection(this.config.frontpage.collection).subscribe((c) => {
+                    this.collectionName = c.collection.title;
+                });
+            }
+        } catch (e) {
+            this.toast.error(e);
+            this.toast.closeModalDialog();
+            this.toast.showConfigurableDialog({
+                title: 'ADMIN.FRONTPAGE.CONFIG_BROKEN',
+                message: 'ADMIN.FRONTPAGE.CONFIG_BROKEN_INFO',
+                buttons: [
+                    new DialogButton('CANCEL',DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
+                    new DialogButton('ADMIN.FRONTPAGE.RESET',DialogButton.TYPE_DANGER, () => {
+                        this.toast.showProgressDialog()
+                        this.adminService.updateRepositoryConfig(null).subscribe(() => {
+                            this.update();
+                        });
+                    })
+                ]
+            });
+        }
+        this.updatePreviews();
+    }
 
   updatePreviews() {
     this.previewLoading = true;

@@ -1437,7 +1437,7 @@ public class AdminApi {
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response setConfig(@Context HttpServletRequest req) {
+	public Response getConfig(@Context HttpServletRequest req) {
 		try {
 			return Response.ok().entity(AdminServiceFactory.getInstance().getConfig()).build();
 		} catch (Throwable t) {
@@ -1454,7 +1454,7 @@ public class AdminApi {
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response getConfig(@Context HttpServletRequest req,RepositoryConfig config) {
+	public Response setConfig(@Context HttpServletRequest req,RepositoryConfig config) {
 		try {
 			AdminServiceFactory.getInstance().setConfig(config);
 			return Response.ok().build();
