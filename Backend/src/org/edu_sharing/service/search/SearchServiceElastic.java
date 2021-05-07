@@ -215,11 +215,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchHits hits = searchResponse.getHits();
             logger.info("result count: "+hits.getTotalHits());
 
-            long millisPerm = 0;
+            long millisPerm = System.currentTimeMillis();
             for (SearchHit hit : hits) {
                 data.add(transformSearchHit(authorities, user, hit));
             }
-            logger.info("permission stuff took:"+millisPerm);
+            logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
 
             Map<String,Map<String,Integer>> facettesResult = new HashMap<String,Map<String,Integer>>();
 
