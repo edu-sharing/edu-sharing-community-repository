@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, NgZone, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {Group, IamGroup, Mediacenter, Node} from '../../../core-module/rest/data-object';
 // import {NodeList} from "../../../core-module/core.module";
@@ -19,6 +19,9 @@ import {CustomOptions, ElementType, OptionItem} from '../../../core-ui-module/op
 import {MdsComponent} from '../../../common/ui/mds/mds.component';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {MdsEditorCoreComponent} from '../../../common/ui/mds-editor/mds-editor-core/mds-editor-core.component';
+import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 // Charts.js
 declare var Chart: any;
@@ -30,7 +33,7 @@ declare var Chart: any;
 })
 export class AdminMediacenterComponent {
     readonly AuthoritySearchMode = AuthoritySearchMode;
-    @ViewChild('mediacenterMds') mediacenterMds: MdsComponent;
+    @ViewChild('mediacenterMds') mediacenterMds: MdsEditorWrapperComponent;
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])
@@ -72,6 +75,7 @@ export class AdminMediacenterComponent {
         private translate: TranslateService,
         private connector: RestConnectorService,
         private iamService: RestIamService,
+        private ngZone: NgZone,
         private toast: Toast,
     ) {
         this.isAdmin = this.connector.getCurrentLogin().isAdmin;
@@ -109,20 +113,22 @@ export class AdminMediacenterComponent {
 
             this.mediacenterNodesTotal = 0;
             this.mediacenterNodes = [];
-            this.mediacenterMds.loadMds();
+            UIHelper.waitForComponent(this.ngZone, this, 'mediacenterMds').subscribe(() =>
+             this.mediacenterMds.loadMds()
+            );
             // done via mds
             // this.loadMediacenterNodes();
 
         }
     }
 
-    loadMediacenterNodes() {
+    async loadMediacenterNodes() {
         if (!this.hasMoreMediacenterNodes) {
             return;
         }
         if (this.currentMediacenter) {
             const licensedNodeReq: RequestObject = {
-                offset: this.mediacenterNodes.length,
+                offset: this.mediacenterNodes?.length,
                 count: this.mediacenterNodes?.length ? 500 : null,
                 propertyFilter: [RestConstants.ALL],
                 sortBy: [this.mediacenterNodesSort.sortBy],
@@ -139,11 +145,10 @@ export class AdminMediacenterComponent {
             }
             criterias = criterias.concat(
                 RestSearchService.convertCritierias(
-                    this.mediacenterMds.getValues(),
+                    await this.mediacenterMds.getValues(),
                     this.mediacenterMds.currentWidgets,
                 ),
             );
-            console.log(this.mediacenterMds.getValues())
 
             this.mediacenterService.getLicensedNodes(this.currentMediacenter.authorityName, criterias,
                 RestConstants.HOME_REPOSITORY, licensedNodeReq).subscribe((data) => {
@@ -155,7 +160,7 @@ export class AdminMediacenterComponent {
                     this.mediacenterNodes = this.mediacenterNodes.concat(data.nodes);
                 }
                 this.hasMoreMediacenterNodes = this.mediacenterNodes.length < this.mediacenterNodesTotal;
-                this.isLoadingMediacenterNodes=false;
+                this.isLoadingMediacenterNodes = false;
             });
 
         }
