@@ -129,7 +129,7 @@ export class AdminMediacenterComponent {
         if (this.currentMediacenter) {
             const licensedNodeReq: RequestObject = {
                 offset: this.mediacenterNodes?.length,
-                count: this.mediacenterNodes?.length ? 500 : null,
+                count: this.mediacenterNodes?.length ? 50 : null,
                 propertyFilter: [RestConstants.ALL],
                 sortBy: [this.mediacenterNodesSort.sortBy],
                 sortAscending: [this.mediacenterNodesSort.sortAscending]
