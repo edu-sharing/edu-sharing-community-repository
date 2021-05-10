@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.repository.client.rpc.ACE;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SortDefinition;
 
@@ -82,4 +84,8 @@ public interface CollectionService {
     String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
 
 	List<String> getFeedbacks(String id) throws Throwable;
+
+	default CollectionProposalInfo getCollectionsContainingProposals(CCConstants.PROPOSAL_STATUS status, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws Throwable {
+		throw new NotImplementedException("collections proposal feature is not supported without elasticsearch");
+	}
 }

@@ -257,14 +257,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private Set<String> getUserAuthorities() {
+    public Set<String> getUserAuthorities() {
         Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
         if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
         return authorities;
     }
 
-    private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit) {
+    public NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit) {
         Map<String, Object> sourceAsMap = hit.getSourceAsMap();
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
