@@ -5,6 +5,6 @@
   <extension>
     <groupId>me.qoomon</groupId>
     <artifactId>maven-git-versioning-extension</artifactId>
-    <version>5.2.1</version>
+    <version>6.4.3</version>
   </extension>
 </extensions>
