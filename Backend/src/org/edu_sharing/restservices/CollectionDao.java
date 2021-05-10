@@ -6,31 +6,23 @@ import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.collection.v1.model.*;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
-import org.edu_sharing.restservices.collection.v1.model.CollectionBaseEntries;
-import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
-import org.edu_sharing.restservices.collection.v1.model.NodeProposal;
 import org.edu_sharing.restservices.node.v1.model.AbstractEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
-import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.collection.CollectionProposalInfo;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
-import org.edu_sharing.service.collection.CollectionServiceImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 public class CollectionDao {
@@ -38,7 +30,7 @@ public class CollectionDao {
 	public static Logger logger = Logger.getLogger(CollectionDao.class);
 	public static final String ROOT = "-root-";
 
-	public enum Scope {
+    public enum Scope {
 		EDU_ALL,
 		EDU_GROUPS,
 		MY,
@@ -99,6 +91,40 @@ public class CollectionDao {
 			throw DAOException.mapping(e);
 		}
 	}
+
+	public static CollectionProposalEntries getCollectionsContainingProposals(RepositoryDao repoDao, CCConstants.PROPOSAL_STATUS status, Boolean fetchCounts, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws DAOException {
+		try {
+			List<NodeCollectionProposalCount> result = new ArrayList<>();
+
+			CollectionProposalInfo children =
+					repoDao.getCollectionClient().getCollectionsContainingProposals(
+							status,
+							skipCount, maxItems,
+							sortDefinition
+					);
+			Pagination pagination = new Pagination();
+			pagination.setTotal((int) children.getTotalHits());
+			pagination.setFrom(skipCount);
+			pagination.setCount(children.getData().size());
+
+			for(CollectionProposalInfo.CollectionProposalData data : children.getData()) {
+				NodeDao dao = NodeDao.getNode(repoDao, data.getNodeRef());
+				NodeCollectionProposalCount node = new NodeCollectionProposalCount();
+				dao.fetchCounts = fetchCounts;
+				dao.fillNodeObject(node);
+				node.setProposalCount(data.getProposalCount());
+				result.add(node);
+			}
+
+			CollectionProposalEntries obj = new CollectionProposalEntries();
+			obj.setCollections(result);
+			obj.setPagination(pagination);
+			return obj;
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+
 	public static CollectionBaseEntries getCollectionsSubcollections(RepositoryDao repoDao, String parentId, SearchScope scope, boolean fetchCounts, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
 		try {
 			return getCollectionsChildren(repoDao, parentId, scope, fetchCounts, filter, Arrays.asList(new String[]{"folders"}), sortDefinition, skipCount, maxItems);
@@ -433,7 +459,7 @@ public class CollectionDao {
 	public static void setPinned(RepositoryDao repoDao, String[] collections) {
 		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING))
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
-		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
 				repoDao.getCollectionClient().setPinned(collections);
