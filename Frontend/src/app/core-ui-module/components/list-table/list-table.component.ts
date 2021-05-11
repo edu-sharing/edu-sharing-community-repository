@@ -538,7 +538,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         // store in url for remembering layout
         const params: any = {};
         params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
-        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params});
+        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params, replaceUrl: true});
         this.changes.detectChanges();
     }
 
