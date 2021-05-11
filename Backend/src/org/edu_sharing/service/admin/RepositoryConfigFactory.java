@@ -49,6 +49,10 @@ public class RepositoryConfigFactory {
     public static void setConfig(RepositoryConfig config){
         try {
             NodeRef node = getConfigNode();
+            if(config == null){
+                NodeServiceFactory.getLocalService().removeNode(node.getId(), null);
+                return;
+            }
             String json = new Gson().toJson(config);
             NodeServiceHelper.writeContentText(node,json);
         } catch (Throwable t) {

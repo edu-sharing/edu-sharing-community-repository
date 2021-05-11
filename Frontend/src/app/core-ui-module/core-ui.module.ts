@@ -74,6 +74,7 @@ import { Toast } from './toast';
 import { FallbackTranslationHandler } from './translation';
 import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
+import {ImageConfigDirective} from './directives/image-config.directive';
 import {ErrorProcessingService} from './error.processing';
 
 @NgModule({
@@ -118,6 +119,7 @@ import {ErrorProcessingService} from './error.processing';
         NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
+        ImageConfigDirective,
         SafeHtmlPipe,
         ListOptionItemComponent,
         DistinctClickDirective,
@@ -176,6 +178,7 @@ import {ErrorProcessingService} from './error.processing';
         GlobalProgressComponent,
         VideoControlsComponent,
         IconDirective,
+        ImageConfigDirective,
         CardComponent,
         UserAvatarComponent,
         UserTileComponent,

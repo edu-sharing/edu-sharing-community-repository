@@ -521,12 +521,16 @@
             "COLLECTION_HINT": "Wählen Sie die Sammlung aus, deren Materialien auf der Startseite angezeigt werden sollen",
             "CHOOSE_COLLECTION": "Sammlung wählen",
             "TIMESPAN_LABEL": "Zeitspanne",
+            "TIMESPAN_DAYS": "Tage",
             "TIMESPAN_HINT": "Über welchen Zeitbereich soll die Auswertung der Daten erfolgen",
             "TIMESPAN": {
                 "days_30": "Letzte 30 Tage",
                 "days_100": "Letzte 100 Tage",
                 "all": "Gesamter Zeitraum"
             },
+            "CONFIG_BROKEN": "Konfiguration fehlerhaft",
+            "CONFIG_BROKEN_INFO": "Die aktuelle Konfiguration scheint fehlerhaft. Möchten Sie die bestehende Konfiguration löschen und auf den Originalzustand zurücksetzen?",
+            "RESET": "Zurücksetzen",
             "SAVED": "Einstellungen wurden gespeichert",
             "TOTAL_COUNT_LABEL": "Gesamtzahl Elemente",
             "TOTAL_COUNT_HINT": "Gesamtzahl an Elementen, welche ausgewählt werden.",

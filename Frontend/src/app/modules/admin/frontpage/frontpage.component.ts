@@ -1,18 +1,18 @@
-import {RestAdminService} from "../../../core-module/rest/services/rest-admin.service";
-import {Component, EventEmitter, Output} from "@angular/core";
-import {TranslateService} from "@ngx-translate/core";
-import {NodeStatistics, Node, Statistics, IamGroup, Group, Collection} from "../../../core-module/rest/data-object";
-import {ListItem} from "../../../core-module/ui/list-item";
-import {RestConstants} from "../../../core-module/rest/rest-constants";
-import {RestHelper} from "../../../core-module/rest/rest-helper";
-import {ConfigurationService} from "../../../core-module/rest/services/configuration.service";
-import {DialogButton, RestCollectionService, RestConnectorService, RestIamService, RestMdsService, RestMediacenterService, RestNodeService} from "../../../core-module/core.module";
-import {Helper} from "../../../core-module/rest/helper";
-import {Toast} from "../../../core-ui-module/toast";
-import {OptionItem} from "../../../core-ui-module/option-item";
-import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators, ValidatorFn} from "@angular/forms";
-import {MdsHelper} from "../../../core-module/rest/mds-helper";
-import {UIHelper} from "../../../core-ui-module/ui-helper";
+import {RestAdminService} from '../../../core-module/rest/services/rest-admin.service';
+import {Component, EventEmitter, Output} from '@angular/core';
+import {TranslateService} from '@ngx-translate/core';
+import {NodeStatistics, Node, Statistics, IamGroup, Group, Collection} from '../../../core-module/rest/data-object';
+import {ListItem} from '../../../core-module/ui/list-item';
+import {RestConstants} from '../../../core-module/rest/rest-constants';
+import {RestHelper} from '../../../core-module/rest/rest-helper';
+import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
+import {DialogButton, RestCollectionService, RestConnectorService, RestIamService, RestMdsService, RestMediacenterService, RestNodeService} from '../../../core-module/core.module';
+import {Helper} from '../../../core-module/rest/helper';
+import {Toast} from '../../../core-ui-module/toast';
+import {OptionItem} from '../../../core-ui-module/option-item';
+import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators, ValidatorFn} from '@angular/forms';
+import {MdsHelper} from '../../../core-module/rest/mds-helper';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 // Charts.js
 declare var Chart:any;
@@ -24,12 +24,10 @@ declare var Chart:any;
 })
 export class AdminFrontpageComponent {
   @Output() onOpenNode = new EventEmitter();
-  loading=true;
   previewLoading=true;
   config: any;
-  modes = ["collection","rating","views","downloads"];
-  conditionTypes = ["TOOLPERMISSION"];
-  timespans = ["days_30","days_100","all"];
+  modes = ['collection','rating','views','downloads'];
+  conditionTypes = ['TOOLPERMISSION'];
   form: FormGroup;
   previewNodes: Node[];
   previewColumns: ListItem[]=[];
@@ -61,16 +59,22 @@ export class AdminFrontpageComponent {
       public configService: ConfigurationService,
       private toast: Toast,
       private mdsService: RestMdsService
-  ){
+  ) {
     this.form = this.formBuilder.group({
-      totalCount : ['',[Validators.required,Validators.min(1),Validators.pattern("[0-9]*")]],
-      displayCount : ['',[Validators.required,,Validators.min(1),Validators.pattern("[0-9]*")]],
-      timespan : ['',[Validators.required,,Validators.min(1),Validators.pattern("[0-9]*")]]
+      totalCount : ['',[Validators.required,Validators.min(1),Validators.pattern('[0-9]*')]],
+      displayCount : ['',[Validators.required,Validators.min(1),Validators.pattern('[0-9]*')]],
+      timespan : ['',[Validators.required,Validators.min(1),Validators.pattern('[0-9]*')]],
+      timespanAll : []
     }, { validator: [
         ValidateForm
       ]
     });
-    this.mdsService.getSet().subscribe((set)=>{
+    this.form.valueChanges.subscribe((values) => {
+        values.timespanAll ?
+            this.form.get('timespan').disable({emitEvent: false}) :
+            this.form.get('timespan').enable({emitEvent: false});
+    })
+    this.mdsService.getSet().subscribe((set)=> {
       this.previewColumns=MdsHelper.getColumns(this.translate, set,'search');
     });
     this.adminService.getToolpermissions().subscribe(toolpermissions =>
@@ -80,31 +84,49 @@ export class AdminFrontpageComponent {
   }
 
   save() {
-    this.config.frontpage.displayCount=this.form.get('displayCount').value;
-    this.config.frontpage.totalCount=this.form.get('totalCount').value;
-    this.config.frontpage.timespan=this.form.get('timespan').value;
-    this.loading=true;
-    this.adminService.updateRepositoryConfig(this.config).subscribe(()=>{
+    for (const key of Object.keys(this.form.value)) {
+        this.config.frontpage[key] = this.form.value[key];
+    }
+    this.toast.showProgressDialog();
+    this.adminService.updateRepositoryConfig(this.config).subscribe(()=> {
       this.update();
       this.toast.toast('ADMIN.FRONTPAGE.SAVED');
     });
   }
 
-  private update() {
-    this.adminService.getRepositoryConfig().subscribe((config)=>{
-      this.config=config;
-      this.form.get('displayCount').setValue(this.config.frontpage.displayCount);
-      this.form.get('totalCount').setValue(this.config.frontpage.totalCount);
-      this.form.get('timespan').setValue(this.config.frontpage.timespan);
-      this.loading=false;
-      if(this.config.frontpage.collection){
-        this.collectionService.getCollection(this.config.frontpage.collection).subscribe((c)=>{
-          this.collectionName=c.collection.title;
-        });
-      }
-    });
-    this.updatePreviews();
-  }
+    private async update() {
+        try {
+            this.config = await this.adminService.getRepositoryConfig().toPromise();
+            const values = this.form.value;
+            for (const key of Object.keys(values)) {
+                values[key] = this.config.frontpage[key];
+            }
+            this.form.setValue(values);
+            this.toast.closeModalDialog();
+            if (this.config.frontpage.collection) {
+                this.collectionService.getCollection(this.config.frontpage.collection).subscribe((c) => {
+                    this.collectionName = c.collection.title;
+                });
+            }
+        } catch (e) {
+            this.toast.error(e);
+            this.toast.closeModalDialog();
+            this.toast.showConfigurableDialog({
+                title: 'ADMIN.FRONTPAGE.CONFIG_BROKEN',
+                message: 'ADMIN.FRONTPAGE.CONFIG_BROKEN_INFO',
+                buttons: [
+                    new DialogButton('CANCEL',DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
+                    new DialogButton('ADMIN.FRONTPAGE.RESET',DialogButton.TYPE_DANGER, () => {
+                        this.toast.showProgressDialog()
+                        this.adminService.updateRepositoryConfig(null).subscribe(() => {
+                            this.update();
+                        });
+                    })
+                ]
+            });
+        }
+        this.updatePreviews();
+    }
 
   updatePreviews() {
     this.previewLoading = true;
@@ -113,20 +135,20 @@ export class AdminFrontpageComponent {
     this.nodeService.getChildren(RestConstants.NODES_FRONTPAGE).subscribe((nodes) => {
       this.previewLoading = false;
       this.previewNodes = nodes.nodes;
-    },(error)=>{
-      if(UIHelper.errorContains(error,'No Elasticsearch instance')){
+    },(error)=> {
+      if(UIHelper.errorContains(error,'No Elasticsearch instance')) {
         this.previewError='ELASTICSEARCH';
       }
-      else{
+      else {
         this.previewError='UNKNOWN';
       }
     });
   }
-  openNode(node : any){
+  openNode(node : any) {
     this.onOpenNode.emit(node.node);
   }
 
-  setCollection(collection : Node){
+  setCollection(collection : Node) {
     this.config.frontpage.collection=collection.ref.id;
     this.collectionName=collection.title;
     this.chooseCollection=false;
@@ -151,11 +173,11 @@ export class AdminFrontpageComponent {
     this.config.frontpage.queries.splice(this.config.frontpage.queries.indexOf(query),1);
   }
 }
-const ValidateForm: ValidatorFn=(control)=>{
+const ValidateForm: ValidatorFn=(control)=> {
   const displayCount = control.get('displayCount');
   const totalCount = control.get('totalCount');
 
-  if(parseInt(displayCount.value,10)>parseInt(totalCount.value,10)){
+  if(parseInt(displayCount.value,10)>parseInt(totalCount.value,10)) {
     totalCount.setErrors({outOfRange:true});
   }
   return null;

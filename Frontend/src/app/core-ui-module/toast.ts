@@ -375,7 +375,10 @@ export class Toast {
         }
         try {
             error = json.error + ': ' + json.message;
-        } catch (e) {}
+        } catch (e) {
+            console.error(errorObject);
+            error = errorObject.toString();
+        }
         if (message === 'COMMON_API_ERROR') {
             dialogMessage = '';
             dialogTitle = 'COMMON_API_ERROR_TITLE';
@@ -445,7 +448,9 @@ export class Toast {
                     } catch (e) {}
                 }
             } catch (e) {
-                error = json;
+                if(json && !error) {
+                    error = json;
+                }
             }
             if (errorInfo === undefined) {
                 errorInfo = '';

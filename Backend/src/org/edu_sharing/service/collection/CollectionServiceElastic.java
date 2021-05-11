@@ -57,9 +57,11 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
             QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(
                     searchServiceElastic.getReadPermissionsQuery()
             ).must(
-                    QueryBuilders.matchQuery("nodeRef.storeRef.protocol","workspace")
+                QueryBuilders.matchQuery("nodeRef.storeRef.protocol","workspace")
             ).must(
-                    QueryBuilders.wildcardQuery("fullpath", path + "/*")
+                QueryBuilders.wildcardQuery("fullpath", path + "/*")
+            ).mustNot(
+                QueryBuilders.matchQuery("aspects", CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))
             );
 
             AggregationBuilder aggregation = AggregationBuilders.terms("type").field("type");
