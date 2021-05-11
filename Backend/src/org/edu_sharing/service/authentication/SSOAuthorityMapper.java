@@ -43,6 +43,7 @@ import org.edu_sharing.service.authentication.sso.config.MappingRoot;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
+import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 
 /**
  * 
@@ -310,6 +311,11 @@ public class SSOAuthorityMapper {
 					
 					if(isHashUserName()) {
 						personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
+					}
+
+					String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
+					if(personActiveStatus != null && !personActiveStatus.trim().isEmpty()){
+						personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), personActiveStatus);
 					}
 
 					personService.createPerson(personProperties);
