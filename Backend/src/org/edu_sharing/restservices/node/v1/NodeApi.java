@@ -1285,6 +1285,9 @@ public class NodeApi  {
 	    if(info.getLrmiProperties()!=null){
 	    	properties.putAll(info.getLrmiProperties());
 		}
+	    if(info.getTwitterImage() != null && !properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_THUMBNAILURL))){
+			properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_THUMBNAILURL),new String[]{info.getTwitterImage()});
+		}
 	}
 	@OPTIONS    
     @Path("/nodes/{repository}/{node}/children")
