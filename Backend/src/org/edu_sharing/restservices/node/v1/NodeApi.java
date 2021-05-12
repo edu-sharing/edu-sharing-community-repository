@@ -1,8 +1,10 @@
 package org.edu_sharing.restservices.node.v1;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1189,10 +1191,21 @@ public class NodeApi  {
 			node=NodeDao.mapNodeConstants(repoDao,node);
 
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	resolveURLTitle(properties);
+	    	WebsiteInformation websiteInformation = resolveURLTitle(properties);
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
 	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
 					assocType!=null && !assocType.trim().isEmpty() ? assocType : null);
+
+	    	if(websiteInformation != null && websiteInformation.getTwitterImage() != null
+					&& !websiteInformation.getTwitterImage().trim().isEmpty()){
+				InputStream inputStream = null;
+	    		try {
+					child.changePreview(inputStream = new URL(websiteInformation.getTwitterImage()).openStream(), "");
+				}catch(IOException e){}
+	    		finally {
+	    			if(inputStream != null) inputStream.close();
+				}
+			}
 	    	
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
@@ -1248,21 +1261,21 @@ public class NodeApi  {
 
 	}
 
-	public void resolveURLTitle(HashMap<String, String[]> properties) {
+	public WebsiteInformation resolveURLTitle(HashMap<String, String[]> properties) {
 		String[] url=(String[])properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
 		if(url==null)
-			return;
+			return null;
 		// Don't resolve url if name is already given by client
 		if(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))!=null) {
 			properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),
 					new String[]{NodeServiceHelper.cleanupCmName(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))[0])});
-			return;
+			return null;
 		}
 		 WebsiteInformation info=ClientUtilsService.getWebsiteInformation(url[0]);
 		 if(info==null){
 		     properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(url[0])});
 		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
-			 return;
+			 return null;
 		 }
 		 String title=info.getTitle();
 		 if(info.getTitle()==null) {
@@ -1285,9 +1298,7 @@ public class NodeApi  {
 	    if(info.getLrmiProperties()!=null){
 	    	properties.putAll(info.getLrmiProperties());
 		}
-	    if(info.getTwitterImage() != null && !properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_THUMBNAILURL))){
-			properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_THUMBNAILURL),new String[]{info.getTwitterImage()});
-		}
+	    return info;
 	}
 	@OPTIONS    
     @Path("/nodes/{repository}/{node}/children")
