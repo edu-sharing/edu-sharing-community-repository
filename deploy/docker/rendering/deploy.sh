@@ -96,7 +96,7 @@ info() {
 	echo ""
 	echo "  Services:"
 	echo ""
-	echo "    HTTP:           http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.xip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo "    HTTP:           http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
 	echo ""
 	echo "#########################################################################"
 	echo ""

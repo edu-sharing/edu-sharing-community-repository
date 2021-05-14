@@ -66,12 +66,12 @@ ingress:
 #      location /esrender/conf/ {return 403;}
 
   hosts:
-  - rendering.127.0.0.1.xip.io
+  - rendering.127.0.0.1.nip.io
 
   tls: []
 #  - secretName: edusharing-rendering-tls
 #    hosts:
-#    - rendering.127.0.0.1.xip.io
+#    - rendering.127.0.0.1.nip.io
 
   paths:
   - /esrender

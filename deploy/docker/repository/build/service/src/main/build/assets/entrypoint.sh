@@ -16,7 +16,7 @@ my_home_auth="${REPOSITORY_SERVICE_HOME_AUTH:-}"
 my_home_provider="${REPOSITORY_SERVICE_HOME_PROVIDER:-}"
 
 my_prot_external="${REPOSITORY_SERVICE_PROT_EXTERNAL:-http}"
-my_host_external="${REPOSITORY_SERVICE_HOST_EXTERNAL:-repository.127.0.0.1.xip.io}"
+my_host_external="${REPOSITORY_SERVICE_HOST_EXTERNAL:-repository.127.0.0.1.nip.io}"
 my_port_external="${REPOSITORY_SERVICE_PORT_EXTERNAL:-8100}"
 my_path_external="${REPOSITORY_SERVICE_PATH_EXTERNAL:-/edu-sharing}"
 my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}${my_path_external}"
@@ -54,7 +54,7 @@ repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-repository-search-
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
 
 repository_smtp_auth="${REPOSITORY_SMTP_AUTH:-}"
-repository_smtp_from="${REPOSITORY_SMTP_FROM:-noreply@repository.127.0.0.1.xip.io}"
+repository_smtp_from="${REPOSITORY_SMTP_FROM:-noreply@repository.127.0.0.1.nip.io}"
 repository_smtp_host="${REPOSITORY_SMTP_HOST:-}"
 repository_smtp_pass="${REPOSITORY_SMTP_PASS:-}"
 repository_smtp_port="${REPOSITORY_SMTP_PORT:-25}"

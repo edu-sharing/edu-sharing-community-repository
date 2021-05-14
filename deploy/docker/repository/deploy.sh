@@ -134,7 +134,7 @@ info() {
 	echo ""
 	echo "  SMTP:"
 	echo ""
-	echo "    From:           ${REPOSITORY_SMTP_FROM:-noreply@repository.127.0.0.1.xip.io}"
+	echo "    From:           ${REPOSITORY_SMTP_FROM:-noreply@repository.127.0.0.1.nip.io}"
 	echo "    Add-Reply-To:   ${REPOSITORY_SMTP_REPL:-false}"
 	echo "    Host:           ${REPOSITORY_SMTP_HOST:-}"
 	echo "    Port:           ${REPOSITORY_SMTP_PORT:-25}"
@@ -144,7 +144,7 @@ info() {
 	echo ""
 	echo "  Services:"
 	echo ""
-	echo "    HTTP:           http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.xip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo "    HTTP:           http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
 	echo "    JPDA:           127.0.0.1:${REPOSITORY_SERVICE_PORT_JPDA:-8101}"
 	echo ""
 	echo "#########################################################################"
@@ -379,7 +379,7 @@ reload-alfresco() {
 	echo "- repository         [ Backend/alfresco ]"
 
 	[[ -f ".env" ]] && source .env
-	curl -sSf -o /dev/null "http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.xip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/alfresco/" || exit
+	curl -sSf -o /dev/null "http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/alfresco/" || exit
 
 	echo "Done."
 }
@@ -407,7 +407,7 @@ reload-services() {
 	echo "- repository         [ Backend/services ]"
 
 	[[ -f ".env" ]] && source .env
-	curl -sSf -o /dev/null "http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.xip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/" || exit
+	curl -sSf -o /dev/null "http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/" || exit
 
 	echo "Done."
 }

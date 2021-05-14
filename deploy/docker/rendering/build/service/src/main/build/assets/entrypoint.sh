@@ -6,7 +6,7 @@ set -eux
 my_bind="${RENDERING_SERVICE_BIND:-"0.0.0.0"}"
 
 my_prot_external="${RENDERING_SERVICE_PROT_EXTERNAL:-http}"
-my_host_external="${RENDERING_SERVICE_HOST_EXTERNAL:-rendering.127.0.0.1.xip.io}"
+my_host_external="${RENDERING_SERVICE_HOST_EXTERNAL:-rendering.127.0.0.1.nip.io}"
 my_port_external="${RENDERING_SERVICE_PORT_EXTERNAL:-9100}"
 my_path_external="${RENDERING_SERVICE_PATH_EXTERNAL:-/esrender}"
 my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}${my_path_external}"

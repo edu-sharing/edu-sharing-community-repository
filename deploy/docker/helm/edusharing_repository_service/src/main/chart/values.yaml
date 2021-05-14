@@ -73,12 +73,12 @@ ingress:
 #      location /share/-default-/proxy/alfresco/api/ {return 403;}
 
   hosts:
-  - repository.127.0.0.1.xip.io
+  - repository.127.0.0.1.nip.io
 
   tls: []
 #  - secretName: edusharing-repository-tls
 #    hosts:
-#    - repository.127.0.0.1.xip.io
+#    - repository.127.0.0.1.nip.io
 
   paths:
   - /edu-sharing
@@ -156,7 +156,7 @@ config:
 
   smtp:
     addReplyTo: false
-    from: noreply@repository.127.0.0.1.xip.io
+    from: noreply@repository.127.0.0.1.nip.io
     host: localhost
     port: 25
     auth: ""

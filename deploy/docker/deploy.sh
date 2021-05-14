@@ -68,7 +68,7 @@ info() {
 	echo ""
 	echo "  When ready:"
 	echo ""
-	echo "  1. Open:   http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.xip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo "  1. Open:   http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
 	echo ""
 	echo "  2. Login:  username:  admin"
 	echo "             password:  ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
