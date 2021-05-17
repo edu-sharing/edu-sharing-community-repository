@@ -3,6 +3,7 @@ package org.edu_sharing.alfresco.webscripts.tracker;
 import org.alfresco.repo.domain.permissions.AclDAO;
 import org.alfresco.repo.security.permissions.AccessControlEntry;
 import org.alfresco.repo.security.permissions.AccessControlList;
+import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.repo.web.scripts.solr.AclsReadersGet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,10 +14,7 @@ import org.springframework.extensions.surf.util.Content;
 import org.springframework.extensions.webscripts.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PermissionsGet extends DeclarativeWebScript {
 
@@ -24,6 +22,8 @@ public class PermissionsGet extends DeclarativeWebScript {
 
 
     private AclDAO aclDAO;
+
+    private PermissionModel permissionModel;
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
@@ -90,6 +90,14 @@ public class PermissionsGet extends DeclarativeWebScript {
                 ace.setAuthority(entry.getAuthority());
                 ace.setPermission(entry.getPermission().getName());
                 aces.add(ace);
+                Set<String> subPermissions = new HashSet<>();
+                getSubPermissions(entry.getPermission().getName(),subPermissions);
+                for(String subPermission : subPermissions){
+                    Ace subAce = new Ace();
+                    subAce.setAuthority(entry.getAuthority());
+                    subAce.setPermission(subPermission);
+                    aces.add(subAce);
+                }
             }
             accessControlLists.add(acl);
         }
@@ -108,5 +116,21 @@ public class PermissionsGet extends DeclarativeWebScript {
 
     public void setAclDAO(AclDAO aclDAO) {
         this.aclDAO = aclDAO;
+    }
+
+    public void setPermissionModel(PermissionModel permissionModel) {
+        this.permissionModel = permissionModel;
+    }
+
+    public void getSubPermissions(String name, Set<String> subPermissions){
+        this.permissionModel.getPermissionSets().values().stream().
+                forEach((ps -> ps.getPermissionGroups().stream().filter(pg ->pg.getName().equals(name)).findFirst().
+                        ifPresent(g->g.getIncludedPermissionGroups().
+                                forEach(ipg->
+                                {
+                                    subPermissions.add(ipg.getName());
+                                    getSubPermissions(ipg.getName(),subPermissions);
+                                }))));
+
     }
 }
