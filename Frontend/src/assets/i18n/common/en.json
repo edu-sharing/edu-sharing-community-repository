@@ -298,6 +298,7 @@
     },
     "NODE_REPORT": {
         "TITLE": "Report problem",
+        "SUBTITLE": "Report an issue or problem",
         "REPORT": "report",
         "REPORT_INFO": "Report problem with \"{{name}}\"",
         "COMMENT": "Provide additional information about the problem that has occurred",
@@ -307,6 +308,7 @@
         "EMAIL_REQUIRED": "Please provide a valind e-mail address.",
         "REASON_REQUIRED": "Please select what kind of problem you are experiencing.",
         "DONE": "Thanks for your message.",
+        "REASON": "Which problem exists?",
         "REASONS": {
             "UNAVAILABLE": "object not available",
             "INAPPROPRIATE_CONTENT": "problematic content",

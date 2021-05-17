@@ -75,6 +75,7 @@ import { FallbackTranslationHandler } from './translation';
 import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
 import {ImageConfigDirective} from './directives/image-config.directive';
+import {NativeElementInjectorDirective} from './directives/native-element-injector.directive';
 
 @NgModule({
     declarations: [
@@ -99,6 +100,7 @@ import {ImageConfigDirective} from './directives/image-config.directive';
         SpinnerSmallComponent,
         GlobalProgressComponent,
         VideoControlsComponent,
+        NativeElementInjectorDirective,
         InfoMessageComponent,
         InputPasswordComponent,
         InfiniteScrollDirective,
@@ -185,6 +187,7 @@ import {ImageConfigDirective} from './directives/image-config.directive';
         InfiniteScrollDirective,
         ToastyModule,
         AuthorityNamePipe,
+        NativeElementInjectorDirective,
         VCardNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,

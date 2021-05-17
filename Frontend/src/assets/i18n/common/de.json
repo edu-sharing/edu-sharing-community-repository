@@ -364,6 +364,7 @@
     },
     "NODE_REPORT": {
         "TITLE": "Problem melden",
+        "SUBTITLE": "Problem oder Fehler am Medium melden",
         "REPORT": "Melden",
         "REPORT_INFO": "Problem mit \"{{name}}\" melden",
         "COMMENT": "Nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
@@ -373,6 +374,7 @@
         "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben",
         "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",
         "DONE": "Vielen Dank für Ihre Meldung.",
+        "REASON": "Welches Problem besteht?",
         "REASONS": {
             "UNAVAILABLE": "Medium nicht verfügbar",
             "INAPPROPRIATE_CONTENT": "Problematischer Inhalt",

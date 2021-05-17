@@ -4,7 +4,6 @@
   height="large" width="normal"
   icon="bookmark_border"
   [buttons]="buttons"
-  [node]="nodes"
   [isCancelable]="true" (onCancel)="cancel()">
       <spinner *ngIf="loading"></spinner>
       <div *ngIf="!loading">
