@@ -29,7 +29,7 @@
                         <input matInput [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
                     </mat-form-field>
                 </div>
-                <div class="lti" *ngIf="showLti">
+                <div class="lti" *ngIf="showLti && configService.instant('upload.lti.enabled', false)">
                     <div><mat-slide-toggle class="toggle-reverse" [disabled]="!ltiAllowed" [(ngModel)]="ltiActivated">{{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}</mat-slide-toggle></div>
                     <div class="lti-data" *ngIf="ltiAllowed && ltiActivated">
                         <div class="heading">{{'WORKSPACE.LTI_HEADING' | translate}}</div>

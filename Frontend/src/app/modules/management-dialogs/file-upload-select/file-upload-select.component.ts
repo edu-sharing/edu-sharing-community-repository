@@ -1,5 +1,5 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {DialogButton, RestConstants} from '../../../core-module/core.module';
+import {ConfigurationService, DialogButton, RestConstants} from '../../../core-module/core.module';
 import {IamUser, Node, NodeList, NodeWrapper} from '../../../core-module/core.module';
 import {RestNodeService} from '../../../core-module/core.module';
 import {trigger} from '@angular/animations';
@@ -47,7 +47,7 @@ export class WorkspaceFileUploadSelectComponent  {
    * Show the lti option and support generation of lti files?
    * @type {boolean}
    */
-  @Input() showLti= true;
+  @Input() showLti=true;
   private breadcrumbs: Node[];
   ltiAllowed: boolean;
   ltiActivated: boolean;
@@ -139,6 +139,7 @@ export class WorkspaceFileUploadSelectComponent  {
     private nodeService: RestNodeService,
     private iamService: RestIamService,
     private searchService: RestSearchService,
+    public configService: ConfigurationService,
     private toast: Toast,
   ){
     this.setState('');

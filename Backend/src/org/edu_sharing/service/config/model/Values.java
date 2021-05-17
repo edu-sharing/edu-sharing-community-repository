@@ -61,4 +61,5 @@ public class Values implements Serializable {
 	@XmlElement	public Admin admin;
 	@XmlElement	public SimpleEdit simpleEdit;
 	@XmlElement	public ConfigFrontpage frontpage;
+	@XmlElement	public ConfigUpload upload;
 }
