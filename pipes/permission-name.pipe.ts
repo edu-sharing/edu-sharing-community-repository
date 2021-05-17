@@ -18,7 +18,7 @@ export class PermissionNamePipe implements PipeTransform {
               email=permission.user.email || permission.user.mailbox;
           }
           if(permission.profile){
-              email=permission.profile.email || permission.profile.mailbox;
+              email=permission.profile.email || permission.profile.mailbox || permission.profile.groupEmail;
           }
           if(field=='email-domain'){
               email=email ? email.substr(email.indexOf("@")+1) : null;
