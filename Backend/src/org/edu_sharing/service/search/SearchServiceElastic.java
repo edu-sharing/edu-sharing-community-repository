@@ -268,6 +268,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
         if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+        if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
+        }
         return authorities;
     }
 
