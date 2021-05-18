@@ -126,15 +126,15 @@ public class ApplicationInfoList {
 	 * synchronized to prevent errors when multithreads call this static method
 	 */
 	private static synchronized void initAppInfos(){
-		String[] appIdArray = null;
+		String[] appFileArray = null;
 		try{
 			String repStr = PropertiesHelper.getProperty("applicationfiles", "ccapp-registry.properties.xml", PropertiesHelper.XML);
 			if(repStr == null || repStr.trim().isEmpty()){
 				logger.error("Repository Registry config is undefined or empty");
 				return;
 			}
-			appIdArray = repStr.split(",");
-			if(appIdArray.length == 0){
+			appFileArray = repStr.split(",");
+			if(appFileArray.length == 0){
 				logger.error("Repository Registry config is empty");
 				return;
 			}
@@ -143,17 +143,17 @@ public class ApplicationInfoList {
 			return;
 		}
 
-		for(String appIdFile: appIdArray){
+		for(String appFile: appFileArray){
 
-			appIdFile = appIdFile.trim();
-			if(appIdFile.isEmpty()){
+			appFile = appFile.trim();
+			if(appFile.isEmpty()){
 				logger.error("found empty value in Repository Registry");
 				continue;
 			}
 
 			try{
-				ApplicationInfo repInfo = new ApplicationInfo(appIdFile);
-				logger.debug("put:"+appIdFile+" "+repInfo);
+				ApplicationInfo repInfo = new ApplicationInfo(appFile);
+				logger.debug("put:"+appFile+" "+repInfo);
 				synchronized(appInfos) {
 					appInfos.put(repInfo.getAppId(), repInfo);
 				}
