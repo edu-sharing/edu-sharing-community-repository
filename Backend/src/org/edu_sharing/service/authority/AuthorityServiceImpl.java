@@ -34,6 +34,7 @@ import org.edu_sharing.repository.server.PropertyRequiredException;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -468,6 +469,11 @@ public EduGroup getEduGroup(String authority){
 
 			if (!currentUser.equals(userName) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
 				throw new NotAnAdminException();
+			}
+
+			String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
+			if(personActiveStatus != null && !personActiveStatus.trim().isEmpty()){
+				userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
 			}
 
 			PersonService personService = serviceRegistry.getPersonService();
