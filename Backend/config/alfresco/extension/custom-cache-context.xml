@@ -71,10 +71,10 @@
    </bean>
 
     <bean name="eduSharingRegisterUserCache" factory-bean="cacheFactory" factory-method="createCache">
-        <constructor-arg value="cache.eduSharingEditLockCache"/>
+        <constructor-arg value="cache.eduSharingRegisterUserCache"/>
     </bean>
 
     <bean name="eduSharingRecoverPasswordCache" factory-bean="cacheFactory" factory-method="createCache">
-        <constructor-arg value="cache.eduSharingEditLockCache"/>
+        <constructor-arg value="cache.eduSharingRecoverPasswordCache"/>
     </bean>
 </beans>
