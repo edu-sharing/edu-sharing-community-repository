@@ -99,7 +99,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
         ).must(
                 QueryBuilders.matchQuery("aspects",  CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION))
         ).must(
-                searchServiceElastic.getPermissionsQuery("permissions.write")
+                searchServiceElastic.getPermissionsQuery("permissions.Write")
         );
         queryBuilder = QueryBuilders.scriptScoreQuery(queryBuilder, scoreScript).setMinScore(1);
         SearchRequest searchRequest = new SearchRequest("workspace");
