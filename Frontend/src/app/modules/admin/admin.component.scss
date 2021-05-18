@@ -424,9 +424,17 @@ main-nav{
         > label {
             padding-bottom: 5px;
         }
+        ngx-monaco-editor{
+            resize: vertical;
+            overflow: auto;
+        }
     }
     .elastic-response{
         padding-top: 20px;
+        ngx-monaco-editor{
+            resize: vertical;
+            overflow: auto;
+        }
     }
     .lucenePaging{
         max-width: 700px;
