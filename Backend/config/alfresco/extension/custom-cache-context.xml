@@ -77,4 +77,8 @@
     <bean name="eduSharingRecoverPasswordCache" factory-bean="cacheFactory" factory-method="createCache">
         <constructor-arg value="cache.eduSharingRecoverPasswordCache"/>
     </bean>
+
+    <bean name="eduSharingApplicationInfoCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingApplicationInfoCache"/>
+    </bean>
 </beans>
