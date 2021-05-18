@@ -1,5 +1,20 @@
 import {TranslateService} from '@ngx-translate/core';
-import {AuthorityProfile, CollectionReference, ConfigurationService, ListItem, Node, NodesRightMode, NodeWrapper, Permissions, Repository, RestConnectorService, RestConstants, RestHelper, TemporaryStorageService, User, WorkflowDefinition} from '../core-module/core.module';
+import {
+  AuthorityProfile,
+  CollectionReference,
+  ConfigurationService,
+  ListItem,
+  Node,
+  NodesRightMode,
+  Permissions,
+  Repository,
+  RestConnectorService,
+  RestConstants,
+  RestHelper,
+  TemporaryStorageService,
+  User,
+  WorkflowDefinition
+} from '../core-module/core.module';
 import {FormatSizePipe} from './pipes/file-size.pipe';
 import {Observable, Observer} from 'rxjs';
 import {Router} from '@angular/router';
@@ -136,7 +151,9 @@ export class NodeHelper {
           continue;
         }
         // return false because either on original not found, or both (because both is then also false)
-        return false;
+        if(currentMode === NodesRightMode.Both) {
+          return false;
+        }
       }
       // check regular node rights
       if(!node.access || node.access.indexOf(right) === -1) {
