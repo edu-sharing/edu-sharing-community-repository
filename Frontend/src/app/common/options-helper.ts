@@ -461,6 +461,7 @@ export class OptionsHelperService {
         }
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
+        editConnectorNode.showAsAction = true;
         editConnectorNode.constrains = [Constrain.Files, Constrain.NoBulk];
 
         /**

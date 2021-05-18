@@ -3,7 +3,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../core-ui-module/translation';
-import {DefaultGroups, ElementType, OptionItem, Scope} from '../../../core-ui-module/option-item';
+import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {Title} from '@angular/platform-browser';
@@ -325,6 +325,8 @@ export class NodeRenderComponent implements EventListener {
     download.elementType = [ElementType.Node, ElementType.NodeChild];
     // declare explicitly so that callback will be overriden
     download.customEnabledCallback = null;
+    download.group = DefaultGroups.View;
+    download.priority = 25;
     download.isEnabled=this._node.downloadUrl!=null && !this._node.properties?.[RestConstants.CCM_PROP_IO_WWWURL];
     download.showAsAction=true;
     if(this.isCollectionRef()) {
