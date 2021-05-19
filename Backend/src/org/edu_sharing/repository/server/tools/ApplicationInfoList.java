@@ -43,7 +43,7 @@ public class ApplicationInfoList {
 	
 	private static Log logger = LogFactory.getLog(ApplicationInfoList.class);
 	
-	private static SimpleCache<String, ApplicationInfo> appInfos =  (SimpleCache<String, ApplicationInfo>) AlfAppContextGate.getApplicationContext().getBean("eduSharingApplicationInfoCache");;
+	private static SimpleCache<String, ApplicationInfo> appInfos =  (SimpleCache<String, ApplicationInfo>) AlfAppContextGate.getApplicationContext().getBean("eduSharingApplicationInfoCache");
 	
 	public static ApplicationInfo getRepositoryInfo(String file){
 		return getApplicationInfoByProperty(file, ApplicationInfoProperty.APPFILE);
