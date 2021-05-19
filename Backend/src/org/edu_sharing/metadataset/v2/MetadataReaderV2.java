@@ -1,5 +1,6 @@
 package org.edu_sharing.metadataset.v2;
 
+import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
@@ -43,7 +44,7 @@ public class MetadataReaderV2 {
 	public static final String QUERY_SYNTAX_LUCENE = "lucene";
 	public static final String QUERY_SYNTAX_DSL = "dsl";
 	private static Logger logger = Logger.getLogger(MetadataReaderV2.class);
-	private static Map<String,MetadataSetV2> mdsCache=new HashMap<>();
+	private static SimpleCache<String,MetadataSetV2> mdsCache = (SimpleCache<String, MetadataSetV2>) AlfAppContextGate.getApplicationContext().getBean("eduSharingMdsCache");
 	XPathFactory pfactory = XPathFactory.newInstance();
 	XPath xpath = pfactory.newXPath();
 	private Document doc;
@@ -102,7 +103,7 @@ public class MetadataReaderV2 {
 		}
 	    try {
             String id = appId.getAppId() + "_" + mdsName + "_" + locale;
-            if (mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
+            if (mdsCache.getKeys().contains(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
                 return SerializationUtils.clone(mdsCache.get(id));
             reader = new MetadataReaderV2(mdsNameDefault + ".xml", locale);
             mds = reader.getMetadatasetForFile(mdsNameDefault);
