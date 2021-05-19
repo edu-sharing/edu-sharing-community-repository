@@ -82,6 +82,8 @@ public interface AdminService {
 
 	void applyTemplate(String template, String group, String folderId) throws Throwable;
 
+	void clearCache(String beanName);
+
 	List<String> getCatalinaOut() throws IOException;
 
 	int importCollections(String parent, InputStream is) throws Throwable;

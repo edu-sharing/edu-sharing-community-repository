@@ -626,6 +626,12 @@ public class AdminServiceImpl implements AdminService  {
 			simpleCache.remove(keyToRemove);
 		}
 	}
+
+	@Override
+	public void clearCache(String beanName){
+		SimpleCache simpleCache = (SimpleCache)AlfAppContextGate.getApplicationContext().getBean(beanName);
+		simpleCache.clear();
+	}
 	
 	@Override
 	public List<String> getCatalinaOut() throws IOException{
