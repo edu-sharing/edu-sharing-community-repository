@@ -321,8 +321,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	
 	private int order;
 
-	Logger logger = Logger.getLogger(ApplicationInfo.class);
-
 	private String xml;
 
 	/**
@@ -395,9 +393,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		appCaption = properties.getProperty(KEY_APPCAPTION);
 		
 		appId = properties.getProperty(KEY_APPID);
-		if(appId == null || appId.trim().equals("")){
-			logger.error("missing appid in file:"+appFile);
-		}
 		
 		trustedclient = properties.getProperty(KEY_TRUSTEDCLIENT);
 		
