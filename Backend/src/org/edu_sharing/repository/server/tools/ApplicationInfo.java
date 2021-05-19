@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 
-public class ApplicationInfo implements Comparable<ApplicationInfo>{
+public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable{
 
 	public static final long DEFAULT_OFFSET_MS = 10000;
 
