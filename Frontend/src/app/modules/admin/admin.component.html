@@ -84,8 +84,6 @@
     <div *ngIf="modeIsActive('INFO')" class="content info">
       <div class="heading">{{'ADMIN.INFO.REPOSITORY' | translate}}</div>
       <div class="version">{{ repositoryVersion }}</div>
-      <div class="heading">{{'ADMIN.INFO.NG' | translate}}</div>
-      <div class="version">{{ ngVersion }}</div>
       <div class="heading">{{'ADMIN.INFO.SYSTEM_CHECKS' | translate}}</div>
       <div class="checks">
         <div class="reload"><i class="material-icons clickable" (click)="runChecks()">refresh</i></div>
@@ -609,6 +607,7 @@
         </div>
         <button mat-flat-button color="primary" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</button>
       </div>
+      <!--
       <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
       <div class="group catalina">
         <button mat-raised-button (click)="refreshCatalina()"><i class="material-icons">refresh</i></button>
@@ -616,6 +615,7 @@
           <textarea matInput id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
         </mat-form-field>
       </div>
+      -->
     </div>
     <div *ngIf="modeIsActive('BROWSER')" class="content browser">
       <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.NODE_BROWSER' | translate}}</span></div>

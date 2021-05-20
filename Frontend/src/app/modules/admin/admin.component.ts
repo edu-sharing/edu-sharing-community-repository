@@ -159,7 +159,6 @@ export class AdminComponent {
   public lucene:LuceneData={mode:'NODEREF',store:'Workspace',offset:0,count:100,outputMode:'view'};
   public oaiSave=true;
   public repositoryVersion:string;
-  public ngVersion:string;
   public updates: ServerUpdate[]=[];
   public applications: Application[]=[];
   public applicationsOpen: any = {};
@@ -1143,7 +1142,7 @@ export class AdminComponent {
                 this.updates = data;
             });
             this.refreshUpdateList();
-            this.refreshCatalina();
+            // this.refreshCatalina();
             this.refreshAppList();
             this.storage.get('admin_job', this.job).subscribe((data: any) => {
                 this.job = data;
@@ -1183,12 +1182,6 @@ export class AdminComponent {
             }, (error: any) => {
                 console.info(error);
                 this.repositoryVersion = 'Error accessing version information. Are you in dev mode?';
-            });
-            this.admin.getNgVersion().subscribe((data: string) => {
-                this.ngVersion = data;
-            }, (error: any) => {
-                console.info(error);
-                this.ngVersion = 'Error accessing version information. Are you in dev mode?';
             });
         }
     }
