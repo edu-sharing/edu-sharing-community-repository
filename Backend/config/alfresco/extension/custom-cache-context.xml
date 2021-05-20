@@ -85,4 +85,9 @@
     <bean name="eduSharingMdsCache" factory-bean="cacheFactory" factory-method="createCache">
         <constructor-arg value="cache.eduSharingMdsCache"/>
     </bean>
+
+    <bean name="eduSharingClientConfigCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingClientConfigCache"/>
+    </bean>
+
 </beans>

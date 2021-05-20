@@ -610,6 +610,14 @@ public class AdminServiceImpl implements AdminService  {
 	public CacheInfo getCacheInfo(String name){
 		return CacheManagerFactory.getCacheInfo(name);
 	}
+
+	@Override
+	public Map<Serializable,Serializable> getCacheEntries(String beanName){
+		Map<Serializable,Serializable> result = new HashMap<>();
+		SimpleCache simpleCache = (SimpleCache)AlfAppContextGate.getApplicationContext().getBean(beanName);
+		simpleCache.getKeys().forEach(k -> result.put((Serializable)k,(Serializable)simpleCache.get((Serializable)k)));
+		return result;
+	}
 	
 	@Override
 	public void removeCacheEntry(Integer index, String beanName) {

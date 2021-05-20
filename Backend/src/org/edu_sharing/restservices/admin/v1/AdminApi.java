@@ -631,6 +631,27 @@ public class AdminApi {
 		}
 	}
 
+	@GET
+	@Path("/cache/cacheEntries/{id}")
+
+	@ApiOperation(value = "Get entries of a cache", notes = "Get entries of a cache.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getCacheEntries(@ApiParam(value = "Id/bean name of the cache") @PathParam("id") String id,
+								 @Context HttpServletRequest req) {
+		try {
+			Map<Serializable, Serializable> result = AdminServiceFactory.getInstance().getCacheEntries(id);
+			return Response.ok().entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
 
 
 	@GET

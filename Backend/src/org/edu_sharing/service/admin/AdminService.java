@@ -2,6 +2,7 @@ package org.edu_sharing.service.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,8 +38,10 @@ public interface AdminService {
 
 
 	CacheInfo getCacheInfo(String name);
-	
-	public void removeCacheEntry(Integer index, String beanName);
+
+    Map<Serializable,Serializable> getCacheEntries(String beanName);
+
+    public void removeCacheEntry(Integer index, String beanName);
 
 	public CacheCluster getCacheCluster();
 
