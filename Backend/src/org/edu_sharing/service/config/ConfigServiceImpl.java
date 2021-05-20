@@ -1,6 +1,7 @@
 package org.edu_sharing.service.config;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +18,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -42,8 +42,8 @@ import org.json.JSONObject;
 public class ConfigServiceImpl implements ConfigService{
 	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
 	// Cached config
-	private static String KEY_DEFAULT = "DEFAULT_CONFIG";
-	private static SimpleCache<String, Config> configCache = (SimpleCache<String, Config>) AlfAppContextGate.getApplicationContext().getBean("eduSharingClientConfigCache");
+	private static String CACHE_KEY = "CLIENT_CONFIG";
+	private static SimpleCache<String, Serializable> configCache = (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
 
 	private static final Unmarshaller jaxbUnmarshaller;
 
@@ -109,9 +109,9 @@ public class ConfigServiceImpl implements ConfigService{
 	*/
 	@Override
 	public Config getConfig() throws Exception {
-	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && configCache.getKeys().size() > 0) {
+	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && configCache.getKeys().contains(CACHE_KEY)) {
 	    	// Deep copy to prevent override cache data from contexts
-			return SerializationUtils.clone(configCache.get(KEY_DEFAULT));
+			return SerializationUtils.clone((Config) configCache.get(CACHE_KEY));
 		}
 		InputStream is = getConfigInputStream();
 		if(is==null)
@@ -121,8 +121,8 @@ public class ConfigServiceImpl implements ConfigService{
             config = (Config) jaxbUnmarshaller.unmarshal(is);
         }
         is.close();
-		configCache.put(KEY_DEFAULT,config);
-        return SerializationUtils.clone(configCache.get(KEY_DEFAULT));
+		configCache.put(CACHE_KEY,config);
+        return SerializationUtils.clone((Config)configCache.get(CACHE_KEY));
 	}
 
 	private InputStream getConfigInputStream() {
@@ -262,7 +262,7 @@ public class ConfigServiceImpl implements ConfigService{
 
 	@Override
 	public void refresh() {
-		configCache.clear();
+		configCache.remove(CACHE_KEY);
 		try {
 			getConfig();
 		} catch (Exception e) {

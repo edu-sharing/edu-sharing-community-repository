@@ -6,23 +6,24 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.edu_sharing.spring.ApplicationContextFactory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ConnectorServiceFactory {
 
-	private static String KEY_DEFAULT = "DEFAULT";
+	private static String CACHE_KEY = "CONNECTOR_CONFIG";
 
-	private static SimpleCache<String, ConnectorService> connectorServiceCache = (SimpleCache<String, ConnectorService>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConnectorServiceCache");
+	private static SimpleCache<String, Serializable> configCache = (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
 	//static ConnectorService cs = new ConnectorService();
 	
 	public static ConnectorService getConnectorService(){
-		return connectorServiceCache.get(KEY_DEFAULT);
+		return (ConnectorService)configCache.get(CACHE_KEY);
 	}
 	public static void invalidate(){
-		connectorServiceCache.clear();connectorServiceCache.put(KEY_DEFAULT,new ConnectorService());
+		configCache.remove(CACHE_KEY);
+		configCache.put(CACHE_KEY,new ConnectorService());
 	}
 
 	public static ConnectorList getConnectorList(){
