@@ -9,6 +9,6 @@ public class LightbendConfigHelper {
 
     public static void refresh() {
         ConnectorServiceFactory.invalidate(); // reinit connectors data
-        HttpQueryTool.initFinished = false; // reinit proxy settings
+        HttpQueryTool.invalidateProxySettings(); // reinit proxy settings
     }
 }
