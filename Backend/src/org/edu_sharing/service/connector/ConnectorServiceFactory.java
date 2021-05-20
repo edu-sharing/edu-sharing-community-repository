@@ -1,9 +1,11 @@
 package org.edu_sharing.service.connector;
 
 import org.alfresco.repo.cache.SimpleCache;
+import org.edu_sharing.alfresco.service.connector.Connector;
+import org.edu_sharing.alfresco.service.connector.ConnectorList;
+import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
@@ -40,7 +42,7 @@ public class ConnectorServiceFactory {
 
 		try{
 			if(new MCAlfrescoAPIClient().isAdmin()){
-				return getConnectorService().connectorList;
+				return getConnectorService().getConnectorList();
 			}
 		}catch(Exception e){
 
@@ -49,7 +51,7 @@ public class ConnectorServiceFactory {
 		ConnectorList filteredList = new ConnectorList();
 
 		List<Connector> filteredConnectors = new ArrayList<Connector>();
-		for(Connector connector : getConnectorService().connectorList.getConnectors()){
+		for(Connector connector : getConnectorService().getConnectorList().getConnectors()){
 			if(toolPermissionService.hasToolPermissionForConnector(connector.getId())){
 				filteredConnectors.add(connector);
 			}
