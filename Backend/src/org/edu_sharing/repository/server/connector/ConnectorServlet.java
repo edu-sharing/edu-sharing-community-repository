@@ -1,9 +1,7 @@
 package org.edu_sharing.repository.server.connector;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,14 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Encryption;
@@ -32,9 +27,9 @@ import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
-import org.edu_sharing.service.connector.Connector;
-import org.edu_sharing.service.connector.ConnectorFileType;
-import org.edu_sharing.service.connector.ConnectorService;
+import org.edu_sharing.alfresco.service.connector.Connector;
+import org.edu_sharing.alfresco.service.connector.ConnectorFileType;
+import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
 import org.edu_sharing.service.editlock.EditLockService;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
@@ -46,7 +41,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 

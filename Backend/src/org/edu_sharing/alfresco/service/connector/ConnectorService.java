@@ -1,4 +1,4 @@
-package org.edu_sharing.service.connector;
+package org.edu_sharing.alfresco.service.connector;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigBeanFactory;
@@ -20,5 +20,8 @@ public class ConnectorService implements Serializable {
 		Config config= LightbendConfigLoader.get().getConfig("connectorList");
 		connectorList=ConfigBeanFactory.create(config,ConnectorList.class);
 	}
-	
+
+	public ConnectorList getConnectorList() {
+		return connectorList;
+	}
 }

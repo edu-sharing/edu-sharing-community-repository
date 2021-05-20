@@ -1,4 +1,4 @@
-package org.edu_sharing.service.connector;
+package org.edu_sharing.alfresco.service.connector;
 
 import java.io.Serializable;
 import java.util.List;
