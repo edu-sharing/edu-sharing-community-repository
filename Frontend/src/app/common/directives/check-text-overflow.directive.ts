@@ -15,13 +15,15 @@ export class CheckTextOverflowDirective implements OnInit {
 
     private textElement: HTMLElement;
 
+    hasTextOverflow = delay(this.hasTextOverflow_);
+
     constructor(private readonly elementRef: ElementRef<HTMLElement>) {}
 
     ngOnInit(): void {
         this.textElement = this.getTextElement();
     }
 
-    hasTextOverflow(): boolean {
+    private hasTextOverflow_(): boolean {
         const element = this.textElement;
         if (element) {
             return element.offsetWidth < element.scrollWidth;
@@ -37,4 +39,23 @@ export class CheckTextOverflowDirective implements OnInit {
             return this.elementRef.nativeElement;
         }
     }
+}
+
+/** Delay the result of a function one tick to avoid changed-after-checked errors. */
+function delay<T>(f: () => T): () => T {
+    let previousValue: any = null;
+    let updating = false;
+    return function () {
+        if (!updating) {
+            const newValue = f.apply(this);
+            if (newValue !== previousValue) {
+                updating = true;
+                Promise.resolve().then(() => {
+                    previousValue = newValue;
+                    updating = false;
+                });
+            }
+        }
+        return previousValue;
+    };
 }
