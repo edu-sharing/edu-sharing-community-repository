@@ -90,4 +90,8 @@
         <constructor-arg value="cache.eduSharingClientConfigCache"/>
     </bean>
 
+    <bean name="eduSharingConnectorServiceCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingConnectorServiceCache"/>
+    </bean>
+
 </beans>

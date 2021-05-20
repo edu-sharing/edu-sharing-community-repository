@@ -2,9 +2,10 @@ package org.edu_sharing.service.connector;
 
 import com.typesafe.config.Optional;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Connector {
+public class Connector  implements Serializable {
 	
 	private String id;
 

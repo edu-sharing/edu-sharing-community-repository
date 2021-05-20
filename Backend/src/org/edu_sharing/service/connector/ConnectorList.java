@@ -1,8 +1,9 @@
 package org.edu_sharing.service.connector;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ConnectorList {
+public class ConnectorList implements Serializable {
 
 	List<Connector> connectors;
 		
