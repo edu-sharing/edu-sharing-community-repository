@@ -20,5 +20,8 @@ public class ConnectorService implements Serializable {
 		Config config= LightbendConfigLoader.get().getConfig("connectorList");
 		connectorList=ConfigBeanFactory.create(config,ConnectorList.class);
 	}
-	
+
+	public ConnectorList getConnectorList() {
+		return connectorList;
+	}
 }
