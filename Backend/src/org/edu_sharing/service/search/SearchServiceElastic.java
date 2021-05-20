@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
@@ -22,6 +23,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -122,6 +124,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return audienceQueryBuilder;
     }
     public BoolQueryBuilder getReadPermissionsQuery(){
+
+        if(AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()){
+            return new BoolQueryBuilder().must(QueryBuilders.matchAllQuery());
+        }
+
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         BoolQueryBuilder audienceQueryBuilder = getPermissionsQuery("permissions.read");
         audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
@@ -208,11 +215,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchHits hits = searchResponse.getHits();
             logger.info("result count: "+hits.getTotalHits());
 
-            long millisPerm = 0;
+            long millisPerm = System.currentTimeMillis();
             for (SearchHit hit : hits) {
                 data.add(transformSearchHit(authorities, user, hit));
             }
-            logger.info("permission stuff took:"+millisPerm);
+            logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
 
             Map<String,Map<String,Integer>> facettesResult = new HashMap<String,Map<String,Integer>>();
 
@@ -564,6 +571,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(RequestOptions.DEFAULT)){
+             if(client != null){
+                 try {
+                     client.close();
+                 }catch (Exception e){
+                     logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
+                 }
+             }
              client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }

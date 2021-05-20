@@ -209,12 +209,12 @@ export class LoginComponent implements OnInit {
                     ) {
                         this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
-                        this.toast.error(null, 'LOGIN.PASSWORD_EXPIRED');
+                        this.toast.error(null, 'LOGIN.PASSWORD_EXPIRED' + (this.isSafeLogin ? '_SAFE' : ''));
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
                     }
                     else {
-                        this.toast.error(null, 'LOGIN.ERROR');
+                        this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
                     this.password = '';
                     this.isLoading = false;

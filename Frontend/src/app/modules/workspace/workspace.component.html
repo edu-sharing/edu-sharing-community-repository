@@ -53,6 +53,7 @@
           } : null"-->
         <breadcrumbs *ngIf="isLoggedIn"
           [breadcrumbsAsNode]="path"
+          [invisibleDescription]="true"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.'+root"
           [canDrop]="canDropBreadcrumbs"

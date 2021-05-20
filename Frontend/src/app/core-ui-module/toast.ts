@@ -33,6 +33,8 @@ export enum ToastDuration {
     Seconds_5,
     Seconds_8,
     Seconds_15,
+    Seconds_30,
+    Seconds_60,
     Infinite
 }
 export enum ToastType {
@@ -79,6 +81,10 @@ export class Toast implements OnDestroy{
                 return 8;
             case ToastDuration.Seconds_15:
                 return 15;
+            case ToastDuration.Seconds_30:
+                return 30;
+            case ToastDuration.Seconds_60:
+                return 60;
         }
         return null;
     }
@@ -458,7 +464,10 @@ export class Toast implements OnDestroy{
         }
         try {
             error = json.error + ': ' + json.message;
-        } catch (e) {}
+        } catch (e) {
+            console.error(errorObject);
+            error = errorObject?.toString();
+        }
         if (message === 'COMMON_API_ERROR') {
             dialogMessage = '';
             dialogTitle = 'COMMON_API_ERROR_TITLE';
@@ -528,7 +537,9 @@ export class Toast implements OnDestroy{
                     } catch (e) {}
                 }
             } catch (e) {
-                error = json;
+                if(json && !error) {
+                    error = json;
+                }
             }
             if (errorInfo === undefined) {
                 errorInfo = '';

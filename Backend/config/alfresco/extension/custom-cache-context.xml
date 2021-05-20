@@ -71,10 +71,22 @@
    </bean>
 
     <bean name="eduSharingRegisterUserCache" factory-bean="cacheFactory" factory-method="createCache">
-        <constructor-arg value="cache.eduSharingEditLockCache"/>
+        <constructor-arg value="cache.eduSharingRegisterUserCache"/>
     </bean>
 
     <bean name="eduSharingRecoverPasswordCache" factory-bean="cacheFactory" factory-method="createCache">
-        <constructor-arg value="cache.eduSharingEditLockCache"/>
+        <constructor-arg value="cache.eduSharingRecoverPasswordCache"/>
+    </bean>
+
+    <bean name="eduSharingApplicationInfoCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingApplicationInfoCache"/>
+    </bean>
+
+    <bean name="eduSharingMdsCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingMdsCache"/>
+    </bean>
+
+    <bean name="eduSharingConfigCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingConfigCache"/>
     </bean>
 </beans>

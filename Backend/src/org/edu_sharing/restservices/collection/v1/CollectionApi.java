@@ -475,8 +475,8 @@ public class CollectionApi {
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
 			@ApiParam(value = "ID of node", required = true) @PathParam("node") String nodeId,
-			@ApiParam(value = "ID of source repository", required=true ) @QueryParam("sourceRepo")  String sourceRepo,
-			@ApiParam(value = "Allow that a node that already is inside the collection can be added again", required=true, defaultValue = "false") @QueryParam("allowDuplicate")  Boolean allowDuplicate,
+			@ApiParam(value = "ID of source repository", required=false ) @QueryParam("sourceRepo")  String sourceRepo,
+			@ApiParam(value = "Allow that a node that already is inside the collection can be added again", required=false, defaultValue = "false") @QueryParam("allowDuplicate")  Boolean allowDuplicate,
 			@Context HttpServletRequest req) {
 
 		try {

@@ -23,6 +23,8 @@ import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
+import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
+import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
@@ -592,6 +594,9 @@ public class MediacenterServiceImpl implements MediacenterService {
         return AuthenticationUtil.runAs(runAs, authority);
     }
 
+    /**
+     * @deprecated
+     */
     public void manageNodeLicenses() {
         logger.info("cache mediacenterids");
         List<String> allMediacenterIds = getAllMediacenterIds();
@@ -837,7 +842,31 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
-       return CMISSearchHelper.getNodeRefByReplicationSourceId(replicationSourceId);
+        NodeRef nodeRef =  CMISSearchHelper.getNodeRefByReplicationSourceId(replicationSourceId);
+
+        if(nodeRef == null){
+            logger.info("creating dummy object for:"+replicationSourceId);
+            HashMap<String,Object> properties = new HashMap<>();
+            properties.put(CCConstants.CM_NAME,replicationSourceId);
+            properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP, "1900-01-01T00:00:00Z");
+            properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID,replicationSourceId);
+            properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getCatalogId());
+            properties.put(CCConstants.CCM_PROP_IO_TECHNICAL_STATE,"problem_notAvailable");
+              try {
+                String nodeId = new PersistentHandlerEdusharing(null,null,false).safe(new RecordHandlerInterfaceBase() {
+                    @Override
+                    public HashMap<String, Object> getProperties() {
+                        return properties;
+                    }
+                },null,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getSet());
+                if(nodeId != null){
+                    nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+                }
+            } catch (Throwable throwable) {
+                logger.error(throwable.getMessage(),throwable);
+            }
+        }
+        return nodeRef;
     }
 
     @Override

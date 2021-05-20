@@ -14,6 +14,7 @@ export class ListCountsComponent extends ListWidget {
         new ListItem('NODE', 'counts.OVERALL'),
         new ListItem('NODE', 'counts.VIEW_MATERIAL'),
         new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),
+        new ListItem('NODE', 'counts.VIEW_MATERIAL_PLAY_MEDIA'),
         new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
     ];
 

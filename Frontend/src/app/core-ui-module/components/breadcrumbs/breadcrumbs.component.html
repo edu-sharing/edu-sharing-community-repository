@@ -1,4 +1,7 @@
 <ng-container *ngIf="clickable">
+  <div *ngIf="invisibleDescription" class="cdk-visually-hidden" id="labelDescription" tabindex="0">
+    {{'BREADCRUMB_LOCATION_PREFIX' | translate}}
+  </div>
   <!-- Full (not short) breadcrumbs -->
   <div class="breadcrumb breadcrumb-full">
     <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>

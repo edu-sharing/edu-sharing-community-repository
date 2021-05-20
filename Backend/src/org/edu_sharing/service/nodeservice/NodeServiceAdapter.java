@@ -234,7 +234,7 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable {
-		return null;
+		return getContent(nodeId);
 	}
 
 	@Override

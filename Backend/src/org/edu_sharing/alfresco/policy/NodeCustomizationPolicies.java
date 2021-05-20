@@ -108,7 +108,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
 			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT,
-			CCConstants.CCM_PROP_MAP_REF_TARGET,
+			CCConstants.CCM_PROP_MAP_REF_TARGET
 	};
 	/**
 	 * These are the properties that will be copied to all io_reference nodes inside collections
@@ -259,7 +259,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			if(reader != null){
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_SIZE), reader.getContentData().getSize());	
 			}
-			if(contentSize > 0 && mimetype != null && !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+			// only override / sync the technical format for non imported objects, because otherwise
+			// the technical format come's via import and might be wrongly replaced
+			if(contentSize > 0 && mimetype != null &&
+					nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE)) == null &&
+					!nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT), mimetype);
 			}
 			logger.debug("will do the resourceinfo. noderef:"+nodeRef);

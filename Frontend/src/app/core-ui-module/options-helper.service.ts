@@ -234,6 +234,10 @@ export class OptionsHelperService {
      * refresh all bound components with available menu options
      */
     refreshComponents(refreshListOptions = true) {
+        if(this.data == null) {
+            console.warn('options helper refresh called but no data previously bound');
+            return;
+        }
         if(this.subscriptions?.length){
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
@@ -666,9 +670,13 @@ export class OptionsHelperService {
             for (const item of nodes) {
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if(item.downloadUrl != null && item.properties &&
-                    !item.properties[RestConstants.CCM_PROP_IO_WWWURL] &&
+                    (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] || !RestNetworkService.isFromHomeRepo(item)) &&
                     this.nodeHelper.referenceOriginalExists(item)
                 ) {
+                    // bulk upload is not supported for remote nodes
+                    if (!RestNetworkService.isFromHomeRepo(item) && nodes.length !== 1) {
+                        continue;
+                    }
                     return true;
                 }
             }

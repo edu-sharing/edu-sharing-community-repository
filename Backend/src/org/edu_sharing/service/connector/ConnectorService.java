@@ -4,7 +4,9 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigBeanFactory;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
-public class ConnectorService {
+import java.io.Serializable;
+
+public class ConnectorService implements Serializable {
 	
 	public static final String ID_ONYX = "ONYX";
 	

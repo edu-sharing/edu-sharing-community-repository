@@ -564,9 +564,11 @@ export class PermissionsAuthoritiesComponent {
       },
         (error: any) => this.toast.error(error));
     }
-    else{
+    else {
       const editStore = Helper.deepCopy(this.edit);
-      editStore.profile.vcard = this.edit.profile.vcard.copy();
+      if(this.edit.profile?.vcard) {
+          editStore.profile.vcard = this.edit.profile.vcard.copy();
+      }
       editStore.profile.sizeQuota *= 1024 * 1024;
       this.globalProgress = true;
       if (this.editId == null){

@@ -2,7 +2,9 @@ package org.edu_sharing.service.connector;
 
 import com.typesafe.config.Optional;
 
-public class ConnectorFileType {
+import java.io.Serializable;
+
+public class ConnectorFileType implements Serializable {
 
 	@Optional private String ccressourceversion;
 

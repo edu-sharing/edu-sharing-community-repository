@@ -1,4 +1,13 @@
 @import "branding";
+
+/* replace variables which are may not defined in the branding */
+@if not variable-exists(primaryVeryLight) {
+    $primaryVeryLight:  lighten($primaryLight, 5%)!global;
+}
+@if not variable-exists(primaryMediumDark) {
+    $primaryMediumDark:  lighten($primaryDark, 10%)!global;
+}
+
 $tabColor: $primary;
 $tabColorDark: $primary;
 $tabColorLight: $primaryMediumLight;
@@ -18,10 +27,12 @@ $backgroundColor: #fff;
 $workspaceSidebarWidth: 300px;
 $workspaceInheritColor: #42CA8D;
 $editorialCollectionsBackground: #f5ec19;
-$itemSelectedBackground:     #F1F6FA;
+$itemSelectedBackground:     $primaryVeryLight;
+$itemSelectedTextColor:     $primaryMediumDark;
 $buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.08);
 $workspaceNewBackground: $itemSelectedBackground;
 $secondaryBarHeight: 65px; // the white bar height in search and workspace
+$listItemSelectedBackground: #F1F6FA;
 $workspaceSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px) no-repeat;
 $listItemSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(red($primary), green($primary), blue($primary), 0.15) 5px,rgba(red($primary), green($primary), blue($primary), 0.15) 5px) no-repeat;
 $workspaceTreeBackground: #f7f7f7;

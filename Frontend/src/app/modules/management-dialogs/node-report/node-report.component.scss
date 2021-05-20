@@ -1,21 +1,25 @@
 @import "../../../core-ui-module/styles/variables";
 
 .report{
-  margin-bottom: 20px;
-  mat-radio-group{
-    display: flex;
-    flex-direction: column;
-    >mat-radio-button{
-      margin:3px 0;
+    margin-bottom: 20px;
+    mat-radio-group{
+        mat-label{
+            color: $textLight;
+            padding-bottom: 6px;
+        }
+        display: flex;
+        flex-direction: column;
+        >mat-radio-button{
+            margin:3px 0;
+        }
     }
-  }
 }
 mat-form-field{
-  width: 100%;
+    width: 100%;
 }
 h4{
-  margin-bottom:20px;
-  font-size: 110%;
-  font-weight: bold;
-  color: $textLight;
+    margin-bottom:20px;
+    font-size: 110%;
+    font-weight: bold;
+    color: $textLight;
 }

@@ -102,12 +102,21 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                 for (Object lval : contributerClean) {
                     Element centityEle = createAndAppendElement("centity", contributeEle);
                     // ## Add URL fields for ORCID/GND-ID resp. ROR/Wikidata-URL
-                    String val=VCardConverter.cleanupVcard((String)lval, (vcard) -> {
-                        Optional<ExtendedType> contributeDate = vcard.getExtendedTypes().stream().filter((type) -> CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE.equals(type.getExtendedName())).findFirst();
-                        contributeDate.ifPresent(vcard::removeExtendedType);
-                        return vcard;
-                    }).get(0);
-                    this.createAndAppendElement("vcard", centityEle, val, true);
+                    if(lval != null) {
+                         List<String> l = VCardConverter.cleanupVcard((String) lval, (vcard) -> {
+                            Optional<ExtendedType> contributeDate = (vcard.getExtendedTypes() == null)? null : vcard.getExtendedTypes().
+                                    stream().
+                                    filter((type) -> CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE.equals(type.getExtendedName())).
+                                    findFirst();
+                            if(contributeDate != null) contributeDate.ifPresent(vcard::removeExtendedType);
+                            return vcard;
+                        });
+                         if(l != null) {
+                             String val = l.get(0);
+                             this.createAndAppendElement("vcard", centityEle, val, true);
+                         }
+                    }
+
                 }
             }
         }
@@ -359,30 +368,73 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
 
     @Override
     public void createClassification(Element lom) {
+        List<String> taxonIds = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));
+       // List<String> classificationKeyword = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
+        if(taxonIds != null){
+            Element classification = createAndAppendElement("classification", lom);
+            Element purpose = createAndAppendElement("purpose", classification);
+            createAndAppendElement("source", purpose,"LOMv1.0");
+            createAndAppendElement("value", purpose,"discipline");
 
-        QName property = QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID);
-        // classification
-        List<String> taxonIdList = (List<String>) nodeService.getProperty(nodeRef, property);
-        if (taxonIdList != null && !taxonIdList.isEmpty()) {
-            try {
-                //fachgebite.xml
-                Map<String, MetadataKey> valuesAsMap = MetadataHelper.getLocalDefaultMetadataset().findWidget("ccm:taxonid").getValuesAsMap();
-                Element category = createAndAppendElement("classification", lom);
-                createAndAppendElementSrcVal("purpose", category, "Discipline", nsLOM);
-                Element taxonPathEle = createAndAppendElement("taxonpath", category);
-                Element srcEle = createAndAppendElement("source", taxonPathEle, nsHSFaecher, false);
-                if (srcEle != null)
-                    srcEle.setAttribute(xmlLanguageAttribute, "x-none");
-                for (String taxonId : taxonIdList) {
-
-                    Element taxon = createAndAppendElement("taxon", taxonPathEle);
-                    createAndAppendIdEnt(taxon,property,taxonId);
-/*                    for (MetadataKey cata : valuesAsMap.values())
-                        if (cata.getKey().equals(taxonId))
-                            createTaxon(taxonPathEle, cata,new ArrayList<>(valuesAsMap.values()));*/
+           /* if(classificationKeyword != null) {
+                for(String kw : classificationKeyword) {
+                    Element keyword = createAndAppendElement("keyword", classification);
+                    Element kwStrEle = createAndAppendElement("string", keyword,kw);
+                    if(kwStrEle != null)kwStrEle.setAttribute(xmlLanguageAttribute, "de");
                 }
-            } catch (Throwable e) {
-                logger.error(e.getMessage(), e);
+            }*/
+
+            if(taxonIds != null) {
+
+                try{
+                    MetadataWidget widget = MetadataHelper.getLocalDefaultMetadataset().findWidget("ccm:taxonid");
+                    Map<String, MetadataKey> values = widget.getValuesAsMap();
+                    if(values!=null){
+                        //1. build parentpath for every taxon id
+                        Map<String,List<String>> taxonIdsWithPath = new HashMap<>();
+                        for(String taxonId : taxonIds){
+                            MetadataKey mdk = values.get(taxonId);
+                            List<String> path = new ArrayList<>();
+                            path.add(taxonId);
+                            taxonIdsWithPath.put(taxonId,path);
+                            if(mdk != null){
+                                while (mdk != null && mdk.getParent() != null){
+                                    path.add(0, mdk.getParent());
+                                    mdk = values.get(mdk.getParent());
+                                }
+                            }
+                        }
+                        //2. remove those taxonid's that are contained by other list
+                        /*Set<String> toRemove = new HashSet<>();
+                        for(String key : taxonIdsWithPath.keySet()){
+                            for(Map.Entry<String,List<String>> entry : taxonIdsWithPath.entrySet()){
+                                if(!entry.getKey().equals(key) && entry.getValue().contains(key)){
+                                    toRemove.add(key);
+                                }
+                            }
+                        }
+                        Map<String,List<String>> result = taxonIdsWithPath.entrySet().stream().filter(e -> !toRemove.contains(e.getKey())).collect(Collectors.toMap(e-> e.getKey(), e->e.getValue()));
+                        */
+                        Map<String,List<String>> result = taxonIdsWithPath;
+                        //3. print the result as xml
+                        for(List<String> path : result.values()){
+                            Element taxonPath = createAndAppendElement("taxonPath", classification);
+                            Element tpSource = createAndAppendElement("source", taxonPath);
+                            Element tpSourceString = createAndAppendElement("string", tpSource,"EAF Thesaurus");
+                            tpSourceString.setAttribute(xmlLanguageAttribute, "x-t-eaf");
+                            for(String id : path){
+                                Element taxon = createAndAppendElement("taxon", taxonPath);
+                                createAndAppendElement("id", taxon,id);
+                                Element entry = createAndAppendElement("entry", taxon);
+                                Element string = createAndAppendElement("string", entry,values.get(id).getCaption());
+                                //<string language="de">Sachkunde</string>
+                                string.setAttribute(xmlLanguageAttribute, "de");
+                            }
+                        }
+                    }
+                }catch(Throwable e){
+                    logger.error(e.getMessage(), e);
+                }
             }
         }
     }

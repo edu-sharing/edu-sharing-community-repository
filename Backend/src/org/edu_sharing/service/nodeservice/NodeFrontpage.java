@@ -46,7 +46,6 @@ public class NodeFrontpage {
     private SearchService searchService= SearchServiceFactory.getLocalService();
     private NodeService nodeService=NodeServiceFactory.getLocalService();
     private PermissionService permissionService= PermissionServiceFactory.getLocalService();
-    private RestHighLevelClient client;
     private HashMap<String, Date> APPLY_DATES;
 
     SearchServiceElastic searchServiceElastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
@@ -58,11 +57,6 @@ public class NodeFrontpage {
     public NodeFrontpage(){
     }
 
-    public void checkClient() throws IOException {
-        if(client == null || !client.ping(RequestOptions.DEFAULT)){
-            client = new RestHighLevelClient(RestClient.builder(SearchServiceElastic.getConfiguredHosts()));
-        }
-    }
 
     public Collection<NodeRef> getNodesForCurrentUserAndConfig() throws Throwable {
         RepositoryConfig.Frontpage config = RepositoryConfigFactory.getConfig().frontpage;
@@ -77,7 +71,6 @@ public class NodeFrontpage {
             return CollectionServiceFactory.getLocalService().getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
         }
         //initElastic rasuschmeißen (frontpage_cache nicht mehr benötigt)
-        checkClient();
 
         BoolQueryBuilder query = QueryBuilders.boolQuery();
         query.must(searchServiceElastic.getReadPermissionsQuery());
@@ -121,7 +114,7 @@ public class NodeFrontpage {
         searchSourceBuilder.from(0);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         searchRequest.indices("workspace");
-        SearchResponse searchResult = client.search(searchRequest,RequestOptions.DEFAULT);
+        SearchResponse searchResult = searchServiceElastic.getClient().search(searchRequest,RequestOptions.DEFAULT);
         List<NodeRef> result=new ArrayList<>();
         for(SearchHit hit : searchResult.getHits().getHits()){
             logger.info("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));

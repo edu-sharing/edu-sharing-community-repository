@@ -38,6 +38,7 @@ import { ListBaseComponent } from './components/list-table/widgets/list-base/lis
 import { ListCollectionInfoComponent } from './components/list-table/widgets/list-collection-info/list-collection-info.component';
 import { ListCountsComponent } from './components/list-table/widgets/list-counts/list-counts.component';
 import { ListNodeLicenseComponent } from './components/list-table/widgets/list-node-license/list-node-license.component';
+import { ListNodeReplicationSourceComponent } from './components/list-table/widgets/list-node-replication-source/list-node-replication-source.component';
 import { ListNodeWorkflowComponent } from './components/list-table/widgets/list-node-workflow/list-node-workflow.component';
 import { ListTextComponent } from './components/list-table/widgets/list-text/list-text.component';
 import { NodeUrlComponent } from './components/node-url/node-url.component';
@@ -74,6 +75,8 @@ import { Toast } from './toast';
 import { FallbackTranslationHandler } from './translation';
 import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
+import {ImageConfigDirective} from './directives/image-config.directive';
+import {NativeElementInjectorDirective} from './directives/native-element-injector.directive';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 
 @NgModule({
@@ -83,6 +86,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         ListBaseComponent,
         ListCollectionInfoComponent,
         ListNodeLicenseComponent,
+        ListNodeReplicationSourceComponent,
         ListNodeWorkflowComponent,
         ListTextComponent,
         ListCountsComponent,
@@ -99,6 +103,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         SpinnerSmallComponent,
         GlobalProgressComponent,
         VideoControlsComponent,
+        NativeElementInjectorDirective,
         InfoMessageComponent,
         InputPasswordComponent,
         InfiniteScrollDirective,
@@ -119,6 +124,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
+        ImageConfigDirective,
         SafeHtmlPipe,
         ListOptionItemComponent,
         DistinctClickDirective,
@@ -173,6 +179,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         GlobalProgressComponent,
         VideoControlsComponent,
         IconDirective,
+        ImageConfigDirective,
         CardComponent,
         UserAvatarComponent,
         UserTileComponent,
@@ -184,6 +191,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         InfiniteScrollDirective,
         ToastyModule,
         AuthorityNamePipe,
+        NativeElementInjectorDirective,
         VCardNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
@@ -199,6 +207,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         NodesDropTargetDirective,
         ListCollectionInfoComponent,
         ListBaseComponent,
+        ListTextComponent,
         TitleDirective,
         SafeHtmlPipe,
         ElementRefDirective,

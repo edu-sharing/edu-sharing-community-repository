@@ -33,11 +33,13 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.*;
+import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -56,6 +58,10 @@ public class DownloadServlet extends HttpServlet{
 			throws ServletException, IOException {
 
 		String nodeId = req.getParameter("nodeId");
+		String repositoryId = req.getParameter("repositoryId");
+		if(repositoryId != null && ApplicationInfoList.isLocalRepository(repositoryId)){
+			repositoryId = null;
+		}
 		String nodeIds = req.getParameter("nodeIds");
 		String fileName = req.getParameter("fileName");
 		Mode mode = req.getParameter("mode")!=null ? Mode.valueOf(req.getParameter("mode")) : Mode.redirect;
@@ -63,15 +69,17 @@ public class DownloadServlet extends HttpServlet{
 			downloadZip(resp, nodeIds.split(","), null, null, null, fileName);
 			return;
 		}
-		downloadNode(nodeId,req,resp,fileName,mode);
+		downloadNode(nodeId, repositoryId,req,resp,fileName,mode);
 
 	}
 
-	private void downloadNode(String nodeId, HttpServletRequest req, HttpServletResponse resp, String fileName, Mode mode) throws IOException {
+	private void downloadNode(String nodeId, String repositoryId, HttpServletRequest req, HttpServletResponse resp, String fileName, Mode mode) throws IOException {
 		try {
 			// allow signature based auth from connector to bypass the download/content access
+			NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
 			logger.debug("Access tool: " + ContextManagementFilter.accessToolType.get());
-			if (!NodeServiceHelper.downloadAllowed(nodeId) &&
+			if (repositoryId == null &&
+					!NodeServiceHelper.downloadAllowed(nodeId) &&
 					!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())) {
 				logger.info("Download forbidden for node " + nodeId);
 				resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_FORBIDDEN));
@@ -80,10 +88,9 @@ public class DownloadServlet extends HttpServlet{
 			String version=req.getParameter("version");
 			if(version!=null && version.isEmpty())
 			    version=null;
-			NodeService nodeService = NodeServiceFactory.getLocalService();
 			OutputStream bufferOut = resp.getOutputStream();
 			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-			String name = fileName!=null ? fileName : NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME);
+			String name = fileName!=null ? fileName : nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
 			if("true".equalsIgnoreCase(req.getParameter("metadata"))){
 				String metadata = getMetadataRenderer(nodeRef).render("io_text");
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -91,9 +98,14 @@ public class DownloadServlet extends HttpServlet{
 				outputData(resp,name + ".txt", out);
 				return;
 			}
-			TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),null,TrackingService.EventType.DOWNLOAD_MATERIAL);
+			String originalNodeId;
+			if(repositoryId == null) {
+				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), null, TrackingService.EventType.DOWNLOAD_MATERIAL);
+				originalNodeId = checkAndGetCollectionRef(nodeId);
+			} else {
+				originalNodeId = nodeId;
+			}
 			InputStream is=null;
-			String originalNodeId = checkAndGetCollectionRef(nodeId);
 			try {
 				if(originalNodeId != null){
 					String finalVersion = version;
@@ -125,7 +137,7 @@ public class DownloadServlet extends HttpServlet{
 					is = getStreamFromLocation(nodeId);
 				}
 				else if(mode.equals(Mode.redirect)){
-					resp.sendRedirect(NodeServiceHelper.getProperty(nodeRef,CCConstants.LOM_PROP_TECHNICAL_LOCATION));
+					resp.sendRedirect(nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(),CCConstants.LOM_PROP_TECHNICAL_LOCATION));
 					return;
 				}
 			}

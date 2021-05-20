@@ -24,7 +24,6 @@
   import {PoweredByComponent} from './common/ui/powered-by/powered-by.component';
   import {FooterComponent} from './common/ui/footer/footer.component';
   import {CalendarComponent} from './common/ui/calendar/calendar.component';
-  import {ImageConfigDirective} from './common/ui/image-config.directive';
   import {UserQuotaComponent} from './common/ui/user-quota/user-quota.component';
   import {EmbedComponent} from './common/ui/embed/embed.component';
   import {TimePipe} from './common/ui/time.pipe';
@@ -92,7 +91,6 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
       CookieInfoComponent,
       AccessibilityComponent,
       TutorialComponent,
-      ImageConfigDirective,
       EmbedComponent,
       ToolpermissionCheckDirective,
       RegisterFormFieldDirective,

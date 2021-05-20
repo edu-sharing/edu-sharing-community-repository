@@ -203,6 +203,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   private queryParams: Params;
   public similarNodes: Node[];
   mds: Mds;
+  isDestroyed = false;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -266,7 +267,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             }
             NodeRenderComponent.close(this.location);
             // use a timeout to let the browser try to go back in history first
-            setTimeout(()=>this.mainNavRef.toggleMenuSidebar(),250);
+            setTimeout(()=> {
+                if(!this.isDestroyed) {
+                    this.mainNavRef.toggleMenuSidebar();
+                }
+            },250);
           }
         }
       }
@@ -300,6 +305,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     ngOnDestroy() {
         (window as any).ngRender = null;
         this.optionsHelper.setListener(null);
+        this.isDestroyed = true;
     }
 
   public switchPosition(pos:number) {
@@ -351,7 +357,10 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
     // declare explicitly so that callback will be overriden
     download.customEnabledCallback = null;
-    download.isEnabled=this._node.downloadUrl!=null && !this._node.properties?.[RestConstants.CCM_PROP_IO_WWWURL];
+    download.isEnabled=this._node.downloadUrl!=null &&  (
+        !this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+        !RestNetworkService.isFromHomeRepo(this._node)
+    );
     download.showAsAction=true;
     if(this.isCollectionRef()) {
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node) => {

@@ -57,7 +57,7 @@ public class CMISSearchHelper {
                     }
                     String aspectTable=CCConstants.getValidLocalName(property.getContainerClass().getName().toString());
                     String aspectTableAlias = property.getContainerClass().getName().getLocalName();
-                    if(!joinedTable.contains(aspectTable)) {
+                    if(!joinedTable.contains(aspectTable) && !tableName.equals(aspectTable)) {
                         join.append("JOIN ").append(aspectTable).append(" AS ").append(aspectTableAlias)
                                 .append(" ON ").append(aspectTableAlias).append(".cmis:objectId = ").append(tableNameAlias).append(".cmis:objectId ");
                         joinedTable.add(aspectTable);
@@ -80,7 +80,7 @@ public class CMISSearchHelper {
                    String aspectTable = CCConstants.getValidLocalName(aspect);
                    String aspectTableAlias = ad.getName().getLocalName();
                    //check if aspect filter was already through property filter added
-                   if(!joinedTable.contains(aspectTable)) {
+                   if(!joinedTable.contains(aspectTable) && !tableName.equals(aspectTable)) {
                        join.append("JOIN ").append(aspectTable).append(" AS ").append(aspectTableAlias)
                                .append(" ON ").append(aspectTableAlias).append(".cmis:objectId = ").append(tableNameAlias).append(".cmis:objectId ");
                    }

@@ -232,6 +232,7 @@
       >
         <breadcrumbs
           class="collections-breadcrumb"
+          [invisibleDescription]="true"
           [home]="'COLLECTIONS.TAB.' + tabSelected"
           [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
           [breadcrumbsAsNode]="path"
