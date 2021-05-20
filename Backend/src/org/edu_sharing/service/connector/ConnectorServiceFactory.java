@@ -19,10 +19,17 @@ public class ConnectorServiceFactory {
 	//static ConnectorService cs = new ConnectorService();
 	
 	public static ConnectorService getConnectorService(){
+		if(configCache.get(CACHE_KEY) == null){
+			init();
+		}
 		return (ConnectorService)configCache.get(CACHE_KEY);
 	}
 	public static void invalidate(){
 		configCache.remove(CACHE_KEY);
+		init();
+	}
+
+	public static void init(){
 		configCache.put(CACHE_KEY,new ConnectorService());
 	}
 
