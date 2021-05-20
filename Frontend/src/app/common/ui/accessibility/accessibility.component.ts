@@ -36,7 +36,6 @@ export class AccessibilityComponent implements OnInit {
         translate: (value) => this.getDuration(value)
     };
 
-    toastDurationMax: number = ToastDuration.Infinite;
     constructor(
         private storage: SessionStorageService,
         private toast: Toast,

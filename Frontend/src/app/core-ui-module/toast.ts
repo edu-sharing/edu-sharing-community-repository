@@ -29,13 +29,13 @@ interface Action {
     callback: () => void;
 }
 export enum ToastDuration {
-    Seconds_3,
-    Seconds_5,
-    Seconds_8,
-    Seconds_15,
-    Seconds_30,
-    Seconds_60,
-    Infinite
+    Seconds_3 = 3,
+    Seconds_5 = 5,
+    Seconds_8 = 8,
+    Seconds_15 = 15,
+    Seconds_30 = 30,
+    Seconds_60 = 60,
+    Infinite = null
 }
 export enum ToastType {
     InfoSimple, // A simple info just confirming an action without providing useful data
@@ -51,8 +51,9 @@ export type ToastMessage = {
     action?: Action
 }
 @Injectable()
-export class Toast implements OnDestroy{
+export class Toast implements OnDestroy {
     private static readonly TOAST_SERVICE: 'TOASTY' | 'MAT_SNACKBAR' = 'MAT_SNACKBAR';
+    // only for legacy Toasts (TOASTY)
     private static readonly TOAST_DEFAULT_DURATION = 8000;
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 
@@ -73,20 +74,10 @@ export class Toast implements OnDestroy{
     duration: ToastDuration = null;
     static convertDuration(duration: ToastDuration) {
         switch (duration) {
-            case ToastDuration.Seconds_3:
-                return 3;
-            case ToastDuration.Seconds_5:
-                return 5;
-            case ToastDuration.Seconds_8:
-                return 8;
-            case ToastDuration.Seconds_15:
-                return 15;
-            case ToastDuration.Seconds_30:
-                return 30;
-            case ToastDuration.Seconds_60:
-                return 60;
+            case ToastDuration.Infinite:
+                return null;
         }
-        return null;
+        return duration.valueOf();
     }
 
     constructor(
