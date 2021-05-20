@@ -418,12 +418,18 @@ public class URLTool{
 		return getBaseUrl(dynamic)+"/eduservlet/";
 	}
 
-	public static String getDownloadServletUrl(String id,String version, boolean dynamic) {
+	public static String getDownloadServletUrl(String id,String version, boolean dynamic, String repositoryId) {
 		String download=getEduservletUrl(dynamic)+"download?nodeId="+URLEncoder.encodeUriComponent(id);
 		if(version!=null){
-			download+="&version="+URLEncoder.encodeUriComponent(version);
+			download += "&version=" + URLEncoder.encodeUriComponent(version);
+		}
+		if(repositoryId!=null){
+			download += "&repositoryId=" + URLEncoder.encodeUriComponent(repositoryId);
 		}
 		return download;
+	}
+	public static String getDownloadServletUrl(String id,String version, boolean dynamic) {
+		return getDownloadServletUrl(id,version,true, null);
 	}
 }
 

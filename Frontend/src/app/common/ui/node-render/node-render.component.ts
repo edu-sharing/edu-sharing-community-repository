@@ -357,7 +357,10 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
     // declare explicitly so that callback will be overriden
     download.customEnabledCallback = null;
-    download.isEnabled=this._node.downloadUrl!=null && !this._node.properties?.[RestConstants.CCM_PROP_IO_WWWURL];
+    download.isEnabled=this._node.downloadUrl!=null &&  (
+        !this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+        !RestNetworkService.isFromHomeRepo(this._node)
+    );
     download.showAsAction=true;
     if(this.isCollectionRef()) {
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node) => {

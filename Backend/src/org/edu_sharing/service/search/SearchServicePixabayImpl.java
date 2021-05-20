@@ -67,7 +67,10 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 
 	}
 	public static HttpsURLConnection openPixabayUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
-		return (HttpsURLConnection) url.openConnection();
+		HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+		// required, otherwise 403 will be thrown
+		conn.setRequestProperty("User-Agent", "edu-sharing pixabay API");
+		return conn;
 
 		// not required, the server should have a current java jdk version!
 		/*HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -178,8 +181,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,thumb);
 			}
 			//properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,json.getString("webformatURL"));//.replace("_640", "_960"));
-			// download is currently broken
-			//properties.put(CCConstants.DOWNLOADURL,json.getString("webformatURL").replace("_640", "_960"));
+			properties.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(json.getString("id"),null,true, repositoryId));
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),properties);

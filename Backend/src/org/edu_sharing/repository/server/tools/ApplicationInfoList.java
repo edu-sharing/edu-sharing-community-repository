@@ -49,6 +49,14 @@ public class ApplicationInfoList {
 		return getApplicationInfoByProperty(file, ApplicationInfoProperty.APPFILE);
 	}
 
+	public static boolean isLocalRepository(String repositoryId) {
+		if(repositoryId == null){
+			return true;
+		}
+		ApplicationInfo repo = getRepositoryInfoById(repositoryId);
+		return repo.getAppId().equals(getHomeRepository().getAppId()) || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(repo.getRepositoryType());
+	}
+
 	static enum ApplicationInfoProperty {TYPE, REPOSITORYTYPE, APPID, HOME, APPFILE};
 	private static ApplicationInfo getApplicationInfoByProperty(String value, ApplicationInfoProperty prop){
 		if(appInfos == null || appInfos.getKeys().size() < 1){
