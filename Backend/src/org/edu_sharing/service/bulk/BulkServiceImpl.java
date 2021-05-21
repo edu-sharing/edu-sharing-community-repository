@@ -108,6 +108,9 @@ public class BulkServiceImpl implements BulkService {
 					throw new IllegalArgumentException("groupBy currently only supports exactly one value");
 				}
 			}
+			// clean up and remove "null" values since they will result in weird data otherwise
+			propertiesNative = new HashMap<>(propertiesNative.entrySet().stream().filter((e) -> e.getValue() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+			// add a default comment for bulk import
 			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_CREATE);
 			existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					NodeServiceFactory.getLocalService().createNodeBasic(
