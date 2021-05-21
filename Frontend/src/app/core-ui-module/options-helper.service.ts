@@ -284,7 +284,7 @@ export class OptionsHelperService {
         return true;
     }
 
-    private getAvailableOptions(target: Target, objects: Node[] = null) {
+    public getAvailableOptions(target: Target, objects: Node[] = null) {
         if (target === Target.List) {
             if(objects == null) {
                 // fetch ALL options of ALL items inside list
