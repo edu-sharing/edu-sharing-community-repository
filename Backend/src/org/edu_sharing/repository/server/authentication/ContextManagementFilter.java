@@ -27,7 +27,7 @@ import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.service.config.model.AvailableMds;
+import org.edu_sharing.alfresco.service.config.model.AvailableMds;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;

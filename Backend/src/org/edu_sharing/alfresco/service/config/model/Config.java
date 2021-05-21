@@ -1,4 +1,4 @@
-package org.edu_sharing.service.config.model;
+package org.edu_sharing.alfresco.service.config.model;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;

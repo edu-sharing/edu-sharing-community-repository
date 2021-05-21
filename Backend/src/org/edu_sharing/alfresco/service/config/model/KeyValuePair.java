@@ -1,4 +1,4 @@
-package org.edu_sharing.service.config.model;
+package org.edu_sharing.alfresco.service.config.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;

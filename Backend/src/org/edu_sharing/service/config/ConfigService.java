@@ -1,6 +1,6 @@
 package org.edu_sharing.service.config;
 
-import org.edu_sharing.service.config.model.Config;
+import org.edu_sharing.alfresco.service.config.model.Config;
 import org.json.JSONObject;
 
 public interface ConfigService {

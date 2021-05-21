@@ -3,9 +3,9 @@ package org.edu_sharing.service.config;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.service.config.model.Config;
-import org.edu_sharing.service.config.model.KeyValuePair;
-import org.edu_sharing.service.config.model.Language;
+import org.edu_sharing.alfresco.service.config.model.Config;
+import org.edu_sharing.alfresco.service.config.model.KeyValuePair;
+import org.edu_sharing.alfresco.service.config.model.Language;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -51,7 +51,7 @@ public class ConfigServiceFactory {
 
 	public static List<KeyValuePair> getLanguageData(List<Language> languages,String language) {
 		if(languages!=null && languages.size()>0) {
-			for(org.edu_sharing.service.config.model.Language entry : languages) {
+			for(org.edu_sharing.alfresco.service.config.model.Language entry : languages) {
 				if(entry.language.equalsIgnoreCase(language))
 					return entry.string;
 			}
