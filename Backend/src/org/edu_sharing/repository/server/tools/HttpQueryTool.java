@@ -48,69 +48,10 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.tools.ProxyConfig;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 
 public class HttpQueryTool {
-
-	public static class ProxyConfig implements Serializable {
-		String host = null;
-		String proxyhost = null;
-
-		String proxyUsername = null;
-		String proxyPass = null;
-
-		Integer proxyport =null;
-
-		String nonProxyHosts = null;
-
-		public String getHost() {
-			return host;
-		}
-
-		public void setHost(String host) {
-			this.host = host;
-		}
-
-		public String getProxyhost() {
-			return proxyhost;
-		}
-
-		public void setProxyhost(String proxyhost) {
-			this.proxyhost = proxyhost;
-		}
-
-		public String getProxyUsername() {
-			return proxyUsername;
-		}
-
-		public void setProxyUsername(String proxyUsername) {
-			this.proxyUsername = proxyUsername;
-		}
-
-		public String getProxyPass() {
-			return proxyPass;
-		}
-
-		public void setProxyPass(String proxyPass) {
-			this.proxyPass = proxyPass;
-		}
-
-		public Integer getProxyport() {
-			return proxyport;
-		}
-
-		public void setProxyport(Integer proxyport) {
-			this.proxyport = proxyport;
-		}
-
-		public String getNonProxyHosts() {
-			return nonProxyHosts;
-		}
-
-		public void setNonProxyHosts(String nonProxyHosts) {
-			this.nonProxyHosts = nonProxyHosts;
-		}
-	}
 
 	private static String CACHE_KEY = "HTTPCLIENT_PROXY_CACHE";
 	private static SimpleCache<String, Serializable> configCache = (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
@@ -146,6 +87,8 @@ public class HttpQueryTool {
 				if(config.hasPath("proxyuser"))proxyConfig.setProxyUsername(config.getString("proxyuser") );
 				if(config.hasPath("proxypass"))proxyConfig.setProxyPass(config.getString("proxypass"));
 				if(config.hasPath("nonproxyhosts")) proxyConfig.setNonProxyHosts(config.getString("nonproxyhosts"));
+
+				configCache.put(CACHE_KEY,proxyConfig);
 
 			}catch(Exception e){
 				logger.info("No proxy to use found or invalid proxy config: "+e.getMessage());
