@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
@@ -573,12 +574,15 @@ public class NodeDao {
     public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform){
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		final Context context = Context.getCurrentInstance();
+		final String scope = NodeServiceInterceptor.getEduSharingScope();
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		List<Node> nodes = null;
 		java.util.Collection<Callable<Node>> tasks = list.stream().map(
 				(nodeRef) -> (Callable<Node>) () -> AuthenticationUtil.runAs(() -> {
 						try {
+							// apply thread variables to keep state of thread
 							Context.setInstance(context);
+							NodeServiceInterceptor.setEduSharingScope(scope);
 							NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
 							if (transform != null) {
 								nodeDao = transform.apply(nodeDao);
