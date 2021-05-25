@@ -170,8 +170,8 @@ user-profile {
         color: white;
         border-radius: 20pt;
         position: fixed;
-        top: 15px;
-        left: 200px;
+        top: 16px;
+        left: 1000px;
         font-size: 1rem;
         padding: 10px 15px;
         padding-left: 40px;
@@ -362,9 +362,6 @@ user-profile {
         .imprint {
             display: none;
         }
-        .timeout {
-            display: none;
-        }
     }
 
     .tab-nav {
@@ -391,6 +388,14 @@ user-profile {
             display: none;
         }
     }
+}
+@media screen and (max-width: ($mobileTabSwitchWidth + $mobileStage*4)) {
+    .topBar {
+        .timeout {
+            display: none;
+        }
+    }
+
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*1)) {
     .topBar span {
