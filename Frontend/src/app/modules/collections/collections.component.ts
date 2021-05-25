@@ -468,7 +468,7 @@ export class CollectionsMainComponent {
 
     isBrightColor() {
         return (
-            ColorHelper.getPreferredColor(this.collectionContent.node.collection.color) === PreferredColor.White
+            ColorHelper.getPreferredColor(this.collectionContent?.node?.collection?.color) === PreferredColor.White
         );
     }
 
@@ -950,7 +950,7 @@ export class CollectionsMainComponent {
     }
 
     hasNonIconPreview(): boolean {
-        return this.collectionContent.node.preview && !this.collectionContent.node.preview.isIcon;
+        return !this.collectionContent?.node?.preview?.isIcon;
     }
 
     private renderBreadcrumbs() {

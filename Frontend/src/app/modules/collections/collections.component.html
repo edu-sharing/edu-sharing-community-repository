@@ -86,15 +86,16 @@
 <div class="alignWithBanner">
   <div [class.collectionsContainerTabs]="showTabs()" class="collectionsContainer">
     <div
-      *ngIf="!isRootLevelCollection() && !isLoading && isReady && tabSelected.length >= -1"
+      *ngIf="!isRootLevelCollection()"
       role="complementary"
       [attr.aria-label]="'COLLECTIONS.DETAILS' | translate"
       class="collections-header"
       [class.alignWithBanner]="isMobileWidth()"
       [class.scrollWithBanner]="!isMobileWidth()"
       [class.dark-color]="isBrightColor()"
-      [style.background-color]="collectionContent.node.collection.color"
+      [style.background-color]="collectionContent?.node?.collection?.color"
     >
+      <div *ngIf="isLoading" class="collection-loading"><spinner-small></spinner-small></div>
       <div class="card-collection-image-container"
            [class.card-collection-icon-container]="!hasNonIconPreview()"
            style="width:100%;">
@@ -120,7 +121,7 @@
           <img
             class="collection-header-image"
             [src]="
-                    collectionContent.node.preview.url + '&crop=true&width=400&height=350'
+                    collectionContent?.node?.preview?.url + '&crop=true&width=400&height=350'
                 "
             role="presentation"
           />
@@ -149,18 +150,18 @@
           class="collection-new-preview-headline collections-header-texttop"
           style="overflow:hidden;"
         >
-          {{ collectionContent.node.title }}
+          {{ collectionContent?.node?.title }}
         </h1>
 
         <div
-          *ngIf="collectionContent.node.collection.childCollectionsCount"
+          *ngIf="collectionContent?.node?.collection?.childCollectionsCount"
           class="collection-new-preview-subline collections-header-texttop"
         >
           {{ collectionContent.node.collection.childCollectionsCount }}
           {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
         </div>
         <div
-          *ngIf="collectionContent.node.collection.childReferencesCount"
+          *ngIf="collectionContent?.node?.collection?.childReferencesCount"
           class="collection-new-preview-subline collections-header-texttop"
         >
           {{ collectionContent.node.collection.childReferencesCount }}
@@ -170,10 +171,10 @@
         <div class="collection-new-preview-infoline">
           <i icon="person" class="icon-bottom"></i>
           &nbsp;
-          <span *ngIf="!collectionContent.node.collection.authorFreetext">{{
+          <span *ngIf="!collectionContent?.node?.collection?.authorFreetext">{{
             collectionContent.node.owner | authorityName
             }}</span>
-          <span *ngIf="collectionContent.node.collection.authorFreetext">{{
+          <span *ngIf="collectionContent?.node?.collection?.authorFreetext">{{
             collectionContent.node.collection.authorFreetext
             }}</span>
         </div>
@@ -184,13 +185,13 @@
         </div>
         <div class="collection-permissions collection-label"></div>
         <div class="collections-metadata">
-          <mds-viewer
+          <mds-viewer *ngIf="collectionContent?.node?.properties"
             [data]="collectionContent.node.properties"
             groupId="collection_sidebar"
           ></mds-viewer>
         </div>
 
-        <ng-container *ngIf="collectionContent.node.access.indexOf('ChangePermissions') !== -1">
+        <ng-container *ngIf="collectionContent?.node?.access?.indexOf('ChangePermissions') !== -1">
           <div class="collection-permissions collection-label">
             {{ 'COLLECTIONS.PERMISSIONS' | translate }}
           </div>
