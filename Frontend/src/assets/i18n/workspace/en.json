@@ -295,7 +295,7 @@
             "COMMENT": "comments",
             "COMMENT_INFO": "What changes have been made?",
             "RECEIVERS_NEXT": "pass on to",
-            "NOBODY": "<nobody>",
+            "NOBODY": "<not assigned>",
             "OLD_STATUS": "old status",
             "NEW_STATUS": "new status",
             "HISTORY": "workflow activities",
