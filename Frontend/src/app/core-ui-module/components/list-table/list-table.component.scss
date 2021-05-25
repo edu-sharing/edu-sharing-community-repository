@@ -834,6 +834,10 @@ a.rowInner {
 
 }
 .tableList{
+    // limit line height to 2 lines
+    app-list-base {
+        @include limitLineCount(2, 1.25);
+    }
     .nodeDeleted{
         display: none;
     }
