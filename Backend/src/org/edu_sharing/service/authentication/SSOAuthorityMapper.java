@@ -30,6 +30,7 @@ import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;

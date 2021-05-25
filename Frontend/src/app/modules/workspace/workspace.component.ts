@@ -177,6 +177,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
     }
     ngOnDestroy(): void {
+        this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
             this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
         }
