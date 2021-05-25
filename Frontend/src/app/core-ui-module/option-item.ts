@@ -116,6 +116,7 @@ export class OptionItem {
   public permissionsMode = HideMode.Disable;
   public permissionsRightMode = NodesRightMode.Local;
   public toolpermissions: string[];
+  public toolpermissionsMode = HideMode.Disable;
   public scopes: Scope[];
 
   /**

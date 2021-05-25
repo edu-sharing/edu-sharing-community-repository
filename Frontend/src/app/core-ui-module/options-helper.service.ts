@@ -352,6 +352,12 @@ export class OptionsHelperService {
                return false;
            }
         }
+        if (option.toolpermissions != null && option.toolpermissionsMode === HideMode.Hide) {
+            if (!this.validateToolpermissions(option)) {
+                // console.log('toolpermissions missing', option, objects);
+                return false;
+            }
+        }
         if (option.permissions != null && option.permissionsMode === HideMode.Hide) {
            if (!this.validatePermissions(option, objects)) {
                // console.log('permissions missing', option, objects);
@@ -745,6 +751,7 @@ export class OptionsHelperService {
         );
         linkMap.constrains = [Constrain.NoBulk, Constrain.HomeRepository, Constrain.User, Constrain.Directory];
         linkMap.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_MAP_LINK];
+        linkMap.toolpermissionsMode = HideMode.Hide;
         linkMap.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         linkMap.permissionsMode = HideMode.Hide;
         linkMap.group = DefaultGroups.FileOperations;
