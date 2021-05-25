@@ -370,6 +370,12 @@ user-profile {
         width: 100%;
         bottom: 0;
         display: flex;
+        // disable events to "click-through" if menu is hidden
+        pointer-events: none;
+        > app-main-menu-bottom {
+            // but re-enable them on the real menu again
+            pointer-events: auto;
+        }
     }
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
