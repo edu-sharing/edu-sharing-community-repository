@@ -156,7 +156,7 @@
     "NODE_SEARCH": "Elemente suchen...",
     "DELETED_USER": "gelöschter Benutzer",
     "GROUP_EVERYONE": "Alle (Öffentlich)",
-    "BREADCRUMB_LOCATION_PREFIX": "Sie sind hier",
+    "BREADCRUMB_LOCATION_PREFIX": "Sie sind hier:",
     "DETAILS": "Details",
     "INFO": "Infos",
     "GOTO_LOGIN": "Zum Login",

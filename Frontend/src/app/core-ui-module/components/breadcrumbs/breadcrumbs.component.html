@@ -1,14 +1,11 @@
 <ng-container *ngIf="clickable">
-  <div *ngIf="invisibleDescription" class="cdk-visually-hidden" id="labelDescription" tabindex="0">
-    {{'BREADCRUMB_LOCATION_PREFIX' | translate}}
-  </div>
   <!-- Full (not short) breadcrumbs -->
   <div class="breadcrumb breadcrumb-full">
     <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
-    <ng-container *ngFor="let node of nodes; let index = index">
+    <ng-container *ngFor="let node of nodes; let index = index; let last = last">
       <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
       <ng-container
-        *ngTemplateOutlet="nodeBreadcrumbElement; context: { node: node, index: index }"
+        *ngTemplateOutlet="nodeBreadcrumbElement; context: { node: node, index: index, currentPos: last }"
       ></ng-container>
     </ng-container>
   </div>
@@ -46,10 +43,13 @@
     </ng-container>
     <!-- breadcrumb for current node -->
     <ng-container *ngIf="nodes.length > 0">
+      <div *ngIf="invisibleDescription" class="cdk-visually-hidden">
+        {{'BREADCRUMB_LOCATION_PREFIX' | translate}}
+      </div>
       <ng-container
         *ngTemplateOutlet="
           nodeBreadcrumbElement;
-          context: { node: nodes[nodes.length - 1], index: nodes.length - 1 }
+          context: { node: nodes[nodes.length - 1], index: nodes.length - 1, currentPos: true }
         "
       ></ng-container>
     </ng-container>
@@ -116,12 +116,13 @@ Short version works only with `short="always"`.
   </button>
 </ng-template>
 
-<ng-template #nodeBreadcrumbElement let-node="node" let-index="index" let-inner="inner">
+<ng-template #nodeBreadcrumbElement let-node="node" let-index="index" let-inner="inner" let-currentPos="currentPos">
   <app-node-url
     #trigger="appElementRef"
     appElementRef
     cdkMonitorSubtreeFocus
     class="breadcrumb-element clickable"
+    [aria-label]="false"
     [node]="node"
     [unclickable]="!createLink"
     (click)="openBreadcrumb(index + 1)"
@@ -133,6 +134,9 @@ Short version works only with `short="always"`.
       (nodesDrop)="onNodesDrop($event, node)"
       [class.selected]="node && dragHover == node"
     >
+      <span *ngIf="currentPos && invisibleDescription" class="cdk-visually-hidden">
+        {{'BREADCRUMB_LOCATION_PREFIX' | translate}}
+      </span>
       <ng-container *ngIf="!inner; else inner">
         {{ node ? node.name : '' }}
       </ng-container>

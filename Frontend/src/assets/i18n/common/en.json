@@ -184,7 +184,7 @@
     "CLIPBOARD_DATA_UNSUPPORTED": "The current clipboard data is not supported",
     "DELETED_USER": "deleted User",
     "GROUP_EVERYONE": "everybody",
-    "BREADCRUMB_LOCATION_PREFIX": "You're here",
+    "BREADCRUMB_LOCATION_PREFIX": "You're here:",
     "DETAILS": "details",
     "INFO": "info",
     "GOTO_LOGIN": "Go to login",
