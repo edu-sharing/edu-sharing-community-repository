@@ -312,7 +312,7 @@
             "COMMENT": "Kommentar zum Workflow",
             "COMMENT_INFO": "Was sollte der/die Zuständige wissen? Was wurde geändert?",
             "RECEIVERS_NEXT": "übergeben an",
-            "NOBODY": "<Niemand>",
+            "NOBODY": "<Nicht zugewiesen>",
             "OLD_STATUS": "alter Status",
             "NEW_STATUS": "neuer Status",
             "HISTORY": "Protokoll der bisherigen Workflow-Aktivitäten",
