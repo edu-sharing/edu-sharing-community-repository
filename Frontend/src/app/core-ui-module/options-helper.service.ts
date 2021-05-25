@@ -59,6 +59,7 @@ export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('Op
 
 @Injectable()
 export class OptionsHelperService {
+    public static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
     private static subscriptionUp: Subscription;
     private static subscriptionDown: Subscription;
     private appleCmd: boolean;
@@ -543,7 +544,7 @@ export class OptionsHelperService {
         const addNodeToCollection = new OptionItem('OPTIONS.COLLECTION', 'layers', (object) =>
             management.addToCollection =  this.getObjects(object)
         );
-        addNodeToCollection.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
         addNodeToCollection.customShowCallback = (nodes) => {
