@@ -293,6 +293,9 @@ export class WorkspaceShareComponent {
                     if (data.permissions) {
                         this.inherit = data.permissions.inheritedPermissions;
                         this.removePermissions(this.inherit, 'OWNER');
+                        this.inherit = this.inherit.filter((p) =>
+                            p.authority.authorityName !== this.connector.getCurrentLogin()?.authorityName
+                        );
                         this.removePermissions(
                             data.permissions.localPermissions.permissions,
                             'OWNER',
@@ -477,7 +480,8 @@ export class WorkspaceShareComponent {
         }
         for (const perm of this.permissions.concat(this.inherited ? this.inherit : [])) {
             if (
-                perm.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
+                perm.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE &&
+                perm.authority.authorityName !== this.connector.getCurrentLogin()?.authorityName
             )
                 return 'SHARED';
         }
