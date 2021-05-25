@@ -180,6 +180,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         if(this.currentFolder) {
             this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
         }
+        // close sidebar, if open
+        this.mainNavRef.management.closeSidebar();
     }
     constructor(
         private toast: Toast,
