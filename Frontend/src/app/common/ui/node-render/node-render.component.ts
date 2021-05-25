@@ -494,8 +494,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 nodes:usages.map((u)=>u.collection),
                 columns:ListItem.getCollectionDefaults(),
                 isClickable:true,
-                clickRow:(event:any)=> {
+                clickRow:(event: {node: Node})=> {
                     UIHelper.goToCollection(this.router,event.node);
+                },
+                doubleClickRow:(event: Node)=> {
+                    UIHelper.goToCollection(this.router,event);
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };
