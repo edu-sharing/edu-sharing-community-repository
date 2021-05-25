@@ -1300,7 +1300,7 @@ export class ListTableComponent implements OnChanges, EventListener {
     }
 
     getPrimaryTitle(node: Node) {
-        if([RestConstants.CM_PROP_TITLE, RestConstants.LOM_PROP_TITLE].indexOf(this.columnsVisible[0].name) !== -1){
+        if([RestConstants.CM_PROP_TITLE, RestConstants.LOM_PROP_TITLE].indexOf(this.columnsVisible[0]?.name) !== -1) {
             return new NodeTitlePipe(this.translate).transform(node);
         }
         return node.name;

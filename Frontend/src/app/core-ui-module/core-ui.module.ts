@@ -38,6 +38,7 @@ import { ListBaseComponent } from './components/list-table/widgets/list-base/lis
 import { ListCollectionInfoComponent } from './components/list-table/widgets/list-collection-info/list-collection-info.component';
 import { ListCountsComponent } from './components/list-table/widgets/list-counts/list-counts.component';
 import { ListNodeLicenseComponent } from './components/list-table/widgets/list-node-license/list-node-license.component';
+import { ListNodeReplicationSourceComponent } from './components/list-table/widgets/list-node-replication-source/list-node-replication-source.component';
 import { ListNodeWorkflowComponent } from './components/list-table/widgets/list-node-workflow/list-node-workflow.component';
 import { ListTextComponent } from './components/list-table/widgets/list-text/list-text.component';
 import { NodeUrlComponent } from './components/node-url/node-url.component';
@@ -76,6 +77,7 @@ import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
 import {ImageConfigDirective} from './directives/image-config.directive';
 import {ErrorProcessingService} from './error.processing';
+import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 
 @NgModule({
     declarations: [
@@ -84,6 +86,7 @@ import {ErrorProcessingService} from './error.processing';
         ListBaseComponent,
         ListCollectionInfoComponent,
         ListNodeLicenseComponent,
+        ListNodeReplicationSourceComponent,
         ListNodeWorkflowComponent,
         ListTextComponent,
         ListCountsComponent,
@@ -109,6 +112,7 @@ import {ErrorProcessingService} from './error.processing';
         AuthorityColorPipe,
         NodeDatePipe,
         NodeUrlComponent,
+        ToastMessageComponent,
         FormatSizePipe,
         KeysPipe,
         ReplaceCharsPipe,
@@ -205,6 +209,7 @@ import {ErrorProcessingService} from './error.processing';
         NodesDropTargetDirective,
         ListCollectionInfoComponent,
         ListBaseComponent,
+        ListTextComponent,
         TitleDirective,
         SafeHtmlPipe,
         ElementRefDirective,

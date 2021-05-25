@@ -1,16 +1,22 @@
-import { trigger } from '@angular/animations';
-import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {trigger} from '@angular/animations';
+import {HttpClient} from '@angular/common/http';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    HostListener,
+    OnDestroy,
+    OnInit,
+    ViewChild
+} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import {TranslateService} from '@ngx-translate/core';
 import 'rxjs/add/operator/map';
-import { Subscription } from 'rxjs/Subscription';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
-import { ActionbarComponent } from '../../common/ui/actionbar/actionbar.component';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
-import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
-import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
+import {ActionbarHelperService} from '../../common/services/actionbar-helper';
+import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MdsEditorWrapperComponent} from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {
     CollectionWrapper,
     ConfigurationHelper,
@@ -41,24 +47,31 @@ import {
     TemporaryStorageService,
     UIService
 } from '../../core-module/core.module';
-import { Helper } from '../../core-module/rest/helper';
-import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
+import {Helper} from '../../core-module/rest/helper';
+import {MdsHelper} from '../../core-module/rest/mds-helper';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {OPEN_URL_MODE, UIConstants} from '../../core-module/ui/ui-constants';
-import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import {CustomOptions, OptionItem, Scope} from '../../core-ui-module/option-item';
-import { Toast } from '../../core-ui-module/toast';
-import { Translation } from '../../core-ui-module/translation';
-import { UIHelper } from '../../core-ui-module/ui-helper';
-import { SearchService } from './search.service';
-import { WindowRefService } from './window-ref.service';
+import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
+import {
+    CustomOptions, DefaultGroups,
+    ElementType,
+    OptionGroup,
+    OptionItem,
+    Scope
+} from '../../core-ui-module/option-item';
+import {Toast} from '../../core-ui-module/toast';
+import {Translation} from '../../core-ui-module/translation';
+import {UIHelper} from '../../core-ui-module/ui-helper';
+import {SearchService} from './search.service';
+import {WindowRefService} from './window-ref.service';
 import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
-import { FormControl } from '@angular/forms';
-import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { MatTabGroup } from '@angular/material/tabs';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {FormControl} from '@angular/forms';
+import {ReplaySubject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
+import {MatTabGroup} from '@angular/material/tabs';
+import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
+import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
 
 @Component({
     selector: 'app-search',
@@ -1406,6 +1419,19 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.setViewType(parseInt(param.viewType, 10));
                 }
                 if (param.addToCollection) {
+                    const addTo = new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT','layers', (node) => {
+                        this.mainNavRef.management.addToCollectionList(this.addToCollection,
+                            ActionbarHelperService.getNodes(this.selection,node), true, () => {
+                                this.switchToCollections(this.addToCollection.ref.id);
+                            });
+                    });
+                    addTo.elementType = OptionsHelperService.ElementTypesAddToCollection;
+                    addTo.group = DefaultGroups.Reuse;
+                    const cancel = new OptionItem('CANCEL', 'close', () => {
+                        this.router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], {queryParams: {id: this.addToCollection.ref.id}});
+                    });
+                    cancel.group = DefaultGroups.Delete;
+                    cancel.elementType = OptionsHelperService.ElementTypesAddToCollection.concat(ElementType.Unknown);
                     this.collectionApi
                         .getCollection(param.addToCollection)
                         .subscribe(
@@ -1418,11 +1444,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                                 this.customOptions = {
                                     useDefaultOptions: false,
                                     addOptions: [
-                                        new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT','layers', (node) => {
-                                            this.mainNavRef.management.addToCollectionList(this.addToCollection, ActionbarHelperService.getNodes(this.selection,node), true, () => {
-                                                this.switchToCollections(this.addToCollection.ref.id);
-                                            });
-                                        })
+                                        cancel,
+                                        addTo
                                     ]
                                 };
                             },

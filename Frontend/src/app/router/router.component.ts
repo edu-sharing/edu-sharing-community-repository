@@ -30,6 +30,7 @@ import { WorkspaceMainComponent } from '../modules/workspace/workspace.component
 import { Routes } from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
+import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
 import { extensionRoutes } from '../extension/extension-routes';
 
 @Component({
@@ -42,6 +43,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
 
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
+    @ViewChild('accessibility') accessibility: AccessibilityComponent;
     @ViewChild('cookie') cookie: CookieInfoComponent;
 
     private numberOfChecks = 0;
@@ -88,6 +90,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     ngAfterViewInit(): void {
         this.mainNavService.registerDialogs(this.management);
         this.mainNavService.registerCookieInfo(this.cookie);
+        this.mainNavService.registerAccessibility(this.accessibility);
     }
 
     private monitorChecks(): void {

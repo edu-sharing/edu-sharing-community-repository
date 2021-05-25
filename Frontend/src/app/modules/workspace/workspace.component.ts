@@ -177,9 +177,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
     }
     ngOnDestroy(): void {
+        this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
             this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
         }
+        // close sidebar, if open
+        this.mainNavRef.management.closeSidebar();
     }
     constructor(
         private toast: Toast,
@@ -405,7 +408,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 if (!needsUpdate) {
                     return;
                 }
-                const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                let lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                if(this.isSafe) {
+                    // clear lastLocation, this is another folder than the safe
+                    lastLocation = null;
+                }
                 if (!params.id && !params.query && lastLocation) {
                     this.openDirectory(lastLocation);
                 } else {

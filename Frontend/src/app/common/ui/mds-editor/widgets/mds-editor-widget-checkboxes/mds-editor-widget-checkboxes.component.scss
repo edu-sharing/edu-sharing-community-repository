@@ -1,6 +1,18 @@
 $checkbox-margin-horizontal: 20px;
 $checkbox-margin-vertical: 10px;
 
+:host ::ng-deep .mat-checkbox {
+    display: flex;
+    max-width: 100%;
+    .mat-checkbox-layout {
+        overflow: hidden;
+        .mat-checkbox-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+}
+
 .checkboxes-group {
     display: flex;
     flex-wrap: wrap;

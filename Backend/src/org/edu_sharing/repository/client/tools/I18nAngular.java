@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.service.config.model.KeyValuePair;
+import org.edu_sharing.alfresco.service.config.model.KeyValuePair;
 import org.json.JSONObject;
 
 import javax.servlet.ServletContext;

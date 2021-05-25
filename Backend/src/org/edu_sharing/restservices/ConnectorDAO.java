@@ -6,7 +6,6 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.connector.v1.ConnectorApi;
 import org.edu_sharing.restservices.connector.v1.model.Connector;
 import org.edu_sharing.restservices.connector.v1.model.ConnectorFileType;
 import org.edu_sharing.restservices.connector.v1.model.ConnectorList;
@@ -20,7 +19,7 @@ public class ConnectorDAO {
 		
 		ConnectorList result = new ConnectorList();
 		
-		org.edu_sharing.service.connector.ConnectorList connectorList = ConnectorServiceFactory.getConnectorList();
+		org.edu_sharing.alfresco.service.connector.ConnectorList connectorList = ConnectorServiceFactory.getConnectorList();
 		
 		ApplicationInfo service = ApplicationInfoList.getRepositoryInfoByType(ApplicationInfo.TYPE_CONNECTOR);
 		if(service==null){
@@ -29,10 +28,10 @@ public class ConnectorDAO {
 		}
 		result.setUrl(service.getContentUrl());
 		
-		for(org.edu_sharing.service.connector.Connector connector : connectorList.getConnectors()){
+		for(org.edu_sharing.alfresco.service.connector.Connector connector : connectorList.getConnectors()){
 			Connector resultConnector = new Connector();
 			
-			for(org.edu_sharing.service.connector.ConnectorFileType cft : connector.getFiletypes()){
+			for(org.edu_sharing.alfresco.service.connector.ConnectorFileType cft : connector.getFiletypes()){
 				ConnectorFileType cftResult = new ConnectorFileType();
 				cftResult.setCcresourcesubtype(cft.getCcresourcesubtype());
 				cftResult.setCcressourcetype(cft.getCcressourcetype());

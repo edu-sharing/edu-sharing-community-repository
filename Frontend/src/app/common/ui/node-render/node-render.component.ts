@@ -16,7 +16,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../core-ui-module/translation';
-import {DefaultGroups, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
+import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {trigger} from '@angular/animations';
@@ -361,8 +361,12 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     download.elementType = OptionsHelperService.DownloadElementTypes;
     // declare explicitly so that callback will be overriden
     download.customEnabledCallback = null;
-    download.isEnabled=this._node.downloadUrl!=null && !this._node.properties?.[RestConstants.CCM_PROP_IO_WWWURL];
-    download.showAsAction=true;
+    download.group = DefaultGroups.View;
+    download.priority = 25;
+    download.isEnabled=this._node.downloadUrl!=null &&  (
+        !this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+        !RestNetworkService.isFromHomeRepo(this._node)
+    );    download.showAsAction=true;
     if(this.isCollectionRef()) {
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node) => {
         this.addDownloadButton(download);
@@ -495,8 +499,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 nodes:usages.map((u)=>u.collection),
                 columns:ListItem.getCollectionDefaults(),
                 isClickable:true,
-                clickRow:(event:any)=> {
+                clickRow:(event: {node: Node})=> {
                     UIHelper.goToCollection(this.router,event.node);
+                },
+                doubleClickRow:(event: Node)=> {
+                    UIHelper.goToCollection(this.router,event);
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };

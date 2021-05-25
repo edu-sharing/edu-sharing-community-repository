@@ -29,154 +29,149 @@ package org.edu_sharing.repository.server.tools;
 
 import java.util.*;
 
+import org.alfresco.repo.cache.SimpleCache;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.rating.RatingsCache;
 
 
 public class ApplicationInfoList {
 	
 	private static Log logger = LogFactory.getLog(ApplicationInfoList.class);
 	
-	private static HashMap<String, ApplicationInfo> appInfos = null;
+	private static SimpleCache<String, ApplicationInfo> appInfos =  (SimpleCache<String, ApplicationInfo>) AlfAppContextGate.getApplicationContext().getBean("eduSharingApplicationInfoCache");
 	
 	public static ApplicationInfo getRepositoryInfo(String file){
-		ApplicationInfo result = null;
-		if(appInfos == null || appInfos.size() < 1){
-			//init
-			getApplicationInfos();
-		}
-		for(String key:appInfos.keySet()){
-			ApplicationInfo repInfo = appInfos.get(key);
-			if(repInfo != null && repInfo.getAppFile().equals(file)){
-				result = repInfo;
-				return result;
-			}
-		}
-		
-		return result;		
+		return getApplicationInfoByProperty(file, ApplicationInfoProperty.APPFILE);
 	}
-	
-	public static ApplicationInfo getRenderService() {
 
-		if(appInfos == null || appInfos.size() < 1){
+	public static boolean isLocalRepository(String repositoryId) {
+		if(repositoryId == null){
+			return true;
+		}
+		ApplicationInfo repo = getRepositoryInfoById(repositoryId);
+		return repo.getAppId().equals(getHomeRepository().getAppId()) || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(repo.getRepositoryType());
+	}
 
+	static enum ApplicationInfoProperty {TYPE, REPOSITORYTYPE, APPID, HOME, APPFILE};
+	private static ApplicationInfo getApplicationInfoByProperty(String value, ApplicationInfoProperty prop){
+		if(appInfos == null || appInfos.getKeys().size() < 1){
 			getApplicationInfos();
 		}
-		for(ApplicationInfo appInfo : appInfos.values()){
-			if(ApplicationInfo.TYPE_RENDERSERVICE.equals(appInfo.getType())){
-				return appInfo;
+		for(String key : appInfos.getKeys()){
+			ApplicationInfo appInfo = appInfos.get(key);
+			if(prop.equals(ApplicationInfoProperty.TYPE)){
+				if(value.equals(appInfo.getType())){
+					return appInfo;
+				}
 			}
+			if(prop.equals(ApplicationInfoProperty.REPOSITORYTYPE)){
+				if(value.equals(appInfo.getRepositoryType())){
+					return appInfo;
+				}
+			}
+			if(prop.equals(ApplicationInfoProperty.APPID)){
+				if(value.equals(appInfo.getAppId())){
+					return appInfo;
+				}
+			}
+			if(prop.equals(ApplicationInfoProperty.HOME)){
+				if(appInfo.ishomeNode()) return appInfo;
+			}
+			if(prop.equals(ApplicationInfoProperty.APPFILE)){
+				if(value.equals(appInfo.getAppFile())){
+					return appInfo;
+				}
+			}
+
 		}
 		return null;
+	}
+
+	public static ApplicationInfo getRenderService() {
+		return getApplicationInfoByProperty(ApplicationInfo.TYPE_RENDERSERVICE, ApplicationInfoProperty.TYPE);
 	}
 
 	public static ApplicationInfo getLearningLocker() {
-
-		if(appInfos == null || appInfos.size() < 1){
-
-			getApplicationInfos();
-		}
-		for(ApplicationInfo appInfo : appInfos.values()){
-			if(ApplicationInfo.TYPE_LEARNING_LOCKER.equals(appInfo.getType())){
-				return appInfo;
-			}
-		}
-		return null;
+		return getApplicationInfoByProperty(ApplicationInfo.TYPE_LEARNING_LOCKER, ApplicationInfoProperty.TYPE);
 	}
 	
 	public static ApplicationInfo getRepositoryInfoById(String repId){
-		ApplicationInfo result = null;
-		if(appInfos == null || appInfos.size() < 1){
-			
-			getApplicationInfos();
-		}
-		for(String key:appInfos.keySet()){
-			ApplicationInfo repInfo = appInfos.get(key);
-			if(repInfo != null && repInfo.getAppId().equals(repId)){
-				result = repInfo;
-				return result;
-			}
-		}
-		return result;
+		return getApplicationInfoByProperty(repId, ApplicationInfoProperty.APPID);
 	}
 	public static ApplicationInfo getRepositoryInfoByType(String type){
-		ApplicationInfo result = null;
-		if(appInfos == null || appInfos.size() < 1){
-			getApplicationInfos();
-		}
-		for(String key:appInfos.keySet()){
-			ApplicationInfo repInfo = appInfos.get(key);
-			if(repInfo != null && repInfo.getType().equals(type)){
-				result = repInfo;
-				return result;
-			}
-		}
-		return result;
+		return getApplicationInfoByProperty(type, ApplicationInfoProperty.TYPE);
 	}
 	public static ApplicationInfo getRepositoryInfoByRepositoryType(String type){
-		ApplicationInfo result = null;
-		if(appInfos == null || appInfos.size() < 1){
-			getApplicationInfos();
-		}
-		for(String key:appInfos.keySet()){
-			ApplicationInfo repInfo = appInfos.get(key);
-			if(repInfo != null && repInfo.getRepositoryType().equals(type)){
-				result = repInfo;
-				return result;
-			}
-		}
-		return result;
+		return getApplicationInfoByProperty(type, ApplicationInfoProperty.REPOSITORYTYPE);
 	}
 	/**
 	 * 
 	 * @return Map with AppId, ApplicationInfo
 	 */
 	public static HashMap<String, ApplicationInfo> getApplicationInfos(){
-		logger.debug("Classloader(Thread):"+Thread.currentThread().getContextClassLoader().getClass().getName());
-		logger.debug("Classloader(ApplicationInfoList):"+ApplicationInfoList.class.getClassLoader().getClass().getName());
-		if(appInfos == null){
-			logger.debug("appInfos == null");
+		if(appInfos.getKeys().size() == 0){
+			logger.debug("appInfos size is 0");
 			initAppInfos();
 		}else{
-			logger.debug("appInfos not null");
+			logger.debug("appInfos size not 0");
 		}
-		return appInfos;
+
+		/**
+		 * @TODO refactor calls to this methode so that hashmap building is not needed
+		 */
+		HashMap<String, ApplicationInfo> result = new HashMap<>();
+		appInfos.getKeys().forEach(appId -> result.put(appId,appInfos.get(appId)));
+
+		return result;
 	}
 	
 	/**
 	 * synchronized to prevent errors when multithreads call this static method
 	 */
 	private static synchronized void initAppInfos(){
-		String repStr = null;
+		String[] appFileArray = null;
 		try{
-			repStr = PropertiesHelper.getProperty("applicationfiles", "ccapp-registry.properties.xml", PropertiesHelper.XML);
+			String repStr = PropertiesHelper.getProperty("applicationfiles", "ccapp-registry.properties.xml", PropertiesHelper.XML);
+			if(repStr == null || repStr.trim().isEmpty()){
+				logger.error("Repository Registry config is undefined or empty");
+				return;
+			}
+			appFileArray = repStr.split(",");
+			if(appFileArray.length == 0){
+				logger.error("Repository Registry config is empty");
+				return;
+			}
 		}catch(Exception e){
 			logger.error("Could not find Repository Registry",e);
 			return;
 		}
-		logger.debug("appStr"+repStr);
-		//Linked hashMap for keeping insertion order
-		appInfos = new LinkedHashMap<String, ApplicationInfo>();
-		if(repStr != null && repStr.trim().length() > 0){
-			logger.debug("appStr != null && appStr.trim().length() > 0");
-			 String[] repField = repStr.split(",");
-			 if(repField.length >= 1){
-				 logger.debug("repField.length >= 1");
-				for(String repFile: repField){
-					if(repFile != null && repFile.trim().length() > 0){
-						try{
-							ApplicationInfo repInfo = new ApplicationInfo(repFile.trim());
-							logger.debug("put:"+repFile.trim()+" "+repInfo);
-							appInfos.put(repInfo.getAppId(), repInfo);
-						}catch(Exception e){
-							e.printStackTrace();
-						}
-					}
-			 	}
-			 }
-		 }
+
+		for(String appFile: appFileArray){
+
+			appFile = appFile.trim();
+			if(appFile.isEmpty()){
+				logger.error("found empty value in Repository Registry");
+				continue;
+			}
+
+			try{
+				ApplicationInfo repInfo = new ApplicationInfo(appFile);
+				logger.debug("put:"+appFile+" "+repInfo);
+				synchronized(appInfos) {
+					appInfos.put(repInfo.getAppId(), repInfo);
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+
+		}
+
+
 	}
 	
 	/**
@@ -195,26 +190,12 @@ public class ApplicationInfoList {
 	}
 	
 	public static ApplicationInfo getHomeRepository(){
-		
-		if(appInfos == null || appInfos.size() < 1){
-			//init
-			getApplicationInfos();
-		}
-		ApplicationInfo homeRepository = null;
-			
-		for(String appKey:appInfos.keySet()){
-			ApplicationInfo appInfo = appInfos.get(appKey);
-			if(appInfo != null && appInfo.ishomeNode()){
-				homeRepository = appInfo;
-			}
-		}
+		ApplicationInfo homeRepository = getApplicationInfoByProperty(null, ApplicationInfoProperty.HOME);
 		if(homeRepository == null) logger.error("no home repository found. check your application files");
 		return homeRepository;
 	}
 	public static ApplicationInfo getHomeRepositoryObeyConfig(String[] allowedRepos){
-		if(appInfos == null || appInfos.size() < 1){
-			getApplicationInfos();
-		}
+
 		ApplicationInfo realHome = getHomeRepository();
 
 		if(allowedRepos == null || allowedRepos.length == 0 ){
@@ -236,7 +217,7 @@ public class ApplicationInfoList {
 	
 	public static void refresh(){
 		logger.debug("calling");
-		appInfos = null;
+		appInfos.clear();
 		getApplicationInfos();
 		logger.debug("returning");
 	}

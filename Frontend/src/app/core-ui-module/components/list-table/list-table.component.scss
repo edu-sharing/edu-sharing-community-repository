@@ -415,7 +415,7 @@ $badgeWidth: 250px;
 }
 .tableList .rowFrame.selected{
     background: $workspaceSelectedBackgroundEffect;
-    background-color: $itemSelectedBackground;
+    background-color: $listItemSelectedBackground;
 }
 
 .cardList .rowFrame.selected {
@@ -433,7 +433,7 @@ $badgeWidth: 250px;
 
 @mixin hoverHighlightColor {
     .rowFrame:hover {
-        background-color: $itemSelectedBackground;
+        background-color: $listItemSelectedBackground;
     }
 }
 
@@ -841,6 +841,10 @@ a.rowInner {
 
 }
 .tableList{
+    // limit line height to 2 lines
+    app-list-base {
+        @include limitLineCount(2, 1.25);
+    }
     .nodeDeleted{
         display: none;
     }

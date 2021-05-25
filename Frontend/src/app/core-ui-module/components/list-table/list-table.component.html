@@ -152,6 +152,7 @@
             <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
               <img
                 src="{{getIconUrl(node)}}"
+                tabindex="0"
                 [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
                 [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
               />

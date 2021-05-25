@@ -67,54 +67,31 @@
     *ngSwitchCase="'cm:modifier'"
     [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    <span class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
     {{ $any(getNode()).modifiedBy | nodePersonName }}
   </span>
-  <span
-    *ngSwitchCase="'ccm:replicationsource'"
-    [matTooltip]="
-      (getI18n(item) | translate) +
-      ': ' +
-      ('REPOSITORIES.' +
-        ($any(getNode()).properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-        | translate
-          : {
-              fallback: ($any(getNode()).properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-            })
-    "
-  >
-    <img
-      src="{{ $any(getNode()).properties['ccm:replicationsource'] | appNodeSource: { mode: 'url' } }}"
-      (error)="$any($event.target).style.display = 'none'"
-      [alt]="
-      (getI18n(item) | translate) +
-      ': ' +
-      ('REPOSITORIES.' +
-        ($any(getNode()).properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-        | translate
-          : {
-              fallback: ($any(getNode()).properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-            })
-    "
-    />
-  </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null">
-    <span class="cdk-visually-hidden">{{ 'NODE' + item.name | translate }}:</span>
-    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1">
+    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    <ng-container
+      *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
+    >
       {{
-      $any(getNode()).properties ?
-        ($any(getNode()).properties[item.name + '_DISPLAYNAME']
-          ? $any(getNode()).properties[item.name + '_DISPLAYNAME'].join(', ')
-          : $any(getNode()).properties[item.name]?.join(', ')
-        )
-         : ''
+        $any(getNode()).properties
+          ? $any(getNode()).properties[item.name + '_DISPLAYNAME']
+            ? $any(getNode()).properties[item.name + '_DISPLAYNAME'].join(', ')
+            : $any(getNode()).properties[item.name]?.join(', ')
+          : ''
       }}
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
-      {{ $any(getNode()).properties[item.name] ? ($any(getNode()).properties[item.name][0] | formatDate) : '' }}
+      {{
+        $any(getNode()).properties[item.name] ? ($any(getNode()).properties[item.name][0] | formatDate) : ''
+      }}
     </ng-container>
-     <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
-      {{ $any(getNode()).properties[item.name] ? ($any(getNode()).properties[item.name][0] | vcardName) : '' }}
+    <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
+      {{
+        $any(getNode()).properties[item.name] ? ($any(getNode()).properties[item.name][0] | vcardName) : ''
+      }}
     </ng-container>
   </span>
 </ng-container>

@@ -22,7 +22,7 @@ import {ListTableComponent} from '../list-table/list-table.component';
             [state]="getState()"
             [queryParams]="get('queryParams')"
             queryParamsHandling="merge"
-            [attr.aria-label]="listTable?.getPrimaryTitle(node) || node.name"
+            [attr.aria-label]="ariaLabel ? listTable?.getPrimaryTitle(node) || node.name : null"
             [attr.aria-describedby]="ariaDescribedby"
 >
             <ng-container *ngTemplateOutlet="content"></ng-container>
@@ -37,6 +37,7 @@ export class NodeUrlComponent {
     @Input() scope: string;
     @Input() unclickable: boolean;
     @Input('aria-describedby') ariaDescribedby: string;
+    @Input('aria-label') ariaLabel = true;
 
     constructor(private nodeHelper: NodeHelperService) {}
 

@@ -185,6 +185,7 @@
     "CLIPBOARD_DATA_UNSUPPORTED": "The current clipboard data is not supported",
     "DELETED_USER": "deleted User",
     "GROUP_EVERYONE": "everybody",
+    "BREADCRUMB_LOCATION_PREFIX": "You're here:",
     "DETAILS": "details",
     "INFO": "info",
     "GOTO_LOGIN": "Go to login",
@@ -381,7 +382,23 @@
     "ACCESSIBILITY": {
         "LASTMODIFIED": "date of last change",
         "AUTHOR": "author",
-        "SOURCE": "source"
+        "SOURCE": "source",
+        "TITLE": "Accessibility",
+        "SUBTITLE": "accessibility options",
+        "ENTRY_MESSAGE": "To accommodate personal needs, some settings for using our application can be set below.",
+        "TOAST_TITLE": "Status messages",
+        "TOAST_MESSAGE": "Status messages indicate whether the system is working correctly. For example, you can see whether a content or changes have been saved correctly.",
+        "TOAST_TYPE": {
+            "IMPORTANT": "Show only important messages.",
+            "ALL": "Show all messages."
+        },
+        "TOAST_DURATION_SECONDS": "{{seconds}} seconds",
+        "TOAST_DURATION_INFINITE": "Do not hide.",
+        "TOAST_DURATION_INFINITE_INFO": "Status messages are not automatically hidden and must be closed manually.",
+        "TOAST_DURATION_TITLE": "display time",
+        "TOAST_DURATION_MESSAGE": "Status messages disappear automatically after a specified time or can be closed manually by clicking.",
+        "SAVED": "Settings have been saved.",
+        "DISMISS_TOAST": "Hide"
     },
     "AUTHORITY_TYPE_GROUP": "Group",
     "AUTHORITY_TYPE_ORG": "Organisation",

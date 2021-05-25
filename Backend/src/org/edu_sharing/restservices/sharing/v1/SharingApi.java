@@ -8,6 +8,7 @@ import org.edu_sharing.restservices.node.v1.NodeApi;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.sharing.v1.model.SharingInfo;
@@ -100,7 +101,7 @@ public class SharingApi {
 				List<String> filter=new ArrayList<>();
 				filter.add("files");
 				children=NodeDao.sortApiNodeRefs(repoDao,children,filter,sortDefinition);
-				NodeEntries response = NodeDao.convertToRest(repoDao,null,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
+				NodeEntries response = NodeDao.convertToRest(repoDao, Filter.createShowAllFilter(),children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
 				return Response.status(Response.Status.OK).entity(response).build();
 			});
 		} catch (Throwable t) {

@@ -37,7 +37,7 @@
 			</widget>
 			<widget>
 				<id>cclom:general_description</id>
-				<type>text</type>
+				<type>textarea</type>
 				<caption>lom_prop_educational_description</caption>
 				<placeholder>lom_prop_educational_description_placeholder</placeholder>
 				<hideIfEmpty>true</hideIfEmpty>
