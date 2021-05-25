@@ -1,16 +1,5 @@
 package org.edu_sharing.service.authentication;
 
-import java.io.Serializable;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -30,21 +19,20 @@ import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
-import org.edu_sharing.restservices.admin.v1.Application;
-import org.edu_sharing.service.authentication.sso.config.Condition;
-import org.edu_sharing.service.authentication.sso.config.CustomGroupMapping;
-import org.edu_sharing.service.authentication.sso.config.MappingGroup;
-import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilder;
-import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilderFactory;
-import org.edu_sharing.service.authentication.sso.config.MappingRoot;
+import org.edu_sharing.service.authentication.sso.config.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
+
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 /**
  * 
