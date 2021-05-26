@@ -18,17 +18,20 @@ mat-tab-group {
     width: 100%;
     display: grid;
     grid-template-columns: $sidenavWidth auto;
-    position: absolute;
+    position: relative;
     top: $mainnavHeight;
     min-height: calc(100vh - #{$mainnavHeight});
+
     .collections-right {
-        > spinner{
+        > spinner {
             text-align: center;
         }
     }
-}
-.collectionsContainerTabs {
-    top: $mainnavHeight + 48px;
+    &.collectionsContainerTabs {
+        top: $mainnavHeight + 48px;
+        padding:0 10%;
+        grid-template-columns: auto;
+    }
 }
 .collection-new-preview-headline {
     word-break: normal;
