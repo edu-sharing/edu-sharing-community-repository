@@ -191,27 +191,30 @@ public class HttpQueryTool {
 			//get host of url to check if its an nonproxy host
 			URL urlObj = new URL(method.getURI().getURI());
 			String urlHost = urlObj.getHost();
+			logger.debug("current Host:" + urlHost);
 
 			ProxyConfig proxyConf = (ProxyConfig)configCache.get(CACHE_KEY);
-			logger.debug("nonProxyHosts:"+proxyConf.getNonProxyHosts()+" current Host:"+urlHost);
+			if (proxyConf != null) {
+				logger.debug("nonProxyHosts:" + proxyConf.getNonProxyHosts());
 
+				if (proxyConf.getHost() != null && proxyConf.getProxyhost() != null && proxyConf.getProxyport() != null
+						&& !(proxyConf.getNonProxyHosts() != null && proxyConf.getNonProxyHosts().contains(urlHost))) {
+					logger.debug("using  proxy proxyhost:" + proxyConf.getProxyhost() + " proxyport:" + proxyConf.getProxyport() + " host" + proxyConf.getHost());
+					client.getHostConfiguration().setHost(proxyConf.getHost());
+					client.getHostConfiguration().setProxy(proxyConf.getProxyhost(), proxyConf.getProxyport());
 
-			if (proxyConf.getHost() != null && proxyConf.getProxyhost() != null && proxyConf.getProxyport() != null
-					&& !(proxyConf.getNonProxyHosts() != null && proxyConf.getNonProxyHosts().contains(urlHost)) ) {
-				logger.debug("using  proxy proxyhost:" + proxyConf.getProxyhost() + " proxyport:" + proxyConf.getProxyport() + " host" + proxyConf.getHost());
-				client.getHostConfiguration().setHost(proxyConf.getHost());
-				client.getHostConfiguration().setProxy(proxyConf.getProxyhost(), proxyConf.getProxyport());
+					if (proxyConf.getProxyUsername() != null && proxyConf.getProxyPass() != null) {
 
-				if (proxyConf.getProxyUsername() != null && proxyConf.getProxyPass() != null) {
+						List authPrefs = new ArrayList(2);
+						authPrefs.add(AuthPolicy.DIGEST);
+						authPrefs.add(AuthPolicy.BASIC);
 
-					List authPrefs = new ArrayList(2);
-					authPrefs.add(AuthPolicy.DIGEST);
-					authPrefs.add(AuthPolicy.BASIC);
-
-					client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-					client.getState().setProxyCredentials(new AuthScope(proxyConf.getProxyhost(), proxyConf.getProxyport()), new UsernamePasswordCredentials(proxyConf.getProxyUsername() , proxyConf.getProxyPass()));
+						client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
+						client.getState().setProxyCredentials(new AuthScope(proxyConf.getProxyhost(), proxyConf.getProxyport()), new UsernamePasswordCredentials(proxyConf.getProxyUsername(), proxyConf.getProxyPass()));
+					}
 				}
 			}
+
 
 		} catch (Exception e) {
 			e.printStackTrace();
