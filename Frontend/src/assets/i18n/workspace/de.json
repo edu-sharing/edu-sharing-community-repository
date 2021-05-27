@@ -241,6 +241,7 @@
                 "BULK_CREATE": "Node via Bulk importiert",
                 "BULK_UPDATE": "Node via Bulk aktualisiert",
                 "BULK_UPDATE_RESYNC": "Lokale Änderungen auf Bulk-Änderungen angewendet",
+                "REMOTE_OBJECT_INIT": "Objekt wurde aus förderierter Suche importiert",
                 "IMPORT_BLOCKED": "Status der Import-Blockierung wurde geändert"
             }
         },

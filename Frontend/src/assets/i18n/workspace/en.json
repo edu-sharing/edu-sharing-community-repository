@@ -242,6 +242,7 @@
                 "BULK_CREATE": "Node imported via bulk",
                 "BULK_UPDATE": "Node updated via bulk",
                 "BULK_UPDATE_RESYNC": "Applied local changes onto bulk-changes",
+                "REMOTE_OBJECT_INIT": "Object imported from federated search source",
                 "IMPORT_BLOCKED": "Changed status of import-blocking"
             }
         },
