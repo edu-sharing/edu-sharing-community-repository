@@ -108,6 +108,9 @@ export class NodeHelperService {
                 // return false because either on original not found, or both (because both is then also false)
                 if(currentMode === NodesRightMode.Both) {
                     return false;
+                } else if(RestConstants.IMPLICIT_COLLECTION_PERMISSIONS.indexOf(right) === -1) {
+                    // permission not matched on original -> implicit permissions from collection may apply
+                    return false;
                 }
             }
             // check regular node rights
