@@ -6,11 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -22,10 +25,14 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.springframework.context.ApplicationContext;
 
 public class RemoteObjectService {
 
 	Logger logger = Logger.getLogger(RemoteObjectService.class);
+	private ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+	private BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 
 	/**
 	 * creates and returns remoteObjectId when it's a 3dParty repo
@@ -200,11 +207,21 @@ public class RemoteObjectService {
 				}
 				if(nodes.size()==0) {
 					// create
-					String containerId = NodeServiceHelper.getContainerIdByPath(ROOT_PATH, "yyyy/MM/dd");
-					props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT);
-					String nodeId = nodeService.createNodeBasic(containerId, CCConstants.CCM_TYPE_IO, props);
-					nodeService.createVersion(nodeId);
-					return nodeId;
+					return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+						String containerId = NodeServiceHelper.getContainerIdByPath(ROOT_PATH, "yyyy/MM/dd");
+						props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT);
+						String nodeId = nodeService.createNodeBasic(containerId, CCConstants.CCM_TYPE_IO, props);
+						NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+
+						policyBehaviourFilter.disableBehaviour(ref);
+						// admin is the owner, not the current user
+						nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
+						NodeServiceHelper.setProperty(ref, CCConstants.CM_PROP_C_CREATOR, ApplicationInfoList.getHomeRepository().getUsername());
+						NodeServiceHelper.setProperty(ref, CCConstants.CM_PROP_C_MODIFIER, ApplicationInfoList.getHomeRepository().getUsername());
+						nodeService.createVersion(nodeId);
+						policyBehaviourFilter.enableBehaviour(ref);
+						return nodeId;
+					});
 				}
 				else{
 					// update in case metadata of remote source have changed

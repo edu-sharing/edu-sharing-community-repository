@@ -509,8 +509,7 @@ public class NodeDao {
 				this.nodeProps = nodeRef.getProperties();
 			}
 			this.previewData = nodeRef.getPreview();
-			refreshPermissions(nodeRef);
-			
+
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
 				this.type = (String) nodeProps.get(CCConstants.NODETYPE);
 			}
@@ -523,6 +522,7 @@ public class NodeDao {
 			} else {
 				this.aspects = nodeRef.getAspects();
 			}
+			refreshPermissions(nodeRef);
 			this.access = PermissionServiceHelper.getPermissionsAsString(hasPermissions);
 			// replace all data if its an remote object
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
@@ -563,6 +563,9 @@ public class NodeDao {
 	public void refreshPermissions(org.edu_sharing.service.model.NodeRef nodeRef) {
 		if(nodeRef!=null && nodeRef.getPermissions()!=null && nodeRef.getPermissions().size() > 0){
 			this.hasPermissions = nodeRef.getPermissions();
+		} else if(!this.isCollectionReference() && aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
+			// remote copy -> local rights apply since it can be modified locally
+			this.hasPermissions = PermissionServiceFactory.getLocalService().hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
 		} else {
 			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
 		}
@@ -978,8 +981,8 @@ public class NodeDao {
 	private void fillNodeReference(CollectionReference reference) throws DAOException {
 		final String originalId = getReferenceOriginalId();
 		reference.setOriginalId(originalId);
-		// not supported and used by remote repositories
-		if(isFromRemoteRepository()){
+		// not supported and used by remote repositories, BUT is supported for local copies
+		if(isFromRemoteRepository() && !aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 			return;
 		}
 		try {
