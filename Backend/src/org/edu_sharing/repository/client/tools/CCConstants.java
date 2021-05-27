@@ -903,6 +903,8 @@ public class CCConstants {
 	/**
 	 * dynamic generated properties
 	 */
+	public final static String VIRT_PROP_MEDIATYPE = "{virtualproperty}mediatype";
+
 	public final static String VIRT_PROP_USAGECOUNT = "{virtualproperty}usagecount";
 
 	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
