@@ -201,7 +201,10 @@ public class RemoteObjectService {
 				if(nodes.size()==0) {
 					// create
 					String containerId = NodeServiceHelper.getContainerIdByPath(ROOT_PATH, "yyyy/MM/dd");
-					return nodeService.createNodeBasic(containerId, CCConstants.CCM_TYPE_IO, props);
+					props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT);
+					String nodeId = nodeService.createNodeBasic(containerId, CCConstants.CCM_TYPE_IO, props);
+					nodeService.createVersion(nodeId);
+					return nodeId;
 				}
 				else{
 					// update in case metadata of remote source have changed

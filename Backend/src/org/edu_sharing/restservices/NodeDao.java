@@ -533,16 +533,21 @@ public class NodeDao {
 				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
 			} else if (this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 				// just fetch dynamic data which needs to be fetched, because the local io already has metadata
-				try {
-					NodeService nodeServiceRemote=NodeServiceFactory.getNodeService((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
-					HashMap<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
-							null, null, (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-					nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_UID);
-					nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
-					nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
-					this.nodeProps.putAll(nodePropsReplace);
-				}catch(Throwable t){
-					logger.warn("Error while fetching properties for node id "+getId()+": Node is a remote node and calling remote "+(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)+" failed",t);
+				String originalNodeId = this.getReferenceOriginalId();
+				HashMap<String, HashMap<String, Object>> history = this.nodeService.getVersionHistory(originalNodeId);
+				Optional<Entry<String, HashMap<String, Object>>> entry = history.entrySet().stream().findFirst();
+				if(!entry.isPresent() || CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT.equals(entry.get().getValue().get(CCConstants.CCM_PROP_IO_VERSION_COMMENT))) {
+					try {
+						NodeService nodeServiceRemote = NodeServiceFactory.getNodeService((String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+						HashMap<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
+								null, null, (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+						nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_UID);
+						nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
+						nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
+						this.nodeProps.putAll(nodePropsReplace);
+					} catch (Throwable t) {
+						logger.warn("Error while fetching properties for node id " + getId() + ": Node is a remote node and calling remote " + (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID) + " failed", t);
+					}
 				}
 			}
 
