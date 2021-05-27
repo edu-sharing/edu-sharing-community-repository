@@ -16,6 +16,12 @@ export class BreadcrumbsComponent {
      * Caption of the home, if not set, an icon is used.
      */
     @Input() home: string;
+
+    /**
+     * shall an invisbile description (for screen readers) be generated, similar to
+     * 'You're here'
+     */
+    @Input() invisibleDescription = false;
     /**
      * The path to give to `routerLink` on the home element.
      *
