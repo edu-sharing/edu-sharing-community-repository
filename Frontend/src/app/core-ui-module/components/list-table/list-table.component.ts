@@ -16,7 +16,14 @@ import {
     Input,
     Output,
     TemplateRef,
-    ViewChild, ViewContainerRef, SimpleChanges, OnChanges, Renderer2, Sanitizer,
+    ViewChild,
+    ViewContainerRef,
+    SimpleChanges,
+    OnChanges,
+    Renderer2,
+    Sanitizer,
+    ViewChildren,
+    QueryList,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -58,6 +65,7 @@ import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
 import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
 import {NodeTitlePipe} from '../../../common/ui/node-title.pipe';
+import {NodeUrlComponent} from '../node-url/node-url.component';
 
 
 @Component({
@@ -116,6 +124,7 @@ export class ListTableComponent implements OnChanges, EventListener {
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
     @ViewChild('dropdown') dropdownElement: ElementRef;
     @ViewChild('sortDropdownMenuTrigger') sortDropdownMenuTrigger: ElementRef<HTMLButtonElement>;
+    @ViewChildren('childList') childList: QueryList<ElementRef>;
 
     @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
@@ -128,6 +137,13 @@ export class ListTableComponent implements OnChanges, EventListener {
             nodes = nodes.filter(
                 n => n.virtual || !virtual.find(v => v.ref.id === n.ref.id),
             );
+        }
+        if(this._nodes?.length && nodes?.length > this._nodes?.length) {
+            const pos = this._nodes.length;
+            setTimeout(() => {
+                // handle focus
+                (this.childList.toArray()[pos] as any as NodeUrlComponent).link.nativeElement.focus();
+            });
         }
         this._nodes = nodes;
         this.refreshAvailableOptions();

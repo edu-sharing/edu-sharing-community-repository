@@ -433,8 +433,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			mdsId = CCConstants.metadatasetdefault_id;
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(appInfo, mdsId,locale);
 
-        HashMap<String, String[]> propsConverted = MetadataTemplateRenderer.convertProps(props);
-        rir.setMdsTemplate(new MetadataTemplateRenderer(mds,nodeRef,userName,propsConverted).render(displayMode.equals(RenderingTool.DISPLAY_INLINE) ? "io_render_inline" : "io_render"));
+        rir.setMdsTemplate(new MetadataTemplateRenderer(mds,nodeRef,userName,props).render(displayMode.equals(RenderingTool.DISPLAY_INLINE) ? "io_render_inline" : "io_render"));
 	}
 
     String getHeaderValue(String key, MessageContext msgContext) throws SOAPException, AxisFault{

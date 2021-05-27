@@ -85,7 +85,7 @@
 
 <div class="alignWithBanner">
   <div class="collections-footer-group">
-    <div [class.collectionsContainerTabs]="showTabs()" class="collectionsContainer">
+    <div [class.collectionsContainerTabs]="showTabs()" [class.collectionsContainerNoSidebar]="isRootLevelCollection()" class="collectionsContainer">
       <div
         *ngIf="!isRootLevelCollection()"
         role="complementary"

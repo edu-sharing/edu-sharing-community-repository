@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 import { Params } from '@angular/router';
 import { Node } from '../../../core-module/rest/data-object';
 import { RestNetworkService } from '../../../core-module/rest/services/rest-network.service';
@@ -11,12 +11,14 @@ import {ListTableComponent} from '../list-table/list-table.component';
     template: `
         <ng-template #content><ng-content></ng-content></ng-template>
         <a *ngIf="unclickable"
+           #link
            matRipple matRippleColor="primary"
         >
             <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
         <a
             *ngIf="!unclickable"
+            #link
             matRipple matRippleColor="primary"
             [routerLink]="get('routerLink')"
             [state]="getState()"
@@ -31,6 +33,7 @@ import {ListTableComponent} from '../list-table/list-table.component';
     styleUrls: ['node-url.component.scss'],
 })
 export class NodeUrlComponent {
+    @ViewChild('link') link: ElementRef;
     @Input() listTable: ListTableComponent;
     @Input() node: Node;
     @Input() nodes: Node[];

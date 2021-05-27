@@ -29,6 +29,8 @@ mat-tab-group {
     }
     &.collectionsContainerTabs {
         top: $mainnavHeight + 48px;
+    }
+    &.collectionsContainerNoSidebar {
         padding:0 10%;
         grid-template-columns: auto;
     }
