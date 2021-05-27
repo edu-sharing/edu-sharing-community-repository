@@ -298,9 +298,11 @@
             </button></div>
         </div>
       </div>
-      <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">
-        <i icon="refresh"></i>
-        <div>{{'LOAD_MORE' | translate}}</div>
+      <div class="loadMore">
+        <button mat-button *ngIf="_nodes && _nodes.length && hasMore && !isLoading" (click)="scroll(true)">
+          <i icon="refresh"></i>
+          <div>{{'LOAD_MORE' | translate}}</div>
+        </button>
       </div>
       <spinner *ngIf="isLoading"></spinner>
     </div>

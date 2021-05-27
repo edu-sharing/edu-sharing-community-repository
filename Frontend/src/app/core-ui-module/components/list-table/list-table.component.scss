@@ -37,8 +37,11 @@ $previewHeight: 160px;
     padding-top: 20px;
     text-transform: uppercase;
     color: $primary;
-    i {
-        font-size: 50px;
+    ::ng-deep {
+        i {
+            font-size: 50px;
+            width: 50px;
+        }
     }
 }
 .heading {
