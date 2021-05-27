@@ -221,7 +221,7 @@ export class OptionsHelperService {
             actionbar.options = [];
         }
     }
-    initComponents(mainNav: MainNavComponent,
+    async initComponents(mainNav: MainNavComponent,
          actionbar: ActionbarComponent = null,
          list: ListTableComponent = null,
          dropdown: DropdownComponent = null) {
@@ -229,6 +229,7 @@ export class OptionsHelperService {
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
+        await this.networkService.getRepositories().toPromise();
     }
     setListener(listener: OptionsListener) {
         this.listener = listener;

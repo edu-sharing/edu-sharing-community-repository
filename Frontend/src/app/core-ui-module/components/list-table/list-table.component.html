@@ -94,7 +94,10 @@
       [class.cardList]="viewType == 1"
       [class.cardSmallList]="viewType == 2"
     >
-      <div *ngIf="optionItems && optionItems.length > 0" class="item-container option-item-container">
+      <div *ngIf="optionItems && optionItems.length > 0"
+           class="item-container option-item-container"
+           [attr.role]="viewType === 0 ? 'rowgroup' : 'listitem'"
+           >
         <app-list-option-item
           *ngFor="let option of optionItems"
           [option]="option"
@@ -132,7 +135,6 @@
              (nodesDrop)="onNodesDrop($event, node)"
              [attr.tabindex]="createLink ? null : 0"
              (keyup.enter)="doubleClick(node)"
-             [attr.aria-label]="getPrimaryTitle(node)"
         >
           <!-- custom data binding from outside -->
           <app-node-url
