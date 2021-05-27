@@ -24,6 +24,7 @@ import {
     Sanitizer,
     ViewChildren,
     QueryList,
+    AfterViewInit,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -115,7 +116,7 @@ import {NodeUrlComponent} from '../node-url/node-url.component';
 /**
  * A provider to render multiple Nodes as a list
  */
-export class ListTableComponent implements OnChanges, EventListener {
+export class ListTableComponent implements OnChanges, AfterViewInit, EventListener {
     public static readonly VIEW_TYPE_LIST = 0;
     public static readonly VIEW_TYPE_GRID = 1;
     public static readonly VIEW_TYPE_GRID_SMALL = 2;
@@ -547,6 +548,10 @@ export class ListTableComponent implements OnChanges, EventListener {
         if (changes.viewType && typeof changes.viewType.currentValue === 'string') {
             this.viewType = parseInt(changes.viewType.currentValue, 10);
         }
+    }
+
+    ngAfterViewInit(): void {
+        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
     }
 
     setViewType(viewType: number) {
@@ -1220,7 +1225,6 @@ export class ListTableComponent implements OnChanges, EventListener {
         this.optionsHelper.setListener({
             onDelete: nodes => this.removeNodes(nodes.error, nodes.objects),
         });
-        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
         // only refresh global if no node was given
         this.optionsHelper.refreshComponents();
     }
