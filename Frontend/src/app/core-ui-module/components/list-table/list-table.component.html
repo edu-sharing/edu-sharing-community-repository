@@ -146,6 +146,7 @@
             [class.node-padding]="_options && _options.length>0"
             [unclickable]="!createLink"
             [aria-describedby]="getDescribedBy(node)"
+            #childList
           >
             <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
             <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
