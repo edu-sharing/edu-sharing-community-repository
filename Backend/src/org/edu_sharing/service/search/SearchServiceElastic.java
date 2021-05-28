@@ -405,7 +405,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
         }
-        if(user.equals(owner)){
+        if(AuthorityServiceHelper.isAdmin() || user.equals(owner)){
             permissions.put(CCConstants.PERMISSION_CC_PUBLISH,true);
             PermissionReference pr = permissionModel.getPermissionReference(null,"FullControl");
             Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
