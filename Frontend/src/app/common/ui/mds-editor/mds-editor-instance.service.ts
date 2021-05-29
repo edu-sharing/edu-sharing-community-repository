@@ -35,9 +35,14 @@ import {
 } from './types';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 
+export interface CompletionStatusField {
+    widget: Widget;
+    isCompleted: boolean;
+}
 export interface CompletionStatusEntry {
     completed: number;
     total: number;
+    fields?: CompletionStatusField[];
 }
 
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
@@ -1087,9 +1092,16 @@ export class MdsEditorInstanceService implements OnDestroy {
     ): CompletionStatusEntry {
         const total = widgets.filter((widget) => widget.definition.isRequired === requiredMode);
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
+        const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
+            return {
+                widget: widget,
+                isCompleted: !!(widget.getValue() && widget.getValue()[0])
+            }
+        });
         return {
             total: total.length,
             completed: completed.length,
+            fields: widgetCompletion,
         };
     }
 
