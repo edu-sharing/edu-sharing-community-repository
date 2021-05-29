@@ -127,6 +127,34 @@ export class MdsEditorInstanceService implements OnDestroy {
             shareReplay(1),
         );
 
+        /**
+         * Checks a dynamic property condition of another widget against the property of this
+         * widget.
+         *
+         * @param condition must satisfy `condition.type === 'PROPERTY'` and `condition.dynamic ===
+         * true`
+         */
+        checkPropertyCondition(condition: MdsWidgetCondition = this.definition.condition): Observable<boolean> {
+            if(!condition) {
+                return Observable.of(true);
+            }
+            console.log(condition, )
+            const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
+            return this.jointProperty.pipe(
+                map((jointProperty) => {
+                    if (pattern) {
+                        return (
+                            jointProperty &&
+                            jointProperty.some((property) => pattern.test(property))
+                        );
+                    } else {
+                        return jointProperty?.[0]?.length >= 1;
+                    }
+                }),
+                map((result) => result !== condition.negate),
+            );
+        }
+
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
             public readonly definition: MdsWidget,
@@ -151,30 +179,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                     }),
                 )
                 .subscribe(this.hasChanged);
-        }
-
-        /**
-         * Checks a dynamic property condition of another widget against the property of this
-         * widget.
-         *
-         * @param condition must satisfy `condition.type === 'PROPERTY'` and `condition.dynamic ===
-         * true`
-         */
-        checkPropertyCondition(condition: MdsWidgetCondition): Observable<boolean> {
-            const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
-            return this.jointProperty.pipe(
-                map((jointProperty) => {
-                    if (pattern) {
-                        return (
-                            jointProperty &&
-                            jointProperty.some((property) => pattern.test(property))
-                        );
-                    } else {
-                        return jointProperty?.[0]?.length >= 1;
-                    }
-                }),
-                map((result) => result !== condition.negate),
-            );
         }
 
         private getJointProperty(): string[] {
@@ -1090,11 +1094,11 @@ export class MdsEditorInstanceService implements OnDestroy {
         widgets: Widget[],
         requiredMode: RequiredMode,
     ): CompletionStatusEntry {
-        const total = widgets.filter((widget) => widget.definition.isRequired === requiredMode);
+        const total = widgets.filter(async (widget) => widget.definition.isRequired === requiredMode && (await widget.checkPropertyCondition()));
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
             return {
-                widget: widget,
+                widget,
                 isCompleted: !!(widget.getValue() && widget.getValue()[0])
             }
         });
