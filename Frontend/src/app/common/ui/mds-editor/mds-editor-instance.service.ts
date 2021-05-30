@@ -1100,7 +1100,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
-            console.log(widget.definition.id, widget.getValue(), !!(widget.getValue()?.[0]));
             return {
                 widget,
                 isCompleted: !!(widget.getValue()?.[0])
