@@ -138,7 +138,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             if(!condition) {
                 return Observable.of(true);
             }
-            console.log(condition, )
             const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
             return this.jointProperty.pipe(
                 map((jointProperty) => {
@@ -1019,7 +1018,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             return true;
         } else if (widget.condition.type === 'PROPERTY') {
             if (widget.condition.dynamic) {
-                return true;
+                const condition = widget.condition;
+                const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
+                return nodes.some((n) => pattern.test(n.properties[condition.value])) !== condition.negate;
             }
             if (nodes) {
                 return nodes.every(
@@ -1094,12 +1095,15 @@ export class MdsEditorInstanceService implements OnDestroy {
         widgets: Widget[],
         requiredMode: RequiredMode,
     ): CompletionStatusEntry {
-        const total = widgets.filter(async (widget) => widget.definition.isRequired === requiredMode && (await widget.checkPropertyCondition()));
+        const total = widgets.filter((widget) =>
+            widget.definition.isRequired === requiredMode && this.meetsCondition(widget.definition, this.nodes$.value)
+        );
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
+            console.log(widget.definition.id, widget.getValue(), !!(widget.getValue()?.[0]));
             return {
                 widget,
-                isCompleted: !!(widget.getValue() && widget.getValue()[0])
+                isCompleted: !!(widget.getValue()?.[0])
             }
         });
         return {
