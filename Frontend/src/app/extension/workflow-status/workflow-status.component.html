@@ -1,0 +1,52 @@
+<app-workflow-action-card *ngIf="card?.title"
+                          [title]="card?.title"
+                          [label]="card?.label"
+                          [buttons]="card?.buttons"
+                          (onCancel)="card = null"
+></app-workflow-action-card>
+<ng-container *ngIf="selection.selected?.length === 1">
+  <app-mds-editor-wrapper
+    #mdsEditorWrapper
+    groupId="editorial_sidebar"
+    setId="mds_oeh"
+    [embedded]="true"
+    mode="default"
+    [nodes]="selection.selected"
+  ></app-mds-editor-wrapper>
+  <mat-tab-group>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <i icon="custom-book"></i>
+      </ng-template>
+      <div class="tab-container tab-metadata">
+        <h3>Metadaten</h3>
+        <button
+          mat-flat-button
+          (click)="showMetadataRecordDialog()"
+          color="warn">Erfassung beauftragen
+        </button>
+        TODO: komponente/Template für letzte Stati-Änderung mit info-message Komponente
+        <button
+          mat-flat-button
+          color="primary">Metadaten in Ordnung</button>
+        <h3>Für Veröffentlichung notwendig</h3>
+        <ul class="metadata-list">
+          <li *ngFor="let widget of requiredWidgets">
+            <i [icon]="widget.isCompleted ? 'check' : 'cancel'" [class.completed]="widget.isCompleted"></i>
+            <span>{{widget.widget.definition.caption}}</span>
+          </li>
+        </ul>
+        <h3>Weitere Metadaten</h3>
+        <ul class="metadata-list">
+          <li *ngFor="let widget of otherWidgets">
+            <i [icon]="widget.isCompleted ? 'check' : 'cancel'" [class.completed]="widget.isCompleted"></i>
+            <span>{{widget.widget.definition.caption}}</span>
+          </li>
+        </ul>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</ng-container>
+<info-message *ngIf="selection.selected?.length > 1">
+  Workflow-Aktionen sind aktuell nur für ein Element möglich
+</info-message>
