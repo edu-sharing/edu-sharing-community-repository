@@ -1071,6 +1071,16 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
+				<!-- any info about unmet legacy criteria for a given node (e.g. some law restriction that is not met) -->
+				<property name="ccm:unmetLegalCriteria">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 		</aspect>
 
