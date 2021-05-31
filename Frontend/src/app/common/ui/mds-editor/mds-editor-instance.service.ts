@@ -591,6 +591,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             )
             .subscribe(this.activeViews);
         this.values = activeWidgets.pipe(
+            // Don't spam the observable with changes while UI is constructing.
+            //
+            // TODO: Does this work when widgets are reset and constructed a second time?
+            switchMap((widgets) => this.mdsInflated.pipe(map(() => widgets))),
             switchMap((widgets) =>
                 // FIXME: The mappings below are a bit hacky. We take take the raw `value`
                 // observable for regular widgets and the `hasChanges` observable for native widgets
