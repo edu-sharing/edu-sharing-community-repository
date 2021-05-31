@@ -18,18 +18,6 @@
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/intendedEndUserRole/index.json</valuespace>
 		</widget>
 		<widget>
-			<caption>Nicht erfüllte, rechtlichte Kriterien</caption>
-			<id>ccm:unmetLegalCriteria</id>
-			<type>checkboxVertical</type>
-			<values>
-				<value cap="Strafrecht">criminal_law</value>
-				<value cap="Jugendschutz">protection_of_minors</value>
-				<value cap="Perönlichkeitsrechte">personality_right</value>
-				<value cap="Urheberrechte">copyright_law</value>
-				<value cap="Datenschutzangaben">data_privacy</value>
-			</values>
-		</widget>
-		<widget>
 			<caption>Bildungsumfeld</caption>
 			<id>ccm:educationalcontext</id>
 			<type>multivalueFixedBadges</type>
