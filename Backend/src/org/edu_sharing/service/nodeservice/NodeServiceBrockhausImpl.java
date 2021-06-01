@@ -38,7 +38,9 @@ public class NodeServiceBrockhausImpl extends NodeServiceAdapterCached{
 		}
 		props = new HashMap<>();
 		String url=SearchServiceBrockhausImpl.buildUrl(apiKey,nodeId);
-		props.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,url);
+		props.put(CCConstants.CONTENTURL,SearchServiceBrockhausImpl.buildUrl(apiKey,url));
+		props.put(CCConstants.CCM_PROP_IO_WWWURL,SearchServiceBrockhausImpl.buildUrl(apiKey,url));
+
 		return props;
 	}
 	@Override
