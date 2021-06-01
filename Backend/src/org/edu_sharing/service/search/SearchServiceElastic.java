@@ -299,7 +299,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
              */
             if(entry.getValue() instanceof ArrayList){
                 if(((ArrayList) entry.getValue()).size() != 1) {
-                    value = entry.getValue();
+                    value = ValueTool.toMultivalue(((ArrayList<?>) entry.getValue()).toArray(new String[0]));
                 } else {
                     value = (Serializable) ((ArrayList) entry.getValue()).get(0);
                 }
@@ -321,7 +321,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             /**
              * metadataset translation
              */
-            String[] displayNames = MetadataHelper.getDisplayNames(mds, entry.getKey(), entry.getValue());
+            String[] displayNames = MetadataHelper.getDisplayNames(mds, entry.getKey(), value);
             if(displayNames != null){
                 props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
             }
