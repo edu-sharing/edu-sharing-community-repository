@@ -264,7 +264,9 @@ export class LoginComponent implements OnInit {
         }
         this.currentProvider = null;
         for (const p of Helper.deepCopy(this.providers)) {
-            p.providers = p.providers.filter((p: any) => p.name.toLowerCase().includes(filter.toLowerCase()));
+            p.providers = p.providers.filter((p: any) =>
+                p.name.toLowerCase().includes(filter.toLowerCase()) || p.data?.toLowerCase().includes(filter.toLocaleString())
+            );
             if (p.providers.length) {
                 filtered.push(p);
             }
