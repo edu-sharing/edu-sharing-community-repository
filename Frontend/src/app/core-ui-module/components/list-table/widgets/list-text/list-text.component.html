@@ -1,5 +1,5 @@
 <label *ngIf="item.config?.showLabel">
-  {{getI18n(item) | translate}}
+  {{ getI18n(item) | translate }}
 </label>
 <ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
   <ng-container [ngSwitch]="item.name">
@@ -25,7 +25,10 @@
     {{ $any(getNode())[item.name] }}
   </span>
 </ng-container>
-<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'NODE' || item.type === 'NODE_PROPOSAL' || item.type === 'COLLECTION'">
+<ng-container
+  [ngSwitch]="item.name"
+  *ngIf="item.type === 'NODE' || item.type === 'NODE_PROPOSAL' || item.type === 'COLLECTION'"
+>
   <span *ngSwitchCase="'name'">
     {{ $any(getNode()).name }}
   </span>
@@ -70,6 +73,20 @@
     <span class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
     {{ $any(getNode()).modifiedBy | nodePersonName }}
   </span>
+  <span
+    *ngSwitchCase="'ccm:commonlicense_key'"
+    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+  >
+    <span class="cdk-visually-hidden">{{ 'NODE.ccm:commonlicense_key' | translate }}:</span>
+    <ng-container *ngIf="$any(getNode()).properties['ccm:commonlicense_key'] as license">
+      {{
+        license[0] === 'CUSTOM'
+          ? $any(getNode()).properties['cclom:rights_description']
+          : ('LICENSE.NAMES.' + $any(getNode()).properties['ccm:commonlicense_key']
+            | translate: { fallback: $any(getNode()).properties['ccm:commonlicense_key'] })
+      }}
+    </ng-container>
+  </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null">
     <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     <ng-container
@@ -85,12 +102,16 @@
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
       {{
-        $any(getNode()).properties[item.name] ? ($any(getNode()).properties[item.name][0] | formatDate) : ''
+        $any(getNode()).properties[item.name]
+          ? ($any(getNode()).properties[item.name][0] | formatDate)
+          : ''
       }}
     </ng-container>
     <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
       {{
-        $any(getNode()).properties[item.name] ? ($any(getNode()).properties[item.name][0] | vcardName) : ''
+        $any(getNode()).properties[item.name]
+          ? ($any(getNode()).properties[item.name][0] | vcardName)
+          : ''
       }}
     </ng-container>
   </span>
