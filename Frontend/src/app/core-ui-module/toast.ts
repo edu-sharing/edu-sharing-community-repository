@@ -230,7 +230,9 @@ export class Toast implements OnDestroy {
     onShowModalDialog(param: (params: any) => void) {
         this.onShowModal = param;
     }
-
+    hasOpenDialog() {
+        return this.isModalDialogOpenSubject.value;
+    }
     closeModalDialog() {
         this.onShowModal({ title: null, message: null });
         this.isModalDialogOpenSubject.next(false);
