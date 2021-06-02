@@ -78,6 +78,7 @@ import {VCardNamePipe} from './pipes/vcard-name.pipe';
 import {ImageConfigDirective} from './directives/image-config.directive';
 import {ErrorProcessingService} from './error.processing';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
+import { FormatDurationPipe } from './pipes/format-duration.pipe';
 
 @NgModule({
     declarations: [
@@ -131,6 +132,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         BitwisePipe,
         ElementRefDirective,
         TitleDirective,
+        FormatDurationPipe,
     ],
     imports: [
         A11yModule,

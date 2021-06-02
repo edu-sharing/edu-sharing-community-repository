@@ -87,6 +87,30 @@
       }}
     </ng-container>
   </span>
+  <span
+    *ngSwitchCase="'ccm:educationaltypicalagerange'"
+    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+  >
+    <span class="cdk-visually-hidden"
+      >{{ 'NODE.ccm:educationaltypicalagerange' | translate }}:</span
+    >
+    <ng-container
+      *ngIf="
+        $any(getNode()).properties['ccm:educationaltypicalagerange_from'] ||
+        $any(getNode()).properties['ccm:educationaltypicalagerange_to']
+      "
+    >
+      {{ $any(getNode()).properties['ccm:educationaltypicalagerange_from'] }} -
+      {{ $any(getNode()).properties['ccm:educationaltypicalagerange_to'] }}
+    </ng-container>
+  </span>
+  <span
+    *ngSwitchCase="'cclom:duration'"
+    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+  >
+    <span class="cdk-visually-hidden">{{ 'NODE.cclom:duration' | translate }}:</span>
+    {{ $any(getNode()) | formatDuration }}
+  </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null">
     <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     <ng-container
