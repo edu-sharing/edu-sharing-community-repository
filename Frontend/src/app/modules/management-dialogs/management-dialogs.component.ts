@@ -729,7 +729,7 @@ export class WorkspaceManagementDialogsComponent  {
             Observable.forkJoin(nodes.map((n) =>
                 this.nodeService.editNodeProperty(n.proposal.ref.id,
                     RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
-                    ('DECLINED' as CollectionProposalStatus))
+                    [('DECLINED' as CollectionProposalStatus)])
             ))).then(() => {
                 this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.DECLINED');
                 this.onDelete.emit({objects: nodes, error: false, count: nodes.length});
@@ -741,7 +741,7 @@ export class WorkspaceManagementDialogsComponent  {
         Observable.forkJoin(nodes.map((n) =>
             this.nodeService.editNodeProperty(n.proposal.ref.id,
                 RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
-                ('ACCEPTED' as CollectionProposalStatus))
+                [('ACCEPTED' as CollectionProposalStatus)])
 
         ))).then(() => {
             this.errorProcessing.handleRestRequest(Observable.forkJoin(nodes.map((n) =>
