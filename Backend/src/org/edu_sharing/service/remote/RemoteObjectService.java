@@ -43,76 +43,72 @@ public class RemoteObjectService {
 	 */
 	public String getRemoteObject(String repositoryId, String nodeId) {
 
-		return AuthenticationUtil.runAsSystem(new RunAsWork<String>() {
+		return AuthenticationUtil.runAsSystem(() -> {
+			try {
+				ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
+				if (is3dPartyRepository(repInfo)) {
+					logger.info("repository " + repInfo.getAppId() + " is not HomeNode and No Alfresco");
 
-			@Override
-			public String doWork() throws Exception {
-				try {
-					ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
-					if (is3dPartyRepository(repInfo)) {
-						logger.info("repository " + repInfo.getAppId() + " is not HomeNode and No Alfresco");
+					MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 
-						MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
+					org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
+							.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
+					String remoteObjectFolderId = null;
+					remoteObjectFolderId = getRemoteObjectsFolder();
 
-						org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
-								.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
-						String remoteObjectFolderId = null;
-						remoteObjectFolderId = getRemoteObjectsFolder();
-		
-						// schau nach ob remote object schon existiert
-						mcAlfrescoBaseClient.setResolveRemoteObjects(false);
-						HashMap<String, Object> remoteObjectProps = mcAlfrescoBaseClient.getChild(remoteObjectFolderId,
-								CCConstants.CCM_TYPE_REMOTEOBJECT, CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, nodeId);
+					// schau nach ob remote object schon existiert
+					mcAlfrescoBaseClient.setResolveRemoteObjects(false);
+					HashMap<String, Object> remoteObjectProps = mcAlfrescoBaseClient.getChild(remoteObjectFolderId,
+							CCConstants.CCM_TYPE_REMOTEOBJECT, CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, nodeId);
 
-						String remoteObjectNodeId = null;
-						if (remoteObjectProps == null) {
-							logger.info("found no remote object for remote node id:" + nodeId + " creating new one");
-							// create RemoteObject as system
-							remoteObjectProps = new HashMap<>();
-							remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, nodeId);
-							remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE,
-									repInfo.getRepositoryType());
-							remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
+					String remoteObjectNodeId = null;
+					if (remoteObjectProps == null) {
+						logger.info("found no remote object for remote node id:" + nodeId + " creating new one");
+						// create RemoteObject as system
+						remoteObjectProps = new HashMap<>();
+						remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, nodeId);
+						remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE,
+								repInfo.getRepositoryType());
+						remoteObjectProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
 
-							remoteObjectNodeId = NodeServiceFactory.getLocalService().createNodeBasic(remoteObjectFolderId,
-									CCConstants.CCM_TYPE_REMOTEOBJECT, remoteObjectProps);
-							NodeService nodeService = NodeServiceFactory.getNodeService(repInfo.getAppId());
-							InputStream content = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,
-									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
-									null,CCConstants.CM_PROP_CONTENT);
-							HashMap<String, Object> properties = nodeService.getPropertiesPersisting(StoreRef.PROTOCOL_WORKSPACE,
-									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
-							if (content != null) {
-								// Store content from remote repo in node
-								NodeServiceFactory.getLocalService().writeContent(
-										StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, remoteObjectNodeId, content,
-										(String) properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT), "UTF-8",
-										CCConstants.CM_PROP_CONTENT);
-							}
-						} else {
-							remoteObjectNodeId = (String) remoteObjectProps.get(CCConstants.SYS_PROP_NODE_UID);
+						remoteObjectNodeId = NodeServiceFactory.getLocalService().createNodeBasic(remoteObjectFolderId,
+								CCConstants.CCM_TYPE_REMOTEOBJECT, remoteObjectProps);
+						NodeService nodeService = NodeServiceFactory.getNodeService(repInfo.getAppId());
+						InputStream content = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,
+								StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
+								null,CCConstants.CM_PROP_CONTENT);
+						HashMap<String, Object> properties = nodeService.getPropertiesPersisting(StoreRef.PROTOCOL_WORKSPACE,
+								StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+						if (content != null) {
+							// Store content from remote repo in node
+							NodeServiceFactory.getLocalService().writeContent(
+									StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, remoteObjectNodeId, content,
+									(String) properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT), "UTF-8",
+									CCConstants.CM_PROP_CONTENT);
 						}
-
-						// CLEANUP english?
-						// read rechte für den eigentlichen user auf das remote Object
-						// setzen, damit render service das checken kann
-
-						String userName = (String) Context.getCurrentInstance().getRequest().getSession()
-								.getAttribute(CCConstants.AUTH_USERNAME);
-						permissionService.setPermissions(remoteObjectNodeId, userName,
-								new String[] { CCConstants.PERMISSION_ALL, CCConstants.PERMISSION_CC_PUBLISH }, true);
-
-						return remoteObjectNodeId;
-
 					} else {
-						return nodeId;
+						remoteObjectNodeId = (String) remoteObjectProps.get(CCConstants.SYS_PROP_NODE_UID);
 					}
 
-				} catch (Throwable t) {
-					throw new Exception(t);
+					// CLEANUP english?
+					// read rechte für den eigentlichen user auf das remote Object
+					// setzen, damit render service das checken kann
+
+					String userName = (String) Context.getCurrentInstance().getRequest().getSession()
+							.getAttribute(CCConstants.AUTH_USERNAME);
+					permissionService.setPermissions(remoteObjectNodeId, userName,
+							new String[] { CCConstants.PERMISSION_ALL, CCConstants.PERMISSION_CC_PUBLISH }, true);
+
+					return remoteObjectNodeId;
+
+				} else {
+					return nodeId;
 				}
 
+			} catch (Throwable t) {
+				throw new Exception(t);
 			}
+
 		});
 
 	}
@@ -175,12 +171,19 @@ public class RemoteObjectService {
 		if(propsIn.containsKey(CCConstants.CM_NAME)) {
 			propsIn.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName((String) propsIn.get(CCConstants.CM_NAME)));
 		}
+		String importMds = repInfo.getString(ApplicationInfo.KEY_IMPORT_METADATASET, null);
+		if(importMds != null && !importMds.isEmpty()){
+			// use the specified metadataset for imports
+			propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, importMds);
+		} else {
+			// set the metadataset to keep the rendering of metadata consistent
+			propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, repInfo.getMetadatsetsV2()[0]);
+		}
 		// set the wwwurl so that the rendering will redirect to the source
 		// @TODO: Check behaviour for each connected repository type
 		// propsIn.put(CCConstants.CCM_PROP_IO_WWWURL, propsIn.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
 
-		// set the metadataset to keep the rendering of metadata consistent
-		propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, repInfo.getMetadatsetsV2()[0]);
+
 		// We also need to store repository information for remote edu-sharing objects
 		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, originalNodeId);
 		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE, repInfo.getRepositoryType());
