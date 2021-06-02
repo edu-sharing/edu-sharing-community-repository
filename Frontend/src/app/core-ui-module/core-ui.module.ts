@@ -76,8 +76,9 @@ import { FallbackTranslationHandler } from './translation';
 import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
 import {ImageConfigDirective} from './directives/image-config.directive';
-import {NativeElementInjectorDirective} from './directives/native-element-injector.directive';
+import {ErrorProcessingService} from './error.processing';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
+import { FormatDurationPipe } from './pipes/format-duration.pipe';
 
 @NgModule({
     declarations: [
@@ -103,7 +104,6 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         SpinnerSmallComponent,
         GlobalProgressComponent,
         VideoControlsComponent,
-        NativeElementInjectorDirective,
         InfoMessageComponent,
         InputPasswordComponent,
         InfiniteScrollDirective,
@@ -132,6 +132,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         BitwisePipe,
         ElementRefDirective,
         TitleDirective,
+        FormatDurationPipe,
     ],
     imports: [
         A11yModule,
@@ -166,7 +167,11 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
             },
         }),
     ],
-    providers: [Toast, NodeHelperService, OptionsHelperService],
+    providers: [
+        Toast,
+        ErrorProcessingService,
+        NodeHelperService,
+        OptionsHelperService],
     exports: [
         TranslateModule,
         ListTableComponent,
@@ -191,7 +196,6 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         InfiniteScrollDirective,
         ToastyModule,
         AuthorityNamePipe,
-        NativeElementInjectorDirective,
         VCardNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,

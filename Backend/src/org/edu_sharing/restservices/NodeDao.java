@@ -56,7 +56,6 @@ import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
-import org.edu_sharing.service.rating.RatingsCache;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
@@ -71,6 +70,7 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -119,7 +119,7 @@ public class NodeDao {
 	}
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
-		return getNode(repoDao, nodeId, new Filter());
+		return getNode(repoDao, nodeId, Filter.createShowAllFilter());
 	}
 	public static NodeDao getNode(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef)
 			throws DAOException {
@@ -352,7 +352,7 @@ public class NodeDao {
 	
 	public static final String archiveStoreProtocol = "archive";
 	public static final String archiveStoreId = "SpacesStore";
-	
+
 	private NodeDao(RepositoryDao repoDao, String nodeId) throws Throwable {
 		this(repoDao,nodeId,new Filter());
 	}
@@ -399,6 +399,28 @@ public class NodeDao {
 			throw DAOException.mapping(e);
 		}
 	}
+
+	/**
+	 * create an empty, Node dummy interface
+	 *
+	 * @param nodeRef
+	 * @return
+	 */
+	public static <T extends Node> T createEmptyDummy(Class<T> clazz, NodeRef nodeRef) throws IllegalAccessException, InstantiationException {
+		T node = clazz.newInstance();
+		node.setRef(nodeRef);
+		node.setName(nodeRef.getId());
+		node.setPreview(new Preview());
+		// allow fetching as admin to properly resolve the url
+		AuthenticationUtil.runAsSystem(() -> {
+			node.getPreview().setUrl(
+					URLTool.getPreviewServletUrl(nodeRef.getId(), StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier())
+			);
+			return null;
+		});
+		return node;
+	}
+
 	public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facettes) throws DAOException {
 		try {
 			if(!CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SAVED_SEARCH).equals(getType())){
@@ -487,8 +509,7 @@ public class NodeDao {
 				this.nodeProps = nodeRef.getProperties();
 			}
 			this.previewData = nodeRef.getPreview();
-			refreshPermissions(nodeRef);
-			
+
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
 				this.type = (String) nodeProps.get(CCConstants.NODETYPE);
 			}
@@ -501,6 +522,7 @@ public class NodeDao {
 			} else {
 				this.aspects = nodeRef.getAspects();
 			}
+			refreshPermissions(nodeRef);
 			this.access = PermissionServiceHelper.getPermissionsAsString(hasPermissions);
 			// replace all data if its an remote object
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
@@ -511,16 +533,21 @@ public class NodeDao {
 				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
 			} else if (this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 				// just fetch dynamic data which needs to be fetched, because the local io already has metadata
-				try {
-					NodeService nodeServiceRemote=NodeServiceFactory.getNodeService((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
-					HashMap<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
-							null, null, (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-					nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_UID);
-					nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
-					nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
-					this.nodeProps.putAll(nodePropsReplace);
-				}catch(Throwable t){
-					logger.warn("Error while fetching properties for node id "+getId()+": Node is a remote node and calling remote "+(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)+" failed",t);
+				String originalNodeId = this.getReferenceOriginalId();
+				HashMap<String, HashMap<String, Object>> history = this.nodeService.getVersionHistory(originalNodeId);
+				Optional<Entry<String, HashMap<String, Object>>> entry = history.entrySet().stream().findFirst();
+				if(!entry.isPresent() || CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT.equals(entry.get().getValue().get(CCConstants.CCM_PROP_IO_VERSION_COMMENT))) {
+					try {
+						NodeService nodeServiceRemote = NodeServiceFactory.getNodeService((String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+						HashMap<String, Object> nodePropsReplace = nodeServiceRemote.getPropertiesDynamic(
+								null, null, (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+						nodePropsReplace.remove(CCConstants.SYS_PROP_NODE_UID);
+						nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
+						nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
+						this.nodeProps.putAll(nodePropsReplace);
+					} catch (Throwable t) {
+						logger.warn("Error while fetching properties for node id " + getId() + ": Node is a remote node and calling remote " + (String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID) + " failed", t);
+					}
 				}
 			}
 
@@ -536,6 +563,9 @@ public class NodeDao {
 	public void refreshPermissions(org.edu_sharing.service.model.NodeRef nodeRef) {
 		if(nodeRef!=null && nodeRef.getPermissions()!=null && nodeRef.getPermissions().size() > 0){
 			this.hasPermissions = nodeRef.getPermissions();
+		} else if(!this.isCollectionReference() && aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
+			// remote copy -> local rights apply since it can be modified locally
+			this.hasPermissions = PermissionServiceFactory.getLocalService().hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
 		} else {
 			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
 		}
@@ -951,8 +981,8 @@ public class NodeDao {
 	private void fillNodeReference(CollectionReference reference) throws DAOException {
 		final String originalId = getReferenceOriginalId();
 		reference.setOriginalId(originalId);
-		// not supported and used by remote repositories
-		if(isFromRemoteRepository()){
+		// not supported and used by remote repositories, BUT is supported for local copies
+		if(isFromRemoteRepository() && !aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 			return;
 		}
 		try {
@@ -989,7 +1019,7 @@ public class NodeDao {
 		return originalId;
 	}
 
-	private void fillNodeObject(Node data) throws DAOException {
+	public <T extends Node> void fillNodeObject(T data) throws DAOException {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
 		data.setRemote(getRemote());

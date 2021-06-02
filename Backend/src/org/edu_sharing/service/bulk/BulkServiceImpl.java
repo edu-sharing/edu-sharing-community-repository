@@ -46,7 +46,6 @@ public class BulkServiceImpl implements BulkService {
 	 */
 
 	public NodeRef getOrCreate(NodeRef parent, String name, HashMap<String, Object> propertiesNative){
-		name = NodeServiceHelper.cleanupCmName(name);
 		NodeRef node = nodeServiceAlfresco.getChildByName(parent, ContentModel.ASSOC_CONTAINS, name);
 		if(node == null){
 			Map<QName, Serializable> props=new HashMap<>();

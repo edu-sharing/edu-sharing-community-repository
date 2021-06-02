@@ -559,7 +559,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         // store in url for remembering layout
         const params: any = {};
         params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
-        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params, replaceUrl: true});
+        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params, skipLocationChange: true});
         this.changes.detectChanges();
     }
 
@@ -693,14 +693,18 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     getItemCssClass(item: ListItem): string {
-        return (
+        let css = (
             item.type.toLowerCase() +
             '_' +
             item.name
                 .toLowerCase()
                 .replace(':', '_')
                 .replace('.', '_')
-        );
+        ) + ' type_' + item.type.toLowerCase();
+        if(item.config?.showLabel) {
+            css += ' item_with_label'
+        }
+        return css;
     }
 
     handleKeyboard(event: any): void {
@@ -1230,6 +1234,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     removeNodes(error: boolean, objects: Node[] | any[]) {
+        console.log('remove nodes', objects);
         if (error) {
             return;
         }
@@ -1244,11 +1249,12 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         }
         this.selectedNodes = [];
         this.selectionChanged.emit([]);
+        console.log('remove nodes', this._nodes);
         this.nodesChange.emit(this._nodes);
         this.refreshAvailableOptions();
     }
     replaceNodes(newObjects: Node[], localArray: Node[]){
-        newObjects.forEach((o: any) => {
+        newObjects?.forEach((o: any) => {
             const index = localArray.findIndex(n => n.ref.id === o.ref.id);
             if (index === -1) {
                 console.warn(
@@ -1278,6 +1284,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.selectedNodes = objects;
         this.selectionChanged.emit(objects);
         this.refreshAvailableOptions();
+        console.log(objects);
     }
 
     showReorder() {

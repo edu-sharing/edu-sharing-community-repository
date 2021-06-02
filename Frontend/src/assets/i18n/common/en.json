@@ -152,7 +152,8 @@
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed",
         "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders",
-        "TOOLPERMISSION_SIGNUP_GROUP": "Signup to an organisation/group (only applies to organisation/groups which are configured for signup)"
+        "TOOLPERMISSION_SIGNUP_GROUP": "Signup to an organisation/group (only applies to organisation/groups which are configured for signup)",
+        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Allow the user to propose materials for collection where he/she doesn't has write permissions for"
     },
     "NO_WRITE_PERMISSIONS": "No permissions",
     "NODE_SEARCH": "Search elements...",
@@ -299,7 +300,6 @@
     },
     "NODE_REPORT": {
         "TITLE": "Report problem",
-        "SUBTITLE": "Report an issue or problem",
         "REPORT": "report",
         "REPORT_INFO": "Report problem with \"{{name}}\"",
         "COMMENT": "Provide additional information about the problem that has occurred",
@@ -309,7 +309,6 @@
         "EMAIL_REQUIRED": "Please provide a valind e-mail address.",
         "REASON_REQUIRED": "Please select what kind of problem you are experiencing.",
         "DONE": "Thanks for your message.",
-        "REASON": "Which problem exists?",
         "REASONS": {
             "UNAVAILABLE": "object not available",
             "INAPPROPRIATE_CONTENT": "problematic content",
@@ -522,7 +521,9 @@
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Add material to collection?",
-        "COLLECTION_SHARE_PUBLIC_INFO": "By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it."
+        "COLLECTION_SHARE_PUBLIC_INFO": "By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it.",
+        "COLLECTION_PROPSE": "Propose material(s)?",
+        "COLLECTION_PROPSE_INFO": "You don't have sufficient permissions for the collection \"{{collection}}\". You can, however, propose this material for this collection. Do you want to continue?"
     },
     "OPTIONS": {
         "SHOW_ALL_OPTIONS": "More actions",

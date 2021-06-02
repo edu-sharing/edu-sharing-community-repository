@@ -242,6 +242,7 @@
                 "BULK_CREATE": "Node imported via bulk",
                 "BULK_UPDATE": "Node updated via bulk",
                 "BULK_UPDATE_RESYNC": "Applied local changes onto bulk-changes",
+                "REMOTE_OBJECT_INIT": "Object imported from federated search source",
                 "IMPORT_BLOCKED": "Changed status of import-blocking"
             }
         },
@@ -419,6 +420,7 @@
             "ADDED_TO_COLLECTION_SHARED": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to all invited persons",
             "ADDED_TO_COLLECTION_PUBLIC": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to everyone",
             "ADDED_TO_COLLECTION_MEDIA_CENTER": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to members of the mediacenter",
+            "PROPOSED_FOR_COLLECTION": "{{count}} element(s) proposed for collection \"{{collection}}\". The elements need to be approved before they are visible.",
             "ADD_TO_COLLECTION_DISABLED": "At least 1 selected material can not be collected",
             "DELETE_FINISHED": "Element(s) move to recycle",
             "CUT_COPY": "{{count}} Element(s) copied to clipboard",

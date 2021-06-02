@@ -150,7 +150,8 @@
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
         "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
-        "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)"
+        "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)",
+        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche der Nutzer keine Schreibrechte hat"
     },
     "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
     "NODE_SEARCH": "Elemente suchen...",
@@ -275,6 +276,10 @@
             "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
     },
+    "NODE_PROPOSAL": {
+        "cm:created": "Zeitpunkt des Vorschlags",
+        "cm:creator": "Vorgeschlagen von"
+    },
     "LICENSE": {
         "TITLE_OF_WORK": "Titel",
         "LINK_AUTHOR": "Link zum Autor",
@@ -365,7 +370,6 @@
     },
     "NODE_REPORT": {
         "TITLE": "Problem melden",
-        "SUBTITLE": "Problem oder Fehler am Medium melden",
         "REPORT": "Melden",
         "REPORT_INFO": "Problem mit \"{{name}}\" melden",
         "COMMENT": "Nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
@@ -375,7 +379,6 @@
         "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben",
         "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",
         "DONE": "Vielen Dank für Ihre Meldung.",
-        "REASON": "Welches Problem besteht?",
         "REASONS": {
             "UNAVAILABLE": "Medium nicht verfügbar",
             "INAPPROPRIATE_CONTENT": "Problematischer Inhalt",
@@ -557,7 +560,9 @@
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Material zur Sammlung hinzufügen?",
-        "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
+        "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben.",
+        "COLLECTION_PROPSE": "Vorschlag einreichen?",
+        "COLLECTION_PROPSE_INFO": "Sie haben auf die Sammlung \"{{collection}}\" keine ausreichenden Rechte. Sie können das Material jedoch als Vorschlag einreichen. Möchten Sie fortfahren?"
     },
     "OPTIONS": {
         "SHOW_ALL_OPTIONS": "Weitere Aktionen",
@@ -573,6 +578,8 @@
         "COLLECTION_PIN": "Sammlung pinnen",
         "COLLECTION_FEEDBACK": "Feedback...",
         "COLLECTION_FEEDBACK_VIEW": "Feedback ansehen",
+        "COLLECTION_PROPOSAL_ACCEPT": "Vorschlag bestätigen",
+        "COLLECTION_PROPOSAL_DECLINE": "Vorschlag ablehnen",
         "OPEN": "Öffnen",
         "DOWNLOAD": "Herunterladen",
         "DOWNLOAD_ALL": "Zip herunterladen",

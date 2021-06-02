@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { ListItem } from '../../../../../core-module/ui/list-item';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
+import {ProposalNode} from '../../../../../core-module/rest/data-object';
 
 @Component({
     selector: 'app-list-text',
@@ -10,6 +11,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 export class ListTextComponent extends ListWidget {
     static supportedItems = [
         new ListItem('NODE', '*'),
+        new ListItem('NODE_PROPOSAL', '*'),
         new ListItem('COLLECTION', '*'),
         new ListItem('ORG', '*'),
         new ListItem('GROUP', '*'),
@@ -21,6 +23,12 @@ export class ListTextComponent extends ListWidget {
     constructor() {
         super();
     }
+    getNode() {
+        if(this.item.type === 'NODE_PROPOSAL') {
+            return (this.node as ProposalNode).proposal;
+        }
+        return this.node;
+    }
 
     isUserProfileAttribute(attribute: string) {
         return (
@@ -30,5 +38,9 @@ export class ListTextComponent extends ListWidget {
                 RestConstants.AUTHORITY_EMAIL,
             ].indexOf(attribute) !== -1
         );
+    }
+
+    getI18n(item: ListItem) {
+        return (item.type === 'NODE_PROPOSAL' ? 'NODE_PROPOSAL' : 'NODE') + '.' + item.name;
     }
 }

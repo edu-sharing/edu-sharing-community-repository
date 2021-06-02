@@ -40,7 +40,9 @@ public class DAOException extends Exception {
 	}
 	
 	public static DAOException mapping(Throwable t,String nodeId) {
-		
+		if(t instanceof RuntimeException && t.getMessage().contains("Error during run as.")){
+			t = t.getCause();
+		}
 		if (t instanceof DAOException) {
 			
 			return (DAOException) t;

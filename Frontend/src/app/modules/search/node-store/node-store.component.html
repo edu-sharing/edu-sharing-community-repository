@@ -1,9 +1,8 @@
 <card
   title="{{'SEARCH.NODE_STORE.TITLE' | translate }}"
-  subtitle="{{'SEARCH.NODE_STORE.SUBTITLE' | translate }}"
   height="large" width="normal"
-  icon="bookmark_border"
   [buttons]="buttons"
+  [node]="nodes"
   [isCancelable]="true" (onCancel)="cancel()">
       <spinner *ngIf="loading"></spinner>
       <div *ngIf="!loading">

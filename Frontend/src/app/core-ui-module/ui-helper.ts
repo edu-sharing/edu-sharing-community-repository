@@ -312,6 +312,7 @@ export class UIHelper {
         router: Router,
         node: any,
         count: number,
+        asProposal = false,
     ) {
         let scope = node.collection ? node.collection.scope : node.scope;
         let type = node.collection ? node.collection.type : node.type;
@@ -332,16 +333,23 @@ export class UIHelper {
         } else if (type == RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
             scope = 'MEDIA_CENTER';
         }
-        bridge.showTemporaryMessage(MessageType.info,
-            'WORKSPACE.TOAST.ADDED_TO_COLLECTION_' + scope,
-            { count: count, collection: RestHelper.getTitle(node) },
-            {
-                link: {
-                    caption: 'WORKSPACE.TOAST.VIEW_COLLECTION',
-                    callback: () => UIHelper.goToCollection(router, node),
+        if(asProposal) {
+            bridge.showTemporaryMessage(MessageType.info,
+                'WORKSPACE.TOAST.PROPOSED_FOR_COLLECTION',
+                {count: count, collection: RestHelper.getTitle(node)},
+            );
+        } else {
+            bridge.showTemporaryMessage(MessageType.info,
+                'WORKSPACE.TOAST.ADDED_TO_COLLECTION_' + scope,
+                {count: count, collection: RestHelper.getTitle(node)},
+                {
+                    link: {
+                        caption: 'WORKSPACE.TOAST.VIEW_COLLECTION',
+                        callback: () => UIHelper.goToCollection(router, node),
+                    },
                 },
-            },
-        );
+            );
+        }
     }
 
     static prepareMetadatasets(
@@ -362,6 +370,7 @@ export class UIHelper {
         bridge: BridgeService,
         collection: Node,
         nodes: Node[],
+        asProposal = false,
         callback: (nodes: Node[]) => void = null,
         allowDuplicate = false,
     ) {
@@ -370,7 +379,8 @@ export class UIHelper {
                 collection.ref.id,
                 node.ref.id,
                 node.ref.repo,
-                allowDuplicate
+                allowDuplicate,
+                asProposal
                 ).pipe(
                     catchError(error => of({error, node}),)
                 )
@@ -385,11 +395,12 @@ export class UIHelper {
                     router,
                     collection,
                     success.length,
+                    asProposal
                 );
             }
             if(failed.length > 0) {
                 const duplicated = failed.filter(({error}) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE);
-                if (duplicated.length > 0) {
+                if (duplicated.length > 0 && !asProposal) {
                     bridge.showModalDialog({
                         title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
                         message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
@@ -411,6 +422,7 @@ export class UIHelper {
                                     bridge,
                                     collection,
                                     duplicated.map(d => d.node),
+                                    false,
                                     callback,
                                     true
                                 )

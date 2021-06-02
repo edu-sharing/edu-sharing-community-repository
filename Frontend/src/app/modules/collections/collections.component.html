@@ -234,7 +234,6 @@
           >
             <breadcrumbs
               class="collections-breadcrumb"
-              [invisibleDescription]="true"
               [home]="'COLLECTIONS.TAB.' + tabSelected"
               [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
               [breadcrumbsAsNode]="path"
@@ -289,7 +288,7 @@
               [isClickable]="true"
               (clickRow)="onCollectionsClick($event.node)"
               (doubleClickRow)="onCollectionsClick($event)"
-              [nodes]="collectionContent.collections"
+          [(nodes)]="collectionContent.collections"
               [hasMore]="
                         collectionContent.collections.length <
                         collectionContent.collectionsPagination.total
@@ -312,6 +311,35 @@
               </ng-container>
             </div>
           </section>
+
+      <section
+        *ngIf="!isLoading && collectionProposals?.nodes?.length"
+        class="collections-cards-div"
+      >
+        <div class="content-header">
+          <h2 class="mat-heading-3">
+            {{ 'COLLECTIONS.PROPOSALS.TITLE' | translate }}
+          </h2>
+        </div>
+
+        <app-custom-node-list-wrapper
+          [parent]="collectionContent.node"
+          [hasHeading]="false"
+          [viewType]="1"
+          [dragDrop]="false"
+          [hasIcon]="true"
+          [columns]="proposalColumns"
+          [mainNav]="mainNavRef"
+          [scope]="SCOPES.CollectionsReferences"
+          [isClickable]="true"
+          (clickRow)="onContentClick($event.node)"
+          [createLink]="true"
+          [nodes]="$any(collectionProposals.nodes)"
+          (nodesChange)="collectionProposals.nodes = $any($event)"
+          class="no-padding"
+        ></app-custom-node-list-wrapper>
+      </section>
+
 
           <!-- content (content cards) if not error -->
           <section
@@ -347,6 +375,7 @@
             </div>
 
             <app-custom-node-list-wrapper
+          #listReferences
               [parent]="collectionContent.node"
               [optionItems]="
                         isUserAllowedToEdit(collectionContent.node)

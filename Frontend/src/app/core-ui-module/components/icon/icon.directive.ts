@@ -93,10 +93,10 @@ export class IconDirective implements OnInit, OnDestroy {
             this.updateAria();
         }
         let cssClass: string;
-        if (id.startsWith('edu-')) {
+        if (id?.startsWith('edu-')) {
             cssClass = 'edu-icons';
             id = id.substr(4);
-        } else if (id.startsWith('custom-')) {
+        } else if (id?.startsWith('custom-')) {
             cssClass = 'custom-icons';
             id = id.substr(7);
         } else {

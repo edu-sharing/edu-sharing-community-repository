@@ -1507,11 +1507,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         'current repository ' +
                             this.currentRepository +
                             ' is restricted by context, switching to primary ' +
-                            use,
+                            use[0], use,
                     );
                     this.routeSearch(
                         this.searchService.searchTerm,
-                        use,
+                        use[0],
                         RestConstants.DEFAULT,
                     );
                 }

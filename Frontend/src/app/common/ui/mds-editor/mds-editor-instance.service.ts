@@ -35,9 +35,14 @@ import {
 } from './types';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 
+export interface CompletionStatusField {
+    widget: Widget;
+    isCompleted: boolean;
+}
 export interface CompletionStatusEntry {
     completed: number;
     total: number;
+    fields?: CompletionStatusField[];
 }
 
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
@@ -951,7 +956,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         const result: Widget[] = [];
         const availableWidgets = mdsDefinition.widgets
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
-            .filter((widget) => this.meetsCondition(widget, nodes, values));
+            .filter((widget) => this.meetsCondition(widget, nodes, values, false));
         const variables = await this.restLocator.getConfigVariables().toPromise();
         for (const view of views) {
             for (const widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
@@ -1009,12 +1014,17 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
     }
 
-    private meetsCondition(widget: MdsWidget, nodes?: Node[], values?: Values): boolean {
+    private meetsCondition(widget: MdsWidget, nodes?: Node[], values?: Values, obeyDynamic = false): boolean {
         if (!widget.condition) {
             return true;
         } else if (widget.condition.type === 'PROPERTY') {
             if (widget.condition.dynamic) {
-                return true;
+                if(!obeyDynamic) {
+                    return true;
+                }
+                const condition = widget.condition;
+                const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
+                return nodes.some((n) => pattern.test(n.properties[condition.value])) !== condition.negate;
             }
             if (nodes) {
                 return nodes.every(
@@ -1089,11 +1099,20 @@ export class MdsEditorInstanceService implements OnDestroy {
         widgets: Widget[],
         requiredMode: RequiredMode,
     ): CompletionStatusEntry {
-        const total = widgets.filter((widget) => widget.definition.isRequired === requiredMode);
+        const total = widgets.filter((widget) =>
+            widget.definition.isRequired === requiredMode && this.meetsCondition(widget.definition, this.nodes$.value, null, true)
+        );
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
+        const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
+            return {
+                widget,
+                isCompleted: !!(widget.getValue()?.[0])
+            }
+        });
         return {
             total: total.length,
             completed: completed.length,
+            fields: widgetCompletion,
         };
     }
 

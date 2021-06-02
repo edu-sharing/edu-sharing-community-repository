@@ -4,11 +4,13 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.repository.client.rpc.ACE;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.spring.ApplicationContextFactory;
 
 public interface CollectionService {
 
@@ -18,9 +20,14 @@ public interface CollectionService {
 	public void update(Collection collection);
 	
 	public void remove(String collectionId);
-	
-	
-	/**
+
+
+    List<AssociationRef> getChildrenProposal(String parentId) throws InsufficientPermissionException, Exception;
+
+    void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
+            throws DuplicateNodeException, Throwable;
+
+    /**
 	 * /**
 	 * creates an refObject
 	 * adds Usage to Original IO (lms=repo,course=sammlungsid,resourceId=refIoId, nodeId=originalIOId
@@ -77,4 +84,8 @@ public interface CollectionService {
     String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
 
 	List<String> getFeedbacks(String id) throws Throwable;
+
+	default CollectionProposalInfo getCollectionsContainingProposals(CCConstants.PROPOSAL_STATUS status, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws Throwable {
+		throw new NotImplementedException("collections proposal feature is not supported without elasticsearch");
+	}
 }

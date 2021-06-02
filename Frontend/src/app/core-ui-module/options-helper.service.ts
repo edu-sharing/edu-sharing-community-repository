@@ -22,7 +22,8 @@ import {
     Filetype,
     Node,
     NodesRightMode,
-    NodeWrapper
+    NodeWrapper,
+    ProposalNode
 } from '../core-module/rest/data-object';
 import {Helper} from '../core-module/rest/helper';
 import {
@@ -59,7 +60,8 @@ export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('Op
 
 @Injectable()
 export class OptionsHelperService {
-    public static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
+    static DownloadElementTypes = [ElementType.Node, ElementType.NodeChild, ElementType.NodeProposal, ElementType.NodePublishedCopy];
+    static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
     private static subscriptionUp: Subscription;
     private static subscriptionDown: Subscription;
     private appleCmd: boolean;
@@ -246,15 +248,13 @@ export class OptionsHelperService {
         }
         if(this.mainNav) {
             this.subscriptions.push(this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) => {
-                if(this.listener && this.listener.onRefresh) {
-                    this.listener.onRefresh(nodes);
-                }
+                this.listener?.onRefresh(nodes);
                 if(this.list) {
                     this.list.updateNodes(nodes);
                 }
             }));
             this.subscriptions.push(this.mainNav.management?.onDelete?.subscribe(
-                (result: { objects: any; count: number; error: boolean; }) => this.listener.onDelete(result)
+                (result: { objects: any; count: number; error: boolean; }) => this.listener?.onDelete(result)
             ));
         }
 
@@ -286,7 +286,7 @@ export class OptionsHelperService {
         return true;
     }
 
-    private getAvailableOptions(target: Target, objects: Node[] = null) {
+    public getAvailableOptions(target: Target, objects: Node[] = null) {
         if (target === Target.List) {
             if(objects == null) {
                 // fetch ALL options of ALL items inside list
@@ -400,6 +400,8 @@ export class OptionsHelperService {
                 return ElementType.NodeChild;
             } else if(object.mediatype === 'folder-link') {
                 return ElementType.MapRef;
+            } else if(object.proposal) {
+                return ElementType.NodeProposal;
             } else {
                 if(this.nodeHelper.isNodePublishedCopy(object)) {
                     return ElementType.NodePublishedCopy;
@@ -465,11 +467,32 @@ export class OptionsHelperService {
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
             management.nodeDebug = this.getObjects(object)[0],
         );
-        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.NodeBlockedImport, ElementType.SavedSearch, ElementType.NodeChild, ElementType.MapRef];
+        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.NodeBlockedImport, ElementType.SavedSearch, ElementType.NodeChild, ElementType.NodeProposal, ElementType.MapRef];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
         debugNode.group = DefaultGroups.View;
         debugNode.priority = 10;
+
+        const acceptProposal = new OptionItem('OPTIONS.COLLECTION_PROPOSAL_ACCEPT', 'check', (object) =>
+            management.addProposalsToCollection(this.getObjects(object))
+        );
+        acceptProposal.customEnabledCallback = ((nodes) =>
+            nodes.every((n) => (n as ProposalNode).accessible)
+        );
+        acceptProposal.elementType = [ElementType.NodeProposal];
+        acceptProposal.constrains = [Constrain.User];
+        acceptProposal.group = DefaultGroups.Primary;
+        acceptProposal.showAsAction = true;
+        acceptProposal.priority = 10;
+
+
+        const declineProposal = new OptionItem('OPTIONS.COLLECTION_PROPOSAL_DECLINE', 'clear', (object) =>
+            management.declineProposals(this.getObjects(object))
+        );
+        declineProposal.elementType = [ElementType.NodeProposal];
+        declineProposal.constrains = [Constrain.User];
+        declineProposal.group = DefaultGroups.Primary;
+        declineProposal.priority = 20;
 
         /*
          let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', null);
@@ -523,6 +546,7 @@ export class OptionsHelperService {
         editConnectorNode.customShowCallback = (nodes) => {
             return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
         }
+        editConnectorNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodeProposal];
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
         editConnectorNode.showAsAction = true;
@@ -668,7 +692,7 @@ export class OptionsHelperService {
         const downloadNode = new OptionItem('OPTIONS.DOWNLOAD', 'cloud_download', (object) =>
             this.nodeHelper.downloadNodes(this.getObjects(object))
         );
-        downloadNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
+        downloadNode.elementType = OptionsHelperService.DownloadElementTypes;
         downloadNode.constrains = [Constrain.Files];
         downloadNode.group = DefaultGroups.View;
         downloadNode.priority = 40;
@@ -1022,6 +1046,8 @@ export class OptionsHelperService {
 
         options.push(applyNode);
         options.push(debugNode);
+        options.push(acceptProposal);
+        options.push(declineProposal);
         options.push(openParentNode);
         options.push(openNode);
         options.push(editConnectorNode);

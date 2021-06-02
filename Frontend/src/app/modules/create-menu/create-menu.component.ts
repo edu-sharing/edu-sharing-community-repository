@@ -17,6 +17,7 @@ import {
 } from '../../core-ui-module/options-helper.service';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
+    ConfigurationService,
     Connector,
     DialogButton,
     Filetype,
@@ -27,7 +28,7 @@ import {
     RestConstants,
     RestHelper,
     RestIamService,
-    RestNodeService,
+    RestNodeService, SessionStorageService,
     TemporaryStorageService, UIConstants,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
@@ -86,6 +87,7 @@ export class CreateMenuComponent {
      * Allow upload of binary files
      */
     @Input() allowBinary = true;
+    private fallbackFolder: Node;
     /**
      * Parent location. If null, the folder picker will be shown
      */
@@ -105,7 +107,6 @@ export class CreateMenuComponent {
     @Output() onCreate = new EventEmitter<Node[]>();
 
     _parent: Node = null;
-    inbox: Node = null;
     addFolderName: string = null;
 
     showUploadSelect = false;
@@ -129,6 +130,8 @@ export class CreateMenuComponent {
         private toast: Toast,
         private router: Router,
         private translate: TranslateService,
+        private configService: ConfigurationService,
+        private sessionStorage: SessionStorageService,
         private temporaryStorage: TemporaryStorageService,
         private route: ActivatedRoute,
         private optionsService: OptionsHelperService,
@@ -147,11 +150,20 @@ export class CreateMenuComponent {
         });
         this.connector.isLoggedIn(false).subscribe((login) => {
             if(login.statusCode === RestConstants.STATUS_CODE_OK) {
-                this.nodeService
-                    .getNodeMetadata(RestConstants.INBOX)
-                    .subscribe(node => {
-                        this.inbox = node.node;
-                    });
+                this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).subscribe((id) => {
+                    this.nodeService
+                        .getNodeMetadata(id)
+                        .subscribe(node => {
+                            this.fallbackFolder = node.node;
+                        });
+                }, (error)=> {
+                    console.warn('error resolving defaultInboxFolder', error);
+                    this.nodeService
+                        .getNodeMetadata(RestConstants.INBOX)
+                        .subscribe(node => {
+                            this.fallbackFolder = node.node;
+                        });
+                });
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.delay(0);
@@ -318,7 +330,7 @@ export class CreateMenuComponent {
     getParent() {
         return this._parent && !this.nodeHelper.isNodeCollection(this._parent)
             ? this._parent
-            : this.inbox;
+            : this.fallbackFolder;
     }
 
     addFolder(folder: any) {
