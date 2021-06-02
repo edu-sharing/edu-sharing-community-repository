@@ -12,6 +12,9 @@ public class ScopeAuthenticationServiceImpl extends ScopeAuthenticationServiceAb
 	
 	@Override
 	public boolean checkScope(String username, String scope) {
+		if(username == null){
+			return false;
+		}
 		return AuthenticationUtil.runAs(new RunAsWork<Boolean>() {
 			@Override
 			public Boolean doWork() throws Exception {
