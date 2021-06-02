@@ -771,7 +771,9 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         const accessibilityOptions = new OptionItem(
             'OPTIONS.ACCESSIBILITY',
             'accessibility',
-            () => this.mainnavService.getAccessibility().visible = true,
+            () => {
+                this.mainnavService.getAccessibility().show();
+            },
         );
         this.userMenuOptions.push(accessibilityOptions);
         for (const option of this.getConfigMenuHelpOptions()) {
