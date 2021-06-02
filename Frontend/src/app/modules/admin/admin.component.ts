@@ -391,7 +391,7 @@ export class AdminComponent {
     window.open(app.configUrl);
   }
   public editApp(app:any) {
-    this.currentApp=app.name;
+    this.currentApp=app.name || 'HOMEAPP';
     this.currentAppXml=app.file;
     this.globalProgress=true;
     this.admin.getApplicationXML(app.file).subscribe((data:any[])=> {
