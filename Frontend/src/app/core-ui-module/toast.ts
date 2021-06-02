@@ -459,7 +459,7 @@ export class Toast implements OnDestroy {
             error = json.error + ': ' + json.message;
         } catch (e) {
             console.error(errorObject);
-            error = errorObject.toString();
+            error = errorObject?.toString();
         }
         if (message === 'COMMON_API_ERROR') {
             dialogMessage = '';
