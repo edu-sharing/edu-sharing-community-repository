@@ -1,7 +1,7 @@
 import { Directive, EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject, from } from 'rxjs';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { map, shareReplay, switchMap, first, takeUntil, filter, tap } from 'rxjs/operators';
 import {
     Node,
     RestConnectorService,
@@ -471,8 +471,13 @@ export class MdsEditorInstanceService implements OnDestroy {
      * accordingly.
      */
     mdsInitDone = new ReplaySubject<void>(1);
-    /** Fires when all widgets have been injected. */
-    mdsInflated = new ReplaySubject<void>(1);
+    /** Fires when all widgets have been injected.
+     *
+     * First value emitted is `true` when all widgets are ready.
+     *
+     * Will set to `false` during re-initialization.
+     */
+    mdsInflated = new ReplaySubject<boolean>(1);
     suggestions$ = new BehaviorSubject<Suggestions>(null);
     /** Views that have at least one widget, that is not hidden due to dynamic conditions. */
     activeViews = new ReplaySubject<MdsView[]>(1);
@@ -592,9 +597,12 @@ export class MdsEditorInstanceService implements OnDestroy {
             .subscribe(this.activeViews);
         this.values = activeWidgets.pipe(
             // Don't spam the observable with changes while UI is constructing.
-            //
-            // TODO: Does this work when widgets are reset and constructed a second time?
-            switchMap((widgets) => this.mdsInflated.pipe(map(() => widgets))),
+            switchMap((widgets) =>
+                this.mdsInflated.pipe(
+                    first((isInflated) => isInflated),
+                    map(() => widgets),
+                ),
+            ),
             switchMap((widgets) =>
                 // FIXME: The mappings below are a bit hacky. We take take the raw `value`
                 // observable for regular widgets and the `hasChanges` observable for native widgets
@@ -626,12 +634,12 @@ export class MdsEditorInstanceService implements OnDestroy {
                                 ),
                             ),
                         ),
-                ]),
+                ]).pipe(takeUntil(this.mdsInflated.pipe(filter((isInflated) => !isInflated)))),
             ),
             map((values) =>
                 values.reduce((acc, v) => ({ ...acc, ...v }), {} as { [id: string]: string[] }),
             ),
-            shareReplay(),
+            shareReplay(1),
         );
     }
 
@@ -775,9 +783,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             // one.
             for (let i = 0; i < this.widgets.value.length; i++) {
                 const index = (i + this.lastScrolledIntoViewIndex + 1) % this.widgets.value.length;
-                const hasJustBeenScrolledIntoView = this.widgets.value[index].showMissingRequired(
-                    true,
-                );
+                const hasJustBeenScrolledIntoView =
+                    this.widgets.value[index].showMissingRequired(true);
                 if (hasJustBeenScrolledIntoView) {
                     this.lastScrolledIntoViewIndex = index;
                     break;
@@ -1014,17 +1021,25 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
     }
 
-    private meetsCondition(widget: MdsWidget, nodes?: Node[], values?: Values, obeyDynamic = false): boolean {
+    private meetsCondition(
+        widget: MdsWidget,
+        nodes?: Node[],
+        values?: Values,
+        obeyDynamic = false,
+    ): boolean {
         if (!widget.condition) {
             return true;
         } else if (widget.condition.type === 'PROPERTY') {
             if (widget.condition.dynamic) {
-                if(!obeyDynamic) {
+                if (!obeyDynamic) {
                     return true;
                 }
                 const condition = widget.condition;
                 const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
-                return nodes.some((n) => pattern.test(n.properties[condition.value])) !== condition.negate;
+                return (
+                    nodes.some((n) => pattern.test(n.properties[condition.value])) !==
+                    condition.negate
+                );
             }
             if (nodes) {
                 return nodes.every(
@@ -1036,13 +1051,18 @@ export class MdsEditorInstanceService implements OnDestroy {
                 return true;
             }
         } else if (widget.condition.type === 'TOOLPERMISSION') {
-            const result = (
+            const result =
                 widget.condition.negate ===
-                !this.restConnector.hasToolPermissionInstant(widget.condition.value)
-            );
-            if(!result) {
+                !this.restConnector.hasToolPermissionInstant(widget.condition.value);
+            if (!result) {
                 // tslint:disable-next-line:no-console
-                console.info('hide widget ' + widget.id + ' because toolpermission ' + widget.condition.value + ' condition not matched');
+                console.info(
+                    'hide widget ' +
+                        widget.id +
+                        ' because toolpermission ' +
+                        widget.condition.value +
+                        ' condition not matched',
+                );
             }
             return result;
         }
@@ -1099,15 +1119,17 @@ export class MdsEditorInstanceService implements OnDestroy {
         widgets: Widget[],
         requiredMode: RequiredMode,
     ): CompletionStatusEntry {
-        const total = widgets.filter((widget) =>
-            widget.definition.isRequired === requiredMode && this.meetsCondition(widget.definition, this.nodes$.value, null, true)
+        const total = widgets.filter(
+            (widget) =>
+                widget.definition.isRequired === requiredMode &&
+                this.meetsCondition(widget.definition, this.nodes$.value, null, true),
         );
         const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
             return {
                 widget,
-                isCompleted: !!(widget.getValue()?.[0])
-            }
+                isCompleted: !!widget.getValue()?.[0],
+            };
         });
         return {
             total: total.length,
