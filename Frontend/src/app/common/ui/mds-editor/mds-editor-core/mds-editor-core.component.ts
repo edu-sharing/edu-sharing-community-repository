@@ -50,7 +50,7 @@ export class MdsEditorCoreComponent {
         await tick();
         // Wait for `MdsEditorViewComponent`s to inject their widgets.
         await tick();
-        this.mdsEditorInstance.mdsInflated.next();
+        this.mdsEditorInstance.mdsInflated.next(true);
     }
 }
 

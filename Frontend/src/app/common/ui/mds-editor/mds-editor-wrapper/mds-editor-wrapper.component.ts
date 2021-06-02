@@ -203,6 +203,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     async reInit(): Promise<void> {
+        this.mdsEditorInstance.mdsInflated.next(false);
         return this.init();
     }
 
