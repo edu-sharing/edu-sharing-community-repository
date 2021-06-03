@@ -348,6 +348,8 @@ public class DownloadServlet extends HttpServlet{
 				MetadataHelper.getMetadataset(nodeRef),
 				nodeRef
 				, AuthenticationUtil.getFullyAuthenticatedUser(),
+				nodeDao.getNativeType(),
+				nodeDao.getAspectsNative(),
 				props
 		);
 		render.setRenderingMode(MetadataTemplateRenderer.RenderingMode.TEXT);
