@@ -155,8 +155,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 							resp.sendRedirect(thumbnail);
 							return;
 						}
+						if(nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
 						props=NodeServiceFactory.getNodeService((String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID))
 								.getProperties(storeProtocol, storeId, (String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+						}
 						if(props != null){
 							thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 							if(thumbnail != null && !thumbnail.trim().equals("")){
@@ -164,10 +166,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 								return;
 							}
 						}
-						deliverContentAsSystem(nodeRef, CCConstants.CM_PROP_CONTENT, req, resp);
-						return;
-						//resp.sendRedirect(defaultImage);
-						//throw new Exception();
+						throw new UnsupportedTypeException();
+						//deliverContentAsSystem(nodeRef, CCConstants.CM_PROP_CONTENT, req, resp);
+						//return;
 					}
 
 					// For collections: Fetch the original object for preview
