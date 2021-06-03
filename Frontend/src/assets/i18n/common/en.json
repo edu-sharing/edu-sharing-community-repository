@@ -734,6 +734,10 @@
         "REQUIREDPUBLISH": "for publishing required fields",
         "SHOW": "show"
     },
+    "KEY_MODIFIER": {
+        "SHIFT": "SHIFT",
+        "CTRL": "CTRL"
+    },
     "LANGUAGE": {
         "INTERNATIONAL": "international",
         "ar": "Arabic",

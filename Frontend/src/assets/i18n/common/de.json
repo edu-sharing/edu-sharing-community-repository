@@ -821,6 +821,10 @@
             "ADDED_TO_GROUP": "Sie sind nun Mitglied der Gruppe {{group}}."
         }
     },
+    "KEY_MODIFIER": {
+        "SHIFT": "SHIFT",
+        "CTRL": "CTRL"
+    },
     "LANGUAGE": {
         "INTERNATIONAL": "International",
         "ar": "Arabisch",

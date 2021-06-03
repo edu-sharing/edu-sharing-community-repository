@@ -78,6 +78,7 @@ import {VCardNamePipe} from './pipes/vcard-name.pipe';
 import {ImageConfigDirective} from './directives/image-config.directive';
 import {NativeElementInjectorDirective} from './directives/native-element-injector.directive';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
+import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
 
 @NgModule({
     declarations: [
@@ -121,6 +122,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         NodeImageSizePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
+        OptionTooltipPipe,
         NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
@@ -191,6 +193,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         InfiniteScrollDirective,
         ToastyModule,
         AuthorityNamePipe,
+        OptionTooltipPipe,
         NativeElementInjectorDirective,
         VCardNamePipe,
         AuthorityColorPipe,
