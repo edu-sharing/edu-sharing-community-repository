@@ -420,9 +420,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 	private String getLanguageString(JSONObject meta, String field) throws JSONException {
 		try {
-			return meta.getJSONObject(field).getString("$");
-		}catch(Throwable t){
-			return meta.getString(field);
+			return meta.getJSONArray(field).getJSONObject(0).getString("$");
+		}catch (Throwable t1) {
+			try {
+				return meta.getJSONObject(field).getString("$");
+			} catch (Throwable t2) {
+				return meta.getString(field);
+			}
 		}
 	}
 
