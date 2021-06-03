@@ -719,7 +719,6 @@ export class MdsComponent {
         version=RestConstants.COMMENT_METADATA_UPDATE;
       }
     }
-
     this.globalProgress=true;
     // can only happen for single element
     if (files.length) {
@@ -738,12 +737,21 @@ export class MdsComponent {
     }
     else {
       // can be bulk mode
-      Observable.forkJoin(this.currentNodes.map((n) => this.node.editNodeMetadataNewVersion(n.ref.id,version,this.getValues(n.properties))))
+      Observable.forkJoin(this.currentNodes.map((n) => {
+        const props = this.getValues(n.properties);
+        if(props) {
+          return this.node.editNodeMetadataNewVersion(n.ref.id, version, this.getValues(n.properties))
+        } else {
+          return Observable.throwError(null);
+        }
+      }))
           .subscribe((nodes) => {
             this.currentNodes = nodes.map((n) => n.node);
             this.onUpdatePreview(callback);
           },(error) => {
-            this.toast.error(error);
+            if(error) {
+              this.toast.error(error);
+            }
             this.globalProgress = false;
           });
     }
