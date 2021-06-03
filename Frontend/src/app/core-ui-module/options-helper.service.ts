@@ -1325,7 +1325,7 @@ export class OptionsHelperService implements OnDestroy {
             this.handleKeyboardEventUp(event)
         );
         OptionsHelperService.subscriptionUp.push(this.localSubscripitionUp);
-        this.localSubscripitionDown = fromEvent(document, 'keydown').subscribe((event) =>
+        this.localSubscripitionDown = fromEvent(document, 'keydown').subscribe((event: KeyboardEvent) =>
             this.handleKeyboardEvent(event)
         );
         OptionsHelperService.subscriptionDown.push(this.localSubscripitionDown);
