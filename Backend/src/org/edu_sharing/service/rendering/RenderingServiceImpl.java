@@ -182,6 +182,8 @@ public class RenderingServiceImpl implements RenderingService{
 					remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
 				user,
+				nodeDao.getNativeType(),
+				nodeDao.getAspectsNative(),
 				nodeDao.getNativeProperties())
 			.getProcessedProperties()));
 		data.setNode(node);
@@ -205,6 +207,8 @@ public class RenderingServiceImpl implements RenderingService{
 						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
 				user,
+				nodeDao.getNativeType(),
+				nodeDao.getAspectsNative(),
 				nodeDao.getNativeProperties()).render(RenderingTool.DISPLAY_INLINE.equals(options.displayMode) ? "io_render_inline" : "io_render"));
 
 		// user

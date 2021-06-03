@@ -1094,6 +1094,9 @@ public class NodeDao {
 		return content;
 	}
 
+	public String getNativeType(){
+		return this.type;
+	}
 	public String getType() {
 		return NameSpaceTool.transformToShortQName(this.type);
 	}
