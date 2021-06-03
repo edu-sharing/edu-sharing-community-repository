@@ -135,9 +135,10 @@ public class UsageDao {
 
 	public void deleteUsage(String nodeId, String usageId) throws DAOException {
 		try {
-			boolean permission = permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
+			boolean permission = (ContextManagementFilter.accessToolType.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
 					CCConstants.PERMISSION_CHANGEPERMISSIONS);
+
 			if (!permission) {
 				throw new SecurityException("Can not modify usages on node " + nodeId);
 			}
