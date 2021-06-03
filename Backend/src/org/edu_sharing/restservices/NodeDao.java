@@ -535,7 +535,7 @@ public class NodeDao {
 				// just fetch dynamic data which needs to be fetched, because the local io already has metadata
 				String originalNodeId = this.getReferenceOriginalId();
 				HashMap<String, HashMap<String, Object>> history = this.nodeService.getVersionHistory(originalNodeId);
-				Optional<Entry<String, HashMap<String, Object>>> entry = history.entrySet().stream().findFirst();
+				Optional<Entry<String, HashMap<String, Object>>> entry = history == null ? Optional.empty() : history.entrySet().stream().findFirst();
 				if(!entry.isPresent() || CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT.equals(entry.get().getValue().get(CCConstants.CCM_PROP_IO_VERSION_COMMENT))) {
 					try {
 						NodeService nodeServiceRemote = NodeServiceFactory.getNodeService((String) this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
