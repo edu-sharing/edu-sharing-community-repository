@@ -11,6 +11,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.Filter;
@@ -22,6 +23,7 @@ import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage2Service;
 
 import io.swagger.annotations.ApiParam;
+import org.edu_sharing.service.usage.UsageException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
@@ -222,5 +224,27 @@ public class UsageDao {
 		};
 		return AuthenticationUtil.runAsSystem(runAs);
 		
+	}
+
+	public Usages.Usage setUsage(String repository,Usages.Usage usage) throws Exception {
+
+		if(ContextManagementFilter.accessToolType == null
+				|| ContextManagementFilter.accessToolType.get() == null
+				|| ContextManagementFilter.accessToolType.get().trim().equals("") ){
+			throw new DAOValidationException(new Exception("app signature required to use this endpoint."));
+		}
+		if(AuthenticationUtil.getFullyAuthenticatedUser() == null){
+			throw new DAOValidationException(new Exception("authenticated user required to use this endpoint."));
+		}
+
+		Usage2Service us = new Usage2Service();
+		org.edu_sharing.service.usage.Usage usageResult = us.setUsage(repository,usage.getAppUser(), usage.getAppId(),
+				usage.getCourseId(), usage.getParentNodeId(),usage.getAppUserMail(),usage.getFromUsed(),
+				usage.getToUsed(),
+				usage.getDistinctPersons() != null ? usage.getDistinctPersons() : -1 ,
+				usage.getUsageVersion(),
+				usage.getResourceId(),
+				usage.getUsageXmlParamsRaw());
+		return convertUsage(usageResult, Usages.Usage.class);
 	}
 }
