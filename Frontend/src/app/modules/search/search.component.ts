@@ -283,8 +283,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                                     /*this.repositories = null;*/
                                 }
                                 this.updateCurrentRepositoryId();
-                                if (this.repositories) {
-                                    let all = new Repository();
+                                if (this.repositories && !this.repositories.some((r) => r.repositoryType === 'ALL')) {
+                                    const all = new Repository();
                                     all.id = RestConstants.ALL;
                                     all.title = this.translate.instant(
                                         'SEARCH.REPOSITORY_ALL',
