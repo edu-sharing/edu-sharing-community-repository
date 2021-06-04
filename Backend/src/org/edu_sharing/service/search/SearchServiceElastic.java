@@ -432,9 +432,22 @@ public class SearchServiceElastic extends SearchServiceImpl {
         List<Map<String, Object>> collections = (List) sourceAsMap.get("collections");
         if(collections != null){
             for(Map<String, Object> collection : collections){
-                NodeRef transform = transform(authorities, user, collection);
-                List<NodeRef> usedInCollections = eduNodeRef.getUsedInCollections();
-                usedInCollections.add(transform);
+
+                Map<String,List<String>> colPermissionsElastic = (Map) collection.get("permissions");
+                String colOwner = (String)collection.get("owner");
+                boolean hasPermission = user.equals(colOwner);
+                if(!hasPermission) {
+                    for (Map.Entry<String, List<String>> entry : colPermissionsElastic.entrySet()) {
+                        if ("read".equals(entry.getKey())) {
+                            hasPermission = entry.getValue().stream().anyMatch(s -> authorities.contains(s) || s.equals(user));
+                            break;
+                        }
+                    }
+                }
+                if(hasPermission) {
+                    NodeRef transform = transform(authorities, user, collection);
+                    eduNodeRef.getUsedInCollections().add(transform);
+                }
             }
         }
 
