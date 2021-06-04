@@ -272,7 +272,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit) {
-        Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+        return this.transform(authorities,user,hit.getSourceAsMap());
+    }
+    private NodeRef transform(Set<String> authorities, String user, Map<String, Object> sourceAsMap){
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
@@ -356,6 +358,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
 
 
+
         org.alfresco.service.cmr.repository.NodeRef alfNodeRef = new  org.alfresco.service.cmr.repository.NodeRef(new StoreRef(protocol,identifier),nodeId);
         String contentUrl = URLTool.getNgRenderNodeUrl(nodeId,null);
         contentUrl = URLTool.addOAuthAccessToken(contentUrl);
@@ -425,6 +428,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         eduNodeRef.setPermissions(permissions);
+
+        List<Map<String, Object>> collections = (List) sourceAsMap.get("collections");
+        if(collections != null){
+            for(Map<String, Object> collection : collections){
+                NodeRef transform = transform(authorities, user, collection);
+                List<NodeRef> usedInCollections = eduNodeRef.getUsedInCollections();
+                usedInCollections.add(transform);
+            }
+        }
+
         long permMillisSingle = (System.currentTimeMillis() - millis);
         return eduNodeRef;
     }

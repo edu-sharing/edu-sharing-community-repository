@@ -43,4 +43,8 @@ public interface NodeRef {
 
 	public List<String> getAspects();
 
+	public void setUsedInCollections(List<NodeRef> usedInCollections);
+
+	public List<NodeRef> getUsedInCollections();
+
 }

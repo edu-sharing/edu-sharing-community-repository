@@ -1,5 +1,6 @@
 package org.edu_sharing.service.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 public class NodeRefImpl implements NodeRef {
 
 	String repositoryId;
+
+	List<NodeRef> usedInCollections = new ArrayList<>();
 
 	public static class PreviewImpl implements Preview {
 		String mimetype;
@@ -129,6 +132,16 @@ public class NodeRefImpl implements NodeRef {
 	@Override
 	public List<String> getAspects() {
 		return aspects;
+	}
+
+	@Override
+	public void setUsedInCollections(List<NodeRef> usedInCollections) {
+
+	}
+
+	@Override
+	public List<NodeRef> getUsedInCollections() {
+		return null;
 	}
 
 	@Override
