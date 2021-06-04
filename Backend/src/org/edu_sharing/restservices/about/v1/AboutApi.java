@@ -150,7 +150,10 @@ public class AboutApi  {
 	    	
 	    	return Response.ok().build();
 	    	
-    	}catch(Throwable t) {
+    	}catch(java.util.concurrent.TimeoutException e){
+    		logger.debug(e.getMessage(),e);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(e)).build();
+		}catch(Throwable t) {
     		logger.error(t.getMessage(), t);			
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
     	}
