@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 
 @Path("/tracking/v1")
 @Api(tags = { "TRACKING v1" })
@@ -38,7 +39,7 @@ public class TrackingApi {
 	    	@ApiParam(value = "node id for which the event is tracked. For some event, this can be null",required=false ) @QueryParam("node") String node,
 			@Context HttpServletRequest req) {
     	try {
-	    	if(event.equals(TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA)){
+	    	if(Arrays.asList(TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA, TrackingService.EventType.VIEW_MATERIAL).contains(event)){
 				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, event);
 				return Response.status(Response.Status.OK).build();
 			} else {

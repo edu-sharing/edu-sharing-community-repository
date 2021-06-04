@@ -1,11 +1,11 @@
 <div class="config config-size-{{ size }}">
-    <div class="size-chooser">
+    <!--<div class="size-chooser">
         <mat-label>{{'ADMIN.GLOBAL_CONFIG.SIZE' | translate}}</mat-label>
         <mat-button-toggle-group name="size" [(ngModel)]="size">
             <mat-button-toggle value="medium">{{'ADMIN.GLOBAL_CONFIG.SIZE_MEDIUM' | translate}}</mat-button-toggle>
             <mat-button-toggle value="large">{{'ADMIN.GLOBAL_CONFIG.SIZE_LARGE' | translate}}</mat-button-toggle>
         </mat-button-toggle-group>
-    </div>
+    </div>-->
     <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.CLIENT_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
         <ngx-monaco-editor [options]="clientCodeOptions" [(ngModel)]="configClient" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>

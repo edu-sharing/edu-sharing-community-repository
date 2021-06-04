@@ -37,6 +37,7 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {ListItemType} from '../../../core-module/ui/list-item';
+import {VCard} from "../../../core-module/ui/VCard";
 
 @Component({
   selector: 'permissions-authorities',
@@ -244,12 +245,11 @@ export class PermissionsAuthoritiesComponent {
               private organization: RestOrganizationService,
               private connector: RestConnectorService,
               private iam: RestIamService) {
-    this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
-      this.connector.isLoggedIn().subscribe(() => {
-        this.isAdmin = data.canCreate;
-        this.updateOptions();
-        this.updateButtons();
-      });
+      this.isAdmin = this.connector.getCurrentLogin()?.isAdmin;
+      this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
+      this.updateOptions();
+      this.updateButtons();
+
     });
   }
   private search(){
@@ -564,8 +564,11 @@ export class PermissionsAuthoritiesComponent {
       },
         (error: any) => this.toast.error(error));
     }
-    else{
+    else {
       const editStore = Helper.deepCopy(this.edit);
+      if(this.edit.profile?.vcard) {
+          editStore.profile.vcard = this.edit.profile.vcard.copy();
+      }
       editStore.profile.sizeQuota *= 1024 * 1024;
       this.globalProgress = true;
       if (this.editId == null){
@@ -633,15 +636,16 @@ export class PermissionsAuthoritiesComponent {
       this.updateOptions();
     });
     if (this._mode === 'ORG') {
-      this.organization.getOrganizations(query, false, request).subscribe((orgs: OrganizationOrganizations) => {
+        // as non-admin, search only own orgs since these are the once with access
+      this.organization.getOrganizations(query, !this.isAdmin, request).subscribe((orgs: OrganizationOrganizations) => {
         this.offset += this.connector.numberPerRequest;
         for (const org of orgs.organizations) {
           if (org.administrationAccess) {
             this.list.push(org);
           }
-          // org endpoint does not support proper pagination, so check if result was empty
-          this.hasMore = orgs.organizations.length > 0;
         }
+        // org endpoint does not support proper pagination, so check if result was empty
+        this.hasMore = orgs.organizations.length > 0;
         this.loading = false;
         this.updateOptions();
       });
@@ -713,7 +717,7 @@ export class PermissionsAuthoritiesComponent {
     }
     else if (this._mode == 'USER'){
       this.iam.getUser(list[0].authorityName).subscribe((user) => {
-          this.edit = Helper.deepCopy(user.person);
+          this.edit = user.person;
           this.edit.profile.sizeQuota = user.person.quota.sizeQuota / 1024 / 1024;
           this.editId = this.edit.authorityName;
           this.primaryAffiliationList = this.edit.profile.primaryAffiliation ? this.PRIMARY_AFFILIATIONS.indexOf(this.edit.profile.primaryAffiliation) != -1 : true;

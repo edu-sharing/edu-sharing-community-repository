@@ -37,6 +37,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.springframework.context.ApplicationContext;
 
 public class AuthorityServiceImpl implements AuthorityService {
@@ -368,6 +369,7 @@ public EduGroup getEduGroup(String authority){
 									folderName = folderName + "_" + eduGroup.getScope();
 								}
 							}
+							folderName = NodeServiceHelper.cleanupCmName(folderName);
 							Map<QName, Serializable> folderProps = new HashMap<QName, Serializable>();
 							folderProps.put(ContentModel.PROP_NAME, folderName);
 

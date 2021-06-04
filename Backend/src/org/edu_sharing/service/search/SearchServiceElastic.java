@@ -1,23 +1,29 @@
 package org.edu_sharing.service.search;
 
+import com.google.gson.Gson;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -104,8 +110,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
         return sr;
     }
+
     public BoolQueryBuilder getPermissionsQuery(String field){
         Set<String> authorities = getUserAuthorities();
+        return getPermissionsQuery(field,authorities);
+    }
+    public BoolQueryBuilder getPermissionsQuery(String field, Set<String> authorities){
         BoolQueryBuilder audienceQueryBuilder = QueryBuilders.boolQuery();
         audienceQueryBuilder.minimumShouldMatch(1);
         for (String a : authorities) {
@@ -114,6 +124,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return audienceQueryBuilder;
     }
     public BoolQueryBuilder getReadPermissionsQuery(){
+
+        if(AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()){
+            return new BoolQueryBuilder().must(QueryBuilders.matchAllQuery());
+        }
+
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         BoolQueryBuilder audienceQueryBuilder = getPermissionsQuery("permissions.read");
         audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
@@ -148,15 +163,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
-            QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
+            QueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
+                    ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
+                    : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
             if(searchToken.getPermissions() != null){
                 for(String permission : searchToken.getPermissions()){
                     queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
                 }
             }
 
-            for(String facette : searchToken.getFacettes()){
-                searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
+            if(searchToken.getFacettes() != null) {
+                for (String facette : searchToken.getFacettes()) {
+                    searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
+                }
             }
 
             /**
@@ -177,7 +196,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.from(searchToken.getFrom());
             searchSourceBuilder.size(searchToken.getMaxResult());
             searchSourceBuilder.trackTotalHits(true);
-            searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
+            if(searchToken.getSortDefinition() != null) {
+                searchToken.getSortDefinition().applyToSearchSourceBuilder(searchSourceBuilder);
+            }
 
 
 
@@ -194,11 +215,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchHits hits = searchResponse.getHits();
             logger.info("result count: "+hits.getTotalHits());
 
-            long millisPerm = 0;
+            long millisPerm = System.currentTimeMillis();
             for (SearchHit hit : hits) {
                 data.add(transformSearchHit(authorities, user, hit));
             }
-            logger.info("permission stuff took:"+millisPerm);
+            logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
 
             Map<String,Map<String,Integer>> facettesResult = new HashMap<String,Map<String,Integer>>();
 
@@ -260,20 +281,47 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String protocol = (String) storeRef.get("protocol");
         String identifier = (String) storeRef.get("identifier");
 
+        String metadataSet = (String)properties.get(CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+
         HashMap<String, Object> props = new HashMap<>();
+
+        MetadataSetV2 mds = null;
+        try{mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),metadataSet);}catch(Exception e){};
+
         for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
 
             Serializable value = null;
+            /**
+             * @TODO: transform to ValueTool.toMultivalue
+             */
             if(entry.getValue() instanceof ArrayList){
                 if(((ArrayList) entry.getValue()).size() != 1) {
-                    value = entry.getValue();
+                    value = ValueTool.toMultivalue(((ArrayList<?>) entry.getValue()).toArray(new String[0]));
                 } else {
                     value = (Serializable) ((ArrayList) entry.getValue()).get(0);
                 }
             } else {
                 value = entry.getValue();
             }
+            if(entry.getKey().equals("ccm:mediacenter")){
+                List<Map<String,Object>> mediacenterStatus = (List<Map<String,Object>>)entry.getValue();
+                ArrayList<String> result = new ArrayList<>();
+                for(Map<String,Object> mcSt: mediacenterStatus){
+                    Gson gson = new Gson();
+                    String json = gson.toJson(mcSt);
+                    result.add(json);
+                }
+                value = ValueTool.toMultivalue(result.toArray(new String[result.size()]));
+            }
             props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
+
+            /**
+             * metadataset translation
+             */
+            String[] displayNames = MetadataHelper.getDisplayNames(mds, entry.getKey(), value);
+            if(displayNames != null){
+                props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
+            }
         }
 
         List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");
@@ -313,7 +361,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         props.put(CCConstants.CONTENTURL, contentUrl);
 
         if(sourceAsMap.get("content") != null) {
-            props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null));
+            props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null, true));
         }
 
         NodeRef eduNodeRef = new NodeRefImpl(ApplicationInfoList.getHomeRepository().getAppId(),
@@ -357,7 +405,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
         }
-        if(user.equals(owner)){
+        if(AuthorityServiceHelper.isAdmin() || user.equals(owner)){
             permissions.put(CCConstants.PERMISSION_CC_PUBLISH,true);
             PermissionReference pr = permissionModel.getPermissionReference(null,"FullControl");
             Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
@@ -523,6 +571,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(RequestOptions.DEFAULT)){
+             if(client != null){
+                 try {
+                     client.close();
+                 }catch (Exception e){
+                     logger.error("ping failed, close failed:" + e.getMessage()+" creating new");
+                 }
+             }
              client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
     }

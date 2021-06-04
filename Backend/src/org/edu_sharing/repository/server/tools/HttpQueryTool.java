@@ -29,12 +29,14 @@ package org.edu_sharing.repository.server.tools;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.typesafe.config.Config;
+import org.alfresco.repo.cache.SimpleCache;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -46,22 +48,18 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.tools.ProxyConfig;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 
 public class HttpQueryTool {
 
+	private static String CACHE_KEY = "HTTPCLIENT_PROXY_CACHE";
+	private static SimpleCache<String, Serializable> configCache = (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
+
+
 	Log logger = LogFactory.getLog(HttpQueryTool.class);
-	
-	public static boolean initFinished = false;
-	
-	static String host = null;
-	static String proxyhost = null;
 
-	static String proxyUsername = null;
-	static String proxyPass = null;
 
-	static Integer proxyport =null;
-	
-	static String nonProxyHosts = null;
 	
 	String basicAuthUn = null;
 	
@@ -79,20 +77,23 @@ public class HttpQueryTool {
 	}
 	
 	private void init(){
-		if(!initFinished){
+		if(configCache.get(CACHE_KEY) == null){
 			try{
 				Config config = LightbendConfigLoader.get().getConfig("repository.proxy");
-				proxyhost = config.getString("proxyhost");
-				proxyport = config.getInt("proxyport");
-				host = config.hasPath("host") ? config.getString("host") : null;
-				proxyUsername = config.hasPath("proxyuser") ? config.getString("proxyuser") : null;
-				proxyPass = config.hasPath("proxypass") ? config.getString("proxypass") : null;
-				nonProxyHosts = config.hasPath("nonproxyhosts") ? config.getString("nonproxyhosts") : null;
+				ProxyConfig proxyConfig = new ProxyConfig();
+				proxyConfig.setProxyhost(config.getString("proxyhost"));
+				proxyConfig.setProxyport(config.getInt("proxyport"));
+				if(config.hasPath("host")){ proxyConfig.setHost(config.getString("host"));};
+				if(config.hasPath("proxyuser"))proxyConfig.setProxyUsername(config.getString("proxyuser") );
+				if(config.hasPath("proxypass"))proxyConfig.setProxyPass(config.getString("proxypass"));
+				if(config.hasPath("nonproxyhosts")) proxyConfig.setNonProxyHosts(config.getString("nonproxyhosts"));
+
+				configCache.put(CACHE_KEY,proxyConfig);
+
 			}catch(Exception e){
 				logger.info("No proxy to use found or invalid proxy config: "+e.getMessage());
 				logger.info("If no proxy should be used, you can ignore this message");
 			}
-			initFinished = true;
 		}
 	}
 
@@ -190,26 +191,30 @@ public class HttpQueryTool {
 			//get host of url to check if its an nonproxy host
 			URL urlObj = new URL(method.getURI().getURI());
 			String urlHost = urlObj.getHost();
+			logger.debug("current Host:" + urlHost);
 
-			logger.debug("nonProxyHosts:"+nonProxyHosts+" current Host:"+urlHost);
+			ProxyConfig proxyConf = (ProxyConfig)configCache.get(CACHE_KEY);
+			if (proxyConf != null) {
+				logger.debug("nonProxyHosts:" + proxyConf.getNonProxyHosts());
 
+				if (proxyConf.getHost() != null && proxyConf.getProxyhost() != null && proxyConf.getProxyport() != null
+						&& !(proxyConf.getNonProxyHosts() != null && proxyConf.getNonProxyHosts().contains(urlHost))) {
+					logger.debug("using  proxy proxyhost:" + proxyConf.getProxyhost() + " proxyport:" + proxyConf.getProxyport() + " host" + proxyConf.getHost());
+					client.getHostConfiguration().setHost(proxyConf.getHost());
+					client.getHostConfiguration().setProxy(proxyConf.getProxyhost(), proxyConf.getProxyport());
 
-			if (host != null && proxyhost != null && proxyport != null && !(nonProxyHosts != null && nonProxyHosts.contains(urlHost)) ) {
-				logger.debug("using  proxy proxyhost:" + proxyhost + " proxyport:" + proxyport + " host" + host);
-				client.getHostConfiguration().setHost(host);
-				client.getHostConfiguration().setProxy(proxyhost, proxyport);
+					if (proxyConf.getProxyUsername() != null && proxyConf.getProxyPass() != null) {
 
-				if (proxyUsername != null && proxyPass != null) {
+						List authPrefs = new ArrayList(2);
+						authPrefs.add(AuthPolicy.DIGEST);
+						authPrefs.add(AuthPolicy.BASIC);
 
-					List authPrefs = new ArrayList(2);
-					authPrefs.add(AuthPolicy.DIGEST);
-					authPrefs.add(AuthPolicy.BASIC);
-
-					client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-					client.getState().setProxyCredentials(new AuthScope(proxyhost, proxyport), new UsernamePasswordCredentials(proxyUsername, proxyPass));
-
+						client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
+						client.getState().setProxyCredentials(new AuthScope(proxyConf.getProxyhost(), proxyConf.getProxyport()), new UsernamePasswordCredentials(proxyConf.getProxyUsername(), proxyConf.getProxyPass()));
+					}
 				}
 			}
+
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -217,6 +222,10 @@ public class HttpQueryTool {
 
 		method.getParams().setContentCharset("utf-8");
 		return client;
+	}
+
+	public static void invalidateProxySettings(){
+		configCache.remove(CACHE_KEY);
 	}
 
 }

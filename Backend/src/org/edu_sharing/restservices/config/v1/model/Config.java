@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.config.v1.model;
 
-import org.edu_sharing.service.config.model.Language;
-import org.edu_sharing.service.config.model.Values;
+import org.edu_sharing.alfresco.service.config.model.Language;
+import org.edu_sharing.alfresco.service.config.model.Values;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,9 +1,5 @@
 package org.edu_sharing.restservices.comment.v1;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -17,17 +13,12 @@ import javax.ws.rs.core.Context;
 
 
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.CommentDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.comment.v1.model.Comments;
-import org.edu_sharing.restservices.config.v1.model.Config;
-import org.edu_sharing.restservices.config.v1.model.Language;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.service.config.model.Values;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

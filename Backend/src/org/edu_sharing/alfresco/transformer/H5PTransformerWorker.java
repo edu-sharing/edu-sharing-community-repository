@@ -59,13 +59,14 @@ public class H5PTransformerWorker extends ContentTransformerHelper implements Co
 					InputStream is = ImageTool.autoRotateImage(zip, ImageTool.MAX_THUMB_SIZE);
 					StreamUtils.copy(is,os);
 					os.close();
-					break;
+					return;
 				}
 			}
 		}
 		catch(Throwable t){
 
 		}
+		throw new AlfrescoRuntimeException("No image found in h5p file");
 	}
 
 	public String getVersionString() {

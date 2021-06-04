@@ -15,15 +15,12 @@ public class RepositoryConfig implements Serializable {
             views,
             downloads
         };
-        public enum Timespan{
-            days_30,
-            days_100,
-            all
-        };
+
         public int totalCount=50;
         public int displayCount=12;
         public Mode mode=Mode.rating;
-        public Timespan timespan=Timespan.all;
+        public int timespan=30;
+        public boolean timespanAll = false;
         public List<Query> queries;
         // the id of the collection, if mode == collection
         public String collection;

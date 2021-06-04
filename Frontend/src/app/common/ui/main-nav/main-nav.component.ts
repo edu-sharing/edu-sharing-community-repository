@@ -197,7 +197,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     showEditProfile: boolean;
     showProfile: boolean;
     _currentScope: string;
-    isGuest = false;
     _showUser = false;
     licenseDialog: boolean;
     showScrollToTop = false;
@@ -225,7 +224,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     constructor(
         public iam: RestIamService,
-        private connector: RestConnectorService,
+        public connector: RestConnectorService,
         private bridge: BridgeService,
         private event: FrameEventsService,
         private nodeService: RestNodeService,
@@ -261,7 +260,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                             this.canOpen = false;
                         }
                         this.showNodeStore = params.nodeStore === 'true';
-                        this.isGuest = data.isGuest;
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
                         this.refreshNodeStore();
@@ -567,7 +565,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return this.create.allowed && !this.isGuest;
+        return this.create.allowed && !this.connector.getCurrentLogin()?.isGuest;
     }
 
     openCreateMenu(x: number, y: number) {
@@ -670,7 +668,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     private showLicenseAgreement() {
         if (
             !this.config.licenseAgreement ||
-            this.isGuest ||
+            this.connector.getCurrentLogin()?.isGuest ||
             !this.connector.getCurrentLogin().isValidLogin
         ) {
             this.startTutorial();
@@ -723,7 +721,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     private updateUserOptions() {
         this.userMenuOptions = [];
-        if (!this.isGuest) {
+        if (!this.connector.getCurrentLogin()?.isGuest) {
             this.userMenuOptions.push(
                 new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
                     this.openProfile(),
@@ -738,7 +736,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 );
             }
         }
-        if (this.isGuest) {
+        if (this.connector.getCurrentLogin()?.isGuest) {
             if (this.config.loginOptions) {
                 for (const login of this.config.loginOptions) {
                     this.userMenuOptions.push(
@@ -770,6 +768,12 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             );
             this.userMenuOptions.push(boomarkOption);
         // }
+        const accessibilityOptions = new OptionItem(
+            'OPTIONS.ACCESSIBILITY',
+            'accessibility',
+            () => this.mainnavService.getAccessibility().visible = true,
+        );
+        this.userMenuOptions.push(accessibilityOptions);
         for (const option of this.getConfigMenuHelpOptions()) {
             this.userMenuOptions.push(option);
         }
@@ -806,7 +810,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         }
         this.userMenuOptions.push(option);
 
-        if (!this.isGuest) {
+        if (!this.connector.getCurrentLogin()?.isGuest) {
             this.userMenuOptions.push(
                 new OptionItem('LOGOUT', 'undo', () => this.logout()),
             );
@@ -921,7 +925,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     private showTimeout() {
         return (
             !this.bridge.isRunningCordova() &&
-            !this.isGuest &&
+            !this.connector.getCurrentLogin()?.isGuest &&
             this.timeIsValid &&
             this.timeout !== '' &&
             (this.isSafe() ||

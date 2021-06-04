@@ -53,7 +53,7 @@ public class StatisticDao {
 			repository.queryTime=System.currentTimeMillis()/1000;
 			statistics.setRepository(repository);
 			*/
-			StatisticsGlobal.User user=new StatisticsGlobal.User();
+			StatisticsGlobal.StatisticsUser user=new StatisticsGlobal.StatisticsUser();
 			user.count=countUser(null);
 			statistics.setUser(user);
 			List<StatisticsGlobal.StatisticsKeyGroup> groups=new ArrayList<>();
@@ -82,8 +82,8 @@ public class StatisticDao {
 		}
 	}
 
-    private static StatisticsGlobal.User getUser() throws Exception {
-        StatisticsGlobal.User user = new StatisticsGlobal.User();
+    private static StatisticsGlobal.StatisticsUser getUser() throws Exception {
+        StatisticsGlobal.StatisticsUser user = new StatisticsGlobal.StatisticsUser();
         AuthenticationUtil.runAsSystem(()-> {
             user.count = SearchServiceFactory.getLocalService().searchUsers("*", true, 0, 0, new SortDefinition(), null).getTotalCount();
             return null;

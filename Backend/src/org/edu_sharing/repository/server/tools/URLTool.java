@@ -411,15 +411,25 @@ public class URLTool{
         return getBaseUrl()+"/rest/";
     }
 
-    public static String getEduservletUrl() {
-        return getBaseUrl()+"/eduservlet/";
-    }
+	public static String getEduservletUrl() {
+		return getEduservletUrl(false);
+	}
+	public static String getEduservletUrl(boolean dynamic) {
+		return getBaseUrl(dynamic)+"/eduservlet/";
+	}
 
-	public static String getDownloadServletUrl(String id,String version) {
-		String download=getEduservletUrl()+"download?nodeId="+URLEncoder.encodeUriComponent(id);
+	public static String getDownloadServletUrl(String id,String version, boolean dynamic, String repositoryId) {
+		String download=getEduservletUrl(dynamic)+"download?nodeId="+URLEncoder.encodeUriComponent(id);
 		if(version!=null){
-			download+="&version="+URLEncoder.encodeUriComponent(version);
+			download += "&version=" + URLEncoder.encodeUriComponent(version);
+		}
+		if(repositoryId!=null){
+			download += "&repositoryId=" + URLEncoder.encodeUriComponent(repositoryId);
 		}
 		return download;
 	}
+	public static String getDownloadServletUrl(String id,String version, boolean dynamic) {
+		return getDownloadServletUrl(id,version,true, null);
+	}
 }
+

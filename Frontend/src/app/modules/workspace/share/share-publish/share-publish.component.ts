@@ -140,7 +140,6 @@ export class SharePublishComponent implements OnChanges {
             direct: this.shareModeDirect
         };
         this.mdsService.observeCompletionStatus().subscribe((completion) => {
-            console.log(completion);
             this.mdsCompletion = {
                 completed: (completion.mandatory.completed || 0) + (completion.mandatoryForPublish.completed || 0),
                 total: (completion.mandatory.total || 0) + (completion.mandatoryForPublish.total || 0),

@@ -43,7 +43,8 @@ mat-form-field {
   line-height: 1.8;
 }
 .suggestbox > li:hover{
-  background-color: $itemSelectedBackground;
+    color: $itemSelectedTextColor;
+    background-color: $itemSelectedBackground;
 }
 
 .suggestbox > li > a > div {

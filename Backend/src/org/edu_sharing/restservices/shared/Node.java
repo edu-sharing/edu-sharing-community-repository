@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
-import org.edu_sharing.service.rating.AccumulatedRatings;
+import org.edu_sharing.service.rating.RatingDetails;
+import org.edu_sharing.service.rating.RatingsCache;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,7 +43,7 @@ public class Node {
 	private Collection collection;
 	private Person owner;
 	private int commentCount;
-	private AccumulatedRatings rating;
+	private RatingDetails rating;
 
 	/**
    **/
@@ -372,11 +373,11 @@ public class Node {
 		this.remote = remote;
 	}
 
-    public void setRating(AccumulatedRatings rating) {
+    public void setRating(RatingDetails rating) {
         this.rating = rating;
     }
 
-    public AccumulatedRatings getRating() {
+    public RatingDetails getRating() {
         return rating;
     }
 }

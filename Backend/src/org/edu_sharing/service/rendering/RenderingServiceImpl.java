@@ -32,6 +32,7 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
@@ -151,24 +152,7 @@ public class RenderingServiceImpl implements RenderingService{
 		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
 
 		// child object: inherit all props from parent
-		if(nodeDao.getAspectsNative().contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
-			Map<String, Object> propsChild = nodeDao.getNativeProperties();
-			String parentRef = nodeService.getPrimaryParent(nodeId);
-			HashMap<String,Object> propsParent =
-					nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,
-							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-							parentRef);
-			// ignore some technical properties, like mimetypes etc.
-			for(String prop : CCConstants.CHILDOBJECT_IGNORED_PARENT_PROPERTIES)
-				propsParent.remove(prop);
-			// override it with the props from the child
-			for(Map.Entry<String,Object> entry : propsChild.entrySet()){
-				if(entry.getValue() != null && !entry.getValue().toString().isEmpty()) {
-					propsParent.put(entry.getKey(), entry.getValue());
-				}
-			}
-			nodeDao.setNativeProperties(propsParent);
-		}
+		nodeDao.setNativeProperties(nodeDao.getInheritedPropertiesFromParent());
 
 		Node node = nodeDao.asNode();
 
@@ -198,7 +182,7 @@ public class RenderingServiceImpl implements RenderingService{
 					remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
 				user,
-				nodeDao.getAllProperties())
+				nodeDao.getNativeProperties())
 			.getProcessedProperties()));
 		data.setNode(node);
 		if(CCConstants.CCM_TYPE_SAVED_SEARCH.equals(nodeService.getType(nodeId))){
@@ -221,7 +205,7 @@ public class RenderingServiceImpl implements RenderingService{
 						remoteApp,node.getMetadataset()==null ? CCConstants.metadatasetdefault_id : node.getMetadataset()),
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
 				user,
-				nodeDao.getAllProperties()).render(RenderingTool.DISPLAY_INLINE.equals(options.displayMode) ? "io_render_inline" : "io_render"));
+				nodeDao.getNativeProperties()).render(RenderingTool.DISPLAY_INLINE.equals(options.displayMode) ? "io_render_inline" : "io_render"));
 
 		// user
 		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {

@@ -48,6 +48,7 @@
         "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} is already on the memo list.",
         "NODE_STORE": {
             "TITLE": "Memo List",
+            "SUBTITLE": "View and manage marked elemens",
             "LIST_EMPTY": "Memo list is empty",
             "REMOVE_ITEM": "Remove",
             "REMOVED_ITEMS": "{{count}} Element(s) have been removed from the memo list."

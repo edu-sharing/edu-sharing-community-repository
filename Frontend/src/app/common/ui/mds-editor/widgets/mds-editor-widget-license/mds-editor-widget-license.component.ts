@@ -87,6 +87,7 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         } else {
             this.checked.splice(this.checked.indexOf(license.id), 1);
         }
+        this.hasChanges.next(true);
     }
 }
 type License = MdsWidgetValue & {imageUrl?: SafeUrl}

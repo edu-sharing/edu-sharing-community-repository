@@ -357,7 +357,6 @@
                 "ConvertMultivalueToSinglevalueJob": "Eine Property von Multivalue in Singlevalue konvertieren",
                 "BulkEditNodesJob": "Bulk-Bearbeitung von einer Property für mehrere Nodes",
                 "BulkDeleteNodesJob": "Bulk-Löschen für mehrere Nodes (z.B. für größe Ordner)",
-                "UpdateFrontpageCacheJob": "Baut den Cache für die Startseite neu auf",
                 "BulkDeleteAuthoritiesJob": "Gruppen & Organisationen im Bulk löschen",
                 "CheckLinkJob": "Prüft, ob das Ziel eines Links noch existiert und setzt den Status"
             }
@@ -381,10 +380,10 @@
             "SINGLE": "Einzelauswertung",
             "NODES": "Nach Objekt",
             "CUSTOM_GROUPS": "Nach Kriterium",
-            "VIEWS": "Objekt-Aufrufe",
-            "VIEWS_EMBEDDED": "Objekt-Ansichten (Remote)",
-            "DOWNLOADS": "Objekt-Downloads",
-            "VIEWS_PLAY_MEDIA": "Medien-Wiedergaben",
+            "VIEWS": "Seitenaufrufe",
+            "VIEWS_EMBEDDED": "Einbettungen",
+            "DOWNLOADS": "Downloads",
+            "VIEWS_PLAY_MEDIA": "Wiedergaben",
             "USER_LOGINS": "Benutzer-Logins",
             "GROUP_BY": "Gruppieren nach",
             "FROM": "Start-Zeit",
@@ -411,7 +410,7 @@
             },
             "HEADERS": {
                 "action": "Aktion",
-                "count": "Anzahl",
+                "count": "Summe",
                 "node": "Element",
                 "authority": "Nutzer/Session",
                 "authority_organization": "Organisation",
@@ -424,10 +423,10 @@
                 "LOGIN_USER_OAUTH_REFRESH_TOKEN": "Login (OAuth)",
                 "LOGOUT_USER_REGULAR": "Logout",
                 "LOGOUT_USER_TIMEOUT": "Logout (Timeout)",
-                "VIEW_MATERIAL": "Material angesehen",
-                "VIEW_MATERIAL_PLAY_MEDIA": "Material abgespielt",
-                "VIEW_MATERIAL_EMBEDDED": "Material angesehen (Remote)",
-                "DOWNLOAD_MATERIAL": "Material heruntergeladen"
+                "VIEW_MATERIAL": "Seitenaufrufe",
+                "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben",
+                "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
+                "DOWNLOAD_MATERIAL": "Downloads"
             }
         },
         "MEDIACENTER": {
@@ -522,12 +521,16 @@
             "COLLECTION_HINT": "Wählen Sie die Sammlung aus, deren Materialien auf der Startseite angezeigt werden sollen",
             "CHOOSE_COLLECTION": "Sammlung wählen",
             "TIMESPAN_LABEL": "Zeitspanne",
+            "TIMESPAN_DAYS": "Tage",
             "TIMESPAN_HINT": "Über welchen Zeitbereich soll die Auswertung der Daten erfolgen",
             "TIMESPAN": {
                 "days_30": "Letzte 30 Tage",
                 "days_100": "Letzte 100 Tage",
                 "all": "Gesamter Zeitraum"
             },
+            "CONFIG_BROKEN": "Konfiguration fehlerhaft",
+            "CONFIG_BROKEN_INFO": "Die aktuelle Konfiguration scheint fehlerhaft. Möchten Sie die bestehende Konfiguration löschen und auf den Originalzustand zurücksetzen?",
+            "RESET": "Zurücksetzen",
             "SAVED": "Einstellungen wurden gespeichert",
             "TOTAL_COUNT_LABEL": "Gesamtzahl Elemente",
             "TOTAL_COUNT_HINT": "Gesamtzahl an Elementen, welche ausgewählt werden.",

@@ -128,6 +128,7 @@ export class WorkspaceShareComponent {
     newPermissions: Permission[] = [];
     inheritAccessDenied = false;
     bulkMode = 'extend';
+    bulkInvite = false;
     owner: Permission;
     publishEnabled: Permission;
     linkEnabled: Permission;
@@ -292,6 +293,9 @@ export class WorkspaceShareComponent {
                     if (data.permissions) {
                         this.inherit = data.permissions.inheritedPermissions;
                         this.removePermissions(this.inherit, 'OWNER');
+                        this.inherit = this.inherit.filter((p) =>
+                            p.authority.authorityName !== this.connector.getCurrentLogin()?.authorityName
+                        );
                         this.removePermissions(
                             data.permissions.localPermissions.permissions,
                             'OWNER',
@@ -476,7 +480,8 @@ export class WorkspaceShareComponent {
         }
         for (const perm of this.permissions.concat(this.inherited ? this.inherit : [])) {
             if (
-                perm.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
+                perm.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE &&
+                perm.authority.authorityName !== this.connector.getCurrentLogin()?.authorityName
             )
                 return 'SHARED';
         }
@@ -602,6 +607,11 @@ export class WorkspaceShareComponent {
                 return new Observable((observer: Observer<void>) => {
                     let permissions: Permission[] = Helper.deepCopy(this.permissions);
                     if (this.isBulk()) {
+                        if(this.bulkInvite) {
+                            const permission = RestHelper.getAllAuthoritiesPermission()
+                            permission.permissions = [RestConstants.ACCESS_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
+                            permissions.push(permission);
+                        }
                         // keep inherit state of original node
                         inherit = this.originalPermissions[i].inherited;
                         if (this.bulkMode === 'extend') {

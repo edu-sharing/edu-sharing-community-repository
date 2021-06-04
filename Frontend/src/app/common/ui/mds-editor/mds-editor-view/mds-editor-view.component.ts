@@ -1,6 +1,6 @@
 import { trigger } from '@angular/animations';
 import {
-    AfterViewInit,
+    AfterViewInit, ApplicationRef,
     Component,
     ComponentFactoryResolver,
     ElementRef,
@@ -50,6 +50,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {MdsEditorWidgetAuthorityComponent} from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -102,6 +103,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetChipsComponent,
+        [MdsWidgetType.MultiValueAuthorityBadges]: MdsEditorWidgetAuthorityComponent,
         [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
         [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,
         [MdsWidgetType.Range]: MdsEditorWidgetSliderComponent,
@@ -133,6 +135,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         private sanitizer: DomSanitizer,
         private factoryResolver: ComponentFactoryResolver,
         private containerRef: ViewContainerRef,
+        private applicationRef: ApplicationRef,
         private mdsEditorInstance: MdsEditorInstanceService,
     ) {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
@@ -150,6 +153,17 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 map((activeViews) => activeViews.some((view) => view.id === this.view.id)),
             )
             .subscribe((isActive) => (this.isHidden = !isActive));
+        this.core.card?.onScrollToJumpmark
+            .pipe(
+                takeUntil(this.destroyed),
+            )
+            .subscribe(async (j) => {
+                if(j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX && !this.show) {
+                    this.show = true;
+                    await this.applicationRef.tick();
+                    this.core.card.scrollSmooth(j);
+                }
+            });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -180,8 +194,6 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     private injectWidgets(): void {
-        console.log('inject', this.view.id);
-        //this.mdsEditorInstance.resetWidgets();
         const elements = this.container.nativeElement.getElementsByTagName('*');
         for (const element of Array.from(elements)) {
             const tagName = element.localName;
@@ -321,6 +333,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 const value = htmlRef.getAttribute(attribute);
                 if (attribute === 'isextended' || attribute === 'extended') {
                     attribute = 'isExtended';
+                } else if (attribute === 'isrequired' || attribute === 'required') {
+                    attribute = 'isRequired';
                 } else if (attribute === 'bottomcaption') {
                     attribute = 'bottomCaption';
                 } else if (attribute === 'defaultmin') {

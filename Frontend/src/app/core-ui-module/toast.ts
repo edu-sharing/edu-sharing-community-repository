@@ -1,9 +1,9 @@
-import { Injectable, Injector } from '@angular/core';
+import {Injectable, Injector, OnDestroy, OnInit} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ToastData, ToastyService } from 'ngx-toasty';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ProgressType } from '../common/ui/modal-dialog/modal-dialog.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -12,6 +12,9 @@ import { DialogButton } from '../core-module/ui/dialog-button';
 import { UIAnimation } from '../core-module/ui/ui-animation';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
+import {Subscription} from 'rxjs/Subscription';
+import {SessionStorageService} from '../core-module/rest/services/session-storage.service';
+import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 
 interface CustomAction {
     link: {
@@ -25,16 +28,41 @@ interface Action {
     label: string;
     callback: () => void;
 }
-
+export enum ToastDuration {
+    Seconds_3 = 3,
+    Seconds_5 = 5,
+    Seconds_8 = 8,
+    Seconds_15 = 15,
+    Seconds_30 = 30,
+    Seconds_60 = 60,
+    Infinite = null
+}
+export enum ToastType {
+    InfoSimple, // A simple info just confirming an action without providing useful data
+    InfoData, // A info including some additional data to the previous action
+    InfoAction, // A info including some interactive feature, e.g. navigating to a newly created item
+    ErrorGeneric, // A generic error without any more specific data available
+    ErrorSpecific // a specific error may also including some details on how to solve it
+}
+export type ToastMessage = {
+    message: string,
+    type: 'error' | 'info',
+    subtype: ToastType,
+    action?: Action
+}
 @Injectable()
-export class Toast {
-    private static readonly TOAST_SERVICE: 'TOASTY' | 'MAT_SNACKBAR' = 'TOASTY';
-    private static readonly TOAST_DURATION = 8000;
+export class Toast implements OnDestroy {
+    private static readonly TOAST_SERVICE: 'TOASTY' | 'MAT_SNACKBAR' = 'MAT_SNACKBAR';
+    // only for legacy Toasts (TOASTY)
+    private static readonly TOAST_DEFAULT_DURATION = 8000;
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 
     dialogInputValue: string;
     isModalDialogOpen: Observable<boolean>;
 
+    private isInstanceVisible = false;
+    private messageQueue = new BehaviorSubject<ToastMessage[]>([]);
+    private subscription: Subscription;
     private onShowModal: (params: ModalDialogOptions) => void;
     private lastToastMessage: string;
     private lastToastMessageTime: number;
@@ -42,6 +70,15 @@ export class Toast {
     private lastToastErrorTime: number;
     private isModalDialogOpenSubject = new BehaviorSubject<boolean>(false);
     private translate: TranslateService;
+    mode: 'important' | 'all' = null;
+    duration: ToastDuration = null;
+    static convertDuration(duration: ToastDuration) {
+        switch (duration) {
+            case ToastDuration.Infinite:
+                return null;
+        }
+        return duration.valueOf();
+    }
 
     constructor(
         private injector: Injector,
@@ -50,11 +87,46 @@ export class Toast {
         private storage: TemporaryStorageService,
         private toasty: ToastyService,
     ) {
+        this.subscription = this.messageQueue.subscribe((message) => {
+            if (this.isInstanceVisible) {
+                return;
+            }
+            this.showNext();
+        })
         this.isModalDialogOpen = this.isModalDialogOpenSubject.asObservable();
+        this.refresh();
         // Avoid cyclic-dependency error at runtime.
         setTimeout(() => {
             this.translate = this.injector.get(TranslateService);
         });
+    }
+    ngOnDestroy() {
+        this.subscription.unsubscribe();
+    }
+    async refresh() {
+        this.messageQueue.next([]);
+        this.snackBar.dismiss();
+        this.mode = await this.injector.get(SessionStorageService).
+            get('accessibility_toastMode', 'all').toPromise();
+        this.duration = await this.injector.get(SessionStorageService).
+            get('accessibility_toastDuration', ToastDuration.Seconds_5).toPromise();
+    }
+    show(message: ToastMessage) {
+        if(message.type === 'info') {
+            this.toast(message.message, null, null, null, message.action ? {
+                link: {
+                    caption: message.action.label,
+                    callback: message.action.callback
+                }
+            } : null, message.subtype);
+        } else {
+            this.error(null, message.message, null, null, null, message.action ? {
+                link: {
+                    caption: message.action.label,
+                    callback: message.action.callback
+                }
+            } : null, message.subtype);
+        }
     }
 
     /**
@@ -62,6 +134,7 @@ export class Toast {
      * @param message Translation-String of message
      * @param translationParameters Parameter bindings for translation
      * @param customAction: additional parameter objects {link:{caption:string,callback:Function}}
+     * @DEPRECATED: Prefer using show instead
      */
     toast(
         message: string,
@@ -69,6 +142,7 @@ export class Toast {
         dialogTitle: string = null,
         dialogMessage: string = null,
         customAction: CustomAction = null,
+        type: ToastType = null
     ): void {
         if (
             this.lastToastMessage === message &&
@@ -76,11 +150,15 @@ export class Toast {
         ) {
             return;
         }
+        if(type == null) {
+            type = customAction ? ToastType.InfoAction : ToastType.InfoSimple;
+        }
         this.lastToastMessage = message;
         this.lastToastMessageTime = Date.now();
         this.showToast({
             message,
             type: 'info',
+            subtype: type,
             translationParameters,
             dialogTitle,
             dialogMessage,
@@ -106,9 +184,10 @@ export class Toast {
         errorObject: any,
         message = 'COMMON_API_ERROR',
         translationParameters: any = null,
-        dialogTitle = '',
-        dialogMessage = '',
-        customAction: any = null,
+        dialogTitle: string = null,
+        dialogMessage: string = null,
+        customAction: CustomAction = null,
+        subtype: ToastType = null,
     ): void {
         const parsingResult = this.parseErrorObject({
             errorObject,
@@ -134,6 +213,7 @@ export class Toast {
         this.showToast({
             message,
             type: 'error',
+            subtype: subtype ? subtype : message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific,
             translationParameters,
             dialogTitle,
             dialogMessage,
@@ -220,10 +300,12 @@ export class Toast {
     private async showToast({
         message,
         type,
+        subtype,
         ...options
     }: {
         message: string;
         type: 'error' | 'info';
+        subtype: ToastType;
         translationParameters?: any;
         dialogTitle?: string;
         dialogMessage?: string;
@@ -238,7 +320,11 @@ export class Toast {
             case 'TOASTY':
                 return this.toastyShowToast(translatedMessage, type, action);
             case 'MAT_SNACKBAR':
-                return this.matSnackbarShowToast(translatedMessage, type, action);
+                return this.matSnackbarShowToast({
+                    message: translatedMessage,
+                    type,
+                    subtype,
+                    action});
         }
     }
 
@@ -292,7 +378,7 @@ export class Toast {
     }
 
     private toastyGetOptions(text: string) {
-        const timeout = Toast.TOAST_DURATION + UIAnimation.ANIMATION_TIME_NORMAL;
+        const timeout = Toast.TOAST_DEFAULT_DURATION + UIAnimation.ANIMATION_TIME_NORMAL;
         return {
             title: '',
             msg: text,
@@ -320,14 +406,8 @@ export class Toast {
         return text;
     }
 
-    private matSnackbarShowToast(message: string, type: 'error' | 'info', action?: Action): void {
-        const snackBarRef = this.snackBar.open(message, action?.label, {
-            duration: Toast.TOAST_DURATION,
-            panelClass: ['app-mat-snackbar-toast', `app-mat-snackbar-toast-${type}`],
-        });
-        if (action) {
-            snackBarRef.onAction().subscribe(action.callback);
-        }
+    private matSnackbarShowToast(message: ToastMessage): void {
+        this.messageQueue.next(this.messageQueue.value.concat([message]));
     }
 
     private getToolpermissionMessage(permission: string) {
@@ -375,7 +455,10 @@ export class Toast {
         }
         try {
             error = json.error + ': ' + json.message;
-        } catch (e) {}
+        } catch (e) {
+            console.error(errorObject);
+            error = errorObject?.toString();
+        }
         if (message === 'COMMON_API_ERROR') {
             dialogMessage = '';
             dialogTitle = 'COMMON_API_ERROR_TITLE';
@@ -445,7 +528,9 @@ export class Toast {
                     } catch (e) {}
                 }
             } catch (e) {
-                error = json;
+                if(json && !error) {
+                    error = json;
+                }
             }
             if (errorInfo === undefined) {
                 errorInfo = '';
@@ -489,5 +574,33 @@ export class Toast {
             dialogTitle,
             dialogMessage,
         };
+    }
+
+    private showNext() {
+        if(this.messageQueue.value.length === 0) {
+            return;
+        }
+        const message = this.messageQueue.value[0];
+        this.isInstanceVisible = true;
+        this.messageQueue.next(this.messageQueue.value.slice(1));
+        // check if the specific message can be ignored
+        if(this.mode === 'important') {
+            if(message.subtype === ToastType.InfoSimple) {
+                this.isInstanceVisible = false;
+                return;
+            }
+        }
+        const snackBarRef = this.snackBar.openFromComponent(ToastMessageComponent,{
+            data: message,
+            duration: Toast.convertDuration(this.duration) ? Toast.convertDuration(this.duration) * 1000 : null,
+            panelClass: ['app-mat-snackbar-toast', `app-mat-snackbar-toast-${message.type}`],
+        });
+        if (message.action) {
+            snackBarRef.onAction().subscribe(message.action.callback);
+        }
+        snackBarRef.afterDismissed().subscribe(() => {
+            this.isInstanceVisible = false;
+            this.showNext();
+        });
     }
 }

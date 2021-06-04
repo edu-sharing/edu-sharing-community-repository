@@ -116,7 +116,7 @@
                         ></app-mds-editor-wrapper>
                     <mat-form-field class="searchword">
                         <mat-label>{{'ADMIN.MEDIACENTER.NODES.SEARCHWORD' | translate}}</mat-label>
-                        <input matInput [disabled]="!isAdmin" [(ngModel)]="mediacenterNodesSearchWord">
+                        <input matInput [(ngModel)]="mediacenterNodesSearchWord">
                     </mat-form-field>
                     <button mat-raised-button color="primary"
                             (click)="searchMediaCenterNodes()">

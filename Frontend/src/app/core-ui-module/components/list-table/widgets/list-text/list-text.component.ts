@@ -16,6 +16,7 @@ export class ListTextComponent extends ListWidget {
         new ListItem('USER', '*'),
     ];
     readonly DATE_FIELDS = RestConstants.DATE_FIELDS;
+    readonly VCARD_FIELDS = RestConstants.getAllVCardFields();
 
     constructor() {
         super();

@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.exporter;
 
+import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.MLText;
@@ -64,23 +65,19 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
         Element contributeEle = null;
         Serializable contributer = nodeService.getProperty(nodeRef, contributerProp);
         if (contributer != null || role.equals("Provider")) {
-            boolean hasValidEls = false;
             List<String> contrib = null;
+            List<String> contributerClean = null;
             //sometimes there are empty values in list
             if (contributer instanceof List) {
-                contrib = (List) contributer;
-                for (String cont : contrib) {
-                    if (cont != null && !cont.trim().equals(""))
-                        hasValidEls = true;
-                }
+                contributerClean = prepareContributer((List) contributer);
+            } else {
+                contributerClean = new ArrayList<>();
             }
 
             // Hack for "Herkunft" : shall be metametadata - Provider
-            if (!hasValidEls && role.equals("Provider")) {
+            if (contributerClean.size() == 0 && role.equals("Provider")) {
                 String university = (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_UNIVERSITY));
                 if (university != null && !university.isEmpty()) {
-                    if (contrib == null)
-                        contrib = new ArrayList<String>();
                     try {
                         Map<String, MetadataKey> valuesAsMap = MetadataHelper.getLocalDefaultMetadataset().findWidget("ccm:university").getValuesAsMap();
                         for(MetadataKey metadataKey : valuesAsMap.values()){
@@ -90,8 +87,7 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                                 map.put(CCConstants.VCARD_ORG,metadataKey.getCaption());
                                 map.put(CCConstants.VCARD_URL,"https://"+university);
 
-                                contrib.add( VCardTool.hashMap2VCard(map));
-                                hasValidEls = true;
+                                contributerClean.add( VCardTool.hashMap2VCard(map));
                             }
                         }
                     } catch (Throwable e) {
@@ -100,23 +96,27 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                 }
             }
 
-            if (hasValidEls) {
+            if (contributerClean.size() > 0) {
                 contributeEle = createAndAppendElement("contribute", eleParent);
                 createAndAppendElementSrcVal("role", contributeEle, role, nsLOM);
-                Element centityEle = null;
-                for (Object lval : contrib) {
-                    centityEle = createAndAppendElement("centity", contributeEle);
+                for (Object lval : contributerClean) {
+                    Element centityEle = createAndAppendElement("centity", contributeEle);
                     // ## Add URL fields for ORCID/GND-ID resp. ROR/Wikidata-URL
-
-                    ArrayList<HashMap<String, Object>> hashMaps = VCardConverter.vcardToHashMap((String) lval);
-                    if(hashMaps.size() > 0){
-                        HashMap<String, Object> map = hashMaps.iterator().next();
-                        Map<String,String> newMap = map.entrySet().stream()
-                                .collect(Collectors.toMap(Map.Entry::getKey, e -> (String)e.getValue()));
-                        newMap.remove(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE);
-                        String val = VCardTool.hashMap2VCard(new HashMap(newMap));
-                        this.createAndAppendElement("vcard", centityEle, val, true);
+                    if(lval != null) {
+                         List<String> l = VCardConverter.cleanupVcard((String) lval, (vcard) -> {
+                            Optional<ExtendedType> contributeDate = (vcard.getExtendedTypes() == null)? null : vcard.getExtendedTypes().
+                                    stream().
+                                    filter((type) -> CCConstants.VCARD_T_X_ES_LOM_CONTRIBUTE_DATE.equals(type.getExtendedName())).
+                                    findFirst();
+                            if(contributeDate != null) contributeDate.ifPresent(vcard::removeExtendedType);
+                            return vcard;
+                        });
+                         if(l != null) {
+                             String val = l.get(0);
+                             this.createAndAppendElement("vcard", centityEle, val, true);
+                         }
                     }
+
                 }
             }
         }
@@ -368,30 +368,73 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
 
     @Override
     public void createClassification(Element lom) {
+        List<String> taxonIds = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));
+       // List<String> classificationKeyword = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
+        if(taxonIds != null){
+            Element classification = createAndAppendElement("classification", lom);
+            Element purpose = createAndAppendElement("purpose", classification);
+            createAndAppendElement("source", purpose,"LOMv1.0");
+            createAndAppendElement("value", purpose,"discipline");
 
-        QName property = QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID);
-        // classification
-        List<String> taxonIdList = (List<String>) nodeService.getProperty(nodeRef, property);
-        if (taxonIdList != null && !taxonIdList.isEmpty()) {
-            try {
-                //fachgebite.xml
-                Map<String, MetadataKey> valuesAsMap = MetadataHelper.getLocalDefaultMetadataset().findWidget("ccm:taxonid").getValuesAsMap();
-                Element category = createAndAppendElement("classification", lom);
-                createAndAppendElementSrcVal("purpose", category, "Discipline", nsLOM);
-                Element taxonPathEle = createAndAppendElement("taxonpath", category);
-                Element srcEle = createAndAppendElement("source", taxonPathEle, nsHSFaecher, false);
-                if (srcEle != null)
-                    srcEle.setAttribute(xmlLanguageAttribute, "x-none");
-                for (String taxonId : taxonIdList) {
-
-                    Element taxon = createAndAppendElement("taxon", taxonPathEle);
-                    createAndAppendIdEnt(taxon,property,taxonId);
-/*                    for (MetadataKey cata : valuesAsMap.values())
-                        if (cata.getKey().equals(taxonId))
-                            createTaxon(taxonPathEle, cata,new ArrayList<>(valuesAsMap.values()));*/
+           /* if(classificationKeyword != null) {
+                for(String kw : classificationKeyword) {
+                    Element keyword = createAndAppendElement("keyword", classification);
+                    Element kwStrEle = createAndAppendElement("string", keyword,kw);
+                    if(kwStrEle != null)kwStrEle.setAttribute(xmlLanguageAttribute, "de");
                 }
-            } catch (Throwable e) {
-                logger.error(e.getMessage(), e);
+            }*/
+
+            if(taxonIds != null) {
+
+                try{
+                    MetadataWidget widget = MetadataHelper.getLocalDefaultMetadataset().findWidget("ccm:taxonid");
+                    Map<String, MetadataKey> values = widget.getValuesAsMap();
+                    if(values!=null){
+                        //1. build parentpath for every taxon id
+                        Map<String,List<String>> taxonIdsWithPath = new HashMap<>();
+                        for(String taxonId : taxonIds){
+                            MetadataKey mdk = values.get(taxonId);
+                            List<String> path = new ArrayList<>();
+                            path.add(taxonId);
+                            taxonIdsWithPath.put(taxonId,path);
+                            if(mdk != null){
+                                while (mdk != null && mdk.getParent() != null){
+                                    path.add(0, mdk.getParent());
+                                    mdk = values.get(mdk.getParent());
+                                }
+                            }
+                        }
+                        //2. remove those taxonid's that are contained by other list
+                        /*Set<String> toRemove = new HashSet<>();
+                        for(String key : taxonIdsWithPath.keySet()){
+                            for(Map.Entry<String,List<String>> entry : taxonIdsWithPath.entrySet()){
+                                if(!entry.getKey().equals(key) && entry.getValue().contains(key)){
+                                    toRemove.add(key);
+                                }
+                            }
+                        }
+                        Map<String,List<String>> result = taxonIdsWithPath.entrySet().stream().filter(e -> !toRemove.contains(e.getKey())).collect(Collectors.toMap(e-> e.getKey(), e->e.getValue()));
+                        */
+                        Map<String,List<String>> result = taxonIdsWithPath;
+                        //3. print the result as xml
+                        for(List<String> path : result.values()){
+                            Element taxonPath = createAndAppendElement("taxonPath", classification);
+                            Element tpSource = createAndAppendElement("source", taxonPath);
+                            Element tpSourceString = createAndAppendElement("string", tpSource,"EAF Thesaurus");
+                            tpSourceString.setAttribute(xmlLanguageAttribute, "x-t-eaf");
+                            for(String id : path){
+                                Element taxon = createAndAppendElement("taxon", taxonPath);
+                                createAndAppendElement("id", taxon,id);
+                                Element entry = createAndAppendElement("entry", taxon);
+                                Element string = createAndAppendElement("string", entry,values.get(id).getCaption());
+                                //<string language="de">Sachkunde</string>
+                                string.setAttribute(xmlLanguageAttribute, "de");
+                            }
+                        }
+                    }
+                }catch(Throwable e){
+                    logger.error(e.getMessage(), e);
+                }
             }
         }
     }

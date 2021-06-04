@@ -760,6 +760,8 @@ public class CCConstants {
 	
 	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
 
+	public final static String CCM_PROP_IO_TECHNICAL_STATE = "{http://www.campuscontent.de/model/1.0}technical_state";
+
 	public final static String CCM_PROP_IO_LOCATION_STATUS = "{http://www.campuscontent.de/model/1.0}location_status";
 
 	public final static String CCM_PROP_IO_EDITORIAL_CHECKLIST = "{http://www.campuscontent.de/model/1.0}editorial_checklist";
@@ -901,6 +903,8 @@ public class CCConstants {
 	/**
 	 * dynamic generated properties
 	 */
+	public final static String VIRT_PROP_MEDIATYPE = "{virtualproperty}mediatype";
+
 	public final static String VIRT_PROP_USAGECOUNT = "{virtualproperty}usagecount";
 
 	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
@@ -1236,6 +1240,7 @@ public class CCConstants {
 	public final static String CCM_PROP_MAP_COLLECTIONTYPE = "{http://www.campuscontent.de/model/1.0}collectiontype";
 	public final static String CCM_PROP_MAP_COLLECTIONSCOPE = "{http://www.campuscontent.de/model/1.0}collectionscope";
 	public final static String CCM_PROP_MAP_COLLECTIONREMOTEID = "{http://www.campuscontent.de/model/1.0}collectionremoteid";
+	public final static String CCM_PROP_MAP_COLLECTIONREMOTESOURCE = "{http://www.campuscontent.de/model/1.0}collectionremotesource";
 
 	public final static String CCM_PROP_MAP_COLLECTIONLEVEL0 = "{http://www.campuscontent.de/model/1.0}collectionlevel0";
 

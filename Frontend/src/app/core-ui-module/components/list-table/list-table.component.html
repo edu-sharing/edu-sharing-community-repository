@@ -94,7 +94,10 @@
       [class.cardList]="viewType == 1"
       [class.cardSmallList]="viewType == 2"
     >
-      <div *ngIf="optionItems && optionItems.length > 0" class="item-container option-item-container">
+      <div *ngIf="optionItems && optionItems.length > 0"
+           class="item-container option-item-container"
+           [attr.role]="viewType === 0 ? 'rowgroup' : 'listitem'"
+           >
         <app-list-option-item
           *ngFor="let option of optionItems"
           [option]="option"
@@ -132,7 +135,6 @@
              (nodesDrop)="onNodesDrop($event, node)"
              [attr.tabindex]="createLink ? null : 0"
              (keyup.enter)="doubleClick(node)"
-             [attr.aria-label]="getPrimaryTitle(node)"
         >
           <!-- custom data binding from outside -->
           <app-node-url
@@ -144,6 +146,7 @@
             [class.node-padding]="_options && _options.length>0"
             [unclickable]="!createLink"
             [aria-describedby]="getDescribedBy(node)"
+            #childList
           >
             <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
             <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
@@ -152,6 +155,7 @@
             <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
               <img
                 src="{{getIconUrl(node)}}"
+                tabindex="0"
                 [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
                 [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
               />
@@ -210,7 +214,6 @@
             >
               <img *ngIf="node.preview?.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && node.preview && !node.preview.isIcon)"
                    [src]="getPreviewSrc(node)"
-                   [title]="getTitle(node)"
                    (mouseenter)="animateIcon(node,true)"
                    (mouseleave)="animateIcon(node,false)"
                    [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
@@ -296,9 +299,11 @@
             </button></div>
         </div>
       </div>
-      <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">
-        <i icon="refresh"></i>
-        <div>{{'LOAD_MORE' | translate}}</div>
+      <div class="loadMore">
+        <button mat-button *ngIf="_nodes && _nodes.length && hasMore && !isLoading" (click)="scroll(true)">
+          <i icon="refresh"></i>
+          <div>{{'LOAD_MORE' | translate}}</div>
+        </button>
       </div>
       <spinner *ngIf="isLoading"></spinner>
     </div>

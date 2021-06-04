@@ -88,13 +88,18 @@ export class WorkspaceMetadataComponent{
         this.forkedParent = null;
         this.forkedChilds = null;
         if (this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
-            this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent) => {
+            this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0]), [RestConstants.ALL]).subscribe((parent) => {
                 this.forkedParent = parent.node;
             }, (error) => {
 
             });
         }
-        this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN], [RestHelper.createSpacesStoreRef(this.nodeObject)], ['=']).subscribe((childs) => {
+        const request = {
+            propertyFilter: [RestConstants.ALL]
+        };
+        this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN],
+            [RestHelper.createSpacesStoreRef(this.nodeObject)], ['='],
+            RestConstants.COMBINE_MODE_AND, RestConstants.CONTENT_TYPE_FILES, request).subscribe((childs) => {
             this.forkedChilds = childs.nodes;
         });
         this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {

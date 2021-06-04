@@ -71,6 +71,9 @@ import { MultiLineLabelComponent } from './common/ui/multi-line-label/multi-line
 import { CheckTextOverflowDirective } from './common/directives/check-text-overflow.directive';
 import { RegisterCustomPropertyDirective } from './common/directives/register-custom-property.directive';
 import { OnAttributeChangeDirective } from './common/directives/on-attribute-change.directive';
+import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
+import { extensionDeclarations } from './extension/extension-declarations';
+import { extensionImports } from './extension/extension-imports';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -111,6 +114,7 @@ import { OnAttributeChangeDirective } from './common/directives/on-attribute-cha
         MdsEditorWidgetContainerComponent,
         MdsEditorWidgetPreviewComponent,
         MdsEditorWidgetAuthorComponent,
+        MdsEditorWidgetAuthorityComponent,
         MdsEditorWidgetChildobjectsComponent,
         MdsEditorWidgetErrorComponent,
         MdsEditorWidgetChipsComponent,
@@ -135,12 +139,14 @@ import { OnAttributeChangeDirective } from './common/directives/on-attribute-cha
         CheckTextOverflowDirective,
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
+        extensionDeclarations,
     ],
     imports: [
         IMPORTS,
         CommonModule,
         Ng5SliderModule,
-        DragDropModule
+        DragDropModule,
+        extensionImports,
     ],
     providers: [
         PROVIDERS,

@@ -16,7 +16,15 @@ import {
     Input,
     Output,
     TemplateRef,
-    ViewChild, ViewContainerRef, SimpleChanges, OnChanges, Renderer2, Sanitizer,
+    ViewChild,
+    ViewContainerRef,
+    SimpleChanges,
+    OnChanges,
+    Renderer2,
+    Sanitizer,
+    ViewChildren,
+    QueryList,
+    AfterViewInit,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -58,6 +66,7 @@ import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
 import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
 import {NodeTitlePipe} from '../../../common/ui/node-title.pipe';
+import {NodeUrlComponent} from '../node-url/node-url.component';
 
 
 @Component({
@@ -107,7 +116,7 @@ import {NodeTitlePipe} from '../../../common/ui/node-title.pipe';
 /**
  * A provider to render multiple Nodes as a list
  */
-export class ListTableComponent implements OnChanges, EventListener {
+export class ListTableComponent implements OnChanges, AfterViewInit, EventListener {
     public static readonly VIEW_TYPE_LIST = 0;
     public static readonly VIEW_TYPE_GRID = 1;
     public static readonly VIEW_TYPE_GRID_SMALL = 2;
@@ -116,6 +125,7 @@ export class ListTableComponent implements OnChanges, EventListener {
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
     @ViewChild('dropdown') dropdownElement: ElementRef;
     @ViewChild('sortDropdownMenuTrigger') sortDropdownMenuTrigger: ElementRef<HTMLButtonElement>;
+    @ViewChildren('childList') childList: QueryList<ElementRef>;
 
     @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
@@ -128,6 +138,13 @@ export class ListTableComponent implements OnChanges, EventListener {
             nodes = nodes.filter(
                 n => n.virtual || !virtual.find(v => v.ref.id === n.ref.id),
             );
+        }
+        if(this._nodes?.length && nodes?.length > this._nodes?.length) {
+            const pos = this._nodes.length;
+            setTimeout(() => {
+                // handle focus
+                (this.childList.toArray()[pos] as any as NodeUrlComponent).link.nativeElement.focus();
+            });
         }
         this._nodes = nodes;
         this.refreshAvailableOptions();
@@ -533,12 +550,16 @@ export class ListTableComponent implements OnChanges, EventListener {
         }
     }
 
+    ngAfterViewInit(): void {
+        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+    }
+
     setViewType(viewType: number) {
         this.viewType = viewType;
         // store in url for remembering layout
         const params: any = {};
         params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
-        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params});
+        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params, replaceUrl: true});
         this.changes.detectChanges();
     }
 
@@ -794,8 +815,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         }
         if (event.pointerType === 'touch' || event.pointerType === 'pen') {
             this.doubleClickRow.emit(node);
-        }
-        if (!this.selectOnClick) {
+        } else  if (!this.selectOnClick) {
             // Propagate event
             this.clickRowSender(node, region);
             this.refreshAvailableOptions(node);
@@ -1205,7 +1225,6 @@ export class ListTableComponent implements OnChanges, EventListener {
         this.optionsHelper.setListener({
             onDelete: nodes => this.removeNodes(nodes.error, nodes.objects),
         });
-        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
         // only refresh global if no node was given
         this.optionsHelper.refreshComponents();
     }
@@ -1294,14 +1313,14 @@ export class ListTableComponent implements OnChanges, EventListener {
     }
 
     getPrimaryTitle(node: Node) {
-        if([RestConstants.CM_PROP_TITLE, RestConstants.LOM_PROP_TITLE].indexOf(this.columnsVisible[0].name) !== -1){
+        if([RestConstants.CM_PROP_TITLE, RestConstants.LOM_PROP_TITLE].indexOf(this.columnsVisible[0]?.name) !== -1) {
             return new NodeTitlePipe(this.translate).transform(node);
         }
         return node.name;
     }
 
-    getRowId(node: Node, rowIndex: number): string {
-        return `list-table-node-${node.ref.id}-row-${rowIndex + 1}`;
+    getRowId(node: Node|any, rowIndex: number): string {
+        return `list-table-node-${node.ref?.id || node.authorityName}-row-${rowIndex + 1}`;
     }
 
     getDescribedBy(node: Node): string {

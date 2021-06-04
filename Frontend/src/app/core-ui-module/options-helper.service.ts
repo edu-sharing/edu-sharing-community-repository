@@ -59,6 +59,7 @@ export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('Op
 
 @Injectable()
 export class OptionsHelperService {
+    public static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
     private static subscriptionUp: Subscription;
     private static subscriptionDown: Subscription;
     private appleCmd: boolean;
@@ -218,7 +219,7 @@ export class OptionsHelperService {
             actionbar.options = [];
         }
     }
-    initComponents(mainNav: MainNavComponent,
+    async initComponents(mainNav: MainNavComponent,
          actionbar: ActionbarComponent = null,
          list: ListTableComponent = null,
          dropdown: DropdownComponent = null) {
@@ -226,6 +227,7 @@ export class OptionsHelperService {
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
+        await this.networkService.getRepositories().toPromise();
     }
     setListener(listener: OptionsListener) {
         this.listener = listener;
@@ -234,6 +236,10 @@ export class OptionsHelperService {
      * refresh all bound components with available menu options
      */
     refreshComponents(refreshListOptions = true) {
+        if(this.data == null) {
+            console.warn('options helper refresh called but no data previously bound');
+            return;
+        }
         if(this.subscriptions?.length){
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
@@ -346,6 +352,12 @@ export class OptionsHelperService {
                // console.log('customShowCallback  was false', option, objects);
                return false;
            }
+        }
+        if (option.toolpermissions != null && option.toolpermissionsMode === HideMode.Hide) {
+            if (!this.validateToolpermissions(option)) {
+                // console.log('toolpermissions missing', option, objects);
+                return false;
+            }
         }
         if (option.permissions != null && option.permissionsMode === HideMode.Hide) {
            if (!this.validatePermissions(option, objects)) {
@@ -513,6 +525,7 @@ export class OptionsHelperService {
         }
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
+        editConnectorNode.showAsAction = true;
         editConnectorNode.constrains = [Constrain.Files, Constrain.NoBulk];
 
         /**
@@ -539,7 +552,7 @@ export class OptionsHelperService {
         const addNodeToCollection = new OptionItem('OPTIONS.COLLECTION', 'layers', (object) =>
             management.addToCollection =  this.getObjects(object)
         );
-        addNodeToCollection.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
         addNodeToCollection.customShowCallback = (nodes) => {
@@ -571,6 +584,7 @@ export class OptionsHelperService {
             management.nodeVariant =  this.getObjects(object)[0]
         );
         createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
+        createNodeVariant.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
         createNodeVariant.customShowCallback = (nodes) => {
             if (nodes) {
                 createNodeVariant.name = 'OPTIONS.VARIANT' + (this.connectors.connectorSupportsEdit(nodes[0]) ? '_OPEN' : '');
@@ -665,9 +679,13 @@ export class OptionsHelperService {
             for (const item of nodes) {
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if(item.downloadUrl != null && item.properties &&
-                    !item.properties[RestConstants.CCM_PROP_IO_WWWURL] &&
+                    (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] || !RestNetworkService.isFromHomeRepo(item)) &&
                     this.nodeHelper.referenceOriginalExists(item)
                 ) {
+                    // bulk upload is not supported for remote nodes
+                    if (!RestNetworkService.isFromHomeRepo(item) && nodes.length !== 1) {
+                        continue;
+                    }
                     return true;
                 }
             }
@@ -735,6 +753,7 @@ export class OptionsHelperService {
         );
         linkMap.constrains = [Constrain.NoBulk, Constrain.HomeRepository, Constrain.User, Constrain.Directory];
         linkMap.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_MAP_LINK];
+        linkMap.toolpermissionsMode = HideMode.Hide;
         linkMap.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         linkMap.permissionsMode = HideMode.Hide;
         linkMap.group = DefaultGroups.FileOperations;

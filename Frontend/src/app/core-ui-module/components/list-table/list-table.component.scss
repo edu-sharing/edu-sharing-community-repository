@@ -37,8 +37,11 @@ $previewHeight: 160px;
     padding-top: 20px;
     text-transform: uppercase;
     color: $primary;
-    i {
-        font-size: 50px;
+    ::ng-deep {
+        i {
+            font-size: 50px;
+            width: 50px;
+        }
     }
 }
 .heading {
@@ -341,6 +344,10 @@ $badgeWidth: 250px;
             word-break: break-all;
         }
 
+        .group_authorityname{
+            width: 180px;
+        }
+
         .user_email {
             width: 180px;
             word-break: break-all;
@@ -418,7 +425,7 @@ $badgeWidth: 250px;
 }
 .tableList .rowFrame.selected{
     background: $workspaceSelectedBackgroundEffect;
-    background-color: $itemSelectedBackground;
+    background-color: $listItemSelectedBackground;
 }
 
 .cardList .rowFrame.selected {
@@ -436,12 +443,12 @@ $badgeWidth: 250px;
 
 @mixin hoverHighlightColor {
     .rowFrame:hover {
-        background-color: $itemSelectedBackground;
+        background-color: $listItemSelectedBackground;
     }
 }
 
 @mixin hoverHighlightFloat {
-    .rowFrame { 
+    .rowFrame {
         position: relative;
         transition:
             z-index $transitionNormal step-start,
@@ -724,7 +731,7 @@ $badgeWidth: 250px;
     background: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0.001) 0,
-        rgba(0, 0, 0, 0.75) 100%
+        rgba(0, 0, 0, 0.9) 100%
     );
     .nodeRating {
         flex-grow: 1;
@@ -761,6 +768,7 @@ $badgeWidth: 250px;
 .node_counts_view_material,
 .node_counts_download_material,
 .node_counts_view_material_embedded,
+.node_counts_view_material_play_media,
 .node_counts_overall{
     .rowInner{
         max-height: unset;
@@ -829,6 +837,10 @@ a.rowInner {
 
 }
 .tableList{
+    // limit line height to 2 lines
+    app-list-base {
+        @include limitLineCount(2, 1.25);
+    }
     .nodeDeleted{
         display: none;
     }
@@ -1175,42 +1187,13 @@ a.rowInner {
         display: none !important;
     }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
-    .row_2,
-    .editColumns {
-        display: none !important;
+@for $i from 2 to 15 {
+    @media screen and (max-width: ($mobileWidth+$mobileStage*($i + 2))) {
+        .row_#{$i},
+        .editColumns {
+            display: none !important;
+        }
     }
-}
-@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
-    .row_3 {
-        display: none !important;
-    }
-}
-@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
-    .row_4 {
-        display: none !important;
-    }
-}
-@media screen and (max-width: ($mobileWidth+$mobileStage*7)) {
-    .row_5 {
-        display: none !important;
-    }
-}
-@media all and (max-width: ($mobileWidth+$mobileStage*8)) {
-    .row_6 {
-        display: none !important;
-    }
-}
-.row_7,
-.row_8,
-.row_9,
-.row_10,
-.row_11,
-.row_12,
-.row_13,
-.row_14,
-.row_15 {
-    display: none !important;
 }
 .cardList .row .column {
     display: block;
@@ -1261,7 +1244,7 @@ a.rowInner {
         }
         box-shadow: none;
         .typeicon {
-            display: none !important;
+            top:17px;
         }
         .more a {
             left: 0;
@@ -1310,7 +1293,7 @@ a.rowInner {
     }
     .cardList .childobjectCount {
         right: auto;
-        left: 15px;
+        left: 80px;
         top: 23px;
     }
     .cardList .nodeRatingComments {
@@ -1328,7 +1311,7 @@ a.rowInner {
         display: inherit !important;
         position: absolute;
         top: 25px;
-        left: 120px;
+        left: 108px;
         max-width: 50px;
     }
     .cardList .actionText {

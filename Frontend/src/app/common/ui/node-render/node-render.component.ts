@@ -16,7 +16,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../core-ui-module/translation';
-import {DefaultGroups, ElementType, OptionItem, Scope} from '../../../core-ui-module/option-item';
+import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {trigger} from '@angular/animations';
@@ -63,6 +63,7 @@ import {
 } from '../../../core-ui-module/options-helper.service';
 import {RestTrackingService} from '../../../core-module/rest/services/rest-tracking.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {CardComponent} from '../../../core-ui-module/components/card/card.component';
 
 declare var jQuery:any;
 declare var window: any;
@@ -136,7 +137,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              this.list = window.history.state?.nodes;
+              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
               this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
@@ -202,6 +203,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   private queryParams: Params;
   public similarNodes: Node[];
   mds: Mds;
+  isDestroyed = false;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -233,6 +235,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     if(this.nodeMetadata!=null) {
       return;
     }
+    if(CardComponent.getNumberOfOpenCards() > 0){
+        return;
+    }
     if (event.code == 'ArrowLeft' && this.canSwitchBack()) {
       this.switchPosition(this.getPosition() - 1);
       event.preventDefault();
@@ -262,7 +267,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             }
             NodeRenderComponent.close(this.location);
             // use a timeout to let the browser try to go back in history first
-            setTimeout(()=>this.mainNavRef.toggleMenuSidebar(),250);
+            setTimeout(()=> {
+                if(!this.isDestroyed) {
+                    this.mainNavRef.toggleMenuSidebar();
+                }
+            },250);
           }
         }
       }
@@ -296,6 +305,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     ngOnDestroy() {
         (window as any).ngRender = null;
         this.optionsHelper.setListener(null);
+        this.isDestroyed = true;
     }
 
   public switchPosition(pos:number) {
@@ -326,13 +336,16 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       this.isChildobject=false;
       this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
               childobject_id: null
-          }});
+          },
+          replaceUrl: true});
   }
   viewChildobject(node:Node,pos:number) {
         this.isChildobject=true;
         this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
-            childobject_id: node.ref.id
-        }});
+                childobject_id: node.ref.id
+            },
+            replaceUrl: true});
+
   }
   private loadNode() {
     if(!this._node) {
@@ -344,8 +357,12 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
     // declare explicitly so that callback will be overriden
     download.customEnabledCallback = null;
-    download.isEnabled=this._node.downloadUrl!=null && !this._node.properties?.[RestConstants.CCM_PROP_IO_WWWURL];
-    download.showAsAction=true;
+    download.group = DefaultGroups.View;
+    download.priority = 25;
+    download.isEnabled=this._node.downloadUrl!=null &&  (
+        !this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+        !RestNetworkService.isFromHomeRepo(this._node)
+    );    download.showAsAction=true;
     if(this.isCollectionRef()) {
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node) => {
         this.addDownloadButton(download);
@@ -407,8 +424,18 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             }
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
-        },(error:any)=> {
-            this.toast.error(error);
+        },(error)=> {
+            console.log(error.error.error);
+            if(error?.error?.error === 'org.edu_sharing.restservices.DAOMissingException') {
+                this.toast.error(null, 'TOAST.RENDER_NOT_FOUND', null, null, null, {
+                    link: {
+                        caption: 'BACK',
+                        callback: () => this.close()
+                    }
+                })
+            } else {
+                this.toast.error(error);
+            }
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
         })
@@ -468,8 +495,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 nodes:usages.map((u)=>u.collection),
                 columns:ListItem.getCollectionDefaults(),
                 isClickable:true,
-                clickRow:(event:any)=> {
+                clickRow:(event: {node: Node})=> {
                     UIHelper.goToCollection(this.router,event.node);
+                },
+                doubleClickRow:(event: Node)=> {
+                    UIHelper.goToCollection(this.router,event);
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };

@@ -177,9 +177,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
     }
     ngOnDestroy(): void {
+        this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
             this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
         }
+        // close sidebar, if open
+        this.mainNavRef.management.closeSidebar();
     }
     constructor(
         private toast: Toast,
@@ -405,7 +408,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 if (!needsUpdate) {
                     return;
                 }
-                const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                let lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                if(this.isSafe) {
+                    // clear lastLocation, this is another folder than the safe
+                    lastLocation = null;
+                }
                 if (!params.id && !params.query && lastLocation) {
                     this.openDirectory(lastLocation);
                 } else {
@@ -464,11 +471,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.nodeDisplayed = event;
             this.nodeDisplayedVersion = event.version;
             */
+            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.currentNodes);
             this.currentNode = list[0];
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
                 {
                     state: {
-                        nodes: this.currentNodes,
                         scope: 'workspace'
                     }
                 }

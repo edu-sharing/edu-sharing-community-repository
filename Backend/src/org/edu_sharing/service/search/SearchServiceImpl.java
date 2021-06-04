@@ -39,6 +39,7 @@ import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -862,7 +863,10 @@ public class SearchServiceImpl implements SearchService {
 		}
 		List<String> searchFields = new ArrayList<>();
 
-		// fields to search in - not using username
+		// fields to search in - also using username as admin (6.0 or later)
+		if(AuthorityServiceHelper.isAdmin()) {
+			searchFields.add("userName");
+		}
 		searchFields.add("email");
 		searchFields.add("firstName");
 		searchFields.add("lastName");

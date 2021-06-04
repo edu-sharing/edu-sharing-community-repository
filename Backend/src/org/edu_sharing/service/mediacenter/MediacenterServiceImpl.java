@@ -23,6 +23,8 @@ import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
+import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
+import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.jobs.helper.NodeHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
@@ -592,6 +594,9 @@ public class MediacenterServiceImpl implements MediacenterService {
         return AuthenticationUtil.runAs(runAs, authority);
     }
 
+    /**
+     * @deprecated
+     */
     public void manageNodeLicenses() {
         logger.info("cache mediacenterids");
         List<String> allMediacenterIds = getAllMediacenterIds();
@@ -698,6 +703,7 @@ public class MediacenterServiceImpl implements MediacenterService {
         for (String mediacenterId : allMediacenterIds) {
             String mediacenterProxyName = "GROUP_" + AuthorityService.MEDIA_CENTER_PROXY_GROUP_TYPE + "_" + mediacenterId;
             String mediacenterGroupName  = "GROUP_" + AuthorityService.MEDIA_CENTER_GROUP_TYPE + "_" + mediacenterId;
+            String mediacenterAdminGroup = getMediacenterAdminGroup(mediacenterGroupName);
             List<String> nodesAdd = MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getNodes(mediacenterId, from, until);
             logger.info(mediacenterId + " found new nodes: " + nodesAdd.size() + " for period: " + from + " - " + until);
 
@@ -711,17 +717,34 @@ public class MediacenterServiceImpl implements MediacenterService {
                         CCConstants.PERMISSION_CC_PUBLISH);
                 boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
                         CCConstants.PERMISSION_CONSUMER);
+                boolean hasPublishPermissionAdmin = hasPermissionSet(nodeRef,mediacenterAdminGroup,
+                        CCConstants.PERMISSION_CC_PUBLISH);
+                boolean hasConsumerPermissionAdmin = hasPermissionSet(nodeRef,mediacenterAdminGroup,
+                        CCConstants.PERMISSION_CONSUMER);
 
-                if(!hasPublishPermission || !hasConsumerPermission){
-                    serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
-                        policyBehaviourFilter.disableBehaviour(nodeRef);
-                        logger.info(mediacenterProxyName + " add consumer and publish permission for " + nodeRef);
+
+                serviceregistry.getRetryingTransactionHelper().doInTransaction(() -> {
+                    policyBehaviourFilter.disableBehaviour(nodeRef);
+                    if(!hasPublishPermission){
+                        logger.info(mediacenterProxyName + " add publish permission for " + nodeRef);
                         permissionService.setPermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CONSUMER, true);
+                    }
+                    if(!hasConsumerPermission){
+                        logger.info(mediacenterProxyName + " add consumer permission for " + nodeRef);
                         permissionService.setPermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CC_PUBLISH, true);
-                        policyBehaviourFilter.enableBehaviour(nodeRef);
-                        return null;
-                    });
-                }
+                    }
+                    if(!hasPublishPermissionAdmin){
+                        logger.info(mediacenterAdminGroup + " add publish permission for " + nodeRef);
+                        permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CC_PUBLISH, true);
+                    }
+                    if(!hasConsumerPermissionAdmin){
+                        logger.info(mediacenterAdminGroup + " add consumer permission for " + nodeRef);
+                        permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CONSUMER, true);
+                    }
+                    policyBehaviourFilter.enableBehaviour(nodeRef);
+                    return null;
+                });
+
 
                 fixMediacenterStatus(nodeRef,mediacenterGroupName,true);
             }
@@ -738,6 +761,11 @@ public class MediacenterServiceImpl implements MediacenterService {
                 boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
                         CCConstants.PERMISSION_CC_PUBLISH);
                 boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
+                        CCConstants.PERMISSION_CONSUMER);
+
+                boolean hasPublishPermissionAdmin = hasPermissionSet(nodeRef,mediacenterAdminGroup,
+                        CCConstants.PERMISSION_CC_PUBLISH);
+                boolean hasConsumerPermissionAdmin = hasPermissionSet(nodeRef,mediacenterAdminGroup,
                         CCConstants.PERMISSION_CONSUMER);
 
                 if(hasPublishPermission){
@@ -759,6 +787,15 @@ public class MediacenterServiceImpl implements MediacenterService {
                     });
                 }
 
+                if(!hasPublishPermissionAdmin){
+                    logger.info(mediacenterAdminGroup + " add publish permission for " + nodeRef);
+                    permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CC_PUBLISH, true);
+                }
+                if(!hasConsumerPermissionAdmin){
+                    logger.info(mediacenterAdminGroup + " add consumer permission for " + nodeRef);
+                    permissionService.setPermission(nodeRef, mediacenterAdminGroup, CCConstants.PERMISSION_CONSUMER, true);
+                }
+
                fixMediacenterStatus(nodeRef,mediacenterGroupName,false);
             }
         }
@@ -778,7 +815,6 @@ public class MediacenterServiceImpl implements MediacenterService {
         if(mcStatusList == null){
             mcStatusListNew.add(jo.toJSONString());
         }else if(mcStatusList.stream().anyMatch(o -> o.contains(mediacenterGroupName))){
-            logger.info("merging mediacenter status list for:" + nodeRef);
             mcStatusListNew.addAll(mcStatusList.stream().map(o -> {
                 try {
                     return ((JSONObject)new JSONParser().parse(o)).get("name").equals(mediacenterGroupName) ? jo.toJSONString() : o;
@@ -806,7 +842,31 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     private NodeRef getNodeRefByReplicationSourceId(String replicationSourceId){
-       return CMISSearchHelper.getNodeRefByReplicationSourceId(replicationSourceId);
+        NodeRef nodeRef =  CMISSearchHelper.getNodeRefByReplicationSourceId(replicationSourceId);
+
+        if(nodeRef == null){
+            logger.info("creating dummy object for:"+replicationSourceId);
+            HashMap<String,Object> properties = new HashMap<>();
+            properties.put(CCConstants.CM_NAME,replicationSourceId);
+            properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP, "1900-01-01T00:00:00Z");
+            properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID,replicationSourceId);
+            properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getCatalogId());
+            properties.put(CCConstants.CCM_PROP_IO_TECHNICAL_STATE,"problem_notAvailable");
+              try {
+                String nodeId = new PersistentHandlerEdusharing(null,null,false).safe(new RecordHandlerInterfaceBase() {
+                    @Override
+                    public HashMap<String, Object> getProperties() {
+                        return properties;
+                    }
+                },null,MediacenterLicenseProviderFactory.getMediacenterLicenseProvider().getSet());
+                if(nodeId != null){
+                    nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+                }
+            } catch (Throwable throwable) {
+                logger.error(throwable.getMessage(),throwable);
+            }
+        }
+        return nodeRef;
     }
 
     @Override

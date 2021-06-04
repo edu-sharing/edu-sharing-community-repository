@@ -9,15 +9,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sf.acegisecurity.context.ContextHolder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -33,10 +35,6 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ImageTool;
-import org.edu_sharing.repository.server.tools.NameSpaceTool;
-import org.edu_sharing.repository.server.tools.XApiTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
@@ -48,7 +46,6 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
-import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
@@ -58,7 +55,8 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
-import org.edu_sharing.service.rating.AccumulatedRatings;
+import org.edu_sharing.service.rating.RatingDetails;
+import org.edu_sharing.service.rating.RatingsCache;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
@@ -73,8 +71,6 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -578,12 +574,15 @@ public class NodeDao {
     public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform){
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		final Context context = Context.getCurrentInstance();
+		final String scope = NodeServiceInterceptor.getEduSharingScope();
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		List<Node> nodes = null;
 		java.util.Collection<Callable<Node>> tasks = list.stream().map(
 				(nodeRef) -> (Callable<Node>) () -> AuthenticationUtil.runAs(() -> {
 						try {
+							// apply thread variables to keep state of thread
 							Context.setInstance(context);
+							NodeServiceInterceptor.setEduSharingScope(scope);
 							NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
 							if (transform != null) {
 								nodeDao = transform.apply(nodeDao);
@@ -1048,7 +1047,11 @@ public class NodeDao {
 		String remoteObjectRepositoryId = (String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
 		if(aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY) && remoteObjectRepositoryId != null){
 			remote.setId((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
-			remote.setRepository(RepositoryDao.getRepository(remoteObjectRepositoryId).asRepo());
+			try {
+				remote.setRepository(RepositoryDao.getRepository(remoteObjectRepositoryId).asRepo());
+			}catch(DAOMissingException e){
+				logger.warn("Repository " + remoteObjectRepositoryId + " is not present anymore: " + e.getMessage());
+			}
 		} else if(remoteId!=null){
 			remote.setId(remoteId);
 			remote.setRepository(remoteRepository.asRepo());
@@ -1389,6 +1392,10 @@ public class NodeDao {
 	 */
 	private boolean checkUserHasPermissionToSeeMail(String userName) {
 		try {
+			if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterMetadataEmail") &&
+					(access== null || !access.contains(CCConstants.PERMISSION_WRITE))){
+				return false;
+			}
 			if (this.isCurrentUserAdminOrSameUserAsUserName(userName)) // if is ADMIN or sameUser, don't need to countinue;
 				return true;
 			else {
@@ -1465,7 +1472,7 @@ public class NodeDao {
 	private String getContentUrl() {
 		return (String) nodeProps.get(CCConstants.CONTENTURL);
 	}
-	private AccumulatedRatings getRating(){
+	private RatingDetails getRating(){
 		try{
 			return RatingServiceFactory.getRatingService(repoDao.getId()).getAccumulatedRatings(nodeId,null);
 		}catch(Throwable t){
@@ -1660,10 +1667,24 @@ public class NodeDao {
 		}
 
 		HashMap<String,String[]> properties = new HashMap<String,String[]>();
+		if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterVCardEmail")) {
+			List<String> cleanup = new ArrayList<>();
+			for (Entry<String, Object> entry : props.entrySet()) {
+				if (CCConstants.getLifecycleContributerPropsMap().containsValue(entry.getKey()) || CCConstants.getMetadataContributerPropsMap().containsValue(entry.getKey())) {
+					if (access == null || !access.contains(CCConstants.PERMISSION_WRITE)) {
+						entry.setValue(VCardConverter.removeEMails(StringUtils.join(ValueTool.getMultivalue(entry.getValue().toString()), "\n")));
+						cleanup.add(entry.getKey() + CCConstants.VCARD_EMAIL);
+					}
+				}
+			}
+			cleanup.forEach(props::remove);
+		}
 		for (Entry<String, Object> entry : props.entrySet()) {
 
-			List<String> values = getPropertyValues(entry.getValue());
-
+			if(entry.getKey() == null) {
+				logger.info(nodeId+" null property has value "+entry.getValue());
+				continue;
+			}
 			String shortPropName = NameSpaceTool.transformToShortQName(entry.getKey());
 
 			if(shortPropName != null){
@@ -1673,6 +1694,8 @@ public class NodeDao {
 						&& !filter.getProperties().contains(shortPropName)){
 					continue;
 				}
+				List<String> values = getPropertyValues(entry.getValue());
+
 				if(props.containsKey(entry.getKey()+ CCConstants.LONG_DATE_SUFFIX)){
 					values = getPropertyValues(props.get(entry.getKey()+CCConstants.LONG_DATE_SUFFIX));
 					properties.put(shortPropName, values.toArray(new String[values.size()]));
@@ -2036,7 +2059,7 @@ public class NodeDao {
 		nodeService.setOwner( this.getId(), username);
 	}
 
-	public void setProperty(String property, String value) {
+	public void setProperty(String property, Serializable value) {
 		if(value==null){
 			nodeService.removeProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property);
 		}else {
@@ -2057,6 +2080,9 @@ public class NodeDao {
 							new org.alfresco.service.cmr.repository.NodeRef(storeProtocol, storeId, source[0]));
 					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
 					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+					permissionService.removeAllPermissions(newNode.getId());
+					// re-activate inherition
+					permissionService.setPermissions(newNode.getId(), null, true);
 					return new NodeDao(repoDao, newNode.getId());
 				} catch (Throwable throwable) {
 					throw new RuntimeException(throwable);
@@ -2092,6 +2118,31 @@ public class NodeDao {
 					getFrontpageNodes().stream().map((ref)->new NodeRef(repoDao,ref.getId())).collect(Collectors.toList());
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
+		}
+	}
+
+	/**
+	 * If the NodeDao is a child, then all properties including inherited are returned
+	 * otherwise, the own properties are returned
+	 */
+	public HashMap<String, Object> getInheritedPropertiesFromParent() throws Throwable {
+		if(getAspectsNative().contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
+			Map<String, Object> propsChild = getNativeProperties();
+			String parentRef = NodeServiceFactory.getLocalService().getPrimaryParent(getRef().getId());
+			HashMap<String,Object> propsParent =
+					NodeServiceHelper.getProperties(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentRef));
+			// ignore some technical properties, like mimetypes etc.
+			for(String prop : CCConstants.CHILDOBJECT_IGNORED_PARENT_PROPERTIES)
+				propsParent.remove(prop);
+			// override it with the props from the child
+			for(Map.Entry<String,Object> entry : propsChild.entrySet()){
+				if(entry.getValue() != null && !entry.getValue().toString().isEmpty()) {
+					propsParent.put(entry.getKey(), entry.getValue());
+				}
+			}
+			return propsParent;
+		} else {
+			return getNativeProperties();
 		}
 	}
 

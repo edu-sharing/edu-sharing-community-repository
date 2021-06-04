@@ -67,48 +67,28 @@
     <span class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
     {{ $any(node).modifiedBy | nodePersonName }}
   </span>
-  <span
-    *ngSwitchCase="'ccm:replicationsource'"
-    [matTooltip]="
-      ('NODE.ccm:replicationsource' | translate) +
-      ': ' +
-      ('REPOSITORIES.' +
-        ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-        | translate
-          : {
-              fallback: ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-            })
-    "
-  >
-    <img
-      src="{{ $any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'url' } }}"
-      (error)="$any($event.target).style.display = 'none'"
-      [alt]="
-      ('NODE.ccm:replicationsource' | translate) +
-      ': ' +
-      ('REPOSITORIES.' +
-        ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-        | translate
-          : {
-              fallback: ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-            })
-    "
-    />
-  </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
     <span class="cdk-visually-hidden">{{ 'NODE.' + item.name | translate }}:</span>
-    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
+    <ng-container
+      *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
+    >
       {{
-      $any(node).properties ?
-        ($any(node).properties[item.name + '_DISPLAYNAME']
-          ? $any(node).properties[item.name + '_DISPLAYNAME'].join(', ')
-          : $any(node).properties[item.name]?.join(', ')
-        )
-         : ''
+        $any(node).properties
+          ? $any(node).properties[item.name + '_DISPLAYNAME']
+            ? $any(node).properties[item.name + '_DISPLAYNAME'].join(', ')
+            : $any(node).properties[item.name]?.join(', ')
+          : ''
       }}
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
-      {{ $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | formatDate) : '' }}
+      {{
+        $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | formatDate) : ''
+      }}
+    </ng-container>
+    <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
+      {{
+        $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | vcardName) : ''
+      }}
     </ng-container>
   </span>
 </ng-container>

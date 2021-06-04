@@ -28,6 +28,14 @@
 				<condition type="PROPERTY">ccm:wwwurl</condition>
 			</widget>
 			<widget>
+				<id>virtual:mediatype</id>
+				<caption>virtual_mediatype</caption>
+				<type>text</type>
+				<hideIfEmpty>false</hideIfEmpty>
+				<required>true</required>
+				<!-- <condition>!ccm:wwwurl</condition>  -->
+			</widget>
+			<widget>
 				<id>ccm:wwwurl</id>
 				<caption>cm_wwwurl</caption>
 				<placeholder>cm_wwwurl_placeholder</placeholder>
@@ -37,7 +45,7 @@
 			</widget>
 			<widget>
 				<id>cclom:general_description</id>
-				<type>text</type>
+				<type>textarea</type>
 				<caption>lom_prop_educational_description</caption>
 				<placeholder>lom_prop_educational_description_placeholder</placeholder>
 				<hideIfEmpty>true</hideIfEmpty>
@@ -559,6 +567,7 @@
 				<html><![CDATA[
               <cclom:title>
               <cm:name>
+              <virtual:mediatype>
 			  <ccm:educationallearningresourcetype>
               <cclom:general_description>
               <cclom:general_keyword>
@@ -1082,6 +1091,12 @@
 					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
+				</property>
+			</query>
+			<query join="AND" id="mediacenter_filter">
+				<basequery>{"term":{"type":"ccm:io"}}</basequery>
+				<property name="ngsearchword">
+					<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.ccm.replicationsourceid":{"value":"*${value}*"}}}]}}</statement>
 				</property>
 			</query>
 		</queries>

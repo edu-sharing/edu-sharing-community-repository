@@ -4,22 +4,13 @@ import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.service.connector.Connector;
-import org.edu_sharing.service.connector.ConnectorList;
+import org.edu_sharing.alfresco.service.connector.Connector;
+import org.edu_sharing.alfresco.service.connector.ConnectorList;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
 
 public class ToolPermissionService extends ToolPermissionBaseService {

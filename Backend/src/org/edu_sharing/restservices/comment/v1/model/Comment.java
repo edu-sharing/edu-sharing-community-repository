@@ -1,11 +1,7 @@
 package org.edu_sharing.restservices.comment.v1.model;
 
 import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.Person;
-import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
-import org.edu_sharing.service.config.model.Language;
-import org.edu_sharing.service.config.model.Values;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

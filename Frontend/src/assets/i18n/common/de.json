@@ -156,6 +156,7 @@
     "NODE_SEARCH": "Elemente suchen...",
     "DELETED_USER": "gelöschter Benutzer",
     "GROUP_EVERYONE": "Alle (Öffentlich)",
+    "BREADCRUMB_LOCATION_PREFIX": "Sie sind hier:",
     "DETAILS": "Details",
     "INFO": "Infos",
     "GOTO_LOGIN": "Zum Login",
@@ -268,9 +269,10 @@
         "ccm:eaf_productionyear": "Prod. Jahr",
         "counts": {
             "OVERALL": "Summe",
-            "VIEW_MATERIAL": "Aufrufe",
-            "VIEW_MATERIAL_EMBEDDED": "Aufrufe (Remote)",
-            "DOWNLOAD_MATERIAL": "Downloads"
+            "VIEW_MATERIAL": "Seitenaufrufe",
+            "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
+            "DOWNLOAD_MATERIAL": "Downloads",
+            "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
     },
     "LICENSE": {
@@ -363,6 +365,7 @@
     },
     "NODE_REPORT": {
         "TITLE": "Problem melden",
+        "SUBTITLE": "Problem oder Fehler am Medium melden",
         "REPORT": "Melden",
         "REPORT_INFO": "Problem mit \"{{name}}\" melden",
         "COMMENT": "Nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
@@ -372,6 +375,7 @@
         "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben",
         "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",
         "DONE": "Vielen Dank für Ihre Meldung.",
+        "REASON": "Welches Problem besteht?",
         "REASONS": {
             "UNAVAILABLE": "Medium nicht verfügbar",
             "INAPPROPRIATE_CONTENT": "Problematischer Inhalt",
@@ -445,7 +449,23 @@
     "ACCESSIBILITY": {
         "LASTMODIFIED": "Letztes Änderungsdatum",
         "AUTHOR": "Autor",
-        "SOURCE": "Quelle"
+        "SOURCE": "Quelle",
+        "TITLE": "Barrierefreiheit",
+        "SUBTITLE": "Optionen für barrierefreie Nutzung",
+        "ENTRY_MESSAGE": "Um persönliche Bedürfnisse zu berücksichtigen, können nachfolgend einige Einstellungen für die Verwendung unserer Anwendung gesetzt werden.",
+        "TOAST_TITLE": "Statusmeldungen",
+        "TOAST_MESSAGE": "Statusmeldungen zeigen an, ob das System korrekt arbeitet. Bspw. lässt sich so erkennen, ob ein Inhalt oder Änderungen korrekt gespeichert wurden.",
+        "TOAST_TYPE": {
+            "IMPORTANT": "Nur wichtige anzeigen",
+            "ALL": "Alle anzeigen"
+        },
+        "TOAST_DURATION_SECONDS": "{{seconds}} Sekunden",
+        "TOAST_DURATION_INFINITE": "Nicht ausblenden",
+        "TOAST_DURATION_INFINITE_INFO": "Statusmeldungen werden nicht automatisch ausgeblendet und müssen manuell geschlossen werden",
+        "TOAST_DURATION_TITLE": "Anzeigedauer",
+        "TOAST_DURATION_MESSAGE": "Statusmeldungen können automatisch nach einer festgelegten Zeit verschwinden oder durch klicken manuell geschlossen werden.",
+        "SAVED": "Einstellungen wurden gespeichert.",
+        "DISMISS_TOAST": "Ausblenden"
     },
     "AUTHORITY_TYPE_GROUP": "Gruppe",
     "AUTHORITY_TYPE_ORG": "Organisation",
@@ -587,7 +607,8 @@
         "SWITCH_TO_LIST_VIEW": "Zur Listenansicht wechseln",
         "SWITCH_TO_CARDS_VIEW": "Zur Kachelansicht wechseln",
         "LIST_SETTINGS": "Liste konfigurieren",
-        "METADATA_SIDEBAR": "Materialinformationen"
+        "METADATA_SIDEBAR": "Materialinformationen",
+        "ACCESSIBILITY": "Barrierefreiheit"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
@@ -704,12 +725,13 @@
     },
     "VIDEO_CONTROLS": {
         "HEADING": "Einen Ausschnitt zum Speichern in einer Sammlung festlegen",
-        "SAVED": "Änderungen wurden gespeichert"
+        "SAVED": "Änderungen wurden gespeichert."
     },
     "TOAST": {
         "NODE_LOCKED": "Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
         "FIELD_REQUIRED": "Das Feld {{ name }} muss ausgefüllt sein",
         "NO_CONNECTION": "Instabile Internetverbindung, Inhalt konnte nicht geladen werden. Bitte später erneut versuchen",
+        "RENDER_NOT_FOUND": "Das angeforderte Element wurde gelöscht oder existiert nicht",
         "DOWNLOAD_STARTED": "Download von {{name}} wurde gestartet",
         "DOWNLOAD_FINISHED_ANDROID": "Download von {{name}} abgeschlossen.<br />Sie finden das Element im Download-Ordner des Gerätes",
         "DOWNLOAD_FINISHED_IOS": "Download von {{name}} abgeschlossen.<br />Sie finden das Element in der Dateien-App",
@@ -795,8 +817,8 @@
             "InvalidPassword": "Das angegebene Passwort ist ungültig",
             "AlreadyInList": "Sie sind bereits auf der Warteliste dieser Gruppe. Sie erhalten eine E-Mail-Benachrichtigung, sobald Sie freigeschaltet wurden",
             "AlreadyMember": "Sie sind bereits Mitglied der gewählten Gruppe",
-            "ADDED_TO_LIST": "Sie wurden auf die Warteliste gesetzt und der Gruppen-Administrator wird benachrichtigt. Sie erhalten eine E-Mail-Benachrichtung, sobald Sie freigeschaltet wurden",
-            "ADDED_TO_GROUP": "Sie sind nun Mitglied der Gruppe {{group}}"
+            "ADDED_TO_LIST": "Sie wurden auf die Warteliste gesetzt und der Gruppen-Administrator wird benachrichtigt. Sie erhalten eine E-Mail-Benachrichtung, sobald Sie freigeschaltet wurden.",
+            "ADDED_TO_GROUP": "Sie sind nun Mitglied der Gruppe {{group}}."
         }
     },
     "LANGUAGE": {
