@@ -64,7 +64,9 @@ public class Monitoring {
 				sp.setMaxItems(1);
 				sp.setQuery("@sys\\:node-uuid:\"" + nodeId + "\"");
 				ResultSet rs = serviceRegistry.getSearchService().query(sp);
-				return rs.getNodeRefs().get(0).getId();
+				if(rs.getNodeRefs() != null && rs.getNodeRefs().size() > 0)
+					return rs.getNodeRefs().get(0).getId();
+				else return null;
 			}
 		};
 		return AuthenticationUtil.runAsSystem(runAs);

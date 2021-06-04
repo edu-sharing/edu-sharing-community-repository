@@ -147,6 +147,11 @@ public class AboutApi  {
 	    	logger.debug("result:" + result);
 	    	//check if it is a node id?
 	    	//NodeServiceFactory.getLocalService().exists(protocol, store, result)
+
+			if(result == null){
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+						.entity(ErrorResponse.createResponse(new Exception(mode +" check failed. no result returned."))).build();
+			}
 	    	
 	    	return Response.ok().build();
 	    	
