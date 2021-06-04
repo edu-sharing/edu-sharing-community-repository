@@ -295,10 +295,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
              * @TODO: transform to ValueTool.toMultivalue
              */
             if(entry.getValue() instanceof ArrayList){
-                if(((ArrayList) entry.getValue()).size() != 1) {
-                    value = ValueTool.toMultivalue(((ArrayList<?>) entry.getValue()).toArray(new String[0]));
-                } else {
-                    value = (Serializable) ((ArrayList) entry.getValue()).get(0);
+                ArrayList<?> list = (ArrayList<?>) entry.getValue();
+                if(list.size() > 1 && list.get(0) instanceof String) {
+                    value = ValueTool.toMultivalue(list.toArray(new String[0]));
+                } else if(list.size() == 1) {
+                    value = (Serializable) ((ArrayList<?>) entry.getValue()).get(0);
                 }
             } else {
                 value = entry.getValue();
