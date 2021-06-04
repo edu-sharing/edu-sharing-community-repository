@@ -80,7 +80,7 @@ export abstract class MdsEditorWidgetCore {
     readonly editorBulkMode: EditorBulkMode;
 
     constructor(
-        private mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorInstance: MdsEditorInstanceService,
         protected translate: TranslateService,
     ) {
         this.editorMode = this.mdsEditorInstance.editorMode;
