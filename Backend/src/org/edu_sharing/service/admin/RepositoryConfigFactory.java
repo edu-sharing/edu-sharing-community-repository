@@ -20,7 +20,7 @@ public class RepositoryConfigFactory {
     private static Logger logger=Logger.getLogger(RepositoryConfigFactory.class);
 
     private static NodeRef getConfigNode() throws Throwable {
-        String folder = ToolPermissionServiceFactory.getInstance().getEdu_SharingSystemFolderBase();
+        String folder = ToolPermissionServiceFactory.getInstance().getEdu_SharingSystemFolderBase().getId();
         NodeService nodeService= NodeServiceFactory.getLocalService();
         String node=nodeService.findNodeByName(folder, CCConstants.CCM_VALUE_IO_NAME_CONFIG_NODE_NAME);
         if(node==null){
@@ -49,6 +49,10 @@ public class RepositoryConfigFactory {
     public static void setConfig(RepositoryConfig config){
         try {
             NodeRef node = getConfigNode();
+            if(config == null){
+                NodeServiceFactory.getLocalService().removeNode(node.getId(), null);
+                return;
+            }
             String json = new Gson().toJson(config);
             NodeServiceHelper.writeContentText(node,json);
         } catch (Throwable t) {

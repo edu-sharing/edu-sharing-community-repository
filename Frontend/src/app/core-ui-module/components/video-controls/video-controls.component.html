@@ -1,13 +1,3 @@
-<collection-chooser
-  class="dialog-right scrollWithBanner"
-  *ngIf="isCollectionChooserVisible"
-  [@fromRight]="isCollectionChooserVisible"
-  title="WORKSPACE.SELECT_COLLECTION"
-  (onCancel)="isCollectionChooserVisible = false"
-  (onChoose)="addToCollection($event)"
-  (onCreateCollection)="createCollectionAndAdd($event)"
-></collection-chooser>
-
 <div
   *ngIf="sliderOptions && hasRequiredPermissions"
   class="selection"

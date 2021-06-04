@@ -95,7 +95,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 				else{
 					// create webp animation
 					String TIME_COUNT="15";
-					String WEBP_FRAMERATE="5";
+					String WEBP_FRAMERATE="1";
 					String WEBP_QUALITY="20";
 					pb = new ProcessBuilder("ffmpeg", "-i",sourceFile.getCanonicalPath(),"-t",TIME_COUNT,"-loop","0","-q",WEBP_QUALITY,"-filter","setpts=0.15*PTS,scale=400:-1","-r",WEBP_FRAMERATE,"-f","webp","-y",targetFile.getCanonicalPath());
 				}

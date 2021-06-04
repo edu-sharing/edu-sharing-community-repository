@@ -90,6 +90,13 @@ public class ShibbolethServlet extends HttpServlet {
 
 		}
 
+		Map<String, String> additionalAttributesMapping = null;
+		try {
+			additionalAttributesMapping = (Map<String, String>)eduApplicationContext.getBean("additionalAttributesMapping");
+		}catch(NoSuchBeanDefinitionException e) {
+
+		}
+
 		String headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
 		if (req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
@@ -100,6 +107,10 @@ public class ShibbolethServlet extends HttpServlet {
 		HashMap<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
 
 		redirectUrl = (String)req.getSession().getAttribute(NgServlet.PREVIOUS_ANGULAR_URL);
+		// prefer the login url since it will intercept the regular angular url
+		if(req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL) != null){
+			redirectUrl = (String) req.getSession().getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL);
+		}
 
 		if (validAuthInfo != null ) {
 			if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(headerUserName)) {
@@ -140,7 +151,16 @@ public class ShibbolethServlet extends HttpServlet {
 				for(String ssoKey : additionalAttributes) {
 					String val = getShibValue(ssoKey, req);
 					if(val != null && !val.trim().isEmpty()) {
-						ssoMap.put(ssoKey, getShibValue(ssoKey,req));
+						ssoMap.put(ssoKey, val);
+					}
+				}
+			}
+
+			if(additionalAttributesMapping != null) {
+				for(String ssoKey : additionalAttributesMapping.keySet()) {
+					String val = getShibValue(ssoKey, req);
+					if(val != null && !val.trim().isEmpty()) {
+						ssoMap.put(additionalAttributesMapping.get(ssoKey), val);
 					}
 				}
 			}
@@ -267,7 +287,7 @@ public class ShibbolethServlet extends HttpServlet {
 	 private String getShibValue(String attName, HttpServletRequest req){
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication.isAuthenticated()) {
+            if (authentication != null && authentication.isAuthenticated()) {
             	Object credential = authentication.getCredentials();
             	if(credential instanceof SAMLCredential) {
             		 SAMLCredential samlCredential = (SAMLCredential) credential;

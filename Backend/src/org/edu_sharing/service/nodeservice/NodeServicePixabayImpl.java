@@ -34,7 +34,7 @@ public class NodeServicePixabayImpl extends NodeServiceAdapterCached{
 	public InputStream getContent(String nodeId) throws Throwable {
 		try {
 			HashMap<String, Object> properties = getProperties(null, null, nodeId);
-			String download = (String) properties.get(CCConstants.DOWNLOADURL);
+			String download = (String) properties.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 			URL url = new URL(download);
 			HttpsURLConnection connection = SearchServicePixabayImpl.openPixabayUrl(url);
 			connection.connect();
@@ -68,21 +68,4 @@ public class NodeServicePixabayImpl extends NodeServiceAdapterCached{
 		
 		throw new Exception("Node "+nodeId+" was not found (cache expired)");
 	}
-
-
-	@Override
-	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp)
-			throws Throwable {
-		// pixabay will usually return 403 when trying to fetch content :-(
-		return null;
-		/*
-		HashMap<String, Object> props = getProperties(storeProtocol, storeId, nodeId);
-		HttpURLConnection url=SearchServicePixabayImpl.openPixabayUrl(new URL((String) props.get(CCConstants.DOWNLOADURL)));
-		return url.getInputStream();
-
-		 */
-
-	}
-	
-
 }

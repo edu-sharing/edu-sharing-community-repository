@@ -16,7 +16,7 @@
       <div class="affiliation" *ngIf="authority.profile.primaryAffiliation">
         {{ authority | authorityAffiliation }}
       </div>
-      <div class="affiliation affiliation-group" *ngIf="authority.profile.displayName">
+      <div class="affiliation affiliation-group" *ngIf="authority.profile.displayName && authority.properties">
         {{ 'AUTHORITY_TYPE_' + (authority.properties['ccm:edu_homedir'] ? 'ORG' : 'GROUP') | translate }}
       </div>
     </div>

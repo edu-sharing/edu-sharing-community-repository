@@ -105,14 +105,14 @@ public class SitemapServlet extends HttpServlet{
         NodeService nodeService = NodeServiceFactory.getLocalService();
 
         SearchToken token=new SearchToken();
-        if(type.equals("collection"))
+        if("collection".equals(type))
             token.setContentType(SearchService.ContentType.COLLECTIONS);
         else
             token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(NODES_PER_MAP);
         token.setFrom(from);
         SortDefinition sort = new SortDefinition();
-        sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.CM_PROP_C_CREATED,true));
+        sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_PROP_C_CREATED),true));
         token.setSortDefinition(sort);
         SearchResultNodeRef result = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         for(org.edu_sharing.service.model.NodeRef ref : result.getData()){

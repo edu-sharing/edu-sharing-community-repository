@@ -54,7 +54,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() invalidate: boolean;
     @Input() labelNegative = 'CANCEL';
     @Input() labelPositive = 'SAVE';
-    @Input() mode = 'default';
+    @Input() mode: 'search' | 'default' = 'default';
     @Input() nodes: Node[];
     @Input() parentNode: Node;
     @Input() priority = 1;
@@ -241,10 +241,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     private handleError(error: any): void {
+        console.error(error);
         if (error instanceof UserPresentableError || error.message) {
             this.toast.error(null, error.message);
         } else {
-            console.error(error);
             this.toast.error(error);
         }
         this.onCancel.emit();

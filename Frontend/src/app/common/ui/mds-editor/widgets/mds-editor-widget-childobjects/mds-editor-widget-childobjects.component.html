@@ -15,14 +15,14 @@
         editorMode="nodes"
         [currentValues]="_edit.properties"
         (onCancel)="_edit=null"
-        (onDone)="setProperties($event)"
+        (onDone)="setProperties($any($event))"
         [invalidate]="_edit!=null"
 ></app-mds-editor-wrapper>
 <workspace-license
         *ngIf="_editLicense"
         [priority]="2"
         [properties]="_editLicense.properties"
-        (onDone)="setProperties($event)"
+        (onDone)="setProperties($any($event))"
         (onCancel)="_editLicense=null"
 ></workspace-license>
 

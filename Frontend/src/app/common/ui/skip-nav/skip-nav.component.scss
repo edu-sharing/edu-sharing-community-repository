@@ -1,3 +1,5 @@
+@import '../../../core-ui-module/styles/variables';
+
 .skip-link {
     position: fixed;
     padding: 20px;
@@ -7,5 +9,8 @@
     &:not(:focus) {
         clip: rect(1px,1px,1px,1px);
         overflow: hidden;
+    }
+    &:focus {
+        @include setGlobalKeyboardFocus();
     }
 }

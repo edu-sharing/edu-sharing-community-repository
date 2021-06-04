@@ -1,4 +1,4 @@
-<ng-container *ngIf="!disabled">
+<ng-container *ngIf="!disabled || isAdmin">
   <main-nav #mainNav
             [title]="'PERMISSIONS.TITLE'"
             [currentScope]="'permissions'"
@@ -9,12 +9,13 @@
   ></main-nav>
   <div
     role="main"
-    appSkipTarget="MAIN_CONTENT"
+    [appSkipTarget]="SkipTarget.MainContent"
   >
     <h1 appTitle class="cdk-visually-hidden">{{ 'PERMISSIONS.TITLE' | translate }}</h1>
     <mat-tab-group
+      *ngIf="!isLoading"
       mat-stretch-tabs
-      color="dark"
+      [color]="$any('dark')"
       [selectedIndex]="tab"
       (selectedIndexChange)="setTab($event)"
     >

@@ -103,10 +103,6 @@ export class WorkspaceLicenseComponent  {
                 this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
                     this.permissions = permissions.permissions.localPermissions;
                     this.readPermissions(i==this.getNodes()?.length);
-                    if(this.getNodes()?.length==1) {
-                        this.doiActive = this.nodeHelper.isDOIActive(node, permissions.permissions.localPermissions.permissions);
-                        this.doiDisabled = this.doiActive;
-                    }
                 });
             }
         }, error => {
@@ -124,7 +120,6 @@ export class WorkspaceLicenseComponent  {
         private iamApi : RestIamService,
         private toast : Toast,
         private nodeApi : RestNodeService) {
-        this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
         this.translateLicenceCountries(this.constantCountries);
         this.updateButtons();
         this.iamApi.getUser().subscribe(() => {});
@@ -141,9 +136,6 @@ export class WorkspaceLicenseComponent  {
     @Input() embedded = false;
     _primaryType='';
     _properties: any;
-    private doiPermission: boolean;
-    private doiActive: boolean;
-    private doiDisabled: boolean;
     buttons: DialogButton[];
     public ccShare='';
     ccCommercial='';
@@ -162,7 +154,7 @@ export class WorkspaceLicenseComponent  {
     private release=false;
     private releaseIndeterminate=false;
     private eduDownload=true;
-    private _ccCountries: Array<{ key: string, name: string }> = [];
+    _ccCountries: Array<{ key: string, name: string }> = [];
 
     private _oerMode=true;
     private constantCountries = [
@@ -341,7 +333,7 @@ export class WorkspaceLicenseComponent  {
         this.contactIndeterminate=contactState=='multi';
     }
 
-    private getLicenseProperty() {
+    getLicenseProperty() {
         let name=this.primaryType;
         if(this.primaryType=='NONE')
             return '';
@@ -366,16 +358,16 @@ export class WorkspaceLicenseComponent  {
 
         return name;
     }
-    private getLicenseName() {
+    getLicenseName() {
         return this.nodeHelper.getLicenseNameByString(this.getLicenseProperty());
     }
-    private getLicenseUrl() {
+    getLicenseUrl() {
         return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
     }
-    private getLicenseUrlVersion(type:string) {
+    getLicenseUrlVersion(type:string) {
         return this.nodeHelper.getLicenseUrlByString(type,this.ccVersion);
     }
-    private getLicenseIcon() {
+    getLicenseIcon() {
         return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());
     }
     private savePermissions(node:Node) {
@@ -414,7 +406,7 @@ export class WorkspaceLicenseComponent  {
             this.permissions.permissions.push(perm);
         }
         const permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.permissions.inherited);
-        this.nodeApi.setNodePermissions(node.ref.id,permissions,false,'',false,this.allowDOI() && this.doiPermission && this.doiActive && this.release).subscribe(()=> {
+        this.nodeApi.setNodePermissions(node.ref.id,permissions,false,'',false).subscribe(()=> {
         },(error:any)=>this.toast.error(error));
     }
     private readPermissions(last:boolean) {
@@ -466,11 +458,6 @@ export class WorkspaceLicenseComponent  {
                 }
             }
         });
-    }
-    allowDOI() {
-        if(!this.getNodes() || this.getNodes().length!=1)
-            return false;
-        return this.doiPermission && this.release;
     }
     setCCBy() {
         this.type='CC_BY';
@@ -535,14 +522,12 @@ export class WorkspaceLicenseComponent  {
                     'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
                     DialogButton.getYesNo(cancel, ()=> {
                         this.release=true;
-                        this.doiActive=true;
                         this.toast.closeModalDialog();
                     }),true,cancel);
 
 
                 return;
             }
-            this.doiActive=true;
         }
     }
 

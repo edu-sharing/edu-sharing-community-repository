@@ -79,6 +79,7 @@ export enum MdsWidgetType {
     MultiValueBadges = 'multivalueBadges',
     MultiValueFixedBadges = 'multivalueFixedBadges',
     MultiValueSuggestBadges = 'multivalueSuggestBadges',
+    MultiValueAuthorityBadges = 'multivalueAuthorityBadges',
     Singleoption = 'singleoption',
     Slider = 'slider',
     Range = 'range',
@@ -115,6 +116,7 @@ export interface MdsDefinition {
 export interface MdsView {
     id: string;
     caption: string;
+    isExtended: boolean;
     html: string;
     icon: string;
     rel: ViewRelation;
@@ -178,9 +180,11 @@ export interface MdsWidgetValue {
 export type MdsWidgetFacetValue = MdsWidgetValue & { count?: string };
 
 export interface MdsWidgetCondition {
+    dynamic: boolean;
     type: 'PROPERTY' | 'TOOLPERMISSION';
     value: string;
     negate: boolean;
+    pattern?: string;
 }
 
 export type Suggestions = { [property: string]: MdsWidgetValue[] };

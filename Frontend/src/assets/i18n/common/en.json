@@ -146,7 +146,7 @@
         "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "View stats of user interaction (login, logout) access of the repository",
         "TOOLPERMISSION_MEDIACENTER_MANAGE": "Change basic data (Address, Catalogs) from media centers where the given user is admin of",
         "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- and audio-files can be cutted when added into collections",
-        "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Permission to change the ownername of a collection (only applies to mediacenter collections)",
+        "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Permission to change the ownername of a collection",
         "TOOLPERMISSION_RATE": "The permission to rate materials",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" can be used",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
@@ -184,6 +184,7 @@
     "CLIPBOARD_DATA_UNSUPPORTED": "The current clipboard data is not supported",
     "DELETED_USER": "deleted User",
     "GROUP_EVERYONE": "everybody",
+    "BREADCRUMB_LOCATION_PREFIX": "You're here:",
     "DETAILS": "details",
     "INFO": "info",
     "GOTO_LOGIN": "Go to login",
@@ -247,14 +248,16 @@
         "ccm:wf_status": "status",
         "ccm:eaf_productionyear": "Production year",
         "counts": {
-            "OVERALL": "Summe",
+            "OVERALL": "Sum",
             "VIEW_MATERIAL": "Access",
-            "VIEW_MATERIAL_EMBEDDED": "Access (Remote)",
-            "DOWNLOAD_MATERIAL": "Downloads"
+            "VIEW_MATERIAL_EMBEDDED": "Embeddings",
+            "DOWNLOAD_MATERIAL": "Downloads",
+            "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
 
     },
     "COOKIE_INFO": {
+        "REGION_LABEL": "Cookie notice",
         "DESCRIPTION": "edu-sharing uses cookies to improve the user-friendliness of the site.\nIf you continue to use it, we'll assume you are ok with that.",
         "MORE_LINK": "find out more",
         "DIALOG_TITLE": "Cookies",
@@ -296,6 +299,7 @@
     },
     "NODE_REPORT": {
         "TITLE": "Report problem",
+        "SUBTITLE": "Report an issue or problem",
         "REPORT": "report",
         "REPORT_INFO": "Report problem with \"{{name}}\"",
         "COMMENT": "Provide additional information about the problem that has occurred",
@@ -305,6 +309,7 @@
         "EMAIL_REQUIRED": "Please provide a valind e-mail address.",
         "REASON_REQUIRED": "Please select what kind of problem you are experiencing.",
         "DONE": "Thanks for your message.",
+        "REASON": "Which problem exists?",
         "REASONS": {
             "UNAVAILABLE": "object not available",
             "INAPPROPRIATE_CONTENT": "problematic content",
@@ -378,12 +383,29 @@
     "ACCESSIBILITY": {
         "LASTMODIFIED": "date of last change",
         "AUTHOR": "author",
-        "SOURCE": "source"
+        "SOURCE": "source",
+        "TITLE": "Accessibility",
+        "SUBTITLE": "accessibility options",
+        "ENTRY_MESSAGE": "To accommodate personal needs, some settings for using our application can be set below.",
+        "TOAST_TITLE": "Status messages",
+        "TOAST_MESSAGE": "Status messages indicate whether the system is working correctly. For example, you can see whether a content or changes have been saved correctly.",
+        "TOAST_TYPE": {
+            "IMPORTANT": "Show only important messages.",
+            "ALL": "Show all messages."
+        },
+        "TOAST_DURATION_SECONDS": "{{seconds}} seconds",
+        "TOAST_DURATION_INFINITE": "Do not hide.",
+        "TOAST_DURATION_INFINITE_INFO": "Status messages are not automatically hidden and must be closed manually.",
+        "TOAST_DURATION_TITLE": "display time",
+        "TOAST_DURATION_MESSAGE": "Status messages disappear automatically after a specified time or can be closed manually by clicking.",
+        "SAVED": "Settings have been saved.",
+        "DISMISS_TOAST": "Hide"
     },
     "AUTHORITY_TYPE_GROUP": "Group",
     "AUTHORITY_TYPE_ORG": "Organisation",
     "GROUP": {
         "displayName": "group name",
+        "authorityName": "system name",
         "groupEmail": "e-mail",
         "groupType": "type",
         "scopeType": "Sichtbarkeit"
@@ -544,6 +566,7 @@
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
+        "NEW_SUB_COLLECTION": "Add subcollection",
         "LINK_MAP": "Create link",
         "TOGGLE_SHARED_TO_ME": "Toggle share receiver",
         "SWITCH_TO_LIST_VIEW": "Switch to list view",
@@ -573,6 +596,7 @@
         "ERROR_INVALID_TYPE_BULK": "Elements of this type can't be edited in bulk",
         "ERROR_INVALID_MDS_COMBINATION": "Elements with different metadatasets can't be edited in bulk",
         "ERROR_INVALID_TYPE_COMBINATION": "Elements with different type (Files/Folders) can't be edited in bulk",
+        "ERROR_ELEMENT_TYPE_UNSUPPORTED": "elements with this type can't be edited",
         "LICENSE_NO_PERMISSIONS_MATERIAL": "You have insufficient permissions to license this material",
         "LICENSE_NO_PERMISSIONS": "You have insufficient permissions to license materials",
         "LICENSE_NO_PERMISSIONS_SAFE": "You may not change licenses in safe environment",
@@ -584,8 +608,10 @@
         "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
         "REQUIRED_MESSAGE": "Field is required",
         "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing",
-        "INDETERMINATE_NOTICE": "Click on the value in order to add it to all elements, or remove it in order to delete it from all elements (when \"replace\" is selected).",
-        "SHOW_OPTIONS_BUTTON": "Show options"
+        "INDETERMINATE_NOTICE": "Click on the chip in order to add the value \"{{ value }}\" to all elements, or remove it in order to delete it from all elements.",
+        "SHOW_OPTIONS_BUTTON": "Show options",
+        "FILTER_FOR": "Filter for \"{{value}}\" ({{count}} matching element(s))",
+        "OPEN_CLOSE_EXTENDED": "Open/close view"
     },
 
      "SIMPLE_EDIT": {
@@ -670,6 +696,7 @@
     },
     "TOAST": {
         "NODE_LOCKED": "The document is currently used by an other user and can not be opened",
+        "RENDER_NOT_FOUND": "The requested element is deleted or does not exist",
         "FIELD_REQUIRED": "The field {{ name }} is required",
         "API_FORBIDDEN": "No permissions to access this content",
         "API_FORBIDDEN_LOGIN": "Please login to access this section"

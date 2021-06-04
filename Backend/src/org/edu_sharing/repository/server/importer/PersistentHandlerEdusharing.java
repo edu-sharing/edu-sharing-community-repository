@@ -101,7 +101,11 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		});
 	}
 	public Logger getLogger(){
-	    return Logger.getLogger(job.getClass());
+		if(job != null) {
+			return Logger.getLogger(job.getClass());
+		}else{
+			return Logger.getLogger(PersistentHandlerEdusharing.class);
+		}
     }
 	public static Logger getLogger(AbstractJob job){
 		return Logger.getLogger(job.getClass());

@@ -190,11 +190,6 @@ public class ExcelLOMImporter {
 						if(createNode) {
 							ChildAssociationRef newNode = nodeService.createNode(new NodeRef(MCAlfrescoAPIClient.storeRef,parentFolder),QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), QName.createQName(nodeName),  QName.createQName(CCConstants.CCM_TYPE_IO),toSafe);
 							
-							HashMap<String,Object> versProps = new HashMap<String,Object> ();
-							for(Map.Entry<QName, Serializable> entry : toSafe.entrySet()){
-								versProps.put(entry.getKey().toString(), entry.getValue());
-							}
-							
 							if(contentUrl != null && !contentUrl.trim().equals("")){
 								String mimetype = MimeTypes.guessMimetype(contentUrl);
 								InputStream inputStream = new URL(contentUrl).openConnection().getInputStream();
@@ -206,7 +201,7 @@ public class ExcelLOMImporter {
 										CCConstants.CM_PROP_CONTENT);
 							}
 						
-							apiClient.createVersion(newNode.getChildRef().getId(), versProps);
+							apiClient.createVersion(newNode.getChildRef().getId());
 
 							logger.info("node created:" + serviceRegistry.getNodeService().getPath(newNode.getChildRef()));
 							addToCollections(newNode,collectionsToImportTo,addToCollection);

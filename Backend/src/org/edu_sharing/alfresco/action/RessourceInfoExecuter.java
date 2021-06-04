@@ -69,10 +69,8 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		logger.info("type:" + type);
 
 		if(type == null) {
-			return null;
-		}
 
-		if(type.equals("application/gzip")) {
+		}else if(type.equals("application/gzip")) {
 
 			try {
 				final InputStream bis = new BufferedInputStream(is);
@@ -83,7 +81,6 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 			}catch(CompressorException e) {
 				logger.error(e.getMessage());
-
 			}
 		}else if(type.equals("application/zip")) {
 		    // allowStoredEntriesWithDataDescriptor = true because some h5p might have this
@@ -91,6 +88,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		}else {
 			logger.info("unknown format:" +  type);
 		}
+		is.close();
 		return null;
 	}
 	protected void executeImpl(Action action, NodeRef actionedUponNodeRef) {

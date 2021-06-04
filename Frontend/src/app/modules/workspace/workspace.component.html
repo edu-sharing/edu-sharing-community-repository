@@ -53,6 +53,7 @@
           } : null"-->
         <breadcrumbs *ngIf="isLoggedIn"
           [breadcrumbsAsNode]="path"
+          [invisibleDescription]="true"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.'+root"
           [canDrop]="canDropBreadcrumbs"
@@ -73,7 +74,7 @@
   <workspace-explorer class="explorer"
                       #explorer
                       role="main"
-                      appSkipTarget="MAIN_CONTENT"
+                      [appSkipTarget]="SkipTarget.MainContent"
                       appCreateContextMenu
                       *ngIf="root!='RECYCLE'"
                       [current]="currentFolder"
@@ -90,7 +91,7 @@
                       (onDrop)="handleDrop($event)"
                       (onSelectionChanged)="setSelection($event)"
                       (onViewNode)="openNode($event, false)"
-                      (onOpenNode)="openNode($event, true)"
+                      (onOpenNode)="openNode($event, false)"
                       (onReset)="resetWorkspace()"
 ></workspace-explorer>
 

@@ -26,6 +26,7 @@ import {Helper} from '../../core-module/rest/helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 import {Observable} from 'rxjs';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
   selector: 'app-profiles',
@@ -36,6 +37,7 @@ import {Observable} from 'rxjs';
   ]
 })
 export class ProfilesComponent {
+  readonly SkipTarget = SkipTarget;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private connector: RestConnectorService,
@@ -76,7 +78,7 @@ export class ProfilesComponent {
   // is editing allowed at all (via global config)
   editProfile: boolean;
   private editProfileUrl: string;
-  private avatarImage: any;
+  avatarImage: any;
   profileSettings: ProfileSettings;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
@@ -236,6 +238,7 @@ export class ProfilesComponent {
   }
   public aboutEdit() {
     this.userEdit=Helper.deepCopy(this.user);
+    this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
     this.editAbout = true;
   }
 

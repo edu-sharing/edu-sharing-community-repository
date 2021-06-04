@@ -33,7 +33,7 @@ export class WorkspaceContributorComponent  {
   public loading=true;
   public edit: VCard;
   public editMode: string;
-  public editType: number;
+  public editType: number | string; // FIXME: weird type
   public more = false;
   public showPersistentIds = false;
   public editScopeNew: string;
@@ -66,7 +66,7 @@ export class WorkspaceContributorComponent  {
   }
   public date : Date;
   buttons: DialogButton[];
-  private editButtons: DialogButton[];
+  editButtons: DialogButton[];
   private static TYPE_PERSON = 0;
   private static TYPE_ORG = 1;
   private fullName = new BehaviorSubject('');

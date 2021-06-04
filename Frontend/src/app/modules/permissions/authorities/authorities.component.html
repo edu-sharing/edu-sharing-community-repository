@@ -95,14 +95,14 @@
             [columns]="addMemberColumns"
             [actionbar]="signupActionbar"
             [customOptions]="signupActions"
-            [selectedNodes]="groupSignupSelected"
+            [selectedNodes]="$any(groupSignupSelected)"
             (selectionChanged)="groupSignupSelected = $event"
             [hasCheckbox]="true"
             [selectOnClick]="true"
             [hasHeading]="true"
             [hasIcon]="true"
             icon="person"
-            [nodes]="groupSignupList"></listTable>
+            [nodes]="$any(groupSignupList)"></listTable>
   </div>
 
 </card>
@@ -223,13 +223,13 @@
         <div class="currentMembers" *ngIf="editMembers">{{ 'PERMISSIONS.CURRENT_MEMBERS' |translate:{group:editMembers.profile ? editMembers.profile.displayName : org.profile.displayName} }}</div>
         <listTable
           [columns]="editGroups ? editGroupColumns : addMemberColumns"
-          [nodes]="memberList"
+          [nodes]="$any(memberList)"
           [hasCheckbox]="true"
           [icon]="editGroups ? 'group' : 'person'"
           [hasIcon]="true"
           [actionbar]="actionbarMember"
           [customOptions]="memberOptions"
-          [selectedNodes]="selectedMembers"
+          [selectedNodes]="$any(selectedMembers)"
           [hasHeading]="true"
           [selectOnClick]="true"
           [isClickable]="true"
@@ -271,7 +271,7 @@
   [actionbar]="actionbar"
   [isLoading]="loading"
   [isClickable]="true"
-  [selectedNodes]="selected"
+  [selectedNodes]="$any(selected)"
   [hasMore]="hasMore"
   (selectionChanged)="selection($event)"
   [sortAscending]="sortAscending"

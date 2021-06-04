@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
 import {UIHelper} from "../../../../core-ui-module/ui-helper";
-import { MatSlideToggle } from "@angular/material/slide-toggle";
+import { MatSlideToggle, MatSlideToggleChange } from "@angular/material/slide-toggle";
 
 @Component({
   selector: 'workspace-share-choose-type',
@@ -8,8 +8,8 @@ import { MatSlideToggle } from "@angular/material/slide-toggle";
   styleUrls: ['choose-type.component.scss']
 })
 export class WorkspaceShareChooseTypeComponent implements AfterViewInit {
-  private publish: boolean;
-  private publishDisabled: boolean;
+  publish: boolean;
+  publishDisabled: boolean;
   ngAfterViewInit(): void {
     setTimeout(()=>UIHelper.setFocusOnDropdown(this.dropdownElement));
   }
@@ -46,7 +46,7 @@ export class WorkspaceShareChooseTypeComponent implements AfterViewInit {
     if(this.contains('Coordinator'))
       this.publish=true;
   }
-  public setPublish(event : MatSlideToggle){
+  public setPublish(event : MatSlideToggleChange){
     if(event.checked){
       if(this.contains('CCPublish'))
         return;

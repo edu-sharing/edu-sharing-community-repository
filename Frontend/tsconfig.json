@@ -16,5 +16,10 @@
       "./node_modules/@types"
     ],
     "downlevelIteration": true
+  },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
   }
 }

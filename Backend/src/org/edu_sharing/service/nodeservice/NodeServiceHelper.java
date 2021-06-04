@@ -1,15 +1,5 @@
 package org.edu_sharing.service.nodeservice;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -22,10 +12,12 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.NodeTool;
+import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -33,6 +25,16 @@ import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.permission.RestrictedAccessException;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 public class NodeServiceHelper {
 	private static final String SEPARATOR = "/";
@@ -428,7 +430,39 @@ public class NodeServiceHelper {
 		}
 	}
 
+	public static List<NodeRef> getParentPath(NodeRef target){
+		List<NodeRef> path = new ArrayList<>();
+		NodeRef currentNode = target;
+		while(currentNode != null){
+			String parent=null;
+			try {
+				parent = NodeServiceFactory.getLocalService().getPrimaryParent(currentNode.getId());
+			}catch(Exception e){
+			}
+			if(parent != null){
+				currentNode = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parent);
+				path.add(currentNode);
+			} else {
+				currentNode = null;
+			}
+		}
+		Collections.reverse(path);
+		return path;
+	}
+
 	public static void copyProperty(NodeRef sourceNode, NodeRef targetNode, String property) {
 		NodeServiceHelper.setProperty(targetNode, property, NodeServiceHelper.getProperty(sourceNode, property));
+	}
+
+	/**
+	 * add virtual properties
+	 * @return
+	 */
+	public static Map<String, Object> addVirtualProperties(String type, List<String> aspects, Map<String, Object> properties) {
+		properties.put(CCConstants.VIRT_PROP_MEDIATYPE, I18nAngular.getTranslationAngular("common", "MEDIATYPE." + MimeTypesV2.getNodeType(type,
+				properties,
+				aspects))
+		);
+		return properties;
 	}
 }

@@ -48,6 +48,7 @@
         "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} ist bereits auf der Merkliste",
         "NODE_STORE": {
             "TITLE": "Merkliste",
+            "SUBTITLE": "Markierte Elemente anzeigen und verwalten",
             "LIST_EMPTY": "Keine Elemente auf der Merkliste",
             "REMOVE_ITEM": "Entfernen",
             "REMOVED_ITEMS": "{{count}} Element(e) wurden von der Merkliste entfernt"

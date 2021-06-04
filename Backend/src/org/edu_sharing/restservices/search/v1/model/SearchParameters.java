@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @ApiModel(description = "")
 public class SearchParameters {
 
+	private List<String> permissions;
 	private List<MdsQueryCriteria> criterias;
 	private List<String> facettes;
 
@@ -33,5 +34,14 @@ public class SearchParameters {
 
 	public void setFacettes(List<String> facettes) {
 		this.facettes = facettes;
+	}
+
+	@JsonProperty
+	public List<String> getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(List<String> permissions) {
+		this.permissions = permissions;
 	}
 }

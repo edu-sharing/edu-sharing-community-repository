@@ -1,6 +1,7 @@
 package org.edu_sharing.service.config;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,11 +11,13 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -22,12 +25,12 @@ import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.config.model.Config;
-import org.edu_sharing.service.config.model.Context;
-import org.edu_sharing.service.config.model.KeyValuePair;
-import org.edu_sharing.service.config.model.Language;
-import org.edu_sharing.service.config.model.Values;
-import org.edu_sharing.service.config.model.Variables;
+import org.edu_sharing.alfresco.service.config.model.Config;
+import org.edu_sharing.alfresco.service.config.model.Context;
+import org.edu_sharing.alfresco.service.config.model.KeyValuePair;
+import org.edu_sharing.alfresco.service.config.model.Language;
+import org.edu_sharing.alfresco.service.config.model.Values;
+import org.edu_sharing.alfresco.service.config.model.Variables;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -39,7 +42,9 @@ import org.json.JSONObject;
 public class ConfigServiceImpl implements ConfigService{
 	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
 	// Cached config
-	private static Config currentConfig=null;
+	private static String CACHE_KEY = "CLIENT_CONFIG";
+	private static SimpleCache<String, Serializable> configCache = (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
+
 	private static final Unmarshaller jaxbUnmarshaller;
 
 	private final NodeService nodeService;
@@ -104,9 +109,9 @@ public class ConfigServiceImpl implements ConfigService{
 	*/
 	@Override
 	public Config getConfig() throws Exception {
-	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && currentConfig!=null) {
+	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && configCache.getKeys().contains(CACHE_KEY)) {
 	    	// Deep copy to prevent override cache data from contexts
-			return SerializationUtils.clone(currentConfig);
+			return SerializationUtils.clone((Config) configCache.get(CACHE_KEY));
 		}
 		InputStream is = getConfigInputStream();
 		if(is==null)
@@ -116,8 +121,8 @@ public class ConfigServiceImpl implements ConfigService{
             config = (Config) jaxbUnmarshaller.unmarshal(is);
         }
         is.close();
-		currentConfig = config;
-        return SerializationUtils.clone(currentConfig);
+		configCache.put(CACHE_KEY,config);
+        return SerializationUtils.clone((Config)configCache.get(CACHE_KEY));
 	}
 
 	private InputStream getConfigInputStream() {
@@ -257,7 +262,7 @@ public class ConfigServiceImpl implements ConfigService{
 
 	@Override
 	public void refresh() {
-		currentConfig = null;
+		configCache.remove(CACHE_KEY);
 		try {
 			getConfig();
 		} catch (Exception e) {

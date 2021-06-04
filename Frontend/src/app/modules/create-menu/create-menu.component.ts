@@ -471,7 +471,7 @@ export class CreateMenuComponent {
             });
         });
     }
-    private createConnector(event: any) {
+    createConnector(event: any) {
         const name = event.name + '.' + event.type.filetype;
         this.createConnectorName = null;
         const prop = this.nodeHelper.propertiesFromConnector(event);

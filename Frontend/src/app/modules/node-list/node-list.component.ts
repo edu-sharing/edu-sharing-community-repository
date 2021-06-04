@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { BrowserModule } from '@angular/platform-browser';
 import {Translation} from "../../core-ui-module/translation";
 import {Toast} from "../../core-ui-module/toast";
-import {ArchiveRestore, RestoreResult, ArchiveSearch, Node, ListItem} from "../../core-module/core.module";
+import {ArchiveRestore, RestoreResult, ArchiveSearch, Node, ListItem, Pagination} from '../../core-module/core.module';
 import {RestConnectorService} from "../../core-module/core.module";
 import {CustomOptions, OptionItem} from "../../core-ui-module/option-item";
 import {ConfigurationService} from "../../core-module/core.module";
@@ -36,7 +36,8 @@ export class NodeListComponent {
     }
   }
   public list : Node[];
-  private _columns : ListItem[];
+  pagination: Pagination;
+  _columns : ListItem[];
   @Input() set columns(columns : ListItem[]){
     this._columns=columns;
     if(this._columns && this._columns.length)
@@ -81,12 +82,12 @@ export class NodeListComponent {
 
     }
 
-    private setSorting(data:any){
+    setSorting(data:any){
       this.sortBy=data.sortBy;
       this.sortAscending=data.sortAscending;
       this.doReload();
     }
-    private loadMore() : void{
+    loadMore() : void{
       if(this.isLoading) {
           return;
         }
@@ -101,7 +102,7 @@ export class NodeListComponent {
           this.search(true);
     }
 
-    private onSelection(node : Node[]){
+    onSelection(node : Node[]){
       this.selected=node;
       this.onSelectionChanged.emit(node);
     }
@@ -144,7 +145,8 @@ export class NodeListComponent {
 
     private display(data : ArchiveSearch,searched : boolean){
       let list=data.nodes;
-        if(this.list){
+      this.pagination = data.pagination;
+      if(this.list){
           this.list=this.list.concat(list);
         }
         else{

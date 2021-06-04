@@ -89,6 +89,10 @@ user-profile {
     &[disabled] .barIcon {
         display: none;
     }
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus();
+        outline-offset: -5px;
+    }
 }
 .menuButtonOuter {
     height: 100%;
@@ -166,8 +170,8 @@ user-profile {
         color: white;
         border-radius: 20pt;
         position: fixed;
-        top: 15px;
-        left: 200px;
+        top: 16px;
+        left: 1000px;
         font-size: 1rem;
         padding: 10px 15px;
         padding-left: 40px;
@@ -204,18 +208,23 @@ user-profile {
             color: $workspaceTopBarInputText;
             border: none !important;
             -webkit-appearance: none;
-        }
-        input:focus {
-            box-shadow: none !important;
-            border-radius: 0;
-            outline: 2px solid #fff;
+            &:focus {
+                border-radius: 0;
+                &:not(.cdk-keyboard-focused) {
+                    @include setGlobalFocus();
+                }
+                &.cdk-keyboard-focused {
+                    transition: none;
+                    @include setGlobalKeyboardFocus();
+                }
+            }
         }
         >button {
             position: absolute;
             top: 0;
             right: 0;
             height: 40px;
-            border-radius: 0;
+            border-radius: 0 2px 2px 0;
             color: $workspaceTopBarInputText;
             background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
         }
@@ -238,9 +247,6 @@ user-profile {
     position: relative;
 }
 
-.topBar .topBarSearch input:focus {
-    @include setGlobalInsetFocus();
-}
 .searchIcon,
 .searchClearIcon {
     font-size: 22px !important;
@@ -337,7 +343,6 @@ user-profile {
         display: flex;
         font-weight: bold;
         font-size: 130%;
-        margin-top: -20px;
     }
     .menuButton {
         display: none;
@@ -357,9 +362,6 @@ user-profile {
         .imprint {
             display: none;
         }
-        .timeout {
-            display: none;
-        }
     }
 
     .tab-nav {
@@ -368,6 +370,12 @@ user-profile {
         width: 100%;
         bottom: 0;
         display: flex;
+        // disable events to "click-through" if menu is hidden
+        pointer-events: none;
+        > app-main-menu-bottom {
+            // but re-enable them on the real menu again
+            pointer-events: auto;
+        }
     }
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
@@ -386,6 +394,14 @@ user-profile {
             display: none;
         }
     }
+}
+@media screen and (max-width: ($mobileTabSwitchWidth + $mobileStage*4)) {
+    .topBar {
+        .timeout {
+            display: none;
+        }
+    }
+
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*1)) {
     .topBar span {

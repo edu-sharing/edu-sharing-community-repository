@@ -42,7 +42,7 @@ export class SimpleEditLicenseComponent {
   @Output() onError = new EventEmitter<any>();
 
   _nodes: Node[];
-  private allowedLicenses: string[];
+  allowedLicenses: string[];
   authorFreetext: string;
   invalid: boolean;
   wasInvalid: boolean;
@@ -106,7 +106,7 @@ export class SimpleEditLicenseComponent {
     }));
   }
 
-  private prepare(updateInvalid = false) {
+  prepare(updateInvalid = false) {
     Observable.forkJoin(this._nodes.map((n) => this.nodeApi.getNodeMetadata(n.ref.id,[RestConstants.ALL])))
         .subscribe((nodes) => {
           this._nodes = nodes.map((n) => n.node);

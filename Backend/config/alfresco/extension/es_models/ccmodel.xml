@@ -942,6 +942,14 @@
 	                  <tokenised>false</tokenised>
 	               </index>
 				</property>
+				<property name="ccm:technical_state">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 				<!-- status of a location (http code), set by CheckLinkJob -->
 				<property name="ccm:location_status">
 					<type>d:text</type>
@@ -1822,6 +1830,14 @@
 	         			<atomic>true</atomic>
 	         			<tokenised>both</tokenised>
 	         		</index>
+				</property>
+				<!-- information for imported collections source.-->
+				<property name="ccm:collectionremotesource">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<tokenised>false</tokenised>
+					</index>
 				</property>
 				<property name="ccm:collectionlevel0">
 					<type>d:boolean</type>

@@ -1,14 +1,14 @@
 package org.edu_sharing.restservices.node.v1;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -29,7 +29,7 @@ import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.dspace.xoai.model.oaipmh.Error;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -51,6 +51,7 @@ import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
@@ -63,7 +64,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.json.JSONObject;
 
 @Path("/node/v1")
 @Api(tags = {"NODE v1"})
@@ -202,12 +202,13 @@ public class NodeApi  {
 	public Response publishCopy(
 			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@ApiParam(value = "handle mode, if a handle should be created. Skip this parameter if you don't want an handle",required=false ) @QueryParam("handleMode") HandleMode handleMode,
 			@Context HttpServletRequest req) {
 
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			NodeDao published = nodeDao.publishCopy();
+			NodeDao published = nodeDao.publishCopy(handleMode);
 			NodeEntry response = new NodeEntry();
 			response.setNode(published.asNode());
 
@@ -323,8 +324,9 @@ public class NodeApi  {
 		@Context HttpServletRequest req) {
     	
     	try {
-			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getMetadata(repository, node, propertyFilter, req);
+			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+			if(remote != null) {
+				return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), propertyFilter, req);
 			}
     		Filter filter = new Filter(propertyFilter);
     		
@@ -820,8 +822,9 @@ public class NodeApi  {
 		@Context HttpServletRequest req) {
 
     	try {
-			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getChildren(repository, node, maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
+			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+			if(remote != null) {
+				return RepoProxyFactory.getRepoProxy().getChildren(remote.getRepository(), remote.getNodeId(), maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
 			}
 
     		Filter propFilter = new Filter(propertyFilter);
@@ -1188,10 +1191,21 @@ public class NodeApi  {
 			node=NodeDao.mapNodeConstants(repoDao,node);
 
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	resolveURLTitle(properties);
+	    	WebsiteInformation websiteInformation = resolveURLTitle(properties);
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
 	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
 					assocType!=null && !assocType.trim().isEmpty() ? assocType : null);
+
+	    	if(websiteInformation != null && websiteInformation.getTwitterImage() != null
+					&& !websiteInformation.getTwitterImage().trim().isEmpty()){
+				InputStream inputStream = null;
+	    		try {
+					child.changePreview(inputStream = new URL(websiteInformation.getTwitterImage()).openStream(), "");
+				}catch(IOException e){}
+	    		finally {
+	    			if(inputStream != null) inputStream.close();
+				}
+			}
 	    	
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
@@ -1247,25 +1261,28 @@ public class NodeApi  {
 
 	}
 
-	public void resolveURLTitle(HashMap<String, String[]> properties) {
+	public WebsiteInformation resolveURLTitle(HashMap<String, String[]> properties) {
 		String[] url=(String[])properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
 		if(url==null)
-			return;
+			return null;
 		// Don't resolve url if name is already given by client
 		if(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))!=null) {
 			properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),
 					new String[]{NodeServiceHelper.cleanupCmName(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))[0])});
-			return;
+			return null;
 		}
 		 WebsiteInformation info=ClientUtilsService.getWebsiteInformation(url[0]);
 		 if(info==null){
 		     properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(url[0])});
 		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
-			 return;
+			 return null;
 		 }
 		 String title=info.getTitle();
 		 if(info.getTitle()==null) {
 			 title = info.getPage();
+		 }
+		 if(title == null || title.trim().isEmpty()){
+		 	title = url[0];
 		 }
 	    properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(title)});
 	    properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),new String[]{title});
@@ -1281,6 +1298,7 @@ public class NodeApi  {
 	    if(info.getLrmiProperties()!=null){
 	    	properties.putAll(info.getLrmiProperties());
 		}
+	    return info;
 	}
 	@OPTIONS    
     @Path("/nodes/{repository}/{node}/children")
@@ -2015,7 +2033,6 @@ public class NodeApi  {
     	@ApiParam(value = "mailtext",required=false ) @QueryParam("mailtext")  String mailText,
     	@ApiParam(value = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
     	@ApiParam(value = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
-    	@ApiParam(value = "createHandle",required=false ) @QueryParam("createHandle") Boolean createHandle,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -2023,8 +2040,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	if(createHandle == null) createHandle = false;
-	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy,createHandle);
+	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy);
 	    	
 	    	return Response.status(Response.Status.OK).build();
 	
@@ -2201,14 +2217,14 @@ public class NodeApi  {
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    	@ApiParam(value = "property",required=true ) @QueryParam("property")  String property,
-	    	@ApiParam(value = "value",required=false ) @QueryParam("value")  String value,
+	    	@ApiParam(value = "value",required=false ) @QueryParam("value")  List<String> value,
 			@Context HttpServletRequest req) {
 	    
 	    	try {
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setProperty(property, value);
+		    	nodeDao.setProperty(property, (Serializable) value);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (DAOValidationException t) {

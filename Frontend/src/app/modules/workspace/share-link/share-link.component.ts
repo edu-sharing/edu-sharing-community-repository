@@ -30,7 +30,7 @@ export class WorkspaceShareLinkComponent  {
   public passwordString:string;
   public _expiryDate : Date;
   private currentDate: number;
-  private edit: boolean;
+  edit: boolean;
   public buttons: DialogButton[];
   public today = new Date();
   public set expiryDate(date:Date){
@@ -40,7 +40,7 @@ export class WorkspaceShareLinkComponent  {
   public get expiryDate(){
     return this._expiryDate;
   }
-  private currentShare: NodeShare;
+  currentShare: NodeShare;
   @Input() priority = 1;
   @Input() set node(node : Node){
     this._node=node;

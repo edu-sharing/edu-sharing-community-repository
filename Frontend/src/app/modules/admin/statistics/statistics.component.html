@@ -59,22 +59,22 @@
           </mat-radio-group>
         </div>
       </div>
-      <div class="group">
+      <div class="group" *ngIf="(nodesPermission && userPermission)">
         <mat-label>{{'ADMIN.STATISTICS.SINGLE_MODE' | translate}}</mat-label>
-        <mat-radio-group [(ngModel)]="customGroupMode" *ngIf="_mediacenter || (nodesPermission && userPermission)">
+        <mat-radio-group [(ngModel)]="customGroupMode">
           <mat-radio-button value="NODES">{{'ADMIN.STATISTICS.MODE_NODES' | translate}}</mat-radio-button>
           <mat-radio-button value="USERS">{{'ADMIN.STATISTICS.MODE_USERS' | translate}}</mat-radio-button>
         </mat-radio-group>
       </div>
-      <div class="calendars">
-        <div>
-          <mat-label>{{'ADMIN.STATISTICS.FROM' | translate}}</mat-label>
-          <mat-calendar [(selected)]="customGroupStart" [maxDate]="customGroupEnd"></mat-calendar>
-        </div>
-        <div>
-          <mat-label>{{'ADMIN.STATISTICS.TO' | translate}}</mat-label>
-          <mat-calendar [(selected)]="customGroupEnd" [minDate]="customGroupStart" [maxDate]="today"></mat-calendar>
-        </div>
+    </div>
+    <div class="calendars">
+      <div>
+        <mat-label>{{'ADMIN.STATISTICS.FROM' | translate}}</mat-label>
+        <mat-calendar [(selected)]="customGroupStart" [maxDate]="customGroupEnd"></mat-calendar>
+      </div>
+      <div>
+        <mat-label>{{'ADMIN.STATISTICS.TO' | translate}}</mat-label>
+        <mat-calendar [(selected)]="customGroupEnd" [minDate]="customGroupStart" [maxDate]="today"></mat-calendar>
       </div>
     </div>
     <spinner *ngIf="customGroupLoading"></spinner>

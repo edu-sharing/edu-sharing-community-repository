@@ -1,8 +1,11 @@
 import { MdsWidgetValue } from '../../types';
 import { DisplayValue } from '../DisplayValues';
 
+let nextUniqueId = 0;
+
 export class TreeNode {
     id: string;
+    uid: string;
     caption: string;
     children?: TreeNode[];
     parent?: TreeNode;
@@ -31,6 +34,7 @@ export class Tree {
                 }
                 const node: TreeNode = {
                     id: value.id,
+                    uid: `app-tree-node-${nextUniqueId++}`,
                     caption: value.caption,
                     isChecked: checkedValues.includes(value.id),
                     isIndeterminate: indeterminateValues?.includes(value.id),

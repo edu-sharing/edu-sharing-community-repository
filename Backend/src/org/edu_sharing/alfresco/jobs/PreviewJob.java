@@ -85,8 +85,10 @@ public class PreviewJob implements Job {
 				// trying to load not the whole image but just the bounding rect, see also:
 				// http://stackoverflow.com/questions/1559253/java-imageio-getting-image-dimensions-without-reading-the-entire-file
 				if(reader.getMimetype().contains("image")){
+					InputStream is = null;
 					try{
-						try(ImageInputStream in = ImageIO.createImageInputStream(reader.getContentInputStream())){
+						is = reader.getContentInputStream();
+						try(ImageInputStream in = ImageIO.createImageInputStream(is)){
 						    final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
 						    if (readers.hasNext()) {
 						        ImageReader imageReader = readers.next();
@@ -99,7 +101,12 @@ public class PreviewJob implements Job {
 						        }
 						    }
 						} 
-					}catch(Throwable t){}
+					}catch(Throwable t){
+					} finally {
+						if(is != null){
+							is.close();
+						}
+					}
 				}
 				return null;
 			}
@@ -243,6 +250,7 @@ public class PreviewJob implements Job {
 									if ((System.currentTimeMillis() > (date.getTime() + latency)) 
 											) {
 										if(lockState.getLockType() == null) {
+											logger.debug("nodeRef:" + entry.getKey() +" runAs:" + creator);
 											extractVideoImageMetadata(entry.getKey(),creator);
 											AuthenticationUtil.runAs(executeActionRunAs, creator);
 											logger.debug("finished action syncronously. nodeRef:" + entry.getKey()

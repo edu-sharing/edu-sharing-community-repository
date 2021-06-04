@@ -4,11 +4,9 @@ import javax.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
 
 public class ConfigUpload implements Serializable {
-    @XmlElement
-    public ConfigUploadDialog postDialog;
-
-    public enum ConfigUploadDialog {
-        SimpleEdit,
-        Mds
+    public static class ConfigUploadLti implements Serializable {
+        @XmlElement Boolean enabled;
     }
+    @XmlElement ConfigUploadLti lti;
+
 }

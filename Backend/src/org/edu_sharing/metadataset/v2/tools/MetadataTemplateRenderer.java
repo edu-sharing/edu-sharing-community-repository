@@ -54,11 +54,19 @@ public class MetadataTemplateRenderer {
 	private Map<String, String[]> properties;
 	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
-	public MetadataTemplateRenderer(MetadataSetV2 mds, NodeRef nodeRef, String userName, Map<String, String[]> properties) {
+	public MetadataTemplateRenderer(MetadataSetV2 mds, NodeRef nodeRef, String userName, Map<String, Object> properties) {
 		this.mds = mds;
 		this.nodeRef = nodeRef;
 		this.userName = userName;
-		this.properties = cleanupTextMultivalueProperties(properties);
+		this.properties = cleanupTextMultivalueProperties(
+				convertProps(
+						NodeServiceHelper.addVirtualProperties(
+								NodeServiceHelper.getType(nodeRef),
+								Arrays.asList(NodeServiceHelper.getAspects(nodeRef)),
+								properties
+						)
+				)
+		);
 	}
 
 	public Map<String, String[]> getProcessedProperties(){
@@ -126,7 +134,7 @@ public class MetadataTemplateRenderer {
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
 		if(renderingMode.equals(RenderingMode.HTML)) {
-			html += "<div class='mdsGroup'>" + "<div class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</div>" + "<div class='mdsContent'>";
+			html += "<div class='mdsGroup'>" + "<h2 class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</h2>" + "<div class='mdsContent'>";
 		}
 		String content=template.getHtml();
 		for(MetadataWidget srcWidget : mds.getWidgets()){
@@ -153,7 +161,7 @@ public class MetadataTemplateRenderer {
 				}
 				widgetHtml.append("'").append(attributes).append(">");
 				if (widget.getCaption() != null) {
-					widgetHtml.append("<div class='mdsWidgetCaption'>").append(widget.getCaption()).append("</div>");
+					widgetHtml.append("<h3 class='mdsWidgetCaption'>").append(widget.getCaption()).append("</h3>");
 				}
 				widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
 				if (widget.isMultivalue()) {
@@ -203,9 +211,7 @@ public class MetadataTemplateRenderer {
 							value += "<img src='" +
 									// @TODO 5.1 This can be set to dynamic!
 									license.getIconUrl(licenseName, false) +
-									"'>";
-							if (link != null)
-								value += "</a>";
+									"' alt=\"\">";
 						}
 						String name = getLicenseName(licenseName, properties);
 						String group = getLicenseGroup(licenseName, properties);
@@ -215,6 +221,9 @@ public class MetadataTemplateRenderer {
 							}else if(renderingMode.equals(RenderingMode.TEXT)){
 								value += name;
 							}
+						}
+						if (renderingMode.equals(RenderingMode.HTML) && link != null) {
+							value += "</a>";
 						}
 						if(group != null && !group.equals(name)) {
 							if(renderingMode.equals(RenderingMode.HTML)) {

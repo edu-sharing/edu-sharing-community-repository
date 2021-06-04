@@ -19,42 +19,54 @@
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
-      [matTooltip]="
-        (widget.observeIsDisabled() | async) === false &&
-        (indeterminateValues$ | async)?.includes(value.key)
-          ? ('MDS.INDETERMINATE_NOTICE' | translate)
-          : value.label
-      "
+      appCheckTextOverflow=".mat-chip-label"
+      #text="appCheckTextOverflow"
+      [matTooltip]="getTooltip(value, text.hasTextOverflow())"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
-    <input
-      #input
-      #trigger="matAutocompleteTrigger"
-      autocomplete="off"
-      [formControl]="inputControl"
-      [matAutocomplete]="auto"
-      [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
-      [matChipInputFor]="chipList"
-      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-      [matChipInputAddOnBlur]="false"
-      (matChipInputTokenEnd)="onInputTokenEnd($event)"
-      (blur)="blurEvent($event)"
-    />
-    <button
-      matSuffix
-      mat-icon-button
-      class="mat-button-select-arrow"
-      *ngIf="showDropdownArrow"
-      (click)="trigger.openPanel(); $event.stopPropagation()"
-      [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
-    >
-      <span class="mat-select-arrow"></span>
-    </button>
+    <div class="input-wrapper">
+      <input
+        #input
+        #trigger="matAutocompleteTrigger"
+        autocomplete="off"
+        [formControl]="inputControl"
+        [matAutocomplete]="auto"
+        [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
+        [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="false"
+        (matChipInputTokenEnd)="onInputTokenEnd($event)"
+        (blur)="onBlurInput($event)"
+      />
+      <button
+        mat-icon-button
+        class="mat-button-select-arrow"
+        *ngIf="showDropdownArrow"
+        (click)="toggleAutoCompletePanel()"
+        [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
+        (keydown.tab)="chipList._allowFocusEscape()"
+      >
+        <span class="mat-select-arrow"></span>
+      </button>
+    </div>
   </mat-chip-list>
-  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
-    <mat-option *ngFor="let value of filteredValues | async" [value]="value">
+  <mat-autocomplete
+    #auto="matAutocomplete"
+    (optionSelected)="selected($event)"
+    (optionActivated)="showTooltip($any($event.option)?.tooltip)"
+  >
+    <mat-option
+      *ngFor="let value of autocompleteValues | async"
+      [value]="value"
+      appCheckTextOverflow=".mat-option-text"
+      #text="appCheckTextOverflow"
+      #tooltip="matTooltip"
+      #option="matOption"
+      [matTooltip]="text.hasTextOverflow() ? value.label : null"
+      [appRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
+    >
       <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
     </mat-option>
   </mat-autocomplete>

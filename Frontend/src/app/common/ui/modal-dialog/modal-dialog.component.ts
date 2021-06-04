@@ -5,7 +5,7 @@ import {
 import {TranslateService} from "@ngx-translate/core";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
-import {DialogButton} from "../../../core-module/core.module";
+import {DialogButton, Node} from "../../../core-module/core.module";
 
 @Component({
   selector: 'modal-dialog',

@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class HighlightPipe implements PipeTransform {
     transform(value: string, highlightString: string): string {
-        if (highlightString) {
+        if (highlightString && highlightString.trim()) {
             const highlightWords = highlightString.trim().toLowerCase().split(/\s+/);
             let index = -1;
             do {

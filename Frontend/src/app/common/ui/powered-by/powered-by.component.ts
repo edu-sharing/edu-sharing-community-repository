@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, HostBinding} from '@angular/core';
 
 @Component({
   selector: 'powered-by',
@@ -16,6 +16,7 @@ export class PoweredByComponent {
    * @type {string}
    */
   @Input() mode='white';
+  @HostBinding('attr.role') readonly role = 'contentinfo';
 
   constructor() {
     /*
@@ -24,8 +25,5 @@ export class PoweredByComponent {
       this.onUpdate.emit(this.banner);
     });
     */
-  }
-  open(){
-    window.open("https://edu-sharing.com/");
   }
 }

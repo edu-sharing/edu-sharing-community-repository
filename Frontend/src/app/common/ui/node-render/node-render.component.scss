@@ -16,10 +16,14 @@ a, a:hover, a:visited, a:active {
   position: fixed;
   left: 0;
   top: 50%;
-  background: rgba(0,0,0,.1);
+  background: #585858;
   border-radius: 2px;
   padding:2px;
   z-index: 5;
+  border: none;
+  &.cdk-keyboard-focused {
+    @include setGlobalKeyboardFocus();
+  }
 }
 .next{
   left:auto;
@@ -80,17 +84,19 @@ a, a:hover, a:visited, a:active {
 }
 .displayBar {
   display: flex;
-  > span {
+  height: 100%;
+  > button, > span {
     flex-grow: 2;
     flex-basis: 0;
     text-align: center;
+    height: 100%;
   }
   .showDetails{
     flex-grow: 1!important;
   }
 }
-.displayBar > span:first-child {
-  text-align: left;
+::ng-deep .displayBar > button:first-child .mat-button-wrapper {
+  justify-content: flex-start !important;
 }
 
 .displayBar > span:last-child {
@@ -103,7 +109,7 @@ a, a:hover, a:visited, a:active {
 }
 
 #nodeRenderContentWrapper {
-  background: #666;
+  background: #ebebeb;
   position: absolute;
   top:$mainnavHeight;
   width:100%;
@@ -124,7 +130,7 @@ a, a:hover, a:visited, a:active {
   position:relative;
   white-space: nowrap;
   .itemTitle {
-    color: #fff;
+    color: #585858;
     display: inline-block;
     width: 100px;
     text-overflow: ellipsis;

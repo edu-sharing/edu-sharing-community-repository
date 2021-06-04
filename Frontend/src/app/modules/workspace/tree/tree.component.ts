@@ -7,7 +7,7 @@ import {
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
-import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
+import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {WorkspaceMainComponent} from '../workspace.component';
 
@@ -58,9 +58,9 @@ export class WorkspaceTreeComponent {
     reload: Boolean;
     dragHover: string;
 
-    private _path: string[][] = [];
+    _path: string[][] = [];
     // just for highlighting, does not open nodes!
-    private _selectedPath: string[] = [];
+    _selectedPath: string[] = [];
     private _current: string;
 
     constructor(
@@ -116,21 +116,21 @@ export class WorkspaceTreeComponent {
         }
     }
 
-    onNodesDrop({ nodes }: DropData, target: string) {
+    onNodesDrop({ nodes }: DragData, target: string) {
         if (target == this.RECYCLE) {
             this.onDeleteNodes.emit(nodes);
         }
     }
 
-    private drop(event: any) {
+    drop(event: any) {
         this.onDrop.emit(event);
     }
 
-    private updateOptions(event: Node) {
+    updateOptions(event: Node) {
         this.onUpdateOptions.emit(event);
     }
 
-    private openNode(event: Node) {
+    openNode(event: Node) {
         this._path.splice(1, this._path.length - 1);
         this.onOpenNode.emit(event);
     }

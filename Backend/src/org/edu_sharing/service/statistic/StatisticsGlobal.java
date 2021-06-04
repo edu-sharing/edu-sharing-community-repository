@@ -47,7 +47,7 @@ public class StatisticsGlobal{
         @JsonProperty public int count;
         @JsonProperty public List<StatisticsGroup.StatisticsSubGroup> subGroups;
     }
-	public static class User{
+	public static class StatisticsUser {
 		@JsonProperty public int count;
 	}
     @JsonProperty
@@ -55,7 +55,7 @@ public class StatisticsGlobal{
 	@JsonProperty
 	private List<StatisticsKeyGroup> groups;
 	@JsonProperty
-	private User user;
+	private StatisticsUser user;
 
     public StatisticsGroup getOverall() {
         return overall;
@@ -73,10 +73,10 @@ public class StatisticsGlobal{
         this.groups = groups;
     }
 
-    public User getUser() {
+    public StatisticsUser getUser() {
 		return user;
 	}
-	public void setUser(User user) {
+	public void setUser(StatisticsUser user) {
 		this.user = user;
 	}
 

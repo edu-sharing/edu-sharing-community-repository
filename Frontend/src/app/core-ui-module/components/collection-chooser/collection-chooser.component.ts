@@ -1,10 +1,10 @@
 import {
-    Component,
+    Component, ContentChild,
     EventEmitter,
     HostListener,
     Input,
     OnInit,
-    Output,
+    Output, TemplateRef,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -29,6 +29,7 @@ import { OptionItem } from '../../option-item';
     styleUrls: ['collection-chooser.component.scss'],
 })
 export class CollectionChooserComponent implements OnInit {
+    @ContentChild('beforeRecent') beforeRecentRef: TemplateRef<any>;
     /**
      * The caption of the dialog, will be translated automatically
      */
@@ -70,6 +71,7 @@ export class CollectionChooserComponent implements OnInit {
      * shall more than 5 recent collections be shown
      */
     showMore = false;
+    canCreate = false;
 
     constructor(
         private connector: RestConnectorService,
@@ -82,6 +84,7 @@ export class CollectionChooserComponent implements OnInit {
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
         this.sortBy = [RestConstants.CM_MODIFIED_DATE];
+        this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS).subscribe((tp) => this.canCreate = tp);
     }
 
     ngOnInit(): void {
@@ -165,14 +168,24 @@ export class CollectionChooserComponent implements OnInit {
         return true;
     }
 
-    hasWritePermissions(node: any) {
+    hasWritePermissions(
+        node: Node,
+    ): {
+        status: boolean;
+        message?: string;
+        button?: {
+            click: Function;
+            caption: string;
+            icon: string;
+        };
+    } {
         if (node.access.indexOf(RestConstants.ACCESS_WRITE) == -1) {
             return { status: false, message: 'NO_WRITE_PERMISSIONS' };
         }
         return { status: true };
     }
 
-    private goIntoCollection(node: Node) {
+    goIntoCollection(node: Node) {
         this.currentRoot = node;
         this.loadMy();
     }

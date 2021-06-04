@@ -18,6 +18,7 @@ import {UIService} from '../../../core-module/rest/services/ui.service';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
+import {ListCountsComponent} from "../../../core-ui-module/components/list-table/widgets/list-counts/list-counts.component";
 
 // Charts.js
 declare var Chart: any;
@@ -227,6 +228,7 @@ export class AdminStatisticsComponent implements OnInit{
             }
         ]).toPromise();
         this.currentTemplate = this.groupModeTemplates[0];
+        this.applyTemplate(this.currentTemplate, false);
         // e.g. ['school']
         this.additionalGroups = await this.config.get('admin.statistics.groups', []).toPromise();
         this.customGroups = ['authority_organization', 'authority_mediacenter'].concat(this.additionalGroups);
@@ -235,7 +237,6 @@ export class AdminStatisticsComponent implements OnInit{
         }
         this.nodesPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
         this.userPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER);
-        this.storage.get('admin_statistics_properties', 'cm:name\ncclom:general_title\ncclom:general_keyword').subscribe((p) => this.exportProperties = p);
         this.finishedPreload = true;
         this.refresh();
     }
@@ -405,11 +406,13 @@ export class AdminStatisticsComponent implements OnInit{
         }
         this.nodes = [];
         this.nodesLoading = true;
-        this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'Node', this.getMediacenter()).subscribe((data) => {
+        const group = this.config.instant('admin.statistics.nodeGroup');
+        this.statistics.getStatisticsNode(this._nodesStart, new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), 'Node',
+            this.getMediacenter(), group ?[group] : null).subscribe((data) => {
             this.nodesLoading = false;
             this.nodesNoData = data.length === 0;
             this.nodes = data.map((stat) => {
-                (stat.node as any).counts = stat.counts;
+                (stat.node as any).counts = stat;
                 return stat.node;
             });
         });
@@ -537,7 +540,6 @@ export class AdminStatisticsComponent implements OnInit{
     }
 
     getGroupKey(element: any, key: string) {
-        console.log(element, key);
         const data = element.entry?.groups?.[element.action]?.[key];
         return data ? Object.keys(data)[0] : null;
     }
@@ -572,30 +574,36 @@ export class AdminStatisticsComponent implements OnInit{
             case 1: {
                 // grouped / folded data
                 csvHeaders = this.customGroupRows.map((h) => {
-                    return this.customGroupLabels[h] || h;
+                    return this.customGroupLabels?.[h] || h;
                 });
                 csvData = this.customGroupData.map((c: any) => {
                     c[this.customGroup] = c.displayValue;
+                    console.log(c);
                     for (const key of this.customGroupRows) {
                         if (key === 'action' || key === 'count' || key === this.customGroup) {
                             continue;
                         }
-                        c[key] = c.entry.groups[this.customUnfold][key];
+                        c[this.customGroupLabels?.[key] || key] = c.entry.groups[c.action]?.[this.customUnfold]?.[key];
                     }
                     return c;
                 });
+                console.log(csvHeaders, csvData);
                 break;
             }
             case 2: {
-                let properties = this.exportProperties.split('\n').map((e) => e.trim());
+                // counts by node including custom properties
+                const properties = this.exportProperties.split('\n').map((e) => e.trim());
                 this.storage.set('admin_statistics_properties', this.exportProperties);
-                csvHeaders = properties.concat(Helper.uniqueArray(this.nodes.map((n) => Object.keys(n.counts)).reduce((a: any, b: any) => a.concat(b))));
+                //csvHeaders = properties.concat(Helper.uniqueArray(this.nodes.map((n) => Object.keys(n.counts)).reduce((a: any, b: any) => a.concat(b))));
+                const countHeaders = ['OVERALL', 'VIEW_MATERIAL', 'VIEW_MATERIAL_EMBEDDED', 'DOWNLOAD_MATERIAL'];
+                csvHeaders = properties.concat(countHeaders);
                 csvData = this.nodes.map((n) => {
                     const c: any = {};
+                    console.log(Object.keys(n.counts));
                     for (const prop of properties) {
                         c[prop] = n.properties ? n.properties[prop] : n.ref.id;
-                        for (const key of Object.keys(n.counts)) {
-                            c[key] = n.counts[key];
+                        for(const idx of countHeaders) {
+                            c[idx] = ListCountsComponent.getCount(n, idx);
                         }
                     }
                     return c;
@@ -604,12 +612,17 @@ export class AdminStatisticsComponent implements OnInit{
             }
             case 3: {
                 csvHeaders = this.singleDataRows; // .map((s) => this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s));
+                console.log(this.singleData);
                 csvData = this.singleData.map((data: any) => {
                     const c: any = Helper.deepCopy(data);
                     // c.action = this.translate.instant('ADMIN.STATISTICS.ACTIONS.' + data.action);
                     c.authority = data.authority.hash.substring(0, 8);
                     c.authority_organization = data.authority.organization.map((m: any) => new AuthorityNamePipe(this.translate).transform((m)));
                     c.authority_mediacenter = data.authority.mediacenter.map((m: any) => new AuthorityNamePipe(this.translate).transform((m)));
+                    const mainGroup = data.entry.groups[Object.keys(data.entry.groups)[0]];
+                    for(const additional of Object.keys(mainGroup)) {
+                        c[additional] = Object.keys(mainGroup[additional])[0];
+                    }
                     return c;
                 });
                 break;
@@ -625,18 +638,25 @@ export class AdminStatisticsComponent implements OnInit{
         } else {
             this.columns = [new ListItem('NODE', RestConstants.CM_NAME)];
         }
+        this.storage.get('admin_statistics_properties', this.columns.map((c) => c.name).join('\n'))
+            .subscribe((p) => this.exportProperties = p);
+
+
         this.columns = this.columns.concat([
             new ListItem('NODE', 'counts.OVERALL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL_EMBEDDED'),
             new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
+            new ListItem('NODE', 'counts.VIEW_MATERIAL_PLAY_MEDIA'),
         ]);
     }
 
-    applyTemplate(template: GroupTemplate) {
+    applyTemplate(template: GroupTemplate, refresh = true) {
         this._customGroup = template.group;
         this._customUnfold = template.unfold ?? '';
         this._customGroupMode = template.type ?? 'NODES';
-        this.refreshCustomGroups();
+        if (refresh) {
+            this.refreshCustomGroups();
+        }
     }
 }

@@ -11,7 +11,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { DropData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
+import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
@@ -74,7 +74,7 @@ export class WorkspaceSubTreeComponent {
     moreItems: number;
     loadingMore: boolean;
 
-    private loadingStates: boolean[] = [];
+    loadingStates: boolean[] = [];
 
     constructor(
         private ui: UIService,
@@ -121,11 +121,11 @@ export class WorkspaceSubTreeComponent {
         }
     }
 
-    onNodesDrop({ event, nodes, dropAction }: DropData, target: Node) {
+    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
         this.onDrop.emit({ target, source: nodes, event, type: dropAction });
     }
 
-    private contextMenu(event: any, node: Node) {
+    contextMenu(event: any, node: Node) {
         event.preventDefault();
         event.stopPropagation();
 
@@ -138,7 +138,7 @@ export class WorkspaceSubTreeComponent {
         this.dropdown = null;
     }
 
-    private updateOptions(event: Node) {
+    updateOptions(event: Node) {
         this.onUpdateOptions.emit(event);
     }
 
@@ -160,11 +160,11 @@ export class WorkspaceSubTreeComponent {
         this.dropdownTrigger.openMenu();
     }
 
-    private dropToParent(event: any) {
+    dropToParent(event: any) {
         this.onDrop.emit(event);
     }
 
-    private isSelected(node: Node) {
+    isSelected(node: Node) {
         return (
             this.selectedNode == node.ref.id ||
             (this.isOpen(node) &&
@@ -174,32 +174,32 @@ export class WorkspaceSubTreeComponent {
         );
     }
 
-    private getFullPath(node: Node): string[] {
+    getFullPath(node: Node): string[] {
         let path = this.parentPath.slice();
         path.push(node.ref.id);
         return path;
     }
 
-    private openPathEvent(event: string[]): void {
+    openPathEvent(event: string[]): void {
         this.onClick.emit(event);
     }
 
-    private toggleTreeEvent(event: string[]): void {
+    toggleTreeEvent(event: string[]): void {
         this.onToggleTree.emit(event);
     }
 
-    private getPathOpen(node: Node) {
+    getPathOpen(node: Node) {
         for (let i = 0; i < this.openPath.length; i++) {
             if (this.openPath[i].indexOf(node.ref.id) != -1) return i;
         }
         return -1;
     }
 
-    private isOpen(node: Node): boolean {
+    isOpen(node: Node): boolean {
         return this.getPathOpen(node) != -1;
     }
 
-    private openOrCloseNode(node: Node): void {
+    openOrCloseNode(node: Node): void {
         /*
     let pos = this.openPath.indexOf(node.ref.id);
 
@@ -212,7 +212,7 @@ export class WorkspaceSubTreeComponent {
         this.onClick.emit(node);
     }
 
-    private openOrCloseTree(node: Node): void {
+    openOrCloseTree(node: Node): void {
         /*
      let pos = this.openPath.indexOf(node.ref.id);
 

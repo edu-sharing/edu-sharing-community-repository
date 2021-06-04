@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
+import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {MainNavService} from '../../../../services/main-nav.service';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 
@@ -9,7 +9,7 @@ import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
     templateUrl: './mds-editor-widget-link.component.html',
     styleUrls: ['./mds-editor-widget-link.component.scss'],
 })
-export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidget {
+export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: true,
         supportsBulk: false,

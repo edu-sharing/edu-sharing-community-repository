@@ -290,6 +290,13 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 						}
 					}
 
+					if (role != null && role.equals("terminator")) {
+						Date terminatorDate =  (Date)contr.get(CCConstants.LOM_PROP_CONTRIBUTE_DATE);
+						if(terminatorDate != null) {
+							toSafeMap.put(CCConstants.CCM_PROP_IO_LICENSE_TO, terminatorDate);
+						}
+					}
+
 
 					/***
 					 * not longer used there will be a separate job to get the expiry date

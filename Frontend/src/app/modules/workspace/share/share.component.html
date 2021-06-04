@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.SHARE.TITLE' | translate }}" [node]="_nodes" tabbed="true" width="xlarge" height="xxlarge"
+<card title="{{'WORKSPACE.SHARE.TITLE' | translate }}" [node]="_nodes" [tabbed]="true" width="xlarge" height="xxlarge"
       [isCancelable]="true"
       [buttons]="buttons"
       (onCancel)="cancel()"
@@ -113,6 +113,18 @@
             </app-multi-line-label>
           </mat-radio-button>
         </mat-radio-group>
+        <div class="publish-bulk">
+          <mat-slide-toggle [(ngModel)]="bulkInvite" [disabled]="!publishPermission">
+            <app-multi-line-label>
+              <ng-container slot="label">
+                {{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate}}
+              </ng-container>
+              <ng-container slot="description">
+                {{'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO_MULTIPLE' | translate}}
+              </ng-container>
+            </app-multi-line-label>
+          </mat-slide-toggle>
+        </div>
       </div>
     </mat-tab>
     <mat-tab *ngIf="_nodes && _nodes.length === 1" class="tabContent">
@@ -306,11 +318,11 @@
 <div class="dialog darken dialog-collections" [@fade]="showCollections" *ngIf="showCollections"></div>
 <div class="card center-card card-action card-high card-collections" [@cardAnimation]="showCollections" *ngIf="showCollections">
   <div class="card-content">
-    <div class="card-cancel" (click)="showCollections=false" tabindex="0" (keyup.enter)="showCollections=false"><i icon="close" aria="true"></i></div>
+    <div class="card-cancel" (click)="showCollections=false" tabindex="0" (keyup.enter)="showCollections=false"><i icon="close" [aria]="true"></i></div>
     <span class="card-title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</span>
     <listTable
             (clickRow)="openCollection($event.node)"
-            [nodes]="collections"
+            [nodes]="$any(collections)"
             [isClickable]="true"
             [columns]="collectionColumns"
             [viewType]="2"

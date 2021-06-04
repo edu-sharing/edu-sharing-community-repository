@@ -1,9 +1,7 @@
 package org.edu_sharing.service.rendering;
 
-import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
-import org.edu_sharing.service.config.model.Config;
-import org.edu_sharing.service.config.model.Values;
+import org.edu_sharing.alfresco.service.config.model.Values;
 
 import java.io.Serializable;
 import java.util.List;

@@ -184,7 +184,9 @@ public class StatisticApi {
 		if(mediacenter==null || mediacenter.isEmpty()) {
 			ToolPermissionHelper.throwIfToolpermissionMissing(toolpermission);
 		}else {
-			MediacenterDao.get(RepositoryDao.getHomeRepository(), mediacenter).checkAdminAccess();
+			// do NOT allow mediacenter persons to view user statistics
+			ToolPermissionHelper.throwIfToolpermissionMissing(toolpermission);
+			// MediacenterDao.get(RepositoryDao.getHomeRepository(), mediacenter).checkAdminAccess();
 		}
 	}
 

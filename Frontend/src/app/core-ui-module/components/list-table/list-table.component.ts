@@ -16,7 +16,15 @@ import {
     Input,
     Output,
     TemplateRef,
-    ViewChild, ViewContainerRef, SimpleChanges, OnChanges, Renderer2, Sanitizer,
+    ViewChild,
+    ViewContainerRef,
+    SimpleChanges,
+    OnChanges,
+    Renderer2,
+    Sanitizer,
+    ViewChildren,
+    QueryList,
+    AfterViewInit,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -46,7 +54,7 @@ import {
     UIService,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import { ColorHelper } from '../../../core-module/ui/color-helper';
+import {ColorHelper, PreferredColor} from '../../../core-module/ui/color-helper';
 import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
@@ -56,6 +64,9 @@ import { CustomOptions, OptionItem, Scope } from '../../option-item';
 import { Toast } from '../../toast';
 import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
+import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
+import {NodeTitlePipe} from '../../../common/ui/node-title.pipe';
+import {NodeUrlComponent} from '../node-url/node-url.component';
 
 
 @Component({
@@ -105,15 +116,16 @@ import {DomSanitizer} from '@angular/platform-browser';
 /**
  * A provider to render multiple Nodes as a list
  */
-export class ListTableComponent implements OnChanges, EventListener {
-    public static VIEW_TYPE_LIST = 0;
-    public static VIEW_TYPE_GRID = 1;
-    public static VIEW_TYPE_GRID_SMALL = 2;
+export class ListTableComponent implements OnChanges, AfterViewInit, EventListener {
+    public static readonly VIEW_TYPE_LIST = 0;
+    public static readonly VIEW_TYPE_GRID = 1;
+    public static readonly VIEW_TYPE_GRID_SMALL = 2;
 
     @ViewChild('drag') drag: ElementRef;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
     @ViewChild('dropdown') dropdownElement: ElementRef;
     @ViewChild('sortDropdownMenuTrigger') sortDropdownMenuTrigger: ElementRef<HTMLButtonElement>;
+    @ViewChildren('childList') childList: QueryList<ElementRef>;
 
     @ContentChild('itemContent') itemContentRef: TemplateRef<any>;
 
@@ -126,6 +138,13 @@ export class ListTableComponent implements OnChanges, EventListener {
             nodes = nodes.filter(
                 n => n.virtual || !virtual.find(v => v.ref.id === n.ref.id),
             );
+        }
+        if(this._nodes?.length && nodes?.length > this._nodes?.length) {
+            const pos = this._nodes.length;
+            setTimeout(() => {
+                // handle focus
+                (this.childList.toArray()[pos] as any as NodeUrlComponent).link.nativeElement.focus();
+            });
         }
         this._nodes = nodes;
         this.refreshAvailableOptions();
@@ -234,7 +253,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         node: Node,
     ) => {
         status: boolean;
-        message: string;
+        message?: string;
         button?: {
             click: Function;
             caption: string;
@@ -481,13 +500,12 @@ export class ListTableComponent implements OnChanges, EventListener {
     private columnsOriginal: ListItem[];
     columnsVisible: ListItem[];
     currentDragColumn: ListItem;
-    optionsAlways: OptionItem[] = [];
     private repositories: Repository[];
 
     constructor(
         private ui: UIService,
         private translate: TranslateService,
-        private cd: ChangeDetectorRef,
+        private changeDetectorRef: ChangeDetectorRef,
         private nodeHelper: NodeHelperService,
         private config: ConfigurationService,
         private changes: ChangeDetectorRef,
@@ -532,12 +550,16 @@ export class ListTableComponent implements OnChanges, EventListener {
         }
     }
 
+    ngAfterViewInit(): void {
+        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+    }
+
     setViewType(viewType: number) {
         this.viewType = viewType;
         // store in url for remembering layout
         const params: any = {};
         params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
-        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params});
+        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params, replaceUrl: true});
         this.changes.detectChanges();
     }
 
@@ -551,7 +573,7 @@ export class ListTableComponent implements OnChanges, EventListener {
                     .getRepositories()
                     .subscribe((data: NetworkRepositories) => {
                         this.repositories = data.repositories;
-                        this.cd.detectChanges();
+                        this.changeDetectorRef.detectChanges();
                     });
             });
         });
@@ -586,8 +608,7 @@ export class ListTableComponent implements OnChanges, EventListener {
             return true;
         }
         return (
-            ColorHelper.getColorBrightness(color) >
-            ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS
+            ColorHelper.getPreferredColor(color) === PreferredColor.White
         );
     }
 
@@ -661,7 +682,9 @@ export class ListTableComponent implements OnChanges, EventListener {
     }
 
     isDeleted(node: any): boolean {
-        return this.isReference(node) && !node.originalId;
+        return this.isReference(node)
+            && node.aspects.indexOf(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) === -1
+            && !node.originalId;
     }
 
     askCCPublish(event: any, node: Node): void {
@@ -771,7 +794,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         this.isNodesDragSource = false;
     }
 
-    onNodesDrop({ event, nodes, dropAction }: DropData, target: Node) {
+    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
         if (dropAction === 'link') {
             throw new Error('dropAction "link" is not allowed');
         }
@@ -792,8 +815,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         }
         if (event.pointerType === 'touch' || event.pointerType === 'pen') {
             this.doubleClickRow.emit(node);
-        }
-        if (!this.selectOnClick) {
+        } else  if (!this.selectOnClick) {
             // Propagate event
             this.clickRowSender(node, region);
             this.refreshAvailableOptions(node);
@@ -1088,7 +1110,8 @@ export class ListTableComponent implements OnChanges, EventListener {
             }
         }
         // Short delay to let onUpdateOptions handler run and angular menu get the correct data from start.
-        setTimeout(() => this.menuTrigger.openMenu());
+        this.changeDetectorRef.detectChanges();
+        this.menuTrigger.openMenu();
     }
 
     doubleClick(node: Node): void {
@@ -1166,7 +1189,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         return this.nodeHelper.getLRMIProperty(data, item);
     }
 
-    private getSelectedPos(selected: Node): number {
+    getSelectedPos(selected: Node): number {
         if (!this.selectedNodes || !this.selectedNodes.length) {
             return -1;
         }
@@ -1176,14 +1199,14 @@ export class ListTableComponent implements OnChanges, EventListener {
         );
     }
 
-    private optionIsValid(optionItem: OptionItem, node: Node): boolean {
+    optionIsValid(optionItem: OptionItem, node: Node): boolean {
         if (optionItem.enabledCallback) {
             return optionItem.enabledCallback(node);
         }
         return optionItem.isEnabled;
     }
 
-    private optionIsShown(optionItem: OptionItem, node: Node): boolean {
+    optionIsShown(optionItem: OptionItem, node: Node): boolean {
         if (optionItem.showCallback) {
             return optionItem.showCallback(node);
         }
@@ -1202,7 +1225,7 @@ export class ListTableComponent implements OnChanges, EventListener {
         this.optionsHelper.setListener({
             onDelete: nodes => this.removeNodes(nodes.error, nodes.objects),
         });
-        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+        // only refresh global if no node was given
         this.optionsHelper.refreshComponents();
     }
 
@@ -1273,10 +1296,37 @@ export class ListTableComponent implements OnChanges, EventListener {
                     'data:' + node.preview.mimetype + ';base64,' + node.preview.data
                 );
             } else {
-                return node.preview.url +
-                    (this.isHomeNode(node) && this.animateNode != node ? '&crop=true&maxWidth=300&maxHeight=300' : '');
+                return node.preview.url + (
+                    ((
+                        this.isHomeNode(node) ||
+                        RestNetworkService.getRepository(node)?.repositoryType === RestConstants.REPOSITORY_TYPE_ALFRESCO
+                    ) &&
+                        this.animateNode !== node) ? '&crop=true&maxWidth=300&maxHeight=300' : ''
+                );
             }
         }
         return null;
+    }
+
+    getOptionsAlways() {
+        return this._options?.filter((o) => o.showAlways);
+    }
+
+    getPrimaryTitle(node: Node) {
+        if([RestConstants.CM_PROP_TITLE, RestConstants.LOM_PROP_TITLE].indexOf(this.columnsVisible[0]?.name) !== -1) {
+            return new NodeTitlePipe(this.translate).transform(node);
+        }
+        return node.name;
+    }
+
+    getRowId(node: Node|any, rowIndex: number): string {
+        return `list-table-node-${node.ref?.id || node.authorityName}-row-${rowIndex + 1}`;
+    }
+
+    getDescribedBy(node: Node): string {
+        return this.columnsVisible
+            .map((_, index) => this.getRowId(node, index))
+            .filter((_, index) => index > 0)
+            .join(' ');
     }
 }

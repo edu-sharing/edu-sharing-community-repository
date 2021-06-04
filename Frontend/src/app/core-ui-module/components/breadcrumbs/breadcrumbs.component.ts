@@ -16,6 +16,12 @@ export class BreadcrumbsComponent {
      * Caption of the home, if not set, an icon is used.
      */
     @Input() home: string;
+
+    /**
+     * shall an invisbile description (for screen readers) be generated, similar to
+     * 'You're here'
+     */
+    @Input() invisibleDescription = false;
     /**
      * The path to give to `routerLink` on the home element.
      *
@@ -65,6 +71,7 @@ export class BreadcrumbsComponent {
     @Input() set breadcrumbsAsNode(nodes: Node[]) {
         if (nodes == null) return;
         this.nodes = nodes;
+        this.addSearch();
     }
     /**
      * Set the breadcrumb main id.
@@ -75,6 +82,7 @@ export class BreadcrumbsComponent {
         if (id == null) return;
         this.node.getNodeParents(id).subscribe((nodes) => {
             this.nodes = nodes.nodes.reverse();
+            this.addSearch();
         });
     }
 
@@ -113,7 +121,7 @@ export class BreadcrumbsComponent {
         }
     }
 
-    onNodesDrop({ event, nodes, dropAction }: DropData, target: Node) {
+    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
         if (dropAction === 'link') {
             throw new Error('dropAction "link" is not allowed');
         }

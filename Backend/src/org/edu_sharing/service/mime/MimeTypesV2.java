@@ -210,9 +210,10 @@ public class MimeTypesV2 {
 		String fallback="file";
 		boolean isLink=properties.get(CCConstants.CCM_PROP_IO_WWWURL)!=null &&
 				!((String)properties.get(CCConstants.CCM_PROP_IO_WWWURL)).isEmpty();
+		// do not force link, the remote object might provided an custom TECHNICAL_FORMAT
 		if(isLink){
-			return "link";
-			//fallback="link";
+			//return "link";
+			fallback="link";
 		}
 		return getTypeFromMimetype(getMimeType(properties),properties,fallback);
 	}

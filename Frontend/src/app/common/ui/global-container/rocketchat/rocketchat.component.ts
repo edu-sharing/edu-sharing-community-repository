@@ -4,7 +4,7 @@ import {trigger} from "@angular/animations";
 import {MainNavComponent} from "../../main-nav/main-nav.component";
 import {EventListener,FrameEventsService} from "../../../../core-module/rest/services/frame-events.service";
 import {UIAnimation} from "../../../../core-module/ui/ui-animation";
-import {RestConnectorService} from "../../../../core-module/core.module";
+import {ConfigurationService, RestConnectorService} from '../../../../core-module/core.module';
 import {GlobalContainerComponent} from "../global-container.component";
 
 @Component({
@@ -18,15 +18,15 @@ import {GlobalContainerComponent} from "../global-container.component";
 /**
  * An edu-sharing file-picker modal dialog
  */
-export class RocketchatComponent implements EventListener{
+export class RocketchatComponent implements EventListener {
     onEvent(event: string, data: any): void {
-        if(event==FrameEventsService.EVENT_USER_LOGGED_IN || event==FrameEventsService.EVENT_USER_LOGGED_OUT)
+        if(event == FrameEventsService.EVENT_USER_LOGGED_IN || event == FrameEventsService.EVENT_USER_LOGGED_OUT)
             this.initalize(true)
     }
     @ViewChild('frame') frame:ElementRef;
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        if(event.code=="Escape" && this.fullscreen){
+        if(event.code == "Escape" && this.fullscreen) {
             event.preventDefault();
             event.stopPropagation();
             this.fullscreen=false;
@@ -42,6 +42,7 @@ export class RocketchatComponent implements EventListener{
     constructor(
         private sanitizer: DomSanitizer,
         private connector: RestConnectorService,
+        private configuration: ConfigurationService,
         private ngZone: NgZone,
         private changes: ChangeDetectorRef,
         private events: FrameEventsService
@@ -72,21 +73,19 @@ export class RocketchatComponent implements EventListener{
         return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general');
     }
 
-    private initalize(forceRenew=false) {
-        this._data=null;
-        this.src=null;
-        this.opened=false;
-        this.fullscreen=false;
-        if(GlobalContainerComponent.getPreloading()) {
+    private async initalize(forceRenew = false) {
+        this._data = null;
+        this.src = null;
+        this.opened = await this.configuration.get('remote.rocketchat.shouldOpen', false).toPromise();
+        this.fullscreen = false;
+        if (GlobalContainerComponent.getPreloading()) {
             GlobalContainerComponent.subscribePreloading().first().subscribe(() => this.initalize());
             return;
         }
-        this.connector.isLoggedIn(forceRenew).subscribe((login)=>{
-            if(login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT){
-                this._data=login.remoteAuthentications.ROCKETCHAT;
-                this.src=this.getFrameUrl();
-
-            }
-        });
+        const login = await this.connector.isLoggedIn(forceRenew).toPromise();
+        if (login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT) {
+            this._data = login.remoteAuthentications.ROCKETCHAT;
+            this.src = this.getFrameUrl();
+        }
     }
 }

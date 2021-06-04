@@ -40,6 +40,7 @@ import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -57,13 +58,7 @@ import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
 import org.edu_sharing.restservices.admin.v1.model.UploadResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
-import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Group;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeSearch;
-import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.SearchResult;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
@@ -75,10 +70,16 @@ import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.PersonReport;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.search.SearchResultNodeRefElastic;
 import org.edu_sharing.service.search.SearchService.ContentType;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.admin.model.ToolPermission;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -605,6 +606,52 @@ public class AdminApi {
 		}
 	}
 
+	@POST
+	@Path("/cache/clearCache")
+
+	@ApiOperation(value = "clear cache", notes = "clear cache")
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+	public Response clearCache(
+
+			@ApiParam(value="bean") @QueryParam("bean") String bean,
+			@Context HttpServletRequest req){
+		try {
+			AdminServiceFactory.getInstance().clearCache(bean);
+			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@GET
+	@Path("/cache/cacheEntries/{id}")
+
+	@ApiOperation(value = "Get entries of a cache", notes = "Get entries of a cache.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getCacheEntries(@ApiParam(value = "Id/bean name of the cache") @PathParam("id") String id,
+								 @Context HttpServletRequest req) {
+		try {
+			Map<Serializable, Serializable> result = AdminServiceFactory.getInstance().getCacheEntries(id);
+			return Response.ok().entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
 
 
 	@GET
@@ -1107,6 +1154,58 @@ public class AdminApi {
 	}
 
 	@GET
+	@Path("/elastic")
+	@Consumes({ "application/json" })
+
+	@ApiOperation(value = "Search for custom elastic DSL query")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultElastic.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response searchByElasticDSL(
+			@ApiParam(value = "dsl query (json encoded)", defaultValue = "") @QueryParam("dsl") String dsl,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			//check that there is an admin
+			AdminServiceFactory.getInstance();
+			SearchServiceElastic elastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
+			SearchResultNodeRefElastic search = elastic.searchDSL(dsl);
+			RepositoryDao repoDao = RepositoryDao.getHomeRepository();
+			List<Node> data = new ArrayList<Node>();
+			for (org.edu_sharing.service.model.NodeRef ref : search.getData()) {
+				try {
+					data.add(NodeDao.getNode(repoDao, ref).asNode());
+				}catch(Throwable t){
+					logger.warn("Error mapping elastic node " + ref.getNodeId(), t);
+				}
+			}
+
+			Pagination pagination = new Pagination();
+			pagination.setFrom(search.getStartIDX());
+			pagination.setCount(data.size());
+			pagination.setTotal(search.getNodeCount());
+
+			SearchResultElastic<Node> response = new SearchResultElastic<>();
+
+			response.setNodes(data);
+			response.setPagination(pagination);
+
+			XContentBuilder builder = XContentFactory.jsonBuilder().prettyPrint();
+			search.getElasticResponse().toXContent(builder, ToXContent.EMPTY_PARAMS);
+			response.setElasticResponse(Strings.toString(builder));
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@GET
 	@Path("/lucene")
 	@Consumes({ "application/json" })
 
@@ -1384,7 +1483,7 @@ public class AdminApi {
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response setConfig(@Context HttpServletRequest req) {
+	public Response getConfig(@Context HttpServletRequest req) {
 		try {
 			return Response.ok().entity(AdminServiceFactory.getInstance().getConfig()).build();
 		} catch (Throwable t) {
@@ -1401,7 +1500,7 @@ public class AdminApi {
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response getConfig(@Context HttpServletRequest req,RepositoryConfig config) {
+	public Response setConfig(@Context HttpServletRequest req,RepositoryConfig config) {
 		try {
 			AdminServiceFactory.getInstance().setConfig(config);
 			return Response.ok().build();

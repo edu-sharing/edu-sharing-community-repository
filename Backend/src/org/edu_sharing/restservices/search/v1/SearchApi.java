@@ -82,6 +82,7 @@ public class SearchApi {
 
 			SearchToken token = new SearchToken();
 			token.setFacettes(parameters.getFacettes());
+			token.setPermissions(parameters.getPermissions());
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 			token.setFrom(skipCount != null ? skipCount : 0);
 			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
@@ -91,13 +92,11 @@ public class SearchApi {
 		    	List<Node> data = null;//new ArrayList<Node>();
 		    	if(search.getNodes().size() < search.getResult().size()){
 		    		//searched repo deliveres only nodeRefs by query time
-		    		data = new ArrayList<Node>();
-		    		for (NodeRef ref : search.getResult()) {
-			    		data.add(NodeDao.getNode(repoDao, ref.getId(),filter).asNode());
-			    	}
+					data = NodeDao.convertToRest(repoDao, search.getResult(), filter, null);
 		    	}else{
 		    		//searched repo delivered properties by query time
 		    		data = search.getNodes();
+		    		// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
 		    	}
 		    	
 		    	

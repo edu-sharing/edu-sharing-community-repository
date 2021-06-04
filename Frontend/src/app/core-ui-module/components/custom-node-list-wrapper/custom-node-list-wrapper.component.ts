@@ -1,4 +1,6 @@
 import {
+    ApplicationRef,
+    ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
     ComponentRef, ContentChild,
@@ -80,14 +82,14 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         node: Node,
     ) => {
         status: boolean;
-        message: string;
+        message?: string;
         button?: {
             click: Function;
             caption: string;
             icon: string;
         };
     };
-    @Input() sortBy: string;
+    @Input() sortBy: string[];
     @Input() sortAscending = true;
 
 
@@ -125,6 +127,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         }
         // Pass changes to the wrapped custom-node-list component and trigger an
         // update.
+        // tslint:disable-next-line:forin
         for (const key in changes) {
             this.componentRef.instance[key] = changes[key].currentValue;
         }
@@ -133,6 +136,9 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         }
         // attach the template ref
         this.componentRef.instance.itemContentRef = this.itemContentRef;
+
+        // force change detection on list table component
+        this.componentRef.instance.changeDetectorRef?.detectChanges();
     }
 
     /**
@@ -157,7 +163,6 @@ export class CustomNodeListWrapperComponent implements OnChanges {
      */
     private getOutputBindings(): { [key: string]: EventEmitter<any> } {
         const outputBindings: { [key: string]: any } = {};
-        console.log(outputBindings);
         for (const key in this) {
             const value = this[key];
             if (value instanceof EventEmitter) {

@@ -4,6 +4,10 @@ import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCBaseClient;
+import org.edu_sharing.service.collection.CollectionService;
+import org.edu_sharing.service.collection.CollectionServiceConfig;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.collection.CollectionServiceImpl;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceAdapter;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -15,6 +19,7 @@ import org.edu_sharing.service.rating.RatingServiceAdapter;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceImpl;
 import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 import java.util.HashMap;
 
@@ -42,6 +47,9 @@ public abstract class Provider {
     }
     public RenderingService getRenderingService(){
         return new RenderingServiceImpl(appId);
+    }
+    public CollectionService getCollectionService(){
+        return CollectionServiceImpl.build(appId);
     }
 
     /**

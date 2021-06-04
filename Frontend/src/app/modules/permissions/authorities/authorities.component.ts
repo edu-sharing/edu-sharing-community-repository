@@ -37,6 +37,7 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {ListItemType} from '../../../core-module/ui/list-item';
+import {VCard} from "../../../core-module/ui/VCard";
 
 @Component({
   selector: 'permissions-authorities',
@@ -60,8 +61,8 @@ export class PermissionsAuthoritiesComponent {
   public PRIMARY_AFFILIATIONS= RestConstants.USER_PRIMARY_AFFILIATIONS;
   public list: any[]= [];
   public edit: any;
-  private editDetails: any;
-  private editId: string;
+  editDetails: any;
+  editId: string;
   private offset = 0;
   public columns: ListItem[]= [];
   public addMemberColumns: ListItem[]= [];
@@ -70,7 +71,7 @@ export class PermissionsAuthoritiesComponent {
   public sortAscending = true;
   public loading = true;
   public _searchQuery: string;
-  private manageMemberSearch: string;
+  manageMemberSearch: string;
   public options: CustomOptions= {
     useDefaultOptions: false,
     addOptions: []
@@ -80,13 +81,13 @@ export class PermissionsAuthoritiesComponent {
   private orgs: OrganizationOrganizations;
   public addMembers: any;
   public editGroups: User;
-  private memberOptions: CustomOptions = {
+  memberOptions: CustomOptions = {
     useDefaultOptions: false,
     addOptions: []
   };
   private addToList: any[];
-  private isAdmin = false;
-  private embeddedQuery: string;
+  isAdmin = false;
+  embeddedQuery: string;
   editButtons: DialogButton[];
   memberButtons: DialogButton[];
   signupButtons: DialogButton[];
@@ -111,7 +112,7 @@ export class PermissionsAuthoritiesComponent {
 
   public _mode: ListItemType;
   public addTo: any;
-  private addToSelection: any;
+  addToSelection: any;
   public globalProgress= false;
   @Input() set org(org: Organization){
     this._org = org;
@@ -124,8 +125,8 @@ export class PermissionsAuthoritiesComponent {
   @Output() onSelection = new EventEmitter();
   @Output() setTab = new EventEmitter<number>();
   public editMembers: any;
-  private memberList: Authority[];
-  private selectedMembers: Authority[]= [];
+  memberList: Authority[];
+  selectedMembers: Authority[]= [];
   private memberSugesstions: SuggestItem[];
   private memberListOffset: number;
   // show primary affiliations as list (or free text)
@@ -244,12 +245,11 @@ export class PermissionsAuthoritiesComponent {
               private organization: RestOrganizationService,
               private connector: RestConnectorService,
               private iam: RestIamService) {
-    this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
-      this.connector.isLoggedIn().subscribe(() => {
-        this.isAdmin = data.canCreate;
-        this.updateOptions();
-        this.updateButtons();
-      });
+      this.isAdmin = this.connector.getCurrentLogin()?.isAdmin;
+      this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
+      this.updateOptions();
+      this.updateButtons();
+
     });
   }
   private search(){
@@ -487,13 +487,13 @@ export class PermissionsAuthoritiesComponent {
     signupRemove.group = DefaultGroups.Delete;
     this.signupActions.addOptions = [signupAdd, signupRemove];
   }
-  private cancelEdit(){
+  cancelEdit(){
     this.edit = null;
   }
-  private cancelAddTo(){
+  cancelAddTo(){
     this.addTo = null;
   }
-  private cancelEditMembers(){
+  cancelEditMembers(){
     this.editMembers = null;
     this.addMembers = null;
     this.editGroups = null;
@@ -564,8 +564,11 @@ export class PermissionsAuthoritiesComponent {
       },
         (error: any) => this.toast.error(error));
     }
-    else{
+    else {
       const editStore = Helper.deepCopy(this.edit);
+      if(this.edit.profile?.vcard) {
+          editStore.profile.vcard = this.edit.profile.vcard.copy();
+      }
       editStore.profile.sizeQuota *= 1024 * 1024;
       this.globalProgress = true;
       if (this.editId == null){
@@ -633,15 +636,16 @@ export class PermissionsAuthoritiesComponent {
       this.updateOptions();
     });
     if (this._mode === 'ORG') {
-      this.organization.getOrganizations(query, false, request).subscribe((orgs: OrganizationOrganizations) => {
+        // as non-admin, search only own orgs since these are the once with access
+      this.organization.getOrganizations(query, !this.isAdmin, request).subscribe((orgs: OrganizationOrganizations) => {
         this.offset += this.connector.numberPerRequest;
         for (const org of orgs.organizations) {
           if (org.administrationAccess) {
             this.list.push(org);
           }
-          // org endpoint does not support proper pagination, so check if result was empty
-          this.hasMore = orgs.organizations.length > 0;
         }
+        // org endpoint does not support proper pagination, so check if result was empty
+        this.hasMore = orgs.organizations.length > 0;
         this.loading = false;
         this.updateOptions();
       });
@@ -713,7 +717,7 @@ export class PermissionsAuthoritiesComponent {
     }
     else if (this._mode == 'USER'){
       this.iam.getUser(list[0].authorityName).subscribe((user) => {
-          this.edit = Helper.deepCopy(user.person);
+          this.edit = user.person;
           this.edit.profile.sizeQuota = user.person.quota.sizeQuota / 1024 / 1024;
           this.editId = this.edit.authorityName;
           this.primaryAffiliationList = this.edit.profile.primaryAffiliation ? this.PRIMARY_AFFILIATIONS.indexOf(this.edit.profile.primaryAffiliation) != -1 : true;
@@ -740,7 +744,7 @@ export class PermissionsAuthoritiesComponent {
       this.memberListOffset = 0;
       this.searchMembers();
   }
-  private addToSelect() {
+  addToSelect() {
     this.addToList = this.selected;
     this.addToSingle();
   }
@@ -889,7 +893,7 @@ export class PermissionsAuthoritiesComponent {
     this.manageMemberSearch = '';
     this.searchMembers();
   }
-  private updateSelectedMembers(data: Authority[]) {
+  updateSelectedMembers(data: Authority[]) {
     this.selectedMembers = data;
     this.updateButtons();
   }
@@ -936,14 +940,14 @@ export class PermissionsAuthoritiesComponent {
             this.deleteMembership(list,position + 1);
         }, (error: any) => this.toast.error(error));
     }
-  private searchMembers(){
+  searchMembers(){
     this.selectedMembers = [];
     this.memberOptions.addOptions = this.getMemberOptions();
     this.memberList = [];
     this.memberListOffset = 0;
     this.refreshMemberList();
   }
-  private refreshMemberList() {
+  refreshMemberList() {
     if (this.addMembers){
       if (this.org && this.addMembers.authorityName != this.org.authorityName){
         const request: any = {
@@ -1032,10 +1036,10 @@ export class PermissionsAuthoritiesComponent {
       this.refresh();
     });
   }
-  private deselectOrg(){
+  deselectOrg(){
     this.onDeselectOrg.emit();
   }
-  private setOrgTab(){
+  setOrgTab(){
     this.setTab.emit(0);
   }
 

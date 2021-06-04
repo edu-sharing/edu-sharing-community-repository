@@ -1,16 +1,5 @@
 package org.edu_sharing.service.authentication;
 
-import java.io.Serializable;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -27,22 +16,23 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
-import org.edu_sharing.restservices.admin.v1.Application;
-import org.edu_sharing.service.authentication.sso.config.Condition;
-import org.edu_sharing.service.authentication.sso.config.CustomGroupMapping;
-import org.edu_sharing.service.authentication.sso.config.MappingGroup;
-import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilder;
-import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilderFactory;
-import org.edu_sharing.service.authentication.sso.config.MappingRoot;
+import org.edu_sharing.service.authentication.sso.config.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
+
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 /**
  * 
@@ -213,11 +203,12 @@ public class SSOAuthorityMapper {
 
 		String appId = ssoAttributes.get(PARAM_APP_ID);
 		ApplicationInfo appInfo = (appId != null) ? ApplicationInfoList.getRepositoryInfoById(appId) : null;
-
+		boolean whitelistedUser = false;
 		if(SSO_TYPE_AuthByApp.equals(ssoType)) {
 			String userWhiteList = appInfo.getAuthByAppUserWhitelist();
 			if(userWhiteList != null && !userWhiteList.trim().equals("")){
 				List<String> userList = Arrays.asList(userWhiteList.split(","));
+				whitelistedUser = true;
 				if(!userList.contains(tmpUserName)){
 					throw new AuthenticationException(AuthenticationExceptionMessages.NOT_IN_WHITELIST);
 				}
@@ -246,6 +237,13 @@ public class SSOAuthorityMapper {
 			boolean hashGroupNames = isHashGroupNames();
 			boolean updateMemberships = isUpdateMemberships();
 
+			if (whitelistedUser) {
+				createUser = false;
+				updateUser = false;
+				createGroups = false;
+				hashGroupNames = false;
+				updateMemberships = false;
+			}
 
 			/**
 			 * SSO_TYPE_AuthByApp: need the Application type to
@@ -324,6 +322,15 @@ public class SSOAuthorityMapper {
 					if(isHashUserName()) {
 						personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
 					}
+
+					if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+						String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+						//if configured initialize with active status
+						if (personActiveStatus != null) {
+							personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), personActiveStatus);
+						}
+					}
+
 
 					personService.createPerson(personProperties);
 				} else if (updateUser) {

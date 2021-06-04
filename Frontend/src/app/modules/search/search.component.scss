@@ -111,14 +111,7 @@ $sidenavTopBaseOffset:110px;
     }
 }
 .collections{
-    min-height: $listCardSmallHeight+10px;
-    max-height: $listCardSmallHeight+10px;
-    overflow: hidden;
     margin-bottom:25px;
-}
-.collectionsMore{
-    min-height: auto;
-    max-height: none;
 }
 .switchToCollections a, .switchToSearch a{
     padding: 5px;
@@ -382,6 +375,7 @@ small-collection{
 }
 .sidenavNoRepositories{
     top:$mainnavHeight+65px;
+    // This brakes when the site has a custom header, that adds to the page height.
     height: calc(100% - #{$mainnavHeight} - 65px - 70px);
     &.no-mainnav{
         top:65px;
@@ -399,7 +393,6 @@ small-collection{
     min-height: 1000px;
     display: inline-block;
     width: 100%;
-    overflow-x: hidden;
     &.no-mainnav{
         margin-top: 130px;
     }

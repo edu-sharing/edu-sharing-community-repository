@@ -35,7 +35,7 @@ export class ActionbarComponent {
      * dropdownPosition is for position of dropdown (default = left)
      * Values 'left' or 'right'
      */
-    @Input() dropdownPosition = 'left';
+    @Input() dropdownPosition: 'left' | 'right' = 'left';
 
     /**
      * backgroundType for color matching, either bright, dark or primary

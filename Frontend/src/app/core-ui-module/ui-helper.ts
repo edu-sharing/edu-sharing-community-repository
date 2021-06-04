@@ -747,6 +747,7 @@ export class UIHelper {
      * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
      * @param bindings Optional bindings (inputs & outputs) to the given component
      * @param delay Optional inflating delay in ms(some components may need some time to "init" the layout)
+     * @param replace Whether to replace to previous `innerHTML` of `targetElement`
      * @param injector (to fetch templates for the component)
      */
     public static injectAngularComponent<T>(
@@ -755,7 +756,7 @@ export class UIHelper {
         componentName: Type<T>,
         targetElement: Element,
         bindings: { [key: string]: any } = null,
-        delay = 0,
+        { delay = 0, replace = true } = {},
     ): ComponentRef<T> {
         if (targetElement == null) {
             return null;
@@ -783,7 +784,9 @@ export class UIHelper {
         const domElem = (component.hostView as EmbeddedViewRef<any>)
             .rootNodes[0] as HTMLElement;
         domElem.style.display = 'none';
-        targetElement.innerHTML = null;
+        if (replace) {
+            targetElement.innerHTML = null;
+        }
         targetElement.appendChild(domElem);
         setTimeout(() => {
             domElem.style.display = null;

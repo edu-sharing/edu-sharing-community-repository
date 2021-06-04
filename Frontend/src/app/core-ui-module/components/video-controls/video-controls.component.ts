@@ -1,9 +1,9 @@
 import {trigger} from '@angular/animations';
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {Router} from '@angular/router';
 import {Options} from 'ng5-slider';
-import {of} from 'rxjs';
-import {catchError, map, tap} from 'rxjs/operators';
+import {of, ReplaySubject} from 'rxjs';
+import {catchError, map, takeUntil, tap} from 'rxjs/operators';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {
     NodesRightMode,
@@ -21,6 +21,7 @@ import {Toast} from '../../toast';
 import {UIHelper} from '../../ui-helper';
 import {DurationPipe} from './duration.pipe';
 import {NodeHelperService} from '../../node-helper.service';
+import {MainNavService} from "../../../common/services/main-nav.service";
 interface VideoControlsValues {
     startTime: number;
     endTime: number;
@@ -33,7 +34,7 @@ interface VideoControlsValues {
     styleUrls: ['video-controls.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
 })
-export class VideoControlsComponent implements OnInit {
+export class VideoControlsComponent implements OnInit, OnDestroy {
     @Input() node: Node;
     @Input() video: HTMLVideoElement;
     @Input() size: 'small' | 'large' = 'large';
@@ -44,10 +45,10 @@ export class VideoControlsComponent implements OnInit {
     /** Whether the user has all required permissions to use this tool on the given node */
     hasRequiredPermissions: boolean;
     isLoading = false;
-    isCollectionChooserVisible = false;
     sliderOptions: Options;
     private playbackStartedTime: Date;
     private previousValues: VideoControlsValues;
+    private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
 
     constructor(
         private bridge: BridgeService,
@@ -56,6 +57,7 @@ export class VideoControlsComponent implements OnInit {
         private nodeService: RestNodeService,
         private nodeHelper: NodeHelperService,
         private router: Router,
+        private mainNav: MainNavService,
         private temporaryStorage: TemporaryStorageService,
         private toast: Toast,
     ) {}
@@ -80,6 +82,11 @@ export class VideoControlsComponent implements OnInit {
         }
     }
 
+    ngOnDestroy() {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
+
     async save(): Promise<void> {
         if (this.isCollectionRef(this.node) && this.isOwner(this.node)) {
             const node = await this.writeVideoControlsValues(this.node, this.values);
@@ -88,40 +95,15 @@ export class VideoControlsComponent implements OnInit {
             }
         } else {
             // Not an individual object, choose new location first.
-            this.isCollectionChooserVisible = true;
+            this.mainNav.getDialogs().addToCollection = [this.node];
+            this.mainNav.getDialogs().onStoredAddToCollection.first().pipe(
+                takeUntil(this.destroyed$)
+            ).subscribe(async ({references}) => {
+                const node = await this.writeVideoControlsValues(references[0], this.values, false);
+                this.node = node;
+                this.updateCurrentNode.emit(node);
+            });
         }
-    }
-
-    addToCollection(collection: Node) {
-        this.isCollectionChooserVisible = false;
-        this.isLoading = true;
-        UIHelper.addToCollection(
-            this.nodeHelper,
-            this.collectionService,
-            this.router,
-            this.bridge,
-            collection,
-            [this.node],
-            (elements: Node[]) => {
-                if (elements.length) {
-                    const node = elements[0];
-                    this.writeVideoControlsValues(node, this.values);
-                } else {
-                    this.isLoading = false;
-                }
-            },
-        );
-    }
-
-    createCollectionAndAdd(root?: Node) {
-        this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES, [this.node]);
-        this.router.navigate([
-            UIConstants.ROUTER_PREFIX,
-            'collections',
-            'collection',
-            'new',
-            root ? root.ref.id : RestConstants.ROOT,
-        ]);
     }
 
     onValueChange(value: number, type: 'start' | 'end') {
@@ -150,7 +132,7 @@ export class VideoControlsComponent implements OnInit {
             if (this.isCollectionRef(node)) {
                 if(this.isOwner(node)) {
                     return this.nodeHelper.getNodesRight([node], RestConstants.ACCESS_WRITE);
-                } else{
+                } else {
                     return this.nodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH, NodesRightMode.Original);
                 }
             } else {
@@ -165,7 +147,7 @@ export class VideoControlsComponent implements OnInit {
      * Uses `video` to set meaningful fallback values in case node doesn't define video-control
      * values. `video` has to have loaded metadata.
      */
-    private readVideoControlsValues(node: Node, video: HTMLVideoElement): VideoControlsValues {
+    readVideoControlsValues(node: Node, video: HTMLVideoElement): VideoControlsValues {
         const values: VideoControlsValues = {
             title: node.properties[RestConstants.LOM_PROP_TITLE]?.[0] ?? '',
             startTime: 0,
@@ -198,6 +180,7 @@ export class VideoControlsComponent implements OnInit {
     private writeVideoControlsValues(
         node: Node,
         values: VideoControlsValues,
+        showMessage = true
     ): Promise<Node | null> {
         this.isLoading = true;
         const props = {
@@ -217,7 +200,9 @@ export class VideoControlsComponent implements OnInit {
             .pipe(
                 tap({
                     next: () => {
-                        this.toast.toast('VIDEO_CONTROLS.SAVED');
+                        if(showMessage) {
+                            this.toast.toast('VIDEO_CONTROLS.SAVED');
+                        }
                     },
                     error: (error) => {
                         this.toast.error(error);
@@ -264,11 +249,11 @@ export class VideoControlsComponent implements OnInit {
         });
     }
 
-    private isCollectionRef(node: Node) {
+    isCollectionRef(node: Node) {
         return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
     }
 
-    private isOwner(node: Node) {
+    isOwner(node: Node) {
         return node.properties[RestConstants.CM_CREATOR][0] === this.connector.getCurrentLogin().authorityName;
     }
 }

@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatRadioButton } from '@angular/material/radio';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
 
 /**
  * Multi-line labels and descriptions for `MatCheckbox` and `MatRadioButton`.
@@ -42,7 +43,7 @@ export class MultiLineLabelComponent implements OnInit, AfterViewInit {
     @ViewChild('description') description: ElementRef<HTMLElement>;
     @ViewChild('additionalInformation') additionalInformation: ElementRef;
 
-    parent: MatCheckbox | MatRadioButton;
+    parent: MatCheckbox | MatRadioButton | MatSlideToggle;
     input: HTMLInputElement;
     hasDescription = true;
     hasAdditionalInformation = true;
@@ -51,8 +52,9 @@ export class MultiLineLabelComponent implements OnInit, AfterViewInit {
         private changeDetector: ChangeDetectorRef,
         @Optional() matCheckbox: MatCheckbox,
         @Optional() matRadioButton: MatRadioButton,
+        @Optional() matSlideToggle: MatSlideToggle,
     ) {
-        this.parent = matCheckbox ?? matRadioButton;
+        this.parent = matCheckbox ?? matRadioButton ?? matSlideToggle;
         if (!this.parent) {
             console.error(
                 'Multi-line-label component missing input element.',

@@ -120,9 +120,23 @@ public class ActionObserver {
 				synchronized (nodeActionsMap) {
 					for (Map.Entry<NodeRef, List<Action>> entry : nodeActionsMap.entrySet()) {
 
-						if (!nodeservice.exists(entry.getKey())) {
+						if(entry.getValue() == null || entry.getValue().size() == 0){
+							logger.info(entry.getKey() +" has no actions. will remove entry");
+							toRemove.add(entry.getKey());
+							continue;
+						}
+
+						//observer removes action when node exists check fails. this can happen when transaction is not commited already.
+						boolean checkExists = true;
+						if(entry.getValue().stream().anyMatch(a -> (a.getParameterValue(ACTION_OBSERVER_ADD_DATE) != null
+								&& (new Date().getTime() - ((Date)a.getParameterValue(ACTION_OBSERVER_ADD_DATE)).getTime()) < 3600000))){
+							checkExists = false;
+						}
+
+						if (checkExists && !nodeservice.exists(entry.getKey())) {
 							logger.info(entry.getKey() + " was deleted will remove entry");
 							toRemove.add(entry.getKey());
+							continue;
 						}
 
 						if (entry.getValue() != null && entry.getValue().size() > 0) {
@@ -155,8 +169,6 @@ public class ActionObserver {
 							for (Action action : toRemoveActions) {
 								actions.remove(action);
 							}
-						} else {
-							toRemove.add(entry.getKey());
 						}
 					}
 				}

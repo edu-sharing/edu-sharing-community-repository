@@ -59,6 +59,7 @@ export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('Op
 
 @Injectable()
 export class OptionsHelperService {
+    public static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
     private static subscriptionUp: Subscription;
     private static subscriptionDown: Subscription;
     private appleCmd: boolean;
@@ -218,7 +219,7 @@ export class OptionsHelperService {
             actionbar.options = [];
         }
     }
-    initComponents(mainNav: MainNavComponent,
+    async initComponents(mainNav: MainNavComponent,
          actionbar: ActionbarComponent = null,
          list: ListTableComponent = null,
          dropdown: DropdownComponent = null) {
@@ -226,6 +227,7 @@ export class OptionsHelperService {
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
+        await this.networkService.getRepositories().toPromise();
     }
     setListener(listener: OptionsListener) {
         this.listener = listener;
@@ -233,7 +235,11 @@ export class OptionsHelperService {
     /**
      * refresh all bound components with available menu options
      */
-    refreshComponents() {
+    refreshComponents(refreshListOptions = true) {
+        if(this.data == null) {
+            console.warn('options helper refresh called but no data previously bound');
+            return;
+        }
         if(this.subscriptions?.length){
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
@@ -247,7 +253,7 @@ export class OptionsHelperService {
                     this.list.updateNodes(nodes);
                 }
             }));
-            this.subscriptions.push(this.mainNav.management.onDelete.subscribe(
+            this.subscriptions.push(this.mainNav.management?.onDelete?.subscribe(
                 (result: { objects: any; count: number; error: boolean; }) => this.listener.onDelete(result)
             ));
         }
@@ -280,10 +286,13 @@ export class OptionsHelperService {
         return true;
     }
 
-    private getAvailableOptions(target: Target) {
-        let objects: Node[]|any[];
+    private getAvailableOptions(target: Target, objects: Node[] = null) {
         if (target === Target.List) {
-            objects = this.data.allObjects && this.data.allObjects.length ? [this.data.allObjects[0]] : null;
+            if(objects == null) {
+                // fetch ALL options of ALL items inside list
+                // the callback handlers will later decide for the individual node
+                objects = null;
+            }
         } else if (target === Target.Actionbar) {
             objects = this.data.selectedObjects || (this.data.activeObjects);
         } else if (target === Target.ListDropdown) {
@@ -343,6 +352,12 @@ export class OptionsHelperService {
                // console.log('customShowCallback  was false', option, objects);
                return false;
            }
+        }
+        if (option.toolpermissions != null && option.toolpermissionsMode === HideMode.Hide) {
+            if (!this.validateToolpermissions(option)) {
+                // console.log('toolpermissions missing', option, objects);
+                return false;
+            }
         }
         if (option.permissions != null && option.permissionsMode === HideMode.Hide) {
            if (!this.validatePermissions(option, objects)) {
@@ -510,6 +525,7 @@ export class OptionsHelperService {
         }
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
+        editConnectorNode.showAsAction = true;
         editConnectorNode.constrains = [Constrain.Files, Constrain.NoBulk];
 
         /**
@@ -536,7 +552,7 @@ export class OptionsHelperService {
         const addNodeToCollection = new OptionItem('OPTIONS.COLLECTION', 'layers', (object) =>
             management.addToCollection =  this.getObjects(object)
         );
-        addNodeToCollection.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
         addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
         addNodeToCollection.customShowCallback = (nodes) => {
@@ -557,11 +573,18 @@ export class OptionsHelperService {
         bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
+        bookmarkNode.customShowCallback = (nodes) => {
+            if(nodes) {
+                return nodes.every((n) => this.nodeHelper.referenceOriginalExists(n));
+            }
+            return true;
+        };
 
         const createNodeVariant = new OptionItem('OPTIONS.VARIANT', 'call_split', (object) =>
             management.nodeVariant =  this.getObjects(object)[0]
         );
         createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
+        createNodeVariant.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
         createNodeVariant.customShowCallback = (nodes) => {
             if (nodes) {
                 createNodeVariant.name = 'OPTIONS.VARIANT' + (this.connectors.connectorSupportsEdit(nodes[0]) ? '_OPEN' : '');
@@ -655,7 +678,14 @@ export class OptionsHelperService {
             }
             for (const item of nodes) {
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
-                if(item.downloadUrl != null && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL]) {
+                if(item.downloadUrl != null && item.properties &&
+                    (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] || !RestNetworkService.isFromHomeRepo(item)) &&
+                    this.nodeHelper.referenceOriginalExists(item)
+                ) {
+                    // bulk upload is not supported for remote nodes
+                    if (!RestNetworkService.isFromHomeRepo(item) && nodes.length !== 1) {
+                        continue;
+                    }
                     return true;
                 }
             }
@@ -723,6 +753,7 @@ export class OptionsHelperService {
         );
         linkMap.constrains = [Constrain.NoBulk, Constrain.HomeRepository, Constrain.User, Constrain.Directory];
         linkMap.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_MAP_LINK];
+        linkMap.toolpermissionsMode = HideMode.Hide;
         linkMap.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         linkMap.permissionsMode = HideMode.Hide;
         linkMap.group = DefaultGroups.FileOperations;
@@ -983,6 +1014,7 @@ export class OptionsHelperService {
             management.nodeSidebarChange.emit(management.nodeSidebar);
 
         });
+        metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         metadataSidebar.scopes = [Scope.WorkspaceList];
         metadataSidebar.constrains = [Constrain.NoBulk];
         metadataSidebar.group = DefaultGroups.Toggles;
@@ -1243,7 +1275,16 @@ export class OptionsHelperService {
      * @param objects
      */
     public filterOptions(options: OptionItem[], target: Target, objects: Node[]|any = null) {
-        options = this.handleCallbackStates(options, target, objects);
+        if(target === Target.List) {
+            /*let optionsAlways = options.filter((o) => o.showAlways);
+            const optionsOthers = options.filter((o) => !o.showAlways);
+            optionsAlways = this.handleCallbackStates(options, target, objects);
+            options = optionsAlways.concat(optionsOthers);*/
+            // attach the show callbacks
+            this.handleCallbacks(options, target);
+        } else {
+            options = this.handleCallbackStates(options, target, objects);
+        }
         options = this.sortOptionsByGroup(options);
         return options;
     }
