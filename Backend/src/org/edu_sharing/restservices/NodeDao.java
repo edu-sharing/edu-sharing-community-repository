@@ -529,7 +529,7 @@ public class NodeDao {
 			this.filter = filter;
 
 			for(org.edu_sharing.service.model.NodeRef usedInCollection : nodeRef.getUsedInCollections()){
-				usedInCollections.add(new NodeDao(repoDao, nodeRef, filter));
+				usedInCollections.add(new NodeDao(repoDao, usedInCollection, filter));
 			}
 			
 		}catch(Throwable t){
