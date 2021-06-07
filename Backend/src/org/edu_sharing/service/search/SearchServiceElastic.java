@@ -326,6 +326,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
             }
         }
+        props.put(CCConstants.NODETYPE, sourceAsMap.get("type"));
 
         List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");
         int childIOCount = 0;
