@@ -136,12 +136,12 @@ public class NodeRefImpl implements NodeRef {
 
 	@Override
 	public void setUsedInCollections(List<NodeRef> usedInCollections) {
-
+		this.usedInCollections = usedInCollections;
 	}
 
 	@Override
 	public List<NodeRef> getUsedInCollections() {
-		return null;
+		return usedInCollections;
 	}
 
 	@Override
