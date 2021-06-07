@@ -15,6 +15,7 @@ public class SearchParameters {
 	private List<String> permissions;
 	private List<MdsQueryCriteria> criterias;
 	private List<String> facettes;
+	private boolean resolveCollections = false;
 
 	@ApiModelProperty(required = true, value = "")
 	@JsonProperty("criterias")
@@ -43,5 +44,13 @@ public class SearchParameters {
 
 	public void setPermissions(List<String> permissions) {
 		this.permissions = permissions;
+	}
+
+	public boolean isResolveCollections() {
+		return resolveCollections;
+	}
+
+	public void setResolveCollections(boolean resolveCollections) {
+		this.resolveCollections = resolveCollections;
 	}
 }

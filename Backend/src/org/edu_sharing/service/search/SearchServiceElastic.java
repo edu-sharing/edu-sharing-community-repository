@@ -106,7 +106,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         Set<String> authorities = getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         for (SearchHit hit : hits) {
-            data.add(transformSearchHit(authorities, user, hit));
+            data.add(transformSearchHit(authorities, user, hit, false));
         }
         return sr;
     }
@@ -218,7 +218,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             long millisPerm = System.currentTimeMillis();
             for (SearchHit hit : hits) {
-                data.add(transformSearchHit(authorities, user, hit));
+                data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
             }
             logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
 
@@ -272,8 +272,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return authorities;
     }
 
-    private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit) {
-        Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+    private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
+        return this.transform(authorities,user,hit.getSourceAsMap(), resolveCollections);
+    }
+    private NodeRef transform(Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections){
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
@@ -325,6 +327,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
             }
         }
+        props.put(CCConstants.NODETYPE, sourceAsMap.get("type"));
 
         List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");
         int childIOCount = 0;
@@ -355,6 +358,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         if(commentCount > 0){
             props.put(CCConstants.VIRT_PROP_COMMENTCOUNT,commentCount);
         }
+
 
 
         org.alfresco.service.cmr.repository.NodeRef alfNodeRef = new  org.alfresco.service.cmr.repository.NodeRef(new StoreRef(protocol,identifier),nodeId);
@@ -426,6 +430,29 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         eduNodeRef.setPermissions(permissions);
+
+        if(resolveCollections) {
+            List<Map<String, Object>> collections = (List) sourceAsMap.get("collections");
+            if (collections != null) {
+                for (Map<String, Object> collection : collections) {
+                    String colOwner = (String) collection.get("owner");
+                    boolean hasPermission = user.equals(colOwner);
+                    if (!hasPermission) {
+                        Map<String, List<String>> colPermissionsElastic = (Map) collection.get("permissions");
+                        for (Map.Entry<String, List<String>> entry : colPermissionsElastic.entrySet()) {
+                            if ("read".equals(entry.getKey())) {
+                                hasPermission = entry.getValue().stream().anyMatch(s -> authorities.contains(s) || s.equals(user));
+                                break;
+                            }
+                        }
+                    }
+                    if (hasPermission) {
+                        NodeRef transform = transform(authorities, user, collection, resolveCollections);
+                        eduNodeRef.getUsedInCollections().add(transform);
+                    }
+                }
+            }
+        }
         long permMillisSingle = (System.currentTimeMillis() - millis);
         return eduNodeRef;
     }
