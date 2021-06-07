@@ -433,6 +433,7 @@ public class NodeServiceHelper {
 	public static List<NodeRef> getParentPath(NodeRef target){
 		List<NodeRef> path = new ArrayList<>();
 		NodeRef currentNode = target;
+		path.add(currentNode);
 		while(currentNode != null){
 			String parent=null;
 			try {
