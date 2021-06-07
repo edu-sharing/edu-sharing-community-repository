@@ -79,6 +79,7 @@ import {ImageConfigDirective} from './directives/image-config.directive';
 import {ErrorProcessingService} from './error.processing';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
+import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
 
 @NgModule({
     declarations: [
@@ -121,6 +122,7 @@ import { FormatDurationPipe } from './pipes/format-duration.pipe';
         NodeImageSizePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
+        OptionTooltipPipe,
         NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
@@ -196,6 +198,7 @@ import { FormatDurationPipe } from './pipes/format-duration.pipe';
         InfiniteScrollDirective,
         ToastyModule,
         AuthorityNamePipe,
+        OptionTooltipPipe,
         VCardNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,
