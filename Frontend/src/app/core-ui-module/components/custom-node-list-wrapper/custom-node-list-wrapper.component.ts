@@ -6,7 +6,7 @@ import {
     ComponentRef, ContentChild,
     ElementRef,
     EventEmitter, Injector,
-    Input,
+    Input, NgZone,
     OnChanges,
     Output,
     SimpleChange, SkipSelf, TemplateRef,
@@ -118,8 +118,13 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         private temporaryStorageService: TemporaryStorageService,
         private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
+        private ngZone: NgZone,
         private elementRef: ElementRef,
     ) {
+        // regulary re-bind template since it might have updated without ngChanges trigger
+        ngZone.runOutsideAngular(() =>
+            setInterval(() => this.componentRef.instance.itemContentRef = this.itemContentRef)
+        );
     }
 
     ngOnChanges(changes: { [key: string]: SimpleChange }) {
@@ -137,7 +142,6 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         }
         // attach the template ref
         this.componentRef.instance.itemContentRef = this.itemContentRef;
-
         // force change detection on list table component
         this.componentRef.instance.changeDetectorRef?.detectChanges();
     }
