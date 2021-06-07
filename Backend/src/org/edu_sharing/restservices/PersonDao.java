@@ -52,8 +52,6 @@ public class PersonDao {
 	Logger logger = Logger.getLogger(PersonDao.class);
 	public static final String ME = "-me-";
 
-	private final ArrayList<EduGroup> parentOrganizations;
-
 	public static PersonDao getPerson(RepositoryDao repoDao, String userName) throws DAOException {
 		
 		try {
@@ -152,12 +150,6 @@ public class PersonDao {
 
 			this.userInfo = authorityService.getUserInfo(userName);
 			this.homeFolderId = baseClient.getHomeFolderID(userName);
-
-			// may causes performance penalties!
-			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
-					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
-			);
-
 
 			try{
 
@@ -295,7 +287,7 @@ public class PersonDao {
     	
     	data.setUserName(getUserName());
 
-		data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
+		data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
 
 
 		data.setProfile(getProfile());
@@ -321,6 +313,13 @@ public class PersonDao {
 	    	data.setSharedFolders(sharedFolderRefs);
     	}
     	return data;
+	}
+
+	private List<EduGroup> getParentOrganizations() {
+		// may causes performance penalties!
+		return AuthenticationUtil.runAsSystem(() ->
+				authorityService.getEduGroups(this.getUserName(), NodeServiceInterceptor.getEduSharingScope())
+		);
 	}
 
 	private Map<String, String[]> getProperties() {
@@ -466,7 +465,7 @@ public class PersonDao {
     	data.setUserName(getUserName());    	
     	data.setProfile(getProfile());
 		data.setStatus(getStatus());
-		data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
+		data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
 		if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());
