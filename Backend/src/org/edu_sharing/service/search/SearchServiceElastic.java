@@ -162,10 +162,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
-            QueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
+            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias);
+            BoolQueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
                     ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
                     : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
+            queryBuilder = queryBuilder.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
             if(searchToken.getPermissions() != null){
                 for(String permission : searchToken.getPermissions()){
                     queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
@@ -298,10 +299,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
              * @TODO: transform to ValueTool.toMultivalue
              */
             if(entry.getValue() instanceof ArrayList){
-                if(((ArrayList) entry.getValue()).size() != 1) {
-                    value = ValueTool.toMultivalue(((ArrayList<?>) entry.getValue()).toArray(new String[0]));
-                } else {
-                    value = (Serializable) ((ArrayList) entry.getValue()).get(0);
+                ArrayList<?> list = (ArrayList<?>) entry.getValue();
+                if(list.size() > 1 && list.get(0) instanceof String) {
+                    value = ValueTool.toMultivalue(list.toArray(new String[0]));
+                } else if(list.size() == 1) {
+                    value = (Serializable) ((ArrayList<?>) entry.getValue()).get(0);
                 }
             } else {
                 value = entry.getValue();

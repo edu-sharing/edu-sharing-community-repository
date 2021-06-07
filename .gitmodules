@@ -1,4 +1,4 @@
 [submodule "Frontend/src/app/core-module"]
 	path = Frontend/src/app/core-module
 	url = https://scm.edu-sharing.com/Angular/core-module
-	branch = develop
+	branch = release/6.0

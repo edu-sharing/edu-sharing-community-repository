@@ -1,5 +1,14 @@
 @import "../../../core-ui-module/styles/variables";
 
+.card-content-padding {
+    > button {
+        margin: 20px 0;
+    }
+    .message,.details {
+        white-space: pre-line;
+    }
+
+}
 .notice{
   position: fixed;
   z-index:$dialogZIndex+10;

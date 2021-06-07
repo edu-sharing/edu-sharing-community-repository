@@ -11,6 +11,8 @@
     class="mat-menu-item collection-item-{{
       option.name | replaceChars: { search: '.', replace: '-' }
     }}"
+    matTooltip="{{ option | optionTooltip }}"
+    matTooltipPosition="right"
     [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
     [class.mat-menu-item-selected]="option.isSelected"
     [disabled]="!option.isEnabled"

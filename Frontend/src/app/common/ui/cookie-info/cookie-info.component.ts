@@ -1,8 +1,12 @@
 import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@angular/core';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {CordovaService} from "../../services/cordova.service";
-import {DialogButton, SessionStorageService} from "../../../core-module/core.module";
+import {CordovaService} from '../../services/cordova.service';
+import {
+    ConfigurationService,
+    DialogButton,
+    SessionStorageService
+} from '../../../core-module/core.module';
 
 @Component({
   selector: 'cookie-info',
@@ -10,20 +14,31 @@ import {DialogButton, SessionStorageService} from "../../../core-module/core.mod
   styleUrls: ['cookie-info.component.scss'],
     animations: [
         trigger('fromBottom', UIAnimation.fromBottom(UIAnimation.ANIMATION_TIME_SLOW)),
+        trigger('overlay', UIAnimation.openOverlay()),
     ]
 })
 
 
-export class CookieInfoComponent{
+export class CookieInfoComponent implements OnInit {
   show=false;
-  dialog=false;
-  buttons : DialogButton[];
-  constructor(private storage : SessionStorageService,private cordova : CordovaService) {
-    this.show=!this.cordova.isRunningCordova() && !this.storage.getCookie("COOKIE_INFO_ACCEPTED",false);
-    this.buttons=[new DialogButton('CLOSE',DialogButton.TYPE_PRIMARY,()=>{this.dialog=false;})];
+  buttons = [
+    new DialogButton('COOKIE_INFO.DECLINE',DialogButton.TYPE_CANCEL,()=>
+        window.history.back()
+    ),
+    new DialogButton('COOKIE_INFO.ACCEPT', DialogButton.TYPE_PRIMARY, () =>
+          this.accept()
+    )];
+    details = false;
+  constructor(private storage : SessionStorageService,private cordova : CordovaService, private config: ConfigurationService) {
   }
-  accept(){
-    this.storage.setCookie("COOKIE_INFO_ACCEPTED",true+"");
+  async ngOnInit() {
+      this.show=!this.cordova.isRunningCordova() &&
+          !this.storage.getCookie('COOKIE_INFO_ACCEPTED',false) &&
+          (await this.config.get('privacy.cookieDisclaimer', false).toPromise());
+
+  }
+  accept() {
+    this.storage.setCookie('COOKIE_INFO_ACCEPTED',true+'');
     this.show=false;
   }
 }

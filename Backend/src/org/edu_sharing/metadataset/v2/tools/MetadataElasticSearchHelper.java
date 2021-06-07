@@ -2,10 +2,7 @@ package org.edu_sharing.metadataset.v2.tools;
 
 import com.sun.star.lang.IllegalArgumentException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
-import org.edu_sharing.metadataset.v2.MetadataQueryPreprocessor;
-import org.edu_sharing.metadataset.v2.QueryUtils;
+import org.edu_sharing.metadataset.v2.*;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -13,13 +10,12 @@ import org.elasticsearch.index.query.WrapperQueryBuilder;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
-
-
-    public static QueryBuilder getElasticSearchQuery(MetadataQuery query, Map<String, String[]> parameters) throws IllegalArgumentException {
+    public static QueryBuilder getElasticSearchQuery(MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
 
         /**
          * @TODO basequery
@@ -46,12 +42,16 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 continue;
             }
 
-
             QueryBuilder queryBuilderParam = null;
-
+            if(query.isApplyBasequery()){
+                if(queries.findBasequery(parameters.keySet())!=null &&
+                        !queries.findBasequery(parameters.keySet()).isEmpty()) {
+                    result.must(QueryBuilders.wrapperQuery(queries.findBasequery(parameters.keySet())));
+                }
+                result = applyCondition(queries, result);
+            }
+            result = applyCondition(query, result);
             if (parameter.isMultiple()) {
-
-                List<QueryBuilder> multiQuery = new ArrayList<QueryBuilder>();
 
                 String multipleJoin = parameter.getMultiplejoin();
                 BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
@@ -85,6 +85,22 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         return result;
     }
 
+    private static BoolQueryBuilder applyCondition(MetadataQueryBase query, BoolQueryBuilder result) {
+        for(MetadataQueryCondition condition : query.getConditions()){
+            boolean conditionState= MetadataHelper.checkConditionTrue(condition.getCondition());
+            if(conditionState && condition.getQueryTrue()!=null) {
+                String conditionString = condition.getQueryTrue();
+                conditionString = replaceCommonQueryVariables(conditionString);
+                result.must(QueryBuilders.wrapperQuery(conditionString));
+            }
+            if(!conditionState && condition.getQueryFalse()!=null) {
+                String conditionString =condition.getQueryFalse();
+                conditionString = replaceCommonQueryVariables(conditionString);
+                result.must(QueryBuilders.wrapperQuery(conditionString));
+            }
+        }
+        return result;
+    }
     private static String getStatmentForValue(MetadataQueryParameter parameter, String value) {
         if (value == null && parameter.isMandatory()) {
             throw new java.lang.IllegalArgumentException("null value for mandatory parameter " + parameter.getName() + " given, null values are not allowed if mandatory is set to true");
