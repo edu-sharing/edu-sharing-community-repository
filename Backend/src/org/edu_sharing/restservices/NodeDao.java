@@ -353,6 +353,8 @@ public class NodeDao {
 	public static final String archiveStoreProtocol = "archive";
 	public static final String archiveStoreId = "SpacesStore";
 
+	List<NodeDao> usedInCollections = new ArrayList<>();
+
 	private NodeDao(RepositoryDao repoDao, String nodeId) throws Throwable {
 		this(repoDao,nodeId,new Filter());
 	}
@@ -552,7 +554,11 @@ public class NodeDao {
 			}
 
 			this.filter = filter;
-			
+
+			for(org.edu_sharing.service.model.NodeRef usedInCollection : nodeRef.getUsedInCollections()){
+				usedInCollections.add(new NodeDao(repoDao, usedInCollection, filter));
+			}
+
 		}catch(Throwable t){
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
@@ -1065,6 +1071,10 @@ public class NodeDao {
 		if(isCollection()){
 			Collection collection=new CollectionDao(repoDao, getRef().getId(),this,data).asCollection();
 			data.setCollection(collection);
+		}
+
+		for(NodeDao nodeDao : usedInCollections){
+			data.getUsedInCollections().add(nodeDao.asNode());
 		}
 	}
 	public RepositoryDao getRepositoryDao(){

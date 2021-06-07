@@ -41,6 +41,7 @@ public class SearchToken implements Serializable {
 	private ContentType contentType;
 	private MetadataQueries queries;
 	private List<String> permissions;
+	private boolean resolveCollections = false;
 
 	public ContentType getContentType(){
 		if(contentType==null)
@@ -233,4 +234,12 @@ public class SearchToken implements Serializable {
     public List<String> getPermissions() {
         return permissions;
     }
+
+	public boolean isResolveCollections() {
+		return resolveCollections;
+	}
+
+	public void setResolveCollections(boolean resolveCollections) {
+		this.resolveCollections = resolveCollections;
+	}
 }

@@ -118,7 +118,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         for(SearchHit hit: result.getHits().getHits()) {
             CollectionProposalInfo.CollectionProposalData data = new CollectionProposalInfo.CollectionProposalData();
-            data.setNodeRef(searchServiceElastic.transformSearchHit(authorities, user, hit));
+            data.setNodeRef(searchServiceElastic.transformSearchHit(authorities, user, hit,false));
             for (Object v : hit.getFields().get("proposals").getValues()) {
                 Map al = (Map)v;
                 for(Object e : al.entrySet()){
