@@ -736,6 +736,32 @@
         "REQUIREDPUBLISH": "for publishing required fields",
         "SHOW": "show"
     },
+    "SIGNUP_GROUP" : {
+        "TITLE": "Enroll in group",
+        "SUBTITLE": "Join a new group",
+        "SELECT_GROUP": "Select a group from the list below which you would like to join.",
+        "NO_GROUPS": "There are currently no groups available to join.",
+        "CONFIRM_GROUP": "You will join the following group:",
+        "GROUP_PASSWORD": "Enter group password",
+        "SIGNUP": "Join",
+        "SIGNUP_TYPE": {
+            "simple": "Access possible without restrictions",
+            "password": "Access only with password",
+            "list": "Admission via waiting list"
+        },
+        "DESCRIPTION": {
+            "simple": "Access to the selected group is possible without restriction. After confirmation you will automatically become a member of the group.",
+            "password": "The selected group may be accessed only with a valid password. Enter the password below to become a member of the group.",
+            "list": "The group administrator will be informed about your membership request. You will receive an email as soon as the administrator has approved your membership."
+        },
+        "TOAST": {
+            "InvalidPassword": "The specified password is invalid.",
+            "AlreadyInList": "You are already on the waiting list for this group. You will receive an email notification as soon as you have been accepted.",
+            "AlreadyMember": "You are already a member of the selected group.",
+            "ADDED_TO_LIST": "You have been placed on the waiting list and the group administrator will be notified. You will receive an email notification when you have been approved.",
+            "ADDED_TO_GROUP": "You are now a member of the group {{group}}."
+        }
+    },
     "KEY_MODIFIER": {
         "SHIFT": "SHIFT",
         "CTRL": "CTRL"
