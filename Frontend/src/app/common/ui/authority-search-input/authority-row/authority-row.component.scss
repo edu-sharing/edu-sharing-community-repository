@@ -12,15 +12,17 @@
   .text-content {
     display: flex;
     flex-grow: 1;
+    min-width: 0;
     justify-content: center;
     > .data {
       flex-grow: 1;
       margin: 0 15px;
       width: 0;
       >div{
-        @include limitLineCount(1,1.6);
-        word-break: break-all;
         color:$textMain;
+        line-height: 1.6em;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       >.primary{
         font-size: 110%;
@@ -47,13 +49,13 @@
       > .parent-orgs {
         color: $textMediumLight;
         font-size: $fontSizeXSmall;
-        @include limitLineCount(1,1.6);
+        line-height: 1.6em;
         display: flex;
         justify-content: flex-end;
         margin-bottom: 5px;
-        word-break: break-all;
-        > span:not(:last-child):after {
-          content: ', ';
+        > span {
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
       }
     }
