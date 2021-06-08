@@ -32,7 +32,12 @@
             <user-avatar [user]="suggestion.originalObject" size="small"></user-avatar>
             <div class="text-content">
               <div class="data">
-                <div class="primary">{{ suggestion.title }}</div>
+                <div
+                  class="primary"
+                  appCheckTextOverflow
+                  #text="appCheckTextOverflow"
+                  [matTooltip]="text.hasTextOverflow() ? suggestion.title : null"
+                >{{ suggestion.title }}</div>
                 <div class="secondary" *ngIf="suggestion.secondaryTitle">{{ suggestion.secondaryTitle }}</div>
               </div>
               <div class="affiliation" *ngIf="affiliation && suggestion.originalObject.profile.primaryAffiliation">

@@ -37,6 +37,7 @@ import { MainMenuSidebarComponent } from './common/ui/main-menu-sidebar/main-men
 import { MainMenuBottomComponent } from './common/ui/main-menu-bottom/main-menu-bottom.component';
 import { MainMenuDropdownComponent } from './common/ui/main-menu-dropdown/main-menu-dropdown.component';
 import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-memory/lucene-template-memory.component';
+import { CheckTextOverflowDirective } from './common/directives/check-text-overflow.directive';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -69,7 +70,8 @@ import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-m
         MainMenuSidebarComponent,
         MainMenuBottomComponent,
         MainMenuDropdownComponent,
-        LuceneTemplateMemoryComponent
+        LuceneTemplateMemoryComponent,
+        CheckTextOverflowDirective,
     ],
     imports: IMPORTS,
     providers: [
