@@ -37,9 +37,10 @@ user-avatar{
       margin: 0 15px;
       width: 0;
       >div{
-        @include limitLineCount(1,1.6);
-        word-break: break-all;
         color:$textMain;
+        line-height: 1.6em;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       >.primary{
         font-size: 110%;
