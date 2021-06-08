@@ -1916,10 +1916,10 @@ public class NodeDao {
 					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION));
 					AuthenticationUtil.runAsSystem(() -> {
 						permissionService.removeAllPermissions(newNode.getId());
+						// re-activate inherition
+						permissionService.setPermissions(newNode.getId(), null, true);
 						return null;
 					});
-					// re-activate inherition
-					permissionService.setPermissions(newNode.getId(), null, true);
 					return new NodeDao(repoDao, newNode.getId());
 				} catch (Throwable throwable) {
 					throw new RuntimeException(throwable);
