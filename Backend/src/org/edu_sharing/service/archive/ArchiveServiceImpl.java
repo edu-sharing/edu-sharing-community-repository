@@ -28,6 +28,7 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.archive.model.RestoreResult;
@@ -87,6 +88,8 @@ public class ArchiveServiceImpl implements ArchiveService  {
 	public void purge(List<String> archivedNodeIds) {
 		for(String archivedNodeId : archivedNodeIds){
 			this.client.removeNode(MCAlfrescoAPIClient.archiveStoreRef.getProtocol(), MCAlfrescoAPIClient.archiveStoreRef.getIdentifier(), archivedNodeId);
+			// clear cache so that primary parent etc. gets newly resolved
+			new RepositoryCache().remove(archivedNodeId);
 		}
 	}
 	
@@ -220,7 +223,9 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		NodeRef restoredNode = nodeService.restoreNode(archivedNodeRef, 
 				new NodeRef(Constants.storeRef, destinationParentId), 
 				QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), 
-				QName.createQName(assocName));	
+				QName.createQName(assocName));
+		// clear cache so that primary parent etc. gets newly resolved
+		new RepositoryCache().remove(restoredNode.getId());
 		
 		restoreResult.setNodeId(restoredNode.getId());
 		restoreResult.setParent(destinationParentId);
