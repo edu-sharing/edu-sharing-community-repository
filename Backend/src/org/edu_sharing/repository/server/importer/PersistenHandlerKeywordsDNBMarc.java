@@ -87,17 +87,24 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
 
         }else{
 
-            List<String> existingSyn = (synonymCollection == null) ? new ArrayList<>() : new ArrayList<>(synonymCollection);
-            List<String> newSyn = (cols.get(COL_SYNONYMS) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_SYNONYMS));
+            List<String> existingSyn = (cols.get(COL_SYNONYMS) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_SYNONYMS));
+            List<String> newSyn = (synonymCollection == null) ? new ArrayList<>() : new ArrayList<>(synonymCollection);
             if(value.equals(cols.get(COL_VALUE))
                     && CollectionUtils.isEqualCollection(existingSyn,newSyn) ){
                 logger.info(id +" didn't change");
                 return null;
             }
 
-            String tmpOldSyns = (cols.get(COL_SYNONYMS) == null) ? "": String.join(",",(List<String>)cols.get(COL_SYNONYMS));
-            String tmpNewSyns = (synonymCollection == null) ? "" :String.join(",",synonymCollection);
+            String tmpOldSyns = (cols.get(COL_SYNONYMS) == null) ? "": String.join(",",existingSyn);
+            String tmpNewSyns = (synonymCollection == null) ? "" :String.join(",",newSyn);
             logger.info("updating;" + id +";old;"+cols.get(COL_VALUE)+";"+tmpOldSyns+";new;"+value+";"+tmpNewSyns);
+
+            String oldValueFormated = displayFormat((String)cols.get(COL_VALUE),existingSyn);
+            String newValueFormated = displayFormat(value,newSyn);
+            if(!oldValueFormated.trim().isEmpty() && !oldValueFormated.equals(newValueFormated)) {
+                logger.info("csv," + escapeSpecialCharacters(oldValueFormated) + "," + escapeSpecialCharacters(newValueFormated));
+            }
+
             Connection con = null;
             PreparedStatement statement = null;
             ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
@@ -119,6 +126,27 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         }
 
         return null;
+    }
+
+    private String displayFormat(String value, List<String> synonyms){
+        String display = value;
+        if(synonyms.size() > 0){
+            display += " ("+synonyms.get(0);
+            if(synonyms.size() > 1){
+                display += ", "+ synonyms.get(1);
+            }
+            display +=")";
+        }
+        return display;
+    }
+
+    public String escapeSpecialCharacters(String data) {
+        String escapedData = data.replaceAll("\\R", " ");
+        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+            data = data.replace("\"", "\"\"");
+            escapedData = "\"" + data + "\"";
+        }
+        return escapedData;
     }
 
 
