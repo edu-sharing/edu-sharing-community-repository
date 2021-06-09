@@ -554,6 +554,7 @@ export class OptionsHelperService implements OnDestroy {
             this.goToWorkspace(this.getObjects(object)[0])
         );
         openParentNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
+        openParentNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
         openParentNode.scopes = [Scope.Search, Scope.Render];
         openParentNode.customEnabledCallback = (nodes) => {
             if(nodes && nodes.length === 1) {
