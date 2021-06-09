@@ -1,9 +1,13 @@
 package org.edu_sharing.repository.server.importer;
 
+import org.alfresco.util.TempFileProvider;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.writer.CSVWriter;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
+import org.edu_sharing.service.util.CSVTool;
 
 import java.sql.Array;
 import java.sql.Connection;
@@ -102,7 +106,7 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
             String oldValueFormated = displayFormat((String)cols.get(COL_VALUE),existingSyn);
             String newValueFormated = displayFormat(value,newSyn);
             if(!oldValueFormated.trim().isEmpty() && !oldValueFormated.equals(newValueFormated)) {
-                logger.info("csv," + escapeSpecialCharacters(oldValueFormated) + "," + escapeSpecialCharacters(newValueFormated));
+                logger.info("csv," +  StringEscapeUtils.escapeCsv(oldValueFormated) + "," +  StringEscapeUtils.escapeCsv(newValueFormated));
             }
 
             Connection con = null;
@@ -139,17 +143,6 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         }
         return display;
     }
-
-    public String escapeSpecialCharacters(String data) {
-        String escapedData = data.replaceAll("\\R", " ");
-        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
-            data = data.replace("\"", "\"\"");
-            escapedData = "\"" + data + "\"";
-        }
-        return escapedData;
-    }
-
-
 
     @Override
     public boolean mustBePersisted(String replId, String timeStamp) {
