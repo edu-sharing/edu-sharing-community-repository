@@ -141,23 +141,31 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div *ngIf="_mode=='ORG'">
-            <mat-form-field>
-              <mat-label>{{'ORG.displayName' | translate}}</mat-label>
-              <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required autofocus>
-            </mat-form-field>
-            <mat-form-field>
+            <div *ngIf="_mode=='ORG'">
+              <mat-form-field>
+                <mat-label>{{'ORG.displayName' | translate}}</mat-label>
+                <input matInput name="displayName" [(ngModel)]="edit.profile.displayName" required autofocus>
+              </mat-form-field>
+              <mat-form-field>
                 <mat-label>{{'ORG.groupEmail' | translate}}</mat-label>
                 <input matInput name="groupEmail" [(ngModel)]="edit.profile.groupEmail">
-            </mat-form-field>
-            <mat-form-field floatLabel="always">
-              <mat-label>{{'ORG.groupType' | translate}}</mat-label>
-              <mat-select name="orgType" [(ngModel)]="edit.profile.groupType" placeholder="{{'PERMISSIONS.GROUP_TYPE.null' | translate}}">
-                <mat-option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <div class="infoText">{{edit.folder}}</div>
-          </div>
+              </mat-form-field>
+              <mat-form-field floatLabel="always">
+                <mat-label>{{'ORG.groupType' | translate}}</mat-label>
+                <mat-select name="orgType" [(ngModel)]="edit.profile.groupType" placeholder="{{'PERMISSIONS.GROUP_TYPE.null' | translate}}">
+                  <mat-option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div class="folder-path" *ngIf="edit.folderPath?.length">
+                <label>{{'PERMISSIONS.ORG_HOME_FOLDER_LABEL' | translate}}</label>
+                <breadcrumbs
+                  [breadcrumbsAsNode]="edit.folderPath"
+                  home="{{'PERMISSIONS.ORG_HOME_FOLDER_MAIN' | translate}}"
+                  [clickable]="true"
+                  [createLink]="true"
+                ></breadcrumbs>
+              </div>
+            </div>
           <div *ngIf="_mode=='USER'">
             <mat-form-field *ngIf="!editId">
               <mat-label>{{'USER.authorityName' | translate}}</mat-label>
