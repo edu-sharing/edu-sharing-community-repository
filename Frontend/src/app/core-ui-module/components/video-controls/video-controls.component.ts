@@ -3,7 +3,7 @@ import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angula
 import {Router} from '@angular/router';
 import {Options} from 'ng5-slider';
 import {of, ReplaySubject} from 'rxjs';
-import {catchError, map, takeUntil, tap} from 'rxjs/operators';
+import {catchError, filter, map, takeUntil, tap} from 'rxjs/operators';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {
     NodesRightMode,
@@ -97,8 +97,9 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
             // Not an individual object, choose new location first.
             this.mainNav.getDialogs().addToCollection = [this.node];
             this.mainNav.getDialogs().onStoredAddToCollection.first().pipe(
-                takeUntil(this.destroyed$)
-            ).subscribe(async ({references}) => {
+                // takeUntil(this.destroyed$)
+            ).filter((ref) => ref.references.some((r) => r.originalId === this.node.ref.id))
+                .subscribe(async ({references}) => {
                 const node = await this.writeVideoControlsValues(references[0], this.values, false);
                 this.node = node;
                 this.updateCurrentNode.emit(node);
