@@ -108,8 +108,9 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
     }
 
     onValueChange(value: number, type: 'start' | 'end') {
-        if(type === 'start' && value !== this.previousValues?.startTime ||
-            type === 'end' && value !== this.previousValues?.endTime) {
+        if(type === 'start' && value !== this.previousValues?.startTime
+            // || type === 'end' && value !== this.previousValues?.endTime
+        ) {
             this.video.currentTime = value;
         }
         this.previousValues = { ...this.values };
