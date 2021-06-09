@@ -47,8 +47,8 @@ export class AccessibilityComponent implements OnInit {
 
     private async save() {
         this.toast.showProgressDialog();
-        await this.storage.set('accessibility_toastMode', this.toastMode).toPromise();
-        await this.storage.set('accessibility_toastDuration', this.toastDuration).toPromise();
+        await this.storage.set('accessibility_toastMode', this.toastMode);
+        await this.storage.set('accessibility_toastDuration', this.toastDuration);
         await this.toast.refresh();
         this.toast.closeModalDialog();
         this.toast.show({
