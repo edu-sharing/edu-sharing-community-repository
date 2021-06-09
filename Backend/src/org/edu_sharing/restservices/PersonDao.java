@@ -292,10 +292,11 @@ public class PersonDao {
 
 		data.setProfile(getProfile());
     	data.setStatus(getStatus());
-    	data.setProperties(getProperties());
 
     	if(isCurrentUserOrAdmin()) {
-	    	NodeRef homeDir = new NodeRef();
+			data.setProperties(getProperties());
+
+			NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());
 	    	homeDir.setId(getHomeFolder());
 	    	data.setHomeFolder(homeDir);
@@ -465,6 +466,9 @@ public class PersonDao {
     	data.setUserName(getUserName());    	
     	data.setProfile(getProfile());
 		data.setStatus(getStatus());
+		if(isCurrentUserOrAdmin()){
+			data.setProperties(getProperties());
+		}
 		data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
 		if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
