@@ -1234,7 +1234,6 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     removeNodes(error: boolean, objects: Node[] | any[]) {
-        console.log('remove nodes', objects);
         if (error) {
             return;
         }
@@ -1249,7 +1248,6 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         }
         this.selectedNodes = [];
         this.selectionChanged.emit([]);
-        console.log('remove nodes', this._nodes);
         this.nodesChange.emit(this._nodes);
         this.refreshAvailableOptions();
     }
