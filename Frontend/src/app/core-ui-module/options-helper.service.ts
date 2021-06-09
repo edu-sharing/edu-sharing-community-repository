@@ -483,10 +483,32 @@ export class OptionsHelperService implements OnDestroy {
        option.isEnabled = this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
      }
         */
-        const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', (object) =>
-            management.nodeDebug = this.getObjects(object)[0],
-        );
-        debugNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy, ElementType.NodeBlockedImport, ElementType.SavedSearch, ElementType.NodeChild, ElementType.NodeProposal, ElementType.MapRef];
+        const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', async (object) => {
+            let node = this.getObjects(object)[0];
+            if(node.authorityName) {
+                try {
+                    node = (await this.nodeService.getNodeMetadata(
+                        node.ref?.id || node.properties?.[RestConstants.NODE_ID]?.[0],
+                        [RestConstants.ALL]
+                    ).toPromise()).node;
+                } catch(e){
+                    console.info(node);
+                    console.warn(e);
+                }
+            }
+            management.nodeDebug = node;
+        });
+        debugNode.elementType = [
+            ElementType.Node,
+            ElementType.NodePublishedCopy,
+            ElementType.NodeBlockedImport,
+            ElementType.Group,
+            ElementType.Person,
+            ElementType.SavedSearch,
+            ElementType.NodeChild,
+            ElementType.NodeProposal,
+            ElementType.MapRef
+        ];
         debugNode.onlyDesktop = true;
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
         debugNode.group = DefaultGroups.View;
@@ -1176,6 +1198,16 @@ export class OptionsHelperService implements OnDestroy {
         if (!this.data.customOptions.useDefaultOptions) {
             options = [];
         }
+        if (this.data.customOptions.supportedOptions && this.data.customOptions.supportedOptions.length > 0) {
+            options = options.filter((o) => this.data.customOptions.supportedOptions.indexOf(o.name) !== -1);
+        }else if (this.data.customOptions.removeOptions) {
+            for (const option of this.data.customOptions.removeOptions) {
+                const index = options.findIndex((o) => o.name === option);
+                if (index !== -1) {
+                    options.splice(index, 1);
+                }
+            }
+        }
         if (this.data.customOptions.addOptions) {
             for (const option of this.data.customOptions.addOptions) {
                 const existing = options.filter((o) => o.name === option.name);
@@ -1186,16 +1218,6 @@ export class OptionsHelperService implements OnDestroy {
                     }
                 } else {
                     options.push(option);
-                }
-            }
-        }
-        if (this.data.customOptions.supportedOptions && this.data.customOptions.supportedOptions.length > 0) {
-            options = options.filter((o) => this.data.customOptions.supportedOptions.indexOf(o.name) !== -1);
-        }else if (this.data.customOptions.removeOptions) {
-            for (const option of this.data.customOptions.removeOptions) {
-                const index = options.findIndex((o) => o.name === option);
-                if (index !== -1) {
-                    options.splice(index, 1);
                 }
             }
         }

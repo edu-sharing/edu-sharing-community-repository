@@ -38,6 +38,7 @@ import {ActionbarHelperService} from '../../../common/services/actionbar-helper'
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {ListItemType} from '../../../core-module/ui/list-item';
 import {VCard} from "../../../core-module/ui/VCard";
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({
   selector: 'permissions-authorities',
@@ -73,7 +74,8 @@ export class PermissionsAuthoritiesComponent {
   public _searchQuery: string;
   manageMemberSearch: string;
   public options: CustomOptions= {
-    useDefaultOptions: false,
+    useDefaultOptions: true,
+    supportedOptions: ['OPTIONS.DEBUG'],
     addOptions: []
   };
   public toolpermissionAuthority: any;
@@ -180,6 +182,7 @@ export class PermissionsAuthoritiesComponent {
       }, (error: any) => this.handleError(error));
     }
   }
+  @Input() mainNav: MainNavComponent;
   @Input() set mode(mode: ListItemType){
    this._mode = mode;
    if (mode == 'USER'){

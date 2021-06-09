@@ -263,6 +263,7 @@
 </div>
 <listTable class="list" infinite-scroll (scrolled)="loadAuthorities()" [scrollWindow]="false" [class.listEmbedded]="embedded"
   #listRef
+  [mainNav]="mainNav"
   (loadMore)="loadAuthorities()"
   [columns]="columns"
   [nodes]="list"
