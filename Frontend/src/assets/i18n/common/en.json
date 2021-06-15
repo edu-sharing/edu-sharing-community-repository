@@ -575,7 +575,8 @@
         "SWITCH_TO_LIST_VIEW": "Switch to list view",
         "SWITCH_TO_CARDS_VIEW": "Switch to cards view",
         "LIST_SETTINGS": "Configure List",
-        "METADATA_SIDEBAR": "Material details"
+        "METADATA_SIDEBAR": "Material details",
+        "ACCESSIBILITY": "Accessibility"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",
