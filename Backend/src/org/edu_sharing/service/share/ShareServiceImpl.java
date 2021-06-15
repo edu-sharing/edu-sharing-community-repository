@@ -194,15 +194,20 @@ public class ShareServiceImpl implements ShareService {
 	}
 	@Override
 	public void updateShare(Share share) {
+		NodeRef shareNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, share.getNodeId());
 		Map<QName,Serializable> props = new HashMap<QName,Serializable>();
 		props.put(SHARE_PROP_SHARE_TOKEN, share.getToken());
 		props.put(SHARE_PROP_EXPIRYDATE, share.getExpiryDate());
-		if(share.getPassword()!=null && !share.getPassword().isEmpty())
+		if(share.getPassword()!=null && !share.getPassword().isEmpty()) {
 			props.put(SHARE_PROP_PASSWORD, encryptPassword(share.getPassword()));
+		}else{
+			props.put(SHARE_PROP_PASSWORD, serviceRegistry.getNodeService().getProperty(shareNodeRef,SHARE_PROP_PASSWORD));
+		}
+
 		props.put(SHARE_PROP_SHARE_MAIL, share.getEmail());
 		props.put(SHARE_PROP_DOWNLOAD_COUNTER, share.getDownloadCount());
 		throwIfScopedNode(new NodeRef(Constants.storeRef,share.getIoNodeId()));
-		serviceRegistry.getNodeService().setProperties(new NodeRef(Constants.storeRef, share.getNodeId()), props);
+		serviceRegistry.getNodeService().setProperties(shareNodeRef, props);
 	}
 	
 	@Override
