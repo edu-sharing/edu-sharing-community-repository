@@ -1,4 +1,4 @@
-package org.edu_sharing.alfresco.monitoring;
+package org.edu_sharing.repository.server.monitoring;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +14,8 @@ import javax.management.ObjectName;
 
 import org.apache.log4j.Logger;
 import org.apache.tomcat.util.modeler.Registry;
+import org.edu_sharing.alfresco.monitoring.Application;
+import org.edu_sharing.alfresco.monitoring.MonitoringDao;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.quartz.JobExecutionContext;

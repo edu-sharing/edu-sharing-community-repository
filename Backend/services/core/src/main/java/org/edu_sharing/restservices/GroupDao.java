@@ -167,7 +167,7 @@ public class GroupDao {
 		try {
 			checkModifyAccess();
 
-			AuthenticationUtil.RunAsWork<Void> runAs = new RunAsWork<Void>() {
+			RunAsWork<Void> runAs = new RunAsWork<Void>() {
 				@Override
 				public Void doWork() throws Exception {
 					((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());

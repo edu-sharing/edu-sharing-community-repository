@@ -22,13 +22,12 @@ import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.shared.Mds;
 
 public class MetadataPresettingPolicy implements
-		NodeServicePolicies.OnCreateNodePolicy,
+		OnCreateNodePolicy,
 		CopyServicePolicies.OnCopyCompletePolicy,
 		NodeServicePolicies.OnMoveNodePolicy,
-		NodeServicePolicies.BeforeDeleteNodePolicy {
+		BeforeDeleteNodePolicy {
 
 	private static final Log logger = LogFactory
 			.getLog(MetadataPresettingPolicy.class);

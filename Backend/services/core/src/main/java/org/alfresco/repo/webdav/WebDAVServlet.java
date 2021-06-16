@@ -104,8 +104,8 @@ public class WebDAVServlet extends HttpServlet
     private WebDAVInitParameters initParams;
 
     /**
-     * @see javax.servlet.http.HttpServlet#service(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
+     * @see HttpServlet#service(HttpServletRequest,
+     *      HttpServletResponse)
      */
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException

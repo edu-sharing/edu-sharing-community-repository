@@ -100,7 +100,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.extensions.surf.util.I18NUtil;
 
 /**
@@ -108,7 +107,7 @@ import org.springframework.extensions.surf.util.I18NUtil;
  * 
  * @author Derek Hulley
  */
-public class FileFolderServiceImpl extends AbstractBaseCopyService implements FileFolderService, Extensible
+public class EduFileFolderServiceImpl extends AbstractBaseCopyService implements FileFolderService, Extensible
 {
     private static final String CANNED_QUERY_FILEFOLDER_LIST = "fileFolderGetChildrenCannedQueryFactory";
     
@@ -143,7 +142,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
         " and (subtypeOf('" + ContentModel.TYPE_CONTENT + "')" +
         " or subtypeOf('" + ContentModel.TYPE_LINK + "'))]";
        
-    private static Log logger = LogFactory.getLog(FileFolderServiceImpl.class);
+    private static Log logger = LogFactory.getLog(EduFileFolderServiceImpl.class);
     
     private HiddenAspect hiddenAspect;
     private NamespaceService namespaceService;
@@ -169,7 +168,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     /**
      * Default constructor
      */
-    public FileFolderServiceImpl()
+    public EduFileFolderServiceImpl()
     {
         super();
 
@@ -1403,7 +1402,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
      * @param parentNodeRef the node under which the path will be created
      * @param pathElements the folder name path to create - may not be empty
      * @param folderTypeQName the types of nodes to create.  This must be a valid subtype of
-     *      {@link org.alfresco.model.ContentModel#TYPE_FOLDER they folder type}.
+     *      {@link ContentModel#TYPE_FOLDER they folder type}.
      * @return Returns the info of the last folder in the path.
      * @deprecated Use FileFolderUtil.makeFolders rather than directly accessing this implementation class.
      */
@@ -1420,7 +1419,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
      * @param parentNodeRef the node under which the path will be created
      * @param pathElements the folder name path to create - may not be empty
      * @param folderTypeQName the types of nodes to create.  This must be a valid subtype of
-     *      {@link org.alfresco.model.ContentModel#TYPE_FOLDER they folder type}.
+     *      {@link ContentModel#TYPE_FOLDER they folder type}.
      * @return Returns the info of the last folder in the path.
      * @deprecated Use FileFolderUtil.makeFolders rather than directly accessing this implementation class.
      */
@@ -1777,9 +1776,9 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
 
     public static class FileFolderServiceTraitImpl implements FileFolderServiceTrait
     {
-        private FileFolderServiceImpl thisService;
+        private EduFileFolderServiceImpl thisService;
 
-        public FileFolderServiceTraitImpl(FileFolderServiceImpl fileFolderServiceImpl)
+        public FileFolderServiceTraitImpl(EduFileFolderServiceImpl fileFolderServiceImpl)
         {
             thisService = fileFolderServiceImpl;
         }

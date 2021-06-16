@@ -93,8 +93,8 @@ public class CCPDFActionExecuter extends ActionExecuterAbstractBase {
 	 * 
 	 * If the log level is not provided the default will be INFO.
 	 * 
-	 * @see org.alfresco.repo.action.executer.ActionExecuterAbstractBase#executeImpl(org.alfresco.service.cmr.action.Action,
-	 *      org.alfresco.service.cmr.repository.NodeRef)
+	 * @see ActionExecuterAbstractBase#executeImpl(Action,
+	 *      NodeRef)
 	 */
 	@Override
 	protected void executeImpl(Action action, NodeRef actionedUponNodeRef) {
@@ -175,7 +175,7 @@ public class CCPDFActionExecuter extends ActionExecuterAbstractBase {
 	}
 
 	/**
-	 * @see org.alfresco.repo.action.ParameterizedItemAbstractBase#addParameterDefinitions(java.util.List)
+	 * @see org.alfresco.repo.action.ParameterizedItemAbstractBase#addParameterDefinitions(List)
 	 */
 	@Override
 	protected void addParameterDefinitions(List<ParameterDefinition> paramList) {

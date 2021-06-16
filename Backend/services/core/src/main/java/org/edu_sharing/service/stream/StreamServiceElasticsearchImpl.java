@@ -1,8 +1,7 @@
 package org.edu_sharing.service.stream;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.http.HttpHost;
-import org.apache.lucene.search.join.ScoreMode;
+import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.search.join.ScoreMode;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -66,7 +65,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 			for(Map<String, Object> mapEntry : audienceMap) {
 				ContentEntry.Audience audienceEntry=new ContentEntry.Audience();
 				audienceEntry.authority=(String) mapEntry.get("authority");
-				audienceEntry.status=(ContentEntry.Audience.STATUS) ContentEntry.Audience.STATUS.valueOf((String) mapEntry.get("status"));
+				audienceEntry.status=(STATUS) STATUS.valueOf((String) mapEntry.get("status"));
 				entry.audience.add(audienceEntry);
 			}
 			return entry;
@@ -173,7 +172,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		SearchResponse searchResult = client.search(request,RequestOptions.DEFAULT);
 		return searchResult.getHits().getTotalHits().value > 0;
 	}
-	private BoolQueryBuilder getAuthorityQuery(List<String> authorities,ContentEntry.Audience.STATUS status) {
+	private BoolQueryBuilder getAuthorityQuery(List<String> authorities, STATUS status) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 	
 		query.minimumShouldMatch(1);
@@ -186,7 +185,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 				bool=bool.must(QueryBuilders.matchQuery("audience.status", status));
 			query=query.should(bool);
 		}
-		for(STATUS type : ContentEntry.Audience.STATUS.values()) {
+		for(STATUS type : STATUS.values()) {
 			if(type.equals(status))
 					continue;
 				exclude=exclude.should(
@@ -205,12 +204,12 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		return main;
 	}
 	@Override
-	public ContentEntry.Audience.STATUS getStatus(String entryId,List<String> authorities) throws Exception {
+	public STATUS getStatus(String entryId,List<String> authorities) throws Exception {
 		List<Map<String,Object>> audience = (List<Map<String, Object>>) getEntryRequest(entryId).getSource().get("audience");
 		for(String a : authorities) {
 			for(Map<String,Object> entry : audience) {
 				if(entry.get("authority").equals(a)) {
-					return ContentEntry.Audience.STATUS.valueOf((String) entry.get("status")); 
+					return STATUS.valueOf((String) entry.get("status"));
 				}
 			}
 		}
@@ -225,7 +224,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		return client.get(request,RequestOptions.DEFAULT);
 	}
 	@Override
-	public ScoreResult getScoreByAuthority(String authority,ContentEntry.Audience.STATUS status) throws Exception {
+	public ScoreResult getScoreByAuthority(String authority, STATUS status) throws Exception {
 		QueryBuilder nested=getAuthorityQuery(Arrays.asList(new String[] {authority}),status);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		searchSourceBuilder.query(nested);
@@ -259,7 +258,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	}
 
 	@Override
-	public void updateStatus(String id,String authority,ContentEntry.Audience.STATUS status) throws Exception {
+	public void updateStatus(String id, String authority, STATUS status) throws Exception {
 		UpdateRequest updateRequest = new UpdateRequest();
 		updateRequest.index(INDEX_NAME);
 		updateRequest.type(TYPE_NAME);

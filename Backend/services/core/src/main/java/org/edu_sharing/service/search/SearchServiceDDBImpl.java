@@ -107,7 +107,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		for(int i = 0; i < docs.length(); i++){
 			JSONObject doc = (JSONObject)docs.get(i);
 			String id =  this.getNodeId(doc);
-			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(
+			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(
 					repositoryId, 
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),

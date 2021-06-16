@@ -114,8 +114,8 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
 	public static final String KEY_ROOT_PATH = "rootPath";
 
     /**
-     * @see javax.servlet.http.HttpServlet#service(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
+     * @see HttpServlet#service(HttpServletRequest,
+     *      HttpServletResponse)
      */
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException
@@ -286,13 +286,13 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         /**
          * edu-sharing customization
          */
-        String storeValue = config.getServletContext().getInitParameter(org.alfresco.repo.webdav.Edu_SharingWebDAVServlet.KEY_STORE);
+        String storeValue = config.getServletContext().getInitParameter(Edu_SharingWebDAVServlet.KEY_STORE);
 		if (storeValue == null)
 		{
 			throw new ServletException("Device missing init value: " + Edu_SharingWebDAVServlet.KEY_STORE);
 		}
 
-		rootPath = config.getServletContext().getInitParameter(org.alfresco.repo.webdav.Edu_SharingWebDAVServlet.KEY_ROOT_PATH);
+		rootPath = config.getServletContext().getInitParameter(Edu_SharingWebDAVServlet.KEY_ROOT_PATH);
 		if (rootPath == null)
 		{
 			throw new ServletException("Device missing init value: " + Edu_SharingWebDAVServlet.KEY_ROOT_PATH);

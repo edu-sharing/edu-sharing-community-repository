@@ -35,7 +35,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.MimeTypes;
 
 public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable{
 

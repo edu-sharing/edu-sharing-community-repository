@@ -14,7 +14,6 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.io.FileUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.PreviewServlet;
 import org.springframework.context.ApplicationContext;
 
 import antlr.collections.List;
@@ -45,7 +44,7 @@ public class PreviewCache {
 		return new File(store.getRootLocation()).getParentFile();
     }
 	public static File getFileForNode(String nodeId,int width,int height,int maxWidth,int maxHeight,boolean createDirectories){
-		String folderName=width==-1 ? "full_"+PreviewServlet.MAX_IMAGE_SIZE : (width+"x"+height);
+		String folderName=width==-1 ? "full" : (width+"x"+height);
 		if(maxWidth>0 && maxHeight>0){
 			folderName="m_"+maxWidth+"x"+maxHeight;
 		}

@@ -4,10 +4,9 @@
   "license": "GNU GPL v2",
   "angular-cli": {},
   "scripts": {
-    "start": "ng serve",
-    "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
-    "build": "..\\Edu-Sharing-Internal\\Frontend\\build.sh",
-    "build-dev": "ng build --base-href /edu-sharing/",
+    "start": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng serve --host repository.127.0.0.1.xip.io --disableHostCheck",
+    "build": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --prod",
+    "build-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build",
     "lint": "ng lint",
     "test": "ng test",
     "pree2e": "webdriver-manager update",

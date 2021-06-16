@@ -73,7 +73,7 @@ public class StreamDao {
 			}
 			// simply check if the given authority is valid (does not work for special groups)
 			//PersonDao.getPerson(repoDao, authority);
-			service.updateStatus(entryId, authority, ContentEntry.Audience.STATUS.valueOf(status));
+			service.updateStatus(entryId, authority, STATUS.valueOf(status));
 		}catch(Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -155,7 +155,7 @@ public class StreamDao {
 	private static STATUS getStatus(String status) {
 		if(status==null || status.isEmpty())
 			return null;
-		return ContentEntry.Audience.STATUS.valueOf(status);
+		return STATUS.valueOf(status);
 	}
 	public static boolean canAccessNode(String nodeId) throws DAOException{
 		try {

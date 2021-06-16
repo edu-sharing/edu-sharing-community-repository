@@ -59,6 +59,7 @@
             <phase>validate</phase>
             <configuration>
               <rules>
+                <dependencyConvergence/>
                 <requireJavaVersion>
                   <version>${repository.java.version.range}</version>
                 </requireJavaVersion>
@@ -71,6 +72,20 @@
     </plugins>
 
   </build>
+
+  <profiles>
+
+    <profile>
+
+      <id>license.skipAddThirdParty</id>
+
+      <properties>
+        <license.skipAddThirdParty>true</license.skipAddThirdParty>
+      </properties>
+
+    </profile>
+
+  </profiles>
 
   <dependencyManagement>
 

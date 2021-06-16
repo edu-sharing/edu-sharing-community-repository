@@ -2,6 +2,7 @@
 
 # compiled output
 /dist
+/node
 /tmp
 
 # dependencies

@@ -21,7 +21,7 @@
    	<bean id="cc-ressourceinfo-action-messages" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
     	<property name="resourceBundles">
     		<list>
-    			<value>org.edu_sharing.alfresco.action.cc-ressourceinfo-messages</value>
+					<value>alfresco.extension.messages.cc-ressourceinfo-messages</value>
     		</list>
     	</property>
    	</bean>

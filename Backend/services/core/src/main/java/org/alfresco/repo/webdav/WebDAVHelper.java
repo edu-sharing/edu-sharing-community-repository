@@ -1189,7 +1189,7 @@ public class WebDAVHelper
     /**
      * Indicates if the node is unlocked or the current user has a WRITE_LOCK<p>
      * 
-     * @see LockService#isLockedAndReadOnly(org.alfresco.service.cmr.repository.NodeRef)
+     * @see LockService#isLockedAndReadOnly(NodeRef)
      * 
      * @param nodeRef    the node reference
      */

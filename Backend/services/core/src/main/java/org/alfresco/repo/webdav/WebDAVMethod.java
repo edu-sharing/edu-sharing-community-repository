@@ -1029,7 +1029,7 @@ public abstract class WebDAVMethod
     	//LockInfo nodeLockInfo = getNodeLockInfo(fileInfo.getNodeRef());
     	
     	final FileInfo finalFileInfo = fileInfo;
-    	AuthenticationUtil.RunAsWork<LockInfo> runAsAdmin = new AuthenticationUtil.RunAsWork<LockInfo>(){
+    	RunAsWork<LockInfo> runAsAdmin = new RunAsWork<LockInfo>(){
     		@Override
     		public LockInfo doWork() throws Exception {
     			LockInfo lockInfo = getNodeLockInfo(finalFileInfo);
@@ -1646,7 +1646,7 @@ public abstract class WebDAVMethod
         	 * 
         	 * so we use admin here
         	 */
-        	AuthenticationUtil.RunAsWork<String> runAsAdmin = new AuthenticationUtil.RunAsWork<String>(){
+        	RunAsWork<String> runAsAdmin = new RunAsWork<String>(){
         		@Override
         		public String doWork() throws Exception {
         			
