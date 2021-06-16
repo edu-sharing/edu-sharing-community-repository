@@ -1,0 +1,10 @@
+{
+  "/edu-sharing/rest": {
+    "target": "http://repository.127.0.0.1.xip.io:8100",
+    "secure": false
+  },
+  "/edu-sharing/themes": {
+    "target": "http://repository.127.0.0.1.xip.io:8100",
+    "secure": false
+  }
+}
