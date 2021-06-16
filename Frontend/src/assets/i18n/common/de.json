@@ -807,7 +807,7 @@
     "SIGNUP_GROUP" : {
         "TITLE": "In Gruppe einschreiben",
         "SUBTITLE": "Einer neuen Gruppe beitreten",
-        "SELECT_GROUP": "Wählen Sie eine Gruppe aus der untenstehenden Liste, in welche Sie beitreten möchten",
+        "SELECT_GROUP": "Wählen Sie eine Gruppe aus der untenstehenden Liste, in welche Sie beitreten möchten.",
         "NO_GROUPS": "Derzeit sind keine Gruppen verfügbar, denen beigetreten werden kann.",
         "CONFIRM_GROUP": "Sie werden der folgenden Gruppe beitreten:",
         "GROUP_PASSWORD": "Gruppen-Passwort eingeben",
@@ -819,13 +819,13 @@
         },
         "DESCRIPTION": {
             "simple": "Der Zutritt zur gewählten Gruppe ist ohne Beschränkung möglich. Nach Bestätigung werden Sie automatisch Mitglied der Gruppe",
-            "password": "Der gewählten Gruppe darf nur mit einem gültigen Passwort beigetreten werden. Geben Sie das Passwort unten ein, um Mitglied der Gruppe zu werden",
-            "list": "Der Gruppen-Administrator wird über Ihre Beitrittsanfrage informiert. Sie erhalten eine E-Mail, sobald der Administrator Ihnen den Zugang genehmigt hat"
+            "password": "Der gewählten Gruppe darf nur mit einem gültigen Passwort beigetreten werden. Geben Sie das Passwort unten ein, um Mitglied der Gruppe zu werden.",
+            "list": "Der Gruppen-Administrator wird über Ihre Beitrittsanfrage informiert. Sie erhalten eine E-Mail, sobald der Administrator Ihnen den Zugang genehmigt hat."
         },
         "TOAST": {
-            "InvalidPassword": "Das angegebene Passwort ist ungültig",
-            "AlreadyInList": "Sie sind bereits auf der Warteliste dieser Gruppe. Sie erhalten eine E-Mail-Benachrichtigung, sobald Sie freigeschaltet wurden",
-            "AlreadyMember": "Sie sind bereits Mitglied der gewählten Gruppe",
+            "InvalidPassword": "Das angegebene Passwort ist ungültig.",
+            "AlreadyInList": "Sie sind bereits auf der Warteliste dieser Gruppe. Sie erhalten eine E-Mail-Benachrichtigung, sobald Sie freigeschaltet wurden.",
+            "AlreadyMember": "Sie sind bereits Mitglied der gewählten Gruppe.",
             "ADDED_TO_LIST": "Sie wurden auf die Warteliste gesetzt und der Gruppen-Administrator wird benachrichtigt. Sie erhalten eine E-Mail-Benachrichtung, sobald Sie freigeschaltet wurden.",
             "ADDED_TO_GROUP": "Sie sind nun Mitglied der Gruppe {{group}}."
         }

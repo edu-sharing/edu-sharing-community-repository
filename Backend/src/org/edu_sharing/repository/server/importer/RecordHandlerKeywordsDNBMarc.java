@@ -84,7 +84,7 @@ public class RecordHandlerKeywordsDNBMarc implements RecordHandlerInterface{
         //550 = Sachbegriff Beziehung
         NodeList nodeListRelations = (NodeList)xpath.evaluate("datafield[@tag='450']",root,XPathConstants.NODESET);
 
-        Set<String> synonyms = new HashSet<String>();
+        Set<String> synonyms = new LinkedHashSet<String>();
         for(int i = 0; i < nodeListRelations.getLength(); i++){
             String synonym = (String)xpath.evaluate("subfield[@code='a']",nodeListRelations.item(i),XPathConstants.STRING);
             synonyms.add(synonym);

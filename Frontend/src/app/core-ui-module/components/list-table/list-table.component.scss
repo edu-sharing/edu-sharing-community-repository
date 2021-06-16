@@ -1189,7 +1189,7 @@ a.rowInner {
         }
     }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+@media screen and (max-width: ($mobileWidth)) {
     .moreAlways {
         display: none !important;
     }

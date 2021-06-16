@@ -1,4 +1,13 @@
-import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer, ElementRef} from '@angular/core';
+import {
+    Component,
+    OnInit,
+    NgZone,
+    HostListener,
+    ViewChild,
+    Sanitizer,
+    ElementRef,
+    EventEmitter
+} from '@angular/core';
 
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
@@ -631,13 +640,14 @@ export class CollectionNewComponent {
 
   private save4(collection: EduData.Node) {
     // check if there are any nodes that should be added to this collection
-    let nodes=this.temporaryStorage.pop(TemporaryStorageService.COLLECTION_ADD_NODES);
-    if(!nodes) {
+    const add: {nodes: EduData.Node[], callback: EventEmitter<any>} = this.temporaryStorage.pop(TemporaryStorageService.COLLECTION_ADD_NODES);
+    if(!add) {
         this.saveImage(collection);
         return;
     }
-    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,nodes, false,()=>{
+    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,add.nodes, false,(references) => {
         this.saveImage(collection);
+        add.callback?.emit({collection, references});
         return;
     });
   }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,7 +12,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel(description = "")
 public class WidgetV2 {
 
-	public static class Condition{
+	public static class WidgetCondition {
 		private String value,type;
 		private boolean negate;
 		private boolean dynamic;
@@ -90,7 +89,7 @@ public class WidgetV2 {
 		private boolean allowempty;
 		private String defaultvalue;
 		private boolean isSearchable;
-		private Condition condition;
+		private WidgetCondition condition;
 		private int maxlength;
 
 	public WidgetV2(){}
@@ -116,7 +115,7 @@ public class WidgetV2 {
 			this.allowempty=widget.isAllowempty();
 			this.isSearchable=widget.isSearchable();
 			if(widget.getCondition()!=null) {
-				this.condition=new Condition();
+				this.condition=new WidgetCondition();
 				this.condition.setValue(widget.getCondition().getValue());
 				this.condition.setType(widget.getCondition().getType().name());
 				this.condition.setNegate(widget.getCondition().isNegate());
@@ -141,10 +140,10 @@ public class WidgetV2 {
 
 		}
 		@JsonProperty
-		public Condition getCondition() {
+		public WidgetCondition getCondition() {
 			return condition;
 		}
-		public void setCondition(Condition condition) {
+		public void setCondition(WidgetCondition condition) {
 			this.condition = condition;
 		}
 		@JsonProperty("isSearchable")
