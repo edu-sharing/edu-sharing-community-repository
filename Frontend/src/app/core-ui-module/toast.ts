@@ -151,6 +151,11 @@ export class Toast implements OnDestroy {
         ) {
             return;
         }
+        toastMessage = toastMessage || {
+            message: null,
+            type: null,
+            subtype: null
+        };
         if(toastMessage.subtype == null) {
             toastMessage.subtype = customAction ? ToastType.InfoAction : ToastType.InfoSimple;
         }
@@ -211,6 +216,11 @@ export class Toast implements OnDestroy {
         }
         this.lastToastError = message + JSON.stringify(translationParameters);
         this.lastToastErrorTime = Date.now();
+        toastMessage = toastMessage || {
+            message: null,
+            type: null,
+            subtype: null
+        };
         if(!toastMessage.subtype) {
             toastMessage.subtype = message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific
         }
@@ -317,14 +327,14 @@ export class Toast implements OnDestroy {
     }): Promise<void> {
         const translatedMessage = await this.injector
             .get(TranslateService)
-            .get(message, options.translationParameters)
+            .get(message ?? toastMessage?.message, options.translationParameters)
             .toPromise();
         const action = this.getAction(options);
         switch (Toast.TOAST_SERVICE) {
             case 'TOASTY':
                 return this.toastyShowToast(translatedMessage, type, action);
             case 'MAT_SNACKBAR':
-                toastMessage.message = toastMessage.message ?? message;
+                toastMessage.message = translatedMessage;
                 toastMessage.type = toastMessage.type ?? type;
                 toastMessage.action = toastMessage.action ?? action;
                 return this.matSnackbarShowToast(toastMessage);
