@@ -135,7 +135,8 @@ public class SortDefinition implements Serializable {
 					if(propDef != null) {
 						if (DataTypeDefinition.TEXT.equals(propDef.getDataType().getName())
 								|| DataTypeDefinition.MLTEXT.equals(propDef.getDataType().getName())
-								|| DataTypeDefinition.DATE.equals(propDef.getDataType().getName())) {
+								|| DataTypeDefinition.DATE.equals(propDef.getDataType().getName())
+								|| DataTypeDefinition.DATETIME.equals(propDef.getDataType().getName())) {
 							addKeywordSuffix = true;
 						}
 					}
