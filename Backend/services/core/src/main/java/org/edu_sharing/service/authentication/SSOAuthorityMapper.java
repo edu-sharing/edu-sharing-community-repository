@@ -403,6 +403,11 @@ public class SSOAuthorityMapper {
 
 					existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, metadataSetId,null);
 					existingOrganisationName = AuthorityType.GROUP.getPrefixString() + existingOrganisationName;
+				}else{
+					String currentDisplayname = (String)orgProps.get(ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
+					if(currentDisplayname == null || !currentDisplayname.equals(organisationDisplayName)){
+						authorityService.setAuthorityDisplayName((String)orgProps.get(ContentModel.PROP_AUTHORITY_NAME),organisationDisplayName);
+					}
 				}
 				
 				if (updateMemberships) {
