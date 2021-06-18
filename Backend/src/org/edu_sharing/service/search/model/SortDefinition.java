@@ -134,7 +134,8 @@ public class SortDefinition implements Serializable {
 					PropertyDefinition propDef = serviceRegistry.getDictionaryService().getProperty(QName.createQName(property));
 					if(propDef != null) {
 						if (DataTypeDefinition.TEXT.equals(propDef.getDataType().getName())
-								|| DataTypeDefinition.MLTEXT.equals(propDef.getDataType().getName())) {
+								|| DataTypeDefinition.MLTEXT.equals(propDef.getDataType().getName())
+								|| DataTypeDefinition.DATE.equals(propDef.getDataType().getName())) {
 							addKeywordSuffix = true;
 						}
 					}
