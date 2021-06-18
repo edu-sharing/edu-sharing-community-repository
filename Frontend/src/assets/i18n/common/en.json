@@ -729,7 +729,8 @@
         "keyboard_arrow_up": "up",
         "file_upload": "file upload",
         "delete": "delete",
-        "add": "New"
+        "add": "New",
+        "redo": "Apply"
     },
     "FILL_STATUS": {
         "REQUIRED": "required fields",

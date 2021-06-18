@@ -789,7 +789,8 @@
         "keyboard_arrow_up": "nach oben",
         "file_upload": "Datei hochladen",
         "delete": "Löschen",
-        "add": "Neu"
+        "add": "Neu",
+        "redo": "Übernehmen"
     },
     "FILL_STATUS": {
         "MESSAGE": "Felder ausgefüllt",
