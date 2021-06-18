@@ -310,9 +310,11 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 
 		} catch (org.alfresco.repo.security.permissions.AccessDeniedException | RestrictedAccessException e) {
+			logger.debug(e.getMessage(),e);
 			resp.sendRedirect(mime.getNoPermissionsPreview());
 			return;
 		}  catch (InvalidNodeRefException e) {
+			logger.debug(e.getMessage(),e);
 			resp.sendRedirect(mime.getNodeDeletedPreview());
 			return;
 		}
