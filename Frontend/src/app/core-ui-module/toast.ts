@@ -46,6 +46,7 @@ export enum ToastType {
 }
 export type ToastMessage = {
     message: string,
+    html?: boolean;
     type: 'error' | 'info',
     subtype: ToastType,
     action?: Action
@@ -118,14 +119,14 @@ export class Toast implements OnDestroy {
                     caption: message.action.label,
                     callback: message.action.callback
                 }
-            } : null, message.subtype);
+            } : null, message);
         } else {
             this.error(null, message.message, null, null, null, message.action ? {
                 link: {
                     caption: message.action.label,
                     callback: message.action.callback
                 }
-            } : null, message.subtype);
+            } : null, message);
         }
     }
 
@@ -142,7 +143,7 @@ export class Toast implements OnDestroy {
         dialogTitle: string = null,
         dialogMessage: string = null,
         customAction: CustomAction = null,
-        type: ToastType = null
+        toastMessage: ToastMessage = null
     ): void {
         if (
             this.lastToastMessage === message &&
@@ -150,15 +151,15 @@ export class Toast implements OnDestroy {
         ) {
             return;
         }
-        if(type == null) {
-            type = customAction ? ToastType.InfoAction : ToastType.InfoSimple;
+        if(toastMessage.subtype == null) {
+            toastMessage.subtype = customAction ? ToastType.InfoAction : ToastType.InfoSimple;
         }
         this.lastToastMessage = message;
         this.lastToastMessageTime = Date.now();
         this.showToast({
             message,
             type: 'info',
-            subtype: type,
+            toastMessage,
             translationParameters,
             dialogTitle,
             dialogMessage,
@@ -187,7 +188,7 @@ export class Toast implements OnDestroy {
         dialogTitle: string = null,
         dialogMessage: string = null,
         customAction: CustomAction = null,
-        subtype: ToastType = null,
+        toastMessage: ToastMessage = null,
     ): void {
         const parsingResult = this.parseErrorObject({
             errorObject,
@@ -210,10 +211,13 @@ export class Toast implements OnDestroy {
         }
         this.lastToastError = message + JSON.stringify(translationParameters);
         this.lastToastErrorTime = Date.now();
+        if(!toastMessage.subtype) {
+            toastMessage.subtype = message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific
+        }
         this.showToast({
             message,
             type: 'error',
-            subtype: subtype ? subtype : message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific,
+            toastMessage,
             translationParameters,
             dialogTitle,
             dialogMessage,
@@ -300,12 +304,12 @@ export class Toast implements OnDestroy {
     private async showToast({
         message,
         type,
-        subtype,
+        toastMessage,
         ...options
     }: {
         message: string;
         type: 'error' | 'info';
-        subtype: ToastType;
+        toastMessage: ToastMessage;
         translationParameters?: any;
         dialogTitle?: string;
         dialogMessage?: string;
@@ -320,11 +324,10 @@ export class Toast implements OnDestroy {
             case 'TOASTY':
                 return this.toastyShowToast(translatedMessage, type, action);
             case 'MAT_SNACKBAR':
-                return this.matSnackbarShowToast({
-                    message: translatedMessage,
-                    type,
-                    subtype,
-                    action});
+                toastMessage.message = toastMessage.message ?? message;
+                toastMessage.type = toastMessage.type ?? type;
+                toastMessage.action = toastMessage.action ?? action;
+                return this.matSnackbarShowToast(toastMessage);
         }
     }
 
