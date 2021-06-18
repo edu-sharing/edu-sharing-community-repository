@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.edu_sharing</groupId>
     <artifactId>edu_sharing-community-parent</artifactId>
-    <version>develop-SNAPSHOT</version>
+    <version>6.0</version>
     <relativePath/>
   </parent>
 
