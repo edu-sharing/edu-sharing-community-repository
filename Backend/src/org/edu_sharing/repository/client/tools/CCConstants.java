@@ -2121,6 +2121,9 @@ public class CCConstants {
 
 	public static final String SESSION_REMOTE_AUTHENTICATIONS = "SESSION_REMOTE_AUTHENTICATIONS";
 
+	// Stores the last "window" based rendering data request including information about the lms
+	public static final String SESSION_RENDERING_DETAILS = "SESSION_RENDERING_DETAILS";
+
 	public static final String COLLECTION_ORDER_MODE_CUSTOM = "custom";
 
 	public static final String ISO8601_SUFFIX = "ISO8601";

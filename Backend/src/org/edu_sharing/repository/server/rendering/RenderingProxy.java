@@ -99,6 +99,7 @@ public class RenderingProxy extends HttpServlet {
 
 			ApplicationInfo repoInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
 			if("window".equals(display)) {
+				storeTrackingDetails(req, usage);
 				openWindow(req, resp, nodeId, parentId, repoInfo);
 			}
 			else{
@@ -112,6 +113,11 @@ public class RenderingProxy extends HttpServlet {
 			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage(),RenderingException.I18N.unknown,e);
 		}
 
+	}
+
+	private void storeTrackingDetails(HttpServletRequest req, Usage usage) {
+		NodeTrackingDetails details = getTrackingDetails(req, usage);
+		req.getSession().setAttribute(CCConstants.SESSION_RENDERING_DETAILS, details);
 	}
 
 	/**
@@ -342,8 +348,7 @@ public class RenderingProxy extends HttpServlet {
 			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes(StandardCharsets.UTF_8));
 			// track inline / lms
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
-				NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
-				details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
+				NodeTrackingDetails details = getTrackingDetails(req, usage);
 				TrackingServiceFactory.getTrackingService().trackActivityOnNode(
 						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), details,
 						TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
@@ -354,6 +359,12 @@ public class RenderingProxy extends HttpServlet {
 			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(),
 					RenderingException.I18N.unknown, t);
 		}
+	}
+
+	private NodeTrackingDetails getTrackingDetails(HttpServletRequest req, Usage usage) {
+		NodeTrackingDetails details = new NodeTrackingDetails(req.getParameter("obj_id"), getVersion(req));
+		details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
+		return details;
 	}
 
 	private void runAsSystem(ThrowingProcedure<RenderingException> f) throws RenderingException {
