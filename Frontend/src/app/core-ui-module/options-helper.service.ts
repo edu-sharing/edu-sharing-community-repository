@@ -50,8 +50,6 @@ import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from './components/dropdown/dropdown.component';
 import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
-import {onTaskCompleted} from '@angular/compiler-cli/ngcc/src/execution/utils';
-import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
 
 
 export class OptionsHelperConfig {
@@ -192,7 +190,12 @@ export class OptionsHelperService implements OnDestroy {
             this.nodeService.copyNode(target, source).subscribe(
                 (data: NodeWrapper) => this.pasteNode(nodes.concat(data.node)),
                 (error: any) => {
-                    this.nodeHelper.handleNodeError(clip.nodes[nodes.length].name, error);
+                    console.log(error);
+                    if(error.error?.error?.indexOf('DAORestrictedAccessException') !== -1) {
+                        this.toast.error(null, 'RESTRICTED_ACCESS_COPY_ERROR');
+                    } else {
+                        this.nodeHelper.handleNodeError(clip.nodes[nodes.length].name, error);
+                    }
                     this.bridge.closeModalDialog();
                 });
         }
@@ -605,6 +608,14 @@ export class OptionsHelperService implements OnDestroy {
         );
         createNodeVariant.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
         createNodeVariant.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
+        createNodeVariant.customEnabledCallback = (nodes) => {
+            if(nodes) {
+                // do not show variant if it's a licensed material and user doesn't has change permission rights
+                return nodes[0].properties?.[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] !== 'true' ||
+                        this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS, NodesRightMode.Original);
+            }
+            return true;
+        }
         createNodeVariant.customShowCallback = (nodes) => {
             if (nodes) {
                 createNodeVariant.name = 'OPTIONS.VARIANT' + (this.connectors.connectorSupportsEdit(nodes[0]) ? '_OPEN' : '');

@@ -1,6 +1,4 @@
-package org.edu_sharing.service.permission;
-
-import org.edu_sharing.repository.client.tools.CCConstants;
+package org.edu_sharing.alfresco;
 
 public class RestrictedAccessException extends RuntimeException{
 

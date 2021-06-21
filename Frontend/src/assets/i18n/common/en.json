@@ -107,6 +107,7 @@
     "CONNECTOR_QUOTA_REACHED_MESSAGE": "This function is unavailable because the upload quota is fully exceeded.\n\nDelete files to reclaim storage space and try it again.",
     "RESTRICTED_ACCESS_ERROR_TITLE": "No license for material",
     "RESTRICTED_ACCESS_ERROR_MESSAGE": "The current material requires a license to be accessed. You currently don't have sufficient rights to access it",
+    "RESTRICTED_ACCESS_COPY_ERROR": "The material or some in this folder located materials are licensed. Only users with sharing permissions might copy them",
     "TOOLPERMISSION_ERROR": "You have insufficient permissions for this task",
     "TOOLPERMISSION_ERROR_INLINE": "You can't do this action because the permission \"{{permission}}\" is missing",
     "TOOLPERMISSION_ERROR_TITLE": "Insufficient permissions",

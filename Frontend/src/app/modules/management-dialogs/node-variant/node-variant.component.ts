@@ -100,15 +100,20 @@ export class NodeVariantComponent  {
                   this.toast.toast('NODE_VARIANT.CREATED', {folder: this.breadcrumbs[this.breadcrumbs.length - 1].name}, null, null, additional);
               }
               this.onDone.emit();
-          },(error)=>{
+          },(error) => {
               this.onLoading.emit(false);
               this.nodeHelper.handleNodeError(this.variantName,error);
               if(win)
                   win.close();
           });
-      },(error)=>{
+      },(error) => {
           this.onLoading.emit(false);
-          this.nodeHelper.handleNodeError(this.variantName,error);
+          console.log(error);
+          if(error.error?.error?.indexOf('DAORestrictedAccessException') !== -1) {
+              this.toast.error(null, 'RESTRICTED_ACCESS_COPY_ERROR');
+          } else {
+              this.nodeHelper.handleNodeError(this.variantName, error);
+          }
           if(win)
               win.close();
       });

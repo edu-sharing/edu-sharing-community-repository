@@ -14,7 +14,7 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
-import org.edu_sharing.service.permission.RestrictedAccessException;
+import org.edu_sharing.alfresco.RestrictedAccessException;
 
 public class DAOException extends Exception {
 
@@ -40,7 +40,10 @@ public class DAOException extends Exception {
 	}
 	
 	public static DAOException mapping(Throwable t,String nodeId) {
-		
+		// de-capsulate previously capsulated runtime throwables
+		if(t instanceof RuntimeException && t.getCause() != null){
+			t = t.getCause();
+		}
 		if (t instanceof DAOException) {
 			
 			return (DAOException) t;
