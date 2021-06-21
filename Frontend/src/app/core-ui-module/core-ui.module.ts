@@ -20,7 +20,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Ng5SliderModule } from 'ng5-slider';
-import { ToastyModule } from 'ngx-toasty';
 import { RestLocatorService } from '../core-module/rest/services/rest-locator.service';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CardComponent } from './components/card/card.component';
@@ -156,7 +155,6 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         MatTooltipModule,
         Ng5SliderModule,
         RouterModule,
-        ToastyModule.forRoot(),
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,
@@ -196,7 +194,6 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         SortDropdownComponent,
         InfoMessageComponent,
         InfiniteScrollDirective,
-        ToastyModule,
         AuthorityNamePipe,
         OptionTooltipPipe,
         VCardNamePipe,

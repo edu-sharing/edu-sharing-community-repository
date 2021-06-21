@@ -2,23 +2,28 @@ package org.edu_sharing.alfresco.policy;
 
 import java.util.Map;
 
+import org.alfresco.repo.copy.CopyServicePolicies;
 import org.alfresco.repo.copy.CopyServicePolicies.OnCopyCompletePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.alfresco.RestrictedAccessException;
 
-public class OnCopyIOPolicy implements OnCopyCompletePolicy{
+public class OnCopyIOPolicy implements OnCopyCompletePolicy, CopyServicePolicies.BeforeCopyPolicy {
 	
 	PolicyComponent policyComponent;
 	
 	NodeService nodeService;
-	
+	PermissionService permissionService;
+
 	Logger logger = Logger.getLogger(OnCopyIOPolicy.class);
 	
 	QName versionProp = QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
@@ -26,10 +31,21 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy{
 	public void init(){
 		this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "onCopyComplete"),
                QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onCopyComplete"));
+		this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "beforeCopy"),
+				QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "beforeCopy"));
 	}
-	
-	
-	
+
+
+	@Override
+	public void beforeCopy(QName qName, NodeRef sourceNode, NodeRef targetNode) {
+		Boolean restrictedAccess = (Boolean) nodeService.getProperty(sourceNode, QName.createQName(CCConstants.CCM_PROP_RESTRICTED_ACCESS));
+
+		if(restrictedAccess != null && restrictedAccess &&
+				!permissionService.hasPermission(sourceNode, CCConstants.PERMISSION_CHANGEPERMISSIONS).equals(AccessStatus.ALLOWED)){
+			throw new RestrictedAccessException(sourceNode.getId());
+		}
+	}
+
 	@Override
 	public void onCopyComplete(QName classRef, NodeRef sourceNodeRef, NodeRef targetNodeRef, boolean copyToNewNode, Map<NodeRef, NodeRef> copyMap) {
 		logger.info("will set " + versionProp.toPrefixString() + " to 1.0");
@@ -64,5 +80,9 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy{
 	
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
+	}
+
+	public void setPermissionService(PermissionService permissionService) {
+		this.permissionService = permissionService;
 	}
 }

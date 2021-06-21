@@ -276,10 +276,11 @@
                  class="more moreAlways column">
               <button mat-icon-button
                       color="primary"
+                      matTooltip="{{option.name | translate}}"
                       [class.display-none]="!optionIsShown(option, node)"
                       [disabled]="!optionIsValid(option, node)"
                       (click)="optionIsShown(option, node) ? callOption(option,node) : null">
-                <i icon="{{option.icon}}" [aria]="true"></i>
+                <i icon="{{option.icon}}" [aria]="false"></i>
               </button>
             </div>
           </ng-container>

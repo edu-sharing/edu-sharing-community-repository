@@ -160,6 +160,7 @@ public class CollectionServiceImpl implements CollectionService{
 			else{
                 originalNodeId = refNodeId;
             }
+			NodeRef originalNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId);
 
 			// user must have CC_PUBLISH on either the original or a reference object
 			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})
@@ -216,12 +217,14 @@ public class CollectionServiceImpl implements CollectionService{
 			    throw new SecurityException("No permissions to add childrens to collection");
             }
 
-            HashMap<String,Object> props = AuthenticationUtil.runAsSystem(()-> {
+            Map<String,Object> props = AuthenticationUtil.runAsSystem(()-> {
                 try {
-                    return client.getProperties(originalNodeId);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                    return null;
+					Map<String,Object> data = new HashMap<>();
+                   	data.put(CCConstants.CM_PROP_VERSIONABLELABEL, NodeServiceHelper.getProperty(originalNodeRef, CCConstants.CM_PROP_VERSIONABLELABEL));
+                   	data.put(CCConstants.LOM_PROP_TECHNICAL_SIZE, NodeServiceHelper.getProperty(originalNodeRef, CCConstants.LOM_PROP_TECHNICAL_SIZE));
+                   	return data;
+                } catch (Throwable t) {
+                    throw new RuntimeException(t);
                 }
             });
             String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
@@ -252,7 +255,6 @@ public class CollectionServiceImpl implements CollectionService{
 				 * "Transformation has not taken place because the declared mimetype (image/jpeg) does not match the detected mimetype (text/plain)"
 				 */
 				NodeServiceInterceptor.ignoreQuota(()-> {
-					//client.writeContent(refId, new String("1").getBytes(), (String) props.get(CCConstants.ALFRESCO_MIMETYPE), "utf-8", CCConstants.CM_PROP_CONTENT);
 					client.writeContent(refId, "1".getBytes(), "text/plain", "utf-8", CCConstants.CM_PROP_CONTENT);
 					return null;
 				});
@@ -334,7 +336,7 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 		return originalNodeId;
 	}
-	
+
 	@Override
 	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate)
 			throws DuplicateNodeException, Throwable {

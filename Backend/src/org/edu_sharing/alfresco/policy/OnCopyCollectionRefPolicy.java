@@ -77,7 +77,7 @@ public class OnCopyCollectionRefPolicy implements OnCopyNodePolicy,CopyServicePo
 		if(!isCollectionReference) {
 			try {
 				isCollectionReference = nodeService.hasAspect(sourceRef,QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))
-						&& nodeService.getAspects(nodeService.getPrimaryParent(targetParentRef).getParentRef()).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION));
+						&& nodeService.hasAspect(nodeService.getPrimaryParent(targetParentRef).getParentRef(), QName.createQName(CCConstants.CCM_ASPECT_COLLECTION));
 			}
 			catch(Throwable t){
 				logger.info(t);

@@ -37,16 +37,14 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.permission.RestrictedAccessException;
+import org.edu_sharing.alfresco.RestrictedAccessException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StreamUtils;
 
@@ -310,9 +308,11 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 
 		} catch (org.alfresco.repo.security.permissions.AccessDeniedException | RestrictedAccessException e) {
+			logger.debug(e.getMessage(),e);
 			resp.sendRedirect(mime.getNoPermissionsPreview());
 			return;
 		}  catch (InvalidNodeRefException e) {
+			logger.debug(e.getMessage(),e);
 			resp.sendRedirect(mime.getNodeDeletedPreview());
 			return;
 		}
