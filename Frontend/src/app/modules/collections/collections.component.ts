@@ -506,6 +506,7 @@ export class CollectionsMainComponent {
         return this.nodeHelper.getCollectionScopeInfo(this.collectionContent.node);
     }
     dropOnCollection(event: any) {
+        console.log(event);
         const target = event.target;
         const source = event.source[0];
         this.toast.showProgressDialog();
@@ -515,7 +516,7 @@ export class CollectionsMainComponent {
                 this.toast.closeModalDialog();
                 return;
             }
-            this.nodeService.moveNode(target.ref.id, source.ref.id).subscribe(
+            this.nodeService.moveNode(target?.ref?.id || RestConstants.COLLECTIONHOME, source.ref.id).subscribe(
                 () => {
                     this.toast.closeModalDialog();
                     this.refreshContent();
@@ -582,13 +583,18 @@ export class CollectionsMainComponent {
     }
 
     canDropOnCollection = (event: DropData) => {
+        // drop to "home"
+        if(event.target === 'HOME') {
+            return event.dropAction === 'move' &&
+                event.nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1 &&
+                this.nodeHelper.getNodesRight(event.nodes, RestConstants.ACCESS_WRITE);
+        }
         if (event.nodes[0].ref.id === event.target.ref.id) {
             return false;
         }
         if (event.target.ref.id === this.collectionContent.node.ref.id) {
             return false;
         }
-        console.log(event.nodes[0], event.dropAction);
         if(event.nodes[0].collection && event.dropAction === 'copy') {
             return false;
         }

@@ -69,6 +69,7 @@ import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 
 
 public class CollectionServiceImpl implements CollectionService{
@@ -369,7 +370,7 @@ public class CollectionServiceImpl implements CollectionService{
 						
 						collection.setLevel0(true);
 						
-						parentIdLocal = NodeServiceHelper.getContainerIdByPath(path, pattern);
+						parentIdLocal = getHomePath();
 					}
 					
 					HashMap<String,Object> props = asProps(collection);
@@ -393,7 +394,15 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 			
 	}
-	
+
+	/**
+	 * return the folder id to the collection home where new collections should be created
+	 */
+	@Override
+	public String getHomePath() {
+		return AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getContainerIdByPath(path, pattern));
+	}
+
 	@Override
 	public Collection createAndSetScope(String parentId, Collection collection) throws Throwable{
 		Collection col = create(parentId,collection);

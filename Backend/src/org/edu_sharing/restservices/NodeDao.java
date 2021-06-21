@@ -20,6 +20,8 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.service.collection.CollectionService;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -90,6 +92,8 @@ public class NodeDao {
 	};
 	final List<String> access;
 	private final org.edu_sharing.service.model.NodeRef.Preview previewData;
+	// true if the current Dao is the collection home folder
+	private final boolean isCollectionHomePath;
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
 	 */
@@ -341,6 +345,7 @@ public class NodeDao {
 	private final String storeId;
 	
 	NodeService nodeService;
+	CollectionService collectionService;
 	CommentService commentService;
 
 	final Filter filter;
@@ -492,6 +497,13 @@ public class NodeDao {
 
 	private NodeDao(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef, Filter filter) throws DAOException {
 		try{
+
+			if(nodeRef.getNodeId().equals("-collectionhome-")){
+				isCollectionHomePath = true;
+				nodeRef.setNodeId(CollectionServiceFactory.getLocalService().getHomePath());
+			} else {
+				isCollectionHomePath = false;
+			}
 	
 			this.repoDao = repoDao;
 			this.nodeId = nodeRef.getNodeId();
@@ -714,7 +726,13 @@ public class NodeDao {
 			
 			nodeService.moveNode(nodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS,
 					sourceId);
-	
+			// set for the given collection level 0 to true to support search
+			if(isCollectionHomePath) {
+				NodeServiceHelper.setProperty(
+						new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, sourceId),
+						CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0,
+						true);
+			}
 			return new NodeDao(repoDao, sourceId, Filter.createShowAllFilter());
 			
 		} catch (Throwable t) {

@@ -1422,7 +1422,6 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			node=NodeDao.mapNodeConstants(repoDao,node);
 			source=NodeDao.mapNodeConstants(repoDao,source);
-
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 			NodeDao child = nodeDao.createChildByMove(source);
 	    			

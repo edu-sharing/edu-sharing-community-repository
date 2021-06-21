@@ -71,7 +71,9 @@ public interface CollectionService {
 
 	void updateAndSetScope(Collection collection) throws Exception;
 
-	Collection createAndSetScope(String parentId, Collection collection) throws Throwable;
+    String getHomePath();
+
+    Collection createAndSetScope(String parentId, Collection collection) throws Throwable;
 
     void updateScope(NodeRef ref, List<ACE> permissions);
 
