@@ -258,17 +258,23 @@
           <!-- content (collection cards) if not error -->
 
           <section class="collections-cards-div" *ngIf="!isLoading">
-            <h2
-              class="mat-heading-3"
-              *ngIf="isAllowedToEditCollection() || collectionContent.collections.length"
-            >
-              <ng-container *ngIf="isRootLevelCollection()">{{
-                'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate
-                }}</ng-container>
-              <ng-container *ngIf="!isRootLevelCollection()">{{
-                'COLLECTION.INFO_REFERENCES_MULTI' | translate
-                }}</ng-container>
-            </h2>
+            <div class="heading-group">
+              <h2
+                class="mat-heading-3"
+                *ngIf="isAllowedToEditCollection() || collectionContent.collections.length"
+              >
+                <ng-container *ngIf="isRootLevelCollection()">{{
+                  'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate
+                  }}</ng-container>
+                <ng-container *ngIf="!isRootLevelCollection()">{{
+                  'COLLECTION.INFO_REFERENCES_MULTI' | translate
+                  }}</ng-container>
+              </h2>
+              <ng-container *ngIf="sortCollections">
+                <ng-container *ngTemplateOutlet="sortTool; context: { sortInfo: sortCollections, callback: collectionSortEmitter }">
+                </ng-container>
+              </ng-container>
+            </div>
 
             <!-- COLLECTION CARDS -->
             <app-custom-node-list-wrapper
@@ -462,3 +468,21 @@
     <app-footer [scope]="'collections'"></app-footer>
   </div>
 </div>
+<ng-template #sortTool let-sortInfo="sortInfo" let-callback="callback">
+  <mat-slide-toggle *ngIf="sortInfo.mode === 'ccm:collection_ordered_position'"></mat-slide-toggle>
+  <button *ngIf="sortDropdown.menu"
+          [matMenuTriggerFor]="sortDropdown.menu"
+          mat-button
+          color="primary"
+  >
+    {{ ('NODE.' + sortInfo.name) | translate}} <i [icon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
+  </button>
+  <sort-dropdown
+    #sortDropdown
+    trigger=""
+    [columns]="sortColumns"
+    [sortBy]="sortInfo.name"
+    [sortAscending]="sortInfo.ascending"
+    (onSort)="callback.emit($event)"
+  ></sort-dropdown>
+</ng-template>

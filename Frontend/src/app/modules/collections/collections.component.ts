@@ -1,4 +1,11 @@
-import {Component, ContentChild, ElementRef, TemplateRef, ViewChild} from '@angular/core';
+import {
+    Component,
+    ContentChild,
+    ElementRef,
+    EventEmitter,
+    TemplateRef,
+    ViewChild
+} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
 import * as EduData from '../../core-module/core.module';
@@ -64,6 +71,7 @@ import {
     ManagementEventType
 } from '../management-dialogs/management-dialogs.component';
 import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/custom-node-list-wrapper/custom-node-list-wrapper.component';
+import {SortEvent} from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
 
 // component class
 @Component({
@@ -122,8 +130,14 @@ export class CollectionsMainComponent {
         referencesLoading?: boolean;
         collectionsLoading?: boolean;
     };
+    collectionSortEmitter = new EventEmitter<SortEvent>();
     mainnav = true;
     isGuest = true;
+    sortColumns: ListItem[] = [
+        new ListItem('NODE', RestConstants.CM_NAME),
+        new ListItem('NODE', RestConstants.CM_MODIFIED_DATE),
+        new ListItem('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),
+    ];
     addToOther: EduData.Node[];
     addPinning: string;
     infoTitle: string;
@@ -166,7 +180,7 @@ export class CollectionsMainComponent {
     ];
     tutorialElement: ElementRef;
     permissions: Permission[];
-    private sortCollections: SortDefault;
+    private sortCollections: SortInfo;
     // FIXME: `collectionShare` is expected to be of type `Node[]` by `workspace-management` but is
     // of type `Node` here.
     set collectionShare(collectionShare: Node[]) {
@@ -283,6 +297,7 @@ export class CollectionsMainComponent {
         private config: ConfigurationService,
         private translationService: TranslateService,
     ) {
+        this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'title'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
@@ -328,8 +343,8 @@ export class CollectionsMainComponent {
                                         mds,
                                         'collectionReferences',
                                     );
-                                    const info = MdsHelper.getSortInfo(mds, 'collections');
-                                    this.sortCollections = info.default;
+                                    //const info = MdsHelper.getSortInfo(mds, 'collections');
+                                    //this.sortCollections = info.default;
                                     this.initialize();
                                 });
                             },(e) => {
@@ -711,8 +726,8 @@ export class CollectionsMainComponent {
             CollectionsMainComponent.DEFAULT_REQUEST,
         );
         if(this.sortCollections) {
-            request.sortBy = [this.sortCollections.sortBy];
-            request.sortAscending = [this.sortCollections.sortAscending];
+            request.sortBy = [this.sortCollections.name];
+            request.sortAscending = [this.sortCollections.ascending];
         } else {
             console.warn('Sort for collections is not defined in the mds!');
         }
@@ -943,6 +958,11 @@ export class CollectionsMainComponent {
                 collection => {
                     // set the collection and load content data by refresh
                     this.setCollectionId(null);
+                    const orderCollections = collection.collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
+                    this.sortCollections = {
+                        name: orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE,
+                        ascending: orderCollections?.[1] || false
+                    };
                     this.collectionContent.node = collection.collection;
 
                     this.renderBreadcrumbs();
@@ -1272,4 +1292,22 @@ export class CollectionsMainComponent {
             this.mainNavRef.refreshNodeStore();
         });
     }
+    async setCollectionSort(sort: SortEvent) {
+        this.sortCollections.name = (sort.name as any);
+        this.sortCollections.ascending = sort.ascending;
+        try {
+            await this.nodeService.editNodeProperty(
+                this.collectionContent.node.ref.id,
+                RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
+                [sort.name, sort.ascending + '']
+            ).toPromise();
+        } catch (e) {
+            this.toast.error(e);
+        }
+        this.refreshContent();
+    }
+}
+export interface SortInfo {
+    name: 'cm:name' | 'cm:modified' | 'ccm:collection_ordered_position';
+    ascending: boolean;
 }

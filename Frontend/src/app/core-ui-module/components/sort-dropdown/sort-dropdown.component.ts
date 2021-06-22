@@ -17,11 +17,11 @@ export class SortDropdownComponent {
     @Input() sortBy: string;
     @Input() sortAscending: boolean;
 
-    @Output() onSort = new EventEmitter();
+    @Output() onSort = new EventEmitter<SortEvent>();
 
     constructor() {}
 
-    setSort(item: any): void {
+    setSort(item: SortEvent): void {
         let ascending = this.sortAscending;
         const itemAscending = item.mode === 'ascending';
         if (item.name === this.sortBy) {
@@ -36,7 +36,14 @@ export class SortDropdownComponent {
             // force mode when switching to item
             ascending = itemAscending;
         }
-        (item as any).ascending = ascending;
+        (item as SortEvent).ascending = ascending;
         this.onSort.emit(item);
     }
+}
+export interface SortEvent {
+    // field name
+    name: string;
+    // allowed modes
+    mode: string;
+    ascending: boolean;
 }

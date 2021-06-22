@@ -263,6 +263,16 @@ section {
 .collections-cards-div {
     display: flex;
     flex-direction: column;
+    .heading-group {
+        display: flex;
+        align-items: center;
+        > h2 {
+            flex-grow: 1;
+        }
+        mat-slide-toggle {
+            margin-right: 20px;
+        }
+    }
 }
 .content-header {
     display: flex;
