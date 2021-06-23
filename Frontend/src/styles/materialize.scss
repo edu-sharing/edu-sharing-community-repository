@@ -5606,6 +5606,8 @@ select:focus {
 ::-moz-placeholder {
   /* Firefox 19+ */
   color: #d1d1d1;
+  // By default, Firefox reduces opacity of placeholders.
+  opacity: 1;
 }
 
 :-ms-input-placeholder {
