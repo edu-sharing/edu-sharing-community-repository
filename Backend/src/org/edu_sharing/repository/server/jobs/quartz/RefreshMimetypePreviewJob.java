@@ -113,7 +113,16 @@ public class RefreshMimetypePreviewJob extends AbstractJob{
 
 				if (typeQName.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
 
+					if(nodeService.getAspects(nodeRef).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
+						logger.warn("ignoring collection_io_reference:" + nodeRef);
+						continue;
+					}
+
 					ContentReader contentReader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
+					if(contentReader == null || !contentReader.exists()) {
+						logger.warn("no content found:" + nodeRef);
+						continue;
+					}
 
 					String oldMimeType = contentReader.getMimetype();
 
@@ -148,7 +157,7 @@ public class RefreshMimetypePreviewJob extends AbstractJob{
 						});
 						writer.setEncoding("UTF-8");
 						writer.setMimetype(newMimetype);
-						writer.putContent(contentReader.getContentInputStream());
+						writer.putContent(contentService.getReader(nodeRef, ContentModel.PROP_CONTENT).getContentInputStream());
 						nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT), newMimetype);
 
 					} finally {
