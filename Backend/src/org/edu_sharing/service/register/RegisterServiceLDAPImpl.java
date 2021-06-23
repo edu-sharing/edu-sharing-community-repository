@@ -1,5 +1,6 @@
 package org.edu_sharing.service.register;
 
+import com.typesafe.config.Config;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 
@@ -19,7 +20,7 @@ public class RegisterServiceLDAPImpl extends RegisterServiceImpl {
     public boolean userExists(RegisterInformation info) throws Exception {
         if(super.userExists(info))
             return true;
-        String userDN = RegisterServiceFactory.getConfig().getProperty("ldap.baseDN");
+        String userDN = RegisterServiceFactory.getConfig().getString("ldap.baseDN");
         LdapContext ctx = getLdapContext();
         boolean exists=false;
         try {
@@ -38,7 +39,7 @@ public class RegisterServiceLDAPImpl extends RegisterServiceImpl {
     @Override
     protected String storeUser(RegisterInformation info) throws Exception {
         LdapContext ctx = getLdapContext();
-        String userDN = RegisterServiceFactory.getConfig().getProperty("ldap.baseDN");
+        String userDN = RegisterServiceFactory.getConfig().getString("ldap.baseDN");
 
         Attributes attrs = getLDAPAttributes(info);
 
@@ -74,7 +75,7 @@ public class RegisterServiceLDAPImpl extends RegisterServiceImpl {
     @Override
     protected void setPassword(RegisterInformation info, String newPassword) throws Exception{
         LdapContext ctx = getLdapContext();
-        String userDN = RegisterServiceFactory.getConfig().getProperty("ldap.baseDN");
+        String userDN = RegisterServiceFactory.getConfig().getString("ldap.baseDN");
         Attributes attrs = getLDAPAttributes(info);
         attrs.put("userPassword",convertPassword(newPassword));
         ctx.rebind("uid="+info.getEmail()+","+userDN,null,attrs);
@@ -83,7 +84,7 @@ public class RegisterServiceLDAPImpl extends RegisterServiceImpl {
     private String convertPassword(String password) throws Exception {
         if(password==null)
             return null;
-        String algorithm = RegisterServiceFactory.getConfig().getProperty("ldap.passwordAlgorithm");
+        String algorithm = RegisterServiceFactory.getConfig().getString("ldap.passwordAlgorithm");
         if("md5".equalsIgnoreCase(algorithm)){
             return "{MD5}"+Base64.getEncoder().encodeToString(DigestUtils.md5(password));
         }
@@ -94,18 +95,18 @@ public class RegisterServiceLDAPImpl extends RegisterServiceImpl {
     }
 
     private LdapContext getLdapContext() throws Exception {
-        Properties config = RegisterServiceFactory.getConfig();
+        Config config = RegisterServiceFactory.getConfig().getConfig("ldap");
 
         Hashtable<String, Object> env = new Hashtable<String, Object>();
-        env.put(Context.SECURITY_AUTHENTICATION, config.getProperty("ldap.authentication"));
-        if(config.getProperty("ldap.username") != null) {
-            env.put(Context.SECURITY_PRINCIPAL, config.getProperty("ldap.username"));
+        env.put(Context.SECURITY_AUTHENTICATION, config.getString("authentication"));
+        if(config.getString("username") != null) {
+            env.put(Context.SECURITY_PRINCIPAL, config.getString("username"));
         }
-        if(config.getProperty("ldap.password") != null) {
-            env.put(Context.SECURITY_CREDENTIALS, config.getProperty("ldap.password"));
+        if(config.getString("password") != null) {
+            env.put(Context.SECURITY_CREDENTIALS, config.getString("password"));
         }
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, config.getProperty("ldap.server"));
+        env.put(Context.PROVIDER_URL, config.getString("server"));
 
         return new InitialLdapContext(env,null);
     }
