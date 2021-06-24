@@ -34,13 +34,16 @@ import io.swagger.client.model.Group;
 import io.swagger.client.model.GroupEntries;
 import io.swagger.client.model.GroupEntry;
 import io.swagger.client.model.GroupProfile;
+import io.swagger.client.model.GroupSignupDetails;
 import io.swagger.client.model.NodeEntries;
 import io.swagger.client.model.Preferences;
+import io.swagger.client.model.ProfileSettings;
 import io.swagger.client.model.User;
 import io.swagger.client.model.UserCredential;
 import io.swagger.client.model.UserEntries;
 import io.swagger.client.model.UserEntry;
 import io.swagger.client.model.UserProfileEdit;
+import io.swagger.client.model.UserStats;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -910,6 +913,145 @@ public class IamV1Api {
         return call;
     }
     /**
+     * Build call for confirmSignup
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param user ID of user (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call confirmSignupCall(String repository, String group, String user, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/groups/{repository}/{group}/signup/list/{user}"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "group" + "\\}", apiClient.escapeString(group.toString()))
+            .replaceAll("\\{" + "user" + "\\}", apiClient.escapeString(user.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call confirmSignupValidateBeforeCall(String repository, String group, String user, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling confirmSignup(Async)");
+        }
+        
+        // verify the required parameter 'group' is set
+        if (group == null) {
+            throw new ApiException("Missing the required parameter 'group' when calling confirmSignup(Async)");
+        }
+        
+        // verify the required parameter 'user' is set
+        if (user == null) {
+            throw new ApiException("Missing the required parameter 'user' when calling confirmSignup(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = confirmSignupCall(repository, group, user, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * put the pending user into the group
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param user ID of user (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public void confirmSignup(String repository, String group, String user) throws ApiException {
+        confirmSignupWithHttpInfo(repository, group, user);
+    }
+
+    /**
+     * put the pending user into the group
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param user ID of user (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Void> confirmSignupWithHttpInfo(String repository, String group, String user) throws ApiException {
+        com.squareup.okhttp.Call call = confirmSignupValidateBeforeCall(repository, group, user, null, null);
+        return apiClient.execute(call);
+    }
+
+    /**
+     * put the pending user into the group (asynchronously)
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param user ID of user (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call confirmSignupAsync(String repository, String group, String user, final ApiCallback<Void> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = confirmSignupValidateBeforeCall(repository, group, user, progressListener, progressRequestListener);
+        apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
      * Build call for createGroup
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param group groupname (required)
@@ -1470,6 +1612,141 @@ public class IamV1Api {
         }
 
         com.squareup.okhttp.Call call = deleteMembershipValidateBeforeCall(repository, group, member, progressListener, progressRequestListener);
+        apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
+     * Build call for deleteUser
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (required)
+     * @param force force the deletion (if false then only persons which are previously marked for deletion are getting deleted) (optional, default to false)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call deleteUserCall(String repository, String person, Boolean force, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/people/{repository}/{person}"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "person" + "\\}", apiClient.escapeString(person.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (force != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("force", force));
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call deleteUserValidateBeforeCall(String repository, String person, Boolean force, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling deleteUser(Async)");
+        }
+        
+        // verify the required parameter 'person' is set
+        if (person == null) {
+            throw new ApiException("Missing the required parameter 'person' when calling deleteUser(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = deleteUserCall(repository, person, force, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Delete the user.
+     * Delete the user. (admin rights are required.)
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (required)
+     * @param force force the deletion (if false then only persons which are previously marked for deletion are getting deleted) (optional, default to false)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public void deleteUser(String repository, String person, Boolean force) throws ApiException {
+        deleteUserWithHttpInfo(repository, person, force);
+    }
+
+    /**
+     * Delete the user.
+     * Delete the user. (admin rights are required.)
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (required)
+     * @param force force the deletion (if false then only persons which are previously marked for deletion are getting deleted) (optional, default to false)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Void> deleteUserWithHttpInfo(String repository, String person, Boolean force) throws ApiException {
+        com.squareup.okhttp.Call call = deleteUserValidateBeforeCall(repository, person, force, null, null);
+        return apiClient.execute(call);
+    }
+
+    /**
+     * Delete the user. (asynchronously)
+     * Delete the user. (admin rights are required.)
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (required)
+     * @param force force the deletion (if false then only persons which are previously marked for deletion are getting deleted) (optional, default to false)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call deleteUserAsync(String repository, String person, Boolean force, final ApiCallback<Void> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = deleteUserValidateBeforeCall(repository, person, force, progressListener, progressRequestListener);
         apiClient.executeAsync(call, callback);
         return call;
     }
@@ -2070,6 +2347,139 @@ public class IamV1Api {
         return call;
     }
     /**
+     * Build call for getProfileSettings
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call getProfileSettingsCall(String repository, String person, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/people/{repository}/{person}/profileSettings"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "person" + "\\}", apiClient.escapeString(person.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call getProfileSettingsValidateBeforeCall(String repository, String person, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling getProfileSettings(Async)");
+        }
+        
+        // verify the required parameter 'person' is set
+        if (person == null) {
+            throw new ApiException("Missing the required parameter 'person' when calling getProfileSettings(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = getProfileSettingsCall(repository, person, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Get profileSettings configuration
+     * Will fail for guest
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @return ProfileSettings
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ProfileSettings getProfileSettings(String repository, String person) throws ApiException {
+        ApiResponse<ProfileSettings> resp = getProfileSettingsWithHttpInfo(repository, person);
+        return resp.getData();
+    }
+
+    /**
+     * Get profileSettings configuration
+     * Will fail for guest
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @return ApiResponse&lt;ProfileSettings&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<ProfileSettings> getProfileSettingsWithHttpInfo(String repository, String person) throws ApiException {
+        com.squareup.okhttp.Call call = getProfileSettingsValidateBeforeCall(repository, person, null, null);
+        Type localVarReturnType = new TypeToken<ProfileSettings>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Get profileSettings configuration (asynchronously)
+     * Will fail for guest
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call getProfileSettingsAsync(String repository, String person, final ApiCallback<ProfileSettings> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = getProfileSettingsValidateBeforeCall(repository, person, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<ProfileSettings>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
      * Build call for getRecentlyInvited
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param progressListener Progress listener
@@ -2632,6 +3042,278 @@ public class IamV1Api {
         return call;
     }
     /**
+     * Build call for getUserStats
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call getUserStatsCall(String repository, String person, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/people/{repository}/{person}/stats"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "person" + "\\}", apiClient.escapeString(person.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call getUserStatsValidateBeforeCall(String repository, String person, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling getUserStats(Async)");
+        }
+        
+        // verify the required parameter 'person' is set
+        if (person == null) {
+            throw new ApiException("Missing the required parameter 'person' when calling getUserStats(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = getUserStatsCall(repository, person, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Get the user stats.
+     * Get the user stats (e.g. publicly created material count)
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @return UserStats
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public UserStats getUserStats(String repository, String person) throws ApiException {
+        ApiResponse<UserStats> resp = getUserStatsWithHttpInfo(repository, person);
+        return resp.getData();
+    }
+
+    /**
+     * Get the user stats.
+     * Get the user stats (e.g. publicly created material count)
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @return ApiResponse&lt;UserStats&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<UserStats> getUserStatsWithHttpInfo(String repository, String person) throws ApiException {
+        com.squareup.okhttp.Call call = getUserStatsValidateBeforeCall(repository, person, null, null);
+        Type localVarReturnType = new TypeToken<UserStats>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Get the user stats. (asynchronously)
+     * Get the user stats (e.g. publicly created material count)
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call getUserStatsAsync(String repository, String person, final ApiCallback<UserStats> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = getUserStatsValidateBeforeCall(repository, person, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<UserStats>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
+     * Build call for rejectSignup
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param user ID of user (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call rejectSignupCall(String repository, String group, String user, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/groups/{repository}/{group}/signup/list/{user}"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "group" + "\\}", apiClient.escapeString(group.toString()))
+            .replaceAll("\\{" + "user" + "\\}", apiClient.escapeString(user.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call rejectSignupValidateBeforeCall(String repository, String group, String user, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling rejectSignup(Async)");
+        }
+        
+        // verify the required parameter 'group' is set
+        if (group == null) {
+            throw new ApiException("Missing the required parameter 'group' when calling rejectSignup(Async)");
+        }
+        
+        // verify the required parameter 'user' is set
+        if (user == null) {
+            throw new ApiException("Missing the required parameter 'user' when calling rejectSignup(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = rejectSignupCall(repository, group, user, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * reject the pending user
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param user ID of user (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public void rejectSignup(String repository, String group, String user) throws ApiException {
+        rejectSignupWithHttpInfo(repository, group, user);
+    }
+
+    /**
+     * reject the pending user
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param user ID of user (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Void> rejectSignupWithHttpInfo(String repository, String group, String user) throws ApiException {
+        com.squareup.okhttp.Call call = rejectSignupValidateBeforeCall(repository, group, user, null, null);
+        return apiClient.execute(call);
+    }
+
+    /**
+     * reject the pending user (asynchronously)
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param user ID of user (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call rejectSignupAsync(String repository, String group, String user, final ApiCallback<Void> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = rejectSignupValidateBeforeCall(repository, group, user, progressListener, progressRequestListener);
+        apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
      * Build call for removeNodeList
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param person username (or \&quot;-me-\&quot; for current user) (required)
@@ -2915,6 +3597,7 @@ public class IamV1Api {
      * @param pattern pattern (required)
      * @param global global search context, defaults to true, otherwise just searches for users within the organizations (optional, default to true)
      * @param groupType find a specific groupType (does nothing for persons) (optional)
+     * @param signupMethod find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons) (optional)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param progressListener Progress listener
@@ -2922,7 +3605,7 @@ public class IamV1Api {
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call searchAuthoritiesCall(String repository, String pattern, Boolean global, String groupType, Integer maxItems, Integer skipCount, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call searchAuthoritiesCall(String repository, String pattern, Boolean global, String groupType, String signupMethod, Integer maxItems, Integer skipCount, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -2937,6 +3620,8 @@ public class IamV1Api {
         localVarQueryParams.addAll(apiClient.parameterToPair("global", global));
         if (groupType != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("groupType", groupType));
+        if (signupMethod != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("signupMethod", signupMethod));
         if (maxItems != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("maxItems", maxItems));
         if (skipCount != null)
@@ -2975,7 +3660,7 @@ public class IamV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call searchAuthoritiesValidateBeforeCall(String repository, String pattern, Boolean global, String groupType, Integer maxItems, Integer skipCount, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call searchAuthoritiesValidateBeforeCall(String repository, String pattern, Boolean global, String groupType, String signupMethod, Integer maxItems, Integer skipCount, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'repository' is set
         if (repository == null) {
@@ -2988,7 +3673,7 @@ public class IamV1Api {
         }
         
 
-        com.squareup.okhttp.Call call = searchAuthoritiesCall(repository, pattern, global, groupType, maxItems, skipCount, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = searchAuthoritiesCall(repository, pattern, global, groupType, signupMethod, maxItems, skipCount, progressListener, progressRequestListener);
         return call;
 
     }
@@ -3000,13 +3685,14 @@ public class IamV1Api {
      * @param pattern pattern (required)
      * @param global global search context, defaults to true, otherwise just searches for users within the organizations (optional, default to true)
      * @param groupType find a specific groupType (does nothing for persons) (optional)
+     * @param signupMethod find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons) (optional)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
      * @return AuthorityEntries
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public AuthorityEntries searchAuthorities(String repository, String pattern, Boolean global, String groupType, Integer maxItems, Integer skipCount) throws ApiException {
-        ApiResponse<AuthorityEntries> resp = searchAuthoritiesWithHttpInfo(repository, pattern, global, groupType, maxItems, skipCount);
+    public AuthorityEntries searchAuthorities(String repository, String pattern, Boolean global, String groupType, String signupMethod, Integer maxItems, Integer skipCount) throws ApiException {
+        ApiResponse<AuthorityEntries> resp = searchAuthoritiesWithHttpInfo(repository, pattern, global, groupType, signupMethod, maxItems, skipCount);
         return resp.getData();
     }
 
@@ -3017,13 +3703,14 @@ public class IamV1Api {
      * @param pattern pattern (required)
      * @param global global search context, defaults to true, otherwise just searches for users within the organizations (optional, default to true)
      * @param groupType find a specific groupType (does nothing for persons) (optional)
+     * @param signupMethod find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons) (optional)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
      * @return ApiResponse&lt;AuthorityEntries&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<AuthorityEntries> searchAuthoritiesWithHttpInfo(String repository, String pattern, Boolean global, String groupType, Integer maxItems, Integer skipCount) throws ApiException {
-        com.squareup.okhttp.Call call = searchAuthoritiesValidateBeforeCall(repository, pattern, global, groupType, maxItems, skipCount, null, null);
+    public ApiResponse<AuthorityEntries> searchAuthoritiesWithHttpInfo(String repository, String pattern, Boolean global, String groupType, String signupMethod, Integer maxItems, Integer skipCount) throws ApiException {
+        com.squareup.okhttp.Call call = searchAuthoritiesValidateBeforeCall(repository, pattern, global, groupType, signupMethod, maxItems, skipCount, null, null);
         Type localVarReturnType = new TypeToken<AuthorityEntries>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -3035,13 +3722,14 @@ public class IamV1Api {
      * @param pattern pattern (required)
      * @param global global search context, defaults to true, otherwise just searches for users within the organizations (optional, default to true)
      * @param groupType find a specific groupType (does nothing for persons) (optional)
+     * @param signupMethod find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons) (optional)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call searchAuthoritiesAsync(String repository, String pattern, Boolean global, String groupType, Integer maxItems, Integer skipCount, final ApiCallback<AuthorityEntries> callback) throws ApiException {
+    public com.squareup.okhttp.Call searchAuthoritiesAsync(String repository, String pattern, Boolean global, String groupType, String signupMethod, Integer maxItems, Integer skipCount, final ApiCallback<AuthorityEntries> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -3062,7 +3750,7 @@ public class IamV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = searchAuthoritiesValidateBeforeCall(repository, pattern, global, groupType, maxItems, skipCount, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = searchAuthoritiesValidateBeforeCall(repository, pattern, global, groupType, signupMethod, maxItems, skipCount, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<AuthorityEntries>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
@@ -3072,6 +3760,7 @@ public class IamV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param pattern pattern (required)
      * @param groupType find a specific groupType (optional)
+     * @param signupMethod find a specific signupMethod for groups (or asterisk for all including one) (optional)
      * @param global global search context, defaults to true, otherwise just searches for groups within the organizations (optional, default to true)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
@@ -3082,7 +3771,7 @@ public class IamV1Api {
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call searchGroupsCall(String repository, String pattern, String groupType, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call searchGroupsCall(String repository, String pattern, String groupType, String signupMethod, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -3095,6 +3784,8 @@ public class IamV1Api {
         localVarQueryParams.addAll(apiClient.parameterToPair("pattern", pattern));
         if (groupType != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("groupType", groupType));
+        if (signupMethod != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("signupMethod", signupMethod));
         if (global != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("global", global));
         if (maxItems != null)
@@ -3139,7 +3830,7 @@ public class IamV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call searchGroupsValidateBeforeCall(String repository, String pattern, String groupType, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call searchGroupsValidateBeforeCall(String repository, String pattern, String groupType, String signupMethod, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'repository' is set
         if (repository == null) {
@@ -3152,7 +3843,7 @@ public class IamV1Api {
         }
         
 
-        com.squareup.okhttp.Call call = searchGroupsCall(repository, pattern, groupType, global, maxItems, skipCount, sortProperties, sortAscending, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = searchGroupsCall(repository, pattern, groupType, signupMethod, global, maxItems, skipCount, sortProperties, sortAscending, progressListener, progressRequestListener);
         return call;
 
     }
@@ -3163,6 +3854,7 @@ public class IamV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param pattern pattern (required)
      * @param groupType find a specific groupType (optional)
+     * @param signupMethod find a specific signupMethod for groups (or asterisk for all including one) (optional)
      * @param global global search context, defaults to true, otherwise just searches for groups within the organizations (optional, default to true)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
@@ -3171,8 +3863,8 @@ public class IamV1Api {
      * @return GroupEntries
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public GroupEntries searchGroups(String repository, String pattern, String groupType, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending) throws ApiException {
-        ApiResponse<GroupEntries> resp = searchGroupsWithHttpInfo(repository, pattern, groupType, global, maxItems, skipCount, sortProperties, sortAscending);
+    public GroupEntries searchGroups(String repository, String pattern, String groupType, String signupMethod, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending) throws ApiException {
+        ApiResponse<GroupEntries> resp = searchGroupsWithHttpInfo(repository, pattern, groupType, signupMethod, global, maxItems, skipCount, sortProperties, sortAscending);
         return resp.getData();
     }
 
@@ -3182,6 +3874,7 @@ public class IamV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param pattern pattern (required)
      * @param groupType find a specific groupType (optional)
+     * @param signupMethod find a specific signupMethod for groups (or asterisk for all including one) (optional)
      * @param global global search context, defaults to true, otherwise just searches for groups within the organizations (optional, default to true)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
@@ -3190,8 +3883,8 @@ public class IamV1Api {
      * @return ApiResponse&lt;GroupEntries&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<GroupEntries> searchGroupsWithHttpInfo(String repository, String pattern, String groupType, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending) throws ApiException {
-        com.squareup.okhttp.Call call = searchGroupsValidateBeforeCall(repository, pattern, groupType, global, maxItems, skipCount, sortProperties, sortAscending, null, null);
+    public ApiResponse<GroupEntries> searchGroupsWithHttpInfo(String repository, String pattern, String groupType, String signupMethod, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending) throws ApiException {
+        com.squareup.okhttp.Call call = searchGroupsValidateBeforeCall(repository, pattern, groupType, signupMethod, global, maxItems, skipCount, sortProperties, sortAscending, null, null);
         Type localVarReturnType = new TypeToken<GroupEntries>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -3202,6 +3895,7 @@ public class IamV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param pattern pattern (required)
      * @param groupType find a specific groupType (optional)
+     * @param signupMethod find a specific signupMethod for groups (or asterisk for all including one) (optional)
      * @param global global search context, defaults to true, otherwise just searches for groups within the organizations (optional, default to true)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
@@ -3211,7 +3905,7 @@ public class IamV1Api {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call searchGroupsAsync(String repository, String pattern, String groupType, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, final ApiCallback<GroupEntries> callback) throws ApiException {
+    public com.squareup.okhttp.Call searchGroupsAsync(String repository, String pattern, String groupType, String signupMethod, Boolean global, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, final ApiCallback<GroupEntries> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -3232,7 +3926,7 @@ public class IamV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = searchGroupsValidateBeforeCall(repository, pattern, groupType, global, maxItems, skipCount, sortProperties, sortAscending, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = searchGroupsValidateBeforeCall(repository, pattern, groupType, signupMethod, global, maxItems, skipCount, sortProperties, sortAscending, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<GroupEntries>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
@@ -3543,6 +4237,554 @@ public class IamV1Api {
 
         com.squareup.okhttp.Call call = setPreferencesValidateBeforeCall(repository, person, body, progressListener, progressRequestListener);
         apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
+     * Build call for setProfileSettings
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @param body ProfileSetting Object (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call setProfileSettingsCall(String repository, String person, ProfileSettings body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = body;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/people/{repository}/{person}/profileSettings"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "person" + "\\}", apiClient.escapeString(person.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call setProfileSettingsValidateBeforeCall(String repository, String person, ProfileSettings body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling setProfileSettings(Async)");
+        }
+        
+        // verify the required parameter 'person' is set
+        if (person == null) {
+            throw new ApiException("Missing the required parameter 'person' when calling setProfileSettings(Async)");
+        }
+        
+        // verify the required parameter 'body' is set
+        if (body == null) {
+            throw new ApiException("Missing the required parameter 'body' when calling setProfileSettings(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = setProfileSettingsCall(repository, person, body, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Set profileSettings Configuration
+     * Will fail for guest
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @param body ProfileSetting Object (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public void setProfileSettings(String repository, String person, ProfileSettings body) throws ApiException {
+        setProfileSettingsWithHttpInfo(repository, person, body);
+    }
+
+    /**
+     * Set profileSettings Configuration
+     * Will fail for guest
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @param body ProfileSetting Object (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Void> setProfileSettingsWithHttpInfo(String repository, String person, ProfileSettings body) throws ApiException {
+        com.squareup.okhttp.Call call = setProfileSettingsValidateBeforeCall(repository, person, body, null, null);
+        return apiClient.execute(call);
+    }
+
+    /**
+     * Set profileSettings Configuration (asynchronously)
+     * Will fail for guest
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param person username (or \&quot;-me-\&quot; for current user) (required)
+     * @param body ProfileSetting Object (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call setProfileSettingsAsync(String repository, String person, ProfileSettings body, final ApiCallback<Void> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = setProfileSettingsValidateBeforeCall(repository, person, body, progressListener, progressRequestListener);
+        apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
+     * Build call for signupGroup
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param password Password for signup (only required if signupMethod &#x3D;&#x3D; password) (optional)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call signupGroupCall(String repository, String group, String password, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/groups/{repository}/{group}/signup"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "group" + "\\}", apiClient.escapeString(group.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (password != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("password", password));
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call signupGroupValidateBeforeCall(String repository, String group, String password, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling signupGroup(Async)");
+        }
+        
+        // verify the required parameter 'group' is set
+        if (group == null) {
+            throw new ApiException("Missing the required parameter 'group' when calling signupGroup(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = signupGroupCall(repository, group, password, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * let the current user signup to the given group
+     * 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param password Password for signup (only required if signupMethod &#x3D;&#x3D; password) (optional)
+     * @return String
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public String signupGroup(String repository, String group, String password) throws ApiException {
+        ApiResponse<String> resp = signupGroupWithHttpInfo(repository, group, password);
+        return resp.getData();
+    }
+
+    /**
+     * let the current user signup to the given group
+     * 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param password Password for signup (only required if signupMethod &#x3D;&#x3D; password) (optional)
+     * @return ApiResponse&lt;String&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<String> signupGroupWithHttpInfo(String repository, String group, String password) throws ApiException {
+        com.squareup.okhttp.Call call = signupGroupValidateBeforeCall(repository, group, password, null, null);
+        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * let the current user signup to the given group (asynchronously)
+     * 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param password Password for signup (only required if signupMethod &#x3D;&#x3D; password) (optional)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call signupGroupAsync(String repository, String group, String password, final ApiCallback<String> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = signupGroupValidateBeforeCall(repository, group, password, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
+     * Build call for signupGroupDetails
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param body Details to edit (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call signupGroupDetailsCall(String repository, String group, GroupSignupDetails body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = body;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/groups/{repository}/{group}/signup/config"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "group" + "\\}", apiClient.escapeString(group.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call signupGroupDetailsValidateBeforeCall(String repository, String group, GroupSignupDetails body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling signupGroupDetails(Async)");
+        }
+        
+        // verify the required parameter 'group' is set
+        if (group == null) {
+            throw new ApiException("Missing the required parameter 'group' when calling signupGroupDetails(Async)");
+        }
+        
+        // verify the required parameter 'body' is set
+        if (body == null) {
+            throw new ApiException("Missing the required parameter 'body' when calling signupGroupDetails(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = signupGroupDetailsCall(repository, group, body, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * set group signup options
+     *  requires admin rights
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param body Details to edit (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public void signupGroupDetails(String repository, String group, GroupSignupDetails body) throws ApiException {
+        signupGroupDetailsWithHttpInfo(repository, group, body);
+    }
+
+    /**
+     * set group signup options
+     *  requires admin rights
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param body Details to edit (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Void> signupGroupDetailsWithHttpInfo(String repository, String group, GroupSignupDetails body) throws ApiException {
+        com.squareup.okhttp.Call call = signupGroupDetailsValidateBeforeCall(repository, group, body, null, null);
+        return apiClient.execute(call);
+    }
+
+    /**
+     * set group signup options (asynchronously)
+     *  requires admin rights
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param body Details to edit (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call signupGroupDetailsAsync(String repository, String group, GroupSignupDetails body, final ApiCallback<Void> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = signupGroupDetailsValidateBeforeCall(repository, group, body, progressListener, progressRequestListener);
+        apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
+     * Build call for signupGroupList
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call signupGroupListCall(String repository, String group, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/iam/v1/groups/{repository}/{group}/signup/list"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "group" + "\\}", apiClient.escapeString(group.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call signupGroupListValidateBeforeCall(String repository, String group, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling signupGroupList(Async)");
+        }
+        
+        // verify the required parameter 'group' is set
+        if (group == null) {
+            throw new ApiException("Missing the required parameter 'group' when calling signupGroupList(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = signupGroupListCall(repository, group, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * list pending users that want to join this group
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @return List&lt;User&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public List<User> signupGroupList(String repository, String group) throws ApiException {
+        ApiResponse<List<User>> resp = signupGroupListWithHttpInfo(repository, group);
+        return resp.getData();
+    }
+
+    /**
+     * list pending users that want to join this group
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @return ApiResponse&lt;List&lt;User&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<List<User>> signupGroupListWithHttpInfo(String repository, String group) throws ApiException {
+        com.squareup.okhttp.Call call = signupGroupListValidateBeforeCall(repository, group, null, null);
+        Type localVarReturnType = new TypeToken<List<User>>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * list pending users that want to join this group (asynchronously)
+     * Requires admin rights or org administrator on this group
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param group ID of group (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call signupGroupListAsync(String repository, String group, final ApiCallback<List<User>> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = signupGroupListValidateBeforeCall(repository, group, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<List<User>>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
     /**

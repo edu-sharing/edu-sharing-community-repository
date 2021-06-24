@@ -27,10 +27,13 @@ import java.io.IOException;
 /**
  * Repo
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Repo {
   @SerializedName("repositoryType")
   private String repositoryType = null;
+
+  @SerializedName("renderingSupported")
+  private Boolean renderingSupported = false;
 
   @SerializedName("id")
   private String id = null;
@@ -63,6 +66,24 @@ public class Repo {
 
   public void setRepositoryType(String repositoryType) {
     this.repositoryType = repositoryType;
+  }
+
+  public Repo renderingSupported(Boolean renderingSupported) {
+    this.renderingSupported = renderingSupported;
+    return this;
+  }
+
+   /**
+   * Get renderingSupported
+   * @return renderingSupported
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isRenderingSupported() {
+    return renderingSupported;
+  }
+
+  public void setRenderingSupported(Boolean renderingSupported) {
+    this.renderingSupported = renderingSupported;
   }
 
   public Repo id(String id) {
@@ -166,6 +187,7 @@ public class Repo {
     }
     Repo repo = (Repo) o;
     return Objects.equals(this.repositoryType, repo.repositoryType) &&
+        Objects.equals(this.renderingSupported, repo.renderingSupported) &&
         Objects.equals(this.id, repo.id) &&
         Objects.equals(this.title, repo.title) &&
         Objects.equals(this.icon, repo.icon) &&
@@ -175,7 +197,7 @@ public class Repo {
 
   @Override
   public int hashCode() {
-    return Objects.hash(repositoryType, id, title, icon, logo, isHomeRepo);
+    return Objects.hash(repositoryType, renderingSupported, id, title, icon, logo, isHomeRepo);
   }
 
 
@@ -185,6 +207,7 @@ public class Repo {
     sb.append("class Repo {\n");
     
     sb.append("    repositoryType: ").append(toIndentedString(repositoryType)).append("\n");
+    sb.append("    renderingSupported: ").append(toIndentedString(renderingSupported)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    title: ").append(toIndentedString(title)).append("\n");
     sb.append("    icon: ").append(toIndentedString(icon)).append("\n");

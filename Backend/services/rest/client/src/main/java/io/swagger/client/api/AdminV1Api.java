@@ -36,12 +36,14 @@ import io.swagger.client.model.ErrorResponse;
 import io.swagger.client.model.ExcelResult;
 import java.io.File;
 import io.swagger.client.model.Group;
+import io.swagger.client.model.JobDescription;
 import io.swagger.client.model.JobInfo;
 import io.swagger.client.model.Node;
 import io.swagger.client.model.PersonDeleteOptions;
 import io.swagger.client.model.PersonReport;
 import io.swagger.client.model.RepositoryConfig;
 import io.swagger.client.model.SearchResult;
+import io.swagger.client.model.SearchResultElastic;
 import io.swagger.client.model.ServerUpdateInfo;
 import io.swagger.client.model.UploadResult;
 
@@ -835,6 +837,121 @@ public class AdminV1Api {
         return call;
     }
     /**
+     * Build call for clearCache
+     * @param bean bean (optional)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call clearCacheCall(String bean, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/v1/cache/clearCache";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (bean != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("bean", bean));
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call clearCacheValidateBeforeCall(String bean, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+
+        com.squareup.okhttp.Call call = clearCacheCall(bean, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * clear cache
+     * clear cache
+     * @param bean bean (optional)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public void clearCache(String bean) throws ApiException {
+        clearCacheWithHttpInfo(bean);
+    }
+
+    /**
+     * clear cache
+     * clear cache
+     * @param bean bean (optional)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Void> clearCacheWithHttpInfo(String bean) throws ApiException {
+        com.squareup.okhttp.Call call = clearCacheValidateBeforeCall(bean, null, null);
+        return apiClient.execute(call);
+    }
+
+    /**
+     * clear cache (asynchronously)
+     * clear cache
+     * @param bean bean (optional)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call clearCacheAsync(String bean, final ApiCallback<Void> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = clearCacheValidateBeforeCall(bean, progressListener, progressRequestListener);
+        apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
      * Build call for deletePerson
      * @param username names of the users to delete (required)
      * @param body options object what and how to delete user contents (optional)
@@ -968,12 +1085,13 @@ public class AdminV1Api {
      * @param sortProperties sort properties (optional)
      * @param sortAscending sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index (optional)
      * @param properties properties to fetch, use parent::&lt;property&gt; to include parent property values (optional)
+     * @param store store, workspace or archive (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call exportByLuceneCall(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call exportByLuceneCall(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties, String store, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -989,6 +1107,8 @@ public class AdminV1Api {
         localVarCollectionQueryParams.addAll(apiClient.parameterToPairs("multi", "sortAscending", sortAscending));
         if (properties != null)
         localVarCollectionQueryParams.addAll(apiClient.parameterToPairs("multi", "properties", properties));
+        if (store != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("store", store));
 
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
 
@@ -1023,10 +1143,10 @@ public class AdminV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call exportByLuceneValidateBeforeCall(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call exportByLuceneValidateBeforeCall(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties, String store, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
 
-        com.squareup.okhttp.Call call = exportByLuceneCall(query, sortProperties, sortAscending, properties, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = exportByLuceneCall(query, sortProperties, sortAscending, properties, store, progressListener, progressRequestListener);
         return call;
 
     }
@@ -1038,11 +1158,12 @@ public class AdminV1Api {
      * @param sortProperties sort properties (optional)
      * @param sortAscending sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index (optional)
      * @param properties properties to fetch, use parent::&lt;property&gt; to include parent property values (optional)
+     * @param store store, workspace or archive (optional)
      * @return List&lt;Object&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public List<Object> exportByLucene(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties) throws ApiException {
-        ApiResponse<List<Object>> resp = exportByLuceneWithHttpInfo(query, sortProperties, sortAscending, properties);
+    public List<Object> exportByLucene(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties, String store) throws ApiException {
+        ApiResponse<List<Object>> resp = exportByLuceneWithHttpInfo(query, sortProperties, sortAscending, properties, store);
         return resp.getData();
     }
 
@@ -1053,11 +1174,12 @@ public class AdminV1Api {
      * @param sortProperties sort properties (optional)
      * @param sortAscending sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index (optional)
      * @param properties properties to fetch, use parent::&lt;property&gt; to include parent property values (optional)
+     * @param store store, workspace or archive (optional)
      * @return ApiResponse&lt;List&lt;Object&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<List<Object>> exportByLuceneWithHttpInfo(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties) throws ApiException {
-        com.squareup.okhttp.Call call = exportByLuceneValidateBeforeCall(query, sortProperties, sortAscending, properties, null, null);
+    public ApiResponse<List<Object>> exportByLuceneWithHttpInfo(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties, String store) throws ApiException {
+        com.squareup.okhttp.Call call = exportByLuceneValidateBeforeCall(query, sortProperties, sortAscending, properties, store, null, null);
         Type localVarReturnType = new TypeToken<List<Object>>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -1069,11 +1191,12 @@ public class AdminV1Api {
      * @param sortProperties sort properties (optional)
      * @param sortAscending sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index (optional)
      * @param properties properties to fetch, use parent::&lt;property&gt; to include parent property values (optional)
+     * @param store store, workspace or archive (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call exportByLuceneAsync(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties, final ApiCallback<List<Object>> callback) throws ApiException {
+    public com.squareup.okhttp.Call exportByLuceneAsync(String query, List<String> sortProperties, List<Boolean> sortAscending, List<String> properties, String store, final ApiCallback<List<Object>> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -1094,7 +1217,7 @@ public class AdminV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = exportByLuceneValidateBeforeCall(query, sortProperties, sortAscending, properties, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = exportByLuceneValidateBeforeCall(query, sortProperties, sortAscending, properties, store, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<List<Object>>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
@@ -1239,6 +1362,119 @@ public class AdminV1Api {
 
         com.squareup.okhttp.Call call = exportLOMValidateBeforeCall(filterQuery, targetDir, subObjectHandler, progressListener, progressRequestListener);
         apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
+     * Build call for getAllJobs
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call getAllJobsCall(final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/v1/jobs/all";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call getAllJobsValidateBeforeCall(final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+
+        com.squareup.okhttp.Call call = getAllJobsCall(progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * get all available jobs
+     * 
+     * @return List&lt;JobDescription&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public List<JobDescription> getAllJobs() throws ApiException {
+        ApiResponse<List<JobDescription>> resp = getAllJobsWithHttpInfo();
+        return resp.getData();
+    }
+
+    /**
+     * get all available jobs
+     * 
+     * @return ApiResponse&lt;List&lt;JobDescription&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<List<JobDescription>> getAllJobsWithHttpInfo() throws ApiException {
+        com.squareup.okhttp.Call call = getAllJobsValidateBeforeCall(null, null);
+        Type localVarReturnType = new TypeToken<List<JobDescription>>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * get all available jobs (asynchronously)
+     * 
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call getAllJobsAsync(final ApiCallback<List<JobDescription>> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = getAllJobsValidateBeforeCall(progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<List<JobDescription>>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
     /**
@@ -1597,6 +1833,129 @@ public class AdminV1Api {
 
         com.squareup.okhttp.Call call = getApplicationsValidateBeforeCall(progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<List<Application>>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
+     * Build call for getCacheEntries
+     * @param id Id/bean name of the cache (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call getCacheEntriesCall(String id, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/v1/cache/cacheEntries/{id}"
+            .replaceAll("\\{" + "id" + "\\}", apiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call getCacheEntriesValidateBeforeCall(String id, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling getCacheEntries(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = getCacheEntriesCall(id, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Get entries of a cache
+     * Get entries of a cache.
+     * @param id Id/bean name of the cache (required)
+     * @return Map&lt;String, Object&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public Map<String, Object> getCacheEntries(String id) throws ApiException {
+        ApiResponse<Map<String, Object>> resp = getCacheEntriesWithHttpInfo(id);
+        return resp.getData();
+    }
+
+    /**
+     * Get entries of a cache
+     * Get entries of a cache.
+     * @param id Id/bean name of the cache (required)
+     * @return ApiResponse&lt;Map&lt;String, Object&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Map<String, Object>> getCacheEntriesWithHttpInfo(String id) throws ApiException {
+        com.squareup.okhttp.Call call = getCacheEntriesValidateBeforeCall(id, null, null);
+        Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Get entries of a cache (asynchronously)
+     * Get entries of a cache.
+     * @param id Id/bean name of the cache (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call getCacheEntriesAsync(String id, final ApiCallback<Map<String, Object>> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = getCacheEntriesValidateBeforeCall(id, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
@@ -2064,14 +2423,13 @@ public class AdminV1Api {
     }
     /**
      * Build call for getConfig
-     * @param body  (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call getConfigCall(RepositoryConfig body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
-        Object localVarPostBody = body;
+    public com.squareup.okhttp.Call getConfigCall(final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
 
         // create path and map variables
         String localVarPath = "/admin/v1/repositoryConfig";
@@ -2108,49 +2466,49 @@ public class AdminV1Api {
         }
 
         String[] localVarAuthNames = new String[] {  };
-        return apiClient.buildCall(localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call getConfigValidateBeforeCall(RepositoryConfig body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call getConfigValidateBeforeCall(final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
 
-        com.squareup.okhttp.Call call = getConfigCall(body, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = getConfigCall(progressListener, progressRequestListener);
         return call;
 
     }
 
     /**
-     * set/update the repository config object
+     * get the repository config object
      * 
-     * @param body  (optional)
+     * @return RepositoryConfig
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public void getConfig(RepositoryConfig body) throws ApiException {
-        getConfigWithHttpInfo(body);
+    public RepositoryConfig getConfig() throws ApiException {
+        ApiResponse<RepositoryConfig> resp = getConfigWithHttpInfo();
+        return resp.getData();
     }
 
     /**
-     * set/update the repository config object
+     * get the repository config object
      * 
-     * @param body  (optional)
-     * @return ApiResponse&lt;Void&gt;
+     * @return ApiResponse&lt;RepositoryConfig&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<Void> getConfigWithHttpInfo(RepositoryConfig body) throws ApiException {
-        com.squareup.okhttp.Call call = getConfigValidateBeforeCall(body, null, null);
-        return apiClient.execute(call);
+    public ApiResponse<RepositoryConfig> getConfigWithHttpInfo() throws ApiException {
+        com.squareup.okhttp.Call call = getConfigValidateBeforeCall(null, null);
+        Type localVarReturnType = new TypeToken<RepositoryConfig>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
     }
 
     /**
-     * set/update the repository config object (asynchronously)
+     * get the repository config object (asynchronously)
      * 
-     * @param body  (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call getConfigAsync(RepositoryConfig body, final ApiCallback<Void> callback) throws ApiException {
+    public com.squareup.okhttp.Call getConfigAsync(final ApiCallback<RepositoryConfig> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -2171,8 +2529,9 @@ public class AdminV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = getConfigValidateBeforeCall(body, progressListener, progressRequestListener);
-        apiClient.executeAsync(call, callback);
+        com.squareup.okhttp.Call call = getConfigValidateBeforeCall(progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<RepositoryConfig>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
     /**
@@ -3008,13 +3367,14 @@ public class AdminV1Api {
     /**
      * Build call for importExcel
      * @param parent parent (required)
+     * @param addToCollection addToCollection (required)
      * @param excel Excel file to import (required)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call importExcelCall(String parent, File excel, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call importExcelCall(String parent, Boolean addToCollection, File excel, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -3024,6 +3384,8 @@ public class AdminV1Api {
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
         if (parent != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("parent", parent));
+        if (addToCollection != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("addToCollection", addToCollection));
 
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
 
@@ -3060,11 +3422,16 @@ public class AdminV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call importExcelValidateBeforeCall(String parent, File excel, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call importExcelValidateBeforeCall(String parent, Boolean addToCollection, File excel, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'parent' is set
         if (parent == null) {
             throw new ApiException("Missing the required parameter 'parent' when calling importExcel(Async)");
+        }
+        
+        // verify the required parameter 'addToCollection' is set
+        if (addToCollection == null) {
+            throw new ApiException("Missing the required parameter 'addToCollection' when calling importExcel(Async)");
         }
         
         // verify the required parameter 'excel' is set
@@ -3073,7 +3440,7 @@ public class AdminV1Api {
         }
         
 
-        com.squareup.okhttp.Call call = importExcelCall(parent, excel, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = importExcelCall(parent, addToCollection, excel, progressListener, progressRequestListener);
         return call;
 
     }
@@ -3082,12 +3449,13 @@ public class AdminV1Api {
      * Import excel data
      * Import excel data.
      * @param parent parent (required)
+     * @param addToCollection addToCollection (required)
      * @param excel Excel file to import (required)
      * @return ExcelResult
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ExcelResult importExcel(String parent, File excel) throws ApiException {
-        ApiResponse<ExcelResult> resp = importExcelWithHttpInfo(parent, excel);
+    public ExcelResult importExcel(String parent, Boolean addToCollection, File excel) throws ApiException {
+        ApiResponse<ExcelResult> resp = importExcelWithHttpInfo(parent, addToCollection, excel);
         return resp.getData();
     }
 
@@ -3095,12 +3463,13 @@ public class AdminV1Api {
      * Import excel data
      * Import excel data.
      * @param parent parent (required)
+     * @param addToCollection addToCollection (required)
      * @param excel Excel file to import (required)
      * @return ApiResponse&lt;ExcelResult&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<ExcelResult> importExcelWithHttpInfo(String parent, File excel) throws ApiException {
-        com.squareup.okhttp.Call call = importExcelValidateBeforeCall(parent, excel, null, null);
+    public ApiResponse<ExcelResult> importExcelWithHttpInfo(String parent, Boolean addToCollection, File excel) throws ApiException {
+        com.squareup.okhttp.Call call = importExcelValidateBeforeCall(parent, addToCollection, excel, null, null);
         Type localVarReturnType = new TypeToken<ExcelResult>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -3109,12 +3478,13 @@ public class AdminV1Api {
      * Import excel data (asynchronously)
      * Import excel data.
      * @param parent parent (required)
+     * @param addToCollection addToCollection (required)
      * @param excel Excel file to import (required)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call importExcelAsync(String parent, File excel, final ApiCallback<ExcelResult> callback) throws ApiException {
+    public com.squareup.okhttp.Call importExcelAsync(String parent, Boolean addToCollection, File excel, final ApiCallback<ExcelResult> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -3135,7 +3505,7 @@ public class AdminV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = importExcelValidateBeforeCall(parent, excel, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = importExcelValidateBeforeCall(parent, addToCollection, excel, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<ExcelResult>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
@@ -3150,15 +3520,19 @@ public class AdminV1Api {
      * @param importerClassName importer class name (call /classes to obtain a list) (optional, default to org.edu_sharing.repository.server.importer.OAIPMHLOMImporter)
      * @param recordHandlerClassName RecordHandler class name (optional, default to org.edu_sharing.repository.server.importer.RecordHandlerLOM)
      * @param binaryHandlerClassName BinaryHandler class name (may be empty for none) (optional)
+     * @param persistentHandlerClassName PersistentHandlerClassName class name (may be empty for none) (optional)
      * @param fileUrl url to file (optional)
      * @param oaiIds OAI Ids to import, can be null than the whole set will be imported (optional)
      * @param forceUpdate force Update of all entries (optional, default to false)
+     * @param from from: datestring yyyy-MM-dd) (optional)
+     * @param until until: datestring yyyy-MM-dd) (optional)
+     * @param periodInDays periodInDays: internal sets from and until. only effective if from/until not set) (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call importOaiCall(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call importOaiCall(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String persistentHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate, String from, String until, String periodInDays, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -3182,12 +3556,20 @@ public class AdminV1Api {
         localVarQueryParams.addAll(apiClient.parameterToPair("recordHandlerClassName", recordHandlerClassName));
         if (binaryHandlerClassName != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("binaryHandlerClassName", binaryHandlerClassName));
+        if (persistentHandlerClassName != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("persistentHandlerClassName", persistentHandlerClassName));
         if (fileUrl != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("fileUrl", fileUrl));
         if (oaiIds != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("oaiIds", oaiIds));
         if (forceUpdate != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("forceUpdate", forceUpdate));
+        if (from != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("from", from));
+        if (until != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("until", until));
+        if (periodInDays != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("periodInDays", periodInDays));
 
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
 
@@ -3222,7 +3604,7 @@ public class AdminV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call importOaiValidateBeforeCall(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call importOaiValidateBeforeCall(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String persistentHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate, String from, String until, String periodInDays, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'baseUrl' is set
         if (baseUrl == null) {
@@ -3245,7 +3627,7 @@ public class AdminV1Api {
         }
         
 
-        com.squareup.okhttp.Call call = importOaiCall(baseUrl, set, metadataPrefix, className, metadataset, importerClassName, recordHandlerClassName, binaryHandlerClassName, fileUrl, oaiIds, forceUpdate, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = importOaiCall(baseUrl, set, metadataPrefix, className, metadataset, importerClassName, recordHandlerClassName, binaryHandlerClassName, persistentHandlerClassName, fileUrl, oaiIds, forceUpdate, from, until, periodInDays, progressListener, progressRequestListener);
         return call;
 
     }
@@ -3261,13 +3643,17 @@ public class AdminV1Api {
      * @param importerClassName importer class name (call /classes to obtain a list) (optional, default to org.edu_sharing.repository.server.importer.OAIPMHLOMImporter)
      * @param recordHandlerClassName RecordHandler class name (optional, default to org.edu_sharing.repository.server.importer.RecordHandlerLOM)
      * @param binaryHandlerClassName BinaryHandler class name (may be empty for none) (optional)
+     * @param persistentHandlerClassName PersistentHandlerClassName class name (may be empty for none) (optional)
      * @param fileUrl url to file (optional)
      * @param oaiIds OAI Ids to import, can be null than the whole set will be imported (optional)
      * @param forceUpdate force Update of all entries (optional, default to false)
+     * @param from from: datestring yyyy-MM-dd) (optional)
+     * @param until until: datestring yyyy-MM-dd) (optional)
+     * @param periodInDays periodInDays: internal sets from and until. only effective if from/until not set) (optional)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public void importOai(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate) throws ApiException {
-        importOaiWithHttpInfo(baseUrl, set, metadataPrefix, className, metadataset, importerClassName, recordHandlerClassName, binaryHandlerClassName, fileUrl, oaiIds, forceUpdate);
+    public void importOai(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String persistentHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate, String from, String until, String periodInDays) throws ApiException {
+        importOaiWithHttpInfo(baseUrl, set, metadataPrefix, className, metadataset, importerClassName, recordHandlerClassName, binaryHandlerClassName, persistentHandlerClassName, fileUrl, oaiIds, forceUpdate, from, until, periodInDays);
     }
 
     /**
@@ -3281,14 +3667,18 @@ public class AdminV1Api {
      * @param importerClassName importer class name (call /classes to obtain a list) (optional, default to org.edu_sharing.repository.server.importer.OAIPMHLOMImporter)
      * @param recordHandlerClassName RecordHandler class name (optional, default to org.edu_sharing.repository.server.importer.RecordHandlerLOM)
      * @param binaryHandlerClassName BinaryHandler class name (may be empty for none) (optional)
+     * @param persistentHandlerClassName PersistentHandlerClassName class name (may be empty for none) (optional)
      * @param fileUrl url to file (optional)
      * @param oaiIds OAI Ids to import, can be null than the whole set will be imported (optional)
      * @param forceUpdate force Update of all entries (optional, default to false)
+     * @param from from: datestring yyyy-MM-dd) (optional)
+     * @param until until: datestring yyyy-MM-dd) (optional)
+     * @param periodInDays periodInDays: internal sets from and until. only effective if from/until not set) (optional)
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<Void> importOaiWithHttpInfo(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate) throws ApiException {
-        com.squareup.okhttp.Call call = importOaiValidateBeforeCall(baseUrl, set, metadataPrefix, className, metadataset, importerClassName, recordHandlerClassName, binaryHandlerClassName, fileUrl, oaiIds, forceUpdate, null, null);
+    public ApiResponse<Void> importOaiWithHttpInfo(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String persistentHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate, String from, String until, String periodInDays) throws ApiException {
+        com.squareup.okhttp.Call call = importOaiValidateBeforeCall(baseUrl, set, metadataPrefix, className, metadataset, importerClassName, recordHandlerClassName, binaryHandlerClassName, persistentHandlerClassName, fileUrl, oaiIds, forceUpdate, from, until, periodInDays, null, null);
         return apiClient.execute(call);
     }
 
@@ -3303,14 +3693,18 @@ public class AdminV1Api {
      * @param importerClassName importer class name (call /classes to obtain a list) (optional, default to org.edu_sharing.repository.server.importer.OAIPMHLOMImporter)
      * @param recordHandlerClassName RecordHandler class name (optional, default to org.edu_sharing.repository.server.importer.RecordHandlerLOM)
      * @param binaryHandlerClassName BinaryHandler class name (may be empty for none) (optional)
+     * @param persistentHandlerClassName PersistentHandlerClassName class name (may be empty for none) (optional)
      * @param fileUrl url to file (optional)
      * @param oaiIds OAI Ids to import, can be null than the whole set will be imported (optional)
      * @param forceUpdate force Update of all entries (optional, default to false)
+     * @param from from: datestring yyyy-MM-dd) (optional)
+     * @param until until: datestring yyyy-MM-dd) (optional)
+     * @param periodInDays periodInDays: internal sets from and until. only effective if from/until not set) (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call importOaiAsync(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate, final ApiCallback<Void> callback) throws ApiException {
+    public com.squareup.okhttp.Call importOaiAsync(String baseUrl, String set, String metadataPrefix, String className, String metadataset, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String persistentHandlerClassName, String fileUrl, String oaiIds, Boolean forceUpdate, String from, String until, String periodInDays, final ApiCallback<Void> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -3331,7 +3725,7 @@ public class AdminV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = importOaiValidateBeforeCall(baseUrl, set, metadataPrefix, className, metadataset, importerClassName, recordHandlerClassName, binaryHandlerClassName, fileUrl, oaiIds, forceUpdate, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = importOaiValidateBeforeCall(baseUrl, set, metadataPrefix, className, metadataset, importerClassName, recordHandlerClassName, binaryHandlerClassName, persistentHandlerClassName, fileUrl, oaiIds, forceUpdate, from, until, periodInDays, progressListener, progressRequestListener);
         apiClient.executeAsync(call, callback);
         return call;
     }
@@ -3942,7 +4336,7 @@ public class AdminV1Api {
     /**
      * Build call for removeCacheEntry
      * @param cacheIndex cacheIndex (optional)
-     * @param bean bean (optional, default to false)
+     * @param bean bean (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
@@ -4006,7 +4400,7 @@ public class AdminV1Api {
      * remove cache entry
      * remove cache entry
      * @param cacheIndex cacheIndex (optional)
-     * @param bean bean (optional, default to false)
+     * @param bean bean (optional)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
     public void removeCacheEntry(Integer cacheIndex, String bean) throws ApiException {
@@ -4017,7 +4411,7 @@ public class AdminV1Api {
      * remove cache entry
      * remove cache entry
      * @param cacheIndex cacheIndex (optional)
-     * @param bean bean (optional, default to false)
+     * @param bean bean (optional)
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
@@ -4030,7 +4424,7 @@ public class AdminV1Api {
      * remove cache entry (asynchronously)
      * remove cache entry
      * @param cacheIndex cacheIndex (optional)
-     * @param bean bean (optional, default to false)
+     * @param bean bean (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -4203,6 +4597,125 @@ public class AdminV1Api {
         return call;
     }
     /**
+     * Build call for searchByElasticDSL
+     * @param dsl dsl query (json encoded) (optional)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call searchByElasticDSLCall(String dsl, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/v1/elastic";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (dsl != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("dsl", dsl));
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call searchByElasticDSLValidateBeforeCall(String dsl, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+
+        com.squareup.okhttp.Call call = searchByElasticDSLCall(dsl, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Search for custom elastic DSL query
+     * 
+     * @param dsl dsl query (json encoded) (optional)
+     * @return SearchResultElastic
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public SearchResultElastic searchByElasticDSL(String dsl) throws ApiException {
+        ApiResponse<SearchResultElastic> resp = searchByElasticDSLWithHttpInfo(dsl);
+        return resp.getData();
+    }
+
+    /**
+     * Search for custom elastic DSL query
+     * 
+     * @param dsl dsl query (json encoded) (optional)
+     * @return ApiResponse&lt;SearchResultElastic&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<SearchResultElastic> searchByElasticDSLWithHttpInfo(String dsl) throws ApiException {
+        com.squareup.okhttp.Call call = searchByElasticDSLValidateBeforeCall(dsl, null, null);
+        Type localVarReturnType = new TypeToken<SearchResultElastic>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Search for custom elastic DSL query (asynchronously)
+     * 
+     * @param dsl dsl query (json encoded) (optional)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call searchByElasticDSLAsync(String dsl, final ApiCallback<SearchResultElastic> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = searchByElasticDSLValidateBeforeCall(dsl, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<SearchResultElastic>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
      * Build call for searchByLucene
      * @param query query (optional, default to @cm\:name:"*")
      * @param maxItems maximum items per page (optional, default to 10)
@@ -4210,13 +4723,14 @@ public class AdminV1Api {
      * @param sortProperties sort properties (optional)
      * @param sortAscending sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index (optional)
      * @param propertyFilter property filter for result nodes (or \&quot;-all-\&quot; for all properties) (optional)
+     * @param store store, workspace or archive (optional)
      * @param authorityScope authority scope to search for (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call searchByLuceneCall(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, List<String> authorityScope, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call searchByLuceneCall(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, String store, List<String> authorityScope, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -4236,6 +4750,8 @@ public class AdminV1Api {
         localVarCollectionQueryParams.addAll(apiClient.parameterToPairs("multi", "sortAscending", sortAscending));
         if (propertyFilter != null)
         localVarCollectionQueryParams.addAll(apiClient.parameterToPairs("multi", "propertyFilter", propertyFilter));
+        if (store != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("store", store));
         if (authorityScope != null)
         localVarCollectionQueryParams.addAll(apiClient.parameterToPairs("multi", "authorityScope", authorityScope));
 
@@ -4272,10 +4788,10 @@ public class AdminV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call searchByLuceneValidateBeforeCall(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, List<String> authorityScope, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call searchByLuceneValidateBeforeCall(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, String store, List<String> authorityScope, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
 
-        com.squareup.okhttp.Call call = searchByLuceneCall(query, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, authorityScope, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = searchByLuceneCall(query, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, store, authorityScope, progressListener, progressRequestListener);
         return call;
 
     }
@@ -4289,12 +4805,13 @@ public class AdminV1Api {
      * @param sortProperties sort properties (optional)
      * @param sortAscending sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index (optional)
      * @param propertyFilter property filter for result nodes (or \&quot;-all-\&quot; for all properties) (optional)
+     * @param store store, workspace or archive (optional)
      * @param authorityScope authority scope to search for (optional)
      * @return SearchResult
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public SearchResult searchByLucene(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, List<String> authorityScope) throws ApiException {
-        ApiResponse<SearchResult> resp = searchByLuceneWithHttpInfo(query, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, authorityScope);
+    public SearchResult searchByLucene(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, String store, List<String> authorityScope) throws ApiException {
+        ApiResponse<SearchResult> resp = searchByLuceneWithHttpInfo(query, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, store, authorityScope);
         return resp.getData();
     }
 
@@ -4307,12 +4824,13 @@ public class AdminV1Api {
      * @param sortProperties sort properties (optional)
      * @param sortAscending sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index (optional)
      * @param propertyFilter property filter for result nodes (or \&quot;-all-\&quot; for all properties) (optional)
+     * @param store store, workspace or archive (optional)
      * @param authorityScope authority scope to search for (optional)
      * @return ApiResponse&lt;SearchResult&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<SearchResult> searchByLuceneWithHttpInfo(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, List<String> authorityScope) throws ApiException {
-        com.squareup.okhttp.Call call = searchByLuceneValidateBeforeCall(query, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, authorityScope, null, null);
+    public ApiResponse<SearchResult> searchByLuceneWithHttpInfo(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, String store, List<String> authorityScope) throws ApiException {
+        com.squareup.okhttp.Call call = searchByLuceneValidateBeforeCall(query, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, store, authorityScope, null, null);
         Type localVarReturnType = new TypeToken<SearchResult>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -4326,12 +4844,13 @@ public class AdminV1Api {
      * @param sortProperties sort properties (optional)
      * @param sortAscending sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index (optional)
      * @param propertyFilter property filter for result nodes (or \&quot;-all-\&quot; for all properties) (optional)
+     * @param store store, workspace or archive (optional)
      * @param authorityScope authority scope to search for (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call searchByLuceneAsync(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, List<String> authorityScope, final ApiCallback<SearchResult> callback) throws ApiException {
+    public com.squareup.okhttp.Call searchByLuceneAsync(String query, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, String store, List<String> authorityScope, final ApiCallback<SearchResult> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -4352,7 +4871,7 @@ public class AdminV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = searchByLuceneValidateBeforeCall(query, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, authorityScope, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = searchByLuceneValidateBeforeCall(query, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, store, authorityScope, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<SearchResult>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
@@ -4606,13 +5125,14 @@ public class AdminV1Api {
     }
     /**
      * Build call for setConfig
+     * @param body  (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call setConfigCall(final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
-        Object localVarPostBody = null;
+    public com.squareup.okhttp.Call setConfigCall(RepositoryConfig body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = body;
 
         // create path and map variables
         String localVarPath = "/admin/v1/repositoryConfig";
@@ -4649,49 +5169,49 @@ public class AdminV1Api {
         }
 
         String[] localVarAuthNames = new String[] {  };
-        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+        return apiClient.buildCall(localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call setConfigValidateBeforeCall(final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call setConfigValidateBeforeCall(RepositoryConfig body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
 
-        com.squareup.okhttp.Call call = setConfigCall(progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = setConfigCall(body, progressListener, progressRequestListener);
         return call;
 
     }
 
     /**
-     * get the repository config object
+     * set/update the repository config object
      * 
-     * @return RepositoryConfig
+     * @param body  (optional)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public RepositoryConfig setConfig() throws ApiException {
-        ApiResponse<RepositoryConfig> resp = setConfigWithHttpInfo();
-        return resp.getData();
+    public void setConfig(RepositoryConfig body) throws ApiException {
+        setConfigWithHttpInfo(body);
     }
 
     /**
-     * get the repository config object
+     * set/update the repository config object
      * 
-     * @return ApiResponse&lt;RepositoryConfig&gt;
+     * @param body  (optional)
+     * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<RepositoryConfig> setConfigWithHttpInfo() throws ApiException {
-        com.squareup.okhttp.Call call = setConfigValidateBeforeCall(null, null);
-        Type localVarReturnType = new TypeToken<RepositoryConfig>(){}.getType();
-        return apiClient.execute(call, localVarReturnType);
+    public ApiResponse<Void> setConfigWithHttpInfo(RepositoryConfig body) throws ApiException {
+        com.squareup.okhttp.Call call = setConfigValidateBeforeCall(body, null, null);
+        return apiClient.execute(call);
     }
 
     /**
-     * get the repository config object (asynchronously)
+     * set/update the repository config object (asynchronously)
      * 
+     * @param body  (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call setConfigAsync(final ApiCallback<RepositoryConfig> callback) throws ApiException {
+    public com.squareup.okhttp.Call setConfigAsync(RepositoryConfig body, final ApiCallback<Void> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -4712,9 +5232,8 @@ public class AdminV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = setConfigValidateBeforeCall(progressListener, progressRequestListener);
-        Type localVarReturnType = new TypeToken<RepositoryConfig>(){}.getType();
-        apiClient.executeAsync(call, localVarReturnType, callback);
+        com.squareup.okhttp.Call call = setConfigValidateBeforeCall(body, progressListener, progressRequestListener);
+        apiClient.executeAsync(call, callback);
         return call;
     }
     /**

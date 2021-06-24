@@ -22,13 +22,14 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.AccumulatedRatings;
 import io.swagger.client.model.Collection;
 import io.swagger.client.model.Content;
 import io.swagger.client.model.License;
+import io.swagger.client.model.Node;
 import io.swagger.client.model.NodeRef;
 import io.swagger.client.model.Person;
 import io.swagger.client.model.Preview;
+import io.swagger.client.model.RatingDetails;
 import io.swagger.client.model.Remote;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import org.threeten.bp.OffsetDateTime;
 /**
  * Node
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Node {
   @SerializedName("remote")
   private Remote remote = null;
@@ -58,7 +59,10 @@ public class Node {
   private Integer commentCount = null;
 
   @SerializedName("rating")
-  private AccumulatedRatings rating = null;
+  private RatingDetails rating = null;
+
+  @SerializedName("usedInCollections")
+  private List<Node> usedInCollections = null;
 
   @SerializedName("ref")
   private NodeRef ref = null;
@@ -216,7 +220,7 @@ public class Node {
     this.commentCount = commentCount;
   }
 
-  public Node rating(AccumulatedRatings rating) {
+  public Node rating(RatingDetails rating) {
     this.rating = rating;
     return this;
   }
@@ -226,12 +230,38 @@ public class Node {
    * @return rating
   **/
   @ApiModelProperty(value = "")
-  public AccumulatedRatings getRating() {
+  public RatingDetails getRating() {
     return rating;
   }
 
-  public void setRating(AccumulatedRatings rating) {
+  public void setRating(RatingDetails rating) {
     this.rating = rating;
+  }
+
+  public Node usedInCollections(List<Node> usedInCollections) {
+    this.usedInCollections = usedInCollections;
+    return this;
+  }
+
+  public Node addUsedInCollectionsItem(Node usedInCollectionsItem) {
+    if (this.usedInCollections == null) {
+      this.usedInCollections = new ArrayList<Node>();
+    }
+    this.usedInCollections.add(usedInCollectionsItem);
+    return this;
+  }
+
+   /**
+   * Get usedInCollections
+   * @return usedInCollections
+  **/
+  @ApiModelProperty(value = "")
+  public List<Node> getUsedInCollections() {
+    return usedInCollections;
+  }
+
+  public void setUsedInCollections(List<Node> usedInCollections) {
+    this.usedInCollections = usedInCollections;
   }
 
   public Node ref(NodeRef ref) {
@@ -667,6 +697,7 @@ public class Node {
         Objects.equals(this.isDirectory, node.isDirectory) &&
         Objects.equals(this.commentCount, node.commentCount) &&
         Objects.equals(this.rating, node.rating) &&
+        Objects.equals(this.usedInCollections, node.usedInCollections) &&
         Objects.equals(this.ref, node.ref) &&
         Objects.equals(this.parent, node.parent) &&
         Objects.equals(this.type, node.type) &&
@@ -693,7 +724,7 @@ public class Node {
 
   @Override
   public int hashCode() {
-    return Objects.hash(remote, content, license, isDirectory, commentCount, rating, ref, parent, type, aspects, name, title, metadataset, repositoryType, createdAt, createdBy, modifiedAt, modifiedBy, access, downloadUrl, properties, mimetype, mediatype, size, preview, iconURL, collection, owner);
+    return Objects.hash(remote, content, license, isDirectory, commentCount, rating, usedInCollections, ref, parent, type, aspects, name, title, metadataset, repositoryType, createdAt, createdBy, modifiedAt, modifiedBy, access, downloadUrl, properties, mimetype, mediatype, size, preview, iconURL, collection, owner);
   }
 
 
@@ -708,6 +739,7 @@ public class Node {
     sb.append("    isDirectory: ").append(toIndentedString(isDirectory)).append("\n");
     sb.append("    commentCount: ").append(toIndentedString(commentCount)).append("\n");
     sb.append("    rating: ").append(toIndentedString(rating)).append("\n");
+    sb.append("    usedInCollections: ").append(toIndentedString(usedInCollections)).append("\n");
     sb.append("    ref: ").append(toIndentedString(ref)).append("\n");
     sb.append("    parent: ").append(toIndentedString(parent)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");

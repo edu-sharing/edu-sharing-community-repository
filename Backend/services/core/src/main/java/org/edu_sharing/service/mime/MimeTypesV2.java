@@ -22,6 +22,7 @@ public class MimeTypesV2 {
 	public static final String MIME_DIRECTORY="application/x-directory";
 
 	private static HashMap<String, String> extensionMimeMap;
+	private static HashMap<String, String> lrtMimeMap;
 	private final ApplicationInfo appInfo;
 	private String theme;
 	private final PathType pathType;
@@ -293,6 +294,24 @@ private static boolean isLtiObject(List<String> aspects) {
 		return false;
 	return aspects.contains(CCConstants.CCM_ASPECT_TOOL_OBJECT);
 }
+	public static HashMap<String, String> getLrtMimeMap() {
+
+		if (lrtMimeMap == null) {
+			lrtMimeMap = new HashMap<>();
+			lrtMimeMap.put("audio", "audio/*");
+			lrtMimeMap.put("audiovisual_medium", "video/*");
+			lrtMimeMap.put("audiovisual medium", "video/*");
+			lrtMimeMap.put("broadcast", "audio/*");
+			lrtMimeMap.put("data", "application/octet-stream");
+			lrtMimeMap.put("image", "image/*");
+			lrtMimeMap.put("photograph", "image/*");
+			lrtMimeMap.put("text", "text/*");
+			lrtMimeMap.put("video", "video/*");
+			// maybe to specific?
+			lrtMimeMap.put("presentation", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+		}
+		return lrtMimeMap;
+	}
 public static HashMap<String, String> getExtensionMimeMap() {
 		
 		if(extensionMimeMap == null){
@@ -406,7 +425,11 @@ public static HashMap<String, String> getExtensionMimeMap() {
 		
 		if(mimeType==null && properties.containsKey((CCConstants.CM_NAME))){
 			String[] name=((String) properties.get(CCConstants.CM_NAME)).split("\\.");
-			return getExtensionMimeMap().get(name[name.length-1].toLowerCase());	
+			mimeType = getExtensionMimeMap().get(name[name.length-1].toLowerCase());
+		}
+		// try to map from learningResourceType
+		if(mimeType == null && properties.containsKey(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE)) {
+			mimeType = getLrtMimeMap().get(properties.get(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE));
 		}
 		return mimeType;
 	}

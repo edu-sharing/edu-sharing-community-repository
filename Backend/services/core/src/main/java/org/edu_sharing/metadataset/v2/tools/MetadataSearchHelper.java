@@ -213,7 +213,12 @@ public class MetadataSearchHelper {
 			statement = con.prepareStatement(query);
 			
 			value = StringEscapeUtils.escapeSql(value);
-			statement.setString(1,"%" + value.toLowerCase() + "%");
+
+			//statement.setString(1,"%" + value.toLowerCase() + "%");
+			long countParams = query.chars().filter(ch->ch == '?').count();
+			for(int i = 1; i <= countParams;i++){
+				statement.setString(i,"%" + value.toLowerCase() + "%");
+			}
 			
 			java.sql.ResultSet resultSet = statement.executeQuery();
 		

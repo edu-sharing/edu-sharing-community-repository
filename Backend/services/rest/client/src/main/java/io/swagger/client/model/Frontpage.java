@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Frontpage
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Frontpage {
   @SerializedName("totalCount")
   private Integer totalCount = null;
@@ -92,57 +92,11 @@ public class Frontpage {
   @SerializedName("mode")
   private ModeEnum mode = null;
 
-  /**
-   * Gets or Sets timespan
-   */
-  @JsonAdapter(TimespanEnum.Adapter.class)
-  public enum TimespanEnum {
-    DAYS_30("days_30"),
-    
-    DAYS_100("days_100"),
-    
-    ALL("all");
-
-    private String value;
-
-    TimespanEnum(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return value;
-    }
-
-    @Override
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    public static TimespanEnum fromValue(String text) {
-      for (TimespanEnum b : TimespanEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-
-    public static class Adapter extends TypeAdapter<TimespanEnum> {
-      @Override
-      public void write(final JsonWriter jsonWriter, final TimespanEnum enumeration) throws IOException {
-        jsonWriter.value(enumeration.getValue());
-      }
-
-      @Override
-      public TimespanEnum read(final JsonReader jsonReader) throws IOException {
-        String value = jsonReader.nextString();
-        return TimespanEnum.fromValue(String.valueOf(value));
-      }
-    }
-  }
-
   @SerializedName("timespan")
-  private TimespanEnum timespan = null;
+  private Integer timespan = null;
+
+  @SerializedName("timespanAll")
+  private Boolean timespanAll = false;
 
   @SerializedName("queries")
   private List<Query> queries = null;
@@ -204,7 +158,7 @@ public class Frontpage {
     this.mode = mode;
   }
 
-  public Frontpage timespan(TimespanEnum timespan) {
+  public Frontpage timespan(Integer timespan) {
     this.timespan = timespan;
     return this;
   }
@@ -214,12 +168,30 @@ public class Frontpage {
    * @return timespan
   **/
   @ApiModelProperty(value = "")
-  public TimespanEnum getTimespan() {
+  public Integer getTimespan() {
     return timespan;
   }
 
-  public void setTimespan(TimespanEnum timespan) {
+  public void setTimespan(Integer timespan) {
     this.timespan = timespan;
+  }
+
+  public Frontpage timespanAll(Boolean timespanAll) {
+    this.timespanAll = timespanAll;
+    return this;
+  }
+
+   /**
+   * Get timespanAll
+   * @return timespanAll
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isTimespanAll() {
+    return timespanAll;
+  }
+
+  public void setTimespanAll(Boolean timespanAll) {
+    this.timespanAll = timespanAll;
   }
 
   public Frontpage queries(List<Query> queries) {
@@ -280,13 +252,14 @@ public class Frontpage {
         Objects.equals(this.displayCount, frontpage.displayCount) &&
         Objects.equals(this.mode, frontpage.mode) &&
         Objects.equals(this.timespan, frontpage.timespan) &&
+        Objects.equals(this.timespanAll, frontpage.timespanAll) &&
         Objects.equals(this.queries, frontpage.queries) &&
         Objects.equals(this.collection, frontpage.collection);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(totalCount, displayCount, mode, timespan, queries, collection);
+    return Objects.hash(totalCount, displayCount, mode, timespan, timespanAll, queries, collection);
   }
 
 
@@ -299,6 +272,7 @@ public class Frontpage {
     sb.append("    displayCount: ").append(toIndentedString(displayCount)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
     sb.append("    timespan: ").append(toIndentedString(timespan)).append("\n");
+    sb.append("    timespanAll: ").append(toIndentedString(timespanAll)).append("\n");
     sb.append("    queries: ").append(toIndentedString(queries)).append("\n");
     sb.append("    collection: ").append(toIndentedString(collection)).append("\n");
     sb.append("}");

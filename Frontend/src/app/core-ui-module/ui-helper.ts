@@ -3,7 +3,7 @@ import {ConfigurationService} from '../core-module/rest/services/configuration.s
 import {TranslateService} from '@ngx-translate/core';
 import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
 import {
-    Collection,
+    Collection, CollectionReference,
     Connector,
     Filetype,
     LoginResult,
@@ -362,7 +362,7 @@ export class UIHelper {
         bridge: BridgeService,
         collection: Node,
         nodes: Node[],
-        callback: (nodes: Node[]) => void = null,
+        callback: (nodes: CollectionReference[]) => void = null,
         allowDuplicate = false,
     ) {
         Observable.forkJoin(nodes.map(node =>
@@ -399,7 +399,7 @@ export class UIHelper {
                             () => {
                                 bridge.closeModalDialog();
                                 if (callback) {
-                                    callback(results.map(n => n.node));
+                                    callback(results.map(n => n.node as CollectionReference));
                                 }
                             },
                             () => {
@@ -427,7 +427,7 @@ export class UIHelper {
             }
 
             if (callback) {
-                callback(success.map(n => n.node));
+                callback(success.map(n => n.node as CollectionReference));
             }
         });
     }

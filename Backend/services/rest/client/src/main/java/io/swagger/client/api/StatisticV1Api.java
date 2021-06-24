@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import io.swagger.client.model.ErrorResponse;
 import io.swagger.client.model.Filter;
+import io.swagger.client.model.NodeData;
 import io.swagger.client.model.Statistics;
 import io.swagger.client.model.StatisticsGlobal;
 import io.swagger.client.model.Tracking;
@@ -323,6 +324,264 @@ public class StatisticV1Api {
         return call;
     }
     /**
+     * Build call for getNodeData
+     * @param id node id to fetch data for (required)
+     * @param dateFrom date range from (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call getNodeDataCall(String id, Long dateFrom, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/statistic/v1/statistics/nodes/node/{id}"
+            .replaceAll("\\{" + "id" + "\\}", apiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (dateFrom != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("dateFrom", dateFrom));
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call getNodeDataValidateBeforeCall(String id, Long dateFrom, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling getNodeData(Async)");
+        }
+        
+        // verify the required parameter 'dateFrom' is set
+        if (dateFrom == null) {
+            throw new ApiException("Missing the required parameter 'dateFrom' when calling getNodeData(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = getNodeDataCall(id, dateFrom, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp
+     * requires admin
+     * @param id node id to fetch data for (required)
+     * @param dateFrom date range from (required)
+     * @return List&lt;NodeData&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public List<NodeData> getNodeData(String id, Long dateFrom) throws ApiException {
+        ApiResponse<List<NodeData>> resp = getNodeDataWithHttpInfo(id, dateFrom);
+        return resp.getData();
+    }
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp
+     * requires admin
+     * @param id node id to fetch data for (required)
+     * @param dateFrom date range from (required)
+     * @return ApiResponse&lt;List&lt;NodeData&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<List<NodeData>> getNodeDataWithHttpInfo(String id, Long dateFrom) throws ApiException {
+        com.squareup.okhttp.Call call = getNodeDataValidateBeforeCall(id, dateFrom, null, null);
+        Type localVarReturnType = new TypeToken<List<NodeData>>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp (asynchronously)
+     * requires admin
+     * @param id node id to fetch data for (required)
+     * @param dateFrom date range from (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call getNodeDataAsync(String id, Long dateFrom, final ApiCallback<List<NodeData>> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = getNodeDataValidateBeforeCall(id, dateFrom, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<List<NodeData>>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
+     * Build call for getNodesAlteredInRange
+     * @param dateFrom date range from (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call getNodesAlteredInRangeCall(Long dateFrom, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/statistic/v1/statistics/nodes/altered";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (dateFrom != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("dateFrom", dateFrom));
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call getNodesAlteredInRangeValidateBeforeCall(Long dateFrom, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'dateFrom' is set
+        if (dateFrom == null) {
+            throw new ApiException("Missing the required parameter 'dateFrom' when calling getNodesAlteredInRange(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = getNodesAlteredInRangeCall(dateFrom, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp
+     * requires admin
+     * @param dateFrom date range from (required)
+     * @return List&lt;String&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public List<String> getNodesAlteredInRange(Long dateFrom) throws ApiException {
+        ApiResponse<List<String>> resp = getNodesAlteredInRangeWithHttpInfo(dateFrom);
+        return resp.getData();
+    }
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp
+     * requires admin
+     * @param dateFrom date range from (required)
+     * @return ApiResponse&lt;List&lt;String&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<List<String>> getNodesAlteredInRangeWithHttpInfo(Long dateFrom) throws ApiException {
+        com.squareup.okhttp.Call call = getNodesAlteredInRangeValidateBeforeCall(dateFrom, null, null);
+        Type localVarReturnType = new TypeToken<List<String>>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp (asynchronously)
+     * requires admin
+     * @param dateFrom date range from (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call getNodesAlteredInRangeAsync(Long dateFrom, final ApiCallback<List<String>> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = getNodesAlteredInRangeValidateBeforeCall(dateFrom, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<List<String>>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
      * Build call for getStatisticsNode
      * @param grouping Grouping type (by date) (required)
      * @param dateFrom date range from (required)
@@ -415,7 +674,7 @@ public class StatisticV1Api {
 
     /**
      * get statistics for node actions
-     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS for global stats or to be admin of the requested mediacenter
+     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_NODES for global stats or to be admin of the requested mediacenter
      * @param grouping Grouping type (by date) (required)
      * @param dateFrom date range from (required)
      * @param dateTo date range to (required)
@@ -433,7 +692,7 @@ public class StatisticV1Api {
 
     /**
      * get statistics for node actions
-     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS for global stats or to be admin of the requested mediacenter
+     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_NODES for global stats or to be admin of the requested mediacenter
      * @param grouping Grouping type (by date) (required)
      * @param dateFrom date range from (required)
      * @param dateTo date range to (required)
@@ -452,7 +711,7 @@ public class StatisticV1Api {
 
     /**
      * get statistics for node actions (asynchronously)
-     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS for global stats or to be admin of the requested mediacenter
+     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_NODES for global stats or to be admin of the requested mediacenter
      * @param grouping Grouping type (by date) (required)
      * @param dateFrom date range from (required)
      * @param dateTo date range to (required)
@@ -583,7 +842,7 @@ public class StatisticV1Api {
 
     /**
      * get statistics for user actions (login, logout)
-     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS for global stats or to be admin of the requested mediacenter
+     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_USER for global stats or to be admin of the requested mediacenter
      * @param grouping Grouping type (by date) (required)
      * @param dateFrom date range from (required)
      * @param dateTo date range to (required)
@@ -601,7 +860,7 @@ public class StatisticV1Api {
 
     /**
      * get statistics for user actions (login, logout)
-     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS for global stats or to be admin of the requested mediacenter
+     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_USER for global stats or to be admin of the requested mediacenter
      * @param grouping Grouping type (by date) (required)
      * @param dateFrom date range from (required)
      * @param dateTo date range to (required)
@@ -620,7 +879,7 @@ public class StatisticV1Api {
 
     /**
      * get statistics for user actions (login, logout) (asynchronously)
-     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS for global stats or to be admin of the requested mediacenter
+     * requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_USER for global stats or to be admin of the requested mediacenter
      * @param grouping Grouping type (by date) (required)
      * @param dateFrom date range from (required)
      * @param dateTo date range to (required)

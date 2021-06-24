@@ -22,9 +22,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.Condition;
 import io.swagger.client.model.Subwidget;
 import io.swagger.client.model.ValueV2;
+import io.swagger.client.model.WidgetCondition;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +32,19 @@ import java.util.List;
 /**
  * WidgetV2
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class WidgetV2 {
+  @SerializedName("link")
+  private String link = null;
+
   @SerializedName("subwidgets")
   private List<Subwidget> subwidgets = null;
 
   @SerializedName("condition")
-  private Condition condition = null;
+  private WidgetCondition condition = null;
+
+  @SerializedName("maxlength")
+  private Integer maxlength = null;
 
   @SerializedName("id")
   private String id = null;
@@ -57,6 +63,9 @@ public class WidgetV2 {
 
   @SerializedName("template")
   private String template = null;
+
+  @SerializedName("hasValues")
+  private Boolean hasValues = false;
 
   @SerializedName("values")
   private List<ValueV2> values = null;
@@ -82,20 +91,89 @@ public class WidgetV2 {
   @SerializedName("step")
   private Integer step = null;
 
+  /**
+   * Gets or Sets isRequired
+   */
+  @JsonAdapter(IsRequiredEnum.Adapter.class)
+  public enum IsRequiredEnum {
+    MANDATORY("mandatory"),
+    
+    MANDATORYFORPUBLISH("mandatoryForPublish"),
+    
+    OPTIONAL("optional"),
+    
+    IGNORE("ignore");
+
+    private String value;
+
+    IsRequiredEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static IsRequiredEnum fromValue(String text) {
+      for (IsRequiredEnum b : IsRequiredEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+
+    public static class Adapter extends TypeAdapter<IsRequiredEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final IsRequiredEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public IsRequiredEnum read(final JsonReader jsonReader) throws IOException {
+        String value = jsonReader.nextString();
+        return IsRequiredEnum.fromValue(String.valueOf(value));
+      }
+    }
+  }
+
+  @SerializedName("isRequired")
+  private IsRequiredEnum isRequired = null;
+
   @SerializedName("allowempty")
   private Boolean allowempty = false;
 
   @SerializedName("defaultvalue")
   private String defaultvalue = null;
 
-  @SerializedName("isRequired")
-  private Boolean isRequired = false;
-
   @SerializedName("isExtended")
   private Boolean isExtended = false;
 
   @SerializedName("isSearchable")
   private Boolean isSearchable = false;
+
+  public WidgetV2 link(String link) {
+    this.link = link;
+    return this;
+  }
+
+   /**
+   * Get link
+   * @return link
+  **/
+  @ApiModelProperty(value = "")
+  public String getLink() {
+    return link;
+  }
+
+  public void setLink(String link) {
+    this.link = link;
+  }
 
   public WidgetV2 subwidgets(List<Subwidget> subwidgets) {
     this.subwidgets = subwidgets;
@@ -123,7 +201,7 @@ public class WidgetV2 {
     this.subwidgets = subwidgets;
   }
 
-  public WidgetV2 condition(Condition condition) {
+  public WidgetV2 condition(WidgetCondition condition) {
     this.condition = condition;
     return this;
   }
@@ -133,12 +211,30 @@ public class WidgetV2 {
    * @return condition
   **/
   @ApiModelProperty(value = "")
-  public Condition getCondition() {
+  public WidgetCondition getCondition() {
     return condition;
   }
 
-  public void setCondition(Condition condition) {
+  public void setCondition(WidgetCondition condition) {
     this.condition = condition;
+  }
+
+  public WidgetV2 maxlength(Integer maxlength) {
+    this.maxlength = maxlength;
+    return this;
+  }
+
+   /**
+   * Get maxlength
+   * @return maxlength
+  **/
+  @ApiModelProperty(value = "")
+  public Integer getMaxlength() {
+    return maxlength;
+  }
+
+  public void setMaxlength(Integer maxlength) {
+    this.maxlength = maxlength;
   }
 
   public WidgetV2 id(String id) {
@@ -247,6 +343,24 @@ public class WidgetV2 {
 
   public void setTemplate(String template) {
     this.template = template;
+  }
+
+  public WidgetV2 hasValues(Boolean hasValues) {
+    this.hasValues = hasValues;
+    return this;
+  }
+
+   /**
+   * Get hasValues
+   * @return hasValues
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isHasValues() {
+    return hasValues;
+  }
+
+  public void setHasValues(Boolean hasValues) {
+    this.hasValues = hasValues;
   }
 
   public WidgetV2 values(List<ValueV2> values) {
@@ -401,6 +515,15 @@ public class WidgetV2 {
     this.step = step;
   }
 
+   /**
+   * Get isRequired
+   * @return isRequired
+  **/
+  @ApiModelProperty(value = "")
+  public IsRequiredEnum getIsRequired() {
+    return isRequired;
+  }
+
   public WidgetV2 allowempty(Boolean allowempty) {
     this.allowempty = allowempty;
     return this;
@@ -435,24 +558,6 @@ public class WidgetV2 {
 
   public void setDefaultvalue(String defaultvalue) {
     this.defaultvalue = defaultvalue;
-  }
-
-  public WidgetV2 isRequired(Boolean isRequired) {
-    this.isRequired = isRequired;
-    return this;
-  }
-
-   /**
-   * Get isRequired
-   * @return isRequired
-  **/
-  @ApiModelProperty(value = "")
-  public Boolean isIsRequired() {
-    return isRequired;
-  }
-
-  public void setIsRequired(Boolean isRequired) {
-    this.isRequired = isRequired;
   }
 
   public WidgetV2 isExtended(Boolean isExtended) {
@@ -501,14 +606,17 @@ public class WidgetV2 {
       return false;
     }
     WidgetV2 widgetV2 = (WidgetV2) o;
-    return Objects.equals(this.subwidgets, widgetV2.subwidgets) &&
+    return Objects.equals(this.link, widgetV2.link) &&
+        Objects.equals(this.subwidgets, widgetV2.subwidgets) &&
         Objects.equals(this.condition, widgetV2.condition) &&
+        Objects.equals(this.maxlength, widgetV2.maxlength) &&
         Objects.equals(this.id, widgetV2.id) &&
         Objects.equals(this.caption, widgetV2.caption) &&
         Objects.equals(this.bottomCaption, widgetV2.bottomCaption) &&
         Objects.equals(this.icon, widgetV2.icon) &&
         Objects.equals(this.type, widgetV2.type) &&
         Objects.equals(this.template, widgetV2.template) &&
+        Objects.equals(this.hasValues, widgetV2.hasValues) &&
         Objects.equals(this.values, widgetV2.values) &&
         Objects.equals(this.placeholder, widgetV2.placeholder) &&
         Objects.equals(this.unit, widgetV2.unit) &&
@@ -517,16 +625,16 @@ public class WidgetV2 {
         Objects.equals(this.defaultMin, widgetV2.defaultMin) &&
         Objects.equals(this.defaultMax, widgetV2.defaultMax) &&
         Objects.equals(this.step, widgetV2.step) &&
+        Objects.equals(this.isRequired, widgetV2.isRequired) &&
         Objects.equals(this.allowempty, widgetV2.allowempty) &&
         Objects.equals(this.defaultvalue, widgetV2.defaultvalue) &&
-        Objects.equals(this.isRequired, widgetV2.isRequired) &&
         Objects.equals(this.isExtended, widgetV2.isExtended) &&
         Objects.equals(this.isSearchable, widgetV2.isSearchable);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subwidgets, condition, id, caption, bottomCaption, icon, type, template, values, placeholder, unit, min, max, defaultMin, defaultMax, step, allowempty, defaultvalue, isRequired, isExtended, isSearchable);
+    return Objects.hash(link, subwidgets, condition, maxlength, id, caption, bottomCaption, icon, type, template, hasValues, values, placeholder, unit, min, max, defaultMin, defaultMax, step, isRequired, allowempty, defaultvalue, isExtended, isSearchable);
   }
 
 
@@ -535,14 +643,17 @@ public class WidgetV2 {
     StringBuilder sb = new StringBuilder();
     sb.append("class WidgetV2 {\n");
     
+    sb.append("    link: ").append(toIndentedString(link)).append("\n");
     sb.append("    subwidgets: ").append(toIndentedString(subwidgets)).append("\n");
     sb.append("    condition: ").append(toIndentedString(condition)).append("\n");
+    sb.append("    maxlength: ").append(toIndentedString(maxlength)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    caption: ").append(toIndentedString(caption)).append("\n");
     sb.append("    bottomCaption: ").append(toIndentedString(bottomCaption)).append("\n");
     sb.append("    icon: ").append(toIndentedString(icon)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    template: ").append(toIndentedString(template)).append("\n");
+    sb.append("    hasValues: ").append(toIndentedString(hasValues)).append("\n");
     sb.append("    values: ").append(toIndentedString(values)).append("\n");
     sb.append("    placeholder: ").append(toIndentedString(placeholder)).append("\n");
     sb.append("    unit: ").append(toIndentedString(unit)).append("\n");
@@ -551,9 +662,9 @@ public class WidgetV2 {
     sb.append("    defaultMin: ").append(toIndentedString(defaultMin)).append("\n");
     sb.append("    defaultMax: ").append(toIndentedString(defaultMax)).append("\n");
     sb.append("    step: ").append(toIndentedString(step)).append("\n");
+    sb.append("    isRequired: ").append(toIndentedString(isRequired)).append("\n");
     sb.append("    allowempty: ").append(toIndentedString(allowempty)).append("\n");
     sb.append("    defaultvalue: ").append(toIndentedString(defaultvalue)).append("\n");
-    sb.append("    isRequired: ").append(toIndentedString(isRequired)).append("\n");
     sb.append("    isExtended: ").append(toIndentedString(isExtended)).append("\n");
     sb.append("    isSearchable: ").append(toIndentedString(isSearchable)).append("\n");
     sb.append("}");

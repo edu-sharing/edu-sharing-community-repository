@@ -31,10 +31,13 @@ import java.util.List;
 /**
  * About
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class About {
   @SerializedName("themesUrl")
   private String themesUrl = null;
+
+  @SerializedName("lastCacheUpdate")
+  private Long lastCacheUpdate = null;
 
   @SerializedName("version")
   private ServiceVersion version = null;
@@ -58,6 +61,24 @@ public class About {
 
   public void setThemesUrl(String themesUrl) {
     this.themesUrl = themesUrl;
+  }
+
+  public About lastCacheUpdate(Long lastCacheUpdate) {
+    this.lastCacheUpdate = lastCacheUpdate;
+    return this;
+  }
+
+   /**
+   * Get lastCacheUpdate
+   * @return lastCacheUpdate
+  **/
+  @ApiModelProperty(value = "")
+  public Long getLastCacheUpdate() {
+    return lastCacheUpdate;
+  }
+
+  public void setLastCacheUpdate(Long lastCacheUpdate) {
+    this.lastCacheUpdate = lastCacheUpdate;
   }
 
   public About version(ServiceVersion version) {
@@ -112,13 +133,14 @@ public class About {
     }
     About about = (About) o;
     return Objects.equals(this.themesUrl, about.themesUrl) &&
+        Objects.equals(this.lastCacheUpdate, about.lastCacheUpdate) &&
         Objects.equals(this.version, about.version) &&
         Objects.equals(this.services, about.services);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(themesUrl, version, services);
+    return Objects.hash(themesUrl, lastCacheUpdate, version, services);
   }
 
 
@@ -128,6 +150,7 @@ public class About {
     sb.append("class About {\n");
     
     sb.append("    themesUrl: ").append(toIndentedString(themesUrl)).append("\n");
+    sb.append("    lastCacheUpdate: ").append(toIndentedString(lastCacheUpdate)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    services: ").append(toIndentedString(services)).append("\n");
     sb.append("}");

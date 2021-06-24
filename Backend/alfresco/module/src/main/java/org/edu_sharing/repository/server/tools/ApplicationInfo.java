@@ -34,8 +34,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
-
 public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable{
 
 	public static final long DEFAULT_OFFSET_MS = 10000;
@@ -163,7 +161,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String AUTHBYAPP_USERNAME_PROP_USERNAME = "USERNAME";
 
 	public static final String AUTHBYAPP_USER_WHITELIST = "auth_by_app_user_whitelist";
-	
+
+	@Deprecated
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
 
 	public static final String NOTIFY_FETCH_LIMIT = "notify_fetch_limit";
@@ -898,6 +897,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		return validatorRegexCMName;
 	}
 
+	@Deprecated
 	public String getWebsitepreviewrenderservice() {
 		return websitepreviewrenderservice;
 	}	

@@ -44,6 +44,9 @@ public class ErrorResponse {
 		if(t instanceof AlfrescoRuntimeException) {
 			t = t.getCause();
 		}
+		if(t instanceof RuntimeException && t.getCause() != null) {
+			t = t.getCause();
+		}
 		if(t instanceof DAOValidationException) {
     		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
 		}
@@ -61,6 +64,9 @@ public class ErrorResponse {
         if(t instanceof DAODuplicateNodeNameException){
         	return Response.status(Response.Status.CONFLICT).entity(new ErrorResponse(t)).build();
         }
+
+
+
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
 	}
 

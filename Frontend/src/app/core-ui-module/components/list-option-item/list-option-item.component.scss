@@ -53,4 +53,7 @@
 
 .tableList :host > div {
     flex-direction: row;
+    > button {
+        min-height: 75px;
+    }
 }

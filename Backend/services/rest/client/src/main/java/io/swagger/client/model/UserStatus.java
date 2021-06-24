@@ -23,12 +23,11 @@ import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
-import org.threeten.bp.OffsetDateTime;
 
 /**
  * UserStatus
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class UserStatus {
   /**
    * Gets or Sets status
@@ -83,7 +82,7 @@ public class UserStatus {
   private StatusEnum status = null;
 
   @SerializedName("date")
-  private OffsetDateTime date = null;
+  private Long date = null;
 
   public UserStatus status(StatusEnum status) {
     this.status = status;
@@ -103,7 +102,7 @@ public class UserStatus {
     this.status = status;
   }
 
-  public UserStatus date(OffsetDateTime date) {
+  public UserStatus date(Long date) {
     this.date = date;
     return this;
   }
@@ -113,11 +112,11 @@ public class UserStatus {
    * @return date
   **/
   @ApiModelProperty(value = "")
-  public OffsetDateTime getDate() {
+  public Long getDate() {
     return date;
   }
 
-  public void setDate(OffsetDateTime date) {
+  public void setDate(Long date) {
     this.date = date;
   }
 

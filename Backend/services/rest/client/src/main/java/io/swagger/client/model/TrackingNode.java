@@ -22,9 +22,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.Authority;
 import io.swagger.client.model.Node;
 import io.swagger.client.model.Serializable;
+import io.swagger.client.model.TrackingAuthority;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * TrackingNode
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class TrackingNode {
   @SerializedName("counts")
   private Map<String, Integer> counts = null;
@@ -41,17 +41,17 @@ public class TrackingNode {
   @SerializedName("date")
   private String date = null;
 
-  @SerializedName("authority")
-  private Authority authority = null;
-
   @SerializedName("fields")
   private Map<String, Serializable> fields = null;
 
   @SerializedName("groups")
-  private Map<String, Map<String, Long>> groups = null;
+  private Map<String, Map<String, Map<String, Long>>> groups = null;
 
   @SerializedName("node")
   private Node node = null;
+
+  @SerializedName("authority")
+  private TrackingAuthority authority = null;
 
   public TrackingNode counts(Map<String, Integer> counts) {
     this.counts = counts;
@@ -97,24 +97,6 @@ public class TrackingNode {
     this.date = date;
   }
 
-  public TrackingNode authority(Authority authority) {
-    this.authority = authority;
-    return this;
-  }
-
-   /**
-   * Get authority
-   * @return authority
-  **/
-  @ApiModelProperty(value = "")
-  public Authority getAuthority() {
-    return authority;
-  }
-
-  public void setAuthority(Authority authority) {
-    this.authority = authority;
-  }
-
   public TrackingNode fields(Map<String, Serializable> fields) {
     this.fields = fields;
     return this;
@@ -141,14 +123,14 @@ public class TrackingNode {
     this.fields = fields;
   }
 
-  public TrackingNode groups(Map<String, Map<String, Long>> groups) {
+  public TrackingNode groups(Map<String, Map<String, Map<String, Long>>> groups) {
     this.groups = groups;
     return this;
   }
 
-  public TrackingNode putGroupsItem(String key, Map<String, Long> groupsItem) {
+  public TrackingNode putGroupsItem(String key, Map<String, Map<String, Long>> groupsItem) {
     if (this.groups == null) {
-      this.groups = new HashMap<String, Map<String, Long>>();
+      this.groups = new HashMap<String, Map<String, Map<String, Long>>>();
     }
     this.groups.put(key, groupsItem);
     return this;
@@ -159,11 +141,11 @@ public class TrackingNode {
    * @return groups
   **/
   @ApiModelProperty(value = "")
-  public Map<String, Map<String, Long>> getGroups() {
+  public Map<String, Map<String, Map<String, Long>>> getGroups() {
     return groups;
   }
 
-  public void setGroups(Map<String, Map<String, Long>> groups) {
+  public void setGroups(Map<String, Map<String, Map<String, Long>>> groups) {
     this.groups = groups;
   }
 
@@ -185,6 +167,24 @@ public class TrackingNode {
     this.node = node;
   }
 
+  public TrackingNode authority(TrackingAuthority authority) {
+    this.authority = authority;
+    return this;
+  }
+
+   /**
+   * Get authority
+   * @return authority
+  **/
+  @ApiModelProperty(value = "")
+  public TrackingAuthority getAuthority() {
+    return authority;
+  }
+
+  public void setAuthority(TrackingAuthority authority) {
+    this.authority = authority;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -197,15 +197,15 @@ public class TrackingNode {
     TrackingNode trackingNode = (TrackingNode) o;
     return Objects.equals(this.counts, trackingNode.counts) &&
         Objects.equals(this.date, trackingNode.date) &&
-        Objects.equals(this.authority, trackingNode.authority) &&
         Objects.equals(this.fields, trackingNode.fields) &&
         Objects.equals(this.groups, trackingNode.groups) &&
-        Objects.equals(this.node, trackingNode.node);
+        Objects.equals(this.node, trackingNode.node) &&
+        Objects.equals(this.authority, trackingNode.authority);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(counts, date, authority, fields, groups, node);
+    return Objects.hash(counts, date, fields, groups, node, authority);
   }
 
 
@@ -216,10 +216,10 @@ public class TrackingNode {
     
     sb.append("    counts: ").append(toIndentedString(counts)).append("\n");
     sb.append("    date: ").append(toIndentedString(date)).append("\n");
-    sb.append("    authority: ").append(toIndentedString(authority)).append("\n");
     sb.append("    fields: ").append(toIndentedString(fields)).append("\n");
     sb.append("    groups: ").append(toIndentedString(groups)).append("\n");
     sb.append("    node: ").append(toIndentedString(node)).append("\n");
+    sb.append("    authority: ").append(toIndentedString(authority)).append("\n");
     sb.append("}");
     return sb.toString();
   }

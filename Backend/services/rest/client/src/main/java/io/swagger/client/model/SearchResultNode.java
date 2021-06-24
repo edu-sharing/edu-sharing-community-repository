@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * SearchResultNode
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class SearchResultNode {
   @SerializedName("nodes")
   private List<Node> nodes = new ArrayList<Node>();

@@ -29,13 +29,81 @@ import java.util.List;
 /**
  * GroupV2
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class GroupV2 {
+  /**
+   * Gets or Sets rendering
+   */
+  @JsonAdapter(RenderingEnum.Adapter.class)
+  public enum RenderingEnum {
+    LEGACY("legacy"),
+    
+    ANGULAR("angular");
+
+    private String value;
+
+    RenderingEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static RenderingEnum fromValue(String text) {
+      for (RenderingEnum b : RenderingEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+
+    public static class Adapter extends TypeAdapter<RenderingEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final RenderingEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public RenderingEnum read(final JsonReader jsonReader) throws IOException {
+        String value = jsonReader.nextString();
+        return RenderingEnum.fromValue(String.valueOf(value));
+      }
+    }
+  }
+
+  @SerializedName("rendering")
+  private RenderingEnum rendering = null;
+
   @SerializedName("id")
   private String id = null;
 
   @SerializedName("views")
   private List<String> views = null;
+
+  public GroupV2 rendering(RenderingEnum rendering) {
+    this.rendering = rendering;
+    return this;
+  }
+
+   /**
+   * Get rendering
+   * @return rendering
+  **/
+  @ApiModelProperty(value = "")
+  public RenderingEnum getRendering() {
+    return rendering;
+  }
+
+  public void setRendering(RenderingEnum rendering) {
+    this.rendering = rendering;
+  }
 
   public GroupV2 id(String id) {
     this.id = id;
@@ -91,13 +159,14 @@ public class GroupV2 {
       return false;
     }
     GroupV2 groupV2 = (GroupV2) o;
-    return Objects.equals(this.id, groupV2.id) &&
+    return Objects.equals(this.rendering, groupV2.rendering) &&
+        Objects.equals(this.id, groupV2.id) &&
         Objects.equals(this.views, groupV2.views);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, views);
+    return Objects.hash(rendering, id, views);
   }
 
 
@@ -106,6 +175,7 @@ public class GroupV2 {
     StringBuilder sb = new StringBuilder();
     sb.append("class GroupV2 {\n");
     
+    sb.append("    rendering: ").append(toIndentedString(rendering)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    views: ").append(toIndentedString(views)).append("\n");
     sb.append("}");

@@ -3394,6 +3394,139 @@ public class NodeV1Api {
         return call;
     }
     /**
+     * Build call for getPublishedCopies
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param node ID of node (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call getPublishedCopiesCall(String repository, String node, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/node/v1/nodes/{repository}/{node}/publish"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "node" + "\\}", apiClient.escapeString(node.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call getPublishedCopiesValidateBeforeCall(String repository, String node, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling getPublishedCopies(Async)");
+        }
+        
+        // verify the required parameter 'node' is set
+        if (node == null) {
+            throw new ApiException("Missing the required parameter 'node' when calling getPublishedCopies(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = getPublishedCopiesCall(repository, node, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Publish
+     * Get all published copies of the current node
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param node ID of node (required)
+     * @return NodeEntries
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public NodeEntries getPublishedCopies(String repository, String node) throws ApiException {
+        ApiResponse<NodeEntries> resp = getPublishedCopiesWithHttpInfo(repository, node);
+        return resp.getData();
+    }
+
+    /**
+     * Publish
+     * Get all published copies of the current node
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param node ID of node (required)
+     * @return ApiResponse&lt;NodeEntries&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<NodeEntries> getPublishedCopiesWithHttpInfo(String repository, String node) throws ApiException {
+        com.squareup.okhttp.Call call = getPublishedCopiesValidateBeforeCall(repository, node, null, null);
+        Type localVarReturnType = new TypeToken<NodeEntries>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Publish (asynchronously)
+     * Get all published copies of the current node
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param node ID of node (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call getPublishedCopiesAsync(String repository, String node, final ApiCallback<NodeEntries> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = getPublishedCopiesValidateBeforeCall(repository, node, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<NodeEntries>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
      * Build call for getShares
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param node ID of node (required)
@@ -4777,6 +4910,145 @@ public class NodeV1Api {
         return call;
     }
     /**
+     * Build call for publishCopy
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param node ID of node (required)
+     * @param handleMode handle mode, if a handle should be created. Skip this parameter if you don&#39;t want an handle (optional)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call publishCopyCall(String repository, String node, String handleMode, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/node/v1/nodes/{repository}/{node}/publish"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "node" + "\\}", apiClient.escapeString(node.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (handleMode != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("handleMode", handleMode));
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call publishCopyValidateBeforeCall(String repository, String node, String handleMode, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling publishCopy(Async)");
+        }
+        
+        // verify the required parameter 'node' is set
+        if (node == null) {
+            throw new ApiException("Missing the required parameter 'node' when calling publishCopy(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = publishCopyCall(repository, node, handleMode, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Publish
+     * Create a published copy of the current node 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param node ID of node (required)
+     * @param handleMode handle mode, if a handle should be created. Skip this parameter if you don&#39;t want an handle (optional)
+     * @return NodeEntry
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public NodeEntry publishCopy(String repository, String node, String handleMode) throws ApiException {
+        ApiResponse<NodeEntry> resp = publishCopyWithHttpInfo(repository, node, handleMode);
+        return resp.getData();
+    }
+
+    /**
+     * Publish
+     * Create a published copy of the current node 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param node ID of node (required)
+     * @param handleMode handle mode, if a handle should be created. Skip this parameter if you don&#39;t want an handle (optional)
+     * @return ApiResponse&lt;NodeEntry&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<NodeEntry> publishCopyWithHttpInfo(String repository, String node, String handleMode) throws ApiException {
+        com.squareup.okhttp.Call call = publishCopyValidateBeforeCall(repository, node, handleMode, null, null);
+        Type localVarReturnType = new TypeToken<NodeEntry>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Publish (asynchronously)
+     * Create a published copy of the current node 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param node ID of node (required)
+     * @param handleMode handle mode, if a handle should be created. Skip this parameter if you don&#39;t want an handle (optional)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call publishCopyAsync(String repository, String node, String handleMode, final ApiCallback<NodeEntry> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = publishCopyValidateBeforeCall(repository, node, handleMode, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<NodeEntry>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
      * Build call for removeShare
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param node ID of node (required)
@@ -5368,13 +5640,12 @@ public class NodeV1Api {
      * @param sendMail sendMail (required)
      * @param sendCopy sendCopy (required)
      * @param mailtext mailtext (optional)
-     * @param createHandle createHandle (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call setPermissionCall(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext, Boolean createHandle, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call setPermissionCall(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = body;
 
         // create path and map variables
@@ -5390,8 +5661,6 @@ public class NodeV1Api {
         localVarQueryParams.addAll(apiClient.parameterToPair("sendMail", sendMail));
         if (sendCopy != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("sendCopy", sendCopy));
-        if (createHandle != null)
-        localVarQueryParams.addAll(apiClient.parameterToPair("createHandle", createHandle));
 
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
 
@@ -5426,7 +5695,7 @@ public class NodeV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call setPermissionValidateBeforeCall(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext, Boolean createHandle, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call setPermissionValidateBeforeCall(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'repository' is set
         if (repository == null) {
@@ -5454,7 +5723,7 @@ public class NodeV1Api {
         }
         
 
-        com.squareup.okhttp.Call call = setPermissionCall(repository, node, body, sendMail, sendCopy, mailtext, createHandle, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = setPermissionCall(repository, node, body, sendMail, sendCopy, mailtext, progressListener, progressRequestListener);
         return call;
 
     }
@@ -5468,11 +5737,10 @@ public class NodeV1Api {
      * @param sendMail sendMail (required)
      * @param sendCopy sendCopy (required)
      * @param mailtext mailtext (optional)
-     * @param createHandle createHandle (optional)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public void setPermission(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext, Boolean createHandle) throws ApiException {
-        setPermissionWithHttpInfo(repository, node, body, sendMail, sendCopy, mailtext, createHandle);
+    public void setPermission(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext) throws ApiException {
+        setPermissionWithHttpInfo(repository, node, body, sendMail, sendCopy, mailtext);
     }
 
     /**
@@ -5484,12 +5752,11 @@ public class NodeV1Api {
      * @param sendMail sendMail (required)
      * @param sendCopy sendCopy (required)
      * @param mailtext mailtext (optional)
-     * @param createHandle createHandle (optional)
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<Void> setPermissionWithHttpInfo(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext, Boolean createHandle) throws ApiException {
-        com.squareup.okhttp.Call call = setPermissionValidateBeforeCall(repository, node, body, sendMail, sendCopy, mailtext, createHandle, null, null);
+    public ApiResponse<Void> setPermissionWithHttpInfo(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext) throws ApiException {
+        com.squareup.okhttp.Call call = setPermissionValidateBeforeCall(repository, node, body, sendMail, sendCopy, mailtext, null, null);
         return apiClient.execute(call);
     }
 
@@ -5502,12 +5769,11 @@ public class NodeV1Api {
      * @param sendMail sendMail (required)
      * @param sendCopy sendCopy (required)
      * @param mailtext mailtext (optional)
-     * @param createHandle createHandle (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call setPermissionAsync(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext, Boolean createHandle, final ApiCallback<Void> callback) throws ApiException {
+    public com.squareup.okhttp.Call setPermissionAsync(String repository, String node, ACL body, Boolean sendMail, Boolean sendCopy, String mailtext, final ApiCallback<Void> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -5528,7 +5794,7 @@ public class NodeV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = setPermissionValidateBeforeCall(repository, node, body, sendMail, sendCopy, mailtext, createHandle, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = setPermissionValidateBeforeCall(repository, node, body, sendMail, sendCopy, mailtext, progressListener, progressRequestListener);
         apiClient.executeAsync(call, callback);
         return call;
     }
@@ -5543,7 +5809,7 @@ public class NodeV1Api {
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call setPropertyCall(String repository, String node, String property, String value, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call setPropertyCall(String repository, String node, String property, List<String> value, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -5556,7 +5822,7 @@ public class NodeV1Api {
         if (property != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("property", property));
         if (value != null)
-        localVarQueryParams.addAll(apiClient.parameterToPair("value", value));
+        localVarCollectionQueryParams.addAll(apiClient.parameterToPairs("multi", "value", value));
 
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
 
@@ -5591,7 +5857,7 @@ public class NodeV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call setPropertyValidateBeforeCall(String repository, String node, String property, String value, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call setPropertyValidateBeforeCall(String repository, String node, String property, List<String> value, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'repository' is set
         if (repository == null) {
@@ -5623,7 +5889,7 @@ public class NodeV1Api {
      * @param value value (optional)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public void setProperty(String repository, String node, String property, String value) throws ApiException {
+    public void setProperty(String repository, String node, String property, List<String> value) throws ApiException {
         setPropertyWithHttpInfo(repository, node, property, value);
     }
 
@@ -5637,7 +5903,7 @@ public class NodeV1Api {
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<Void> setPropertyWithHttpInfo(String repository, String node, String property, String value) throws ApiException {
+    public ApiResponse<Void> setPropertyWithHttpInfo(String repository, String node, String property, List<String> value) throws ApiException {
         com.squareup.okhttp.Call call = setPropertyValidateBeforeCall(repository, node, property, value, null, null);
         return apiClient.execute(call);
     }
@@ -5653,7 +5919,7 @@ public class NodeV1Api {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call setPropertyAsync(String repository, String node, String property, String value, final ApiCallback<Void> callback) throws ApiException {
+    public com.squareup.okhttp.Call setPropertyAsync(String repository, String node, String property, List<String> value, final ApiCallback<Void> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;

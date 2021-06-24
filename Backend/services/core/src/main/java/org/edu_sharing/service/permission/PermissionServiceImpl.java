@@ -50,6 +50,7 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -1020,7 +1021,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 
 		//cm:espersonstatus
-		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")
+				&& !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
 			String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
 			searchQuery.append(" AND @cm\\:espersonstatus:\"" + personActiveStatus + "\"");
 		}

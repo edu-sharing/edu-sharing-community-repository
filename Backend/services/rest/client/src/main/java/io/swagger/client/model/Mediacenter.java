@@ -24,18 +24,84 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.client.model.GroupProfile;
 import io.swagger.client.model.NodeRef;
+import io.swagger.client.model.Organization;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Mediacenter
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Mediacenter {
+  @SerializedName("properties")
+  private Map<String, List<String>> properties = null;
+
+  /**
+   * Gets or Sets signupMethod
+   */
+  @JsonAdapter(SignupMethodEnum.Adapter.class)
+  public enum SignupMethodEnum {
+    SIMPLE("simple"),
+    
+    PASSWORD("password"),
+    
+    LIST("list");
+
+    private String value;
+
+    SignupMethodEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static SignupMethodEnum fromValue(String text) {
+      for (SignupMethodEnum b : SignupMethodEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+
+    public static class Adapter extends TypeAdapter<SignupMethodEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final SignupMethodEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public SignupMethodEnum read(final JsonReader jsonReader) throws IOException {
+        String value = jsonReader.nextString();
+        return SignupMethodEnum.fromValue(String.valueOf(value));
+      }
+    }
+  }
+
+  @SerializedName("signupMethod")
+  private SignupMethodEnum signupMethod = null;
+
   @SerializedName("ref")
   private NodeRef ref = null;
 
   @SerializedName("editable")
   private Boolean editable = false;
+
+  @SerializedName("aspects")
+  private List<String> aspects = null;
+
+  @SerializedName("organizations")
+  private List<Organization> organizations = null;
 
   @SerializedName("authorityName")
   private String authorityName = null;
@@ -105,6 +171,50 @@ public class Mediacenter {
   @SerializedName("administrationAccess")
   private Boolean administrationAccess = false;
 
+  public Mediacenter properties(Map<String, List<String>> properties) {
+    this.properties = properties;
+    return this;
+  }
+
+  public Mediacenter putPropertiesItem(String key, List<String> propertiesItem) {
+    if (this.properties == null) {
+      this.properties = new HashMap<String, List<String>>();
+    }
+    this.properties.put(key, propertiesItem);
+    return this;
+  }
+
+   /**
+   * Get properties
+   * @return properties
+  **/
+  @ApiModelProperty(value = "")
+  public Map<String, List<String>> getProperties() {
+    return properties;
+  }
+
+  public void setProperties(Map<String, List<String>> properties) {
+    this.properties = properties;
+  }
+
+  public Mediacenter signupMethod(SignupMethodEnum signupMethod) {
+    this.signupMethod = signupMethod;
+    return this;
+  }
+
+   /**
+   * Get signupMethod
+   * @return signupMethod
+  **/
+  @ApiModelProperty(value = "")
+  public SignupMethodEnum getSignupMethod() {
+    return signupMethod;
+  }
+
+  public void setSignupMethod(SignupMethodEnum signupMethod) {
+    this.signupMethod = signupMethod;
+  }
+
   public Mediacenter ref(NodeRef ref) {
     this.ref = ref;
     return this;
@@ -139,6 +249,58 @@ public class Mediacenter {
 
   public void setEditable(Boolean editable) {
     this.editable = editable;
+  }
+
+  public Mediacenter aspects(List<String> aspects) {
+    this.aspects = aspects;
+    return this;
+  }
+
+  public Mediacenter addAspectsItem(String aspectsItem) {
+    if (this.aspects == null) {
+      this.aspects = new ArrayList<String>();
+    }
+    this.aspects.add(aspectsItem);
+    return this;
+  }
+
+   /**
+   * Get aspects
+   * @return aspects
+  **/
+  @ApiModelProperty(value = "")
+  public List<String> getAspects() {
+    return aspects;
+  }
+
+  public void setAspects(List<String> aspects) {
+    this.aspects = aspects;
+  }
+
+  public Mediacenter organizations(List<Organization> organizations) {
+    this.organizations = organizations;
+    return this;
+  }
+
+  public Mediacenter addOrganizationsItem(Organization organizationsItem) {
+    if (this.organizations == null) {
+      this.organizations = new ArrayList<Organization>();
+    }
+    this.organizations.add(organizationsItem);
+    return this;
+  }
+
+   /**
+   * Get organizations
+   * @return organizations
+  **/
+  @ApiModelProperty(value = "")
+  public List<Organization> getOrganizations() {
+    return organizations;
+  }
+
+  public void setOrganizations(List<Organization> organizations) {
+    this.organizations = organizations;
   }
 
   public Mediacenter authorityName(String authorityName) {
@@ -241,8 +403,12 @@ public class Mediacenter {
       return false;
     }
     Mediacenter mediacenter = (Mediacenter) o;
-    return Objects.equals(this.ref, mediacenter.ref) &&
+    return Objects.equals(this.properties, mediacenter.properties) &&
+        Objects.equals(this.signupMethod, mediacenter.signupMethod) &&
+        Objects.equals(this.ref, mediacenter.ref) &&
         Objects.equals(this.editable, mediacenter.editable) &&
+        Objects.equals(this.aspects, mediacenter.aspects) &&
+        Objects.equals(this.organizations, mediacenter.organizations) &&
         Objects.equals(this.authorityName, mediacenter.authorityName) &&
         Objects.equals(this.authorityType, mediacenter.authorityType) &&
         Objects.equals(this.groupName, mediacenter.groupName) &&
@@ -252,7 +418,7 @@ public class Mediacenter {
 
   @Override
   public int hashCode() {
-    return Objects.hash(ref, editable, authorityName, authorityType, groupName, profile, administrationAccess);
+    return Objects.hash(properties, signupMethod, ref, editable, aspects, organizations, authorityName, authorityType, groupName, profile, administrationAccess);
   }
 
 
@@ -261,8 +427,12 @@ public class Mediacenter {
     StringBuilder sb = new StringBuilder();
     sb.append("class Mediacenter {\n");
     
+    sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
+    sb.append("    signupMethod: ").append(toIndentedString(signupMethod)).append("\n");
     sb.append("    ref: ").append(toIndentedString(ref)).append("\n");
     sb.append("    editable: ").append(toIndentedString(editable)).append("\n");
+    sb.append("    aspects: ").append(toIndentedString(aspects)).append("\n");
+    sb.append("    organizations: ").append(toIndentedString(organizations)).append("\n");
     sb.append("    authorityName: ").append(toIndentedString(authorityName)).append("\n");
     sb.append("    authorityType: ").append(toIndentedString(authorityType)).append("\n");
     sb.append("    groupName: ").append(toIndentedString(groupName)).append("\n");

@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.client.model.StatisticsGroup;
 import io.swagger.client.model.StatisticsKeyGroup;
-import io.swagger.client.model.User;
+import io.swagger.client.model.StatisticsUser;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * StatisticsGlobal
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class StatisticsGlobal {
   @SerializedName("overall")
   private StatisticsGroup overall = null;
@@ -41,7 +41,7 @@ public class StatisticsGlobal {
   private List<StatisticsKeyGroup> groups = null;
 
   @SerializedName("user")
-  private User user = null;
+  private StatisticsUser user = null;
 
   public StatisticsGlobal overall(StatisticsGroup overall) {
     this.overall = overall;
@@ -87,7 +87,7 @@ public class StatisticsGlobal {
     this.groups = groups;
   }
 
-  public StatisticsGlobal user(User user) {
+  public StatisticsGlobal user(StatisticsUser user) {
     this.user = user;
     return this;
   }
@@ -97,11 +97,11 @@ public class StatisticsGlobal {
    * @return user
   **/
   @ApiModelProperty(value = "")
-  public User getUser() {
+  public StatisticsUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(StatisticsUser user) {
     this.user = user;
   }
 

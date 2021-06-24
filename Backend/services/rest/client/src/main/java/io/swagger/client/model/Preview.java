@@ -23,17 +23,28 @@ import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Preview
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Preview {
   @SerializedName("isIcon")
   private Boolean isIcon = false;
 
   @SerializedName("isGenerated")
   private Boolean isGenerated = false;
+
+  @SerializedName("type")
+  private String type = null;
+
+  @SerializedName("mimetype")
+  private String mimetype = null;
+
+  @SerializedName("data")
+  private List<byte[]> data = null;
 
   @SerializedName("url")
   private String url = null;
@@ -78,6 +89,68 @@ public class Preview {
 
   public void setIsGenerated(Boolean isGenerated) {
     this.isGenerated = isGenerated;
+  }
+
+  public Preview type(String type) {
+    this.type = type;
+    return this;
+  }
+
+   /**
+   * Get type
+   * @return type
+  **/
+  @ApiModelProperty(value = "")
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public Preview mimetype(String mimetype) {
+    this.mimetype = mimetype;
+    return this;
+  }
+
+   /**
+   * Get mimetype
+   * @return mimetype
+  **/
+  @ApiModelProperty(value = "")
+  public String getMimetype() {
+    return mimetype;
+  }
+
+  public void setMimetype(String mimetype) {
+    this.mimetype = mimetype;
+  }
+
+  public Preview data(List<byte[]> data) {
+    this.data = data;
+    return this;
+  }
+
+  public Preview addDataItem(byte[] dataItem) {
+    if (this.data == null) {
+      this.data = new ArrayList<byte[]>();
+    }
+    this.data.add(dataItem);
+    return this;
+  }
+
+   /**
+   * Get data
+   * @return data
+  **/
+  @ApiModelProperty(value = "")
+  public List<byte[]> getData() {
+    return data;
+  }
+
+  public void setData(List<byte[]> data) {
+    this.data = data;
   }
 
   public Preview url(String url) {
@@ -146,6 +219,9 @@ public class Preview {
     Preview preview = (Preview) o;
     return Objects.equals(this.isIcon, preview.isIcon) &&
         Objects.equals(this.isGenerated, preview.isGenerated) &&
+        Objects.equals(this.type, preview.type) &&
+        Objects.equals(this.mimetype, preview.mimetype) &&
+        Objects.equals(this.data, preview.data) &&
         Objects.equals(this.url, preview.url) &&
         Objects.equals(this.width, preview.width) &&
         Objects.equals(this.height, preview.height);
@@ -153,7 +229,7 @@ public class Preview {
 
   @Override
   public int hashCode() {
-    return Objects.hash(isIcon, isGenerated, url, width, height);
+    return Objects.hash(isIcon, isGenerated, type, mimetype, data, url, width, height);
   }
 
 
@@ -164,6 +240,9 @@ public class Preview {
     
     sb.append("    isIcon: ").append(toIndentedString(isIcon)).append("\n");
     sb.append("    isGenerated: ").append(toIndentedString(isGenerated)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    mimetype: ").append(toIndentedString(mimetype)).append("\n");
+    sb.append("    data: ").append(toIndentedString(data)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    width: ").append(toIndentedString(width)).append("\n");
     sb.append("    height: ").append(toIndentedString(height)).append("\n");

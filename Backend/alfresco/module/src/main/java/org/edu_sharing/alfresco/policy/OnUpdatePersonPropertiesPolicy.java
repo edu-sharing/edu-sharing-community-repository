@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 /**
@@ -72,6 +73,16 @@ public class OnUpdatePersonPropertiesPolicy implements OnCreateNodePolicy, OnUpd
 		String username = (String)after.get(ContentModel.PROP_USERNAME);
 		logger.debug("username:"+username);
 		NodeRef homeFolderNodeRef = (NodeRef)before.get(ContentModel.PROP_HOMEFOLDER);
+
+		if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+			QName prop = QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
+			String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+			if(personActiveStatus != null && !personActiveStatus.trim().isEmpty()){
+				if(serviceRegistry.getNodeService().getProperty(nodeRef,prop) == null && !after.containsKey(prop)){
+					serviceRegistry.getNodeService().setProperty(nodeRef, prop, personActiveStatus);
+				}
+			}
+		}
 		
 		if(homeFolderNodeRef != null){
 			logger.debug("will do nothing cause HomeFolder exsisted before this update");

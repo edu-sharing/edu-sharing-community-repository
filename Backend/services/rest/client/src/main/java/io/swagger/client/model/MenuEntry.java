@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * MenuEntry
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class MenuEntry {
   @SerializedName("position")
   private Integer position = null;
@@ -44,14 +44,20 @@ public class MenuEntry {
   @SerializedName("isDisabled")
   private Boolean isDisabled = false;
 
-  @SerializedName("isSeperate")
-  private Boolean isSeperate = false;
+  @SerializedName("openInNew")
+  private Boolean openInNew = false;
 
-  @SerializedName("isSeperateBottom")
-  private Boolean isSeperateBottom = false;
+  @SerializedName("isSeparate")
+  private Boolean isSeparate = false;
+
+  @SerializedName("isSeparateBottom")
+  private Boolean isSeparateBottom = false;
 
   @SerializedName("onlyDesktop")
   private Boolean onlyDesktop = false;
+
+  @SerializedName("onlyWeb")
+  private Boolean onlyWeb = false;
 
   @SerializedName("path")
   private String path = null;
@@ -149,40 +155,58 @@ public class MenuEntry {
     this.isDisabled = isDisabled;
   }
 
-  public MenuEntry isSeperate(Boolean isSeperate) {
-    this.isSeperate = isSeperate;
+  public MenuEntry openInNew(Boolean openInNew) {
+    this.openInNew = openInNew;
     return this;
   }
 
    /**
-   * Get isSeperate
-   * @return isSeperate
+   * Get openInNew
+   * @return openInNew
   **/
   @ApiModelProperty(value = "")
-  public Boolean isIsSeperate() {
-    return isSeperate;
+  public Boolean isOpenInNew() {
+    return openInNew;
   }
 
-  public void setIsSeperate(Boolean isSeperate) {
-    this.isSeperate = isSeperate;
+  public void setOpenInNew(Boolean openInNew) {
+    this.openInNew = openInNew;
   }
 
-  public MenuEntry isSeperateBottom(Boolean isSeperateBottom) {
-    this.isSeperateBottom = isSeperateBottom;
+  public MenuEntry isSeparate(Boolean isSeparate) {
+    this.isSeparate = isSeparate;
     return this;
   }
 
    /**
-   * Get isSeperateBottom
-   * @return isSeperateBottom
+   * Get isSeparate
+   * @return isSeparate
   **/
   @ApiModelProperty(value = "")
-  public Boolean isIsSeperateBottom() {
-    return isSeperateBottom;
+  public Boolean isIsSeparate() {
+    return isSeparate;
   }
 
-  public void setIsSeperateBottom(Boolean isSeperateBottom) {
-    this.isSeperateBottom = isSeperateBottom;
+  public void setIsSeparate(Boolean isSeparate) {
+    this.isSeparate = isSeparate;
+  }
+
+  public MenuEntry isSeparateBottom(Boolean isSeparateBottom) {
+    this.isSeparateBottom = isSeparateBottom;
+    return this;
+  }
+
+   /**
+   * Get isSeparateBottom
+   * @return isSeparateBottom
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isIsSeparateBottom() {
+    return isSeparateBottom;
+  }
+
+  public void setIsSeparateBottom(Boolean isSeparateBottom) {
+    this.isSeparateBottom = isSeparateBottom;
   }
 
   public MenuEntry onlyDesktop(Boolean onlyDesktop) {
@@ -201,6 +225,24 @@ public class MenuEntry {
 
   public void setOnlyDesktop(Boolean onlyDesktop) {
     this.onlyDesktop = onlyDesktop;
+  }
+
+  public MenuEntry onlyWeb(Boolean onlyWeb) {
+    this.onlyWeb = onlyWeb;
+    return this;
+  }
+
+   /**
+   * Get onlyWeb
+   * @return onlyWeb
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isOnlyWeb() {
+    return onlyWeb;
+  }
+
+  public void setOnlyWeb(Boolean onlyWeb) {
+    this.onlyWeb = onlyWeb;
   }
 
   public MenuEntry path(String path) {
@@ -254,16 +296,18 @@ public class MenuEntry {
         Objects.equals(this.name, menuEntry.name) &&
         Objects.equals(this.url, menuEntry.url) &&
         Objects.equals(this.isDisabled, menuEntry.isDisabled) &&
-        Objects.equals(this.isSeperate, menuEntry.isSeperate) &&
-        Objects.equals(this.isSeperateBottom, menuEntry.isSeperateBottom) &&
+        Objects.equals(this.openInNew, menuEntry.openInNew) &&
+        Objects.equals(this.isSeparate, menuEntry.isSeparate) &&
+        Objects.equals(this.isSeparateBottom, menuEntry.isSeparateBottom) &&
         Objects.equals(this.onlyDesktop, menuEntry.onlyDesktop) &&
+        Objects.equals(this.onlyWeb, menuEntry.onlyWeb) &&
         Objects.equals(this.path, menuEntry.path) &&
         Objects.equals(this.scope, menuEntry.scope);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(position, icon, name, url, isDisabled, isSeperate, isSeperateBottom, onlyDesktop, path, scope);
+    return Objects.hash(position, icon, name, url, isDisabled, openInNew, isSeparate, isSeparateBottom, onlyDesktop, onlyWeb, path, scope);
   }
 
 
@@ -277,9 +321,11 @@ public class MenuEntry {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    isDisabled: ").append(toIndentedString(isDisabled)).append("\n");
-    sb.append("    isSeperate: ").append(toIndentedString(isSeperate)).append("\n");
-    sb.append("    isSeperateBottom: ").append(toIndentedString(isSeperateBottom)).append("\n");
+    sb.append("    openInNew: ").append(toIndentedString(openInNew)).append("\n");
+    sb.append("    isSeparate: ").append(toIndentedString(isSeparate)).append("\n");
+    sb.append("    isSeparateBottom: ").append(toIndentedString(isSeparateBottom)).append("\n");
     sb.append("    onlyDesktop: ").append(toIndentedString(onlyDesktop)).append("\n");
+    sb.append("    onlyWeb: ").append(toIndentedString(onlyWeb)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
     sb.append("}");

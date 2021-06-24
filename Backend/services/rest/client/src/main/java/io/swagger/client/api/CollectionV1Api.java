@@ -199,13 +199,14 @@ public class CollectionV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param collection ID of collection (required)
      * @param node ID of node (required)
-     * @param sourceRepo ID of source repository (required)
+     * @param sourceRepo ID of source repository (optional)
+     * @param allowDuplicate Allow that a node that already is inside the collection can be added again (optional, default to false)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call addToCollectionCall(String repository, String collection, String node, String sourceRepo, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call addToCollectionCall(String repository, String collection, String node, String sourceRepo, Boolean allowDuplicate, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -218,6 +219,8 @@ public class CollectionV1Api {
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
         if (sourceRepo != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("sourceRepo", sourceRepo));
+        if (allowDuplicate != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("allowDuplicate", allowDuplicate));
 
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
 
@@ -252,7 +255,7 @@ public class CollectionV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call addToCollectionValidateBeforeCall(String repository, String collection, String node, String sourceRepo, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call addToCollectionValidateBeforeCall(String repository, String collection, String node, String sourceRepo, Boolean allowDuplicate, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'repository' is set
         if (repository == null) {
@@ -269,13 +272,8 @@ public class CollectionV1Api {
             throw new ApiException("Missing the required parameter 'node' when calling addToCollection(Async)");
         }
         
-        // verify the required parameter 'sourceRepo' is set
-        if (sourceRepo == null) {
-            throw new ApiException("Missing the required parameter 'sourceRepo' when calling addToCollection(Async)");
-        }
-        
 
-        com.squareup.okhttp.Call call = addToCollectionCall(repository, collection, node, sourceRepo, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = addToCollectionCall(repository, collection, node, sourceRepo, allowDuplicate, progressListener, progressRequestListener);
         return call;
 
     }
@@ -286,12 +284,13 @@ public class CollectionV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param collection ID of collection (required)
      * @param node ID of node (required)
-     * @param sourceRepo ID of source repository (required)
+     * @param sourceRepo ID of source repository (optional)
+     * @param allowDuplicate Allow that a node that already is inside the collection can be added again (optional, default to false)
      * @return NodeEntry
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public NodeEntry addToCollection(String repository, String collection, String node, String sourceRepo) throws ApiException {
-        ApiResponse<NodeEntry> resp = addToCollectionWithHttpInfo(repository, collection, node, sourceRepo);
+    public NodeEntry addToCollection(String repository, String collection, String node, String sourceRepo, Boolean allowDuplicate) throws ApiException {
+        ApiResponse<NodeEntry> resp = addToCollectionWithHttpInfo(repository, collection, node, sourceRepo, allowDuplicate);
         return resp.getData();
     }
 
@@ -301,12 +300,13 @@ public class CollectionV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param collection ID of collection (required)
      * @param node ID of node (required)
-     * @param sourceRepo ID of source repository (required)
+     * @param sourceRepo ID of source repository (optional)
+     * @param allowDuplicate Allow that a node that already is inside the collection can be added again (optional, default to false)
      * @return ApiResponse&lt;NodeEntry&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<NodeEntry> addToCollectionWithHttpInfo(String repository, String collection, String node, String sourceRepo) throws ApiException {
-        com.squareup.okhttp.Call call = addToCollectionValidateBeforeCall(repository, collection, node, sourceRepo, null, null);
+    public ApiResponse<NodeEntry> addToCollectionWithHttpInfo(String repository, String collection, String node, String sourceRepo, Boolean allowDuplicate) throws ApiException {
+        com.squareup.okhttp.Call call = addToCollectionValidateBeforeCall(repository, collection, node, sourceRepo, allowDuplicate, null, null);
         Type localVarReturnType = new TypeToken<NodeEntry>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -317,12 +317,13 @@ public class CollectionV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param collection ID of collection (required)
      * @param node ID of node (required)
-     * @param sourceRepo ID of source repository (required)
+     * @param sourceRepo ID of source repository (optional)
+     * @param allowDuplicate Allow that a node that already is inside the collection can be added again (optional, default to false)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call addToCollectionAsync(String repository, String collection, String node, String sourceRepo, final ApiCallback<NodeEntry> callback) throws ApiException {
+    public com.squareup.okhttp.Call addToCollectionAsync(String repository, String collection, String node, String sourceRepo, Boolean allowDuplicate, final ApiCallback<NodeEntry> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -343,7 +344,7 @@ public class CollectionV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = addToCollectionValidateBeforeCall(repository, collection, node, sourceRepo, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = addToCollectionValidateBeforeCall(repository, collection, node, sourceRepo, allowDuplicate, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<NodeEntry>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
@@ -1209,6 +1210,7 @@ public class CollectionV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param collection ID of parent collection (or \&quot;-root-\&quot; for level0 collections) (required)
      * @param scope scope (only relevant if parent &#x3D;&#x3D; -root-) (required)
+     * @param fetchCounts fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data (optional, default to true)
      * @param maxItems maximum items per page (optional, default to 500)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param sortProperties sort properties (optional)
@@ -1219,7 +1221,7 @@ public class CollectionV1Api {
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call getCollectionsSubcollectionsCall(String repository, String collection, String scope, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call getCollectionsSubcollectionsCall(String repository, String collection, String scope, Boolean fetchCounts, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = null;
 
         // create path and map variables
@@ -1231,6 +1233,8 @@ public class CollectionV1Api {
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
         if (scope != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("scope", scope));
+        if (fetchCounts != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("fetchCounts", fetchCounts));
         if (maxItems != null)
         localVarQueryParams.addAll(apiClient.parameterToPair("maxItems", maxItems));
         if (skipCount != null)
@@ -1275,7 +1279,7 @@ public class CollectionV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call getCollectionsSubcollectionsValidateBeforeCall(String repository, String collection, String scope, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call getCollectionsSubcollectionsValidateBeforeCall(String repository, String collection, String scope, Boolean fetchCounts, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'repository' is set
         if (repository == null) {
@@ -1293,7 +1297,7 @@ public class CollectionV1Api {
         }
         
 
-        com.squareup.okhttp.Call call = getCollectionsSubcollectionsCall(repository, collection, scope, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = getCollectionsSubcollectionsCall(repository, collection, scope, fetchCounts, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
         return call;
 
     }
@@ -1304,6 +1308,7 @@ public class CollectionV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param collection ID of parent collection (or \&quot;-root-\&quot; for level0 collections) (required)
      * @param scope scope (only relevant if parent &#x3D;&#x3D; -root-) (required)
+     * @param fetchCounts fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data (optional, default to true)
      * @param maxItems maximum items per page (optional, default to 500)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param sortProperties sort properties (optional)
@@ -1312,8 +1317,8 @@ public class CollectionV1Api {
      * @return ReferenceEntries
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ReferenceEntries getCollectionsSubcollections(String repository, String collection, String scope, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter) throws ApiException {
-        ApiResponse<ReferenceEntries> resp = getCollectionsSubcollectionsWithHttpInfo(repository, collection, scope, maxItems, skipCount, sortProperties, sortAscending, propertyFilter);
+    public ReferenceEntries getCollectionsSubcollections(String repository, String collection, String scope, Boolean fetchCounts, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter) throws ApiException {
+        ApiResponse<ReferenceEntries> resp = getCollectionsSubcollectionsWithHttpInfo(repository, collection, scope, fetchCounts, maxItems, skipCount, sortProperties, sortAscending, propertyFilter);
         return resp.getData();
     }
 
@@ -1323,6 +1328,7 @@ public class CollectionV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param collection ID of parent collection (or \&quot;-root-\&quot; for level0 collections) (required)
      * @param scope scope (only relevant if parent &#x3D;&#x3D; -root-) (required)
+     * @param fetchCounts fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data (optional, default to true)
      * @param maxItems maximum items per page (optional, default to 500)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param sortProperties sort properties (optional)
@@ -1331,8 +1337,8 @@ public class CollectionV1Api {
      * @return ApiResponse&lt;ReferenceEntries&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<ReferenceEntries> getCollectionsSubcollectionsWithHttpInfo(String repository, String collection, String scope, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter) throws ApiException {
-        com.squareup.okhttp.Call call = getCollectionsSubcollectionsValidateBeforeCall(repository, collection, scope, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, null, null);
+    public ApiResponse<ReferenceEntries> getCollectionsSubcollectionsWithHttpInfo(String repository, String collection, String scope, Boolean fetchCounts, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter) throws ApiException {
+        com.squareup.okhttp.Call call = getCollectionsSubcollectionsValidateBeforeCall(repository, collection, scope, fetchCounts, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, null, null);
         Type localVarReturnType = new TypeToken<ReferenceEntries>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -1343,6 +1349,7 @@ public class CollectionV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param collection ID of parent collection (or \&quot;-root-\&quot; for level0 collections) (required)
      * @param scope scope (only relevant if parent &#x3D;&#x3D; -root-) (required)
+     * @param fetchCounts fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data (optional, default to true)
      * @param maxItems maximum items per page (optional, default to 500)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param sortProperties sort properties (optional)
@@ -1352,7 +1359,7 @@ public class CollectionV1Api {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call getCollectionsSubcollectionsAsync(String repository, String collection, String scope, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ApiCallback<ReferenceEntries> callback) throws ApiException {
+    public com.squareup.okhttp.Call getCollectionsSubcollectionsAsync(String repository, String collection, String scope, Boolean fetchCounts, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ApiCallback<ReferenceEntries> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -1373,7 +1380,7 @@ public class CollectionV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = getCollectionsSubcollectionsValidateBeforeCall(repository, collection, scope, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = getCollectionsSubcollectionsValidateBeforeCall(repository, collection, scope, fetchCounts, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<ReferenceEntries>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;

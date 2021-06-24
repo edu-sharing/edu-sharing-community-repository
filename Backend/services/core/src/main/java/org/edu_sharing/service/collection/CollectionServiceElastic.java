@@ -44,15 +44,15 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
     @Override
     protected void addCollectionCountProperties(NodeRef nodeRef, Collection collection) {
         try {
-            String path = AuthenticationUtil.runAsSystem(() ->
+            /*String path = AuthenticationUtil.runAsSystem(() ->
                     StringUtils.join(NodeServiceHelper.getParentPath(nodeRef).stream().map(NodeRef::getId).collect(Collectors.toList()), '/')
-            );
+            );*/
             QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(
                 searchServiceElastic.getReadPermissionsQuery()
             ).must(
                 QueryBuilders.matchQuery("nodeRef.storeRef.protocol","workspace")
             ).must(
-                QueryBuilders.wildcardQuery("fullpath", path + "/*")
+                QueryBuilders.wildcardQuery("fullpath", "*/" + nodeRef.getId() + "*")
             ).mustNot(
                 QueryBuilders.matchQuery("aspects", CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))
             );

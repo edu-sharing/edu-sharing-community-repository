@@ -22,18 +22,28 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.client.model.Organization;
 import io.swagger.client.model.UserProfile;
-import io.swagger.client.model.UserStats;
 import io.swagger.client.model.UserStatus;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * UserSimple
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class UserSimple {
+  @SerializedName("properties")
+  private Map<String, List<String>> properties = null;
+
   @SerializedName("status")
   private UserStatus status = null;
+
+  @SerializedName("organizations")
+  private List<Organization> organizations = null;
 
   @SerializedName("authorityName")
   private String authorityName = null;
@@ -100,8 +110,31 @@ public class UserSimple {
   @SerializedName("profile")
   private UserProfile profile = null;
 
-  @SerializedName("stats")
-  private UserStats stats = null;
+  public UserSimple properties(Map<String, List<String>> properties) {
+    this.properties = properties;
+    return this;
+  }
+
+  public UserSimple putPropertiesItem(String key, List<String> propertiesItem) {
+    if (this.properties == null) {
+      this.properties = new HashMap<String, List<String>>();
+    }
+    this.properties.put(key, propertiesItem);
+    return this;
+  }
+
+   /**
+   * Get properties
+   * @return properties
+  **/
+  @ApiModelProperty(value = "")
+  public Map<String, List<String>> getProperties() {
+    return properties;
+  }
+
+  public void setProperties(Map<String, List<String>> properties) {
+    this.properties = properties;
+  }
 
   public UserSimple status(UserStatus status) {
     this.status = status;
@@ -119,6 +152,32 @@ public class UserSimple {
 
   public void setStatus(UserStatus status) {
     this.status = status;
+  }
+
+  public UserSimple organizations(List<Organization> organizations) {
+    this.organizations = organizations;
+    return this;
+  }
+
+  public UserSimple addOrganizationsItem(Organization organizationsItem) {
+    if (this.organizations == null) {
+      this.organizations = new ArrayList<Organization>();
+    }
+    this.organizations.add(organizationsItem);
+    return this;
+  }
+
+   /**
+   * Get organizations
+   * @return organizations
+  **/
+  @ApiModelProperty(value = "")
+  public List<Organization> getOrganizations() {
+    return organizations;
+  }
+
+  public void setOrganizations(List<Organization> organizations) {
+    this.organizations = organizations;
   }
 
   public UserSimple authorityName(String authorityName) {
@@ -193,24 +252,6 @@ public class UserSimple {
     this.profile = profile;
   }
 
-  public UserSimple stats(UserStats stats) {
-    this.stats = stats;
-    return this;
-  }
-
-   /**
-   * Get stats
-   * @return stats
-  **/
-  @ApiModelProperty(value = "")
-  public UserStats getStats() {
-    return stats;
-  }
-
-  public void setStats(UserStats stats) {
-    this.stats = stats;
-  }
-
 
   @Override
   public boolean equals(Object o) {
@@ -221,17 +262,18 @@ public class UserSimple {
       return false;
     }
     UserSimple userSimple = (UserSimple) o;
-    return Objects.equals(this.status, userSimple.status) &&
+    return Objects.equals(this.properties, userSimple.properties) &&
+        Objects.equals(this.status, userSimple.status) &&
+        Objects.equals(this.organizations, userSimple.organizations) &&
         Objects.equals(this.authorityName, userSimple.authorityName) &&
         Objects.equals(this.authorityType, userSimple.authorityType) &&
         Objects.equals(this.userName, userSimple.userName) &&
-        Objects.equals(this.profile, userSimple.profile) &&
-        Objects.equals(this.stats, userSimple.stats);
+        Objects.equals(this.profile, userSimple.profile);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, authorityName, authorityType, userName, profile, stats);
+    return Objects.hash(properties, status, organizations, authorityName, authorityType, userName, profile);
   }
 
 
@@ -240,12 +282,13 @@ public class UserSimple {
     StringBuilder sb = new StringBuilder();
     sb.append("class UserSimple {\n");
     
+    sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    organizations: ").append(toIndentedString(organizations)).append("\n");
     sb.append("    authorityName: ").append(toIndentedString(authorityName)).append("\n");
     sb.append("    authorityType: ").append(toIndentedString(authorityType)).append("\n");
     sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
     sb.append("    profile: ").append(toIndentedString(profile)).append("\n");
-    sb.append("    stats: ").append(toIndentedString(stats)).append("\n");
     sb.append("}");
     return sb.toString();
   }

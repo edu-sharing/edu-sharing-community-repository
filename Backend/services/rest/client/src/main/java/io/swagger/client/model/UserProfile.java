@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * UserProfile
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class UserProfile {
   @SerializedName("primaryAffiliation")
   private String primaryAffiliation = null;
@@ -39,6 +39,9 @@ public class UserProfile {
 
   @SerializedName("types")
   private List<String> types = null;
+
+  @SerializedName("vcard")
+  private String vcard = null;
 
   @SerializedName("firstName")
   private String firstName = null;
@@ -106,6 +109,24 @@ public class UserProfile {
   @ApiModelProperty(value = "")
   public List<String> getTypes() {
     return types;
+  }
+
+  public UserProfile vcard(String vcard) {
+    this.vcard = vcard;
+    return this;
+  }
+
+   /**
+   * Get vcard
+   * @return vcard
+  **/
+  @ApiModelProperty(value = "")
+  public String getVcard() {
+    return vcard;
+  }
+
+  public void setVcard(String vcard) {
+    this.vcard = vcard;
   }
 
   public UserProfile firstName(String firstName) {
@@ -211,6 +232,7 @@ public class UserProfile {
     return Objects.equals(this.primaryAffiliation, userProfile.primaryAffiliation) &&
         Objects.equals(this.skills, userProfile.skills) &&
         Objects.equals(this.types, userProfile.types) &&
+        Objects.equals(this.vcard, userProfile.vcard) &&
         Objects.equals(this.firstName, userProfile.firstName) &&
         Objects.equals(this.lastName, userProfile.lastName) &&
         Objects.equals(this.email, userProfile.email) &&
@@ -220,7 +242,7 @@ public class UserProfile {
 
   @Override
   public int hashCode() {
-    return Objects.hash(primaryAffiliation, skills, types, firstName, lastName, email, avatar, about);
+    return Objects.hash(primaryAffiliation, skills, types, vcard, firstName, lastName, email, avatar, about);
   }
 
 
@@ -232,6 +254,7 @@ public class UserProfile {
     sb.append("    primaryAffiliation: ").append(toIndentedString(primaryAffiliation)).append("\n");
     sb.append("    skills: ").append(toIndentedString(skills)).append("\n");
     sb.append("    types: ").append(toIndentedString(types)).append("\n");
+    sb.append("    vcard: ").append(toIndentedString(vcard)).append("\n");
     sb.append("    firstName: ").append(toIndentedString(firstName)).append("\n");
     sb.append("    lastName: ").append(toIndentedString(lastName)).append("\n");
     sb.append("    email: ").append(toIndentedString(email)).append("\n");

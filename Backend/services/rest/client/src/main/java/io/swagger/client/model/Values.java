@@ -26,7 +26,13 @@ import io.swagger.client.model.Admin;
 import io.swagger.client.model.AvailableMds;
 import io.swagger.client.model.Banner;
 import io.swagger.client.model.Collections;
+import io.swagger.client.model.ConfigFrontpage;
+import io.swagger.client.model.ConfigPrivacy;
+import io.swagger.client.model.ConfigRemote;
+import io.swagger.client.model.ConfigUpload;
+import io.swagger.client.model.ConfigWorkflow;
 import io.swagger.client.model.ContextMenuEntry;
+import io.swagger.client.model.FontIcon;
 import io.swagger.client.model.Guest;
 import io.swagger.client.model.HelpMenuOptions;
 import io.swagger.client.model.Image;
@@ -39,8 +45,8 @@ import io.swagger.client.model.Register;
 import io.swagger.client.model.Rendering;
 import io.swagger.client.model.Services;
 import io.swagger.client.model.SessionExpiredDialog;
+import io.swagger.client.model.SimpleEdit;
 import io.swagger.client.model.Stream;
-import io.swagger.client.model.Workflow;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +54,7 @@ import java.util.List;
 /**
  * Values
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Values {
   @SerializedName("supportedLanguages")
   private List<String> supportedLanguages = null;
@@ -104,20 +110,8 @@ public class Values {
   @SerializedName("menuEntries")
   private List<MenuEntry> menuEntries = null;
 
-  @SerializedName("nodeOptions")
-  private List<ContextMenuEntry> nodeOptions = null;
-
-  @SerializedName("searchNodeOptions")
-  private List<ContextMenuEntry> searchNodeOptions = null;
-
-  @SerializedName("renderNodeOptions")
-  private List<ContextMenuEntry> renderNodeOptions = null;
-
-  @SerializedName("collectionNodeOptions")
-  private List<ContextMenuEntry> collectionNodeOptions = null;
-
-  @SerializedName("nodeStoreOptions")
-  private List<ContextMenuEntry> nodeStoreOptions = null;
+  @SerializedName("customOptions")
+  private List<ContextMenuEntry> customOptions = null;
 
   @SerializedName("allowedLicenses")
   private List<String> allowedLicenses = null;
@@ -125,8 +119,8 @@ public class Values {
   @SerializedName("customLicenses")
   private List<License> customLicenses = null;
 
-  @SerializedName("workflows")
-  private List<Workflow> workflows = null;
+  @SerializedName("workflow")
+  private ConfigWorkflow workflow = null;
 
   @SerializedName("licenseDialogOnUpload")
   private Boolean licenseDialogOnUpload = false;
@@ -170,6 +164,9 @@ public class Values {
   @SerializedName("searchViewType")
   private Integer searchViewType = null;
 
+  @SerializedName("workspaceViewType")
+  private Integer workspaceViewType = null;
+
   @SerializedName("itemsPerRequest")
   private Integer itemsPerRequest = null;
 
@@ -209,11 +206,32 @@ public class Values {
   @SerializedName("images")
   private List<Image> images = null;
 
+  @SerializedName("icons")
+  private List<FontIcon> icons = null;
+
   @SerializedName("stream")
   private Stream stream = null;
 
   @SerializedName("admin")
   private Admin admin = null;
+
+  @SerializedName("simpleEdit")
+  private SimpleEdit simpleEdit = null;
+
+  @SerializedName("frontpage")
+  private ConfigFrontpage frontpage = null;
+
+  @SerializedName("upload")
+  private ConfigUpload upload = null;
+
+  @SerializedName("remote")
+  private ConfigRemote remote = null;
+
+  @SerializedName("customCSS")
+  private String customCSS = null;
+
+  @SerializedName("privacy")
+  private ConfigPrivacy privacy = null;
 
   public Values supportedLanguages(List<String> supportedLanguages) {
     this.supportedLanguages = supportedLanguages;
@@ -571,134 +589,30 @@ public class Values {
     this.menuEntries = menuEntries;
   }
 
-  public Values nodeOptions(List<ContextMenuEntry> nodeOptions) {
-    this.nodeOptions = nodeOptions;
+  public Values customOptions(List<ContextMenuEntry> customOptions) {
+    this.customOptions = customOptions;
     return this;
   }
 
-  public Values addNodeOptionsItem(ContextMenuEntry nodeOptionsItem) {
-    if (this.nodeOptions == null) {
-      this.nodeOptions = new ArrayList<ContextMenuEntry>();
+  public Values addCustomOptionsItem(ContextMenuEntry customOptionsItem) {
+    if (this.customOptions == null) {
+      this.customOptions = new ArrayList<ContextMenuEntry>();
     }
-    this.nodeOptions.add(nodeOptionsItem);
+    this.customOptions.add(customOptionsItem);
     return this;
   }
 
    /**
-   * Get nodeOptions
-   * @return nodeOptions
+   * Get customOptions
+   * @return customOptions
   **/
   @ApiModelProperty(value = "")
-  public List<ContextMenuEntry> getNodeOptions() {
-    return nodeOptions;
+  public List<ContextMenuEntry> getCustomOptions() {
+    return customOptions;
   }
 
-  public void setNodeOptions(List<ContextMenuEntry> nodeOptions) {
-    this.nodeOptions = nodeOptions;
-  }
-
-  public Values searchNodeOptions(List<ContextMenuEntry> searchNodeOptions) {
-    this.searchNodeOptions = searchNodeOptions;
-    return this;
-  }
-
-  public Values addSearchNodeOptionsItem(ContextMenuEntry searchNodeOptionsItem) {
-    if (this.searchNodeOptions == null) {
-      this.searchNodeOptions = new ArrayList<ContextMenuEntry>();
-    }
-    this.searchNodeOptions.add(searchNodeOptionsItem);
-    return this;
-  }
-
-   /**
-   * Get searchNodeOptions
-   * @return searchNodeOptions
-  **/
-  @ApiModelProperty(value = "")
-  public List<ContextMenuEntry> getSearchNodeOptions() {
-    return searchNodeOptions;
-  }
-
-  public void setSearchNodeOptions(List<ContextMenuEntry> searchNodeOptions) {
-    this.searchNodeOptions = searchNodeOptions;
-  }
-
-  public Values renderNodeOptions(List<ContextMenuEntry> renderNodeOptions) {
-    this.renderNodeOptions = renderNodeOptions;
-    return this;
-  }
-
-  public Values addRenderNodeOptionsItem(ContextMenuEntry renderNodeOptionsItem) {
-    if (this.renderNodeOptions == null) {
-      this.renderNodeOptions = new ArrayList<ContextMenuEntry>();
-    }
-    this.renderNodeOptions.add(renderNodeOptionsItem);
-    return this;
-  }
-
-   /**
-   * Get renderNodeOptions
-   * @return renderNodeOptions
-  **/
-  @ApiModelProperty(value = "")
-  public List<ContextMenuEntry> getRenderNodeOptions() {
-    return renderNodeOptions;
-  }
-
-  public void setRenderNodeOptions(List<ContextMenuEntry> renderNodeOptions) {
-    this.renderNodeOptions = renderNodeOptions;
-  }
-
-  public Values collectionNodeOptions(List<ContextMenuEntry> collectionNodeOptions) {
-    this.collectionNodeOptions = collectionNodeOptions;
-    return this;
-  }
-
-  public Values addCollectionNodeOptionsItem(ContextMenuEntry collectionNodeOptionsItem) {
-    if (this.collectionNodeOptions == null) {
-      this.collectionNodeOptions = new ArrayList<ContextMenuEntry>();
-    }
-    this.collectionNodeOptions.add(collectionNodeOptionsItem);
-    return this;
-  }
-
-   /**
-   * Get collectionNodeOptions
-   * @return collectionNodeOptions
-  **/
-  @ApiModelProperty(value = "")
-  public List<ContextMenuEntry> getCollectionNodeOptions() {
-    return collectionNodeOptions;
-  }
-
-  public void setCollectionNodeOptions(List<ContextMenuEntry> collectionNodeOptions) {
-    this.collectionNodeOptions = collectionNodeOptions;
-  }
-
-  public Values nodeStoreOptions(List<ContextMenuEntry> nodeStoreOptions) {
-    this.nodeStoreOptions = nodeStoreOptions;
-    return this;
-  }
-
-  public Values addNodeStoreOptionsItem(ContextMenuEntry nodeStoreOptionsItem) {
-    if (this.nodeStoreOptions == null) {
-      this.nodeStoreOptions = new ArrayList<ContextMenuEntry>();
-    }
-    this.nodeStoreOptions.add(nodeStoreOptionsItem);
-    return this;
-  }
-
-   /**
-   * Get nodeStoreOptions
-   * @return nodeStoreOptions
-  **/
-  @ApiModelProperty(value = "")
-  public List<ContextMenuEntry> getNodeStoreOptions() {
-    return nodeStoreOptions;
-  }
-
-  public void setNodeStoreOptions(List<ContextMenuEntry> nodeStoreOptions) {
-    this.nodeStoreOptions = nodeStoreOptions;
+  public void setCustomOptions(List<ContextMenuEntry> customOptions) {
+    this.customOptions = customOptions;
   }
 
   public Values allowedLicenses(List<String> allowedLicenses) {
@@ -753,30 +667,22 @@ public class Values {
     this.customLicenses = customLicenses;
   }
 
-  public Values workflows(List<Workflow> workflows) {
-    this.workflows = workflows;
-    return this;
-  }
-
-  public Values addWorkflowsItem(Workflow workflowsItem) {
-    if (this.workflows == null) {
-      this.workflows = new ArrayList<Workflow>();
-    }
-    this.workflows.add(workflowsItem);
+  public Values workflow(ConfigWorkflow workflow) {
+    this.workflow = workflow;
     return this;
   }
 
    /**
-   * Get workflows
-   * @return workflows
+   * Get workflow
+   * @return workflow
   **/
   @ApiModelProperty(value = "")
-  public List<Workflow> getWorkflows() {
-    return workflows;
+  public ConfigWorkflow getWorkflow() {
+    return workflow;
   }
 
-  public void setWorkflows(List<Workflow> workflows) {
-    this.workflows = workflows;
+  public void setWorkflow(ConfigWorkflow workflow) {
+    this.workflow = workflow;
   }
 
   public Values licenseDialogOnUpload(Boolean licenseDialogOnUpload) {
@@ -1047,6 +953,24 @@ public class Values {
     this.searchViewType = searchViewType;
   }
 
+  public Values workspaceViewType(Integer workspaceViewType) {
+    this.workspaceViewType = workspaceViewType;
+    return this;
+  }
+
+   /**
+   * Get workspaceViewType
+   * @return workspaceViewType
+  **/
+  @ApiModelProperty(value = "")
+  public Integer getWorkspaceViewType() {
+    return workspaceViewType;
+  }
+
+  public void setWorkspaceViewType(Integer workspaceViewType) {
+    this.workspaceViewType = workspaceViewType;
+  }
+
   public Values itemsPerRequest(Integer itemsPerRequest) {
     this.itemsPerRequest = itemsPerRequest;
     return this;
@@ -1297,6 +1221,32 @@ public class Values {
     this.images = images;
   }
 
+  public Values icons(List<FontIcon> icons) {
+    this.icons = icons;
+    return this;
+  }
+
+  public Values addIconsItem(FontIcon iconsItem) {
+    if (this.icons == null) {
+      this.icons = new ArrayList<FontIcon>();
+    }
+    this.icons.add(iconsItem);
+    return this;
+  }
+
+   /**
+   * Get icons
+   * @return icons
+  **/
+  @ApiModelProperty(value = "")
+  public List<FontIcon> getIcons() {
+    return icons;
+  }
+
+  public void setIcons(List<FontIcon> icons) {
+    this.icons = icons;
+  }
+
   public Values stream(Stream stream) {
     this.stream = stream;
     return this;
@@ -1333,6 +1283,114 @@ public class Values {
     this.admin = admin;
   }
 
+  public Values simpleEdit(SimpleEdit simpleEdit) {
+    this.simpleEdit = simpleEdit;
+    return this;
+  }
+
+   /**
+   * Get simpleEdit
+   * @return simpleEdit
+  **/
+  @ApiModelProperty(value = "")
+  public SimpleEdit getSimpleEdit() {
+    return simpleEdit;
+  }
+
+  public void setSimpleEdit(SimpleEdit simpleEdit) {
+    this.simpleEdit = simpleEdit;
+  }
+
+  public Values frontpage(ConfigFrontpage frontpage) {
+    this.frontpage = frontpage;
+    return this;
+  }
+
+   /**
+   * Get frontpage
+   * @return frontpage
+  **/
+  @ApiModelProperty(value = "")
+  public ConfigFrontpage getFrontpage() {
+    return frontpage;
+  }
+
+  public void setFrontpage(ConfigFrontpage frontpage) {
+    this.frontpage = frontpage;
+  }
+
+  public Values upload(ConfigUpload upload) {
+    this.upload = upload;
+    return this;
+  }
+
+   /**
+   * Get upload
+   * @return upload
+  **/
+  @ApiModelProperty(value = "")
+  public ConfigUpload getUpload() {
+    return upload;
+  }
+
+  public void setUpload(ConfigUpload upload) {
+    this.upload = upload;
+  }
+
+  public Values remote(ConfigRemote remote) {
+    this.remote = remote;
+    return this;
+  }
+
+   /**
+   * Get remote
+   * @return remote
+  **/
+  @ApiModelProperty(value = "")
+  public ConfigRemote getRemote() {
+    return remote;
+  }
+
+  public void setRemote(ConfigRemote remote) {
+    this.remote = remote;
+  }
+
+  public Values customCSS(String customCSS) {
+    this.customCSS = customCSS;
+    return this;
+  }
+
+   /**
+   * Get customCSS
+   * @return customCSS
+  **/
+  @ApiModelProperty(value = "")
+  public String getCustomCSS() {
+    return customCSS;
+  }
+
+  public void setCustomCSS(String customCSS) {
+    this.customCSS = customCSS;
+  }
+
+  public Values privacy(ConfigPrivacy privacy) {
+    this.privacy = privacy;
+    return this;
+  }
+
+   /**
+   * Get privacy
+   * @return privacy
+  **/
+  @ApiModelProperty(value = "")
+  public ConfigPrivacy getPrivacy() {
+    return privacy;
+  }
+
+  public void setPrivacy(ConfigPrivacy privacy) {
+    this.privacy = privacy;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -1361,14 +1419,10 @@ public class Values {
         Objects.equals(this.hideMainMenu, values.hideMainMenu) &&
         Objects.equals(this.logout, values.logout) &&
         Objects.equals(this.menuEntries, values.menuEntries) &&
-        Objects.equals(this.nodeOptions, values.nodeOptions) &&
-        Objects.equals(this.searchNodeOptions, values.searchNodeOptions) &&
-        Objects.equals(this.renderNodeOptions, values.renderNodeOptions) &&
-        Objects.equals(this.collectionNodeOptions, values.collectionNodeOptions) &&
-        Objects.equals(this.nodeStoreOptions, values.nodeStoreOptions) &&
+        Objects.equals(this.customOptions, values.customOptions) &&
         Objects.equals(this.allowedLicenses, values.allowedLicenses) &&
         Objects.equals(this.customLicenses, values.customLicenses) &&
-        Objects.equals(this.workflows, values.workflows) &&
+        Objects.equals(this.workflow, values.workflow) &&
         Objects.equals(this.licenseDialogOnUpload, values.licenseDialogOnUpload) &&
         Objects.equals(this.nodeReport, values.nodeReport) &&
         Objects.equals(this.branding, values.branding) &&
@@ -1383,6 +1437,7 @@ public class Values {
         Objects.equals(this.availableMds, values.availableMds) &&
         Objects.equals(this.availableRepositories, values.availableRepositories) &&
         Objects.equals(this.searchViewType, values.searchViewType) &&
+        Objects.equals(this.workspaceViewType, values.workspaceViewType) &&
         Objects.equals(this.itemsPerRequest, values.itemsPerRequest) &&
         Objects.equals(this.rendering, values.rendering) &&
         Objects.equals(this.sessionExpiredDialog, values.sessionExpiredDialog) &&
@@ -1396,13 +1451,20 @@ public class Values {
         Objects.equals(this.services, values.services) &&
         Objects.equals(this.helpMenuOptions, values.helpMenuOptions) &&
         Objects.equals(this.images, values.images) &&
+        Objects.equals(this.icons, values.icons) &&
         Objects.equals(this.stream, values.stream) &&
-        Objects.equals(this.admin, values.admin);
+        Objects.equals(this.admin, values.admin) &&
+        Objects.equals(this.simpleEdit, values.simpleEdit) &&
+        Objects.equals(this.frontpage, values.frontpage) &&
+        Objects.equals(this.upload, values.upload) &&
+        Objects.equals(this.remote, values.remote) &&
+        Objects.equals(this.customCSS, values.customCSS) &&
+        Objects.equals(this.privacy, values.privacy);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(supportedLanguages, extension, loginUrl, loginAllowLocal, loginProvidersUrl, loginProviderTargetUrl, register, recoverPasswordUrl, imprintUrl, privacyInformationUrl, helpUrl, whatsNewUrl, editProfileUrl, editProfile, workspaceColumns, hideMainMenu, logout, menuEntries, nodeOptions, searchNodeOptions, renderNodeOptions, collectionNodeOptions, nodeStoreOptions, allowedLicenses, customLicenses, workflows, licenseDialogOnUpload, nodeReport, branding, publishingNotice, siteTitle, userDisplayName, userSecondaryDisplayName, userAffiliation, defaultUsername, defaultPassword, banner, availableMds, availableRepositories, searchViewType, itemsPerRequest, rendering, sessionExpiredDialog, loginDefaultLocation, searchGroupResults, mainnav, searchSidenavMode, guest, collections, licenseAgreement, services, helpMenuOptions, images, stream, admin);
+    return Objects.hash(supportedLanguages, extension, loginUrl, loginAllowLocal, loginProvidersUrl, loginProviderTargetUrl, register, recoverPasswordUrl, imprintUrl, privacyInformationUrl, helpUrl, whatsNewUrl, editProfileUrl, editProfile, workspaceColumns, hideMainMenu, logout, menuEntries, customOptions, allowedLicenses, customLicenses, workflow, licenseDialogOnUpload, nodeReport, branding, publishingNotice, siteTitle, userDisplayName, userSecondaryDisplayName, userAffiliation, defaultUsername, defaultPassword, banner, availableMds, availableRepositories, searchViewType, workspaceViewType, itemsPerRequest, rendering, sessionExpiredDialog, loginDefaultLocation, searchGroupResults, mainnav, searchSidenavMode, guest, collections, licenseAgreement, services, helpMenuOptions, images, icons, stream, admin, simpleEdit, frontpage, upload, remote, customCSS, privacy);
   }
 
 
@@ -1429,14 +1491,10 @@ public class Values {
     sb.append("    hideMainMenu: ").append(toIndentedString(hideMainMenu)).append("\n");
     sb.append("    logout: ").append(toIndentedString(logout)).append("\n");
     sb.append("    menuEntries: ").append(toIndentedString(menuEntries)).append("\n");
-    sb.append("    nodeOptions: ").append(toIndentedString(nodeOptions)).append("\n");
-    sb.append("    searchNodeOptions: ").append(toIndentedString(searchNodeOptions)).append("\n");
-    sb.append("    renderNodeOptions: ").append(toIndentedString(renderNodeOptions)).append("\n");
-    sb.append("    collectionNodeOptions: ").append(toIndentedString(collectionNodeOptions)).append("\n");
-    sb.append("    nodeStoreOptions: ").append(toIndentedString(nodeStoreOptions)).append("\n");
+    sb.append("    customOptions: ").append(toIndentedString(customOptions)).append("\n");
     sb.append("    allowedLicenses: ").append(toIndentedString(allowedLicenses)).append("\n");
     sb.append("    customLicenses: ").append(toIndentedString(customLicenses)).append("\n");
-    sb.append("    workflows: ").append(toIndentedString(workflows)).append("\n");
+    sb.append("    workflow: ").append(toIndentedString(workflow)).append("\n");
     sb.append("    licenseDialogOnUpload: ").append(toIndentedString(licenseDialogOnUpload)).append("\n");
     sb.append("    nodeReport: ").append(toIndentedString(nodeReport)).append("\n");
     sb.append("    branding: ").append(toIndentedString(branding)).append("\n");
@@ -1451,6 +1509,7 @@ public class Values {
     sb.append("    availableMds: ").append(toIndentedString(availableMds)).append("\n");
     sb.append("    availableRepositories: ").append(toIndentedString(availableRepositories)).append("\n");
     sb.append("    searchViewType: ").append(toIndentedString(searchViewType)).append("\n");
+    sb.append("    workspaceViewType: ").append(toIndentedString(workspaceViewType)).append("\n");
     sb.append("    itemsPerRequest: ").append(toIndentedString(itemsPerRequest)).append("\n");
     sb.append("    rendering: ").append(toIndentedString(rendering)).append("\n");
     sb.append("    sessionExpiredDialog: ").append(toIndentedString(sessionExpiredDialog)).append("\n");
@@ -1464,8 +1523,15 @@ public class Values {
     sb.append("    services: ").append(toIndentedString(services)).append("\n");
     sb.append("    helpMenuOptions: ").append(toIndentedString(helpMenuOptions)).append("\n");
     sb.append("    images: ").append(toIndentedString(images)).append("\n");
+    sb.append("    icons: ").append(toIndentedString(icons)).append("\n");
     sb.append("    stream: ").append(toIndentedString(stream)).append("\n");
     sb.append("    admin: ").append(toIndentedString(admin)).append("\n");
+    sb.append("    simpleEdit: ").append(toIndentedString(simpleEdit)).append("\n");
+    sb.append("    frontpage: ").append(toIndentedString(frontpage)).append("\n");
+    sb.append("    upload: ").append(toIndentedString(upload)).append("\n");
+    sb.append("    remote: ").append(toIndentedString(remote)).append("\n");
+    sb.append("    customCSS: ").append(toIndentedString(customCSS)).append("\n");
+    sb.append("    privacy: ").append(toIndentedString(privacy)).append("\n");
     sb.append("}");
     return sb.toString();
   }

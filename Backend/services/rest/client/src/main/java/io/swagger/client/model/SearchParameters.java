@@ -30,13 +30,63 @@ import java.util.List;
 /**
  * SearchParameters
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class SearchParameters {
+  @SerializedName("permissions")
+  private List<String> permissions = null;
+
+  @SerializedName("resolveCollections")
+  private Boolean resolveCollections = false;
+
   @SerializedName("criterias")
   private List<MdsQueryCriteria> criterias = new ArrayList<MdsQueryCriteria>();
 
   @SerializedName("facettes")
   private List<String> facettes = new ArrayList<String>();
+
+  public SearchParameters permissions(List<String> permissions) {
+    this.permissions = permissions;
+    return this;
+  }
+
+  public SearchParameters addPermissionsItem(String permissionsItem) {
+    if (this.permissions == null) {
+      this.permissions = new ArrayList<String>();
+    }
+    this.permissions.add(permissionsItem);
+    return this;
+  }
+
+   /**
+   * Get permissions
+   * @return permissions
+  **/
+  @ApiModelProperty(value = "")
+  public List<String> getPermissions() {
+    return permissions;
+  }
+
+  public void setPermissions(List<String> permissions) {
+    this.permissions = permissions;
+  }
+
+  public SearchParameters resolveCollections(Boolean resolveCollections) {
+    this.resolveCollections = resolveCollections;
+    return this;
+  }
+
+   /**
+   * Get resolveCollections
+   * @return resolveCollections
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isResolveCollections() {
+    return resolveCollections;
+  }
+
+  public void setResolveCollections(Boolean resolveCollections) {
+    this.resolveCollections = resolveCollections;
+  }
 
   public SearchParameters criterias(List<MdsQueryCriteria> criterias) {
     this.criterias = criterias;
@@ -94,13 +144,15 @@ public class SearchParameters {
       return false;
     }
     SearchParameters searchParameters = (SearchParameters) o;
-    return Objects.equals(this.criterias, searchParameters.criterias) &&
+    return Objects.equals(this.permissions, searchParameters.permissions) &&
+        Objects.equals(this.resolveCollections, searchParameters.resolveCollections) &&
+        Objects.equals(this.criterias, searchParameters.criterias) &&
         Objects.equals(this.facettes, searchParameters.facettes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(criterias, facettes);
+    return Objects.hash(permissions, resolveCollections, criterias, facettes);
   }
 
 
@@ -109,6 +161,8 @@ public class SearchParameters {
     StringBuilder sb = new StringBuilder();
     sb.append("class SearchParameters {\n");
     
+    sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
+    sb.append("    resolveCollections: ").append(toIndentedString(resolveCollections)).append("\n");
     sb.append("    criterias: ").append(toIndentedString(criterias)).append("\n");
     sb.append("    facettes: ").append(toIndentedString(facettes)).append("\n");
     sb.append("}");

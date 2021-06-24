@@ -28,10 +28,13 @@ import java.io.IOException;
 /**
  * Mainnav
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Mainnav {
   @SerializedName("icon")
   private Icon icon = null;
+
+  @SerializedName("mainMenuStyle")
+  private String mainMenuStyle = null;
 
   public Mainnav icon(Icon icon) {
     this.icon = icon;
@@ -51,6 +54,24 @@ public class Mainnav {
     this.icon = icon;
   }
 
+  public Mainnav mainMenuStyle(String mainMenuStyle) {
+    this.mainMenuStyle = mainMenuStyle;
+    return this;
+  }
+
+   /**
+   * Get mainMenuStyle
+   * @return mainMenuStyle
+  **/
+  @ApiModelProperty(value = "")
+  public String getMainMenuStyle() {
+    return mainMenuStyle;
+  }
+
+  public void setMainMenuStyle(String mainMenuStyle) {
+    this.mainMenuStyle = mainMenuStyle;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -61,12 +82,13 @@ public class Mainnav {
       return false;
     }
     Mainnav mainnav = (Mainnav) o;
-    return Objects.equals(this.icon, mainnav.icon);
+    return Objects.equals(this.icon, mainnav.icon) &&
+        Objects.equals(this.mainMenuStyle, mainnav.mainMenuStyle);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(icon);
+    return Objects.hash(icon, mainMenuStyle);
   }
 
 
@@ -76,6 +98,7 @@ public class Mainnav {
     sb.append("class Mainnav {\n");
     
     sb.append("    icon: ").append(toIndentedString(icon)).append("\n");
+    sb.append("    mainMenuStyle: ").append(toIndentedString(mainMenuStyle)).append("\n");
     sb.append("}");
     return sb.toString();
   }

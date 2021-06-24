@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * UserProfileEdit
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class UserProfileEdit {
   @SerializedName("primaryAffiliation")
   private String primaryAffiliation = null;
@@ -42,6 +42,9 @@ public class UserProfileEdit {
 
   @SerializedName("sizeQuota")
   private Long sizeQuota = null;
+
+  @SerializedName("vcard")
+  private String vcard = null;
 
   @SerializedName("firstName")
   private String firstName = null;
@@ -127,6 +130,24 @@ public class UserProfileEdit {
 
   public void setSizeQuota(Long sizeQuota) {
     this.sizeQuota = sizeQuota;
+  }
+
+  public UserProfileEdit vcard(String vcard) {
+    this.vcard = vcard;
+    return this;
+  }
+
+   /**
+   * Get vcard
+   * @return vcard
+  **/
+  @ApiModelProperty(value = "")
+  public String getVcard() {
+    return vcard;
+  }
+
+  public void setVcard(String vcard) {
+    this.vcard = vcard;
   }
 
   public UserProfileEdit firstName(String firstName) {
@@ -233,6 +254,7 @@ public class UserProfileEdit {
         Objects.equals(this.skills, userProfileEdit.skills) &&
         Objects.equals(this.types, userProfileEdit.types) &&
         Objects.equals(this.sizeQuota, userProfileEdit.sizeQuota) &&
+        Objects.equals(this.vcard, userProfileEdit.vcard) &&
         Objects.equals(this.firstName, userProfileEdit.firstName) &&
         Objects.equals(this.lastName, userProfileEdit.lastName) &&
         Objects.equals(this.email, userProfileEdit.email) &&
@@ -242,7 +264,7 @@ public class UserProfileEdit {
 
   @Override
   public int hashCode() {
-    return Objects.hash(primaryAffiliation, skills, types, sizeQuota, firstName, lastName, email, avatar, about);
+    return Objects.hash(primaryAffiliation, skills, types, sizeQuota, vcard, firstName, lastName, email, avatar, about);
   }
 
 
@@ -255,6 +277,7 @@ public class UserProfileEdit {
     sb.append("    skills: ").append(toIndentedString(skills)).append("\n");
     sb.append("    types: ").append(toIndentedString(types)).append("\n");
     sb.append("    sizeQuota: ").append(toIndentedString(sizeQuota)).append("\n");
+    sb.append("    vcard: ").append(toIndentedString(vcard)).append("\n");
     sb.append("    firstName: ").append(toIndentedString(firstName)).append("\n");
     sb.append("    lastName: ").append(toIndentedString(lastName)).append("\n");
     sb.append("    email: ").append(toIndentedString(email)).append("\n");

@@ -93,25 +93,24 @@ export class AdminComponent {
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-          this.storage.refresh();
-      GlobalContainerComponent.finishPreloading();
-      this.warningButtons=[
-        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
-        new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=> {this.showWarning=false})
-      ];
-      this.xmlCardButtons=[
-          new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.xmlAppProperties=null}),
-          new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=> {this.saveApp()})
-      ];
-      this.getTemplates();
-      this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-          this.loginResult=data;
-          this.mediacenterService.getMediacenters().subscribe((mediacenters)=> {
-              this.mediacenters=mediacenters;
-              this.init();
+          GlobalContainerComponent.finishPreloading();
+          this.warningButtons=[
+              new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
+              new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=> {this.showWarning=false})
+          ];
+          this.xmlCardButtons=[
+              new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.xmlAppProperties=null}),
+              new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=> {this.saveApp()})
+          ];
+          this.getTemplates();
+          this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+              this.loginResult=data;
+              this.mediacenterService.getMediacenters().subscribe((mediacenters)=> {
+                  this.mediacenters=mediacenters;
+                  this.init();
+              });
           });
       });
-    });
   }
   private static MULTILINE_PROPERTIES = [
     'custom_html_headers','public_key'

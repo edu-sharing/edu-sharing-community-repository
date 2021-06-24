@@ -1,15 +1,13 @@
-import {Injectable, Injector, OnDestroy, OnInit} from '@angular/core';
+import {Injectable, Injector, OnDestroy} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ToastData, ToastyService } from 'ngx-toasty';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ProgressType } from '../common/ui/modal-dialog/modal-dialog.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { TemporaryStorageService } from '../core-module/rest/services/temporary-storage.service';
 import { DialogButton } from '../core-module/ui/dialog-button';
-import { UIAnimation } from '../core-module/ui/ui-animation';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
 import {Subscription} from 'rxjs/Subscription';
@@ -46,15 +44,13 @@ export enum ToastType {
 }
 export type ToastMessage = {
     message: string,
+    html?: boolean;
     type: 'error' | 'info',
     subtype: ToastType,
     action?: Action
 }
 @Injectable()
 export class Toast implements OnDestroy {
-    private static readonly TOAST_SERVICE: 'TOASTY' | 'MAT_SNACKBAR' = 'MAT_SNACKBAR';
-    // only for legacy Toasts (TOASTY)
-    private static readonly TOAST_DEFAULT_DURATION = 8000;
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 
     dialogInputValue: string;
@@ -85,7 +81,6 @@ export class Toast implements OnDestroy {
         private router: Router,
         private snackBar: MatSnackBar,
         private storage: TemporaryStorageService,
-        private toasty: ToastyService,
     ) {
         this.subscription = this.messageQueue.subscribe((message) => {
             if (this.isInstanceVisible) {
@@ -118,14 +113,14 @@ export class Toast implements OnDestroy {
                     caption: message.action.label,
                     callback: message.action.callback
                 }
-            } : null, message.subtype);
+            } : null, message);
         } else {
             this.error(null, message.message, null, null, null, message.action ? {
                 link: {
                     caption: message.action.label,
                     callback: message.action.callback
                 }
-            } : null, message.subtype);
+            } : null, message);
         }
     }
 
@@ -142,7 +137,7 @@ export class Toast implements OnDestroy {
         dialogTitle: string = null,
         dialogMessage: string = null,
         customAction: CustomAction = null,
-        type: ToastType = null
+        toastMessage: ToastMessage = null
     ): void {
         if (
             this.lastToastMessage === message &&
@@ -150,15 +145,20 @@ export class Toast implements OnDestroy {
         ) {
             return;
         }
-        if(type == null) {
-            type = customAction ? ToastType.InfoAction : ToastType.InfoSimple;
+        toastMessage = toastMessage || {
+            message: null,
+            type: null,
+            subtype: null
+        };
+        if(toastMessage.subtype == null) {
+            toastMessage.subtype = customAction ? ToastType.InfoAction : ToastType.InfoSimple;
         }
         this.lastToastMessage = message;
         this.lastToastMessageTime = Date.now();
         this.showToast({
             message,
             type: 'info',
-            subtype: type,
+            toastMessage,
             translationParameters,
             dialogTitle,
             dialogMessage,
@@ -187,7 +187,7 @@ export class Toast implements OnDestroy {
         dialogTitle: string = null,
         dialogMessage: string = null,
         customAction: CustomAction = null,
-        subtype: ToastType = null,
+        toastMessage: ToastMessage = null,
     ): void {
         const parsingResult = this.parseErrorObject({
             errorObject,
@@ -210,10 +210,18 @@ export class Toast implements OnDestroy {
         }
         this.lastToastError = message + JSON.stringify(translationParameters);
         this.lastToastErrorTime = Date.now();
+        toastMessage = toastMessage || {
+            message: null,
+            type: null,
+            subtype: null
+        };
+        if(!toastMessage.subtype) {
+            toastMessage.subtype = message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific
+        }
         this.showToast({
             message,
             type: 'error',
-            subtype: subtype ? subtype : message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific,
+            toastMessage,
             translationParameters,
             dialogTitle,
             dialogMessage,
@@ -300,12 +308,12 @@ export class Toast implements OnDestroy {
     private async showToast({
         message,
         type,
-        subtype,
+        toastMessage,
         ...options
     }: {
         message: string;
         type: 'error' | 'info';
-        subtype: ToastType;
+        toastMessage: ToastMessage;
         translationParameters?: any;
         dialogTitle?: string;
         dialogMessage?: string;
@@ -313,19 +321,13 @@ export class Toast implements OnDestroy {
     }): Promise<void> {
         const translatedMessage = await this.injector
             .get(TranslateService)
-            .get(message, options.translationParameters)
+            .get(message ?? toastMessage?.message, options.translationParameters)
             .toPromise();
         const action = this.getAction(options);
-        switch (Toast.TOAST_SERVICE) {
-            case 'TOASTY':
-                return this.toastyShowToast(translatedMessage, type, action);
-            case 'MAT_SNACKBAR':
-                return this.matSnackbarShowToast({
-                    message: translatedMessage,
-                    type,
-                    subtype,
-                    action});
-        }
+        toastMessage.message = translatedMessage;
+        toastMessage.type = toastMessage.type ?? type;
+        toastMessage.action = toastMessage.action ?? action;
+        return this.matSnackbarShowToast(toastMessage);
     }
 
     private getAction({
@@ -365,46 +367,6 @@ export class Toast implements OnDestroy {
         this.isModalDialogOpenSubject.next(true);
     }
 
-    private toastyShowToast(message: string, type: 'error' | 'info', action?: Action): void {
-        if (action) {
-            message = this.toastyAppendAction(message, action);
-        }
-        switch (type) {
-            case 'error':
-                return this.toasty.error(this.toastyGetOptions(message));
-            case 'info':
-                return this.toasty.info(this.toastyGetOptions(message));
-        }
-    }
-
-    private toastyGetOptions(text: string) {
-        const timeout = Toast.TOAST_DEFAULT_DURATION + UIAnimation.ANIMATION_TIME_NORMAL;
-        return {
-            title: '',
-            msg: text,
-            showClose: true,
-            animate: 'scale',
-            timeout,
-            onAdd: (toast: ToastData) => {
-                setTimeout(() => {
-                    const elements = document.getElementsByClassName('toasty-theme-default');
-                    const element: any = elements[elements.length - 1];
-                    element.style.opacity = 1;
-                    element.style.transform = 'translateY(0)';
-                    setTimeout(() => {
-                        element.style.opacity = 0;
-                    }, timeout - UIAnimation.ANIMATION_TIME_NORMAL);
-                }, 10);
-            },
-            onRemove(toast: ToastData) {},
-        };
-    }
-
-    private toastyAppendAction(text: string, action: Action) {
-        (window as any).toastActionCallback = action.callback;
-        text += '<br /><a onclick="window.toastActionCallback()">' + action.label + '</a>';
-        return text;
-    }
 
     private matSnackbarShowToast(message: ToastMessage): void {
         this.messageQueue.next(this.messageQueue.value.concat([message]));

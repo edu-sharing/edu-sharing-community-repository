@@ -22,13 +22,14 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.AccumulatedRatings;
 import io.swagger.client.model.Collection;
 import io.swagger.client.model.Content;
 import io.swagger.client.model.License;
+import io.swagger.client.model.Node;
 import io.swagger.client.model.NodeRef;
 import io.swagger.client.model.Person;
 import io.swagger.client.model.Preview;
+import io.swagger.client.model.RatingDetails;
 import io.swagger.client.model.Remote;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import org.threeten.bp.OffsetDateTime;
 /**
  * CollectionReference
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class CollectionReference {
   @SerializedName("remote")
   private Remote remote = null;
@@ -58,10 +59,16 @@ public class CollectionReference {
   private Integer commentCount = null;
 
   @SerializedName("rating")
-  private AccumulatedRatings rating = null;
+  private RatingDetails rating = null;
+
+  @SerializedName("usedInCollections")
+  private List<Node> usedInCollections = null;
 
   @SerializedName("accessOriginal")
   private List<String> accessOriginal = null;
+
+  @SerializedName("originalRestrictedAccess")
+  private Boolean originalRestrictedAccess = false;
 
   @SerializedName("ref")
   private NodeRef ref = null;
@@ -222,7 +229,7 @@ public class CollectionReference {
     this.commentCount = commentCount;
   }
 
-  public CollectionReference rating(AccumulatedRatings rating) {
+  public CollectionReference rating(RatingDetails rating) {
     this.rating = rating;
     return this;
   }
@@ -232,12 +239,38 @@ public class CollectionReference {
    * @return rating
   **/
   @ApiModelProperty(value = "")
-  public AccumulatedRatings getRating() {
+  public RatingDetails getRating() {
     return rating;
   }
 
-  public void setRating(AccumulatedRatings rating) {
+  public void setRating(RatingDetails rating) {
     this.rating = rating;
+  }
+
+  public CollectionReference usedInCollections(List<Node> usedInCollections) {
+    this.usedInCollections = usedInCollections;
+    return this;
+  }
+
+  public CollectionReference addUsedInCollectionsItem(Node usedInCollectionsItem) {
+    if (this.usedInCollections == null) {
+      this.usedInCollections = new ArrayList<Node>();
+    }
+    this.usedInCollections.add(usedInCollectionsItem);
+    return this;
+  }
+
+   /**
+   * Get usedInCollections
+   * @return usedInCollections
+  **/
+  @ApiModelProperty(value = "")
+  public List<Node> getUsedInCollections() {
+    return usedInCollections;
+  }
+
+  public void setUsedInCollections(List<Node> usedInCollections) {
+    this.usedInCollections = usedInCollections;
   }
 
   public CollectionReference accessOriginal(List<String> accessOriginal) {
@@ -264,6 +297,24 @@ public class CollectionReference {
 
   public void setAccessOriginal(List<String> accessOriginal) {
     this.accessOriginal = accessOriginal;
+  }
+
+  public CollectionReference originalRestrictedAccess(Boolean originalRestrictedAccess) {
+    this.originalRestrictedAccess = originalRestrictedAccess;
+    return this;
+  }
+
+   /**
+   * Get originalRestrictedAccess
+   * @return originalRestrictedAccess
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isOriginalRestrictedAccess() {
+    return originalRestrictedAccess;
+  }
+
+  public void setOriginalRestrictedAccess(Boolean originalRestrictedAccess) {
+    this.originalRestrictedAccess = originalRestrictedAccess;
   }
 
   public CollectionReference ref(NodeRef ref) {
@@ -717,7 +768,9 @@ public class CollectionReference {
         Objects.equals(this.isDirectory, collectionReference.isDirectory) &&
         Objects.equals(this.commentCount, collectionReference.commentCount) &&
         Objects.equals(this.rating, collectionReference.rating) &&
+        Objects.equals(this.usedInCollections, collectionReference.usedInCollections) &&
         Objects.equals(this.accessOriginal, collectionReference.accessOriginal) &&
+        Objects.equals(this.originalRestrictedAccess, collectionReference.originalRestrictedAccess) &&
         Objects.equals(this.ref, collectionReference.ref) &&
         Objects.equals(this.parent, collectionReference.parent) &&
         Objects.equals(this.type, collectionReference.type) &&
@@ -745,7 +798,7 @@ public class CollectionReference {
 
   @Override
   public int hashCode() {
-    return Objects.hash(remote, content, license, isDirectory, commentCount, rating, accessOriginal, ref, parent, type, aspects, name, title, metadataset, repositoryType, createdAt, createdBy, modifiedAt, modifiedBy, access, downloadUrl, properties, mimetype, mediatype, size, preview, iconURL, collection, owner, originalId);
+    return Objects.hash(remote, content, license, isDirectory, commentCount, rating, usedInCollections, accessOriginal, originalRestrictedAccess, ref, parent, type, aspects, name, title, metadataset, repositoryType, createdAt, createdBy, modifiedAt, modifiedBy, access, downloadUrl, properties, mimetype, mediatype, size, preview, iconURL, collection, owner, originalId);
   }
 
 
@@ -760,7 +813,9 @@ public class CollectionReference {
     sb.append("    isDirectory: ").append(toIndentedString(isDirectory)).append("\n");
     sb.append("    commentCount: ").append(toIndentedString(commentCount)).append("\n");
     sb.append("    rating: ").append(toIndentedString(rating)).append("\n");
+    sb.append("    usedInCollections: ").append(toIndentedString(usedInCollections)).append("\n");
     sb.append("    accessOriginal: ").append(toIndentedString(accessOriginal)).append("\n");
+    sb.append("    originalRestrictedAccess: ").append(toIndentedString(originalRestrictedAccess)).append("\n");
     sb.append("    ref: ").append(toIndentedString(ref)).append("\n");
     sb.append("    parent: ").append(toIndentedString(parent)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");

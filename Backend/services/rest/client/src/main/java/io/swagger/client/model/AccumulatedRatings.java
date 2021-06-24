@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * AccumulatedRatings
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-11-30T10:38:59.102+01:00")
 public class AccumulatedRatings {
   @SerializedName("overall")
   private RatingData overall = null;

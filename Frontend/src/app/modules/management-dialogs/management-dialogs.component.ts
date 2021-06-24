@@ -8,7 +8,15 @@ import {
     HostListener,
     ContentChild, TemplateRef
 } from '@angular/core';
-import {DialogButton, LocalPermissions, NodeVersions, RestConnectorService, RestNodeService, Version} from "../../core-module/core.module";
+import {
+    CollectionReference,
+    DialogButton,
+    LocalPermissions,
+    NodeVersions,
+    RestConnectorService,
+    RestNodeService,
+    Version
+} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../core-module/core.module";
 import {Toast} from "../../core-ui-module/toast";
@@ -160,7 +168,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
-  @Output() onStoredAddToCollection=new EventEmitter<{collection: Node, references: Node[]}>();
+  @Output() onStoredAddToCollection=new EventEmitter<{collection: Node, references: CollectionReference[]}>();
   _nodeDelete: Node[];
   _nodeMetadata: Node[];
   _nodeSimpleEdit: Node[];
@@ -519,7 +527,10 @@ export class WorkspaceManagementDialogsComponent  {
     this.onCloseAddToCollection.emit();
   }
   public addToCollectionCreate(parent:Node=null){
-      this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES,this.addToCollection);
+      this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES,{
+          nodes: this.addToCollection,
+          callback: this.onStoredAddToCollection
+      });
       this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",parent ? parent.ref.id : RestConstants.ROOT]);
       this.addToCollection=null;
       this.addToCollectionChange.emit(null);

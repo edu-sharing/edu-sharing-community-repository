@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import io.swagger.client.model.Collection;
 import io.swagger.client.model.ErrorResponse;
+import io.swagger.client.model.Usage;
 import io.swagger.client.model.Usages;
 
 import java.lang.reflect.Type;
@@ -829,6 +830,138 @@ public class UsageV1Api {
 
         com.squareup.okhttp.Call call = getUsages_0ValidateBeforeCall(appId, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<Usages>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
+     * Build call for setUsage
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param body  usage date (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call setUsageCall(String repository, Usage body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = body;
+
+        // create path and map variables
+        String localVarPath = "/usage/v1/usages/repository/{repositoryId}"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call setUsageValidateBeforeCall(String repository, Usage body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling setUsage(Async)");
+        }
+        
+        // verify the required parameter 'body' is set
+        if (body == null) {
+            throw new ApiException("Missing the required parameter 'body' when calling setUsage(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = setUsageCall(repository, body, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Set a usage for a node. app signature headers and authenticated user required.
+     * headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param body  usage date (required)
+     * @return Usage
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public Usage setUsage(String repository, Usage body) throws ApiException {
+        ApiResponse<Usage> resp = setUsageWithHttpInfo(repository, body);
+        return resp.getData();
+    }
+
+    /**
+     * Set a usage for a node. app signature headers and authenticated user required.
+     * headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param body  usage date (required)
+     * @return ApiResponse&lt;Usage&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Usage> setUsageWithHttpInfo(String repository, Usage body) throws ApiException {
+        com.squareup.okhttp.Call call = setUsageValidateBeforeCall(repository, body, null, null);
+        Type localVarReturnType = new TypeToken<Usage>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Set a usage for a node. app signature headers and authenticated user required. (asynchronously)
+     * headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param body  usage date (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call setUsageAsync(String repository, Usage body, final ApiCallback<Usage> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = setUsageValidateBeforeCall(repository, body, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<Usage>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }

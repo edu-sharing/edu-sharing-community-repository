@@ -65,6 +65,8 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         }
         if(this.checked.length) {
             values[this.widget.definition.id] = this.checked;
+        } else {
+            delete values[this.widget.definition.id];
         }
         return values;
     }

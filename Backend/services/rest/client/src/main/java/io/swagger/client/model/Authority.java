@@ -23,12 +23,18 @@ import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Authority
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Authority {
+  @SerializedName("properties")
+  private Map<String, List<String>> properties = null;
+
   @SerializedName("authorityName")
   private String authorityName = null;
 
@@ -88,6 +94,32 @@ public class Authority {
   @SerializedName("authorityType")
   private AuthorityTypeEnum authorityType = null;
 
+  public Authority properties(Map<String, List<String>> properties) {
+    this.properties = properties;
+    return this;
+  }
+
+  public Authority putPropertiesItem(String key, List<String> propertiesItem) {
+    if (this.properties == null) {
+      this.properties = new HashMap<String, List<String>>();
+    }
+    this.properties.put(key, propertiesItem);
+    return this;
+  }
+
+   /**
+   * Get properties
+   * @return properties
+  **/
+  @ApiModelProperty(value = "")
+  public Map<String, List<String>> getProperties() {
+    return properties;
+  }
+
+  public void setProperties(Map<String, List<String>> properties) {
+    this.properties = properties;
+  }
+
   public Authority authorityName(String authorityName) {
     this.authorityName = authorityName;
     return this;
@@ -134,13 +166,14 @@ public class Authority {
       return false;
     }
     Authority authority = (Authority) o;
-    return Objects.equals(this.authorityName, authority.authorityName) &&
+    return Objects.equals(this.properties, authority.properties) &&
+        Objects.equals(this.authorityName, authority.authorityName) &&
         Objects.equals(this.authorityType, authority.authorityType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authorityName, authorityType);
+    return Objects.hash(properties, authorityName, authorityType);
   }
 
 
@@ -149,6 +182,7 @@ public class Authority {
     StringBuilder sb = new StringBuilder();
     sb.append("class Authority {\n");
     
+    sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("    authorityName: ").append(toIndentedString(authorityName)).append("\n");
     sb.append("    authorityType: ").append(toIndentedString(authorityType)).append("\n");
     sb.append("}");

@@ -33,6 +33,7 @@ import io.swagger.client.model.Node;
 import io.swagger.client.model.NodeEntry;
 import io.swagger.client.model.SearchParameters;
 import io.swagger.client.model.SearchResultNode;
+import io.swagger.client.model.SearchVCard;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -712,6 +713,163 @@ public class SearchV1Api {
 
         com.squareup.okhttp.Call call = searchByPropertyValidateBeforeCall(repository, contentType, combineMode, property, value, comparator, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<SearchResultNode>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
+     * Build call for searchContributor
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param searchWord search word (required)
+     * @param contributorKind contributor kind (required)
+     * @param fields define which authority fields should be searched: [&#39;firstname&#39;, &#39;lastname&#39;, &#39;email&#39;, &#39;uuid&#39;, &#39;url&#39;] (optional)
+     * @param contributorProperties define which contributor props should be searched: [&#39;ccm:lifecyclecontributer_author&#39;, &#39;ccm:lifecyclecontributer_publisher&#39;, ..., &#39;ccm:metadatacontributer_creator&#39;, &#39;ccm:metadatacontributer_validator&#39;] (optional)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call searchContributorCall(String repository, String searchWord, String contributorKind, List<String> fields, List<String> contributorProperties, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/search/v1/queriesV2/{repository}/contributor"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        if (searchWord != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("searchWord", searchWord));
+        if (contributorKind != null)
+        localVarQueryParams.addAll(apiClient.parameterToPair("contributorKind", contributorKind));
+        if (fields != null)
+        localVarCollectionQueryParams.addAll(apiClient.parameterToPairs("multi", "fields", fields));
+        if (contributorProperties != null)
+        localVarCollectionQueryParams.addAll(apiClient.parameterToPairs("multi", "contributorProperties", contributorProperties));
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call searchContributorValidateBeforeCall(String repository, String searchWord, String contributorKind, List<String> fields, List<String> contributorProperties, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling searchContributor(Async)");
+        }
+        
+        // verify the required parameter 'searchWord' is set
+        if (searchWord == null) {
+            throw new ApiException("Missing the required parameter 'searchWord' when calling searchContributor(Async)");
+        }
+        
+        // verify the required parameter 'contributorKind' is set
+        if (contributorKind == null) {
+            throw new ApiException("Missing the required parameter 'contributorKind' when calling searchContributor(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = searchContributorCall(repository, searchWord, contributorKind, fields, contributorProperties, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Search for contributors
+     * 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param searchWord search word (required)
+     * @param contributorKind contributor kind (required)
+     * @param fields define which authority fields should be searched: [&#39;firstname&#39;, &#39;lastname&#39;, &#39;email&#39;, &#39;uuid&#39;, &#39;url&#39;] (optional)
+     * @param contributorProperties define which contributor props should be searched: [&#39;ccm:lifecyclecontributer_author&#39;, &#39;ccm:lifecyclecontributer_publisher&#39;, ..., &#39;ccm:metadatacontributer_creator&#39;, &#39;ccm:metadatacontributer_validator&#39;] (optional)
+     * @return List&lt;SearchVCard&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public List<SearchVCard> searchContributor(String repository, String searchWord, String contributorKind, List<String> fields, List<String> contributorProperties) throws ApiException {
+        ApiResponse<List<SearchVCard>> resp = searchContributorWithHttpInfo(repository, searchWord, contributorKind, fields, contributorProperties);
+        return resp.getData();
+    }
+
+    /**
+     * Search for contributors
+     * 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param searchWord search word (required)
+     * @param contributorKind contributor kind (required)
+     * @param fields define which authority fields should be searched: [&#39;firstname&#39;, &#39;lastname&#39;, &#39;email&#39;, &#39;uuid&#39;, &#39;url&#39;] (optional)
+     * @param contributorProperties define which contributor props should be searched: [&#39;ccm:lifecyclecontributer_author&#39;, &#39;ccm:lifecyclecontributer_publisher&#39;, ..., &#39;ccm:metadatacontributer_creator&#39;, &#39;ccm:metadatacontributer_validator&#39;] (optional)
+     * @return ApiResponse&lt;List&lt;SearchVCard&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<List<SearchVCard>> searchContributorWithHttpInfo(String repository, String searchWord, String contributorKind, List<String> fields, List<String> contributorProperties) throws ApiException {
+        com.squareup.okhttp.Call call = searchContributorValidateBeforeCall(repository, searchWord, contributorKind, fields, contributorProperties, null, null);
+        Type localVarReturnType = new TypeToken<List<SearchVCard>>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Search for contributors (asynchronously)
+     * 
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param searchWord search word (required)
+     * @param contributorKind contributor kind (required)
+     * @param fields define which authority fields should be searched: [&#39;firstname&#39;, &#39;lastname&#39;, &#39;email&#39;, &#39;uuid&#39;, &#39;url&#39;] (optional)
+     * @param contributorProperties define which contributor props should be searched: [&#39;ccm:lifecyclecontributer_author&#39;, &#39;ccm:lifecyclecontributer_publisher&#39;, ..., &#39;ccm:metadatacontributer_creator&#39;, &#39;ccm:metadatacontributer_validator&#39;] (optional)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call searchContributorAsync(String repository, String searchWord, String contributorKind, List<String> fields, List<String> contributorProperties, final ApiCallback<List<SearchVCard>> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = searchContributorValidateBeforeCall(repository, searchWord, contributorKind, fields, contributorProperties, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<List<SearchVCard>>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }

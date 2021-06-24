@@ -843,7 +843,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             .reduce((acc, widget) => {
                 const property = widget.definition.id;
                 const newValue = this.getNewPropertyValue(widget, node?.properties[property]);
-                if (newValue) {
+                // filter null values in search
+                if(this.editorMode === 'search' && newValue?.length === 1 && newValue[0] === null) {
+                    return acc;
+                } else if (newValue) {
                     if (widget.definition.type === MdsWidgetType.Range) {
                         acc[`${property}_from`] = [newValue[0]];
                         acc[`${property}_to`] = [newValue[1]];

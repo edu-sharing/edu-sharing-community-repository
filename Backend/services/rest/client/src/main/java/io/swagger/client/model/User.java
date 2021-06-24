@@ -23,9 +23,9 @@ import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.client.model.NodeRef;
+import io.swagger.client.model.Organization;
 import io.swagger.client.model.UserProfile;
 import io.swagger.client.model.UserQuota;
-import io.swagger.client.model.UserStats;
 import io.swagger.client.model.UserStatus;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,16 +36,19 @@ import java.util.Map;
 /**
  * User
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class User {
+  @SerializedName("properties")
+  private Map<String, List<String>> properties = null;
+
   @SerializedName("status")
   private UserStatus status = null;
 
+  @SerializedName("organizations")
+  private List<Organization> organizations = null;
+
   @SerializedName("quota")
   private UserQuota quota = null;
-
-  @SerializedName("properties")
-  private Map<String, List<String>> properties = null;
 
   @SerializedName("authorityName")
   private String authorityName = null;
@@ -112,50 +115,11 @@ public class User {
   @SerializedName("profile")
   private UserProfile profile = null;
 
-  @SerializedName("stats")
-  private UserStats stats = null;
-
   @SerializedName("homeFolder")
   private NodeRef homeFolder = null;
 
   @SerializedName("sharedFolders")
   private List<NodeRef> sharedFolders = null;
-
-  public User status(UserStatus status) {
-    this.status = status;
-    return this;
-  }
-
-   /**
-   * Get status
-   * @return status
-  **/
-  @ApiModelProperty(value = "")
-  public UserStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(UserStatus status) {
-    this.status = status;
-  }
-
-  public User quota(UserQuota quota) {
-    this.quota = quota;
-    return this;
-  }
-
-   /**
-   * Get quota
-   * @return quota
-  **/
-  @ApiModelProperty(value = "")
-  public UserQuota getQuota() {
-    return quota;
-  }
-
-  public void setQuota(UserQuota quota) {
-    this.quota = quota;
-  }
 
   public User properties(Map<String, List<String>> properties) {
     this.properties = properties;
@@ -181,6 +145,68 @@ public class User {
 
   public void setProperties(Map<String, List<String>> properties) {
     this.properties = properties;
+  }
+
+  public User status(UserStatus status) {
+    this.status = status;
+    return this;
+  }
+
+   /**
+   * Get status
+   * @return status
+  **/
+  @ApiModelProperty(value = "")
+  public UserStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(UserStatus status) {
+    this.status = status;
+  }
+
+  public User organizations(List<Organization> organizations) {
+    this.organizations = organizations;
+    return this;
+  }
+
+  public User addOrganizationsItem(Organization organizationsItem) {
+    if (this.organizations == null) {
+      this.organizations = new ArrayList<Organization>();
+    }
+    this.organizations.add(organizationsItem);
+    return this;
+  }
+
+   /**
+   * Get organizations
+   * @return organizations
+  **/
+  @ApiModelProperty(value = "")
+  public List<Organization> getOrganizations() {
+    return organizations;
+  }
+
+  public void setOrganizations(List<Organization> organizations) {
+    this.organizations = organizations;
+  }
+
+  public User quota(UserQuota quota) {
+    this.quota = quota;
+    return this;
+  }
+
+   /**
+   * Get quota
+   * @return quota
+  **/
+  @ApiModelProperty(value = "")
+  public UserQuota getQuota() {
+    return quota;
+  }
+
+  public void setQuota(UserQuota quota) {
+    this.quota = quota;
   }
 
   public User authorityName(String authorityName) {
@@ -255,24 +281,6 @@ public class User {
     this.profile = profile;
   }
 
-  public User stats(UserStats stats) {
-    this.stats = stats;
-    return this;
-  }
-
-   /**
-   * Get stats
-   * @return stats
-  **/
-  @ApiModelProperty(value = "")
-  public UserStats getStats() {
-    return stats;
-  }
-
-  public void setStats(UserStats stats) {
-    this.stats = stats;
-  }
-
   public User homeFolder(NodeRef homeFolder) {
     this.homeFolder = homeFolder;
     return this;
@@ -327,21 +335,21 @@ public class User {
       return false;
     }
     User user = (User) o;
-    return Objects.equals(this.status, user.status) &&
+    return Objects.equals(this.properties, user.properties) &&
+        Objects.equals(this.status, user.status) &&
+        Objects.equals(this.organizations, user.organizations) &&
         Objects.equals(this.quota, user.quota) &&
-        Objects.equals(this.properties, user.properties) &&
         Objects.equals(this.authorityName, user.authorityName) &&
         Objects.equals(this.authorityType, user.authorityType) &&
         Objects.equals(this.userName, user.userName) &&
         Objects.equals(this.profile, user.profile) &&
-        Objects.equals(this.stats, user.stats) &&
         Objects.equals(this.homeFolder, user.homeFolder) &&
         Objects.equals(this.sharedFolders, user.sharedFolders);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, quota, properties, authorityName, authorityType, userName, profile, stats, homeFolder, sharedFolders);
+    return Objects.hash(properties, status, organizations, quota, authorityName, authorityType, userName, profile, homeFolder, sharedFolders);
   }
 
 
@@ -350,14 +358,14 @@ public class User {
     StringBuilder sb = new StringBuilder();
     sb.append("class User {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    quota: ").append(toIndentedString(quota)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    organizations: ").append(toIndentedString(organizations)).append("\n");
+    sb.append("    quota: ").append(toIndentedString(quota)).append("\n");
     sb.append("    authorityName: ").append(toIndentedString(authorityName)).append("\n");
     sb.append("    authorityType: ").append(toIndentedString(authorityType)).append("\n");
     sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
     sb.append("    profile: ").append(toIndentedString(profile)).append("\n");
-    sb.append("    stats: ").append(toIndentedString(stats)).append("\n");
     sb.append("    homeFolder: ").append(toIndentedString(homeFolder)).append("\n");
     sb.append("    sharedFolders: ").append(toIndentedString(sharedFolders)).append("\n");
     sb.append("}");

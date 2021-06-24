@@ -29,10 +29,13 @@ import java.util.List;
 /**
  * Statistics
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class Statistics {
   @SerializedName("groups")
   private List<String> groups = null;
+
+  @SerializedName("nodeGroup")
+  private String nodeGroup = null;
 
   public Statistics groups(List<String> groups) {
     this.groups = groups;
@@ -60,6 +63,24 @@ public class Statistics {
     this.groups = groups;
   }
 
+  public Statistics nodeGroup(String nodeGroup) {
+    this.nodeGroup = nodeGroup;
+    return this;
+  }
+
+   /**
+   * Get nodeGroup
+   * @return nodeGroup
+  **/
+  @ApiModelProperty(value = "")
+  public String getNodeGroup() {
+    return nodeGroup;
+  }
+
+  public void setNodeGroup(String nodeGroup) {
+    this.nodeGroup = nodeGroup;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -70,12 +91,13 @@ public class Statistics {
       return false;
     }
     Statistics statistics = (Statistics) o;
-    return Objects.equals(this.groups, statistics.groups);
+    return Objects.equals(this.groups, statistics.groups) &&
+        Objects.equals(this.nodeGroup, statistics.nodeGroup);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(groups);
+    return Objects.hash(groups, nodeGroup);
   }
 
 
@@ -85,6 +107,7 @@ public class Statistics {
     sb.append("class Statistics {\n");
     
     sb.append("    groups: ").append(toIndentedString(groups)).append("\n");
+    sb.append("    nodeGroup: ").append(toIndentedString(nodeGroup)).append("\n");
     sb.append("}");
     return sb.toString();
   }

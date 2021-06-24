@@ -4,25 +4,20 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.UsageDao;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
+import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -219,6 +214,38 @@ public class UsageApi {
 			return ErrorResponse.createResponse(t);
 		}
 		
+	}
+
+	@POST
+	@Path("/usages/repository/{repositoryId}")
+
+	@ApiOperation(
+			value = "Set a usage for a node. app signature headers and authenticated user required.",
+			notes = "headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Usages.Usage.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+	public Response setUsage(@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+							 @ApiParam(value = " usage date",required = true) Usage usage){
+		try {
+			RepositoryDao homeRepo = RepositoryDao.getRepository(RepositoryDao.HOME);
+			if(RepositoryDao.HOME.equals(repository)) {
+				repository = homeRepo.getId();
+			}
+
+			Usages.Usage result = new UsageDao(homeRepo).setUsage(repository,usage);
+			return Response.status(Response.Status.OK).entity(result).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 	
 	

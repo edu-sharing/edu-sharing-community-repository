@@ -63,7 +63,7 @@ public class ShareServiceImpl implements ShareService {
 	}
 	
 	public Share createShare(String nodeId, long expiryDate, String password) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException{
-			return getShare(nodeId, createShare(nodeId,new String[]{EMAIL_TYPE_LINK},expiryDate,password,null));
+		return getShare(nodeId, createShare(nodeId,new String[]{EMAIL_TYPE_LINK},expiryDate,password,null));
 	}
 	
 	@Override
@@ -190,15 +190,19 @@ public class ShareServiceImpl implements ShareService {
 	}
 	@Override
 	public void updateShare(Share share) {
+		NodeRef shareNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, share.getNodeId());
 		Map<QName,Serializable> props = new HashMap<QName,Serializable>();
 		props.put(SHARE_PROP_SHARE_TOKEN, share.getToken());
 		props.put(SHARE_PROP_EXPIRYDATE, share.getExpiryDate());
-		if(share.getPassword()!=null && !share.getPassword().isEmpty())
+		if(share.getPassword()!=null && !share.getPassword().isEmpty()) {
 			props.put(SHARE_PROP_PASSWORD, encryptPassword(share.getPassword()));
+		}else{
+			props.put(SHARE_PROP_PASSWORD, serviceRegistry.getNodeService().getProperty(shareNodeRef,SHARE_PROP_PASSWORD));
+		}
 		props.put(SHARE_PROP_SHARE_MAIL, share.getEmail());
 		props.put(SHARE_PROP_DOWNLOAD_COUNTER, share.getDownloadCount());
 		throwIfScopedNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,share.getIoNodeId()));
-		serviceRegistry.getNodeService().setProperties(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, share.getNodeId()), props);
+		serviceRegistry.getNodeService().setProperties(shareNodeRef, props);
 	}
 	
 	@Override

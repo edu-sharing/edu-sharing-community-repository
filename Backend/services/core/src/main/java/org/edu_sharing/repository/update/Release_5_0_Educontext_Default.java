@@ -55,7 +55,7 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		NodeRunner runner=new NodeRunner();
 		runner.setRunAsSystem(true);
 		runner.setTypes(CCConstants.EDUCONTEXT_TYPES);
-		runner.setThreaded(true);
+		runner.setThreaded(false);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		runner.setKeepModifiedDate(true);
 		runner.setRecurseMode(RecurseMode.All);

@@ -107,7 +107,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		for(int i = 0; i < docs.length(); i++){
 			JSONObject doc = (JSONObject)docs.get(i);
 			String id =  this.getNodeId(doc);
-			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(
+			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(
 					repositoryId, 
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
@@ -420,9 +420,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 	private String getLanguageString(JSONObject meta, String field) throws JSONException {
 		try {
-			return meta.getJSONObject(field).getString("$");
-		}catch(Throwable t){
-			return meta.getString(field);
+			return meta.getJSONArray(field).getJSONObject(0).getString("$");
+		}catch (Throwable t1) {
+			try {
+				return meta.getJSONObject(field).getString("$");
+			} catch (Throwable t2) {
+				return meta.getString(field);
+			}
 		}
 	}
 

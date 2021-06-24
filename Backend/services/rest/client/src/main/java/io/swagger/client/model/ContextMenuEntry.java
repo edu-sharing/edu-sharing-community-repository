@@ -23,11 +23,13 @@ import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ContextMenuEntry
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class ContextMenuEntry {
   @SerializedName("position")
   private Integer position = null;
@@ -44,20 +46,91 @@ public class ContextMenuEntry {
   @SerializedName("isDisabled")
   private Boolean isDisabled = false;
 
-  @SerializedName("isSeperate")
-  private Boolean isSeperate = false;
+  @SerializedName("openInNew")
+  private Boolean openInNew = false;
 
-  @SerializedName("isSeperateBottom")
-  private Boolean isSeperateBottom = false;
+  @SerializedName("isSeparate")
+  private Boolean isSeparate = false;
+
+  @SerializedName("isSeparateBottom")
+  private Boolean isSeparateBottom = false;
 
   @SerializedName("onlyDesktop")
   private Boolean onlyDesktop = false;
 
+  @SerializedName("onlyWeb")
+  private Boolean onlyWeb = false;
+
   @SerializedName("mode")
   private String mode = null;
 
+  /**
+   * Gets or Sets scopes
+   */
+  @JsonAdapter(ScopesEnum.Adapter.class)
+  public enum ScopesEnum {
+    RENDER("Render"),
+    
+    SEARCH("Search"),
+    
+    COLLECTIONSREFERENCES("CollectionsReferences"),
+    
+    COLLECTIONSCOLLECTION("CollectionsCollection"),
+    
+    WORKSPACELIST("WorkspaceList"),
+    
+    WORKSPACETREE("WorkspaceTree"),
+    
+    OER("Oer"),
+    
+    CREATEMENU("CreateMenu");
+
+    private String value;
+
+    ScopesEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static ScopesEnum fromValue(String text) {
+      for (ScopesEnum b : ScopesEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+
+    public static class Adapter extends TypeAdapter<ScopesEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final ScopesEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public ScopesEnum read(final JsonReader jsonReader) throws IOException {
+        String value = jsonReader.nextString();
+        return ScopesEnum.fromValue(String.valueOf(value));
+      }
+    }
+  }
+
+  @SerializedName("scopes")
+  private List<ScopesEnum> scopes = null;
+
   @SerializedName("ajax")
   private Boolean ajax = false;
+
+  @SerializedName("group")
+  private String group = null;
 
   @SerializedName("permission")
   private String permission = null;
@@ -68,11 +141,61 @@ public class ContextMenuEntry {
   @SerializedName("isDirectory")
   private Boolean isDirectory = false;
 
+  @SerializedName("showAsAction")
+  private Boolean showAsAction = false;
+
   @SerializedName("multiple")
   private Boolean multiple = false;
 
-  @SerializedName("remove")
-  private Boolean remove = false;
+  /**
+   * Gets or Sets changeStrategy
+   */
+  @JsonAdapter(ChangeStrategyEnum.Adapter.class)
+  public enum ChangeStrategyEnum {
+    UPDATE("update"),
+    
+    REMOVE("remove");
+
+    private String value;
+
+    ChangeStrategyEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static ChangeStrategyEnum fromValue(String text) {
+      for (ChangeStrategyEnum b : ChangeStrategyEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+
+    public static class Adapter extends TypeAdapter<ChangeStrategyEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final ChangeStrategyEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public ChangeStrategyEnum read(final JsonReader jsonReader) throws IOException {
+        String value = jsonReader.nextString();
+        return ChangeStrategyEnum.fromValue(String.valueOf(value));
+      }
+    }
+  }
+
+  @SerializedName("changeStrategy")
+  private ChangeStrategyEnum changeStrategy = null;
 
   public ContextMenuEntry position(Integer position) {
     this.position = position;
@@ -164,40 +287,58 @@ public class ContextMenuEntry {
     this.isDisabled = isDisabled;
   }
 
-  public ContextMenuEntry isSeperate(Boolean isSeperate) {
-    this.isSeperate = isSeperate;
+  public ContextMenuEntry openInNew(Boolean openInNew) {
+    this.openInNew = openInNew;
     return this;
   }
 
    /**
-   * Get isSeperate
-   * @return isSeperate
+   * Get openInNew
+   * @return openInNew
   **/
   @ApiModelProperty(value = "")
-  public Boolean isIsSeperate() {
-    return isSeperate;
+  public Boolean isOpenInNew() {
+    return openInNew;
   }
 
-  public void setIsSeperate(Boolean isSeperate) {
-    this.isSeperate = isSeperate;
+  public void setOpenInNew(Boolean openInNew) {
+    this.openInNew = openInNew;
   }
 
-  public ContextMenuEntry isSeperateBottom(Boolean isSeperateBottom) {
-    this.isSeperateBottom = isSeperateBottom;
+  public ContextMenuEntry isSeparate(Boolean isSeparate) {
+    this.isSeparate = isSeparate;
     return this;
   }
 
    /**
-   * Get isSeperateBottom
-   * @return isSeperateBottom
+   * Get isSeparate
+   * @return isSeparate
   **/
   @ApiModelProperty(value = "")
-  public Boolean isIsSeperateBottom() {
-    return isSeperateBottom;
+  public Boolean isIsSeparate() {
+    return isSeparate;
   }
 
-  public void setIsSeperateBottom(Boolean isSeperateBottom) {
-    this.isSeperateBottom = isSeperateBottom;
+  public void setIsSeparate(Boolean isSeparate) {
+    this.isSeparate = isSeparate;
+  }
+
+  public ContextMenuEntry isSeparateBottom(Boolean isSeparateBottom) {
+    this.isSeparateBottom = isSeparateBottom;
+    return this;
+  }
+
+   /**
+   * Get isSeparateBottom
+   * @return isSeparateBottom
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isIsSeparateBottom() {
+    return isSeparateBottom;
+  }
+
+  public void setIsSeparateBottom(Boolean isSeparateBottom) {
+    this.isSeparateBottom = isSeparateBottom;
   }
 
   public ContextMenuEntry onlyDesktop(Boolean onlyDesktop) {
@@ -218,6 +359,24 @@ public class ContextMenuEntry {
     this.onlyDesktop = onlyDesktop;
   }
 
+  public ContextMenuEntry onlyWeb(Boolean onlyWeb) {
+    this.onlyWeb = onlyWeb;
+    return this;
+  }
+
+   /**
+   * Get onlyWeb
+   * @return onlyWeb
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isOnlyWeb() {
+    return onlyWeb;
+  }
+
+  public void setOnlyWeb(Boolean onlyWeb) {
+    this.onlyWeb = onlyWeb;
+  }
+
   public ContextMenuEntry mode(String mode) {
     this.mode = mode;
     return this;
@@ -236,6 +395,32 @@ public class ContextMenuEntry {
     this.mode = mode;
   }
 
+  public ContextMenuEntry scopes(List<ScopesEnum> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  public ContextMenuEntry addScopesItem(ScopesEnum scopesItem) {
+    if (this.scopes == null) {
+      this.scopes = new ArrayList<ScopesEnum>();
+    }
+    this.scopes.add(scopesItem);
+    return this;
+  }
+
+   /**
+   * Get scopes
+   * @return scopes
+  **/
+  @ApiModelProperty(value = "")
+  public List<ScopesEnum> getScopes() {
+    return scopes;
+  }
+
+  public void setScopes(List<ScopesEnum> scopes) {
+    this.scopes = scopes;
+  }
+
   public ContextMenuEntry ajax(Boolean ajax) {
     this.ajax = ajax;
     return this;
@@ -252,6 +437,24 @@ public class ContextMenuEntry {
 
   public void setAjax(Boolean ajax) {
     this.ajax = ajax;
+  }
+
+  public ContextMenuEntry group(String group) {
+    this.group = group;
+    return this;
+  }
+
+   /**
+   * Get group
+   * @return group
+  **/
+  @ApiModelProperty(value = "")
+  public String getGroup() {
+    return group;
+  }
+
+  public void setGroup(String group) {
+    this.group = group;
   }
 
   public ContextMenuEntry permission(String permission) {
@@ -308,6 +511,24 @@ public class ContextMenuEntry {
     this.isDirectory = isDirectory;
   }
 
+  public ContextMenuEntry showAsAction(Boolean showAsAction) {
+    this.showAsAction = showAsAction;
+    return this;
+  }
+
+   /**
+   * Get showAsAction
+   * @return showAsAction
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isShowAsAction() {
+    return showAsAction;
+  }
+
+  public void setShowAsAction(Boolean showAsAction) {
+    this.showAsAction = showAsAction;
+  }
+
   public ContextMenuEntry multiple(Boolean multiple) {
     this.multiple = multiple;
     return this;
@@ -326,22 +547,22 @@ public class ContextMenuEntry {
     this.multiple = multiple;
   }
 
-  public ContextMenuEntry remove(Boolean remove) {
-    this.remove = remove;
+  public ContextMenuEntry changeStrategy(ChangeStrategyEnum changeStrategy) {
+    this.changeStrategy = changeStrategy;
     return this;
   }
 
    /**
-   * Get remove
-   * @return remove
+   * Get changeStrategy
+   * @return changeStrategy
   **/
   @ApiModelProperty(value = "")
-  public Boolean isRemove() {
-    return remove;
+  public ChangeStrategyEnum getChangeStrategy() {
+    return changeStrategy;
   }
 
-  public void setRemove(Boolean remove) {
-    this.remove = remove;
+  public void setChangeStrategy(ChangeStrategyEnum changeStrategy) {
+    this.changeStrategy = changeStrategy;
   }
 
 
@@ -359,21 +580,26 @@ public class ContextMenuEntry {
         Objects.equals(this.name, contextMenuEntry.name) &&
         Objects.equals(this.url, contextMenuEntry.url) &&
         Objects.equals(this.isDisabled, contextMenuEntry.isDisabled) &&
-        Objects.equals(this.isSeperate, contextMenuEntry.isSeperate) &&
-        Objects.equals(this.isSeperateBottom, contextMenuEntry.isSeperateBottom) &&
+        Objects.equals(this.openInNew, contextMenuEntry.openInNew) &&
+        Objects.equals(this.isSeparate, contextMenuEntry.isSeparate) &&
+        Objects.equals(this.isSeparateBottom, contextMenuEntry.isSeparateBottom) &&
         Objects.equals(this.onlyDesktop, contextMenuEntry.onlyDesktop) &&
+        Objects.equals(this.onlyWeb, contextMenuEntry.onlyWeb) &&
         Objects.equals(this.mode, contextMenuEntry.mode) &&
+        Objects.equals(this.scopes, contextMenuEntry.scopes) &&
         Objects.equals(this.ajax, contextMenuEntry.ajax) &&
+        Objects.equals(this.group, contextMenuEntry.group) &&
         Objects.equals(this.permission, contextMenuEntry.permission) &&
         Objects.equals(this.toolpermission, contextMenuEntry.toolpermission) &&
         Objects.equals(this.isDirectory, contextMenuEntry.isDirectory) &&
+        Objects.equals(this.showAsAction, contextMenuEntry.showAsAction) &&
         Objects.equals(this.multiple, contextMenuEntry.multiple) &&
-        Objects.equals(this.remove, contextMenuEntry.remove);
+        Objects.equals(this.changeStrategy, contextMenuEntry.changeStrategy);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(position, icon, name, url, isDisabled, isSeperate, isSeperateBottom, onlyDesktop, mode, ajax, permission, toolpermission, isDirectory, multiple, remove);
+    return Objects.hash(position, icon, name, url, isDisabled, openInNew, isSeparate, isSeparateBottom, onlyDesktop, onlyWeb, mode, scopes, ajax, group, permission, toolpermission, isDirectory, showAsAction, multiple, changeStrategy);
   }
 
 
@@ -387,16 +613,21 @@ public class ContextMenuEntry {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    isDisabled: ").append(toIndentedString(isDisabled)).append("\n");
-    sb.append("    isSeperate: ").append(toIndentedString(isSeperate)).append("\n");
-    sb.append("    isSeperateBottom: ").append(toIndentedString(isSeperateBottom)).append("\n");
+    sb.append("    openInNew: ").append(toIndentedString(openInNew)).append("\n");
+    sb.append("    isSeparate: ").append(toIndentedString(isSeparate)).append("\n");
+    sb.append("    isSeparateBottom: ").append(toIndentedString(isSeparateBottom)).append("\n");
     sb.append("    onlyDesktop: ").append(toIndentedString(onlyDesktop)).append("\n");
+    sb.append("    onlyWeb: ").append(toIndentedString(onlyWeb)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
+    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    ajax: ").append(toIndentedString(ajax)).append("\n");
+    sb.append("    group: ").append(toIndentedString(group)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    toolpermission: ").append(toIndentedString(toolpermission)).append("\n");
     sb.append("    isDirectory: ").append(toIndentedString(isDirectory)).append("\n");
+    sb.append("    showAsAction: ").append(toIndentedString(showAsAction)).append("\n");
     sb.append("    multiple: ").append(toIndentedString(multiple)).append("\n");
-    sb.append("    remove: ").append(toIndentedString(remove)).append("\n");
+    sb.append("    changeStrategy: ").append(toIndentedString(changeStrategy)).append("\n");
     sb.append("}");
     return sb.toString();
   }

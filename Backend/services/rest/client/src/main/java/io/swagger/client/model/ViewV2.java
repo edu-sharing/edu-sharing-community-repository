@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * ViewV2
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-03-20T14:32:44.166+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2021-06-09T17:32:21.273+02:00")
 public class ViewV2 {
   @SerializedName("id")
   private String id = null;
@@ -46,6 +46,9 @@ public class ViewV2 {
 
   @SerializedName("hideIfEmpty")
   private Boolean hideIfEmpty = false;
+
+  @SerializedName("isExtended")
+  private Boolean isExtended = false;
 
   public ViewV2 id(String id) {
     this.id = id;
@@ -155,6 +158,24 @@ public class ViewV2 {
     this.hideIfEmpty = hideIfEmpty;
   }
 
+  public ViewV2 isExtended(Boolean isExtended) {
+    this.isExtended = isExtended;
+    return this;
+  }
+
+   /**
+   * Get isExtended
+   * @return isExtended
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean isIsExtended() {
+    return isExtended;
+  }
+
+  public void setIsExtended(Boolean isExtended) {
+    this.isExtended = isExtended;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -170,12 +191,13 @@ public class ViewV2 {
         Objects.equals(this.icon, viewV2.icon) &&
         Objects.equals(this.html, viewV2.html) &&
         Objects.equals(this.rel, viewV2.rel) &&
-        Objects.equals(this.hideIfEmpty, viewV2.hideIfEmpty);
+        Objects.equals(this.hideIfEmpty, viewV2.hideIfEmpty) &&
+        Objects.equals(this.isExtended, viewV2.isExtended);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, caption, icon, html, rel, hideIfEmpty);
+    return Objects.hash(id, caption, icon, html, rel, hideIfEmpty, isExtended);
   }
 
 
@@ -190,6 +212,7 @@ public class ViewV2 {
     sb.append("    html: ").append(toIndentedString(html)).append("\n");
     sb.append("    rel: ").append(toIndentedString(rel)).append("\n");
     sb.append("    hideIfEmpty: ").append(toIndentedString(hideIfEmpty)).append("\n");
+    sb.append("    isExtended: ").append(toIndentedString(isExtended)).append("\n");
     sb.append("}");
     return sb.toString();
   }

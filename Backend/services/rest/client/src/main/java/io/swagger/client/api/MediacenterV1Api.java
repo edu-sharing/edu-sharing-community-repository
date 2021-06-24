@@ -35,6 +35,7 @@ import io.swagger.client.model.Mediacenter;
 import io.swagger.client.model.MediacentersImportResult;
 import io.swagger.client.model.OrganisationsImportResult;
 import io.swagger.client.model.Profile;
+import io.swagger.client.model.SearchParameters;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -342,6 +343,135 @@ public class MediacenterV1Api {
         return call;
     }
     /**
+     * Build call for deleteMediacenter
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param mediacenter authorityName of the mediacenter that should manage the group (required)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call deleteMediacenterCall(String repository, String mediacenter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/mediacenter/v1/mediacenter/{repository}/{mediacenter}"
+            .replaceAll("\\{" + "repository" + "\\}", apiClient.escapeString(repository.toString()))
+            .replaceAll("\\{" + "mediacenter" + "\\}", apiClient.escapeString(mediacenter.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+            
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call deleteMediacenterValidateBeforeCall(String repository, String mediacenter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        
+        // verify the required parameter 'repository' is set
+        if (repository == null) {
+            throw new ApiException("Missing the required parameter 'repository' when calling deleteMediacenter(Async)");
+        }
+        
+        // verify the required parameter 'mediacenter' is set
+        if (mediacenter == null) {
+            throw new ApiException("Missing the required parameter 'mediacenter' when calling deleteMediacenter(Async)");
+        }
+        
+
+        com.squareup.okhttp.Call call = deleteMediacenterCall(repository, mediacenter, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * delete a mediacenter group and it&#39;s admin group and proxy group
+     * admin rights are required.
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param mediacenter authorityName of the mediacenter that should manage the group (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public void deleteMediacenter(String repository, String mediacenter) throws ApiException {
+        deleteMediacenterWithHttpInfo(repository, mediacenter);
+    }
+
+    /**
+     * delete a mediacenter group and it&#39;s admin group and proxy group
+     * admin rights are required.
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param mediacenter authorityName of the mediacenter that should manage the group (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<Void> deleteMediacenterWithHttpInfo(String repository, String mediacenter) throws ApiException {
+        com.squareup.okhttp.Call call = deleteMediacenterValidateBeforeCall(repository, mediacenter, null, null);
+        return apiClient.execute(call);
+    }
+
+    /**
+     * delete a mediacenter group and it&#39;s admin group and proxy group (asynchronously)
+     * admin rights are required.
+     * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
+     * @param mediacenter authorityName of the mediacenter that should manage the group (required)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call deleteMediacenterAsync(String repository, String mediacenter, final ApiCallback<Void> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = deleteMediacenterValidateBeforeCall(repository, mediacenter, progressListener, progressRequestListener);
+        apiClient.executeAsync(call, callback);
+        return call;
+    }
+    /**
      * Build call for editMediacenter
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param mediacenter mediacenter name (required)
@@ -616,6 +746,7 @@ public class MediacenterV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param mediacenter authorityName of the mediacenter that licenses nodes (required)
      * @param searchword searchword of licensed nodes (required)
+     * @param body search parameters (required)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param sortProperties sort properties (optional)
@@ -626,8 +757,8 @@ public class MediacenterV1Api {
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call getMediacenterLicensedNodesCall(String repository, String mediacenter, String searchword, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
-        Object localVarPostBody = null;
+    public com.squareup.okhttp.Call getMediacenterLicensedNodesCall(String repository, String mediacenter, String searchword, SearchParameters body, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = body;
 
         // create path and map variables
         String localVarPath = "/mediacenter/v1/mediacenter/{repository}/{mediacenter}/licenses"
@@ -682,7 +813,7 @@ public class MediacenterV1Api {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call getMediacenterLicensedNodesValidateBeforeCall(String repository, String mediacenter, String searchword, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call getMediacenterLicensedNodesValidateBeforeCall(String repository, String mediacenter, String searchword, SearchParameters body, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         
         // verify the required parameter 'repository' is set
         if (repository == null) {
@@ -699,8 +830,13 @@ public class MediacenterV1Api {
             throw new ApiException("Missing the required parameter 'searchword' when calling getMediacenterLicensedNodes(Async)");
         }
         
+        // verify the required parameter 'body' is set
+        if (body == null) {
+            throw new ApiException("Missing the required parameter 'body' when calling getMediacenterLicensedNodes(Async)");
+        }
+        
 
-        com.squareup.okhttp.Call call = getMediacenterLicensedNodesCall(repository, mediacenter, searchword, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = getMediacenterLicensedNodesCall(repository, mediacenter, searchword, body, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
         return call;
 
     }
@@ -711,6 +847,7 @@ public class MediacenterV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param mediacenter authorityName of the mediacenter that licenses nodes (required)
      * @param searchword searchword of licensed nodes (required)
+     * @param body search parameters (required)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param sortProperties sort properties (optional)
@@ -719,8 +856,8 @@ public class MediacenterV1Api {
      * @return List&lt;Group&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public List<Group> getMediacenterLicensedNodes(String repository, String mediacenter, String searchword, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter) throws ApiException {
-        ApiResponse<List<Group>> resp = getMediacenterLicensedNodesWithHttpInfo(repository, mediacenter, searchword, maxItems, skipCount, sortProperties, sortAscending, propertyFilter);
+    public List<Group> getMediacenterLicensedNodes(String repository, String mediacenter, String searchword, SearchParameters body, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter) throws ApiException {
+        ApiResponse<List<Group>> resp = getMediacenterLicensedNodesWithHttpInfo(repository, mediacenter, searchword, body, maxItems, skipCount, sortProperties, sortAscending, propertyFilter);
         return resp.getData();
     }
 
@@ -730,6 +867,7 @@ public class MediacenterV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param mediacenter authorityName of the mediacenter that licenses nodes (required)
      * @param searchword searchword of licensed nodes (required)
+     * @param body search parameters (required)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param sortProperties sort properties (optional)
@@ -738,8 +876,8 @@ public class MediacenterV1Api {
      * @return ApiResponse&lt;List&lt;Group&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<List<Group>> getMediacenterLicensedNodesWithHttpInfo(String repository, String mediacenter, String searchword, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter) throws ApiException {
-        com.squareup.okhttp.Call call = getMediacenterLicensedNodesValidateBeforeCall(repository, mediacenter, searchword, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, null, null);
+    public ApiResponse<List<Group>> getMediacenterLicensedNodesWithHttpInfo(String repository, String mediacenter, String searchword, SearchParameters body, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter) throws ApiException {
+        com.squareup.okhttp.Call call = getMediacenterLicensedNodesValidateBeforeCall(repository, mediacenter, searchword, body, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, null, null);
         Type localVarReturnType = new TypeToken<List<Group>>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -750,6 +888,7 @@ public class MediacenterV1Api {
      * @param repository ID of repository (or \&quot;-home-\&quot; for home repository) (required)
      * @param mediacenter authorityName of the mediacenter that licenses nodes (required)
      * @param searchword searchword of licensed nodes (required)
+     * @param body search parameters (required)
      * @param maxItems maximum items per page (optional, default to 10)
      * @param skipCount skip a number of items (optional, default to 0)
      * @param sortProperties sort properties (optional)
@@ -759,7 +898,7 @@ public class MediacenterV1Api {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call getMediacenterLicensedNodesAsync(String repository, String mediacenter, String searchword, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ApiCallback<List<Group>> callback) throws ApiException {
+    public com.squareup.okhttp.Call getMediacenterLicensedNodesAsync(String repository, String mediacenter, String searchword, SearchParameters body, Integer maxItems, Integer skipCount, List<String> sortProperties, List<Boolean> sortAscending, List<String> propertyFilter, final ApiCallback<List<Group>> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -780,7 +919,7 @@ public class MediacenterV1Api {
             };
         }
 
-        com.squareup.okhttp.Call call = getMediacenterLicensedNodesValidateBeforeCall(repository, mediacenter, searchword, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = getMediacenterLicensedNodesValidateBeforeCall(repository, mediacenter, searchword, body, maxItems, skipCount, sortProperties, sortAscending, propertyFilter, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<List<Group>>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
