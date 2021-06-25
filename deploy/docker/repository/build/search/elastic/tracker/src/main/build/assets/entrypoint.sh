@@ -52,6 +52,9 @@ grep -q '^[#]*\s*elastic\.host=' "application.properties" || echo "elastic.host=
 sed -i -r 's|^[#]*\s*elastic\.port=.*|elastic.port='"${repository_search_elastic_port}"'|' "application.properties"
 grep -q '^[#]*\s*elastic\.port=' "application.properties" || echo "elastic.port=${repository_search_elastic_port}" >>"application.properties"
 
+sed -i -r 's|^[#]*\s*server\.address=.*|server.address='"${my_bind}"'|' "application.properties"
+grep -q '^[#]*\s*server\.address=' "application.properties" || echo "server.address=${my_bind}" >>"application.properties"
+
 sed -i -r 's|^[#]*\s*management\.server\.address=.*|management.server.address='"${my_bind}"'|' "application.properties"
 grep -q '^[#]*\s*management\.server\.address=' "application.properties" || echo "management.server.address=${my_bind}" >>"application.properties"
 

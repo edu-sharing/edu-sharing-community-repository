@@ -37,7 +37,7 @@ COPY --chown=worker:worker artifacts/*.jar tracker.jar
 
 ########################################################################################################################
 
-EXPOSE 8080
+EXPOSE 8080 8081
 
 ENTRYPOINT ["entrypoint.sh"]
 
