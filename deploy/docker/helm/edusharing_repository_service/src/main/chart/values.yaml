@@ -104,7 +104,6 @@ config:
     commons: |
       threads: 16
       nettyThreads: 32
-      codec: !<org.redisson.codec.FstCodec> {}
       transportMode: "NIO"
 
   cluster:

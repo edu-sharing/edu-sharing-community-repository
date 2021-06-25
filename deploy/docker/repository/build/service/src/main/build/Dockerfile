@@ -54,7 +54,7 @@ COPY --chown=worker:worker assets/agent/jmx-exporter-config.yaml tomcat/agent/
 
 COPY --chown=worker:worker artifacts/postgresql-${repository.postgresql.client.version}.jar tomcat/lib/
 COPY --chown=worker:worker artifacts/redisson-all-${repository.redis.client.version}.jar tomcat/lib/
-COPY --chown=worker:worker artifacts/redisson-tomcat-7-${repository.redis.client.version}.jar tomcat/lib/
+COPY --chown=worker:worker artifacts/redisson-tomcat-${repository.tomcat.major}-${repository.redis.client.version}.jar tomcat/lib/
 
 COPY --chown=worker:worker assets/tomcat/logging.properties tomcat/conf/logging.properties
 COPY --chown=worker:worker assets/tomcat/redisson.yaml tomcat/conf/redisson.yaml
@@ -82,6 +82,7 @@ RUN set -eux \
     && cp -rf /tmp/install/alfresco-platform/bin/* bin \
     && rm -f /tmp/install/alfresco-platform/web-server/lib/postgresql* \
     && cp -rf /tmp/install/alfresco-platform/web-server/* tomcat/ \
+    && xmlstarlet ed -L -d '/Context/Loader' tomcat/conf/Catalina/localhost/alfresco.xml \
     && rm -rf /tmp/install/alfresco-platform \
     && mkdir -p tomcat/webapps/alfresco \
     && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco -x "WEB-INF/lib/hazelcast*" \
@@ -134,6 +135,7 @@ RUN set -eux \
         tomcat/webapps/alfresco -nobackup -force \
     && mv /tmp/install/alfresco-share/web-extension* tomcat/shared/classes/alfresco/web-extension \
     && cp -rf /tmp/install/alfresco-share/web-server/* tomcat/ \
+    && xmlstarlet ed -L -d '/Context/Loader' tomcat/conf/Catalina/localhost/share.xml \
     && rm -rf /tmp/install/alfresco-share \
     && mkdir -p tomcat/webapps/share \
     && unzip tomcat/webapps/share.war -d tomcat/webapps/share \
@@ -177,9 +179,10 @@ RUN set -eux \
         --var redis '$prev' \
         -i '$redis' -t attr -n "className" -v "org.redisson.tomcat.RedissonSessionManager" \
         -i '$redis' -t attr -n "configPath" -v "tomcat/conf/redisson.yaml" \
-        -i '$redis' -t attr -n "readMode" -v "REDIS" \
-        -i '$redis' -t attr -n "updateMode" -v "DEFAULT" \
-        -i '$redis' -t attr -n "broadcastSessionEvents" -v "false" \
+        -i '$redis' -t attr -n "readMode" -v "MEMORY" \
+        -i '$redis' -t attr -n "updateMode" -v "AFTER_REQUEST" \
+        -i '$redis' -t attr -n "broadcastSessionEvents" -v "true" \
+        -i '$redis' -t attr -n "broadcastSessionUpdates" -v "true" \
         tomcat/conf/Catalina/localhost/edu-sharing.xml
 
 

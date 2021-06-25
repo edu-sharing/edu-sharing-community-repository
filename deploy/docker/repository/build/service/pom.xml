@@ -43,7 +43,7 @@
                 jmx_prometheus_javaagent,
                 postgresql,
                 redisson-all,
-                redisson-tomcat-7
+                redisson-tomcat-${repository.tomcat.major}
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/artifacts</outputDirectory>
             </configuration>
@@ -195,7 +195,7 @@
 
     <dependency>
       <groupId>org.redisson</groupId>
-      <artifactId>redisson-tomcat-7</artifactId>
+      <artifactId>redisson-tomcat-${repository.tomcat.major}</artifactId>
     </dependency>
 
   </dependencies>

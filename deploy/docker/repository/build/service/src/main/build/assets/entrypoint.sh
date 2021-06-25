@@ -116,7 +116,7 @@ xmlstarlet ed -L \
 	-i '$internal' -t attr -n "scheme" -v "http" \
 	-i '$internal' -t attr -n "proxyName" -v "${my_host_internal}" \
 	-i '$internal' -t attr -n "proxyPort" -v "${my_port_internal}" \
-	-i '$internal' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11Protocol" \
+	-i '$internal' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11NioProtocol" \
 	-i '$internal' -t attr -n "connectionTimeout" -v "${my_wait_internal}" \
 	-i '$internal' -t attr -n "maxThreads" -v "${my_pool_internal}" \
 	-s '/Server/Service[@name="Catalina"]' -t elem -n 'Connector' -v '' \
@@ -126,7 +126,7 @@ xmlstarlet ed -L \
 	-i '$external' -t attr -n "scheme" -v "${my_prot_external}" \
 	-i '$external' -t attr -n "proxyName" -v "${my_host_external}" \
 	-i '$external' -t attr -n "proxyPort" -v "${my_port_external}" \
-	-i '$external' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11Protocol" \
+	-i '$external' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11NioProtocol" \
 	-i '$external' -t attr -n "connectionTimeout" -v "${my_wait_external}" \
 	-i '$external' -t attr -n "maxThreads" -v "${my_pool_external}" \
 	tomcat/conf/server.xml
