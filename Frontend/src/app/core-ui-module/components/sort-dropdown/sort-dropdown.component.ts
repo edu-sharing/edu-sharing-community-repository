@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core
 import { MatMenu } from '@angular/material/menu';
 import { ListItem } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import {ListItemType} from '../../../core-module/ui/list-item';
 
 @Component({
     selector: 'sort-dropdown',
@@ -21,7 +22,7 @@ export class SortDropdownComponent {
 
     constructor() {}
 
-    setSort(item: SortEvent): void {
+    setSort(item: ListItem|any): void {
         let ascending = this.sortAscending;
         const itemAscending = item.mode === 'ascending';
         if (item.name === this.sortBy) {
@@ -40,10 +41,13 @@ export class SortDropdownComponent {
         this.onSort.emit(item);
     }
 }
-export interface SortEvent {
-    // field name
-    name: string;
-    // allowed modes
-    mode: string;
+export class ListItemSort extends ListItem {
+    constructor(public type : ListItemType,public name : string, public mode : 'ascending' | 'descending' | null = null, public config = {
+        showLabel: false
+    }) {
+        super(type ,name, config);
+    }
+}
+export class SortEvent extends ListItemSort {
     ascending: boolean;
 }

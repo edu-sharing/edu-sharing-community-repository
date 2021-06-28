@@ -639,33 +639,33 @@ $badgeWidth: 250px;
 
 @keyframes OrderAnimationCards {
     0% {
-        transform: rotate(-0.75deg);
+        transform: rotate(-0.5deg);
     }
     50% {
-        transform: rotate(0.75deg);
+        transform: rotate(0.5deg);
     }
     100% {
-        transform: rotate(-0.75deg);
+        transform: rotate(-0.5deg);
     }
 }
 
 @keyframes OrderAnimationList {
     0% {
-        transform: translate(0, -.1em);
+        transform: translate(0, -.05em);
     }
     50% {
-        transform: translate(0, .1em);
+        transform: translate(0, .05em);
     }
     100% {
-        transform: translate(0, -.1em);
+        transform: translate(0, -.05em);
     }
 }
 
 .order-animation {
-    $orderAnimationTime: $transitionNormal;
+    $orderAnimationTime: 0.5s;
     animation-iteration-count: infinite;
     animation-duration: $orderAnimationTime;
-    .cardList & {
+    .cardList &, .cardSmallList & {
         animation-name: OrderAnimationCards;
     }
     .tableList & {

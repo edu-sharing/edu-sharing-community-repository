@@ -799,6 +799,9 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
+        if(this.orderElementsActive) {
+            return;
+        }
         if (dropAction === 'link') {
             throw new Error('dropAction "link" is not allowed');
         }
@@ -811,6 +814,9 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     onDistinctClick(event: DistinctClickEvent, node: Node, region?: string) {
         // in link mode, we will not emit any events
         if(this.createLink) {
+            return;
+        }
+        if(this.orderElementsActive){
             return;
         }
         if (!this.isClickable) {
@@ -1221,7 +1227,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.optionsHelper.setData({
             scope: this.scope,
             activeObjects: this.selectedNodes,
-            selectedObjects: this.selectedNodes,
+            selectedObjects: this.orderElementsActive ? []: this.selectedNodes,
             allObjects: this._nodes,
             parent: this.parent,
             customOptions: this._customOptions,

@@ -270,8 +270,17 @@
                   'COLLECTION.INFO_REFERENCES_MULTI' | translate
                   }}</ng-container>
               </h2>
-              <ng-container *ngIf="sortCollections">
-                <ng-container *ngTemplateOutlet="sortTool; context: { sortInfo: sortCollections, callback: collectionSortEmitter }">
+              <ng-container *ngIf="
+                isAllowedToEditCollection() &&
+                sortCollections &&
+                !isMobile() &&
+                collectionContent.collections?.length"
+              >
+                <ng-container *ngTemplateOutlet="sortTool; context: {
+                columns: sortCollectionColumns,
+                sortInfo: sortCollections,
+                callback: collectionSortEmitter,
+                toggleCallback: collectionCustomSortEmitter }">
                 </ng-container>
               </ng-container>
             </div>
@@ -286,6 +295,8 @@
                     "
               [hasHeading]="false"
               [isLoading]="isLoading"
+              [orderElements]="sortCollections?.customActive"
+              [orderElementsActive]="sortCollections?.customActive"
               [viewType]="getCollectionViewType()"
               [dragDrop]="true"
               [canDrop]="canDropOnCollection"
@@ -294,7 +305,7 @@
               [isClickable]="true"
               (clickRow)="onCollectionsClick($event.node)"
               (doubleClickRow)="onCollectionsClick($event)"
-          [(nodes)]="collectionContent.collections"
+              [(nodes)]="collectionContent.collections"
               [hasMore]="
                         collectionContent.collections.length <
                         collectionContent.collectionsPagination.total
@@ -352,26 +363,21 @@
             class="collections-cards-div"
             *ngIf="!isLoading && isReady && !isRootLevelCollection()"
           >
-            <div class="content-header">
+            <div class="content-header heading-group">
               <h2 class="mat-heading-3">
                 {{ 'collections_content' | translate }}
               </h2>
-              <div
-                class="custom-order"
-                *ngIf="
-                          !isMobile() &&
-                          collectionContent.references &&
-                          collectionContent.references.length > 1 &&
-                          isUserAllowedToEdit(collectionContent.node)
-                      "
-              >
-                <mat-slide-toggle
-                  [ngModel]="collectionContent.node.collection.orderMode == 'custom'"
-                  (change)="setCustomOrder($event)"
-                >
-                  {{ 'COLLECTIONS.CUSTOM_ORDER' | translate }}
-                </mat-slide-toggle>
-              </div>
+              <ng-container *ngIf="!isMobile() &&
+                          collectionContent.references?.length > 1 &&
+                          listReferences?.getListTable()?.selectedNodes?.length === 0 &&
+                          isUserAllowedToEdit(collectionContent.node)">
+                <ng-container *ngTemplateOutlet="sortTool; context: {
+                sortInfo: sortReferences,
+                columns: sortReferencesColumns,
+                callback: referenceSortEmitter,
+                toggleCallback: referenceCustomSortEmitter }">
+                </ng-container>
+              </ng-container>
               <actionbar
                 #actionbarReferences
                 class="actionbarMaterials"
@@ -392,14 +398,14 @@
               [viewType]="viewTypeNodes"
               [dragDrop]="true"
               [hasIcon]="true"
-              [orderElements]="isUserAllowedToEdit(collectionContent.node)"
-              [(orderElementsActive)]="orderActive"
+              [orderElements]="sortReferences?.customActive"
+              [orderElementsActive]="sortReferences?.customActive"
               [columns]="referencesColumns"
               [mainNav]="mainNavRef"
               [actionbar]="actionbarReferences"
               [scope]="SCOPES.CollectionsReferences"
               [isClickable]="true"
-              [hasCheckbox]="!orderActive && !reurl"
+              [hasCheckbox]="!sortReferences?.customActive && !reurl"
               [canDrop]="canDropOnRef"
               (clickRow)="onContentClick($event.node)"
               (onRequestRefresh)="refreshContent()"
@@ -468,19 +474,23 @@
     <app-footer [scope]="'collections'"></app-footer>
   </div>
 </div>
-<ng-template #sortTool let-sortInfo="sortInfo" let-callback="callback">
-  <mat-slide-toggle *ngIf="sortInfo.mode === 'ccm:collection_ordered_position'"></mat-slide-toggle>
+<ng-template #sortTool let-columns="columns" let-sortInfo="sortInfo" let-callback="callback" let-toggleCallback="toggleCallback">
+  <mat-slide-toggle *ngIf="sortInfo.name === 'ccm:collection_ordered_position'" [(ngModel)]="sortInfo.customActive" (ngModelChange)="toggleCallback.emit($event)">
+    {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
+  </mat-slide-toggle>
   <button *ngIf="sortDropdown.menu"
           [matMenuTriggerFor]="sortDropdown.menu"
           mat-button
           color="primary"
   >
-    {{ ('NODE.' + sortInfo.name) | translate}} <i [icon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
+    {{ ('NODE.' + sortInfo.name) | translate}}
+    <i *ngIf="sortInfo.name !== 'ccm:collection_ordered_position'"
+      [icon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
   </button>
   <sort-dropdown
     #sortDropdown
     trigger=""
-    [columns]="sortColumns"
+    [columns]="columns"
     [sortBy]="sortInfo.name"
     [sortAscending]="sortInfo.ascending"
     (onSort)="callback.emit($event)"

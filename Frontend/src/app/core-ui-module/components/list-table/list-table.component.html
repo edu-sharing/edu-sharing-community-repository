@@ -112,7 +112,7 @@
            [class.selected]="getSelectedPos(node)!=-1"
            [class.node-virtual]="node.virtual"
            [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-           [class.hover]="dragHover==node"
+           [class.hover]="dragHover==node && !orderElementsActive"
       >
         <div class="row node-row"
              [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
@@ -284,23 +284,25 @@
               </button>
             </div>
           </ng-container>
-          <div class="more column" *ngIf="_options && _options.length>1" >
-            <button mat-icon-button
-                    color="primary"
-                    (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
-            >
-              <i icon="more_vert" [aria]="true"></i>
-            </button>
-          </div>
-          <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
-            <button mat-icon-button
-                    color="primary"
-                    [class.disabled]="!optionIsValid(_options[0],node)"
-                    matTooltip="{{_options[0].name | translate}}"
-                    (click)="callOption(_options[0],node);$event.stopPropagation();"
-            >
-              <i icon="{{_options[0].icon}}"></i>
-            </button></div>
+          <ng-container *ngIf="!orderElementsActive">
+            <div class="more column" *ngIf="_options && _options.length>1" >
+              <button mat-icon-button
+                      color="primary"
+                      (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
+              >
+                <i icon="more_vert" [aria]="true"></i>
+              </button>
+            </div>
+            <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
+              <button mat-icon-button
+                      color="primary"
+                      [class.disabled]="!optionIsValid(_options[0],node)"
+                      matTooltip="{{_options[0].name | translate}}"
+                      (click)="callOption(_options[0],node);$event.stopPropagation();"
+              >
+                <i icon="{{_options[0].icon}}"></i>
+              </button></div>
+          </ng-container>
         </div>
       </div>
       <div class="loadMore">

@@ -1889,6 +1889,7 @@
 				<!-- order mode for references inside this collection -->
 				<property name="ccm:collectionordermode">
 					<type>d:text</type>
+					<multiple>true</multiple>
 				</property>
 				<!-- order mode for subcollection inside this collection -->
 				<property name="ccm:collectionsubcollectionordermode">
