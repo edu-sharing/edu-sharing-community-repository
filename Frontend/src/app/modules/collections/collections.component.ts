@@ -318,9 +318,9 @@ export class CollectionsMainComponent {
     ) {
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
-        this.collectionCustomSortEmitter.subscribe(() => this.toggleCollectionsOrder());
+        this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
         this.referenceSortEmitter.subscribe((sort: SortEvent) => this.setReferenceSort(sort));
-        this.referenceCustomSortEmitter.subscribe(() => this.toggleReferencesOrder());
+        this.referenceCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleReferencesOrder() : this.changeReferencesOrder());
         this.collectionsColumns.push(new ListItem('COLLECTION', 'title'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
@@ -967,7 +967,7 @@ export class CollectionsMainComponent {
                 const orderCollections = collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
                 this.sortCollections = {
                     name: orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE,
-                    ascending: orderCollections?.[1] || false
+                    ascending: orderCollections?.[1] === 'true'
                 };
                 const refMode = collection.collection.orderMode;
                 const refAscending = collection.collection.orderAscending;
@@ -1226,7 +1226,8 @@ export class CollectionsMainComponent {
     }
 
     private changeCollectionsOrder() {
-        this.toast.showProgressDialog();        this.collectionService
+        this.toast.showProgressDialog();
+        this.collectionService
             .setOrder(
                 this.collectionContent.node.ref.id,
                 RestHelper.getNodeIds(this.collectionContent.collections),
@@ -1339,6 +1340,10 @@ export class CollectionsMainComponent {
             this.toast.error(e);
         }
         this.refreshContent();
+        this.sortCollections.customActive = this.sortCollections.name === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        if(this.sortCollections.customActive) {
+            this.toggleCollectionsOrder();
+        }
     }
     async setReferenceSort(sort: SortEvent) {
         console.log(sort, sort.name === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION)
@@ -1355,6 +1360,10 @@ export class CollectionsMainComponent {
             this.toast.error(e);
         }
         this.refreshContent();
+        this.sortReferences.customActive = this.sortReferences.name === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        if(this.sortReferences.customActive) {
+            this.toggleReferencesOrder();
+        }
     }
 
     private getReferencesRequest(): RequestObject {

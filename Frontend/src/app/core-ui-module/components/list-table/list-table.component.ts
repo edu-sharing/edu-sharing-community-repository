@@ -548,6 +548,9 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         if (changes.viewType && typeof changes.viewType.currentValue === 'string') {
             this.viewType = parseInt(changes.viewType.currentValue, 10);
         }
+        if(changes.orderElementsActive) {
+            this.clearSelection();
+        }
     }
 
     ngAfterViewInit(): void {

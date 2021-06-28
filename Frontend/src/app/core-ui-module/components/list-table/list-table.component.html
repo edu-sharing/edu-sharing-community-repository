@@ -148,6 +148,9 @@
             [aria-describedby]="getDescribedBy(node)"
             #childList
           >
+            <ng-container *ngIf="orderElementsActive">
+              <ng-container *ngTemplateOutlet="itemOrderHint; context: { $implicit: node }"></ng-container>
+            </ng-container>
             <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
             <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
               <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
@@ -313,3 +316,8 @@
       </div>
       <spinner *ngIf="isLoading"></spinner>
     </div>
+<ng-template #itemOrderHint>
+  <div class="item-order-overlay">
+    <i icon="drag_handle"></i>
+  </div>
+</ng-template>

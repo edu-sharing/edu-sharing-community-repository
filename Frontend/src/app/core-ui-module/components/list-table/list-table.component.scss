@@ -1214,6 +1214,40 @@ a.rowInner {
     display: inline-block;
 }
 
+.item-order-overlay {
+    position: absolute;
+    z-index: 15;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    > i {
+        font-size: 20px;
+    }
+}
+.cardList .item-order-overlay{
+    background-color: rgba(255,255,255,.75);
+    backdrop-filter: blur(5px);
+    width: 50px;
+    height: 50px;
+    margin: auto;
+    left: 0;
+    right: 0;
+    border-radius: 5px;
+    top: ($previewHeight - 60px)/2;
+}
+.cardSmallList .item-order-overlay{
+    background-color: #fff;
+    height: 40px;
+    bottom: 0;
+    width: 100%;
+}
+.tableList .item-order-overlay{
+    background-color: transparent;
+    right: 10px;
+    width: 20px!important;
+}
+
 @media all {
     .cardList .row .column.node_ccm_commonlicense_key {
         /*text-align: right;
