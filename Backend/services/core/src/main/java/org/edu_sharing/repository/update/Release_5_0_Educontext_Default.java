@@ -61,6 +61,9 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		runner.setRecurseMode(RecurseMode.All);
 		int[] processed=new int[]{0};
 		runner.setFilter((ref)->{
+			if(!nodeService.exists(ref)){
+				return false;
+			}
 			Serializable prop = nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));
 			// we want to return true for all nodes which don't have the property set yet
 			if(prop==null)
@@ -75,6 +78,9 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 				return true;
 		});
 		runner.setTask((ref)->{
+			if(!nodeService.exists(ref)){
+				return;
+			}
 			logDebug("add educontext to "+ref.getId());
 			if(!test){
 				nodeService.setProperty(ref,QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME),CCConstants.EDUCONTEXT_DEFAULT);
