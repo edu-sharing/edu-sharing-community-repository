@@ -61,31 +61,38 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		runner.setRecurseMode(RecurseMode.All);
 		int[] processed=new int[]{0};
 		runner.setFilter((ref)->{
-			if(!nodeService.exists(ref)){
+			try {
+				if (!nodeService.exists(ref)) {
+					return false;
+				}
+				Serializable prop = nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));
+				// we want to return true for all nodes which don't have the property set yet
+				if (prop == null)
+					return true;
+				if (prop instanceof String) {
+					return ((String) prop).isEmpty();
+				} else if (prop instanceof List) {
+					return ((List) prop).isEmpty();
+				} else
+					return true;
+			}catch(Throwable e){
+				logger.error("error filtering node:" + ref +" " + e.getMessage());
 				return false;
 			}
-			Serializable prop = nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));
-			// we want to return true for all nodes which don't have the property set yet
-			if(prop==null)
-				return true;
-			if(prop instanceof String) {
-				 return ((String)prop).isEmpty();
-			}
-			else if(prop instanceof List){
-				return ((List)prop).isEmpty();
-			}
-			else
-				return true;
 		});
 		runner.setTask((ref)->{
-			if(!nodeService.exists(ref)){
-				return;
+			try {
+				if (!nodeService.exists(ref)) {
+					return;
+				}
+				logDebug("add educontext to " + ref.getId());
+				if (!test) {
+					nodeService.setProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME), CCConstants.EDUCONTEXT_DEFAULT);
+				}
+				processed[0]++;
+			}catch(Throwable e){
+				logger.error("error processing node:" + ref +" " + e.getMessage());
 			}
-			logDebug("add educontext to "+ref.getId());
-			if(!test){
-				nodeService.setProperty(ref,QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME),CCConstants.EDUCONTEXT_DEFAULT);
-			}
-			processed[0]++;
 		});
         runner.run();
 		logInfo("Added educontext default value to a total of "+processed[0]+" nodes");
