@@ -4,7 +4,7 @@
   "license": "GNU GPL v2",
   "angular-cli": {},
   "scripts": {
-    "start": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng serve --host repository.127.0.0.1.xip.io --disableHostCheck",
+    "start": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng serve --host repository.127.0.0.1.nip.io --disableHostCheck",
     "build": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --prod",
     "build-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build",
     "lint": "ng lint",
