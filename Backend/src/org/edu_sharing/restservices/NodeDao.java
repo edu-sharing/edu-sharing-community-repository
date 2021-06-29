@@ -119,7 +119,7 @@ public class NodeDao {
 	}
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
-		return getNode(repoDao, nodeId, new Filter());
+		return getNode(repoDao, nodeId, Filter.createShowAllFilter());
 	}
 	public static NodeDao getNode(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef)
 			throws DAOException {
@@ -354,7 +354,7 @@ public class NodeDao {
 	public static final String archiveStoreId = "SpacesStore";
 
 	List<NodeDao> usedInCollections = new ArrayList<>();
-	
+
 	private NodeDao(RepositoryDao repoDao, String nodeId) throws Throwable {
 		this(repoDao,nodeId,new Filter());
 	}
@@ -531,7 +531,7 @@ public class NodeDao {
 			for(org.edu_sharing.service.model.NodeRef usedInCollection : nodeRef.getUsedInCollections()){
 				usedInCollections.add(new NodeDao(repoDao, usedInCollection, filter));
 			}
-			
+
 		}catch(Throwable t){
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
@@ -2095,10 +2095,10 @@ public class NodeDao {
 					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION));
 					AuthenticationUtil.runAsSystem(() -> {
 						permissionService.removeAllPermissions(newNode.getId());
+						// re-activate inherition
+						permissionService.setPermissions(newNode.getId(), null, true);
 						return null;
 					});
-					// re-activate inherition
-					permissionService.setPermissions(newNode.getId(), null, true);
 					return new NodeDao(repoDao, newNode.getId());
 				} catch (Throwable throwable) {
 					throw new RuntimeException(throwable);
