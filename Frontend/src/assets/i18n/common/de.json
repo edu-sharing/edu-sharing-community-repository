@@ -724,7 +724,9 @@
         "ERROR_INVALID_PASSWORD": "Ungültiges Passwort",
         "PASSWORD": "Passwort",
         "PASSWORD_PLACEHOLDER": "Passwort eingeben ...",
-        "PASSWORD_CORRECT": "Passwort korrekt"
+        "PASSWORD_CORRECT": "Passwort korrekt",
+        "SUBELEMENT_SINGLE": "enthält 1 weiteres Element",
+        "SUBELEMENT_MULTI": "enthält {{count}} weitere Elemente"
     },
     "VIDEO_CONTROLS": {
         "HEADING": "Einen Ausschnitt zum Speichern in einer Sammlung festlegen",

@@ -24,6 +24,11 @@
     flex-direction: column;
   }
 }
+.subobjects {
+    font-size: $fontSizeSmall;
+    color: $textLight;
+    margin: 6px 0;
+}
 
 .branding{
   position: relative;
