@@ -131,7 +131,7 @@
           mat-button
           class="addDesktop mat-button-no-uppercase"
           *ngIf="!isGuest && isCreateAllowed()"
-          [disabled]="!isCreateAllowed()"
+          [disabled]="!isCreateAllowed() || !createMenu.hasUsableOptions()"
           #dropdownTrigger="matMenuTrigger"
           (menuOpened)="createMenu.updateOptions()"
           [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"

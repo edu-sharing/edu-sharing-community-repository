@@ -49,6 +49,8 @@ export class ToolpermissionManagerComponent {
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
+        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
             RestConstants.TOOLPERMISSION_COMMENT_WRITE,
             RestConstants.TOOLPERMISSION_RATE
@@ -61,7 +63,8 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE,
     ]},
     {name:"COLLECTIONS",icon:"layers",permissions:[
-      RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
+        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+        RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
         RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM,
         RestConstants.TOOLPERMISSION_COLLECTION_PINNING,
         RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,

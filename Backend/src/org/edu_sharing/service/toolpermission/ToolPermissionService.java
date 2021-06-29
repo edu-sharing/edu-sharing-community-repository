@@ -371,6 +371,10 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
 
+		// backport from 6.0
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FILES);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS);
+
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
 
 		addConnectorToolpermissions(toInit);

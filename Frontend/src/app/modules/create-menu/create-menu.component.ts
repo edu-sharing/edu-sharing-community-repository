@@ -218,6 +218,7 @@ export class CreateMenuComponent {
             );
             newCollection.elementType = [ElementType.Unknown];
             newCollection.constrains = [Constrain.NoSelection, Constrain.User];
+            newCollection.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS];
             newCollection.group = DefaultGroups.Create;
             newCollection.priority = 5;
             this.options.push(newCollection);
@@ -240,6 +241,7 @@ export class CreateMenuComponent {
                 () => this.showUploadSelect = true,
             );
             upload.elementType = [ElementType.Unknown];
+            upload.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
             upload.group = DefaultGroups.Create;
             upload.priority = 10;
             this.options.push(upload);
@@ -267,6 +269,7 @@ export class CreateMenuComponent {
                     () => (this.openCamera()),
                 );
                 camera.elementType = [ElementType.Unknown];
+                camera.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
                 camera.group = DefaultGroups.Create;
                 camera.priority = 20;
                 this.options.push(camera);
@@ -279,6 +282,7 @@ export class CreateMenuComponent {
                 () => (this.addFolderName = ''),
             );
             addFolder.elementType = [ElementType.Unknown];
+            addFolder.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS];
             addFolder.group = DefaultGroups.Create;
             addFolder.priority = 30;
             this.options.push(addFolder);
@@ -294,6 +298,10 @@ export class CreateMenuComponent {
             this.options,
             Target.CreateMenu,
         );
+    }
+
+    public hasUsableOptions() {
+        return this.options.some((o) => o.isEnabled);
     }
 
     getParent() {
@@ -359,11 +367,19 @@ export class CreateMenuComponent {
             this.toast.error(null, 'WORKSPACE.TOAST.ONGOING_UPLOAD');
             return;
         }
+        if(!this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES)) {
+            // not available in 5.1
+            // this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
+            return;
+        }
         this.showUploadSelect = false;
         this.filesToUpload = files;
     }
 
     afterUpload(nodes: Node[]) {
+        if(nodes == null) {
+            return;
+        }
         if (this.params.reurl) {
             NodeHelper.addNodeToLms(
                 this.router,
@@ -488,5 +504,10 @@ export class CreateMenuComponent {
                     }
                 },
             );
+    }
+
+    isAllowed() {
+        return this.allowed && !this.filesToUpload &&
+            this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
     }
 }
