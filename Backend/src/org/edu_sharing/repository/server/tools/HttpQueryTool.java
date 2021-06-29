@@ -54,7 +54,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 public class HttpQueryTool {
 
 	private static String CACHE_KEY = "HTTPCLIENT_PROXY_CACHE";
-	private static SimpleCache<String, Serializable> configCache = (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
+	private static SimpleCache<String, Serializable> configCache = (AlfAppContextGate.getApplicationContext() != null) ? (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache") : null;
 
 
 	Log logger = LogFactory.getLog(HttpQueryTool.class);
@@ -77,7 +77,7 @@ public class HttpQueryTool {
 	}
 	
 	private void init(){
-		if(configCache.get(CACHE_KEY) == null){
+		if(configCache != null && configCache.get(CACHE_KEY) == null){
 			try{
 				Config config = LightbendConfigLoader.get().getConfig("repository.proxy");
 				ProxyConfig proxyConfig = new ProxyConfig();
@@ -193,7 +193,7 @@ public class HttpQueryTool {
 			String urlHost = urlObj.getHost();
 			logger.debug("current Host:" + urlHost);
 
-			ProxyConfig proxyConf = (ProxyConfig)configCache.get(CACHE_KEY);
+			ProxyConfig proxyConf = (configCache != null) ? (ProxyConfig)configCache.get(CACHE_KEY) : null;
 			if (proxyConf != null) {
 				logger.debug("nonProxyHosts:" + proxyConf.getNonProxyHosts());
 
