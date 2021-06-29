@@ -65,7 +65,9 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "angular-edusharing:build",
-            "proxyConfig": "proxy.docker.json"
+            "proxyConfig": "proxy.docker.json",
+            "baseHref": "/edu-sharing/",
+            "deployUrl": "/edu-sharing/"
           },
           "configurations": {
             "production": {

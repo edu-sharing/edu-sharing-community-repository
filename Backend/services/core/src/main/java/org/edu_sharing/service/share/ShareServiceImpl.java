@@ -243,7 +243,7 @@ public class ShareServiceImpl implements ShareService {
 				break;
 			}
 		}
-		return isChild;
+		return isChild || sharedNode.getId().equals(accessNodeId);
 	}
 	private Share getNodeShareObject(String nodeId, NodeRef shareNodeRef) {
 		HashMap<String, Object> props;
