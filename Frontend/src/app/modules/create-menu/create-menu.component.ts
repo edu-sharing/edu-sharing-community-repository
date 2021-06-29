@@ -218,7 +218,8 @@ export class CreateMenuComponent {
             );
             newCollection.elementType = [ElementType.Unknown];
             newCollection.constrains = [Constrain.NoSelection, Constrain.User];
-            newCollection.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS];
+            // this permission does not exist in 5.1
+            // newCollection.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS];
             newCollection.group = DefaultGroups.Create;
             newCollection.priority = 5;
             this.options.push(newCollection);
