@@ -4,8 +4,8 @@ lowercaseOutputName: true
 blacklistObjectNames: ["org.apache.logging.log4j2:*"]
 rules:
   - pattern: 'Alfresco<type=DataSource><>(.*)Connections:'
-    name: alfresco_datasource_$2_connection
-    help: alfresco_datasource_$2_connection
+    name: alfresco_datasource_$1_connection
+    help: alfresco_datasource_$1_connection
     type: GAUGE
   - pattern: 'Catalina<type=StringCache><>accessCount:'
     name: tomcat_cache_access_total
