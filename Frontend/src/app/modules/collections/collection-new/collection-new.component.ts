@@ -23,7 +23,7 @@ import {SessionStorageService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {TranslateService} from "@ngx-translate/core";
-import {ColorHelper} from '../../../core-module/ui/color-helper';
+import {ColorHelper, PreferredColor} from '../../../core-module/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../core-module/core.module";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
@@ -36,6 +36,9 @@ import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 import {MdsMetadatasets} from '../../../core-module/core.module';
 import {ConfigurationHelper} from '../../../core-module/core.module';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import { SkipTarget } from '../../../common/ui/skip-nav/skip-nav.service';
+
+type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
 // component class
 @Component({
@@ -44,6 +47,7 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
   styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
+  readonly SkipTarget = SkipTarget;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('mds') mds : MdsComponent;
   @ViewChild('share') shareRef : WorkspaceShareComponent;
@@ -60,7 +64,7 @@ export class CollectionNewComponent {
   user : User;
   public mainnav = true;
   public editPermissionsId: string;
-  private permissions: LocalPermissions = null;
+  permissions: LocalPermissions = null;
   public canInvite: boolean;
   public shareToAll: boolean;
   public createEditorial = false;
@@ -71,34 +75,36 @@ export class CollectionNewComponent {
   public editId: any;
   public editorialGroups:Group[]=[];
   public editorialGroupsSelected:Group[]=[];
+  public editorialPublic = true;
   public editorialColumns:ListItem[]=[new ListItem("GROUP",RestConstants.AUTHORITY_DISPLAYNAME)];
-  private imageData:any = null;
+  imageData:any = null;
   private imageFile:File = null;
-  private STEP_NEW = 'NEW';
-  private STEP_GENERAL = 'GENERAL';
-  private STEP_METADATA = 'METADATA';
-  private STEP_PERMISSIONS = 'PERMISSIONS';
+  readonly STEP_NEW = 'NEW';
+  readonly STEP_GENERAL = 'GENERAL';
+  readonly STEP_METADATA = 'METADATA';
+  readonly STEP_PERMISSIONS = 'PERMISSIONS';
   private STEP_SETTINGS = 'SETTINGS';
-  private STEP_EDITORIAL_GROUPS = 'EDITORIAL_GROUPS';
-  private STEP_ICONS={
+  readonly STEP_EDITORIAL_GROUPS = 'EDITORIAL_GROUPS';
+  STEP_ICONS: { [step in Step]?: string }={
     GENERAL:'edit',
     METADATA:'info_outline',
     PERMISSIONS:'group_add',
     SETTINGS:'settings',
     EDITORIAL_GROUPS:'star'
   };
-  public newCollectionStep=this.STEP_NEW;
+  public newCollectionStep: Step = this.STEP_NEW;
   public editPermissionsDummy: EduData.Node;
-  private availableSteps: string[];
+  availableSteps: Step[];
   private parentCollection: EduData.Node;
   private originalPermissions: LocalPermissions;
   private permissionsInfo: any;
 
   @ViewChild('file') imageFileRef : ElementRef;
+  @ViewChild('authorFreetextInput') authorFreetextInput : ElementRef<HTMLInputElement>;
   buttons: DialogButton[];
   authorFreetext=false;
   authorFreetextAllowed=false;
-  private mdsSet: string;
+  mdsSet: string;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -151,7 +157,6 @@ export class CollectionNewComponent {
             if(this.createMediacenter)
               this.mediacenter=mediacenters[0];
           });
-          this.createMediacenter=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM);
           this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 
           this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
@@ -171,6 +176,9 @@ export class CollectionNewComponent {
                   this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
                     this.mdsSet = node.node.metadataset;
                     this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
+                    this.editorialPublic=perm.permissions.localPermissions?.permissions?.some(
+                        (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
+                    );;
                     this.editId=id;
                     this.currentCollection = data.collection;
                     // cleanup irrelevant data
@@ -237,7 +245,7 @@ export class CollectionNewComponent {
          //this.toast.error(error)
        });
     }
-    private setPermissions(permissions : any){
+    setPermissions(permissions : any){
       if(permissions) {
         this.permissionsInfo = permissions;
         this.permissions = permissions.permissions;
@@ -253,7 +261,7 @@ export class CollectionNewComponent {
       }
       this.showPermissions=false;
     }
-    private editPermissions(){
+    editPermissions(){
       if(this.permissions==null && !this.editId) {
         this.permissions = new LocalPermissions();
       }
@@ -289,10 +297,10 @@ export class CollectionNewComponent {
         this.currentCollection.collection.color = color;
     }
 
-    setColorByDirection(event: KeyboardEvent): void {
+    setColorByDirection(event: Event): void {
         const rowLength = 6;
         let index = this.COLORS.indexOf(this.currentCollection.collection.color);
-        switch (event.key) {
+        switch ((event as KeyboardEvent).key) {
             case 'ArrowUp': index -= rowLength; break;
             case 'ArrowDown': index += rowLength; break;
             case 'ArrowLeft': index -= 1; break;
@@ -419,8 +427,8 @@ export class CollectionNewComponent {
       this.updateAvailableSteps();
       this.goToNextStep();
     }
-    public getAvailableSteps():string[] {
-      let steps:string[]=[];
+    public getAvailableSteps(): Step[] {
+      let steps: Step[] = [];
       steps.push(this.STEP_GENERAL);
       if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL || this.newCollectionType==RestConstants.COLLECTIONTYPE_MEDIA_CENTER){
         steps.push(this.STEP_METADATA);
@@ -516,7 +524,7 @@ export class CollectionNewComponent {
     }
   }
     public isBrightColor() {
-        return ColorHelper.getColorBrightness(this.currentCollection.collection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+        return ColorHelper.getPreferredColor(this.currentCollection.collection.color) === PreferredColor.White
     }
     private save3(collection:EduData.Node) {
     if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
@@ -566,13 +574,15 @@ export class CollectionNewComponent {
   }
 
   private getEditorialGroupPermissions() {
-    let permissions=new LocalPermissions();
+    const permissions=new LocalPermissions();
     permissions.permissions=[];
-    let pub=RestHelper.getAllAuthoritiesPermission();
-    pub.permissions=[RestConstants.PERMISSION_CONSUMER];
-    permissions.permissions.push(pub);
-    for(let group of this.editorialGroupsSelected){
-      let perm=new Permission();
+    if(this.editorialPublic) {
+        const pub=RestHelper.getAllAuthoritiesPermission();
+        pub.permissions = [RestConstants.PERMISSION_CONSUMER];
+        permissions.permissions.push(pub);
+    }
+    for(const group of this.editorialGroupsSelected){
+      const perm=new Permission();
       perm.authority={authorityName:group.authorityName,authorityType:group.authorityType};
       perm.permissions=[RestConstants.PERMISSION_COORDINATOR];
       permissions.permissions.push(perm);
@@ -660,6 +670,9 @@ export class CollectionNewComponent {
         this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ||
         this.currentCollection.collection.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ?
             this.mediacenter : this.user,null);
+    setTimeout(() => {
+        this.authorFreetextInput.nativeElement.focus();
+    });
   }
 
   cancelAuthorFreetext() {

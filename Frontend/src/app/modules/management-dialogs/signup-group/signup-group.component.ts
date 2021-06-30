@@ -59,7 +59,7 @@ export class SignupGroupComponent  {
     });
   }
 
-  private updateButtons() {
+  updateButtons() {
     if(this.dialogStep === Step.selectGroup) {
       this.buttons = DialogButton.getNextCancel(() => this.onCancel.emit(), () => {
         this.dialogStep = Step.confirmGroup;

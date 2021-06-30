@@ -33,7 +33,7 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 export class SearchNodeStoreComponent {
 
   @Output() onClose=new EventEmitter();
-  private selected:Node[] = [];
+  selected:Node[] = [];
 
   public columns : ListItem[]=[];
   public options : CustomOptions={

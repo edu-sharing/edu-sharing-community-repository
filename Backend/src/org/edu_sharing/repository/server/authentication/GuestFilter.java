@@ -17,8 +17,7 @@ import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.service.config.model.Config;
-import org.edu_sharing.service.config.model.Values;
+import org.edu_sharing.alfresco.service.config.model.Config;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 public class GuestFilter implements javax.servlet.Filter {

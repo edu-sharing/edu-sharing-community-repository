@@ -1,6 +1,7 @@
 package org.edu_sharing.service.tracking;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 
@@ -31,6 +32,8 @@ public interface TrackingService {
         LOGOUT_USER_TIMEOUT,
         LOGOUT_USER_REGULAR
     }
+    List<String> getAlteredNodes(java.util.Date from);
+    List<NodeData> getNodeData(String nodeId, java.util.Date from);
     boolean trackActivityOnUser(String authorityName,EventType type);
     boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details,EventType type);
     List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;

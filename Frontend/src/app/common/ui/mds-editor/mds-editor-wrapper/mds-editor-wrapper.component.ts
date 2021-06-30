@@ -54,7 +54,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() invalidate: boolean;
     @Input() labelNegative = 'CANCEL';
     @Input() labelPositive = 'SAVE';
-    @Input() mode = 'default';
+    @Input() mode: 'search' | 'default' = 'default';
     @Input() nodes: Node[];
     @Input() parentNode: Node;
     @Input() priority = 1;
@@ -65,7 +65,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
-    @Output() onDone = new EventEmitter();
+    @Output() onDone = new EventEmitter<Node[]|Values>();
     @Output() onMdsLoaded = new EventEmitter();
     @Output() openContributor = new EventEmitter();
     @Output() openLicense = new EventEmitter();
@@ -83,7 +83,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         //
         // TODO: Make sure that inputs are ready when this component is initialized and remove calls
         // to `loadMds()`.
-        if (this.nodes) {
+        if (this.nodes || this.currentValues) {
             this.init();
         }
     }
@@ -126,12 +126,12 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
      *
      * Use `getValues()`
      */
-    saveValues(): Promise<{ [property: string]: string[] }> {
+    async saveValues(): Promise<{ [property: string]: string[] }> {
         switch (this.editorType) {
             case 'legacy':
                 return this.mdsRef.saveValues();
             case 'angular':
-                const values = this.mdsEditorInstance.getValues();
+                const values = await this.mdsEditorInstance.getValues();
                 this.onDone.emit(values);
                 return values;
             default:
@@ -182,7 +182,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     async onSave(): Promise<void> {
         this.isLoading = true;
         try {
-            console.log(this.mdsEditorInstance.getCanSave());
             if (!this.mdsEditorInstance.getCanSave()) {
                 // no changes, behave like close
                 if(this.mdsEditorInstance.getIsValid()){
@@ -242,10 +241,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     private handleError(error: any): void {
+        console.error(error);
         if (error instanceof UserPresentableError || error.message) {
             this.toast.error(null, error.message);
         } else {
-            console.error(error);
             this.toast.error(error);
         }
         this.onCancel.emit();

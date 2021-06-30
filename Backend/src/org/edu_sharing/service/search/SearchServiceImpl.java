@@ -39,6 +39,7 @@ import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
@@ -836,8 +837,8 @@ public class SearchServiceImpl implements SearchService {
 		
 		
 		Set<String> authoritiesForUser = serviceRegistry.getAuthorityService().getAuthorities();
-		// Do not display io_references
-		String query = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND ISUNSET:\"" + CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL + "\" AND NOT ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND (@ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"";
+		// Do not display io_references + published copies
+		String query = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND (ISUNSET:\"" + CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL + "\" OR ISNULL:\"" + CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL + "\") AND NOT ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND (@ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"";
 		for(String authority : authoritiesForUser) {
 			query+=" OR @ccm\\:wf_receiver:\"" + authority + "\"";
 		}
@@ -862,7 +863,10 @@ public class SearchServiceImpl implements SearchService {
 		}
 		List<String> searchFields = new ArrayList<>();
 
-		// fields to search in - not using username
+		// fields to search in - also using username as admin (6.0 or later)
+		if(AuthorityServiceHelper.isAdmin()) {
+			searchFields.add("userName");
+		}
 		searchFields.add("email");
 		searchFields.add("firstName");
 		searchFields.add("lastName");

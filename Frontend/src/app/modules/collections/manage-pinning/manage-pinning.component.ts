@@ -71,12 +71,12 @@ export class CollectionManagePinningComponent {
   public getName(collection:Node) : string {
     return RestHelper.getTitle(collection);
   }
-  private dragStartColumn(event:any,index:number,node : Node){
+  dragStartColumn(event:any,index:number,node : Node){
     event.dataTransfer.effectAllowed = 'all';
     event.dataTransfer.setData("text",index);
     this.currentDragColumn=node;
   }
-  private allowDragColumn(event:any,index:number,target:Node){
+  allowDragColumn(event:any,index:number,target:Node){
     if(!this.currentDragColumn)
       return;
     event.preventDefault();
@@ -87,7 +87,7 @@ export class CollectionManagePinningComponent {
     let posOld=this.pinnedCollections.indexOf(this.currentDragColumn);
     Helper.arraySwap(this.pinnedCollections,posOld,index);
   }
-  private dropColumn(event:any,index:number,target:Node){
+  dropColumn(event:any,index:number,target:Node){
     this.currentDragColumn=null;
     event.preventDefault();
     event.stopPropagation();

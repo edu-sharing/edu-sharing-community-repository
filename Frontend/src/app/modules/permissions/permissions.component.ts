@@ -14,6 +14,7 @@ import {SessionStorageService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
   selector: 'permissions-main',
@@ -24,12 +25,14 @@ import {GlobalContainerComponent} from "../../common/ui/global-container/global-
   ]
 })
 export class PermissionsMainComponent {
+  readonly SkipTarget = SkipTarget;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public tab : number;
   public searchQuery: string;
-  private selected: Organization[];
+  selected: Organization[];
   public isAdmin = false;
   public disabled = false;
+  public isLoading = true;
   TABS = ["ORG","GROUP","USER","DELETE"];
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -50,6 +53,7 @@ export class PermissionsMainComponent {
             else{
                 this.goToLogin();
             }
+            this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
         }, (error: any) => this.goToLogin());
         this.config.get("hideMainMenu").subscribe((data:string[])=>{

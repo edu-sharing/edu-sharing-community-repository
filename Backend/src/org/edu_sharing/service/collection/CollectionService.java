@@ -6,13 +6,14 @@ import java.util.List;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.ACE;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 public interface CollectionService {
-	
 
-	
-	public Collection create(String collectionId, Collection collection) throws Throwable;
+
+    public Collection create(String collectionId, Collection collection) throws Throwable;
 	
 	public void update(Collection collection);
 	

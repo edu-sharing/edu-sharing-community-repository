@@ -14,6 +14,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface NodeService {
@@ -70,7 +71,7 @@ public interface NodeService {
 
     public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
-	public void createVersion(String nodeId, HashMap _properties) throws Exception;
+	public void createVersion(String nodeId) throws Exception;
 
 	public void deleteVersionHistory(String nodeId) throws Exception;
 
@@ -86,6 +87,12 @@ public interface NodeService {
 	 * updated on the fly with the properties provided by this method
 	 */
 	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable;
+
+	/**
+	 * this method is called when a local object has ccm:remoterepositry aspect and the node should be stored localy
+	 * You can define which properties should be copied locally and which should be fetched dynamically by skipping them here
+	 */
+	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
 	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
 		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);
@@ -172,8 +179,9 @@ public interface NodeService {
 
 	/**
 	 * create a published copy of the node
+	 * if handle mode is set, a handle should also be generated
 	 */
-	String publishCopy(String nodeId) throws Throwable;
+	String publishCopy(String nodeId, HandleMode handleMode) throws Throwable;
 
 	/**
 	 * Get all published copies of this node

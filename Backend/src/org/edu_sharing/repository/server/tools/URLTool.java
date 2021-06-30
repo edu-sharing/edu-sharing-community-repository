@@ -193,7 +193,10 @@ public class URLTool{
 		return getNgComponentsUrl()+"error/"+errorId;
 	}
 	public static String getNgComponentsUrl(){
-		return getBaseUrl(true)+"/components/";
+		return getNgComponentsUrl(true);
+	}
+	public static String getNgComponentsUrl(boolean dynamic){
+		return getBaseUrl(dynamic)+"/components/";
 	}
     public static String getNgAssetsUrl(){
         return getBaseUrl(false)+"/assets/";
@@ -374,7 +377,7 @@ public class URLTool{
 	 * @return
 	 */
 	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic, String repository) {
-		String ngComponentsUrl =  getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.equals("-1") && !version.trim().isEmpty() ? "/"+version : "");
+		String ngComponentsUrl =  getNgComponentsUrl(dynamic)+"render/"+nodeId+(version!=null && !version.equals("-1") && !version.trim().isEmpty() ? "/"+version : "");
 		if(repository != null) {
 			ngComponentsUrl+="?repository="+repository;
 		}
@@ -408,15 +411,25 @@ public class URLTool{
         return getBaseUrl()+"/rest/";
     }
 
-    public static String getEduservletUrl() {
-        return getBaseUrl()+"/eduservlet/";
-    }
+	public static String getEduservletUrl() {
+		return getEduservletUrl(false);
+	}
+	public static String getEduservletUrl(boolean dynamic) {
+		return getBaseUrl(dynamic)+"/eduservlet/";
+	}
 
-	public static String getDownloadServletUrl(String id,String version) {
-		String download=getEduservletUrl()+"download?nodeId="+URLEncoder.encodeUriComponent(id);
+	public static String getDownloadServletUrl(String id,String version, boolean dynamic, String repositoryId) {
+		String download=getEduservletUrl(dynamic)+"download?nodeId="+URLEncoder.encodeUriComponent(id);
 		if(version!=null){
-			download+="&version="+URLEncoder.encodeUriComponent(version);
+			download += "&version=" + URLEncoder.encodeUriComponent(version);
+		}
+		if(repositoryId!=null){
+			download += "&repositoryId=" + URLEncoder.encodeUriComponent(repositoryId);
 		}
 		return download;
 	}
+	public static String getDownloadServletUrl(String id,String version, boolean dynamic) {
+		return getDownloadServletUrl(id,version,true, null);
+	}
 }
+

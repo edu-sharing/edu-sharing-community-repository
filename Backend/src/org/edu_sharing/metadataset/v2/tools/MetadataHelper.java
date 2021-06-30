@@ -3,11 +3,13 @@ package org.edu_sharing.metadataset.v2.tools;
 import io.swagger.config.ConfigFactory;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -17,8 +19,10 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class MetadataHelper {
 
@@ -59,6 +63,26 @@ public class MetadataHelper {
 	}
 	public static String getTranslation(ApplicationInfo appId,String key,String fallback) throws Exception {
 		return MetadataReaderV2.getTranslation(getMetadataset(appId,CCConstants.metadatasetdefault_id).getI18n(),key,fallback,getLocale());
+	}
+
+	public static String[] getDisplayNames(MetadataSetV2 mds, String key, Serializable value){
+		try{
+			if(mds == null){
+				return null;
+			}
+			MetadataWidget widget = mds.findWidget(key);
+			if(widget != null) {
+				Map<String, MetadataKey> map = widget.getValuesAsMap();
+				if (!map.isEmpty()) {
+					String[] keys = ValueTool.getMultivalue((String) value);
+					String[] values = new String[keys.length];
+					for (int i = 0; i < keys.length; i++)
+						values[i] = map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
+					return values;
+				}
+			}
+		} catch (Exception e){};
+		return null;
 	}
 
     /** resolves this widget's condition

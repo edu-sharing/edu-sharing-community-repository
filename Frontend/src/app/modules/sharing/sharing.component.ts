@@ -59,6 +59,7 @@ export class SharingComponent {
     private config : ConfigurationService,
     private translate : TranslateService) {
       this.columns.push(new ListItem('NODE',RestConstants.CM_NAME));
+      this.columns.push(new ListItem('NODE',RestConstants.CM_MODIFIED_DATE));
       this.columns.push(new ListItem('NODE',RestConstants.SIZE));
       this.options.addOptions.push(new OptionItem('SHARING.DOWNLOAD','cloud_download',(node:Node)=>this.download(node)));
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=> {
@@ -105,7 +106,7 @@ export class SharingComponent {
         window.open(url);
 
     }
-    private changeSort(sort:any) {
+    changeSort(sort:any) {
         this.sort=sort;
         this.loadChildren();
     }
@@ -114,7 +115,12 @@ export class SharingComponent {
             return;
         this.loadingChildren=true;
         this.childs=[];
-        const request= {count:RestConstants.COUNT_UNLIMITED,sortBy:[this.sort.sortBy],sortAscending:[this.sort.sortAscending]};
+        const request= {
+            count:RestConstants.COUNT_UNLIMITED,
+            sortBy:[this.sort.sortBy],
+            sortAscending:[this.sort.sortAscending],
+            propertyFilter: [RestConstants.ALL]
+        };
         this.sharingService.getChildren(this.params.nodeId, this.params.token, this.passwordInput,request).subscribe((nodes)=> {
             this.childs=nodes.nodes;
             this.loadingChildren=false;

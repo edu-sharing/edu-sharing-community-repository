@@ -2,7 +2,7 @@
       [node]="_node"
       width="small"
       height="large"
-      priority="2"
+      [priority]="2"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
@@ -32,7 +32,7 @@
 </card>
 <card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
       subtitle="{{'WORKSPACE.CONTRIBUTOR.TYPE.'+editScopeNew.toUpperCase() | translate}}"
-      priority="3"
+      [priority]="3"
       (onCancel)="cancel()"
       [buttons]="editButtons"
       *ngIf="edit"
@@ -111,7 +111,7 @@
                    id="orcid"
                    [(ngModel)]="edit.orcid"
                    [disabled]="editDisabled"
-                   pattern="https?:\/\/orcid.org\/\d{4}(-\d{4}){3}"
+                   pattern="https?:\/\/orcid.org\/\d{4}(-\d{4}){2}((-\d{3}X)|(-\d{4}))"
                    placeholder="http://orcid.org/0000-0000-0000-0000"
             >
             <mat-hint innerHTML="{{'VCARD_HINT.X-ORCID' | translate}}"></mat-hint>
@@ -124,7 +124,7 @@
                    id="gnduri"
                    [(ngModel)]="edit.gnduri"
                    [disabled]="editDisabled"
-                   pattern="https?://d-nb.info\/gnd\/\d+"
+                   pattern="https?:\/\/d-nb.info\/gnd\/(\d|x|X)+"
                    placeholder="http://d-nb.info/gnd/0000000000"
             >
             <mat-hint innerHTML="{{'VCARD_HINT.X-GND-URI' | translate}}"></mat-hint>
@@ -213,7 +213,7 @@
       </div>
       <div class="calendar">
         <calendar label="{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}"
-                  isResettable="true"
+                  [isResettable]="true"
                   [(date)]="date"
                   [disabled]="editDisabled"
         ></calendar>

@@ -9,3 +9,11 @@
     margin-top: 5px;
   }
 }
+::ng-deep {
+    @media screen and (max-width: $mobileTabSwitchWidth) {
+        .list > div {
+            // keep space for scrolling to the very end
+            margin-bottom: $mobileTabNavHeight;
+        }
+    }
+}

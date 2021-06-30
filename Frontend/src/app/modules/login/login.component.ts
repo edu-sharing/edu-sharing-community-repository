@@ -18,6 +18,7 @@ import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
 import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 
 @Component({
@@ -29,6 +30,8 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
     ]
 })
 export class LoginComponent implements OnInit {
+    readonly SkipTarget = SkipTarget;
+    readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('passwordInput') passwordInput: InputPasswordComponent;
@@ -81,8 +84,6 @@ export class LoginComponent implements OnInit {
                         this.username = params.username;
                     }
 
-                    this.isLoading = false;
-                    GlobalContainerComponent.finishPreloading();
                     setTimeout(() => {
                         if (this.username && this.passwordInput) {
                             this.passwordInput.nativeInput.nativeElement.focus();
@@ -123,6 +124,8 @@ export class LoginComponent implements OnInit {
                             this.openLoginUrl();
                             return;
                         }
+                        this.isLoading = false;
+                        GlobalContainerComponent.finishPreloading();
                     });
                     this.isSafeLogin=this.scope==RestConstants.SAFE_SCOPE;
                     this.next = params.next;
@@ -206,12 +209,12 @@ export class LoginComponent implements OnInit {
                     ) {
                         this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
-                        this.toast.error(null, 'LOGIN.PASSWORD_EXPIRED');
+                        this.toast.error(null, 'LOGIN.PASSWORD_EXPIRED' + (this.isSafeLogin ? '_SAFE' : ''));
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
                     }
                     else {
-                        this.toast.error(null, 'LOGIN.ERROR');
+                        this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
                     this.password = '';
                     this.isLoading = false;
@@ -228,15 +231,6 @@ export class LoginComponent implements OnInit {
 
     openLoginUrl() {
         window.location.href = this.loginUrl;
-    }
-
-    recoverPassword() {
-        if (this.config.register.local) {
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'register', 'request']);
-        }
-        else {
-            window.location.href = this.config.register.recoverUrl;
-        }
     }
 
     register() {
@@ -283,9 +277,9 @@ export class LoginComponent implements OnInit {
 
     private processProviders(providers: any) {
         const data: any = {};
-        for (const provider in providers.wayf_idps) {
-            if (providers.hasOwnProperty(provider)) {
-                const object = providers.wayf_idps[provider];
+        for (const provider of Object.keys(providers.wayf_idps)) {
+            const object = providers.wayf_idps[provider];
+            if (object) {
                 object.url = provider;
                 const type = object.type;
                 if (!data[type]) {
@@ -298,8 +292,8 @@ export class LoginComponent implements OnInit {
             }
         }
         this.providers = [];
-        for (const element of data) {
-            this.providers.push(element);
+        for (const key of Object.keys(data)) {
+            this.providers.push(data[key]);
         }
 
         // register observer for autocomplete

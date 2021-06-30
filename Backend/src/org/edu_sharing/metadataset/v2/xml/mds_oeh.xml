@@ -38,6 +38,7 @@
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/sourceContentType/index.json</valuespace>
+			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
 		</widget>
 		<widget>
 			<caption>Art des Tools</caption>
@@ -46,6 +47,7 @@
 			<type>multivalueFixedBadges</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/toolCategory/index.json</valuespace>
+			<condition type="PROPERTY" pattern="TOOL" dynamic="true">ccm:objecttype</condition>
 		</widget>
 		<widget>
 			<caption>Zugangsbedingungen (Login)</caption>
@@ -54,6 +56,7 @@
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/conditionsOfAccess/index.json</valuespace>
+			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
 		</widget>
 		<widget>
 			<caption>Enthält Werbung</caption>
@@ -100,12 +103,14 @@
 			<allowempty>true</allowempty>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oer/index.json</valuespace>
+			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
 		</widget>
 		<widget>
 			<caption>Interner Quellenname</caption>
 			<id>ccm:general_identifier</id>
 			<type>text</type>
 			<hideIfEmpty>true</hideIfEmpty>
+			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
 		</widget>
 		<widget>
 			<caption>Notizen / Bermerkungen (intern)</caption>

@@ -26,7 +26,7 @@ export class ModalDialogToastComponent {
   private onCancel: () => void;
   node: Node | Node[];
 
-  constructor(private toast: Toast) {
+  constructor(public toast: Toast) {
     this.toast.onShowModalDialog((data: ModalDialogOptions) => {
       this.title = data.title;
       this.message = data.message;

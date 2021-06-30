@@ -6,7 +6,7 @@
 ></main-nav>
 <div
   role="main"
-  appSkipTarget="MAIN_CONTENT"
+  [appSkipTarget]="SkipTarget.MainContent"
   class="collections-master-div"
   [class.collections-master-div-mainnav]="mainnav"
 >
@@ -103,7 +103,7 @@
                   class="image-upload-field-input">
               </div>
               <div class="button-icon">
-                  <button mat-fab color="white" (click)="file.click()"
+                  <button mat-fab [color]="$any('white')" (click)="file.click()"
                     [matTooltip]="'collectionNew_uploadCollectionImage' | translate"
                     [attr.aria-label]="'collectionNew_uploadCollectionImage' | translate"
                   >
@@ -111,7 +111,7 @@
                   </button>
                   <button
                     mat-fab
-                    color="white"
+                    [color]="$any('white')"
                     *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (click)="deleteImage()"
                     [matTooltip]="'collectionNew_deleteCollectionImage' | translate"
                     [attr.aria-label]="'collectionNew_deleteCollectionImage' | translate"
@@ -144,31 +144,53 @@
           </div>
 
           <div class="collection-new-preview-infoarea" [style.background-color]="currentCollection.collection.color" [class.dark-color]="isBrightColor()">
-
+            <div class="collection-new-bg"></div>
             <div class="dialog-basic-area dialog-input-area">
-                <mat-form-field [class.mat-form-field-bright]="!isBrightColor()">
+                <mat-form-field [class.mat-form-field-bright]="!isBrightColor()"
+                                [class.mat-form-field-dark]="isBrightColor()">
                     <mat-label>{{'collectionNew_placeholderTitle' | translate }}</mat-label>
-                    <input matInput class="title" [(ngModel)]="currentCollection.title" autofocus>
+                    <!-- Autofocus and autocomplete don't work well together here, because the
+                    autocomplete list will open before the card animation finishes. -->
+                    <input matInput class="title" [(ngModel)]="currentCollection.title" autofocus autocomplete="off">
                 </mat-form-field>
-                  <mat-form-field [class.mat-form-field-bright]="!isBrightColor()">
+                  <mat-form-field [class.mat-form-field-bright]="!isBrightColor()"
+                                  [class.mat-form-field-dark]="isBrightColor()">
                       <mat-label>{{'collectionNew_placeholderDescription' | translate }}</mat-label>
                       <textarea matInput
                                 [(ngModel)]="currentCollection.collection.description"
                                 ></textarea>
                   </mat-form-field>
             </div>
-            <div class="collection-new-owner" *ngIf="!authorFreetext">
-                <i icon="person"></i>
-                <span>{{user | authorityName}}</span>
-                <button mat-icon-button *ngIf="authorFreetextAllowed" (click)="switchToAuthorFreetext()"><i icon="edit"></i></button>
-            </div>
-            <div class="collection-new-owner" *ngIf="authorFreetext">
-                <i icon="person"></i>
-                <mat-form-field class="mat-form-field-no-padding" [class.mat-form-field-bright]="!isBrightColor()">
-                    <mat-label>{{'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}</mat-label>
-                    <input matInput [(ngModel)]="currentCollection.collection.authorFreetext">
-                </mat-form-field>
-                <button mat-icon-button (click)="cancelAuthorFreetext()"><i icon="close"></i></button>
+            <div class="collection-new-owner">
+              <ng-container *ngIf="!authorFreetext">
+                  <i icon="person"></i>
+                  <span>{{user | authorityName}}</span>
+                  <button
+                    *ngIf="authorFreetextAllowed"
+                    mat-icon-button
+                    [attr.aria-label]="'EDIT' | translate: {thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate)}"
+                    (click)="switchToAuthorFreetext()"
+                  >
+                    <i icon="edit"></i>
+                  </button>
+              </ng-container>
+              <ng-container *ngIf="authorFreetext">
+                  <i icon="person"></i>
+                  <mat-form-field class="mat-form-field-no-padding" [class.mat-form-field-bright]="!isBrightColor()">
+                      <mat-label id="collection-new-author-freetext-label">
+                        {{'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}
+                      </mat-label>
+                      <input #authorFreetextInput matInput
+                             [disabled]="!authorFreetextAllowed"
+                             [(ngModel)]="currentCollection.collection.authorFreetext">
+                  </mat-form-field>
+                  <button
+                    mat-icon-button
+                    [attr.aria-label]="'CANCEL' | translate"
+                    aria-describedby="collection-new-author-freetext-label"
+                    (click)="cancelAuthorFreetext()"
+                  ><i icon="close"></i></button>
+              </ng-container>
             </div>
 
               <div class="dialog-basic-area dialog-color-group">
@@ -218,7 +240,7 @@
         [subtitle]="currentCollection.title"
         [isCancelable]="false"
         modal="auto"
-        width="xsmall"
+        width="large"
         height="xlarge"
         [buttons]="buttons"
         class="collection-metadata">
@@ -233,25 +255,26 @@
       </div>
   </card>
   <card *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS"
-          title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
-          [subtitle]="currentCollection.title"
-          [isCancelable]="false"
-          modal="auto"
-          width="xsmall"
-          height="xlarge"
-          [buttons]="buttons"
-          class="collection-metadata">
-    <div class="card-content">
+        title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
+        [subtitle]="currentCollection.title"
+        [isCancelable]="false"
+        modal="auto"
+        width="large"
+        height="xxlarge"
+        [buttons]="buttons"
+        class="collection-metadata">
+    <div class="editorial-group">
+      <div class="editorial-list">
         <div class="noGroups" *ngIf="editorialGroups.length==0">{{'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate}}</div>
         <div class="noPermission" *ngIf="!shareToAll">
-            <h4>{{'TOOLPERMISSION_ERROR_HEADER' | translate}}</h4>
-            <h5>{{'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate}}</h5>
+          <h4>{{'TOOLPERMISSION_ERROR_HEADER' | translate}}</h4>
+          <h5>{{'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate}}</h5>
         </div>
         <listTable
           *ngIf="editorialGroups.length!=0 && shareToAll"
-          [nodes]="editorialGroups"
+          [nodes]="$any(editorialGroups)"
           [columns]="editorialColumns"
-          [selectedNodes]="editorialGroupsSelected"
+          [selectedNodes]="$any(editorialGroupsSelected)"
           [hasCheckbox]="true"
           [hasIcon]="true"
           [hasHeading]="false"
@@ -259,6 +282,19 @@
           [icon]="'star'"
         ></listTable>
       </div>
+      <div class="editorial-public">
+        <mat-slide-toggle [(ngModel)]="editorialPublic">
+          <app-multi-line-label>
+            <ng-container slot="label">
+              {{'COLLECTIONS.EDITORIAL_PUBLIC' | translate}}
+            </ng-container>
+            <ng-container slot="description">
+              {{'COLLECTIONS.EDITORIAL_PUBLIC_INFO' | translate}}
+            </ng-container>
+          </app-multi-line-label>
+        </mat-slide-toggle>
+      </div>
+    </div>
   </card>
   <card *ngIf="newCollectionStep==STEP_PERMISSIONS"
         title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"

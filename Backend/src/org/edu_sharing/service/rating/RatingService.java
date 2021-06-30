@@ -11,5 +11,5 @@ public interface RatingService {
 
 	void deleteRating(String nodeId) throws Exception;
 
-	AccumulatedRatings getAccumulatedRatings(String nodeId,Date after);
+	RatingDetails getAccumulatedRatings(String nodeId, Date after);
 }

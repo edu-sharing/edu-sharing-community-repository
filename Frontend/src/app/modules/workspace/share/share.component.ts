@@ -52,7 +52,7 @@ export class WorkspaceShareComponent {
     @Input() sendMessages = true;
     @Input() sendToApi = true;
     @Input() currentPermissions: LocalPermissions = null;
-    @Input() set nodes(nodes: []) {
+    @Input() set nodes(nodes: Node[]) {
         this.setNodes(nodes);
     }
     @Input() set nodeId(node: string) {
@@ -127,6 +127,7 @@ export class WorkspaceShareComponent {
     newPermissions: Permission[] = [];
     inheritAccessDenied = false;
     bulkMode = 'extend';
+    bulkInvite = false;
     owner: Permission;
     publishEnabled: Permission;
     linkEnabled: Permission;
@@ -163,17 +164,17 @@ export class WorkspaceShareComponent {
         ),
     ];
 
-    private currentType = [
+    currentType = [
         RestConstants.ACCESS_CONSUMER,
         RestConstants.ACCESS_CC_PUBLISH,
     ];
     inherited: boolean;
-    private notifyUsers = true;
-    private notifyMessage: string;
-    private inherit: Permission[] = [];
+    notifyUsers = true;
+    notifyMessage: string;
+    inherit: Permission[] = [];
     permissions: Permission[] = [];
     private originalPermissions: LocalPermissions[];
-    private showChooseType = false;
+    showChooseType = false;
     private showChooseTypeList: Permission;
 
     constructor(
@@ -292,6 +293,9 @@ export class WorkspaceShareComponent {
                     if (data.permissions) {
                         this.inherit = data.permissions.inheritedPermissions;
                         this.removePermissions(this.inherit, 'OWNER');
+                        this.inherit = this.inherit.filter((p) =>
+                            p.authority.authorityName !== this.connector.getCurrentLogin()?.authorityName
+                        );
                         this.removePermissions(
                             data.permissions.localPermissions.permissions,
                             'OWNER',
@@ -476,7 +480,8 @@ export class WorkspaceShareComponent {
         }
         for (const perm of this.permissions.concat(this.inherited ? this.inherit : [])) {
             if (
-                perm.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
+                perm.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE &&
+                perm.authority.authorityName !== this.connector.getCurrentLogin()?.authorityName
             )
                 return 'SHARED';
         }
@@ -501,7 +506,7 @@ export class WorkspaceShareComponent {
         saveButton.name = 'SAVE';// this.tab == 0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY';
     }
 
-    private chooseType() {
+    chooseType() {
         this.showChooseType = true;
     }
 
@@ -509,7 +514,7 @@ export class WorkspaceShareComponent {
         this.showChooseTypeList = p;
     }
 
-    private removePermission(p: Permission) {
+    removePermission(p: Permission) {
         if (this.isDeleted(p))
             this.deletedPermissions.splice(
                 this.deletedPermissions.indexOf(p.authority.authorityName),
@@ -524,7 +529,7 @@ export class WorkspaceShareComponent {
     */
     }
 
-    private setType(type: any) {
+    setType(type: any) {
         this.currentType = type.permissions;
         if (type.wasMain) this.showChooseType = false;
         for (let permission of this.newPermissions) {
@@ -582,7 +587,7 @@ export class WorkspaceShareComponent {
         this.searchStr = '';
     }
 
-    private isNewPermission(p: Permission) {
+    isNewPermission(p: Permission) {
         if (
             !this.originalPermissions?.length ||
             !this.originalPermissions[0].permissions
@@ -602,6 +607,11 @@ export class WorkspaceShareComponent {
                 return new Observable((observer: Observer<void>) => {
                     let permissions: Permission[] = Helper.deepCopy(this.permissions);
                     if (this.isBulk()) {
+                        if(this.bulkInvite) {
+                            const permission = RestHelper.getAllAuthoritiesPermission()
+                            permission.permissions = [RestConstants.ACCESS_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
+                            permissions.push(permission);
+                        }
                         // keep inherit state of original node
                         inherit = this.originalPermissions[i].inherited;
                         if (this.bulkMode === 'extend') {
@@ -630,11 +640,11 @@ export class WorkspaceShareComponent {
                     }
                 })
             });
-            if(!this.sendToApi) {
-                return;
-            }
             Observable.forkJoin(actions).subscribe(
                 () => {
+                    if(!this.sendToApi) {
+                        return;
+                    }
                     this.updateUsages(
                         RestHelper.copyPermissions(
                             Helper.deepCopy(this.permissions),
@@ -672,7 +682,7 @@ export class WorkspaceShareComponent {
         )
         .subscribe((has: boolean) => (this.publishPermission = has));
   }
-    private updatePermissionInfo() {
+    updatePermissionInfo() {
         let type: string[];
         for (let permission of this.newPermissions) {
             if (type && !Helper.arrayEquals(type, permission.permissions)) {
@@ -816,7 +826,6 @@ export class WorkspaceShareComponent {
             this.notifyUsers && this.sendMessages,
             this.notifyMessage,
             false,
-            false, // handle will always be created via publish component
         ).subscribe(() => {
             observer.next();
             observer.complete();
@@ -826,7 +835,7 @@ export class WorkspaceShareComponent {
         });
     }
 
-    private setInitialState() {
+    setInitialState() {
         this.initialState = this.getState();
     }
 

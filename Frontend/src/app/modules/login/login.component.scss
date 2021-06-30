@@ -40,6 +40,9 @@ powered-by{
     a{
       text-transform: uppercase;
       font-size: $fontSizeXSmall;
+      &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus();
+      }
     }
   }
 }
@@ -98,6 +101,10 @@ powered-by{
     }
   }
 }
+.login-help {
+  text-align: center;
+  padding-bottom: $cardPadding;
+}
 .useUrl{
   .goto{
     display: inline-flex;
@@ -136,7 +143,7 @@ powered-by{
   powered-by{
     display: none;
   }
-  .card-action-info{
+  .login-help{
     display: none;
   }
 }

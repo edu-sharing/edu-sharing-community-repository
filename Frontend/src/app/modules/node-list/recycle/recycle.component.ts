@@ -96,13 +96,13 @@ export class RecycleMainComponent {
       this.toDelete.push(list[i]);
     }
   }
-  private restoreNodesEvent(event : any){
+  restoreNodesEvent(event : any){
     this.restoreNodes(event.nodes,event.parent);
   }
-  private finishRestore(){
+  finishRestore(){
     this.restoreResult=null;
   }
-  private finishDelete(){
+  finishDelete(){
     this.toDelete=null;
   }
   public restoreNodes(list : Node[],toPath=""){

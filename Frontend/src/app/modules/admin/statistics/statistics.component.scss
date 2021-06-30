@@ -1,4 +1,19 @@
 @import "../../../core-ui-module/styles/variables";
+.groups-button{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.groups-template-select{
+    display: flex;
+    justify-content: center;
+    max-width: 600px;
+    width: 100%;
+    margin: auto;
+    ::ng-deep .mat-form-field-wrapper{
+        width: 100%;
+    }
+}
 .modes{
   display: flex;
   flex-direction: column;
@@ -30,21 +45,21 @@
       }
     }
   }
-  .calendars{
+}
+.calendars{
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     >div{
-      padding:10px;
-      margin:15px;
-      background-color: #fff;
-      @include materialShadow();
-      text-align: center;
-      mat-calendar{
-        width: 220px;
-      }
+        padding:10px;
+        margin:15px;
+        background-color: #fff;
+        @include materialShadow();
+        text-align: center;
+        mat-calendar{
+            width: 220px;
+        }
     }
-  }
 }
 canvas{
   max-width:100%;

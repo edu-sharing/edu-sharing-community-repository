@@ -46,15 +46,16 @@
   </div>
 <div class="breadcrumbFrame">
     <div class="mobile-move-top">
-        <breadcrumbs *ngIf="isLoggedIn"
-          [breadcrumbsAsNode]="path"
-          [searchQuery]="searchQuery ? searchQuery.query : null"
-          [home]="'WORKSPACE.'+root"
-          [homeRouterLink]="path ? {
+        <!--[homeRouterLink]="path ? {
             routerLink: '.',
             queryParams: { id: null },
             queryParamsHandling: 'merge'
-          } : null"
+          } : null"-->
+        <breadcrumbs *ngIf="isLoggedIn"
+          [breadcrumbsAsNode]="path"
+          [invisibleDescription]="true"
+          [searchQuery]="searchQuery ? searchQuery.query : null"
+          [home]="'WORKSPACE.'+root"
           [canDrop]="canDropBreadcrumbs"
           (onDrop)="handleDrop($event)"
           (onClick)="openBreadcrumb($event)"
@@ -73,7 +74,7 @@
   <workspace-explorer class="explorer"
                       #explorer
                       role="main"
-                      appSkipTarget="MAIN_CONTENT"
+                      [appSkipTarget]="SkipTarget.MainContent"
                       appCreateContextMenu
                       *ngIf="root!='RECYCLE'"
                       [current]="currentFolder"
@@ -90,7 +91,7 @@
                       (onDrop)="handleDrop($event)"
                       (onSelectionChanged)="setSelection($event)"
                       (onViewNode)="openNode($event, false)"
-                      (onOpenNode)="openNode($event, true)"
+                      (onOpenNode)="openNode($event, false)"
                       (onReset)="resetWorkspace()"
 ></workspace-explorer>
 

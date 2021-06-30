@@ -9,13 +9,42 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 public class NodeRefImpl implements NodeRef {
 
 	String repositoryId;
-	
+
+	public static class PreviewImpl implements Preview {
+		String mimetype;
+		byte[] data;
+
+		public PreviewImpl(String mimetype, byte[] data) {
+			this.mimetype = mimetype;
+			this.data = data;
+		}
+
+		@Override
+		public String getMimetype() {
+			return mimetype;
+		}
+
+		public void setMimetype(String mimetype) {
+			this.mimetype = mimetype;
+		}
+
+		@Override
+		public byte[] getData() {
+			return data;
+		}
+
+		public void setData(byte[] data) {
+			this.data = data;
+		}
+	}
+
 	String storeProtocol;
 	
 	String storeId;
 	
 	String nodeId;
-	
+
+	Preview preview;
 	HashMap<String, Object> properties;
 	Map<String, Boolean> permissions;
 	private List<String> aspects;
@@ -100,5 +129,15 @@ public class NodeRefImpl implements NodeRef {
 	@Override
 	public List<String> getAspects() {
 		return aspects;
+	}
+
+	@Override
+	public void setPreview(Preview preview) {
+		this.preview = preview;
+	}
+
+	@Override
+	public Preview getPreview() {
+		return preview;
 	}
 }

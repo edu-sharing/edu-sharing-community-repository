@@ -5,6 +5,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
 import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
 import {Helper} from '../../../core-module/rest/helper';
+import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
 
 @Component({
   selector: 'permissions-delete',
@@ -13,6 +14,7 @@ import {Helper} from '../../../core-module/rest/helper';
 
 })
 export class PermissionsDeleteComponent {
+ readonly AuthoritySearchMode = AuthoritySearchMode;
  deleteModes= [DeleteMode.none, DeleteMode.assign, DeleteMode.delete];
  deleteModesFolder= [DeleteMode.none, DeleteMode.assign];
  options: any;
@@ -110,7 +112,7 @@ export class PermissionsDeleteComponent {
         || this.options.collections.publicCollections === mode;
   }
 
-    private refresh() {
+    refresh() {
         this.selectedUsers = [];
         this.loading = true;
         const request = {maxItems: RestConstants.COUNT_UNLIMITED};

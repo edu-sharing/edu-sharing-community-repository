@@ -19,7 +19,7 @@
       <mat-card-title [class.no-subtitle]="!subtitle">{{title}}</mat-card-title>
       <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
       <div class="cancel">
-        <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon="close" aria="true"></i></button>
+        <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon="close" [aria]="true"></i></button>
       </div>
     </mat-card-header>
     <div #jumpmarksRef class="jumpmarks" *ngIf="jumpmarks && jumpmarks.length>1">

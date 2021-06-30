@@ -3,11 +3,11 @@ import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
 import {
-  ConfigurationService,
-  DialogButton, JobDescription,
-  ListItem,
-  RestIamService,
-  RestMediacenterService
+    ConfigurationService,
+    DialogButton, JobDescription,
+    ListItem, NodeListElastic,
+    RestIamService,
+    RestMediacenterService
 } from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
@@ -44,7 +44,21 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
+
+type LuceneData = {
+    mode: 'NODEREF' | 'SOLR' | 'ELASTIC',
+    store: 'Workspace' | 'Archive',
+    offset: number,
+    count: number,
+    noderef?: string,
+    query?: string,
+    properties?: string,
+    authorities?: Authority[],
+    outputMode?: 'view' | 'export',
+    exportFormat?: 'json' | 'csv',
+}
 
 @Component({
   selector: 'admin-main',
@@ -56,6 +70,7 @@ import {Scope} from '../../core-ui-module/option-item';
 })
 export class AdminComponent {
   readonly SCOPES = Scope;
+  readonly SkipTarget = SkipTarget;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -137,12 +152,13 @@ export class AdminComponent {
   public jobsLogLevel:any = [];
   public jobsLogData:any = [];
   public jobCodeOptions = {minimap: {enabled: false}, language: 'json', autoIndent: true, automaticLayout: true };
+  public dslCodeOptions = {minimap: {enabled: false}, language: 'json', autoIndent: true, automaticLayout: true };
+  public elasticResponseCodeOptions = {minimap: {enabled: false}, language: 'json', autoIndent: true, automaticLayout: true, readOnly: true };
   public jobClasses:SuggestItem[]=[];
   public jobClassesSuggested:SuggestItem[]=[];
-  public lucene:any={mode:'NODEREF',offset:0,count:100,outputMode:'view'};
+  public lucene:LuceneData={mode:'NODEREF',store:'Workspace',offset:0,count:100,outputMode:'view'};
   public oaiSave=true;
   public repositoryVersion:string;
-  public ngVersion:string;
   public updates: ServerUpdate[]=[];
   public applications: Application[]=[];
   public applicationsOpen: any = {};
@@ -156,11 +172,11 @@ export class AdminComponent {
   public xmlAppProperties:any;
   public xmlAppAdditionalPropertyName:string;
   public xmlAppAdditionalPropertyValue:string;
-  private parentNode: Node;
-  private parentCollection: Node;
-  private parentCollectionType = 'root';
+  parentNode: Node;
+  parentCollection: Node;
+  parentCollectionType = 'root';
   public catalina : string;
-  private oaiClasses: string[];
+  oaiClasses: string[];
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
@@ -170,20 +186,19 @@ export class AdminComponent {
 
   buttons:any[]=[];
   availableJobs: JobDescription[];
-  private excelFile: File;
-  private collectionsFile: File;
-  private uploadTempFile: File;
-  private uploadJobsFile: File;
-  private uploadOaiFile: File;
+  excelFile: File;
+  collectionsFile: File;
+  uploadTempFile: File;
+  uploadJobsFile: File;
+  uploadOaiFile: File;
   public xmlAppKeys: string[];
   public currentApp: string;
-  private currentAppXml: string;
+  currentAppXml: string;
   public editableXmls=[
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
     {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
   ]
-  luceneNodes: Node[];
-  luceneCount: number;
+  searchResponse: NodeList | NodeListElastic;
   searchColumns: ListItem[]=[];
   nodeInfo: Node;
   public selectedTemplate = '';
@@ -200,14 +215,20 @@ export class AdminComponent {
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
-    this.admin.startJob(this.job.class,JSON.parse(this.job.params), this.uploadJobsFile).subscribe(()=> {
-        this.globalProgress=false;
-        // this.uploadJobsFile = null;
-        this.toast.toast('ADMIN.JOBS.JOB_STARTED');
-    },(error:any)=> {
-        this.globalProgress=false;
-        this.toast.error(error);
-    });
+    try {
+        this.admin.startJob(this.job.class, JSON.parse(this.job.params), this.uploadJobsFile).subscribe(() => {
+            this.globalProgress = false;
+            // this.uploadJobsFile = null;
+            this.toast.toast('ADMIN.JOBS.JOB_STARTED');
+        }, (error: any) => {
+            this.globalProgress = false;
+            this.toast.error(error);
+        });
+    } catch(e) {
+        console.warn(e);
+        this.toast.error(e);
+        this.globalProgress = false;
+    }
   }
   public debugNode(node:Node) {
     this.nodeInfo=node;
@@ -220,14 +241,20 @@ export class AdminComponent {
         this.globalProgress=true;
         this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=> {
             this.globalProgress=false;
-            this.luceneNodes=[node.node];
-            this.luceneCount=1;
+            this.searchResponse={
+                nodes: [node.node],
+                pagination: {
+                    from: 0,
+                    count: 1,
+                    total: 1
+                }
+            };
         },(error)=> {
             this.globalProgress=false;
             this.toast.error(error);
         });
     }
-  public searchLucene() {
+  public searchNodes() {
     this.storage.set('admin_lucene',this.lucene);
     const authorities=[];
     if(this.lucene.authorities) {
@@ -241,14 +268,23 @@ export class AdminComponent {
       propertyFilter:[RestConstants.ALL]
     };
     this.globalProgress=true;
-    this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=> {
-      this.globalProgress=false;
-      this.luceneNodes=data.nodes;
-      this.luceneCount=data.pagination.total;
-    },(error:any)=> {
-      this.globalProgress=false;
-      this.toast.error(error);
-    });
+    if(this.lucene.mode === 'SOLR') {
+        this.admin.searchLucene(this.lucene.query, this.lucene.store, authorities, request).subscribe((data) => {
+            this.globalProgress = false;
+            this.searchResponse = data;
+        }, (error: any) => {
+            this.globalProgress = false;
+            this.toast.error(error);
+        });
+    } else if (this.lucene.mode === 'ELASTIC') {
+        this.admin.searchElastic(this.lucene.query).subscribe((data) => {
+            this.globalProgress = false;
+            this.searchResponse = data;
+        }, (error: any) => {
+            this.globalProgress = false;
+            this.toast.error(error);
+        });
+    }
   }
   public addLuceneAuthority(authority:Authority) {
     if(!this.lucene.authorities)
@@ -380,7 +416,7 @@ export class AdminComponent {
     this.dialogParameters= {info};
     this.dialogButtons=[
       new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.dialogTitle=null}),
-      new DialogButton('ADMIN.APPLICATIONS.REMOVE',DialogButton.TYPE_PRIMARY,()=> {
+      new DialogButton('ADMIN.APPLICATIONS.REMOVE',DialogButton.TYPE_DANGER,()=> {
         this.dialogTitle=null;
         this.globalProgress=true;
         this.admin.removeApplication(app.id).subscribe(()=> {
@@ -581,7 +617,7 @@ export class AdminComponent {
     });
   }
 
-  private refreshCatalina() {
+  refreshCatalina() {
     this.admin.getCatalina().subscribe((data:string[])=> {
       this.catalina=data.reverse().join('\n');
       this.setCatalinaPosition();
@@ -731,7 +767,7 @@ export class AdminComponent {
             return log;
         return log.slice(0,200);
     }
-    private cancelJob(job:any) {
+    cancelJob(job:any) {
       this.dialogTitle='ADMIN.JOBS.CANCEL_TITLE';
       this.dialogMessage='ADMIN.JOBS.CANCEL_MESSAGE';
       this.dialogButtons=DialogButton.getYesNo(()=> {
@@ -748,7 +784,7 @@ export class AdminComponent {
           });
       });
     }
-    private reloadJobStatus() {
+    reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs)=> {
             this.jobs=jobs;
             this.updateJobLogs();
@@ -761,7 +797,7 @@ export class AdminComponent {
       v.splice(2,v.length-2);
       return v.join('.');
     }
-  private runTpChecks() {
+  runTpChecks() {
     const checks = [
         RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
@@ -780,7 +816,7 @@ export class AdminComponent {
     });
 
   }
-  private runChecks() {
+  runChecks() {
         this.systemChecks=[];
 
         // check versions render service
@@ -923,7 +959,7 @@ export class AdminComponent {
         });
     }
 
-    private updateJobLogs() {
+    updateJobLogs() {
       this.jobsLogData=[];
       let i=0;
       if(this.jobs) {
@@ -980,7 +1016,7 @@ export class AdminComponent {
     this.storage.set('admin_lucene',this.lucene);
     this.globalProgress=true;
     const props=this.lucene.properties.split('\n');
-    this.admin.exportLucene(this.lucene.query,props).subscribe((data)=> {
+    this.admin.exportLucene(this.lucene.query, this.lucene.store, props).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
 
@@ -1106,7 +1142,7 @@ export class AdminComponent {
                 this.updates = data;
             });
             this.refreshUpdateList();
-            this.refreshCatalina();
+            // this.refreshCatalina();
             this.refreshAppList();
             this.storage.get('admin_job', this.job).subscribe((data: any) => {
                 this.job = data;
@@ -1146,12 +1182,6 @@ export class AdminComponent {
             }, (error: any) => {
                 console.info(error);
                 this.repositoryVersion = 'Error accessing version information. Are you in dev mode?';
-            });
-            this.admin.getNgVersion().subscribe((data: string) => {
-                this.ngVersion = data;
-            }, (error: any) => {
-                console.info(error);
-                this.ngVersion = 'Error accessing version information. Are you in dev mode?';
             });
         }
     }

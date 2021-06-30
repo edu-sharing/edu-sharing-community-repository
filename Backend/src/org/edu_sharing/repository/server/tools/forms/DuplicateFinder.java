@@ -33,6 +33,7 @@ import java.util.Map;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 
 public class DuplicateFinder {
@@ -108,7 +109,34 @@ public class DuplicateFinder {
 		
 		return result;
 	}
-	
+
+	public String getUniqueValue(String parentId, String property, String value){
+		int cm_name_exists_counter = 2;
+
+		String[] splitted = value.split("\\.");
+		String value0 = (splitted.length > 0 )? splitted[0] : value;
+		String result = value;
+		while(NodeServiceFactory.getLocalService().findNodeByName(parentId, result) != null){
+			result = value0 + " - " + cm_name_exists_counter;
+			if(splitted.length > 1){
+				for(int i = 1; i < splitted.length;i++){
+					result = result +"."+splitted[i];
+				}
+			}
+			cm_name_exists_counter++;
+		}
+
+		return result;
+	}
+
+	/**
+	 * @DEPRECATED
+	 * Do not use this method accepting a HashMap, since the HashMap building is too slow
+	 * @param nodes
+	 * @param property
+	 * @param value
+	 * @return
+	 */
 	public String getUniqueValue(HashMap<String,HashMap<String,Object>> nodes, String property, String value){
 		int cm_name_exists_counter = 2;
 		

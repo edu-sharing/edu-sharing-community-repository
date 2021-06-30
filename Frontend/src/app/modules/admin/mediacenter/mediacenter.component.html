@@ -90,11 +90,11 @@
                 <div class="groups">
                     <h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.GROUPS.DESCRIPTION' | translate}}</h6>
                     <ng-container *ngIf="hasManagePermissions">
-                        <authority-search-input placeholder="ADMIN.MEDIACENTER.GROUPS.ADD_LABEL" mode="Organizations" [showRecent]="false" (onChooseAuthority)="addGroup=$event"></authority-search-input>
+                        <authority-search-input placeholder="ADMIN.MEDIACENTER.GROUPS.ADD_LABEL" [mode]="AuthoritySearchMode.Organizations" [showRecent]="false" (onChooseAuthority)="addGroup=$event"></authority-search-input>
                         <button *ngIf="addGroup" mat-raised-button color="primary" (click)="addCurrentGroup()"><i icon="add"></i>{{'ADMIN.MEDIACENTER.GROUPS.ADD' | translate:{name:addGroup.profile.displayName} }}</button>
                     </ng-container>
                     <listTable *ngIf="mediacenterGroups"
-                        [nodes]="mediacenterGroups"
+                        [nodes]="$any(mediacenterGroups)"
                         [hasIcon]="true"
                         [customOptions]="groupActions"
                         icon="group"
@@ -105,17 +105,18 @@
             <mat-tab label="{{'ADMIN.MEDIACENTER.NODES.TITLE' | translate}}">
                 <div class="nodes">
                     <!--h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.NODES.DESCRIPTION' | translate}}</h6-->
-                    <mds
+                    <app-mds-editor-wrapper
                         #mediacenterMds
                         [embedded]="true"
                         mode="search"
-                        [invalidate]="mediacenterMdsReload"
+                        editorMode="search"
+                        [currentValues]="{}"
                         (onMdsLoaded)="searchMediaCenterNodes()"
                         groupId="mediacenter_filter"
-                        ></mds>
+                        ></app-mds-editor-wrapper>
                     <mat-form-field class="searchword">
                         <mat-label>{{'ADMIN.MEDIACENTER.NODES.SEARCHWORD' | translate}}</mat-label>
-                        <input matInput [disabled]="!isAdmin" [(ngModel)]="mediacenterNodesSearchWord">
+                        <input matInput [(ngModel)]="mediacenterNodesSearchWord">
                     </mat-form-field>
                     <button mat-raised-button color="primary"
                             (click)="searchMediaCenterNodes()">

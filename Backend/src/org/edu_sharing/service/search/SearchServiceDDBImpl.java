@@ -259,14 +259,15 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						VCardTool.nameToVCard(meta.getString("publisher")));
 				}catch(Throwable t) {}
 				try {
+					String creator=getLanguageString(meta, "creator");
 					properties.put(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR,
-							VCardTool.nameToVCard(meta.getString("creator")));
-					properties.put(CCConstants.CM_PROP_C_CREATOR,meta.getString("creator"));
-					properties.put(CCConstants.NODECREATOR_FIRSTNAME,meta.getString("creator"));
-					properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,meta.getString("creator"));
+							VCardTool.nameToVCard(creator));
+					properties.put(CCConstants.CM_PROP_C_CREATOR,creator);
+					properties.put(CCConstants.NODECREATOR_FIRSTNAME,creator);
+					properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,creator);
 				}catch(Throwable t) {}
 				try {
-					String name=meta.getString("title");
+					String name=getLanguageString(meta, "title");
 					properties.put(CCConstants.CM_NAME, name);
 					properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, name);
 				}catch(Throwable t) {}
@@ -415,6 +416,14 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			
 			
 		return properties;
+	}
+
+	private String getLanguageString(JSONObject meta, String field) throws JSONException {
+		try {
+			return meta.getJSONObject(field).getString("$");
+		}catch(Throwable t){
+			return meta.getString(field);
+		}
 	}
 
 	public List<? extends  Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {

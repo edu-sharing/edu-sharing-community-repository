@@ -28,8 +28,6 @@ import org.edu_sharing.repository.server.tools.LocaleValidator;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
-import org.edu_sharing.service.config.ConfigServiceFactory;
-import org.edu_sharing.service.config.model.Config;
 import org.springframework.context.ApplicationContext;
 
 public class AuthenticationFilter implements javax.servlet.Filter {

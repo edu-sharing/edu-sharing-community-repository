@@ -196,10 +196,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     globalProgress = false;
     showEditProfile: boolean;
     showProfile: boolean;
-    user: IamUser;
-    userName: string;
     _currentScope: string;
-    isGuest = false;
     _showUser = false;
     licenseDialog: boolean;
     showScrollToTop = false;
@@ -226,8 +223,8 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     }
 
     constructor(
-        private iam: RestIamService,
-        private connector: RestConnectorService,
+        public iam: RestIamService,
+        public connector: RestConnectorService,
         private bridge: BridgeService,
         private event: FrameEventsService,
         private nodeService: RestNodeService,
@@ -263,20 +260,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                             this.canOpen = false;
                         }
                         this.showNodeStore = params.nodeStore === 'true';
-                        this.isGuest = data.isGuest;
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
                         this.refreshNodeStore();
                         this.checkConfig();
-                        const user = await this.iam.getCurrentUserAsync();
-                        this.user = user;
+                        const user = await this.iam.getUser().toPromise();
                         this.canEditProfile = user.editProfile;
-                        this.configService.getAll().subscribe(() => {
-                            this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
-                                this.user.person,
-                                this.configService,
-                            );
-                        });
+                        this.configService.getAll().subscribe(() => {});
                     });
                 });
             });
@@ -575,7 +565,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return this.create.allowed && !this.isGuest;
+        return this.create.allowed && !this.connector.getCurrentLogin()?.isGuest;
     }
 
     openCreateMenu(x: number, y: number) {
@@ -587,13 +577,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.createMenuTrigger.onMenuClose;
     }
 
-    private clearSearch() {
+    clearSearch() {
         this.searchQuery = '';
         this.searchQueryChange.emit('');
         this.onSearch.emit({ query: '', cleared: true });
     }
 
-    private logout() {
+    logout() {
         this.globalProgress = true;
         this.uiService.handleLogout().subscribe(() => this.finishLogout());
     }
@@ -620,7 +610,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.onSearch.emit({ query: value, cleared: false });
     }
 
-    private openImprint() {
+    openImprint() {
         UIHelper.openUrl(
             this.config.imprintUrl,
             this.bridge,
@@ -628,7 +618,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         );
     }
 
-    private openPrivacy() {
+    openPrivacy() {
         UIHelper.openUrl(
             this.config.privacyInformationUrl,
             this.bridge,
@@ -678,7 +668,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     private showLicenseAgreement() {
         if (
             !this.config.licenseAgreement ||
-            this.isGuest ||
+            this.connector.getCurrentLogin()?.isGuest ||
             !this.connector.getCurrentLogin().isValidLogin
         ) {
             this.startTutorial();
@@ -731,7 +721,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     private updateUserOptions() {
         this.userMenuOptions = [];
-        if (!this.isGuest) {
+        if (!this.connector.getCurrentLogin()?.isGuest) {
             this.userMenuOptions.push(
                 new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
                     this.openProfile(),
@@ -746,7 +736,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 );
             }
         }
-        if (this.isGuest) {
+        if (this.connector.getCurrentLogin()?.isGuest) {
             if (this.config.loginOptions) {
                 for (const login of this.config.loginOptions) {
                     this.userMenuOptions.push(
@@ -778,6 +768,12 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             );
             this.userMenuOptions.push(boomarkOption);
         // }
+        const accessibilityOptions = new OptionItem(
+            'OPTIONS.ACCESSIBILITY',
+            'accessibility',
+            () => this.mainnavService.getAccessibility().visible = true,
+        );
+        this.userMenuOptions.push(accessibilityOptions);
         for (const option of this.getConfigMenuHelpOptions()) {
             this.userMenuOptions.push(option);
         }
@@ -814,7 +810,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         }
         this.userMenuOptions.push(option);
 
-        if (!this.isGuest) {
+        if (!this.connector.getCurrentLogin()?.isGuest) {
             this.userMenuOptions.push(
                 new OptionItem('LOGOUT', 'undo', () => this.logout()),
             );
@@ -850,8 +846,12 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         if (this.tabNav == null || this.tabNav.nativeElement == null) {
             return;
         }
+        // Take the scroll position inside a viewport that was zoomed in using pinch-to-zoom into
+        // account. This allows us to scroll bottom elements out of view, but is not really needed
+        // for top elements. Using for both as long as no problems come up.
+        const scrollY = (window as any).visualViewport?.pageTop ?? window.scrollY;
         if (this.lastScroll === -1) {
-            this.lastScroll = window.scrollY;
+            this.lastScroll = scrollY;
             return;
         }
         const elementsTop: any = document.getElementsByClassName(
@@ -874,8 +874,8 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 top = rect.top;
             }
         }
-        let diffTop = window.scrollY - this.lastScroll;
-        let diffBottom = window.scrollY - this.lastScroll;
+        let diffTop = scrollY - this.lastScroll;
+        let diffBottom = scrollY - this.lastScroll;
         if (diffTop < 0) {
             diffTop *= 2;
         }
@@ -883,10 +883,16 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             diffBottom *= 2;
         }
 
+        // Don't move top elements any further up when they already lie above the screen.
         if (diffTop > 0 && bottom < 0) {
             diffTop = 0;
         }
+        // Don't move bottom elements any further down when they already lie below the screen.
         if (diffBottom > 0 && top > window.innerHeight) {
+            diffBottom = 0;
+        }
+        // Don't move bottom elements any further up when the page is zoomed in on mobile.
+        if (diffBottom < 0 && (window as any).visualViewport?.scale > 1) {
             diffBottom = 0;
         }
         this.elementsTopY += diffTop;
@@ -895,7 +901,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.elementsBottomY = Math.max(0, this.elementsBottomY);
         // For ios elastic scroll
         if (
-            window.scrollY <= 0 ||
+            window.scrollY < 0 ||
             this.fixScrollElements ||
             !UIHelper.evaluateMediaQuery(
                 UIConstants.MEDIA_QUERY_MAX_WIDTH,
@@ -913,13 +919,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             elementsBottom.item(i).style.position = 'relative';
             elementsBottom.item(i).style.top = this.elementsBottomY + 'px';
         }
-        this.lastScroll = window.scrollY;
+        this.lastScroll = scrollY;
     }
 
     private showTimeout() {
         return (
             !this.bridge.isRunningCordova() &&
-            !this.isGuest &&
+            !this.connector.getCurrentLogin()?.isGuest &&
             this.timeIsValid &&
             this.timeout !== '' &&
             (this.isSafe() ||

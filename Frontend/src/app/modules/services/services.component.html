@@ -47,7 +47,7 @@
         <div class="service-logo"><img class="service-logo" src="{{service.logo}}"></div>
         <div>{{service.name}}</div>
         <div>{{service.url}}</div>
-        <div>{{service.type}}</div>
+        <div>{{$any(service).type}}</div>
         <div class="interface" *ngFor="let interface of interfaces" class="interface"><i class="material-icons">{{hasInterface(service,interface) ? 'check' : 'close'}}</i></div>
         <div><a href="{{service.url}}" target="_blank"><i class="material-icons clickable">open_in_new</i></a></div>
     </div>

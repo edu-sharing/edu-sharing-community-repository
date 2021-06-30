@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, NgZone, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {Group, IamGroup, Mediacenter, Node} from '../../../core-module/rest/data-object';
 // import {NodeList} from "../../../core-module/core.module";
@@ -18,6 +18,10 @@ import {Toast} from '../../../core-ui-module/toast';
 import {CustomOptions, ElementType, OptionItem} from '../../../core-ui-module/option-item';
 import {MdsComponent} from '../../../common/ui/mds/mds.component';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
+import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {MdsEditorCoreComponent} from '../../../common/ui/mds-editor/mds-editor-core/mds-editor-core.component';
+import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 // Charts.js
 declare var Chart: any;
@@ -28,7 +32,8 @@ declare var Chart: any;
     styleUrls: ['mediacenter.component.scss']
 })
 export class AdminMediacenterComponent {
-    @ViewChild('mediacenterMds') mediacenterMds: MdsComponent;
+    readonly AuthoritySearchMode = AuthoritySearchMode;
+    @ViewChild('mediacenterMds') mediacenterMds: MdsEditorWrapperComponent;
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])
@@ -39,8 +44,6 @@ export class AdminMediacenterComponent {
     addGroup: Group;
     mediacenterGroups: IamGroup[];
     mediacenterNodes: Node[];
-    mediacenterNodesMax = 20;
-    mediacenterNodesOffset = 0;
     mediacenterNodesTotal = 0;
     mediacenterNodesSearchWord='';
     hasMoreMediacenterNodes = true;
@@ -56,7 +59,6 @@ export class AdminMediacenterComponent {
         useDefaultOptions: false
     };
     currentTab = 0;
-    mediacenterMdsReload = new Boolean(true);
     isAdmin: boolean;
     hasManagePermissions: boolean;
     public mediacentersFile: File;
@@ -73,17 +75,15 @@ export class AdminMediacenterComponent {
         private translate: TranslateService,
         private connector: RestConnectorService,
         private iamService: RestIamService,
+        private ngZone: NgZone,
         private toast: Toast,
     ) {
         this.isAdmin = this.connector.getCurrentLogin().isAdmin;
         this.hasManagePermissions = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_MEDIACENTER_MANAGE);
         this.refresh();
-        this.groupColumns = [
-            new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
-            new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE)
-        ];
         this.mdsService.getSet().subscribe((mds) => {
             this.nodeColumns = MdsHelper.getColumns(this.translate, mds, 'mediacenterManaged');
+            this.groupColumns = MdsHelper.getColumns(this.translate, mds, 'mediacenterGroups');
         });
         const remove = new OptionItem('ADMIN.MEDIACENTER.GROUPS.REMOVE', 'delete', (authority: Group) => {
             this.toast.showModalDialog('ADMIN.MEDIACENTER.GROUPS.REMOVE_TITLE', 'ADMIN.MEDIACENTER.GROUPS.REMOVE_MESSAGE',
@@ -93,7 +93,9 @@ export class AdminMediacenterComponent {
                 }), true, () => this.toast.closeModalDialog(), {name: authority.profile.displayName});
         });
         remove.elementType = [ElementType.Group];
-        this.groupActions.addOptions = [remove];
+        if(this.isAdmin) {
+            this.groupActions.addOptions = [remove];
+        }
     }
 
 
@@ -109,24 +111,25 @@ export class AdminMediacenterComponent {
                 this.mediacenterGroups = groups;
             });
 
-            this.mediacenterNodesOffset = 0;
             this.mediacenterNodesTotal = 0;
             this.mediacenterNodes = [];
-            this.mediacenterMdsReload = new Boolean(true);
+            UIHelper.waitForComponent(this.ngZone, this, 'mediacenterMds').subscribe(() =>
+             this.mediacenterMds.loadMds()
+            );
             // done via mds
             // this.loadMediacenterNodes();
 
         }
     }
 
-    loadMediacenterNodes() {
+    async loadMediacenterNodes() {
         if (!this.hasMoreMediacenterNodes) {
             return;
         }
         if (this.currentMediacenter) {
             const licensedNodeReq: RequestObject = {
-                offset: this.mediacenterNodesOffset,
-                count: this.mediacenterNodesMax,
+                offset: this.mediacenterNodes?.length,
+                count: this.mediacenterNodes?.length ? 50 : null,
                 propertyFilter: [RestConstants.ALL],
                 sortBy: [this.mediacenterNodesSort.sortBy],
                 sortAscending: [this.mediacenterNodesSort.sortAscending]
@@ -142,28 +145,22 @@ export class AdminMediacenterComponent {
             }
             criterias = criterias.concat(
                 RestSearchService.convertCritierias(
-                    this.mediacenterMds.getValues(),
+                    await this.mediacenterMds.getValues(),
                     this.mediacenterMds.currentWidgets,
                 ),
             );
-            console.log(this.mediacenterMds.getValues())
 
             this.mediacenterService.getLicensedNodes(this.currentMediacenter.authorityName, criterias,
                 RestConstants.HOME_REPOSITORY, licensedNodeReq).subscribe((data) => {
                 this.mediacenterNodesTotal = data.pagination.total;
-                if (this.mediacenterNodesTotal < (this.mediacenterNodesOffset + this.mediacenterNodesMax)) {
-                    this.hasMoreMediacenterNodes = false;
-                } else {
-                    this.mediacenterNodesOffset = data.pagination.from + this.mediacenterNodesMax;
-                }
                 if (this.mediacenterNodes == null
                     || (this.mediacenterNodesSearchWord != null && this.mediacenterNodesSearchWord.trim().length > 0)) {
                     this.mediacenterNodes = data.nodes;
                 } else {
-
                     this.mediacenterNodes = this.mediacenterNodes.concat(data.nodes);
                 }
-                this.isLoadingMediacenterNodes=false;
+                this.hasMoreMediacenterNodes = this.mediacenterNodes.length < this.mediacenterNodesTotal;
+                this.isLoadingMediacenterNodes = false;
             });
 
         }
@@ -171,7 +168,6 @@ export class AdminMediacenterComponent {
 
     searchMediaCenterNodes() {
         this.hasMoreMediacenterNodes = true;
-        this.mediacenterNodesOffset = 0;
         this.mediacenterNodes = [];
         this.loadMediacenterNodes()
     }
@@ -346,7 +342,6 @@ export class AdminMediacenterComponent {
     private resetMediacenterNodes() {
         this.mediacenterNodes = null;
         this.mediacenterNodesTotal = 0;
-        this.mediacenterNodesOffset = 0;
         this.hasMoreMediacenterNodes = true
     }
 }

@@ -31,6 +31,7 @@
 <app-mds-editor-card
   *ngIf="editorType === 'angular' && !embedded"
   [title]="(customTitle ? customTitle : 'MDS.TITLE') | translate"
+  [priority]="priority"
   (cancel)="onCancel.emit()"
   (save)="onSave()"
 >

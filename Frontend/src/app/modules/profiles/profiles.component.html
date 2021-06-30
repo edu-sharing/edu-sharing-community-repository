@@ -16,7 +16,7 @@
 </div>
 <div class="profiles-wrapper">
   <div class="profiles" *ngIf="user">
-    <div role="main" appSkipTarget="MAIN_CONTENT" class="main">
+    <div role="main" [appSkipTarget]="SkipTarget.MainContent" class="main">
       <h1 appTitle class="cdk-visually-hidden">{{ 'PROFILES.TITLE' | translate: {name: user | authorityName} }}</h1>
       <div class="top" style.background-color="{{ (edit ? userEdit : user) | authorityColor }}">
         <div class="profile-gradient"></div>
@@ -69,7 +69,7 @@
               <mat-label>{{'USER.email' | translate}}</mat-label>
               <input matInput type="email" [(ngModel)]="userEdit.profile.email">
             </mat-form-field>
-            <mat-slide-toggle color="primary-bright"
+            <mat-slide-toggle [color]="$any('primary-bright')"
                               matTooltip="{{ 'PROFILE_SETTINGS.SHOW_EMAIL_TOOLTIP' | translate}}"
                               [checked]="profileSettings.showEmail"
                               [(ngModel)]="profileSettings.showEmail">
@@ -161,7 +161,7 @@
             <input matInput
                    id="gnduri"
                    [(ngModel)]="userEdit.profile.vcard.gnduri"
-                   pattern="https?://d-nb.info\/gnd\/\d+"
+                   pattern="https?:\/\/d-nb.info\/gnd\/(\d|x|X)+"
                    placeholder="http://d-nb.info/gnd/0000000000"
             >
             <mat-hint innerHTML="{{'VCARD_HINT.X-GND-URI' | translate}}"></mat-hint>
@@ -182,9 +182,9 @@
           </button>
         </div>
         <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
-          <input-password label="{{'OLD_PASSWORD' | translate }}" [displayStrength]="false" [(value)]="oldPassword" required="true" id="oldPassword"></input-password>
+          <input-password label="{{'OLD_PASSWORD' | translate }}" [displayStrength]="false" [(value)]="oldPassword" [required]="true" id="oldPassword"></input-password>
           <!--<input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="" required="true">-->
-          <input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
+          <input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" [(value)]="password" [required]="true" id="password"></input-password>
           <div class="change-buttons">
             <button mat-raised-button color="primary" [disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (click)="savePassword()">{{'SAVE' | translate}}</button>
           </div>

@@ -52,6 +52,7 @@ import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import { CardService } from '../../core-ui-module/card.service';
 import { Observable } from 'rxjs';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
     selector: 'workspace-main',
@@ -66,6 +67,7 @@ import { Observable } from 'rxjs';
     ]
 })
 export class WorkspaceMainComponent implements EventListener, OnDestroy {
+    readonly SkipTarget = SkipTarget;
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
@@ -79,9 +81,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private parameterNode: Node;
     root = 'MY_FILES';
 
-    private selection: Node[] = [];
+    selection: Node[] = [];
 
-    private showSelectRoot = false;
+    showSelectRoot = false;
     createConnectorName: string;
     createConnectorType: Connector;
 
@@ -92,10 +94,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private nodeDisplayedVersion: string;
     createAllowed: boolean;
     currentFolder: Node;
-    private user: IamUser;
+    user: IamUser;
     public searchQuery: any;
     public isSafe = false;
-    private isLoggedIn = false;
+    isLoggedIn = false;
     public addNodesToCollection: Node[];
     public addNodesStream: Node[];
     public variantNode: Node;
@@ -116,18 +118,18 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     toMeSharedToggle: boolean;
 
-    private currentNodes: Node[];
+    currentNodes: Node[];
     private appleCmd = false;
     private reurl: string;
     private mdsParentNode: Node;
     public showLtiTools = false;
     private oldParams: Params;
-    private selectedNodeTree: string;
+    selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
-    private viewType: 0|1 = 0;
+    viewType: 0|1 = 0;
     private reurlDirectories: boolean;
-    private reorderDialog: boolean;
+    reorderDialog: boolean;
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
@@ -175,9 +177,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
     }
     ngOnDestroy(): void {
+        this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
             this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
         }
+        // close sidebar, if open
+        this.mainNavRef.management.closeSidebar();
     }
     constructor(
         private toast: Toast,
@@ -231,7 +236,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private editConnector(node: Node = null, type: Filetype = null, win: any = null, connectorType: Connector = null) {
         UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, this.getNodeList(node)[0], type, win, connectorType);
     }
-    private handleDrop(event: any) {
+    handleDrop(event: any) {
         for (const s of event.source) {
             if (event.target.ref.id === s.ref.id || event.target.ref.id === s.parent.id) {
                 this.toast.error(null, 'WORKSPACE.SOURCE_TARGET_IDENTICAL');
@@ -403,8 +408,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 if (!needsUpdate) {
                     return;
                 }
-                const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
-                if (!params.id && lastLocation) {
+                let lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                if(this.isSafe) {
+                    // clear lastLocation, this is another folder than the safe
+                    lastLocation = null;
+                }
+                if (!params.id && !params.query && lastLocation) {
                     this.openDirectory(lastLocation);
                 } else {
                     this.openDirectoryFromRoute(params);
@@ -462,11 +471,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.nodeDisplayed = event;
             this.nodeDisplayedVersion = event.version;
             */
+            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.currentNodes);
             this.currentNode = list[0];
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
                 {
                     state: {
-                        nodes: this.currentNodes,
                         scope: 'workspace'
                     }
                 }
@@ -500,7 +509,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.currentNodes = nodes;
     }
 
-    private setSelection(nodes: Node[]) {
+    setSelection(nodes: Node[]) {
         this.selection = nodes;
         this.setFixMobileNav();
     }
@@ -585,7 +594,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
 
     }
-    private openNode(node: Node, useConnector = true) {
+    openNode(node: Node, useConnector = true) {
         if (this.nodeHelper.isSavedSearchObject(node)) {
             UIHelper.routeToSearchNode(this.router, null, node);
         }
@@ -599,9 +608,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.displayNode(node);
         }
     }
-    private openBreadcrumb(position: number) {
+    openBreadcrumb(position: number) {
+        console.log(position);
         this.searchQuery = null;
-        if (position > 0 || this.path) {
+        if (position > 0) {
             // handled automatically via routing
         } else {
             // TODO: handle with homeRouterLink if possible.
@@ -612,6 +622,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 )
             ) {
                 this.showSelectRoot = true;
+            } else {
+                this.routeTo(this.root);
             }
         }
     }

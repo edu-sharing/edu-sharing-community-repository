@@ -1,12 +1,12 @@
 <!-- TODO: remove remaining h4 and h5 headings (misused as labels) -->
-<card title="{{'WORKSPACE.LICENSE.TITLE' | translate }}" [priority]="priority" [node]="_nodes" width="large" height="xlarge"
+<card title="{{'WORKSPACE.LICENSE.TITLE' | translate }}" [priority]="priority" [node]="getNodes()" width="large" height="xlarge"
       [buttons]="embedded ? null : buttons"
       [header]="!embedded"
       [isCancelable]="!embedded"
       (onCancel)="cancel()"
 >
       <spinner *ngIf="loading"></spinner>
-      <div *ngIf="(_nodes || _properties) && !loading" class="license-content">
+      <div *ngIf="(getNodes() || _properties) && !loading" class="license-content">
         <mat-slide-toggle class="oerSelect switch toggle-reverse" [(ngModel)]="oerMode">{{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}</mat-slide-toggle>
         <mat-radio-group class="oerLicenses" [(ngModel)]="type" name="oerLicenses" *ngIf="oerMode">
           <fieldset>
@@ -195,7 +195,9 @@
                 </mat-form-field>
               </div>
           </div>
-        <app-mds-editor-widget-author #author></app-mds-editor-widget-author>
+        <app-mds-editor-widget-author #author
+          [showContributorDialog]="!_properties"
+        ></app-mds-editor-widget-author>
         <app-license-source class="cc-additional" *ngIf="isCCAttributableLicense()"
           [(ccTitleOfWork)]="ccTitleOfWork"
           [(ccSourceUrl)]="ccSourceUrl"
@@ -257,9 +259,9 @@
         </div>
         <!--
         <div class="licenseCheckbox">
-          <div class="switch-release" *ngIf="_nodes">
+          <div class="switch-release" *ngIf="getNodes()">
             <mat-checkbox class="strong" [disabled]="!allowRelease" [(ngModel)]="release" [(indeterminate)]="releaseIndeterminate" (ngModelChange)="changeRelease($event)">
-              {{'WORKSPACE.LICENSE.RELEASE'+(_nodes.length>1 ? '_MULTI' : '') | translate:{count:_nodes.length} }}
+              {{'WORKSPACE.LICENSE.RELEASE'+(getNodes().length>1 ? '_MULTI' : '') | translate:{count:getNodes().length} }}
             </mat-checkbox>
             <div class="doi" *ngIf="allowDOI()">
               <mat-checkbox [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">

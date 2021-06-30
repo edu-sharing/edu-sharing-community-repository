@@ -1,4 +1,6 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
+  <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
+  ></tutorial>
   <main-nav #mainNav
     [hidden]="!mainnav"
     [title]="'SEARCH.TITLE'"
@@ -13,14 +15,15 @@
     (onSearch)="routeAndClearSearch($event)"
     (onCreate)="list.addVirtualNodes($event)"
   ></main-nav>
-  <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
-  ></tutorial>
 
   <div class="rowRepositories scrollWithBanner" [class.no-mainnav]="!mainnav" *ngIf="repositories && repositories.length>2">
       <div class="mobile-move-top row tab-group row-dark">
-          <div class="col s12">
+          <div class="col s12" role="region">
               <ul class="tabs tabsRepositories tabs-fixed-width">
-                  <li class="clickable tab col s3" *ngFor="let repo of repositories.length<=4 ? repositories : repositories.slice(0,3)" tabindex="0" (keyup.enter)="setRepository(repo.id)" (click)="setRepository(repo.id)">
+                  <li class="clickable tab col s3" *ngFor="let repo of repositories.length<=4 ? repositories : repositories.slice(0,3)"
+                      tabindex="0"
+                      (keyup.enter)="setRepository(repo.id)"
+                      (click)="setRepository(repo.id)">
                       <a [class.active]="currentRepository==repo.id">
                           <img [src]="getSourceIcon(repo)" alt=""><span class="repositoryTitle">{{ repo.title }}</span></a>
                   </li>
@@ -110,7 +113,7 @@
             [mode]="'search'"
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
-            (onDone)="applyParameters($event)">
+            (onDone)="applyParameters($any($event))">
       </app-mds-editor-wrapper>
   </card>
   <div class="sidenav-container">
@@ -155,7 +158,7 @@
             [mode]="'search'"
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
-            (onDone)="applyParameters($event)"
+            (onDone)="applyParameters($any($event))"
           >
           </app-mds-editor-wrapper>
           <div class="mdsSelect" *ngIf="initalized">
@@ -214,7 +217,6 @@
               [isLoading]="savedSearchLoading"
               [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
               [columns]="savedSearchColumns"
-              (onUpdateOptions)="refreshListOptions()"
               (clickRow)="loadSavedSearchNode($event.node)"
             ></listTable>
             <div
@@ -228,7 +230,7 @@
           </div>
         </mat-tab>
       </mat-tab-group>
-      <div class="apply" *ngIf="searchService.sidenavOpened && !isMdsLoading()">
+      <div class="apply" #sidenavApply *ngIf="searchService.sidenavOpened && !isMdsLoading()">
         <actionbar
           [options]="mdsActions"
           [numberOfAlwaysVisibleOptions]="2"
@@ -239,7 +241,7 @@
     <div class="content-with-footer">
         <div
             role="main"
-            appSkipTarget="MAIN_CONTENT"
+            [appSkipTarget]="SkipTarget.MainContent"
             class="content_wrapper"
             [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
             [class.contentSidenav]="searchService.sidenavOpened"
@@ -254,17 +256,17 @@
                             {{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})
                           </h2>
                           <button
-                            *ngIf="hasMoreCollections"
+                            *ngIf="getHasMoreCollections()"
                             mat-button
                             color="primary"
                             class="toggle"
                             (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</button>
                           </div>
                     </div>
-                    <div class="collections" [class.collectionsMore]="collectionsMore" id="collections">
+                    <div #collections class="collections">
                         <listTable
                                 class="collections"
-                                [nodes]="searchService.searchResultCollections"
+                                [nodes]="getSearchResultCollections()"
                                 [columns]="searchService.collectionsColumns"
                                 [hasIcon]="true"
                                 [dragDrop]="false"
@@ -383,7 +385,7 @@
     </div>
 </div>
 </div>
-<div tabindex="0" *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false" (keyup.enter)="showMoreRepositories=false">
+<div tabindex="0" *ngIf="showMoreRepositories" class="scrollWithBanner dialog moreRepositories" (click)="showMoreRepositories=false" (keyup.enter)="showMoreRepositories=false">
   <div class="collection" [class.no-mainnav]="!mainnav">
     <a class="collection-item"
        *ngFor="let repo of repositories.slice(3)"

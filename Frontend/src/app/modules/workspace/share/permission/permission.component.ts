@@ -55,7 +55,7 @@ export class WorkspacePermissionComponent  {
       return;
     this.showChooseType=true;
   }
-  private changeType(type : any){
+  changeType(type : any){
     this.onType.emit(type);
     if(type.wasMain)
       this.showChooseType=false;

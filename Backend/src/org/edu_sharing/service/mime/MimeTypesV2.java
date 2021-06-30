@@ -13,11 +13,18 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 
 public class MimeTypesV2 {
+
+
+	public enum PathType{
+		Relative,
+		Absolute
+	}
 	public static final String MIME_DIRECTORY="application/x-directory";
 
 	private static HashMap<String, String> extensionMimeMap;
 	private final ApplicationInfo appInfo;
 	private String theme;
+	private final PathType pathType;
 	public enum Format {
 		Svg("svg"),
 		Png("png");
@@ -79,9 +86,13 @@ public class MimeTypesV2 {
 	public MimeTypesV2() {
 		this(ApplicationInfoList.getHomeRepository());
 	}
-	public MimeTypesV2(ApplicationInfo appInfo){
-		this.appInfo=appInfo;
-		this.theme=Theme.getThemeId();
+	public MimeTypesV2(ApplicationInfo appInfo) {
+		this(appInfo, PathType.Absolute);
+	}
+	public MimeTypesV2(ApplicationInfo appInfo, PathType pathType){
+		this.appInfo = appInfo;
+		this.theme = Theme.getThemeId();
+		this.pathType = pathType;
 		if(theme == null){
 			theme = CCConstants.THEME_DEFAULT_ID;
 		}
@@ -109,6 +120,9 @@ public class MimeTypesV2 {
 		return getBasePath() + "/themes/"+theme+"/";
 	}
 	private String getBasePath(){
+		if(PathType.Relative.equals(this.pathType)){
+			return "/" + appInfo.getWebappname();
+		}
 		if(appInfo.ishomeNode()){
 			// @TODO 5.1 This can be set to dynamic!
 			return URLTool.getBaseUrl(false);
@@ -194,10 +208,14 @@ public class MimeTypesV2 {
 		if(isLtiInstance(nodeType))
 			return "tool_instance";
 		String fallback="file";
-		boolean isLink=properties.containsKey(CCConstants.CCM_PROP_IO_WWWURL);
-		if(isLink)
+		boolean isLink=properties.get(CCConstants.CCM_PROP_IO_WWWURL)!=null &&
+				!((String)properties.get(CCConstants.CCM_PROP_IO_WWWURL)).isEmpty();
+		// do not force link, the remote object might provided an custom TECHNICAL_FORMAT
+		if(isLink){
+			//return "link";
 			fallback="link";
-		return getTypeFromMimetype(getMimeType(properties),properties,fallback);	
+		}
+		return getTypeFromMimetype(getMimeType(properties),properties,fallback);
 	}
 	public static String getTypeFromMimetype(String mimetype) {
 		return getTypeFromMimetype(mimetype,null,"file");
@@ -205,7 +223,7 @@ public class MimeTypesV2 {
 	private static String getTypeFromMimetype(String mimetype,Map<String,Object> properties,String fallback) {
 	if(mimetype==null)
 		return fallback;
-	
+
 	if(WORD.contains(mimetype))
 		return "file-word";
 	if(EXCEL.contains(mimetype))

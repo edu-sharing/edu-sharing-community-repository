@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -7,7 +7,7 @@ import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { VCard } from '../../../../../core-module/ui/VCard';
 import { MainNavService } from '../../../../services/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Values } from '../../types';
 
 export interface AuthorData {
@@ -20,11 +20,12 @@ export interface AuthorData {
     templateUrl: './mds-editor-widget-author.component.html',
     styleUrls: ['./mds-editor-widget-author.component.scss'],
 })
-export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidget {
+export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {
-        requiresNode: true,
+        requiresNode: false,
         supportsBulk: false,
     };
+    @Input() showContributorDialog = true;
     _nodes: Node[];
     hasChanges = new BehaviorSubject<boolean>(false);
     authorTab = 0;
@@ -36,7 +37,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidget {
     private initialAuthor: AuthorData;
 
     constructor(
-        private mdsEditorValues: MdsEditorInstanceService,
+        public mdsEditorValues: MdsEditorInstanceService,
         private iamApi: RestIamService,
         private mainNavService: MainNavService,
         public ui: UIService,
@@ -48,6 +49,13 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidget {
             .subscribe((nodes) => {
                 this.updateValues(nodes);
             });
+        this.mdsEditorValues.values$
+            .filter((v) => v != null)
+            .subscribe((values) => {
+                this.updateValues([
+                    {properties: values}
+                ] as Node[])
+            })
     }
     onChange(): void {
         this.hasChanges.next(
@@ -90,7 +98,6 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidget {
         values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] = this.author.author.toVCardString();
         return values;
     }
-
     private updateValues(nodes: Node[]) {
         this._nodes = nodes;
         if (nodes?.length) {

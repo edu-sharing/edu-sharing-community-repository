@@ -1,4 +1,13 @@
-import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
+import {
+    Component,
+    Input,
+    EventEmitter,
+    Output,
+    ViewChild,
+    ElementRef,
+    HostListener,
+    ContentChild, TemplateRef
+} from '@angular/core';
 import {DialogButton, LocalPermissions, NodeVersions, RestConnectorService, RestNodeService, Version} from "../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../core-module/core.module";
@@ -21,6 +30,7 @@ import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import {WorkspaceLicenseComponent} from './license/license.component';
 
 
 export enum DialogType {
@@ -40,13 +50,15 @@ export enum DialogType {
 export class WorkspaceManagementDialogsComponent  {
   readonly BulkBehaviour = BulkBehavior;
   @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef : MdsEditorWrapperComponent;
+  @ViewChild(WorkspaceLicenseComponent) licenseComponent : WorkspaceLicenseComponent;
+  @ContentChild('collectionChooserBeforeRecent') collectionChooserBeforeRecentRef: TemplateRef<any>;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() uploadMultiple = true;
   @Input() fileIsOver = false;
   @Input() addToCollection:Node[];
   @Output() addToCollectionChange = new EventEmitter();
-  @Input() filesToUpload : Node[];
+  @Input() filesToUpload : FileList;
   @Output() filesToUploadChange = new EventEmitter();
   @Input() parent : Node;
   @Output() showLtiToolsChange = new EventEmitter();
@@ -148,7 +160,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
-  @Output() onStoredAddToCollection=new EventEmitter();
+  @Output() onStoredAddToCollection=new EventEmitter<{collection: Node, references: Node[]}>();
   _nodeDelete: Node[];
   _nodeMetadata: Node[];
   _nodeSimpleEdit: Node[];
@@ -170,8 +182,8 @@ export class WorkspaceManagementDialogsComponent  {
   public dialogCancelable:boolean;
   public dialogNode:Node|Node[];
   public dialogButtons:DialogButton[];
-  private currentLtiTool: Node;
-  private ltiToolRefresh: Boolean;
+  currentLtiTool: Node;
+  ltiToolRefresh: Boolean;
   @Input() nodeDeleteOnCancel: boolean;
   @Output() nodeDeleteOnCancelChange = new EventEmitter();
   private nodeLicenseOnUpload = false;
@@ -265,7 +277,7 @@ export class WorkspaceManagementDialogsComponent  {
     private router:Router,
   ){
    }
- private closeLtiToolConfig(){
+ closeLtiToolConfig(){
     this.ltiToolConfig=null;
     this.ltiToolRefresh=new Boolean();
  }
@@ -383,7 +395,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.toast.closeModalDialog();
       });
   }
- private openLtiConfig(event:Node){
+ openLtiConfig(event:Node){
    this.ltiToolConfig=event;
  }
  public closeUploadSelect(){
@@ -401,11 +413,11 @@ export class WorkspaceManagementDialogsComponent  {
        this.onRefresh.emit([node]);
    }
   }
-  private closeLtiTools() {
+  closeLtiTools() {
     this.showLtiTools = false;
     this.showLtiToolsChange.emit(false);
   }
-  private closeLicense() {
+  closeLicense() {
     if(this.nodeLicenseOnUpload){
       this.showMetadataAfterUpload(this.nodeLicense);
     }
@@ -435,7 +447,7 @@ export class WorkspaceManagementDialogsComponent  {
               this.closeEditor(true);
           });
   }
-  private closeEditor(refresh:boolean,nodes: Node[]=null){
+  closeEditor(refresh:boolean,nodes: Node[]=null){
       if (this.nodeDeleteOnCancel && nodes == null) {
           this.nodeDeleteOnCancel = false;
           this.deleteNodes(this._nodeMetadata);
@@ -500,7 +512,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeVariant=null;
         this.nodeVariantChange.emit(null);
     }
-  private cancelAddToCollection(){
+  cancelAddToCollection(){
     this.dialogTitle=null;
     this.addToCollection=null;
     this.addToCollectionChange.emit(null);
@@ -529,11 +541,12 @@ export class WorkspaceManagementDialogsComponent  {
       this.dialogTitle=null;
     }
     this.toast.showProgressDialog();
-    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list,()=>{
+    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list,(nodes) => {
         this.toast.closeModalDialog();
-       this.onStoredAddToCollection.emit(collection);
-      if(callback)
-        callback();
+        this.onStoredAddToCollection.emit({collection, references: nodes});
+        if(callback) {
+            callback();
+        }
     });
   }
 
@@ -592,7 +605,7 @@ export class WorkspaceManagementDialogsComponent  {
                 },
             );
     }
-    private restoreVersion(restore:{version: Version,node: Node}) {
+    restoreVersion(restore:{version: Version,node: Node}) {
         this.toast.showConfigurableDialog({
             title: 'WORKSPACE.METADATA.RESTORE_TITLE',
             message: 'WORKSPACE.METADATA.RESTORE_MESSAGE',

@@ -4,21 +4,27 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.Normalizer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import bsh.StringUtil;
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
@@ -28,10 +34,12 @@ import org.alfresco.service.namespace.QNamePattern;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -47,11 +55,14 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.version.VersionTool;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
@@ -829,6 +840,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 				if (compare == 0) {
 					if (prop1 instanceof String && prop2 instanceof String) {
+						// normalize umlauts
+						prop1 = StringUtils.stripAccents((String)prop1);
+						prop2 = StringUtils.stripAccents((String)prop2);
 						compare = ((String) prop1).compareToIgnoreCase((String) prop2);
 					} else if (prop1 instanceof Date && prop2 instanceof Date) {
 						compare = ((Date) prop1).compareTo((Date) prop2);
@@ -902,8 +916,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return parentNodeRef;
 	}
 
-	public void createVersion(String nodeId, HashMap _properties) throws Exception{
-		apiClient.createVersion(nodeId, _properties);
+	public void createVersion(String nodeId) throws Exception{
+		apiClient.createVersion(nodeId);
 	}
 
 	@Override
@@ -919,7 +933,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			nodeID = getProperty(store.getProtocol(), store.getIdentifier(), nodeID, CCConstants.CCM_PROP_IO_ORIGINAL);
 		}
 		apiClient.writeContent(store, nodeID, content, mimetype, _encoding, property);
-		RenderingTool.buildRenderingCache(nodeID);
+		if(property == null || property.equals(ContentModel.PROP_CONTENT.toString())) {
+			RenderingTool.buildRenderingCache(nodeID);
+		}
 	}
 	
 	@Override
@@ -969,7 +985,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable{
-		throw new NotImplementedException("getPropertiesDynamic may not be called for the local repository");
+		throw new NotImplementedException("getPropertiesDynamic may not be called for the local repository (was the remote repo removed?)");
+	}
+	@Override
+	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable{
+		throw new NotImplementedException("getPropertiesPersisting may not be called for the local repository (was the remote repo removed?)");
 	}
 
 	@Override
@@ -982,7 +1002,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public String publishCopy(String nodeId) throws Throwable {
+	public String publishCopy(String nodeId, HandleMode handleMode) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
 		if(PermissionServiceFactory.getLocalService().hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,
 				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
@@ -1003,36 +1023,146 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
 			// permissions are checked beforehand,
 			return AuthenticationUtil.runAsSystem(() -> {
+				String currentVersion = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+				List<String> currentCopies = getPublishedCopies(nodeId);
+				if(currentCopies.stream().anyMatch((c) -> currentVersion.equals(getProperty(
+						StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.LOM_PROP_LIFECYCLE_VERSION
+				)))) {
+					throw new IllegalArgumentException("The version " + currentVersion + " is already published!");
+				}
 				String container = NodeServiceHelper.getContainerId(parent, pattern);
 				NodeRef oldNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-				NodeRef newNode = null;
+				NodeRef newNode;
 				try {
 					newNode = copyNode(nodeId, container, true);
 				} catch (Throwable t) {
 					throw new RuntimeException(t);
 				}
-				policyBehaviourFilter.disableBehaviour(newNode);
-				// replace owner, creator & modifier
-				setPublishedCopyProperties(oldNodeRef, newNode, owner);
-				setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
-				setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
-				setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
-						oldNodeRef);
-				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
-				NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
-				for(ChildAssociationRef child : this.getChildAssocs(newNode)){
-					policyBehaviourFilter.disableBehaviour(child.getChildRef());
-					setPublishedCopyProperties(oldNodeRef, child.getChildRef(), owner);
-					policyBehaviourFilter.enableBehaviour(child.getChildRef());
-				}
-				serviceRegistry.getPermissionService().deletePermissions(newNode);
-				setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
-						new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
-						true);
-				policyBehaviourFilter.enableBehaviour(newNode);
-				return newNode.getId();
+				return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+					// disable behaviour so no version data is altered externally
+					policyBehaviourFilter.disableBehaviour(newNode);
+					// replace owner, creator & modifier
+					setPublishedCopyProperties(oldNodeRef, newNode, owner);
+					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
+					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
+					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
+							oldNodeRef);
+					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
+					//deleteVersionHistory(newNode.getId());
+					//createVersion(newNode.getId());
+					for (ChildAssociationRef child : this.getChildAssocs(newNode)) {
+						policyBehaviourFilter.disableBehaviour(child.getChildRef());
+						setPublishedCopyProperties(oldNodeRef, child.getChildRef(), owner);
+						policyBehaviourFilter.enableBehaviour(child.getChildRef());
+					}
+					serviceRegistry.getPermissionService().deletePermissions(newNode);
+					setPermissions(newNode.getId(), CCConstants.AUTHORITY_GROUP_EVERYONE,
+							new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH},
+							true);
+					if(handleMode != null) {
+						createHandle(newNode, currentCopies, handleMode);
+					}
+
+					policyBehaviourFilter.enableBehaviour(newNode);
+					return newNode.getId();
+				});
 			});
 		});
+
+	}
+
+
+	public void createHandle(NodeRef nodeRef, List<String> publishedCopies, HandleMode handleMode) throws Exception {
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
+		HandleService handleService = null;
+		try {
+			handleService = new HandleService();
+			/**
+			 * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
+			 */
+			handleService.handleServiceAvailable();
+		} catch (Exception e) {
+			// DEBUG ONLY
+			//handle = "test/" + Math.random();
+			throw new RuntimeException("Handle service throwed an error: " + e.getMessage(), e);
+		}
+		String currentHandle = null;
+		// fetch the last given handle from the currently existing copies
+		if(handleMode.equals(HandleMode.update) && publishedCopies.size() > 0 ){
+			Set<String> handles = publishedCopies.stream().filter((c) ->
+					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) != null
+			).map((c) ->
+					getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), c, CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID)
+			).distinct().collect(Collectors.toSet());
+			if(handles.size() != 1){
+				throw new IllegalStateException("Multiple handles found but handleMode " + handleMode + " was requested");
+			}
+			currentHandle = handles.iterator().next();
+		}
+
+		String handle = null;
+
+		Map<QName, Serializable> publishedProps = new HashMap<QName, Serializable>();
+
+		if(handleMode.equals(HandleMode.distinct)) {
+			try {
+				handle = handleService.generateHandle();
+
+			} catch (Exception e) {
+				logger.error("sql error while creating handle id", e);
+				// DEBUG ONLY
+				//handle = "test/" + Math.random();
+				throw new RuntimeException("Handle generation throwed an error: " + e.getMessage(), e);
+			}
+		} else {
+			if(currentHandle == null){
+				throw new IllegalArgumentException("Handle Mode " + handleMode + " requested but no handle assigned yet");
+			}
+			handle = currentHandle;
+		}
+
+
+		publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
+
+		if (handle != null) {
+			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
+		}
+
+		if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
+			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
+		} else {
+			for (Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
+				nodeService.setProperty(nodeRef, entry.getKey(), entry.getValue());
+			}
+		}
+
+		/**
+		 * create version for the published node
+		 * NO: NOT NEEDED ANYMORE!
+		 * The version is implicitly correct because a copied node has exact ONE version!
+		 *
+		 */
+				/*
+				Map<QName, Serializable> props = nodeService.getProperties(nodeRef);
+				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
+				try {
+					new MCAlfrescoAPIClient().createVersion(_nodeId);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					logger.error(e1.getMessage(), e1);
+				}*/
+		if (handle != null) {
+			String contentLink = URLTool.getNgRenderNodeUrl(nodeRef.getId(), null, false);
+			if (handleMode.equals(HandleMode.distinct)) {
+				logger.info("Create handle " + handle + ", " + contentLink);
+				handleService.createHandle(handle, handleService.getDefautValues(contentLink));
+			} else if (handleMode.equals(HandleMode.update)) {
+				logger.info("Update handle " + handle + ", " + contentLink);
+				handleService.updateHandle(handle, handleService.getDefautValues(contentLink));
+			}
+
+		}
 
 	}
 
@@ -1217,7 +1347,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
 		property = NameSpaceTool.transformToLongQName(property);
-		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);
+		QName prop = QName.createQName(property);
+		PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
+		if(propertyDefinition == null){
+			logger.error("property" + property + " is not defined in content model");
+			return;
+		}
+
+		if(!propertyDefinition.isMultiValued() && value instanceof Collection){
+			value = (Serializable)((Collection)value).stream().iterator().next();
+		}
+
+		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), prop,value);
 	}
 
 	@Override

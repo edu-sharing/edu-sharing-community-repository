@@ -1,103 +1,94 @@
 <ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
   <ng-container [ngSwitch]="item.name">
     <span *ngSwitchCase="'displayName'">
-      {{ node.profile.displayName }}
+      {{ $any(node).profile.displayName }}
     </span>
     <span *ngSwitchCase="'groupType'">
-      {{ 'PERMISSIONS.GROUP_TYPE.' + node.profile.groupType | translate }}
+      {{ 'PERMISSIONS.GROUP_TYPE.' + $any(node).profile.groupType | translate }}
     </span>
     <span *ngSwitchDefault>
-      {{ node[item.name] }}
+      {{ $any(node)[item.name] }}
     </span>
   </ng-container>
 </ng-container>
 <ng-container *ngIf="item.type === 'USER'">
   <span *ngIf="isUserProfileAttribute(item.name)">
-    {{ node.profile[item.name] }}
+    {{ $any(node).profile[item.name] }}
   </span>
   <span *ngIf="item.name === 'status'">
-    {{ 'PERMISSIONS.USER_STATUS.' + node.status.status | translate }}
+    {{ 'PERMISSIONS.USER_STATUS.' + $any(node).status.status | translate }}
   </span>
   <span *ngIf="!isUserProfileAttribute(item.name) && item.name !== 'status'">
-    {{ node[item.name] }}
+    {{ $any(node)[item.name] }}
   </span>
 </ng-container>
 <ng-container [ngSwitch]="item.name" *ngIf="item.type === 'NODE' || item.type === 'COLLECTION'">
   <span *ngSwitchCase="'name'">
-    {{ node.name }}
+    {{ $any(node).name }}
   </span>
   <span *ngSwitchCase="'title'">
-    {{ node.title || node.name }}
+    {{ $any(node).title || $any(node).name }}
+  </span>
+  <span *ngSwitchCase="'cm:title'">
+    {{ $any(node).title || $any(node).name }}
   </span>
   <span *ngSwitchCase="'cclom:title'">
-    {{ node.title || node.name }}
+    {{ $any(node).title || $any(node).name }}
   </span>
   <span
     *ngSwitchCase="'mediatype'"
     [matTooltip]="showFieldTooltip ? ('NODE.mediatype' | translate) : null"
   >
-    {{ 'MEDIATYPE.' + node.mediatype | translate }}
+    <span class="cdk-visually-hidden">{{ 'NODE.mediatype' | translate }}:</span>
+    {{ 'MEDIATYPE.' + $any(node).mediatype | translate }}
   </span>
   <span *ngSwitchCase="'size'" [matTooltip]="showFieldTooltip ? ('NODE.size' | translate) : null">
-    {{ node.size | formatSize }}
+    <span class="cdk-visually-hidden">{{ 'NODE.size' | translate }}:</span>
+    {{ $any(node).size | formatSize }}
   </span>
   <span
     *ngSwitchCase="'dimensions'"
     [matTooltip]="showFieldTooltip ? ('NODE.dimensions' | translate) : null"
   >
-    {{ node | NodeImageSize }}
+    <span class="cdk-visually-hidden">{{ 'NODE.dimensions' | translate }}:</span>
+    {{ $any(node) | NodeImageSize }}
   </span>
   <span
     *ngSwitchCase="'cm:creator'"
     [matTooltip]="showFieldTooltip ? ('NODE.cm:creator' | translate) : null"
   >
-    {{ node.createdBy | nodePersonName }}
+    <span class="cdk-visually-hidden">{{ 'NODE.cm:creator' | translate }}:</span>
+    {{ $any(node).createdBy | nodePersonName }}
   </span>
   <span
     *ngSwitchCase="'cm:modifier'"
     [matTooltip]="showFieldTooltip ? ('NODE.cm:modifier' | translate) : null"
   >
-    {{ node.modifiedBy | nodePersonName }}
-  </span>
-  <span
-    *ngSwitchCase="'ccm:replicationsource'"
-    [matTooltip]="
-      ('NODE.ccm:replicationsource' | translate) +
-      ': ' +
-      ('REPOSITORIES.' +
-        (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-        | translate
-          : {
-              fallback: (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-            })
-    "
-  >
-    <img
-      src="{{ node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'url' } }}"
-      alt="{{
-        'REPOSITORIES.' +
-          (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-          | translate
-            : {
-                fallback:
-                  (node.properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-              }
-      }}"
-    />
+    <span class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
+    {{ $any(node).modifiedBy | nodePersonName }}
   </span>
   <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
-    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) === -1">
+    <span class="cdk-visually-hidden">{{ 'NODE.' + item.name | translate }}:</span>
+    <ng-container
+      *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
+    >
       {{
-      node.properties ?
-        (node.properties[item.name + '_DISPLAYNAME']
-          ? node.properties[item.name + '_DISPLAYNAME'].join(', ')
-          : node.properties[item.name]?.join(', ')
-        )
-         : ''
+        $any(node).properties
+          ? $any(node).properties[item.name + '_DISPLAYNAME']
+            ? $any(node).properties[item.name + '_DISPLAYNAME'].join(', ')
+            : $any(node).properties[item.name]?.join(', ')
+          : ''
       }}
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
-      {{ node.properties[item.name] ? (node.properties[item.name][0] | formatDate) : '' }}
+      {{
+        $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | formatDate) : ''
+      }}
+    </ng-container>
+    <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
+      {{
+        $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | vcardName) : ''
+      }}
     </ng-container>
   </span>
 </ng-container>

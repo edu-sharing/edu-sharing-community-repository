@@ -81,6 +81,10 @@ export class SimpleEditDialogComponent  {
     }
 
   save(callback: () => void = null) {
+    // validate inputs first
+    if(!this.metadata.validate()) {
+        return;
+    }
     this.toast.showProgressDialog();
     this.metadata.save().subscribe( () => {
       this.invite.save().subscribe(() => {

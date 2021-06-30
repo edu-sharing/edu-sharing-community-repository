@@ -5,7 +5,7 @@ import {Node} from '../../core-module/core.module';
 
 @Pipe({name: 'nodeTitle'})
 export class NodeTitlePipe implements PipeTransform {
-  transform(node : Node,args:string[]): string {
+  transform(node : Node,args:string[] = null): string {
     return RestHelper.getTitle(node);
   }
   constructor(private translate : TranslateService){}

@@ -61,11 +61,12 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	
 	@Override
 	public boolean isTransformable(String sourceMimetype, String targetMimetype, TransformationOptions options) {
-		
+
 		//JCodec supports only AVC, H.264 in MP4, ISO BMF, Quicktime container for getting a singe frame
 		logger.debug("isTransformable sourceMimetype:"+sourceMimetype+ " targetMimetype:"+targetMimetype);
 		if((MimetypeMap.MIMETYPE_VIDEO_MP4.equals(sourceMimetype)
-				|| MimetypeMap.MIMETYPE_VIDEO_QUICKTIME.equals(sourceMimetype))
+				|| MimetypeMap.MIMETYPE_VIDEO_QUICKTIME.equals(sourceMimetype)
+				|| "video/x-matroska".equals(sourceMimetype))
 				&& (MimetypeMap.MIMETYPE_IMAGE_PNG.equals(targetMimetype) || MimetypeMap.MIMETYPE_IMAGE_JPEG.equals(targetMimetype) )){
 			return true;
 		}
@@ -94,7 +95,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 				else{
 					// create webp animation
 					String TIME_COUNT="15";
-					String WEBP_FRAMERATE="5";
+					String WEBP_FRAMERATE="1";
 					String WEBP_QUALITY="20";
 					pb = new ProcessBuilder("ffmpeg", "-i",sourceFile.getCanonicalPath(),"-t",TIME_COUNT,"-loop","0","-q",WEBP_QUALITY,"-filter","setpts=0.15*PTS,scale=400:-1","-r",WEBP_FRAMERATE,"-f","webp","-y",targetFile.getCanonicalPath());
 				}

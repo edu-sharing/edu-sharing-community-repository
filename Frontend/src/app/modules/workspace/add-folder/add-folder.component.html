@@ -9,7 +9,7 @@
   <div class="card-content-padding">
     <mat-form-field>
       <mat-label>{{'WORKSPACE.FOLDER_PLACEHOLDER' | translate }}</mat-label>
-      <input matInput [(ngModel)]="folder" (keyup.enter)="addFolder()" autofocus>
+      <input matInput [(ngModel)]="folder" (keyup.enter)="addFolder()" autofocus autocomplete="off">
     </mat-form-field>
     <div *ngIf="mdsSets && mdsSets.length>1">
       <mat-form-field>

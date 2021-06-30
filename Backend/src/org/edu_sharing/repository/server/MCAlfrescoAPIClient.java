@@ -154,7 +154,7 @@ import org.edu_sharing.repository.server.tools.cache.Cache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
-import org.edu_sharing.service.connector.ConnectorService;
+import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -912,7 +912,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			boolean downloadAllowed = downloadAllowed(nodeRef.getId(),commonLicenseKey,(String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 
 			if ((propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null || propsCopy.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION)!=null) && downloadAllowed) {
-				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId(),null));
+				propsCopy.put(CCConstants.DOWNLOADURL,URLTool.getDownloadServletUrl(nodeRef.getId(),null, true));
 			}
 
 			String commonLicensekey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
@@ -1190,7 +1190,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					if (cachedModTime != null && orginalModTime != null && cachedModTime.longValue() == orginalModTime.longValue() && !refreshThumbnail) {
 						return propsFromCache;
 					} else {
-						logger.info("CACHE modified Date changed! refreshing:" + nodeRef.getId() + " cachedModTime:" + cachedModTime + " orginalModTime:"
+						logger.debug("CACHE modified Date changed! refreshing:" + nodeRef.getId() + " cachedModTime:" + cachedModTime + " orginalModTime:"
 								+ orginalModTime + " refreshThumbnail:" + refreshThumbnail);
 					}
 					
@@ -2242,25 +2242,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 	}
 
-	public synchronized void createVersion(String nodeId, HashMap _properties) throws Exception {
+	public synchronized void createVersion(String nodeId) throws Exception {
 
-		Map<String, Serializable> properties = null;
-		if (_properties != null) {
-			properties = transformPropMapToStringKeys(_properties);
-		}
 		VersionService versionService = serviceRegistry.getVersionService();
 		NodeRef nodeRef = new NodeRef(storeRef, nodeId);
-
+		Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
 		if (versionService.getVersionHistory(nodeRef) == null) {
 
 			// see https://issues.alfresco.com/jira/browse/ALF-12815
 			// alfresco-4.0.d fix version should start with 1.0 not with 0.1
-			Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
 			transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
-			versionService.createVersion(nodeRef, transFormedProps);
-		} else {
-			versionService.createVersion(nodeRef, transformQNameKeyToString(nodeService.getProperties(nodeRef)));
 		}
+		versionService.createVersion(nodeRef, transFormedProps);
+
 
 	}
 
@@ -3622,7 +3616,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				
 				props.put(CCConstants.CONTENTURL, contentUrl);
 				if (props.get(CCConstants.ALFRESCO_MIMETYPE) != null && contentUrl != null) {
-					props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(nodeId,version.getVersionLabel()));
+					props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(nodeId,version.getVersionLabel(), true));
 				}
 
 				// thumbnail take the current thumbnail cause subobjects

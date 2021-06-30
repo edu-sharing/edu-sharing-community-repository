@@ -1,13 +1,13 @@
 <div class="dialog darken">
   <div class="card center-card card-high card-actionbar card-wide">
     <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon="close" aria="true"></i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon="close" [aria]="true"></i></div>
       <div class="card-title" *ngIf="_currentTool">{{'WORKSPACE.LTI_TOOLS.TITLE_TOOL' |
         translate:{tool:_currentTool.name} }}</div>
       <div class="card-title" *ngIf="!_currentTool">{{'WORKSPACE.LTI_TOOLS.TITLE' | translate}}</div>
       <div class="card-title-actionbar">
         <div class="back" *ngIf="_currentTool && !loading">
-          <a class="clickable" (click)="openTool(null);doRefresh()">{{'BACK' | translate}}</a>
+          <a class="clickable" (click)="openTool(null); doRefresh()">{{'BACK' | translate}}</a>
         </div>
 
         <div class="search" *ngIf="!_currentTool">
@@ -27,7 +27,7 @@
                *ngIf="showCreateList && _currentTool">
             <a *ngFor="let tool of toolInstances"
                class="collection-item"
-               (click)="showCreateList=false;createLtiObject(tool)">
+               (click)="showCreateList=false; createLtiObject(tool)">
               <i class="material-icons">open_in_new</i> {{ tool.name }}</a>
           </div>
         </div>
@@ -39,7 +39,7 @@
             [nodes]="[_currentTool]"
             [clickable]="false"
           ></toolList>
-          <div class="description">{{_currentTool.description}}</div>
+          <div class="description">{{$any(_currentTool).description}}</div>
           <a class="url clickable"
              *ngIf="_currentTool.properties['ccm:tool_producer']"
              target="_blank"

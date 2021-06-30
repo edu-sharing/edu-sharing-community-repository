@@ -1,7 +1,5 @@
 package org.edu_sharing.repository.client.tools;
 
-import org.edu_sharing.restservices.RestConstants;
-
 import java.util.*;
 
 public class CCConstants {
@@ -320,6 +318,8 @@ public class CCConstants {
 
 	public final static String CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION = "{http://www.alfresco.org/model/content/1.0}eduSchoolPrimaryAffiliation";
 
+	public final static String CM_PROP_OWNER = "{http://www.alfresco.org/model/content/1.0}owner";
+
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
 
 	public final static String CCM_PROP_PERSON_SHOW_EMAIL = "{http://www.campuscontent.de/model/1.0}showEmail";
@@ -498,7 +498,6 @@ public class CCConstants {
 
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
     		CCConstants.CM_NAME,
-			CCConstants.LOM_PROP_GENERAL_TITLE,
 			CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, // Materialart
 			CCConstants.CCM_PROP_IO_WWWURL,
 			CCConstants.ALFRESCO_MIMETYPE,
@@ -761,6 +760,8 @@ public class CCConstants {
 	
 	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
 
+	public final static String CCM_PROP_IO_TECHNICAL_STATE = "{http://www.campuscontent.de/model/1.0}technical_state";
+
 	public final static String CCM_PROP_IO_LOCATION_STATUS = "{http://www.campuscontent.de/model/1.0}location_status";
 
 	public final static String CCM_PROP_IO_EDITORIAL_CHECKLIST = "{http://www.campuscontent.de/model/1.0}editorial_checklist";
@@ -902,6 +903,8 @@ public class CCConstants {
 	/**
 	 * dynamic generated properties
 	 */
+	public final static String VIRT_PROP_MEDIATYPE = "{virtualproperty}mediatype";
+
 	public final static String VIRT_PROP_USAGECOUNT = "{virtualproperty}usagecount";
 
 	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
@@ -1076,6 +1079,7 @@ public class CCConstants {
 	//replicated object
 	public final static String CCM_PROP_IO_REPLICATIONSOURCE = "{http://www.campuscontent.de/model/1.0}replicationsource";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCEID = "{http://www.campuscontent.de/model/1.0}replicationsourceid";
+	public final static String CCM_PROP_IO_REPLICATIONSOURCEUUID = "{http://www.campuscontent.de/model/1.0}replicationsourceuuid";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestamp";
 	public final static String CCM_PROP_IO_REPLICATION_MODIFIED = "{http://www.campuscontent.de/model/1.0}replicationmodified";
 	public final static String CCM_PROP_IO_IMPORT_MODIFIED = "{http://www.campuscontent.de/model/1.0}importmodified";
@@ -1236,6 +1240,7 @@ public class CCConstants {
 	public final static String CCM_PROP_MAP_COLLECTIONTYPE = "{http://www.campuscontent.de/model/1.0}collectiontype";
 	public final static String CCM_PROP_MAP_COLLECTIONSCOPE = "{http://www.campuscontent.de/model/1.0}collectionscope";
 	public final static String CCM_PROP_MAP_COLLECTIONREMOTEID = "{http://www.campuscontent.de/model/1.0}collectionremoteid";
+	public final static String CCM_PROP_MAP_COLLECTIONREMOTESOURCE = "{http://www.campuscontent.de/model/1.0}collectionremotesource";
 
 	public final static String CCM_PROP_MAP_COLLECTIONLEVEL0 = "{http://www.campuscontent.de/model/1.0}collectionlevel0";
 
@@ -1909,6 +1914,7 @@ public class CCConstants {
 	/**
 	 * VCARD
 	 */
+	public final static String VCARD_URN_UID = "VCARD_URN_UID";
 	public final static String VCARD_GIVENNAME = "VCARD_GIVENNAME";
 	public final static String VCARD_SURNAME = "VCARD_SURNAME";
 	public final static String VCARD_ORG = "VCARD_ORG";

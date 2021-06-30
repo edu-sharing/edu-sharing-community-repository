@@ -28,7 +28,7 @@ public interface PermissionService {
 	 */
 	public void addPermissions(String _nodeId, HashMap<String,String[]> _authPerm, 
 			Boolean _inheritPermissions, String _mailText, Boolean _sendMail, 
-			Boolean _sendCopy, Boolean createHandle) throws Throwable;
+			Boolean _sendCopy) throws Throwable;
 	
 	
 	/**
@@ -43,7 +43,7 @@ public interface PermissionService {
 	 * @throws Throwable
 	 */
 	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions,
-			String mailText, Boolean sendMail, Boolean sendCopy, Boolean createHandle) throws Throwable;
+							   String mailText, Boolean sendMail, Boolean sendCopy) throws Throwable;
 
 
 	public void createNotifyObject(final String nodeId, final String user, final String action);
@@ -68,8 +68,10 @@ public interface PermissionService {
 	public void addPermissions(String nodeId, ACE[] aces) throws Exception;
 	
 	public void removePermissions(String nodeId, ACE[] aces) throws Exception;
-	
-	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception;
+
+    void removeAllPermissions(String nodeId) throws Exception;
+
+    public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception;
 
     StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck);
 

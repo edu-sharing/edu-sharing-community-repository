@@ -3,28 +3,28 @@
 <div class="sidebar" *ngIf="show" [@fromLeft]="show" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="main">
     <button mat-button class="close" (click)="hide()">
-      <i icon="close" aria="true"></i>
+      <i icon="close" [aria]="true"></i>
     </button>
     <!-- We should get loginInfo in any case, but it might not be ready from the start. -->
     <div
       *ngIf="loginInfo"
       class="top"
-      style.background-color="{{ (user ? user.person : null) | authorityColor }}"
+      style.background-color="{{ (iam.getCurrentUser() ? iam.getCurrentUser() : null) | authorityColor }}"
     >
       <div class="profile-gradient"></div>
       <img
-        *ngIf="user && user.person.profile.avatar"
+        *ngIf="iam.getCurrentUser() && iam.getCurrentUser().profile.avatar"
         class="blurred-image"
-        [src]="user.person.profile.avatar + '&crop=true&width=200&height=200'"
+        [src]="iam.getCurrentUser().profile.avatar + '&crop=true&width=200&height=200'"
       />
-      <div *ngIf="user" class="profile">
+      <div *ngIf="iam.getCurrentUser()" class="profile">
         <ng-template #userAvatar>
             <user-avatar
-              [user]="user.person"
+              [user]="iam.getCurrentUser()"
               size="medium"
             ></user-avatar>
             <div id="main-menu-sidebar-username" class="username">
-              <ng-container *ngIf="user && !loginInfo.isGuest">{{ username }}</ng-container>
+              <ng-container *ngIf="iam.getCurrentUser() && !loginInfo.isGuest">{{ iam.getCurrentUser() | authorityName }}</ng-container>
               <ng-container *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</ng-container>
             </div>
         </ng-template>

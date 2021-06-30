@@ -4,6 +4,7 @@
   <button #dropdownTrigger="matMenuTrigger" mat-button class="dropdown-dummy"
           [style.left]="dropdownLeft" [style.top]="dropdownTop"
           tabindex="-1"
+          aria-hidden="true"
           [matMenuTriggerFor]="dropdown.menu"></button>
 
   <div *ngIf="_nodes && _nodes.length" [@open]="_nodes && _nodes.length">

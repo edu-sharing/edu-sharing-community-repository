@@ -93,7 +93,7 @@ export class StreamComponent {
   // TODO: Store and use current search query
   searchQuery:string;
   isLoading=true;
-  doSearch(query:string){
+  doSearch({query}: { query: string; cleared: boolean; }){
     this.searchQuery=query;
     // TODO: Search for the given query doch nicht erledigt
   }
@@ -333,12 +333,12 @@ export class StreamComponent {
   public updateStatus(idToUpdate: any, status: any): Observable<any> {
     return this.streamService.updateStatus(idToUpdate, this.connector.getCurrentLogin().authorityName, status)
   }
-    private create(){
+    create(){
         if(!this.createAllowed)
             return;
         this.showCreate = true;
     }
-    private createConnector(event : any){
+    createConnector(event : any){
         this.createConnectorName=null;
         let prop=this.nodeHelper.propertiesFromConnector(event);
         let win:any;

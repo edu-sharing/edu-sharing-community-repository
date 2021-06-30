@@ -32,22 +32,22 @@ import {FrameEventsService} from "../../core-module/core.module";
 })
 export class ShareAppComponent {
     globalProgress=true;
-    private uri: string;
+    uri: string;
     private type="LINK";
-    private title:string;
-    private description:string;
-    private previewUrl:any;
+    title:string;
+    description:string;
+    previewUrl:any;
     private inboxPath: Node[];
-    private inbox: Node;
-    private columns:ListItem[]=[];
-    private collections: Node[];
+    inbox: Node;
+    columns:ListItem[]=[];
+    collections: Node[];
     private cordovaType: string;
     private mimetype: string;
     private editorType: string;
     private file: File;
     private fileName: string;
     private text: string;
-    private loading=true;
+    loading=true;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -116,7 +116,7 @@ export class ShareAppComponent {
             this.events.broadcastEvent(FrameEventsService.EVENT_SHARED,node);
         });
     }
-    private saveToCollection(collection:Node){
+    saveToCollection(collection:Node){
       this.saveInternal((node:Node)=>{
           this.collectionApi.addNodeToCollection(collection.ref.id,node.ref.id,node.ref.repo).subscribe(()=>{
               UIHelper.goToCollection(this.router,collection,null,{replaceUrl:true});
@@ -150,7 +150,7 @@ export class ShareAppComponent {
     private goToInbox() {
         UIHelper.goToWorkspaceFolder(this.node,this.router,null,this.inbox.ref.id,{replaceUrl:true});
     }
-    private hasWritePermissions(node:any){
+    hasWritePermissions(node:any){
         if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){
             return {status:false,message:'NO_WRITE_PERMISSIONS'};
         }

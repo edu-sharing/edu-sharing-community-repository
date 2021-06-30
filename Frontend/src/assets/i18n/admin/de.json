@@ -278,8 +278,11 @@
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",
             "MODE": "Modus:",
+            "STORE": "Store (Node-Speicherort):",
             "NODEREF": "UUID der gesuchten Node:",
             "LUCENE_QUERY": "Lucene-Query:",
+            "DSL_QUERY": "DSL-Query (JSON):",
+            "ELASTIC_RESPONSE": "Elastic-Rückgabe (JSON):",
             "LUCENE_AUTHORITIES": "Suchen als folgende Authorities:",
             "LUCENE_OFFSET": "Start bei:",
             "LUCENE_COUNT": "Anzahl Treffer:",
@@ -305,9 +308,9 @@
                 "CONFIRM_UPDATE_TITLE": "\"{{ template }}\" überschreiben?",
                 "CONFIRM_UPDATE_MESSAGE": "Möchten Sie die Vorlage mit den aktuellen Werten überschreiben?",
                 "CONFIRM_DELETE_BUTTON": "Löschen",
-                "CONFIRM_DELETE_TITLE": "\"{{ template }}\" löschen?",
+                "CONFIRM_DELETE_TITLE": "\"Vorlage {{ template }}\" löschen?",
                 "CONFIRM_DELETE_MESSAGE": "Möchten Sie die Vorlage löschen?",
-                "DELETE_BUTTON": "\"{{ template }}\" löschen",
+                "DELETE_BUTTON": "Vorlage \"{{ template }}\" löschen",
                 "CREATE_BUTTON": "Erstellen",
                 "DEFAULT_TEMPLATE_OVERRIDE": "Standard-Vorlagen dürfen nicht überschrieben werden",
                 "CHOOSE_NAME_TEXT": "Wählen Sie einen Namen für die neue Vorlage.",
@@ -354,7 +357,6 @@
                 "ConvertMultivalueToSinglevalueJob": "Eine Property von Multivalue in Singlevalue konvertieren",
                 "BulkEditNodesJob": "Bulk-Bearbeitung von einer Property für mehrere Nodes",
                 "BulkDeleteNodesJob": "Bulk-Löschen für mehrere Nodes (z.B. für größe Ordner)",
-                "UpdateFrontpageCacheJob": "Baut den Cache für die Startseite neu auf",
                 "BulkDeleteAuthoritiesJob": "Gruppen & Organisationen im Bulk löschen",
                 "CheckLinkJob": "Prüft, ob das Ziel eines Links noch existiert und setzt den Status"
             }
@@ -373,14 +375,15 @@
         },
         "STATISTICS": {
             "NO_DATA": "Keine Daten für den gewählten Zeitraum",
+            "CSV_FILENAME": "Statistiken",
             "GROUPED": "Nach Zeitraum",
             "SINGLE": "Einzelauswertung",
             "NODES": "Nach Objekt",
             "CUSTOM_GROUPS": "Nach Kriterium",
-            "VIEWS": "Objekt-Aufrufe",
-            "VIEWS_EMBEDDED": "Objekt-Ansichten (Remote)",
-            "DOWNLOADS": "Objekt-Downloads",
-            "VIEWS_PLAY_MEDIA": "Medien-Wiedergaben",
+            "VIEWS": "Seitenaufrufe",
+            "VIEWS_EMBEDDED": "Einbettungen",
+            "DOWNLOADS": "Downloads",
+            "VIEWS_PLAY_MEDIA": "Wiedergaben",
             "USER_LOGINS": "Benutzer-Logins",
             "GROUP_BY": "Gruppieren nach",
             "FROM": "Start-Zeit",
@@ -398,9 +401,16 @@
             "EXPORT_LABEL": "Angezeigte Daten exportieren",
             "EXPORT_PROPERTIES": "Zu exportierende Properties",
             "EXPORT_PROPERTIES_HINT": "z.B.: cm:name, cclom:title, cclom:general_keyword",
+            "GROUP_TEMPLATE_LABEL": "Vorlage auswählen",
+            "GROUPS_ADVANCED": "Erweiterte Optionen",
+            "GROUP_TEMPLATE": {
+                "group_organization": "Zugriffe aufgeteilt nach Organisation des Nutzers",
+                "group_mediacenter": "Zugriffe aufgeteilt nach Medienzentrum des Nutzers",
+                "group_organization_unfold_mediacenter": "Zugriffe aufgeteilt nach Organisation des Nutzers und aufgeteilt nach Medienzentrum"
+            },
             "HEADERS": {
                 "action": "Aktion",
-                "count": "Anzahl",
+                "count": "Summe",
                 "node": "Element",
                 "authority": "Nutzer/Session",
                 "authority_organization": "Organisation",
@@ -413,10 +423,10 @@
                 "LOGIN_USER_OAUTH_REFRESH_TOKEN": "Login (OAuth)",
                 "LOGOUT_USER_REGULAR": "Logout",
                 "LOGOUT_USER_TIMEOUT": "Logout (Timeout)",
-                "VIEW_MATERIAL": "Material angesehen",
-                "VIEW_MATERIAL_PLAY_MEDIA": "Material abgespielt",
-                "VIEW_MATERIAL_EMBEDDED": "Material angesehen (Remote)",
-                "DOWNLOAD_MATERIAL": "Material heruntergeladen"
+                "VIEW_MATERIAL": "Seitenaufrufe",
+                "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben",
+                "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
+                "DOWNLOAD_MATERIAL": "Downloads"
             }
         },
         "MEDIACENTER": {
@@ -511,12 +521,16 @@
             "COLLECTION_HINT": "Wählen Sie die Sammlung aus, deren Materialien auf der Startseite angezeigt werden sollen",
             "CHOOSE_COLLECTION": "Sammlung wählen",
             "TIMESPAN_LABEL": "Zeitspanne",
+            "TIMESPAN_DAYS": "Tage",
             "TIMESPAN_HINT": "Über welchen Zeitbereich soll die Auswertung der Daten erfolgen",
             "TIMESPAN": {
                 "days_30": "Letzte 30 Tage",
                 "days_100": "Letzte 100 Tage",
                 "all": "Gesamter Zeitraum"
             },
+            "CONFIG_BROKEN": "Konfiguration fehlerhaft",
+            "CONFIG_BROKEN_INFO": "Die aktuelle Konfiguration scheint fehlerhaft. Möchten Sie die bestehende Konfiguration löschen und auf den Originalzustand zurücksetzen?",
+            "RESET": "Zurücksetzen",
             "SAVED": "Einstellungen wurden gespeichert",
             "TOTAL_COUNT_LABEL": "Gesamtzahl Elemente",
             "TOTAL_COUNT_HINT": "Gesamtzahl an Elementen, welche ausgewählt werden.",

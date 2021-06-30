@@ -38,17 +38,18 @@ import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
-import { ColorHelper } from '../../core-module/ui/color-helper';
+import {ColorHelper, PreferredColor} from '../../core-module/ui/color-helper';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { Observable } from 'rxjs';
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../common/options-helper';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 // component class
 @Component({
@@ -79,16 +80,17 @@ export class CollectionsMainComponent {
         sortAscending: [false, true, false],
     };
     readonly SCOPES = Scope;
+    readonly SkipTarget = SkipTarget;
 
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections')
     listCollections: ListTableComponent;
-    @ContentChild('beforeCollectionHeader') beforeCollectionHeaderRef: TemplateRef<any>;
+    @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
 
-    viewTypeNodes = ListTableComponent.VIEW_TYPE_GRID;
+    viewTypeNodes: 0 | 1 | 2 = ListTableComponent.VIEW_TYPE_GRID;
 
     dialogTitle: string;
     dialogCancelable = false;
@@ -125,7 +127,14 @@ export class CollectionsMainComponent {
     addMaterialSearchOptionItem = new OptionItem(
         'OPTIONS.SEARCH_OBJECT',
         'redo',
-        () => this.mainNavRef.createMenu.pickMaterialFromSearch(),
+        () => {
+            UIHelper.getCommonParameters(this.route).subscribe(params => {
+                params.addToCollection = this.collectionContent.node.ref.id;
+                this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+                    queryParams: params,
+                });
+            });
+        }
     );
     addMaterialBinaryOptionItem = new OptionItem(
         'OPTIONS.ADD_OBJECT',
@@ -136,15 +145,16 @@ export class CollectionsMainComponent {
     );
     optionsMaterials: OptionItem[];
     tutorialElement: ElementRef;
-    customNodeList = false;
     permissions: Permission[];
     private sortCollections: SortDefault;
-    set collectionShare(collectionShare: Node) {
-        this._collectionShare = collectionShare;
+    // FIXME: `collectionShare` is expected to be of type `Node[]` by `workspace-management` but is
+    // of type `Node` here.
+    set collectionShare(collectionShare: Node[]) {
+        this._collectionShare = collectionShare as any as Node;
         this.refreshAll();
     }
     get collectionShare() {
-        return this._collectionShare;
+        return this._collectionShare as any as Node[];
     }
     set tabSelectedIndex(pos: number) {
         if (this.isGuest) {
@@ -217,11 +227,11 @@ export class CollectionsMainComponent {
     private lastScrollY: number;
     private person: EduData.User;
     path: EduData.Node[];
-    private hasEditorial = false;
-    private hasMediacenter = false;
+    hasEditorial = false;
+    hasMediacenter = false;
     private showCollection = false;
     private _orderActive: boolean;
-    private reurl: any;
+    reurl: any;
     private _collectionShare: Node;
     private feedbacks: CollectionFeedback[];
     private params: Params;
@@ -312,7 +322,6 @@ export class CollectionsMainComponent {
                 (error: any) => RestHelper.goToLogin(this.router, this.config),
             );
         });
-        this.initCustomNodeList();
     }
 
     isMobile() {
@@ -323,7 +332,7 @@ export class CollectionsMainComponent {
         return window.innerWidth < UIConstants.MOBILE_WIDTH;
     }
 
-    setCustomOrder(event: MatSlideToggle) {
+    setCustomOrder(event: MatSlideToggleChange) {
         const checked = event.checked;
         this.collectionContent.node.collection.orderMode = checked
             ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM
@@ -459,9 +468,7 @@ export class CollectionsMainComponent {
 
     isBrightColor() {
         return (
-            ColorHelper.getColorBrightness(
-                this.collectionContent.node.collection.color,
-            ) > ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS
+            ColorHelper.getPreferredColor(this.collectionContent?.node?.collection?.color) === PreferredColor.White
         );
     }
 
@@ -913,6 +920,8 @@ export class CollectionsMainComponent {
                 },
             );
         }
+        this.createSubCollectionOptionItem.name = 'OPTIONS.' +
+            (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
     }
 
     closeDialog() {
@@ -941,7 +950,7 @@ export class CollectionsMainComponent {
     }
 
     hasNonIconPreview(): boolean {
-        return this.collectionContent.node.preview && !this.collectionContent.node.preview.isIcon;
+        return !this.collectionContent?.node?.preview?.isIcon;
     }
 
     private renderBreadcrumbs() {
@@ -1213,12 +1222,5 @@ export class CollectionsMainComponent {
             this.toast.closeModalDialog();
             this.mainNavRef.refreshNodeStore();
         });
-    }
-
-    private initCustomNodeList(): void {
-        const customNodeListComponent = this.tempStorage.get(
-            TemporaryStorageService.CUSTOM_NODE_LIST_COMPONENT,
-        );
-        this.customNodeList = !!customNodeListComponent;
     }
 }

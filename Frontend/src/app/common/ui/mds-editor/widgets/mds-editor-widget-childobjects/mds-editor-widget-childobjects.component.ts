@@ -5,7 +5,7 @@ import {VCard} from '../../../../../core-module/ui/VCard';
 import {UIService} from '../../../../../core-module/rest/services/ui.service';
 import {Node, NodeWrapper} from '../../../../../core-module/rest/data-object';
 import {RestIamService} from '../../../../../core-module/rest/services/rest-iam.service';
-import {NativeWidget} from '../../mds-editor-view/mds-editor-view.component';
+import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {BehaviorSubject, Observable, Subscriber} from 'rxjs';
 import {Helper} from '../../../../../core-module/rest/helper';
 import {Values} from '../../types';
@@ -36,7 +36,7 @@ interface ChildobjectEdit {
     templateUrl: './mds-editor-widget-childobjects.component.html',
     styleUrls: ['./mds-editor-widget-childobjects.component.scss'],
 })
-export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidget {
+export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: true,
         supportsBulk: false,
@@ -117,16 +117,19 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     setProperties(props: Values) {
         const edit = this._edit ?? this._editLicense;
         // keep any existing license data
-        if (this._edit && edit.child.properties) {
-            for (const key of Object.keys(props)) {
-                edit.child.properties[key] = props[key];
+        if(props) {
+            if (!edit.child.properties) {
+                edit.child.properties = edit.properties;
             }
-        } else {
-            edit.child.properties = props;
+            if (this._edit) {
+                for (const key of Object.keys(props)) {
+                    edit.child.properties[key] = props[key];
+                }
+            }
+            edit.child.name = edit.child.properties[RestConstants.LOM_PROP_TITLE]?.[0]
+                ? edit.child.properties[RestConstants.LOM_PROP_TITLE][0]
+                : edit.child.properties[RestConstants.CM_NAME][0];
         }
-        edit.child.name = props[RestConstants.LOM_PROP_TITLE]?.[0]
-            ? props[RestConstants.LOM_PROP_TITLE][0]
-            : props[RestConstants.CM_NAME][0];
         this._edit = null;
         this._editLicense = null;
         this.onChange();

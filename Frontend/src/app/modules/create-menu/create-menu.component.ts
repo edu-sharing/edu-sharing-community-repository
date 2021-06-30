@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import {
     OptionsHelperService,
     OPTIONS_HELPER_CONFIG,
-} from '../../common/options-helper';
+} from '../../core-ui-module/options-helper.service';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     Connector,
@@ -107,7 +107,6 @@ export class CreateMenuComponent {
     _parent: Node = null;
     inbox: Node = null;
     addFolderName: string = null;
-    filesCreateAllowed: boolean;
 
     showUploadSelect = false;
     filesToUpload: FileList;
@@ -147,7 +146,6 @@ export class CreateMenuComponent {
             this.updateOptions();
         });
         this.connector.isLoggedIn(false).subscribe((login) => {
-            this.filesCreateAllowed = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
             if(login.statusCode === RestConstants.STATUS_CODE_OK) {
                 this.nodeService
                     .getNodeMetadata(RestConstants.INBOX)
@@ -168,7 +166,7 @@ export class CreateMenuComponent {
             if (CardComponent.getNumberOfOpenCards() > 0) {
                 return;
             }
-            if((event.target as HTMLElement)?.tagName === 'INPUT'){
+            if((event.target as HTMLElement)?.tagName === 'INPUT') {
                 return;
             }
             if (event.clipboardData.items.length > 0) {
@@ -210,7 +208,8 @@ export class CreateMenuComponent {
                 Constrain.AddObjects,
                 Constrain.User,
             ];
-            pasteNodes.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS, RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
+            pasteNodes.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
             pasteNodes.key = 'KeyV';
             pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
             pasteNodes.group = DefaultGroups.Primary;
@@ -378,7 +377,7 @@ export class CreateMenuComponent {
             this.toast.error(null, 'WORKSPACE.TOAST.ONGOING_UPLOAD');
             return;
         }
-        if(!this.filesCreateAllowed) {
+        if(!this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES)) {
             this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
             return;
         }
@@ -472,7 +471,7 @@ export class CreateMenuComponent {
             });
         });
     }
-    private createConnector(event: any) {
+    createConnector(event: any) {
         const name = event.name + '.' + event.type.filetype;
         this.createConnectorName = null;
         const prop = this.nodeHelper.propertiesFromConnector(event);
@@ -513,6 +512,7 @@ export class CreateMenuComponent {
     }
 
     isAllowed() {
-        return this.allowed && !this.filesToUpload && this.filesCreateAllowed;
+        return this.allowed && !this.filesToUpload &&
+            this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
     }
 }

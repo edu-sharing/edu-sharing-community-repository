@@ -132,7 +132,7 @@
             "PUBLISH_ACTIVE_DIRECTORY": "Alle Materialien in diesem Ordner sind öffentlich im Internet sichtbar",
             "NO_FUZZY": "Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
             "DOI": "Mit Handle versehen",
-            "DOI_INFO": "Ein Handle ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+            "DOI_INFO": "Ein Handle ist ein standardisierter Identifikator, mit dessen Hilfe ein Material global eindeutig identifiziert und wiedergefunden werden kann",
             "PUBLISHING_WARNING_TITLE": "Element wirklich veröffentlichen?",
             "PUBLISHING_WARNING_MESSAGE": "Wenn Sie fortfahren, wird das aktuelle Element für alle Nutzer des Systems freigegeben und kann von jedem aufgerufen werden.\n\nSind Sie sicher, dass Sie das Element öffentlich freigeben möchten?",
             "ERROR_INVALID_TYPE_COMBINATION": "Elemente verschiedener Typen können nicht im Bulk freigegeben werden",
@@ -156,13 +156,18 @@
                 "MODE_OFF": "Unveröffentlicht",
                 "MODE_OFF_INFO": "Das Element ist nicht öffentlich zugänglich und kann nur von eingelandenen Benutzern abgerufen werden",
                 "MODE_DIRECT": "Öffentlich freigeben",
-                "MODE_DIRECT_INFO": "Das Element wird öffentlich freigegeben. Wird das aktuelle Element gelöscht, ist die Veröffentlichung ungültig.\nBei Veränderungen des Elements wirken sich diese direkt auf die Veröffentlichung aus",
+                "MODE_DIRECT_INFO": "Das Element wird öffentlich freigegeben. Wird das aktuelle Element gelöscht, ist die Veröffentlichung ungültig.\nBei Veränderungen des Elements wirken sich diese direkt auf die Veröffentlichung aus.",
+                "MODE_DIRECT_INFO_MULTIPLE": "Die Elemente werden öffentlich freigegeben.",
                 "MODE_COPY": "Als Kopie veröffentlichen",
                 "MODE_COPY_INFO": "Vom Element wird eine Kopie erzeugt. Diese wird im zentralen Bereich für veröffentliche Inhalte abgelegt und öffentlich verfügbar gemacht.\nÄnderungen an oder eine Löschung des Originals hat keinen Einfluss auf die veröffentlichte Kopie.\nNur die Redaktion kann die Veröffentlichung nachträglich steuern. Es können mehrere Versionen parallel veröffentlicht werden.",
                 "NO_PUBLISH_COPY_PERMISSION": "Sie besitzen keine Berechtigung, eine Kopie zu veröffentlichen",
                 "VERSION_COMMENT": "Versionskommentar",
                 "VERSION_NUMBER": "Versionsnummer",
-                "VERSION_DATE": "Zeitpunkt der Veröffentlichung"
+                "VERSION_DATE": "Zeitpunkt der Veröffentlichung",
+                "DOI_DISTINCT": "Neuen Handle erzeugen",
+                "DOI_DISTINCT_INFO": "Ein neuer, eindeutiger Handle wird erzeugt. Zukünftige Versionen des Objektes haben eigenständige Identifikatoren. Beachten Sie, dass nach einmaliger Wahl dieser Option nachträglich keine aktualisierten Versionen des Elements unter dem gleichen Handle erfolgen können",
+                "DOI_UPDATE": "Bestehenden Handle aktualisieren",
+                "DOI_UPDATE_INFO": "Die neue Version des Elements wird unter der bestehenden, alten Handle-Adresse zukünftig verfügbar gemacht. Die zuvor veröffentlichte Version ist über die Handle-Adresse nicht mehr direkt zugänglich"
             },
             "STATE": {
                 "PRIVATE": "Privat",
@@ -178,6 +183,7 @@
             },
             "USAGE_TYPE": {
                 "MOODLE": "Moodle-Kurse",
+                "ILIAS": "Ilias-Kurse",
                 "COLLECTION": "Sammlungen",
                 "UNKNOWN": "Andere / Unbekannt"
             },
@@ -219,7 +225,7 @@
                 "LMS": "LMS-Kurse",
                 "COLLECTION": "Sammlungen",
                 "DOWNLOAD": "Downloads",
-                "VIEW": "Aufrufe"
+                "VIEW": "Seitenaufrufe"
             },
             "COMMENT": {
                 "NONE": "[Nicht angegeben]",
@@ -306,14 +312,14 @@
             "COMMENT": "Kommentar zum Workflow",
             "COMMENT_INFO": "Was sollte der/die Zuständige wissen? Was wurde geändert?",
             "RECEIVERS_NEXT": "übergeben an",
-            "NOBODY": "<Niemand>",
+            "NOBODY": "<Nicht zugewiesen>",
             "OLD_STATUS": "alter Status",
             "NEW_STATUS": "neuer Status",
             "HISTORY": "Protokoll der bisherigen Workflow-Aktivitäten",
             "NO_COMMENT": "Bitte geben Sie einen Kommentar für diesen Vorgang an",
             "NO_HISTORY": "Es wurden noch keine Workflow-Einträge vorgenommen",
             "USER_NO_PERMISSION": "Zuständige(n) als Koordinator einladen",
-            "USER_NO_PERMISSION_INFO": "Die von Ihnen gewählte zuständige Person {{user}} hat aktuell keine Berechtigung das Objekt / die Objekte zu bearbeiten. Möchten Sie sie als Koordinator zulassen?\n\nKoordinatoren dürfen das Material bearbeiten und weiteren Personen Zugriff gewähren.",
+            "USER_NO_PERMISSION_INFO": "Die von Ihnen gewählte zuständige Person/Gruppe {{user}} hat aktuell keine Berechtigung das Objekt / die Objekte zu bearbeiten. Möchten Sie sie als Koordinator zulassen?\n\nKoordinatoren dürfen das Material bearbeiten und weiteren Personen Zugriff gewähren.",
             "PROCEED": "Ja, Zulassen",
             "BULK_WORKFLOWS_EXIST": "Einige der ausgewählten Objekte haben bereits einen aktiven Workflow. Bitte bearbeiten Sie diese Objekte einzeln."
         },

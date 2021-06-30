@@ -11,6 +11,9 @@
         "ORDER_SAVED": "The object order has been changed.",
         "CUSTOM_ORDER":"change element order",
         "PERMISSIONS": "Invited:",
+        "DETAILS": "Collection details",
+        "EDITORIAL_PUBLIC": "Publicly visible",
+        "EDITORIAL_PUBLIC_INFO": "The editorial collection is for all users and guests visible",
         "STEP": {
             "GENERAL": "Title, Image, Description and Color",
             "METADATA": "Additional information",

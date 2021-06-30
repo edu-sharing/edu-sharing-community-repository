@@ -1,4 +1,4 @@
-import { animate, group, keyframes, state, style, transition, trigger } from '@angular/animations';
+import { animate, group, state, style, transition, trigger } from '@angular/animations';
 import {
     AfterContentInit,
     ChangeDetectorRef,
@@ -9,19 +9,23 @@ import {
     HostBinding,
     Injectable,
     Input,
+    OnChanges,
     OnInit,
+    SimpleChanges,
+    ViewChild,
 } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import { MatRipple } from '@angular/material/core';
 import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, startWith } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
+import { BulkBehavior } from '../../../mds/mds.component';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { BulkMode, EditorBulkMode, InputStatus, RequiredMode } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
-import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
-import { BulkBehavior } from '../../../mds/mds.component';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
 // its `FormFieldControl`.
@@ -89,12 +93,13 @@ export class RegisterFormFieldDirective {
         ]),
     ],
 })
-export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentInit {
+export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, AfterContentInit {
     readonly RequiredMode = RequiredMode;
     readonly ValueType = ValueType;
+    @ViewChild(MatRipple) ripple: MatRipple;
 
     @Input() widget: Widget;
-    @Input() injectedView: MdsEditorWidgetBase | NativeWidget;
+    @Input() injectedView: MdsEditorWidgetBase | NativeWidgetComponent;
     @Input() valueType: ValueType;
     @Input() label: string | boolean;
     @Input() control: AbstractControl;
@@ -154,6 +159,12 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
         });
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.widget) {
+            this.registerIsHidden();
+        }
+    }
+
     ngOnInit(): void {
         if (this.label === true) {
             this.label = this.widget.definition.caption;
@@ -168,11 +179,24 @@ export class MdsEditorWidgetContainerComponent implements OnInit, AfterContentIn
             this.initFormControl(this.control);
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
-        this.mdsEditorInstance.shouldShowExtendedWidgets$.subscribe(
-            (shouldShowExtendedWidgets) =>
-                (this.isHidden =
-                    !!this.widget?.definition.isExtended && !shouldShowExtendedWidgets),
-        );
+    }
+
+    private registerIsHidden(): void {
+        const shouldShowFactors = [this.widget.meetsDynamicCondition];
+        if (this.widget.definition.isExtended) {
+            shouldShowFactors.push(this.mdsEditorInstance.shouldShowExtendedWidgets$);
+        }
+        combineLatest(shouldShowFactors)
+            .pipe(
+                map((factors) => factors.every((f) => f)),
+                distinctUntilChanged(),
+            )
+            .subscribe((shouldShow) => {
+                this.isHidden = !shouldShow;
+                if (shouldShow) {
+                    this.ripple?.launch({ centered: true, animation: { exitDuration: 5000 } });
+                }
+            });
     }
 
     onBulkEditToggleChange(event: MatSlideToggleChange): void {

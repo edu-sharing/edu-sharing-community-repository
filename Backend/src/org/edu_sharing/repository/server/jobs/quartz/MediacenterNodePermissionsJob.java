@@ -87,11 +87,7 @@ public class MediacenterNodePermissionsJob extends AbstractJob {
 	}
 	
 	private void run(Date from, Date until) {
-		if(from != null && until != null){
-			MediacenterServiceFactory.getLocalService().manageNodeLicenses(from, until);
-		}else{
-			MediacenterServiceFactory.getLocalService().manageNodeLicenses();
-		}
+		MediacenterServiceFactory.getLocalService().manageNodeLicenses(from, until);
 	}
 	
 

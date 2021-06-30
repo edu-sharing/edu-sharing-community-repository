@@ -1,23 +1,32 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { NativeWidget } from '../../mds-editor-view/mds-editor-view.component';
-import { Values } from '../../types';
+import {BehaviorSubject, Observable} from 'rxjs';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
+import {InputStatus, Values} from '../../types';
+import { map } from 'rxjs/operators/map';
 
 @Component({
     selector: 'app-mds-editor-widget-file-upload',
     templateUrl: './mds-editor-widget-file-upload.component.html',
     styleUrls: ['./mds-editor-widget-file-upload.component.scss'],
 })
-export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget {
+export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidgetComponent {
     static readonly constraints = {
         requiresNode: false,
         supportsBulk: false,
     };
-    selectedFiles: File[];
+    selectedFiles = new BehaviorSubject<File[]>(null);
     hasChanges = new BehaviorSubject<boolean>(false);
     isFileOver = false;
     supportsDrop = true;
-    link: string;
+    _link: string;
+    get link() {
+        return this._link;
+    }
+    set link(link: string) {
+        this._link = link;
+        this.update();
+    }
+    status = new BehaviorSubject<InputStatus>('INVALID');
 
     @Output() onSetLink = new EventEmitter<string>();
 
@@ -33,23 +42,21 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
         if (this.link) {
             return;
         }
-        this.selectedFiles = [];
+        const selectedFiles = [];
         for (let i = 0; i < fileList.length; i++) {
-            this.selectedFiles.push(fileList.item(i));
+            selectedFiles.push(fileList.item(i));
         }
+        this.selectedFiles.next(selectedFiles);
+        this.update();
     }
 
     filesSelected(files: Event) {
         this.setFilesByFileList((files.target as HTMLInputElement).files);
     }
 
-    getStatus() {
-        return this.selectedFiles?.length || this.link ? 'VALID' : 'INVALID';
-    }
-
     async getValues(values: Values) {
-        if (this.selectedFiles?.length) {
-            const file = this.selectedFiles[0];
+        if (this.selectedFiles.value?.length) {
+            const file = this.selectedFiles.value[0];
             const base64 = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -62,5 +69,10 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidget 
             values['fileupload-link'] = [this.link];
         }
         return values;
+    }
+
+    private update() {
+        this.hasChanges.next(!!this.selectedFiles.value?.length || !!this._link);
+        this.status.next(this.hasChanges.value ? 'VALID' : 'INVALID');
     }
 }

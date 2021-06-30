@@ -7,7 +7,7 @@ import {Router} from '@angular/router';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {DomSanitizer} from "@angular/platform-browser";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
-import {Group, UserSimple} from "../../../core-module/core.module";
+import {Group, RestConnectorService, UserSimple} from '../../../core-module/core.module';
 import {TranslateService} from "@ngx-translate/core";
 import {AuthorityNamePipe} from "../../pipes/authority-name.pipe";
 
@@ -56,6 +56,7 @@ export class UserAvatarComponent {
     };
     constructor(private router : Router,
                 private translate : TranslateService,
+                private connector : RestConnectorService,
                 private sanitizer : DomSanitizer) {
     }
     isEditorialUser(){
@@ -69,6 +70,7 @@ export class UserAvatarComponent {
     }
 
     getLetter(user: UserSimple) {
-        return new AuthorityNamePipe(this.translate).transform(user,null).substring(0,1).toUpperCase();
+        return this.connector.getCurrentLogin()?.isGuest ? 'G' :
+            new AuthorityNamePipe(this.translate).transform(user,null).substring(0,1).toUpperCase();
     }
 }

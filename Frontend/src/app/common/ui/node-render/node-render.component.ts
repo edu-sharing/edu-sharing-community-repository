@@ -1,9 +1,22 @@
-import {ChangeDetectorRef, Component, ComponentFactoryResolver, ElementRef, EventEmitter, HostListener, Input, NgZone, Output, ViewChild, ViewContainerRef} from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    ComponentFactoryResolver,
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Input,
+    NgZone,
+    OnDestroy,
+    Output,
+    ViewChild,
+    ViewContainerRef
+} from '@angular/core';
 import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../core-ui-module/translation';
-import {DefaultGroups, ElementType, OptionItem, Scope} from '../../../core-ui-module/option-item';
+import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {trigger} from '@angular/animations';
@@ -20,7 +33,7 @@ import {
     EventType,
     FrameEventsService,
     ListItem,
-    LoginResult,
+    LoginResult, Mds, Metadataset,
     Node,
     NodeList,
     RestConnectorService,
@@ -44,9 +57,13 @@ import {CommentsListComponent} from '../../../modules/management-dialogs/node-co
 import {GlobalContainerComponent} from '../global-container/global-container.component';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
 import {ActionbarComponent} from '../actionbar/actionbar.component';
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper';
-import {RestTrackingService} from "../../../core-module/rest/services/rest-tracking.service";
+import {
+    OPTIONS_HELPER_CONFIG,
+    OptionsHelperService
+} from '../../../core-ui-module/options-helper.service';
+import {RestTrackingService} from '../../../core-module/rest/services/rest-tracking.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {CardComponent} from '../../../core-ui-module/components/card/card.component';
 
 declare var jQuery:any;
 declare var window: any;
@@ -64,7 +81,7 @@ declare var window: any;
 })
 
 
-export class NodeRenderComponent implements EventListener {
+export class NodeRenderComponent implements EventListener, OnDestroy {
     @Input() set node(node: Node|string) {
       const id=(node as Node).ref ? (node as Node).ref.id : (node as string);
       jQuery('#nodeRenderContent').html('');
@@ -120,8 +137,7 @@ export class NodeRenderComponent implements EventListener {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              console.log('state', window.history.state);
-              this.list = window.history.state?.nodes;
+              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
               this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
@@ -165,7 +181,7 @@ export class NodeRenderComponent implements EventListener {
   private isOpenable: boolean;
   private closeOnBack: boolean;
   public nodeMetadata: Node[];
-  public nodeShare: Node;
+  public nodeShare: Node[];
   public nodeShareLink: Node;
   public nodeWorkflow: Node[];
   public addNodesStream: Node[];
@@ -179,20 +195,22 @@ export class NodeRenderComponent implements EventListener {
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
+  currentOptions: OptionItem[];
   sequence: NodeList;
   sequenceParent: Node;
   canScrollLeft = false;
   canScrollRight = false;
   private queryParams: Params;
   public similarNodes: Node[];
-  mds: any;
+  mds: Mds;
+  isDestroyed = false;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('actionbar') actionbar: ActionbarComponent;
   isChildobject = false;
     _node : Node;
-    private _nodeId : string;
+    _nodeId : string;
     @Output() onClose=new EventEmitter();
     similarNodeColumns: ListItem[]=[];
 
@@ -217,6 +235,9 @@ export class NodeRenderComponent implements EventListener {
     if(this.nodeMetadata!=null) {
       return;
     }
+    if(CardComponent.getNumberOfOpenCards() > 0){
+        return;
+    }
     if (event.code == 'ArrowLeft' && this.canSwitchBack()) {
       this.switchPosition(this.getPosition() - 1);
       event.preventDefault();
@@ -231,7 +252,7 @@ export class NodeRenderComponent implements EventListener {
     }
 
   }
-    private close() {
+    close() {
       if(this.isRoute) {
         if(this.closeOnBack) {
           window.close();
@@ -241,12 +262,16 @@ export class NodeRenderComponent implements EventListener {
             UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, false);
           }
           else {
-            if(window.history.state?.scope === 'search') {
+            if(window.history.state?.scope === Scope.Search) {
                 this.searchService.reinit = false;
             }
             NodeRenderComponent.close(this.location);
             // use a timeout to let the browser try to go back in history first
-            setTimeout(()=>this.mainNavRef.toggleMenuSidebar(),250);
+            setTimeout(()=> {
+                if(!this.isDestroyed) {
+                    this.mainNavRef.toggleMenuSidebar();
+                }
+            },250);
           }
         }
       }
@@ -255,7 +280,7 @@ export class NodeRenderComponent implements EventListener {
     }
 
 
-    private showDetails() {
+    showDetails() {
       const rect=document.getElementById('edusharing_rendering_metadata').getBoundingClientRect();
       if(window.scrollY<rect.top) {
           UIHelper.scrollSmooth(rect.top, 1.5);
@@ -279,6 +304,8 @@ export class NodeRenderComponent implements EventListener {
     }
     ngOnDestroy() {
         (window as any).ngRender = null;
+        this.optionsHelper.setListener(null);
+        this.isDestroyed = true;
     }
 
   public switchPosition(pos:number) {
@@ -301,18 +328,24 @@ export class NodeRenderComponent implements EventListener {
     if(this.isLoading) {
         return;
     }
-
     this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
     this.isLoading=true;
     this.node=this._nodeId;
   }
   viewParent() {
       this.isChildobject=false;
-      this.node=this.sequenceParent;
+      this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
+              childobject_id: null
+          },
+          replaceUrl: true});
   }
   viewChildobject(node:Node,pos:number) {
         this.isChildobject=true;
-        this.node=node;
+        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: {
+                childobject_id: node.ref.id
+            },
+            replaceUrl: true});
+
   }
   private loadNode() {
     if(!this._node) {
@@ -322,8 +355,14 @@ export class NodeRenderComponent implements EventListener {
 
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
-    download.isEnabled=this._node.downloadUrl!=null;
-    download.showAsAction=true;
+    // declare explicitly so that callback will be overriden
+    download.customEnabledCallback = null;
+    download.group = DefaultGroups.View;
+    download.priority = 25;
+    download.isEnabled=this._node.downloadUrl!=null &&  (
+        !this._node.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+        !RestNetworkService.isFromHomeRepo(this._node)
+    );    download.showAsAction=true;
     if(this.isCollectionRef()) {
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node) => {
         this.addDownloadButton(download);
@@ -360,27 +399,43 @@ export class NodeRenderComponent implements EventListener {
             else {
                 this._node=data.node;
                 this.isOpenable = this.connectors.connectorSupportsEdit(this._node) != null;
+                const finish = (set:Mds = null) => {
+                    this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
+                    this.mds = set;
+
+                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                    this.postprocessHtml();
+                    this.addCollections();
+                    this.addVideoControls();
+                    this.linkSearchableWidgets();
+                    this.addComments();
+                    this.loadNode();
+                    this.loadSimilarNodes();
+                    this.isLoading = false;
+                };
                 this.getSequence(()=> {
                     this.mdsApi.getSet(this.getMdsId(), this.repository).subscribe((set) => {
-                        this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
-                        this.mds = set;
-
-                        jQuery('#nodeRenderContent').html(data.detailsSnippet);
-                        this.postprocessHtml();
-                        this.addCollections();
-                        this.addVideoControls();
-                        this.linkSearchableWidgets();
-                        this.addComments();
-                        this.loadNode();
-                        this.loadSimilarNodes();
-                        this.isLoading = false;
+                        finish(set);
+                    },(error) => {
+                        console.warn('mds fetch error', error);
+                        finish();
                     });
                 });
             }
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
-        },(error:any)=> {
-            this.toast.error(error);
+        },(error)=> {
+            console.log(error.error.error);
+            if(error?.error?.error === 'org.edu_sharing.restservices.DAOMissingException') {
+                this.toast.error(null, 'TOAST.RENDER_NOT_FOUND', null, null, null, {
+                    link: {
+                        caption: 'BACK',
+                        callback: () => this.close()
+                    }
+                })
+            } else {
+                this.toast.error(error);
+            }
             this.isLoading = false;
             GlobalContainerComponent.finishPreloading();
         })
@@ -440,12 +495,15 @@ export class NodeRenderComponent implements EventListener {
                 nodes:usages.map((u)=>u.collection),
                 columns:ListItem.getCollectionDefaults(),
                 isClickable:true,
-                clickRow:(event:any)=> {
+                clickRow:(event: {node: Node})=> {
                     UIHelper.goToCollection(this.router,event.node);
+                },
+                doubleClickRow:(event: Node)=> {
+                    UIHelper.goToCollection(this.router,event);
                 },
                 viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
             };
-            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName('collections')[0],data,250);
+            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName('collections')[0],data, { delay: 250 });
         },(error)=> {
             domContainer.parentElement.removeChild(domContainer);
         });
@@ -495,7 +553,7 @@ export class NodeRenderComponent implements EventListener {
     }
   }
 
-    private initOptions(options:OptionItem[]) {
+    private initOptions() {
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObjects: [this._node],
@@ -503,7 +561,7 @@ export class NodeRenderComponent implements EventListener {
             allObjects: this.list,
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: options
+                addOptions: this.currentOptions
             },
         });
         this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
@@ -521,7 +579,7 @@ export class NodeRenderComponent implements EventListener {
   }
 
   private addDownloadButton(download: OptionItem) {
-      this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=> {
+      this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.sequenceParent.ref.repo).subscribe((data:NodeList)=> {
           this.downloadButton=download;
           const options: OptionItem[] = [];
           options.splice(0,0,download);
@@ -533,20 +591,22 @@ export class NodeRenderComponent implements EventListener {
               downloadAll.priority = 35;
               options.splice(1,0,downloadAll);
           }
-          this.initOptions(options);
+          this.currentOptions = options;
+          this.initOptions();
     });
   }
   setDownloadUrl(url:string) {
       if(this.downloadButton!=null)
         this.downloadButton.isEnabled=url!=null;
       this.downloadUrl=url;
+      this.initOptions();
   }
 
-    private getSequence(onFinish:Function) {
+    private getSequence(onFinish: () => void) {
         if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data => {
              this.sequenceParent = data.node;
-               this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=> {
+               this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.sequenceParent.ref.repo).subscribe((data:NodeList)=> {
                    if(data.nodes.length > 0)
                     this.sequence = data;
                     setTimeout(()=>this.setScrollparameters(),100);
@@ -555,16 +615,20 @@ export class NodeRenderComponent implements EventListener {
             });
         } else {
             this.sequenceParent = this._node;
-            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=> {
+            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.sequenceParent.ref.repo).subscribe((data:NodeList)=> {
                 if(data.nodes.length > 0)
                   this.sequence = data;
                   setTimeout(()=>this.setScrollparameters(),100);
                 onFinish();
+            }, error => {
+                    console.error('failed sequence fetching');
+                    console.error(error);
+                    onFinish();
             });
         }
     }
 
-    private scroll(direction: string) {
+    scroll(direction: string) {
         const element = this.sequencediv.nativeElement;
         const width=window.innerWidth/2;
         UIHelper.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=> {
@@ -597,7 +661,7 @@ export class NodeRenderComponent implements EventListener {
         return '';
       }
     }
-    private getNodeTitle(node:Node) {
+    getNodeTitle(node:Node) {
         return RestHelper.getTitle(node);
     }
 

@@ -1,5 +1,5 @@
 
-import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Component, ViewChild, HostListener, ElementRef, OnDestroy} from '@angular/core';
 import 'rxjs/add/operator/map';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
@@ -33,19 +33,19 @@ import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 
 
-export class OerComponent {
+export class OerComponent implements OnDestroy{
   readonly SCOPES = Scope;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public COLLECTIONS=0;
   public MATERIALS=1;
   public TOOLS=2;
   private TYPE_COUNT=3;
-  private columns:ListItem[][]=[];
+  columns:ListItem[][]=[];
   private options: OptionItem[][]=[];
   private displayedNode: Node;
   public currentQuery: string;
   public loading:boolean[]=[];
-  private showMore:boolean[]=[];
+  showMore:boolean[]=[];
   public hasMore:boolean[]=[];
   private offsets:number[]=[];
   public nodes:Node[][]=[];
@@ -113,10 +113,14 @@ export class OerComponent {
 
     setInterval(()=>this.updateHasMore(),1000);
    }
-   private goToCollections() {
+   ngOnDestroy() {
+       this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes[this.MATERIALS]);
+   }
+
+    goToCollections() {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{mainnav:true}});
    }
-  private goToSearch() {
+  goToSearch() {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'search']);
   }
   public routeSearch(query=this.currentQuery) {
@@ -203,19 +207,19 @@ export class OerComponent {
      );
 
    }
-   private toggleMore(mode:number) {
+   toggleMore(mode:number) {
     this.showMore[mode]=!this.showMore[mode];
     this.routeSearch();
    }
-   private loadMore(mode:number) {
+   loadMore(mode:number) {
 
    }
-   private openNode(node: Node){
-      this.router.navigate([this.nodeHelper.getNodeLink('routerLink', node)],
+   private openNode(node: Node) {
+       this.router.navigate([this.nodeHelper.getNodeLink('routerLink', node)],
           {queryParams: (this.nodeHelper.getNodeLink('queryParams', node) as any)}
       );
    }
-   private updateOptions(mode:number,node:Node=null) {
+   updateOptions(mode:number,node:Node=null) {
      this.options[mode]=[];
      if(mode==this.MATERIALS) {
        this.options[mode].push(new OptionItem('INFORMATION', 'info_outline', (node: Node) => this.openNode(node)));

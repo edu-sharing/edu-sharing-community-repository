@@ -16,13 +16,16 @@
 
 <div class="dialog" *ngIf="currentMore" (click)="currentMore=null"></div>
 <div class="recycleContainer" [class.recylceContainerWorkspace]="isInsideWorkspace">
-<div class="results" *ngIf="list">
+<div class="results">
   <listTable
     [nodes]="list"
     [columns]="_columns"
     [hasIcon]="true"
     [hasCheckbox]="true"
+    [totalCount]="pagination?.total"
+    [hasMore]="list?.length < pagination?.total"
     [isClickable]="true"
+    [isLoading]="isLoading"
     [dragDrop]="false"
     [actionbar]="actionbar"
     [customOptions]="customOptions"
@@ -31,7 +34,6 @@
     [sortAscending]="sortAscending"
     (sortListener)="setSorting($event)"
     (selectionChanged)="onSelection($event)"
-
     (loadMore)="loadMore()"></listTable>
 </div>
 
@@ -43,7 +45,6 @@
 <div class="noResults" *ngIf="!list && !hasSearched && !isLoading">
   <h5>{{ "RECYCLE.ARCHIVE_EMPTY" | translate}}</h5>
 </div>
-<spinner *ngIf="isLoading"></spinner>
 <div class="dialog darken valign-wrapper" *ngIf="fullscreenLoading">
   <spinner class="center"></spinner>
 </div>

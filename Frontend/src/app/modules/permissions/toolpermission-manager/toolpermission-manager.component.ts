@@ -121,7 +121,7 @@ export class ToolpermissionManagerComponent {
     }
     return permissions;
   }
-  private _authority: any;
+  _authority: any;
   name:string;
   @Input() set authority(authority:any){
     if(authority==null)

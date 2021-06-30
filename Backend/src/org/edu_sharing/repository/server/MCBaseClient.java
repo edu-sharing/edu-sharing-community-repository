@@ -149,10 +149,9 @@ public abstract class MCBaseClient {
 	/**
 	 * create a new version for an node with the given metadata (_properties)
 	 * @param nodeId the nodeId of the node
-	 * @param _properties the metadata for the node's version
 	 * @throws Exception
 	 */
-	public abstract void createVersion(String nodeId, HashMap _properties) throws Exception;
+	public abstract void createVersion(String nodeId) throws Exception;
 	
 	/**
 	 * get the nodeIds that are referenced by the specified association of the given node

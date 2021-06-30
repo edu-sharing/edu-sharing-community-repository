@@ -17,7 +17,9 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpSession;
+import java.sql.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 

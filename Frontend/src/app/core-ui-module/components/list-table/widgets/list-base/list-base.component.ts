@@ -8,7 +8,6 @@ import { ListWidget } from '../list-widget';
 })
 export class ListBaseComponent extends ListWidget implements OnChanges {
     widgetType: ListWidgetType;
-
     constructor() {
         super();
     }

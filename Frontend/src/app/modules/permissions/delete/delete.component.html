@@ -18,11 +18,11 @@
     <h3 class="mat-heading-3 mat-heading-underline" *ngIf="!loading" ><span>{{'PERMISSIONS.DELETE.USER_LIST' | translate}}</span><button mat-icon-button (click)="refresh()"><i icon="refresh" ></i></button></h3>
     <div class="user-list" *ngIf="users && users.length">
       <listTable
-              [nodes]="users"
+              [nodes]="$any(users)"
               [hasIcon]="true"
               [hasCheckbox]="true"
               [isClickable]="true"
-              [selectedNodes]="selectedUsers"
+              [selectedNodes]="$any(selectedUsers)"
               icon="person"
               [isLoading]="loading"
               [columns]="columns"
@@ -124,7 +124,7 @@
         </mat-chip-list>
         <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.RECEIVER_GROUP_CAPTION' | translate}}</h4>
         <authority-search-input
-                mode="Organizations"
+                [mode]="AuthoritySearchMode.Organizations"
                 hint="{{'PERMISSIONS.DELETE.RECEIVER_GROUP_HINT' | translate}}"
                 [showRecent]="false"
                 (onChooseAuthority)="receiverGroup=$event"

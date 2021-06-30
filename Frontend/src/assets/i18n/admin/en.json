@@ -74,7 +74,7 @@
             "TYPE": "Type",
             "REPOTYPE": "Repo-Type",
             "SUBTYPE": "Sub-Type",
-            "REMOVE": "Discover",
+            "REMOVE": "Delete",
             "REMOVE_TITLE": "Delete application",
             "REMOVE_MESSAGE": "If you continue, the application will be deleted with the following information.\nPlease note that this procedure cannot be undone!\n\n{{info}}",
             "EDIT_APP": "{{xml}} edit",
@@ -276,8 +276,11 @@
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",
             "MODE": "Modus:",
+            "STORE": "Store (Node-Store):",
             "NODEREF": "UUID of the searched node:",
             "LUCENE_QUERY": "Lucene-Query:",
+            "DSL_QUERY": "DSL-Query (JSON):",
+            "ELASTIC_RESPONSE": "Elastic-Response (JSON):",
             "LUCENE_AUTHORITIES": "Search as the following authorities:",
             "LUCENE_OFFSET": "Start at:",
             "LUCENE_COUNT": "number of hits:",
@@ -303,9 +306,9 @@
                 "CONFIRM_UPDATE_TITLE": "Overwrite \"{{ template }}\"?",
                 "CONFIRM_UPDATE_MESSAGE": "Do you want to overwrite the template with the current values?",
                 "CONFIRM_DELETE_BUTTON": "Delete",
-                "CONFIRM_DELETE_TITLE": "Delete \"{{ template }}\"?",
+                "CONFIRM_DELETE_TITLE": "Delete template \"{{ template }}\"?",
                 "CONFIRM_DELETE_MESSAGE": "Do you want to delete the template?",
-                "DELETE_BUTTON": "Delete \"{{ template }}\"",
+                "DELETE_BUTTON": "Delete template \"{{ template }}\"",
                 "CREATE_BUTTON": "Create",
                 "CHOOSE_NAME_TEXT": "Choose a name for the new template.",
                 "CHOOSE_NAME_INPUT_LABEL": "Name"
@@ -349,7 +352,6 @@
                 "ConvertMultivalueToSinglevalueJob": "Convert a property from multivalue to singlevalue",
                 "BulkDeleteNodesJob": "Bulk deleting of multiple nodes (e.g. large folders)",
                 "BulkEditNodesJob": "Bulk processing of a property for multiple nodes",
-                "UpdateFrontpageCacheJob": "Rebuilds the cache for the start page",
                 "BulkDeleteAuthoritiesJob": "Delete users & orgs via bulk",
                 "CheckLinkJob": "Checks if the target of a link still exists and sets an appropriate status"
             }
@@ -368,6 +370,7 @@
         },
         "STATISTICS": {
             "NO_DATA": "No data for the selected period",
+            "CSV_FILENAME": "Statistics",
             "GROUPED": "By time period",
             "SINGLE": "Individual evaluation",
             "NODES": "By object",
@@ -393,9 +396,16 @@
             "EXPORT_LABEL": "Export displayed data",
             "EXPORT_PROPERTIES": "Properties to be exported",
             "EXPORT_PROPERTIES_HINT": "eg cm:name, cclom:title, cclom:general_keyword",
+            "GROUP_TEMPLATE_LABEL": "Select template",
+            "GROUPS_ADVANCED": "Advanced options",
+            "GROUP_TEMPLATE": {
+                "group_organization": "Access counts grouped by organisation of the user",
+                "group_mediacenter": "Access counts grouped by mediacenter of the user",
+                "group_organization_unfold_mediacenter": "Access counts grouped by organisation of the user and splitted by organisation"
+            },
             "HEADERS": {
                 "action": "Action",
-                "count": "Number",
+                "count": "Sum",
                 "node": "Element",
                 "authority": "User/Session",
                 "authority_organization": "Organisation",
@@ -408,10 +418,10 @@
                 "LOGIN_USER_OAUTH_REFRESH_TOKEN": "Login (OAuth)",
                 "LOGOUT_USER_REGULAR": "Logout",
                 "LOGOUT_USER_TIMEOUT": "Logout (Timeout)",
-                "VIEW_MATERIAL": "Material viewed",
-                "VIEW_MATERIAL_PLAY_MEDIA": "Material played",
-                "VIEW_MATERIAL_EMBEDDED": "Material viewed (Remote)",
-                "DOWNLOAD_MATERIAL": "Material downloaded"
+                "VIEW_MATERIAL": "Views",
+                "VIEW_MATERIAL_PLAY_MEDIA": "Plays",
+                "VIEW_MATERIAL_EMBEDDED": "Embeddings",
+                "DOWNLOAD_MATERIAL": "Downloads"
             }
         },
         "MEDIACENTER": {
@@ -506,6 +516,7 @@
             "COLLECTION_HINT": "Select the collection whose materials you want to display on the home page",
             "CHOOSE_COLLECTION": "Select collection",
             "TIMESPAN_LABEL": "Time span",
+            "TIMESPAN_DAYS": "days",
             "TIMESPAN_HINT": "For which time range should the data be evaluated",
             "TIMESPAN": {
                 "days_30": "Last 30 days",
@@ -513,6 +524,9 @@
                 "all": "Lifetime"
             },
             "SAVED": "Settings have been saved",
+            "CONFIG_BROKEN": "Config has errors",
+            "CONFIG_BROKEN_INFO": "The current configuration seems to contain errors. Do you want to remove the current configuration and reset to default?",
+            "RESET": "Reset",
             "TOTAL_COUNT_LABEL": "Total number of elements",
             "TOTAL_COUNT_HINT": "Total number of elements which are selected. If this value is >= of the displayed elements, the selected number of displayed elements is always randomly selected from this pool",
             "DISPLAY_COUNT_LABEL": "Number of displayed elements",

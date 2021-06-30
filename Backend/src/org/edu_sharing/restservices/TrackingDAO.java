@@ -5,6 +5,7 @@ import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 
@@ -85,5 +86,13 @@ public class TrackingDAO {
             }).collect(Collectors.toList()));
         }
         return trackingAuthority;
+    }
+
+    public static List<String> getNodesAltered(Date dateFrom) {
+        return TrackingServiceFactory.getTrackingService().getAlteredNodes(dateFrom);
+    }
+
+    public static List<NodeData> getNodeData(String nodeId, Date dateFrom) {
+        return TrackingServiceFactory.getTrackingService().getNodeData(nodeId, dateFrom);
     }
 }

@@ -9,7 +9,7 @@
 <global-progress *ngIf="isLoading"></global-progress>
 <div *ngIf="!isLoading">
   <card
-    role="main" appSkipTarget="MAIN_CONTENT"
+    role="main" [appSkipTarget]="SkipTarget.MainContent"
     title="{{ caption | translate }}"
     avatar="assets/images/app-icon.svg"
     subtitle="{{ 'LOGIN.SUBTITLE' | translate }}"
@@ -79,12 +79,23 @@
                 id="password"
                 label="{{ 'LOGIN.PASSWORD' | translate }}"
                 floatLabel="always"
-                required="true"
+                [required]="true"
                 (keydown.enter)="login()"
                 [(value)]="password"
               ></input-password>
               <div class="forgot-password" *ngIf="config.register.local || config.register.recoverUrl">
-                <a (click)="recoverPassword()" (keyup.enter)="recoverPassword()" class="focus-underline" tabindex="0">
+                <a
+                  *ngIf="config.register.local"
+                  cdkMonitorElementFocus
+                  [routerLink]="['/' + ROUTER_PREFIX + 'register', 'request']"
+                >
+                  {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
+                </a>
+                <a
+                  *ngIf="!config.register.local"
+                  [href]="config.register.recoverUrl"
+                  cdkMonitorElementFocus
+                >
                   {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
                 </a>
               </div>
@@ -103,7 +114,7 @@
         </div>
       </div>
     </div>
-    <div class="card-action card-action-info" *ngIf="showProviders"><div innerHTML="{{ 'LOGIN.ACTION_HELP' | translate }}"></div></div>
+    <div class="login-help" *ngIf="showProviders"><div innerHTML="{{ 'LOGIN.ACTION_HELP' | translate }}"></div></div>
   </card>
   <powered-by mode="color" [ngClass]="{ 'powered-down': config.register.local || config.register.registerUrl }"></powered-by>
 </div>

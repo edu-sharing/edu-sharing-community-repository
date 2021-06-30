@@ -20,6 +20,7 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.extensions.surf.util.URLEncoder;
 
@@ -95,7 +96,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public void createVersion(String nodeId, HashMap _properties) throws Exception {
+	public void createVersion(String nodeId) throws Exception {
 	}
 
 	@Override
@@ -120,6 +121,11 @@ public class NodeServiceAdapter implements NodeService {
 	@Override
 	public HashMap<String, Object> getPropertiesDynamic(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		return new HashMap<String,Object>();
+	}
+
+	@Override
+	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable {
+		return getProperties(storeProtocol, storeId, nodeId);
 	}
 
 	
@@ -228,7 +234,7 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable {
-		return null;
+		return getContent(nodeId);
 	}
 
 	@Override
@@ -361,7 +367,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String publishCopy(String nodeId) throws Throwable {
+	public String publishCopy(String nodeId, HandleMode handleMode) throws Throwable {
 		throw new NotImplementedException("publishCopy");
 	}
 

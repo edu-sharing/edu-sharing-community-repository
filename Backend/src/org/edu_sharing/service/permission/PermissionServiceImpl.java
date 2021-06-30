@@ -1,7 +1,6 @@
 package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,11 +49,11 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
-
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
-import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -115,7 +114,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendCopy
 	 */
 	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy, Boolean createHandle) throws Throwable {
+			Boolean sendCopy) throws Throwable {
 
 		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 		ACL currentACL = repoClient.getPermissions(nodeId);
@@ -191,12 +190,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 				authPermissions.put(toAdd.getAuthority(), permissions);
 			}
-			addPermissions(nodeId, authPermissions, inheritPermissions, mailText, sendMail, sendCopy,createHandle);
+			addPermissions(nodeId, authPermissions, inheritPermissions, mailText,
+					sendMail, sendCopy);
 		}
 
 		if (acesToUpdate.size() > 0) {
 			for (ACE toUpdate : acesToUpdate) {
-				setPermissions(nodeId, toUpdate.getAuthority(), new String[] { toUpdate.getPermission() }, null,createHandle);
+				setPermissions(nodeId, toUpdate.getAuthority(), new String[] { toUpdate.getPermission() }, null);
 			}
 			createNotify = true;
 		}
@@ -219,17 +219,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
 		}
 
-
-		if(createHandle) {
-
-			/**
-			 * no transaction cause of
-			 * org.hibernate.HibernateException: connnection proxy not usable after transaction completion
-			 *
-			 * problem is when handle service fails
-			 */
-			createHandle(AuthorityType.EVERYONE,nodeId);
-		}
 		if(nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))){
 			CollectionServiceFactory.getCollectionService(appInfo.getAppId()).updateScope(nodeRef, aces);
 		}
@@ -274,7 +263,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	@Override
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
-			String _mailText, Boolean _sendMail, Boolean _sendCopy, Boolean createHandle) throws Throwable {
+							   String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
 
 		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
 
@@ -343,7 +332,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 				String permText = "";
 				for (String perm : permissions) {
-
+					if(CCConstants.CCM_VALUE_SCOPE_SAFE.equals(NodeServiceInterceptor.getEduSharingScope())){
+						// do not show some permission infos in safe invitations since they don't make sense
+						if(Arrays.asList(CCConstants.PERMISSION_CC_PUBLISH).contains(perm)){
+							continue;
+						}
+					}
 					String i18nPerm = I18nServer
 							.getTranslationDefaultResourcebundle(I18nServer.getPermissionCaption(perm), "en_EN");
 					String i18nPermDesc = I18nServer.getTranslationDefaultResourcebundle(
@@ -448,87 +442,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	}
 
-	public void createHandle(AuthorityType authorityType, String _nodeId) throws Exception {
-
-
-		if (AuthorityType.EVERYONE.equals(authorityType)) {
-
-			String version = (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,_nodeId),
-					QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION) );
-
-			String currentHandle =  (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,_nodeId),
-					QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) );
-
-			/**
-			 * only create a new handle when version changed
-			 */
-			if(currentHandle != null && currentHandle.endsWith(version)) {
-				return;
-			}
-
-			String newVersion = new VersionTool().incrementVersion(version);
-
-			HandleService handleService = null;
-			String handle = null;
-
-
-			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
-				try {
-					 handleService = new HandleService();
-					 /**
-					  * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
-					  */
-					 handleService.handleServiceAvailable();
-					 handle = handleService.generateHandle();
-
-				}catch (SQLException e) {
-					logger.error("sql error while creating handle id",e);
-					return;
-				}
-			}
-
-			Map<QName,Serializable> publishedProps = new HashMap<QName,Serializable>();
-			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
-
-			if(handle != null) {
-				publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
-			}
-
-			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,_nodeId);
-			if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
-				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
-			}else {
-				for(Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
-					nodeService.setProperty(nodeRef,entry.getKey(), entry.getValue());
-				}
-			}
-
-			/**
-			 * create version for the published node
-			 */
-			Map<QName,Serializable> props = nodeService.getProperties(nodeRef);
-			props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
-			HashMap<String,Object> vprops = new HashMap<String,Object>();
-			for(Map.Entry<QName, Serializable> entry : props.entrySet()) {
-				vprops.put(entry.getKey().getPrefixString(), entry.getValue());
-			}
-			try {
-				new MCAlfrescoAPIClient().createVersion(_nodeId, vprops);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				logger.error(e1.getMessage(), e1);
-			}
-			if(handleService != null && handle != null) {
-
-				String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
-				handleService.createHandle(handle,handleService.getDefautValues(contentLink));
-
-			}
-		}
-	}
-	
-	
-
 	@Override
 	public List<Notify> getNotifyList(final String nodeId) throws Throwable {
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY)) {
@@ -554,7 +467,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		Gson gson = new Gson();
 		List<String> jsonHistory = (List<String>)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
-		
+
 		List<Notify> notifyList = new ArrayList<Notify>();
 		if(jsonHistory != null) {
 			for(String json : jsonHistory) {
@@ -886,10 +799,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 */
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission)
 			throws Exception {
-		setPermissions(nodeId, authority, permissions, inheritPermission, false);
-	}
-	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission, Boolean createHandle)
-			throws Exception {
 		checkCanManagePermissions(nodeId, authority);
 
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
@@ -914,6 +823,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 
+	}
+
+	@Override
+	public void removeAllPermissions(String nodeId) throws Exception {
+		permissionService.deletePermissions(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
 	}
 
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception {
@@ -1096,7 +1010,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
-		filterGuestAuthority(searchQuery);
+		if(!AuthorityServiceHelper.isAdmin()) {
+			// allow the access to the guest user for admin
+			filterGuestAuthority(searchQuery);
+		}
 
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
@@ -1472,7 +1389,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void createNotifyObject(final String nodeId, final String user, final String action) {
 
 		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-		
+
 		if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
 			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY), null);
 		}

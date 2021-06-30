@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete/autocomplete';
 import { forkJoin, Observable, of } from 'rxjs';
@@ -6,7 +6,7 @@ import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
-    Group,
+    Group, RestConnectorService,
     RestConstants,
     RestIamService,
     RestOrganizationService,
@@ -26,6 +26,8 @@ interface SuggestionGroup {
     styleUrls: ['authority-search-input.component.scss'],
 })
 export class AuthoritySearchInputComponent {
+    @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
+
     @Input() globalSearchAllowed = false;
     /**
      * Do allow any entered authority (not recommended for general use)
@@ -49,10 +51,14 @@ export class AuthoritySearchInputComponent {
     }
     @Input() maxSuggestions = 10;
     @Input() inputIcon = 'search';
+    /**
+     * label, if unset, placeholder will be used
+     */
+    @Input() label: string;
     @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
     @Input() hint = '';
 
-    @Output() onChooseAuthority = new EventEmitter();
+    @Output() onChooseAuthority = new EventEmitter<Authority|any>();
 
     input = new FormControl('');
     suggestionGroups$: Observable<SuggestionGroup[]>;
@@ -60,6 +66,7 @@ export class AuthoritySearchInputComponent {
     constructor(
         private iam: RestIamService,
         private organization: RestOrganizationService,
+        private restConnector: RestConnectorService,
         private namePipe: PermissionNamePipe,
         private nodeHelper: NodeHelperService,
     ) {
@@ -94,7 +101,7 @@ export class AuthoritySearchInputComponent {
 
     getSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
         if (inputValue.length < 2) {
-            if (this.showRecent) {
+            if (this.showRecent && this.restConnector.getCurrentLogin()?.currentScope == null) {
                 return this.getRecentSuggestions();
             } else {
                 return of(null);

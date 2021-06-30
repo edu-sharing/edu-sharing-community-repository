@@ -144,6 +144,10 @@
          <mimetype mimetype="video/x-ms-wmv" display="MS WMV Streaming Video">
             <extension>wmv</extension>
          </mimetype>
+         <mimetype mimetype="video/x-matroska" display="Matroska Video">
+            <extension>mkv</extension>
+         </mimetype>
+
          <mimetype mimetype="audio/x-ms-wma" display="MS WMA Streaming Audio">
             <extension>wma</extension>
          </mimetype>

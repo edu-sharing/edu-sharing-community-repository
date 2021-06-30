@@ -26,7 +26,10 @@ public class Context {
     public static ServletContext getGlobalContext() {
         return globalContext;
     }
-
+    public static Context setInstance(Context context){
+        instance.set(context);
+        return context;
+    }
     public static Context newInstance(HttpServletRequest request, HttpServletResponse response, ServletContext servletContext) {
         Context context = new Context(request,response);
         if(globalContext==null)
@@ -35,7 +38,7 @@ public class Context {
         return context;
     }
 
-    public void release() {
+    public static void release() {
         instance.remove();
     }
 

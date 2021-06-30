@@ -7,6 +7,7 @@ import {
     MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import {
@@ -37,9 +38,20 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
     inputControl = new FormControl();
     chipsControl: FormControl;
-    filteredValues: Observable<DisplayValue[]>;
+    autocompleteValues: Observable<DisplayValue[]>;
     indeterminateValues$: BehaviorSubject<string[]>;
     showDropdownArrow: boolean;
+
+    private autocompleteIsInhibited = new BehaviorSubject(false);
+
+    readonly showTooltip = (() => {
+        let previousTooltip: MatTooltip;
+        return (tooltip?: MatTooltip) => {
+            previousTooltip?.hide();
+            tooltip?.show();
+            previousTooltip = tooltip;
+        };
+    })();
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
@@ -76,7 +88,11 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges ||
             this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges
         ) {
-            this.filteredValues = this.subscribeForSuggestionUpdates();
+            const filteredValues = this.subscribeForSuggestionUpdates();
+            this.autocompleteValues = combineLatest([
+                filteredValues,
+                this.autocompleteIsInhibited,
+            ]).pipe(map(([values, inhibit]) => (inhibit ? null : values)));
         }
         this.showDropdownArrow =
             this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
@@ -104,19 +120,49 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         }
     }
 
+    onBlurInput(event: FocusEvent): void {
+        const tag = (event.relatedTarget as HTMLElement)?.tagName;
+        // ignore mat option focus to prevent resetting before selection is done
+        if (tag === 'MAT-OPTION' || event.relatedTarget === this.input.nativeElement) {
+            return;
+        }
+        this.inputControl.setValue(null);
+        if (tag === 'MAT-CHIP' || tag === 'INPUT' || tag === 'BUTTON') {
+            // `matAutocomplete` doesn't seem to close the autocomplete panel when focus goes to
+            // chips, however, navigating the autocomplete options by keyboard doesn't work when the
+            // input doesn't have the focus.
+            //
+            // We don't generally close the panel on blur, so the toggle button doesn't get
+            // confused.
+            // Also, we need to close the list when an other element (e.g. a tree input) gets focus
+            this.trigger.closePanel();
+        }
+    }
+
+    toggleAutoCompletePanel(): void {
+        // use set timeout because otherwise multiple panels stay open cause of stopPropagation
+        // see https://stackoverflow.com/questions/50491195/open-matautocomplete-with-open-openpanel-method
+        if (this.trigger.panelOpen) {
+            setTimeout(() => this.trigger.closePanel());
+        } else {
+            // this.input.nativeElement.focus();
+            setTimeout(() => this.trigger.openPanel());
+        }
+    }
+
     remove(toBeRemoved: DisplayValue): void {
         const values: DisplayValue[] = this.chipsControl.value;
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
         this.removeFromIndeterminateValues(toBeRemoved.key);
+        this.inhibitAutocomplete();
     }
 
     selected(event: MatAutocompleteSelectedEvent) {
         this.add(event.option.value);
         this.input.nativeElement.value = '';
         this.inputControl.setValue(null);
-        setTimeout(() => this.trigger.openPanel());
     }
 
     focus() {
@@ -128,6 +174,19 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
             this.chipsControl.setValue([...this.chipsControl.value, value]);
         }
         this.removeFromIndeterminateValues(value.key);
+    }
+
+    getTooltip(value: DisplayValue, hasTextOverflow: boolean): string | null {
+        const shouldShowIndeterminateNotice =
+            this.widget.getStatus() !== 'DISABLED' &&
+            this.widget.getIndeterminateValues()?.includes(value.key);
+        if (shouldShowIndeterminateNotice) {
+            return this.translate.instant('MDS.INDETERMINATE_NOTICE', { value: value.label });
+        } else if (hasTextOverflow) {
+            return value.label;
+        } else {
+            return null;
+        }
     }
 
     private removeFromIndeterminateValues(key: string): void {
@@ -197,11 +256,11 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         );
     }
 
-    blurEvent(event: FocusEvent) {
-        // ignore mat option focus to prevent resetting before selection is done
-        if((event.relatedTarget as HTMLElement)?.tagName === 'MAT-OPTION') {
-            return;
-        }
-        this.inputControl.setValue(null);
+    private inhibitAutocomplete() {
+        this.autocompleteIsInhibited.next(true);
+        setTimeout(() => {
+            this.trigger.closePanel();
+            this.autocompleteIsInhibited.next(false);
+        });
     }
 }

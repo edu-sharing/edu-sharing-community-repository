@@ -5,6 +5,8 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.apache.ibatis.binding.BindingException;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -13,6 +15,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.tracking.ibatis.EduTrackingMapper;
+import org.edu_sharing.service.tracking.ibatis.NodeData;
+import org.edu_sharing.service.tracking.ibatis.NodeResult;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.json.JSONObject;
@@ -86,8 +91,39 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
 
         ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         nodeService=serviceRegistry.getNodeService();
+        /*
+        SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
+        PGPoolingDataSource source = new PGPoolingDataSource();
+        source.setDataSourceName("tracking data source");
+        source.setServerName("localhost");
+        source.setDatabaseName("edu_tracking_node");
+        source.setUser("testuser");
+        source.setPassword("testpassword");
+        source.setMaxConnections(10);
+
+        TransactionFactory transactionFactory = new JdbcTransactionFactory();
+        Environment environment = new Environment("tracking", transactionFactory, source);
+        Configuration configuration = new Configuration(environment);
+        */
+        try {
+            new ConnectionDBAlfresco().getSqlSessionFactoryBean().getConfiguration().addMapper(EduTrackingMapper.class);
+        }catch(BindingException ignored) {}
     }
 
+    @Override
+    public List<String> getAlteredNodes(java.util.Date from) {
+        try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
+            return session.getMapper(EduTrackingMapper.class).eduAlteredNodes(from).stream().
+                    map(NodeResult::getNodeid).collect(Collectors.toList());
+        }
+    }
+    @Override
+    public List<NodeData> getNodeData(String nodeId, java.util.Date from) {
+        try (SqlSession session = new ConnectionDBAlfresco().getSqlSessionFactoryBean().openSession()) {
+            return session.getMapper(EduTrackingMapper.class).
+                    eduNodeData(nodeId, "YYYY-MM-DD", from);
+        }
+    }
     @Override
     public boolean trackActivityOnUser(String authorityName, EventType type) {
         super.trackActivityOnUser(authorityName,type);

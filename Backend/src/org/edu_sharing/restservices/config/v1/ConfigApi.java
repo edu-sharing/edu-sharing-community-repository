@@ -176,21 +176,21 @@ public class ConfigApi {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
 		}
 	}
-	private Map<String, String> convertVariables(org.edu_sharing.service.config.model.Variables variables) {
+	private Map<String, String> convertVariables(org.edu_sharing.alfresco.service.config.model.Variables variables) {
 		if(variables==null || variables.variable==null)
 			return null;
 		return convertKeyValue(variables.variable);
 	}
-	private Map<String,String> convertKeyValue(List<org.edu_sharing.service.config.model.KeyValuePair> pairs) {
+	private Map<String,String> convertKeyValue(List<org.edu_sharing.alfresco.service.config.model.KeyValuePair> pairs) {
 		if(pairs==null)
 			return null;
 		Map<String,String> map=new HashMap<String, String>();
-		for(org.edu_sharing.service.config.model.KeyValuePair pair : pairs) {
+		for(org.edu_sharing.alfresco.service.config.model.KeyValuePair pair : pairs) {
 			map.put(pair.key, pair.value);
 		}
 		return map;
 	}
-	private Map<String,String> getActiveLanguage(List<org.edu_sharing.service.config.model.Language> languages) {
+	private Map<String,String> getActiveLanguage(List<org.edu_sharing.alfresco.service.config.model.Language> languages) {
 		return convertKeyValue(ConfigServiceFactory.getLanguageData(languages));
 	}
 }

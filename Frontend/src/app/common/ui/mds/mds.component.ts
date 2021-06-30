@@ -115,7 +115,7 @@ export class MdsComponent {
     dialogParameters: any;
     dialogButtons: DialogButton[];
     private variables: string[];
-    private currentWidgetSuggestion: string;
+    currentWidgetSuggestion: string;
     private static GROUP_MULTIVALUE_DELIMITER = '[+]';
     private mdsId = new Date().getTime();
     private childobjectDrag: number;
@@ -247,14 +247,14 @@ export class MdsComponent {
     @Output() openTemplate = new EventEmitter();
     @Output() openContributor = new EventEmitter();
     @Output() onMdsLoaded = new EventEmitter();
-    private rendered: SafeHtml;
-    private renderedSuggestions: SafeHtml;
-    private jumpmarks: CardJumpmark[];
+    rendered: SafeHtml;
+    renderedSuggestions: SafeHtml;
+    jumpmarks: CardJumpmark[];
     isLoading = false;
 
     private widgetName = 'cclom:general_keyword';
     private widgetType = 'multivalueFixedBadges';
-    private currentNodes: Node[];
+    currentNodes: Node[];
     public addChildobject = false;
     public editChildobject: any;
     public editChildobjectLicense: any;
@@ -266,12 +266,12 @@ export class MdsComponent {
     private mds: any;
     private static MAX_SUGGESTIONS = 5;
     private suggestionsViaSearch = false;
-    private buttons = [
+    buttons = [
         new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
         new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveValues()),
     ];
 
-    private resetValues() {
+    resetValues() {
         this._currentValues = null;
         this.loadMdsFinal(() => {
             this.onDone.emit(null);
@@ -1717,7 +1717,7 @@ export class MdsComponent {
         }
         return html;
     }
-    private closeDialog() {
+    closeDialog() {
         document.getElementById(this.currentWidgetSuggestion + '_suggestions').style.display =
             'none';
         this.currentWidgetSuggestion = null;
@@ -2495,7 +2495,7 @@ export class MdsComponent {
         }
         this.refreshChildobjects();
     }
-    private addChildobjectLink(event: any) {
+    addChildobjectLink(event: any) {
         let link = this.nodeHelper.addHttpIfRequired(event.link);
         this.addChildobject = false;
         let properties = RestHelper.createNameProperty(link);
@@ -2523,7 +2523,7 @@ export class MdsComponent {
             },
         );
     }
-    private addChildobjectFile(event: any) {
+    addChildobjectFile(event: any) {
         this.addChildobject = false;
         for (let file of event) {
             let child = {
@@ -2865,7 +2865,7 @@ export class MdsComponent {
             this.onAddChildobject(callback);
         }
     }
-    private cancel() {
+    cancel() {
         this.onCancel.emit();
     }
 
@@ -3096,7 +3096,7 @@ export class MdsComponent {
             this.onRemoveChildobject(callback, pos + 1);
         });
     }
-    private setChildobjectProperties(props: any) {
+    setChildobjectProperties(props: any) {
         let edit = this.editChildobject || this.editChildobjectLicense;
         // keep any existing license data
         if (this.editChildobject && edit.child.properties) {
