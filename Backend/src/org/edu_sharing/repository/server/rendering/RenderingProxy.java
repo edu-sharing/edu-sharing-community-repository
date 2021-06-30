@@ -87,6 +87,9 @@ public class RenderingProxy extends HttpServlet {
 		}catch(Exception e){
 			throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,e.getMessage(),RenderingException.I18N.encryption,e);
 		}
+		if(usernameDecrypted==null || usernameDecrypted.isEmpty()){
+			throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,"Encrypted username was empty. Check your keys",RenderingException.I18N.encryption,new Throwable());
+		}
 
 		// remove any old states from current session before continuing
 		req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
