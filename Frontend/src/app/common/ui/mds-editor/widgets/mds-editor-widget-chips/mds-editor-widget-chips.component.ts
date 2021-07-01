@@ -9,15 +9,8 @@ import {
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
-import {
-    debounceTime,
-    distinctUntilChanged,
-    filter,
-    map,
-    startWith,
-    switchMap,
-} from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, EMPTY, from, Observable, timer } from 'rxjs';
+import { debounce, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { DisplayValue } from '../DisplayValues';
@@ -110,14 +103,11 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         if (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges) {
             return;
         }
-        const input = event.input;
         const value = (event.value || '').trim();
         if (value) {
             this.add(this.toDisplayValues(value));
         }
-        if (input) {
-            input.value = '';
-        }
+        this.inputControl.setValue(null);
     }
 
     onBlurInput(event: FocusEvent): void {
@@ -207,7 +197,8 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
                     (value: string | null | DisplayValue) =>
                         typeof value === 'string' || value === null,
                 ),
-                debounceTime(200),
+                // Debounce user input, but pass on a cleared input field immediately.
+                debounce((value) => (value !== null ? timer(200) : EMPTY)),
                 distinctUntilChanged(),
             ) as Observable<string | null>,
             this.chipsControl.valueChanges.pipe(

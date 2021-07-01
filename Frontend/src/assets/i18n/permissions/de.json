@@ -29,6 +29,8 @@
         "MENU_EXCLUDE": "Ausschließen",
         "MENU_REMOVE_MEMBERSHIP": "Aus Gruppe(n) entfernen",
         "MENU_STATUS": "Status festlegen",
+        "ORG_HOME_FOLDER_LABEL": "Position des Organisations-Ordners",
+        "ORG_HOME_FOLDER_MAIN": "System",
         "SEARCH_GROUP": "Gruppen suchen...",
         "SEARCH_USER": "Nutzer suchen...",
         "SEARCH_GROUPS": "Gruppen durchsuchen...",

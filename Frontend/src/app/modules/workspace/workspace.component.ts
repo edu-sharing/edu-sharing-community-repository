@@ -53,6 +53,7 @@ import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import { CardService } from '../../core-ui-module/card.service';
 import { Observable } from 'rxjs';
 import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 @Component({
     selector: 'workspace-main',
@@ -238,12 +239,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
     handleDrop(event: any) {
         for (const s of event.source) {
-            if (event.target.ref.id === s.ref.id || event.target.ref.id === s.parent.id) {
+            if (event.target?.ref?.id === s.ref.id || event.target?.ref?.id === s.parent.id) {
                 this.toast.error(null, 'WORKSPACE.SOURCE_TARGET_IDENTICAL');
                 return;
             }
         }
-        if (!event.target.isDirectory) {
+        if (event.target !== 'HOME' && !event.target.isDirectory) {
             this.toast.error(null, 'WORKSPACE.TARGET_NO_DIRECTORY');
             return;
         }
@@ -267,15 +268,18 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         ]
         */
     }
-    canDropBreadcrumbs = (event: any) => event.target.ref.id !== this.currentFolder.ref.id;
-    private moveNode(target: Node, source: Node[], position = 0) {
+    canDropBreadcrumbs = (event: any) => {
+        return event.target === 'HOME' ? this.root === 'MY_FILES' :
+            event.target?.ref?.id !== this.currentFolder.ref.id;
+    };
+    private moveNode(target: DragNodeTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
             this.finishMoveCopy(target, source, false);
             this.globalProgress = false;
             return;
         }
-        this.node.moveNode(target.ref.id, source[position].ref.id).subscribe((data: NodeWrapper) => {
+        this.node.moveNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id).subscribe((data: NodeWrapper) => {
                 this.moveNode(target, source, position + 1);
             },
             (error: any) => {
@@ -284,14 +288,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.moveNode(target, source, position + 1);
             });
     }
-    private copyNode(target: Node, source: Node[], position = 0) {
+    private copyNode(target: DragNodeTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
             this.finishMoveCopy(target, source, true);
             this.globalProgress = false;
             return;
         }
-        this.node.copyNode(target.ref.id, source[position].ref.id).subscribe((data: NodeWrapper) => {
+        this.node.copyNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id).subscribe((data: NodeWrapper) => {
                 this.copyNode(target, source, position + 1);
             },
             (error: any) => {
@@ -300,10 +304,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.copyNode(target, source, position + 1);
             });
     }
-    private finishMoveCopy(target: Node, source: Node[], copy: boolean) {
+    private finishMoveCopy(target: DragNodeTarget, source: Node[], copy: boolean) {
         this.toast.closeModalDialog();
         const info: any = {
-            to: target.name,
+            to: (target as Node).name || this.translate.instant('WORKSPACE.MY_FILES'),
             count: source.length,
             mode: this.translate.instant('WORKSPACE.' + (copy ? 'PASTE_COPY' : 'PASTE_MOVE'))
         };

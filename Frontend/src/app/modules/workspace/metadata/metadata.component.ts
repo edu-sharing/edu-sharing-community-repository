@@ -27,7 +27,7 @@ export class WorkspaceMetadataComponent{
   permissions: any;
   private usages: Usage[];
   usagesCollection: Node[];
-  private nodeObject: Node;
+  nodeObject: Node;
   versions: Version[];
   versionsLoading= false;
   columns: ListItem[]= [];

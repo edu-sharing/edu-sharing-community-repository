@@ -106,7 +106,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         Set<String> authorities = getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         for (SearchHit hit : hits) {
-            data.add(transformSearchHit(authorities, user, hit));
+            data.add(transformSearchHit(authorities, user, hit, false));
         }
         return sr;
     }
@@ -162,10 +162,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(queryData,criterias);
-            QueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
+            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias);
+            BoolQueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
                     ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
                     : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
+            queryBuilder = queryBuilder.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
             if(searchToken.getPermissions() != null){
                 for(String permission : searchToken.getPermissions()){
                     queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
@@ -217,7 +218,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             long millisPerm = System.currentTimeMillis();
             for (SearchHit hit : hits) {
-                data.add(transformSearchHit(authorities, user, hit));
+                data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
             }
             logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
 
@@ -264,15 +265,20 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return sr;
     }
 
-    private Set<String> getUserAuthorities() {
+    public Set<String> getUserAuthorities() {
         Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
         if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+        if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
+        }
         return authorities;
     }
 
-    private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit) {
-        Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+    public NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
+        return this.transform(authorities,user,hit.getSourceAsMap(), resolveCollections);
+    }
+    private NodeRef transform(Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections){
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
@@ -295,10 +301,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
              * @TODO: transform to ValueTool.toMultivalue
              */
             if(entry.getValue() instanceof ArrayList){
-                if(((ArrayList) entry.getValue()).size() != 1) {
-                    value = ValueTool.toMultivalue(((ArrayList<?>) entry.getValue()).toArray(new String[0]));
-                } else {
-                    value = (Serializable) ((ArrayList) entry.getValue()).get(0);
+                ArrayList<?> list = (ArrayList<?>) entry.getValue();
+                if(list.size() > 1 && list.get(0) instanceof String) {
+                    value = ValueTool.toMultivalue(list.toArray(new String[0]));
+                } else if(list.size() == 1) {
+                    value = (Serializable) ((ArrayList<?>) entry.getValue()).get(0);
                 }
             } else {
                 value = entry.getValue();
@@ -323,6 +330,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
             }
         }
+        props.put(CCConstants.NODETYPE, sourceAsMap.get("type"));
 
         List<Map<String, Serializable>> children = (List) sourceAsMap.get("children");
         int childIOCount = 0;
@@ -353,6 +361,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         if(commentCount > 0){
             props.put(CCConstants.VIRT_PROP_COMMENTCOUNT,commentCount);
         }
+
 
 
         org.alfresco.service.cmr.repository.NodeRef alfNodeRef = new  org.alfresco.service.cmr.repository.NodeRef(new StoreRef(protocol,identifier),nodeId);
@@ -424,6 +433,29 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         eduNodeRef.setPermissions(permissions);
+
+        if(resolveCollections) {
+            List<Map<String, Object>> collections = (List) sourceAsMap.get("collections");
+            if (collections != null) {
+                for (Map<String, Object> collection : collections) {
+                    String colOwner = (String) collection.get("owner");
+                    boolean hasPermission = user.equals(colOwner);
+                    if (!hasPermission) {
+                        Map<String, List<String>> colPermissionsElastic = (Map) collection.get("permissions");
+                        for (Map.Entry<String, List<String>> entry : colPermissionsElastic.entrySet()) {
+                            if ("read".equals(entry.getKey())) {
+                                hasPermission = entry.getValue().stream().anyMatch(s -> authorities.contains(s) || s.equals(user));
+                                break;
+                            }
+                        }
+                    }
+                    if (hasPermission) {
+                        NodeRef transform = transform(authorities, user, collection, resolveCollections);
+                        eduNodeRef.getUsedInCollections().add(transform);
+                    }
+                }
+            }
+        }
         long permMillisSingle = (System.currentTimeMillis() - millis);
         return eduNodeRef;
     }

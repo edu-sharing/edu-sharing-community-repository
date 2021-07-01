@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Node, RestNodeService } from '../../../core-module/core.module';
-import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
+import {DragData, DragNodeTarget, DropData} from '../../directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
 
 /**
@@ -98,7 +98,7 @@ export class BreadcrumbsComponent {
     @Output() onDrop = new EventEmitter();
 
     nodes: Node[] = [];
-    dragHover: Node;
+    dragHover: DragNodeTarget;
 
     private _searchQuery: string;
 
@@ -108,7 +108,7 @@ export class BreadcrumbsComponent {
         return this.canDrop({ event, nodes, dropAction, target });
     }
 
-    onNodesHoveringChange(nodesHovering: boolean, target: Node) {
+    onNodesHoveringChange(nodesHovering: boolean, target: DragNodeTarget) {
         if (nodesHovering) {
             this.dragHover = target;
         } else {
@@ -121,7 +121,7 @@ export class BreadcrumbsComponent {
         }
     }
 
-    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
+    onNodesDrop({ event, nodes, dropAction }: DragData, target: DragNodeTarget) {
         if (dropAction === 'link') {
             throw new Error('dropAction "link" is not allowed');
         }

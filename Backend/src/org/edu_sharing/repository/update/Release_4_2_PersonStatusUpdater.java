@@ -27,6 +27,8 @@ public class Release_4_2_PersonStatusUpdater extends UpdateAbstract{
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	PersonService personService = serviceRegistry.getPersonService();
+
+	QName prop = QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
 	
 	public Release_4_2_PersonStatusUpdater(PrintWriter out) {
 		this.out = out;
@@ -56,8 +58,10 @@ public class Release_4_2_PersonStatusUpdater extends UpdateAbstract{
 			   
 				List<PersonInfo> people = getAllPeople();
 				for(PersonInfo personInfo : people) {
-		    		logInfo("updateing person: " + personInfo.getUserName());
-		    		serviceRegistry.getNodeService().setProperty(personInfo.getNodeRef(), QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), personActiveStatus);
+					if(serviceRegistry.getNodeService().getProperty(personInfo.getNodeRef(),prop) == null){
+						logInfo("updateing person: " + personInfo.getUserName());
+						serviceRegistry.getNodeService().setProperty(personInfo.getNodeRef(), prop, personActiveStatus);
+					}
 		    	}
 				
 				return null;

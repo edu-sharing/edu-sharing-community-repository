@@ -44,6 +44,7 @@ public class Node {
 	private Person owner;
 	private int commentCount;
 	private RatingDetails rating;
+	private List<Node> usedInCollections = new ArrayList<>();
 
 	/**
    **/
@@ -380,4 +381,8 @@ public class Node {
     public RatingDetails getRating() {
         return rating;
     }
+
+	public void setUsedInCollections(List<Node> usedInCollections) { this.usedInCollections = usedInCollections; }
+
+	public List<Node> getUsedInCollections() { return usedInCollections; }
 }

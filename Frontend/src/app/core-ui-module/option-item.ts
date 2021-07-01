@@ -169,6 +169,7 @@ export enum ElementType {
   MapRef, // Map ref (link to another map)
   NodePublishedCopy,
   NodeBlockedImport, // node with property ccm:importblocked == true
+  NodeProposal, // node proposal for a collection
   Person,
   Group,
   SavedSearch,
