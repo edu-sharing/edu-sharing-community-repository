@@ -30,8 +30,8 @@
         </mat-form-field>
       </div>
 
-      <div class="config-timespan">
-        <mat-form-field *ngIf="config.frontpage.mode !== 'collection'">
+      <div class="config-timespan" *ngIf="config.frontpage.mode !== 'collection'">
+        <mat-form-field>
           <mat-label>{{'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate}}</mat-label>
           <mat-hint>{{'ADMIN.FRONTPAGE.TIMESPAN_HINT' | translate}}</mat-hint>
           <span matSuffix>{{'ADMIN.FRONTPAGE.TIMESPAN_DAYS' | translate}}</span>
@@ -133,7 +133,7 @@
   </h4>
   <div class="group preview">
     <h5 class="mat-heading-5 preview-error" *ngIf="previewError">{{'ADMIN.FRONTPAGE.PREVIEW_ERROR.'+previewError | translate}}</h5>
-    <listTable *ngIf="!previewError"
+    <app-custom-node-list-wrapper *ngIf="!previewError"
                [isLoading]="previewLoading"
                [nodes]="previewNodes"
                [columns]="previewColumns"
@@ -141,8 +141,10 @@
                [hasIcon]="true"
                [viewType]="1"
                [isClickable]="true"
+               [createLink]="false"
                (clickRow)="openNode($event)"
-    ></listTable>
+               (doubleClickRow)="openNode($event)"
+    ></app-custom-node-list-wrapper>
   </div>
   <h5 class="mat-heading-5 preview-hint" *ngIf="!previewLoading && !previewError" innerHTML="{{'ADMIN.FRONTPAGE.PREVIEW_HINT' | translate}}"></h5>
 </div>
