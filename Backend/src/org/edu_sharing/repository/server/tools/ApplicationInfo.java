@@ -104,7 +104,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String KEY_CUSTOM_HTML_HEADERS = "custom_html_headers";
 
 	public static final String KEY_METADATASETS_V2 = "metadatasetsV2";
-	
+
+	// metadataset used when an element from a remote repository is copied into the local one
+	// if unset, the main metadataset (KEY_METADATASETS_V2) from the remote repo will be used
+	public static final String KEY_IMPORT_METADATASET = "import_metadataset";
+
 	public static final String KEY_PUBLIC_KEY = "public_key";
 	public static final String KEY_PRIVATE_KEY = "private_key";
 	
@@ -164,7 +168,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String AUTHBYAPP_USERNAME_PROP_USERNAME = "USERNAME";
 
 	public static final String AUTHBYAPP_USER_WHITELIST = "auth_by_app_user_whitelist";
-	
+
+	@Deprecated
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
 
 	public static final String NOTIFY_FETCH_LIMIT = "notify_fetch_limit";
@@ -899,6 +904,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		return validatorRegexCMName;
 	}
 
+	@Deprecated
 	public String getWebsitepreviewrenderservice() {
 		return websitepreviewrenderservice;
 	}	

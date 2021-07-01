@@ -95,6 +95,10 @@ Short version works only with `short="always"`.
   <a
     *ngIf="homeRouterLink"
     #trigger
+    [appNodesDropTarget]="canDropNodes.bind(this, 'HOME')"
+    (nodesHoveringChange)="onNodesHoveringChange($event, 'HOME')"
+    (nodesDrop)="onNodesDrop($event, 'HOME')"
+    [class.selected]="dragHover === 'HOME'"
     [routerLink]="homeRouterLink.routerLink"
     [queryParams]="homeRouterLink.queryParams"
     [queryParamsHandling]="homeRouterLink.queryParamsHandling"
@@ -106,6 +110,10 @@ Short version works only with `short="always"`.
   </a>
   <button
     *ngIf="!homeRouterLink"
+    [appNodesDropTarget]="canDropNodes.bind(this, 'HOME')"
+    (nodesHoveringChange)="onNodesHoveringChange($event, 'HOME')"
+    (nodesDrop)="onNodesDrop($event, 'HOME')"
+    [class.selected]="dragHover === 'HOME'"
     #trigger
     cdkMonitorElementFocus
     class="breadcrumb-element {{ classes }}"

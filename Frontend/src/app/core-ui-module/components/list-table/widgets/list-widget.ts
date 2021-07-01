@@ -1,10 +1,16 @@
 import { Input, Type, Directive } from '@angular/core';
-import {Group, Node, Statistics, Person} from '../../../../core-module/rest/data-object';
+import {
+    Group,
+    Node,
+    Statistics,
+    Person,
+    ProposalNode
+} from '../../../../core-module/rest/data-object';
 import { ListItem } from '../../../../core-module/ui/list-item';
 
 @Directive()
 export class ListWidget {
-    @Input() node: Node | Group | Person | Statistics; // node (or group/user)
+    @Input() node: Node | ProposalNode | Group | Person | Statistics; // node (or group/user)
     @Input() item: ListItem;
     /**
      * Whether to add a tooltip to non-obvious fields that describes the field the given value

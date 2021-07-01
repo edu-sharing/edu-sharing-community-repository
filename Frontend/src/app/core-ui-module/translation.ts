@@ -231,6 +231,6 @@ export class Translation {
 
 export class FallbackTranslationHandler implements MissingTranslationHandler {
     handle(params: MissingTranslationHandlerParams) {
-        return (params.interpolateParams as any)?.fallback || params.key;
+        return (params.interpolateParams as any)?.fallback ?? params.key;
     }
 }

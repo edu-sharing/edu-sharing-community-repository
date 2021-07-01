@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {DialogButton, SessionStorageService} from '../../../core-module/core.module';
@@ -18,9 +18,9 @@ import {TranslateService} from '@ngx-translate/core';
 
 export class AccessibilityComponent implements OnInit {
     readonly TOAST_DURATION = ToastDuration;
-    @Input() visible = false;
+    visible = false;
     buttons = DialogButton.getSaveCancel(
-        () => this.visible = false,
+        () => this.hide(),
         () => this.save()
     );
     toastMode: 'important' | 'all' = null;
@@ -42,15 +42,13 @@ export class AccessibilityComponent implements OnInit {
         private translate: TranslateService
     ) {
     }
-    async ngOnInit() {
-        this.toastMode = await this.storage.get('accessibility_toastMode', 'all').toPromise();
-        this.toastDuration = await this.storage.get('accessibility_toastDuration', ToastDuration.Seconds_5).toPromise();
+    ngOnInit() {
     }
 
     private async save() {
         this.toast.showProgressDialog();
-        await this.storage.set('accessibility_toastMode', this.toastMode).toPromise();
-        await this.storage.set('accessibility_toastDuration', this.toastDuration).toPromise();
+        await this.storage.set('accessibility_toastMode', this.toastMode);
+        await this.storage.set('accessibility_toastDuration', this.toastDuration);
         await this.toast.refresh();
         this.toast.closeModalDialog();
         this.toast.show({
@@ -68,5 +66,16 @@ export class AccessibilityComponent implements OnInit {
         } else {
             return this.translate.instant('ACCESSIBILITY.TOAST_DURATION_INFINITE', {seconds: time});
         }
+    }
+
+    async show() {
+        this.toastMode = null;
+        this.toastDuration = null;
+        this.visible = true;
+        this.toastMode = await this.storage.get('accessibility_toastMode', 'all').toPromise();
+        this.toastDuration = await this.storage.get('accessibility_toastDuration', ToastDuration.Seconds_5).toPromise();
+    }
+    hide() {
+        this.visible = false;
     }
 }

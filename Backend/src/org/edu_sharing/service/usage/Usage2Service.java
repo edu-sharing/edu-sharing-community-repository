@@ -188,8 +188,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		String guid = null;
 		NodeRef personRef = serviceRegistry.getPersonService().getPerson(user);
 		if(personRef != null){
-			Map<QName, Serializable> personProps = serviceRegistry.getNodeService().getProperties(personRef);
-			guid = (String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_GUID));
+			guid = (String)NodeServiceHelper.getProperty(personRef, CCConstants.CM_PROP_PERSON_GUID);
 		}
 
 		if(guid == null){

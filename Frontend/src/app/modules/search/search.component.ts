@@ -283,8 +283,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                                     /*this.repositories = null;*/
                                 }
                                 this.updateCurrentRepositoryId();
-                                if (this.repositories) {
-                                    let all = new Repository();
+                                if (this.repositories && !this.repositories.some((r) => r.repositoryType === 'ALL')) {
+                                    const all = new Repository();
                                     all.id = RestConstants.ALL;
                                     all.title = this.translate.instant(
                                         'SEARCH.REPOSITORY_ALL',
@@ -1507,11 +1507,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         'current repository ' +
                             this.currentRepository +
                             ' is restricted by context, switching to primary ' +
-                            use,
+                            use[0], use,
                     );
                     this.routeSearch(
                         this.searchService.searchTerm,
-                        use,
+                        use[0],
                         RestConstants.DEFAULT,
                     );
                 }

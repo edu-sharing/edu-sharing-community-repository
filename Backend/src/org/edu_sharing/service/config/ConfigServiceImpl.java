@@ -11,6 +11,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -43,12 +47,14 @@ public class ConfigServiceImpl implements ConfigService{
 	private static Logger logger=Logger.getLogger(ConfigServiceImpl.class);
 	// Cached config
 	private static String CACHE_KEY = "CLIENT_CONFIG";
-	private static SimpleCache<String, Serializable> configCache = (SimpleCache<String, Serializable>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
+	private static SimpleCache<String, String> configCache = (SimpleCache<String, String>) AlfAppContextGate.getApplicationContext().getBean("eduSharingConfigCache");
 
 	private static final Unmarshaller jaxbUnmarshaller;
 
 	private final NodeService nodeService;
 	private final PermissionService permissionService;
+
+	private static final ObjectReader jacksonReader;
 
 	static{
 		Unmarshaller jaxbUnmarshaller1;
@@ -60,6 +66,7 @@ public class ConfigServiceImpl implements ConfigService{
 			logger.error(e.getMessage(),e);
 		}
 		jaxbUnmarshaller = jaxbUnmarshaller1;
+		jacksonReader = new ObjectMapper().reader(Config.class);
 	}
 
 	/*
@@ -111,7 +118,9 @@ public class ConfigServiceImpl implements ConfigService{
 	public Config getConfig() throws Exception {
 	    if(!"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()) && configCache.getKeys().contains(CACHE_KEY)) {
 	    	// Deep copy to prevent override cache data from contexts
-			return SerializationUtils.clone((Config) configCache.get(CACHE_KEY));
+			return jacksonReader.readValue(configCache.get(CACHE_KEY));
+			//return new Gson().fromJson(configCache.get(CACHE_KEY), Config.class);
+			//return SerializationUtils.clone((Config) configCache.get(CACHE_KEY));
 		}
 		InputStream is = getConfigInputStream();
 		if(is==null)
@@ -121,8 +130,8 @@ public class ConfigServiceImpl implements ConfigService{
             config = (Config) jaxbUnmarshaller.unmarshal(is);
         }
         is.close();
-		configCache.put(CACHE_KEY,config);
-        return SerializationUtils.clone((Config)configCache.get(CACHE_KEY));
+		configCache.put(CACHE_KEY, new ObjectMapper().writer().writeValueAsString(config));
+		return jacksonReader.readValue(configCache.get(CACHE_KEY));
 	}
 
 	private InputStream getConfigInputStream() {

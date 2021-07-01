@@ -89,6 +89,15 @@
     mat-form-field {
       width: 100%;
     }
+      .folder-path{
+          display: flex;
+          flex-direction: column;
+          ::ng-deep {
+              .breadcrumb {
+                  flex-wrap: wrap;
+              }
+          }
+      }
     .group {
       display: flex;
       align-items: center;

@@ -54,15 +54,15 @@ public class MetadataTemplateRenderer {
 	private Map<String, String[]> properties;
 	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
-	public MetadataTemplateRenderer(MetadataSetV2 mds, NodeRef nodeRef, String userName, Map<String, Object> properties) {
+	public MetadataTemplateRenderer(MetadataSetV2 mds, NodeRef nodeRef, String userName, String type, List<String> aspects, Map<String, Object> properties) {
 		this.mds = mds;
 		this.nodeRef = nodeRef;
 		this.userName = userName;
 		this.properties = cleanupTextMultivalueProperties(
 				convertProps(
 						NodeServiceHelper.addVirtualProperties(
-								NodeServiceHelper.getType(nodeRef),
-								Arrays.asList(NodeServiceHelper.getAspects(nodeRef)),
+								type,
+								aspects,
 								properties
 						)
 				)

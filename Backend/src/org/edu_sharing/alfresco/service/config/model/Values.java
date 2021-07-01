@@ -61,4 +61,5 @@ public class Values implements Serializable {
 	@XmlElement	public ConfigUpload upload;
 	@XmlElement	public ConfigRemote remote;
 	@XmlElement	public String customCSS;
+	@XmlElement	public ConfigPrivacy privacy;
 }

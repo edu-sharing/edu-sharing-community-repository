@@ -16,7 +16,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../core-ui-module/translation';
-import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope} from '../../../core-ui-module/option-item';
+import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {trigger} from '@angular/animations';
@@ -33,9 +33,11 @@ import {
     EventType,
     FrameEventsService,
     ListItem,
-    LoginResult, Mds, Metadataset,
+    LoginResult,
+    Mds,
     Node,
     NodeList,
+    ProposalNode,
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
@@ -64,6 +66,7 @@ import {
 import {RestTrackingService} from '../../../core-module/rest/services/rest-tracking.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {CardComponent} from '../../../core-ui-module/components/card/card.component';
+import {CardService} from '../../../core-ui-module/card.service';
 
 declare var jQuery:any;
 declare var window: any;
@@ -104,6 +107,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       private usageApi : RestUsageService,
       private toolService: RestToolService,
       private componentFactoryResolver: ComponentFactoryResolver,
+      private cardServcie: CardService,
       private viewContainerRef: ViewContainerRef,
       private frame : FrameEventsService,
       private actionbarService : ActionbarHelperService,
@@ -354,7 +358,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
-    download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
+    download.elementType = OptionsHelperService.DownloadElementTypes;
     // declare explicitly so that callback will be overriden
     download.customEnabledCallback = null;
     download.group = DefaultGroups.View;
@@ -402,9 +406,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 const finish = (set:Mds = null) => {
                     this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
                     this.mds = set;
-
                     jQuery('#nodeRenderContent').html(data.detailsSnippet);
                     this.postprocessHtml();
+                    this.handleProposal();
                     this.addCollections();
                     this.addVideoControls();
                     this.linkSearchableWidgets();
@@ -566,12 +570,15 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         });
         this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
         this.optionsHelper.setListener({
-            onRefresh: () => this.refresh(),
+            onRefresh: (node) => {
+                this.refresh();
+            },
             onDelete: (result) => this.onDelete(result),
         });
         this.optionsHelper.refreshComponents();
         this.postprocessHtml();
         this.isBuildingPage=false;
+        this.handleQueryAction();
     }
 
   private isCollectionRef() {
@@ -717,5 +724,49 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
     private getMdsId() {
         return this._node.metadataset ? this._node.metadataset : RestConstants.DEFAULT;
+    }
+
+    private async handleProposal() {
+        if(this.queryParams.proposal && this.queryParams.proposalCollection) {
+            (this._node as ProposalNode).proposal = (await this.nodeApi.getNodeMetadata(
+                this.queryParams.proposal, [RestConstants.ALL]).toPromise()
+            ).node;
+            (this._node as ProposalNode).proposalCollection = new Node(this.queryParams.proposalCollection);
+            // access is granted when we can fetch the node
+            (this._node as ProposalNode).accessible = true;
+            this.optionsHelper.refreshComponents();
+        }
+    }
+
+    /**
+     * check if the current url requested to directly open an action (from the actionbar),
+     * and if so, call it
+     */
+    private handleQueryAction() {
+        if(this.queryParams.action) {
+            const option = this.optionsHelper.getAvailableOptions(Target.Actionbar).
+            filter((o) => o.name === this.queryParams.action)?.[0];
+            if(option) {
+                if(option.isEnabled) {
+                    option.callback();
+                    // wait until a dialog has opened, then, as soon as the particular dialog closed
+                    // trigger that the action has been done
+                    this.cardServcie.hasOpenModals
+                        .skipWhile((h) => !h)
+                        .filter((h) => !h)
+                        .subscribe(() => this.onQueryActionDone());
+                } else {
+                    console.warn('action ' + this.queryParams.action + ' is currently not enabled');
+                }
+            } else {
+                console.warn('action ' + this.queryParams.action + ' is either not supported or not allowed for current user');
+            }
+        }
+    }
+
+    private onQueryActionDone() {
+        if(this.queryParams.action) {
+            window.close();
+        }
     }
 }

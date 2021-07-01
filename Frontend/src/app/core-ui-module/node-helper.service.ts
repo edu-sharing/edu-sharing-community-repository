@@ -14,7 +14,17 @@ import {Toast} from './toast';
 import {UIHelper} from './ui-helper';
 import {ComponentFactoryResolver, Injectable, ViewContainerRef} from '@angular/core';
 import {BridgeService} from '../core-bridge-module/bridge.service';
-import {AuthorityProfile, CollectionReference, NodesRightMode, Node, Permission, User, WorkflowDefinition, Repository} from '../core-module/rest/data-object';
+import {
+    AuthorityProfile,
+    CollectionReference,
+    NodesRightMode,
+    Node,
+    Permission,
+    User,
+    WorkflowDefinition,
+    Repository,
+    ProposalNode
+} from '../core-module/rest/data-object';
 import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
@@ -667,6 +677,8 @@ export class NodeHelperService {
                     routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
                     queryParams: {
                         repository: fromHome ? null : node.ref.repo,
+              proposal: (node as ProposalNode).proposal?.ref.id,
+              proposalCollection: (node as ProposalNode).proposalCollection?.ref.id,
                     },
                 };
             }

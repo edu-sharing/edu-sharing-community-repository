@@ -76,6 +76,7 @@ public class NodeFrontpage {
         query.must(searchServiceElastic.getReadPermissionsQuery());
         query.must(QueryBuilders.termQuery("type","ccm:io"));
         query.must(QueryBuilders.termQuery("nodeRef.storeRef.protocol","workspace"));
+        query.mustNot(QueryBuilders.termQuery("aspects","ccm:collection_io_reference"));
 
         if(config.queries!=null && !config.queries.isEmpty()) {
             // filter all queries with matching toolpermissions, than concat them via "must"

@@ -92,6 +92,13 @@
         "ADD_TO": {
             "DUPLICATE_TITLE": "Element(e) bereits vorhanden",
             "DUPLICATE_MESSAGE": "{{count}} Element(e) sind bereits in der Sammlung vorhanden. Möchten Sie diese erneut einfügen?"
+        },
+        "PROPOSALS": {
+            "TITLE": "Von Nutzern vorgeschlagene Materialien",
+            "TOAST": {
+                "ACCEPTED": "Das Element wurde der Sammlung hinzugefügt",
+                "DECLINED": "Der Vorschlag wurde abgelehnt"
+            }
         }
     },
 

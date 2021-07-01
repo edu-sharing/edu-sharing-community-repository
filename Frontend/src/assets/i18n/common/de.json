@@ -105,6 +105,7 @@
     "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Sie das Speicherplatz-Quota vollständig überschritten haben.\n\nLöschen Sie einige Dateien, um Speicherplatz zu schaffen und versuchen Sie es anschließend erneut.",
     "RESTRICTED_ACCESS_ERROR_TITLE": "Keine Lizenz für Material",
     "RESTRICTED_ACCESS_ERROR_MESSAGE": "Beim aktuellen Material handelt es sich um ein lizenziertes Material. Sie besitzen jedoch keine Lizenz, um auf das Material zuzugreifen",
+    "RESTRICTED_ACCESS_COPY_ERROR": "Das Material bzw. im Ordner befindliche Materialien sind als lizenziert festgelegt. Nur Nutzer mit Freigaberechten dürfen dieses Element kopieren",
     "TOOLPERMISSION_ERROR": "Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
     "TOOLPERMISSION_ERROR_INLINE": "Sie dürfen diese Aktion nicht durchführen, da die Berechtigung \"{{permission}}\" fehlt.",
     "TOOLPERMISSION_ERROR_TITLE": "Fehlende Berechtigung",
@@ -150,7 +151,8 @@
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
         "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
-        "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)"
+        "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)",
+        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche der Nutzer keine Schreibrechte hat"
     },
     "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
     "NODE_SEARCH": "Elemente suchen...",
@@ -275,6 +277,10 @@
             "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
     },
+    "NODE_PROPOSAL": {
+        "cm:created": "Zeitpunkt des Vorschlags",
+        "cm:creator": "Vorgeschlagen von"
+    },
     "LICENSE": {
         "TITLE_OF_WORK": "Titel",
         "LINK_AUTHOR": "Link zum Autor",
@@ -323,11 +329,13 @@
         }
     },
     "COOKIE_INFO": {
+        "ACCEPT": " Akzeptieren",
+        "DECLINE": " Ablehnen & Verlassen",
         "REGION_LABEL": "Cookie-Hinweis",
-        "DESCRIPTION": "edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren und diese Seite verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
+        "DESCRIPTION": "edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren möchten diese Seite zu verwenden, stimmen Sie der Nutzung von Cookies bitte zu.",
         "MORE_LINK": "Weitere Informationen",
         "DIALOG_TITLE": "Cookies",
-        "DIALOG_MESSAGE": "Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies kann die Funktionalität dieser Website eingeschränkt sein."
+        "DIALOG_MESSAGE": "Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies ist die Nutzung der Seite nicht möglich."
     },
     "QUOTA": {
         "TITLE": "Speicherplatz",
@@ -365,7 +373,6 @@
     },
     "NODE_REPORT": {
         "TITLE": "Problem melden",
-        "SUBTITLE": "Problem oder Fehler am Medium melden",
         "REPORT": "Melden",
         "REPORT_INFO": "Problem mit \"{{name}}\" melden",
         "COMMENT": "Nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
@@ -375,7 +382,6 @@
         "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben",
         "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",
         "DONE": "Vielen Dank für Ihre Meldung.",
-        "REASON": "Welches Problem besteht?",
         "REASONS": {
             "UNAVAILABLE": "Medium nicht verfügbar",
             "INAPPROPRIATE_CONTENT": "Problematischer Inhalt",
@@ -557,7 +563,9 @@
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Material zur Sammlung hinzufügen?",
-        "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
+        "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben.",
+        "COLLECTION_PROPSE": "Vorschlag einreichen?",
+        "COLLECTION_PROPSE_INFO": "Sie haben auf die Sammlung \"{{collection}}\" keine ausreichenden Rechte. Sie können das Material jedoch als Vorschlag einreichen. Möchten Sie fortfahren?"
     },
     "OPTIONS": {
         "SHOW_ALL_OPTIONS": "Weitere Aktionen",
@@ -573,6 +581,8 @@
         "COLLECTION_PIN": "Sammlung pinnen",
         "COLLECTION_FEEDBACK": "Feedback...",
         "COLLECTION_FEEDBACK_VIEW": "Feedback ansehen",
+        "COLLECTION_PROPOSAL_ACCEPT": "Vorschlag bestätigen",
+        "COLLECTION_PROPOSAL_DECLINE": "Vorschlag ablehnen",
         "OPEN": "Öffnen",
         "DOWNLOAD": "Herunterladen",
         "DOWNLOAD_ALL": "Zip herunterladen",
@@ -787,7 +797,8 @@
         "keyboard_arrow_up": "nach oben",
         "file_upload": "Datei hochladen",
         "delete": "Löschen",
-        "add": "Neu"
+        "add": "Neu",
+        "redo": "Übernehmen"
     },
     "FILL_STATUS": {
         "MESSAGE": "Felder ausgefüllt",
@@ -798,7 +809,7 @@
     "SIGNUP_GROUP" : {
         "TITLE": "In Gruppe einschreiben",
         "SUBTITLE": "Einer neuen Gruppe beitreten",
-        "SELECT_GROUP": "Wählen Sie eine Gruppe aus der untenstehenden Liste, in welche Sie beitreten möchten",
+        "SELECT_GROUP": "Wählen Sie eine Gruppe aus der untenstehenden Liste, in welche Sie beitreten möchten.",
         "NO_GROUPS": "Derzeit sind keine Gruppen verfügbar, denen beigetreten werden kann.",
         "CONFIRM_GROUP": "Sie werden der folgenden Gruppe beitreten:",
         "GROUP_PASSWORD": "Gruppen-Passwort eingeben",
@@ -810,16 +821,20 @@
         },
         "DESCRIPTION": {
             "simple": "Der Zutritt zur gewählten Gruppe ist ohne Beschränkung möglich. Nach Bestätigung werden Sie automatisch Mitglied der Gruppe",
-            "password": "Der gewählten Gruppe darf nur mit einem gültigen Passwort beigetreten werden. Geben Sie das Passwort unten ein, um Mitglied der Gruppe zu werden",
-            "list": "Der Gruppen-Administrator wird über Ihre Beitrittsanfrage informiert. Sie erhalten eine E-Mail, sobald der Administrator Ihnen den Zugang genehmigt hat"
+            "password": "Der gewählten Gruppe darf nur mit einem gültigen Passwort beigetreten werden. Geben Sie das Passwort unten ein, um Mitglied der Gruppe zu werden.",
+            "list": "Der Gruppen-Administrator wird über Ihre Beitrittsanfrage informiert. Sie erhalten eine E-Mail, sobald der Administrator Ihnen den Zugang genehmigt hat."
         },
         "TOAST": {
-            "InvalidPassword": "Das angegebene Passwort ist ungültig",
-            "AlreadyInList": "Sie sind bereits auf der Warteliste dieser Gruppe. Sie erhalten eine E-Mail-Benachrichtigung, sobald Sie freigeschaltet wurden",
-            "AlreadyMember": "Sie sind bereits Mitglied der gewählten Gruppe",
+            "InvalidPassword": "Das angegebene Passwort ist ungültig.",
+            "AlreadyInList": "Sie sind bereits auf der Warteliste dieser Gruppe. Sie erhalten eine E-Mail-Benachrichtigung, sobald Sie freigeschaltet wurden.",
+            "AlreadyMember": "Sie sind bereits Mitglied der gewählten Gruppe.",
             "ADDED_TO_LIST": "Sie wurden auf die Warteliste gesetzt und der Gruppen-Administrator wird benachrichtigt. Sie erhalten eine E-Mail-Benachrichtung, sobald Sie freigeschaltet wurden.",
             "ADDED_TO_GROUP": "Sie sind nun Mitglied der Gruppe {{group}}."
         }
+    },
+    "KEY_MODIFIER": {
+        "SHIFT": "SHIFT",
+        "CTRL": "CTRL"
     },
     "LANGUAGE": {
         "INTERNATIONAL": "International",

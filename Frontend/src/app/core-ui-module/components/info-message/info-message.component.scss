@@ -13,8 +13,8 @@
     width: 100%;
   }
   &.warning{
-    background-color: lighten($warningMedium,50%);
-    border: 1px solid $warningMedium;
+    background-color: lighten($warningMedium,45%);
+    border: 1px solid darken($warningMedium, 10%);
   }
   &.info{
     background-color: lighten($primary,50%);

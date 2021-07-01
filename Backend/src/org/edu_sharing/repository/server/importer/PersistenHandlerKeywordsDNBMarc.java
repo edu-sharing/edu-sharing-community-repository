@@ -1,9 +1,13 @@
 package org.edu_sharing.repository.server.importer;
 
+import org.alfresco.util.TempFileProvider;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.writer.CSVWriter;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
+import org.edu_sharing.service.util.CSVTool;
 
 import java.sql.Array;
 import java.sql.Connection;
@@ -87,17 +91,24 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
 
         }else{
 
-            List<String> existingSyn = (synonymCollection == null) ? new ArrayList<>() : new ArrayList<>(synonymCollection);
-            List<String> newSyn = (cols.get(COL_SYNONYMS) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_SYNONYMS));
+            List<String> existingSyn = (cols.get(COL_SYNONYMS) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_SYNONYMS));
+            List<String> newSyn = (synonymCollection == null) ? new ArrayList<>() : new ArrayList<>(synonymCollection);
             if(value.equals(cols.get(COL_VALUE))
                     && CollectionUtils.isEqualCollection(existingSyn,newSyn) ){
                 logger.info(id +" didn't change");
                 return null;
             }
 
-            String tmpOldSyns = (cols.get(COL_SYNONYMS) == null) ? "": String.join(",",(List<String>)cols.get(COL_SYNONYMS));
-            String tmpNewSyns = (synonymCollection == null) ? "" :String.join(",",synonymCollection);
+            String tmpOldSyns = (cols.get(COL_SYNONYMS) == null) ? "": String.join(",",existingSyn);
+            String tmpNewSyns = (synonymCollection == null) ? "" :String.join(",",newSyn);
             logger.info("updating;" + id +";old;"+cols.get(COL_VALUE)+";"+tmpOldSyns+";new;"+value+";"+tmpNewSyns);
+
+            String oldValueFormated = displayFormat((String)cols.get(COL_VALUE),existingSyn);
+            String newValueFormated = displayFormat(value,newSyn);
+            if(!oldValueFormated.trim().isEmpty() && !oldValueFormated.equals(newValueFormated)) {
+                logger.info("csv," +  StringEscapeUtils.escapeCsv(oldValueFormated) + "," +  StringEscapeUtils.escapeCsv(newValueFormated));
+            }
+
             Connection con = null;
             PreparedStatement statement = null;
             ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
@@ -121,7 +132,17 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         return null;
     }
 
-
+    private String displayFormat(String value, List<String> synonyms){
+        String display = value;
+        if(synonyms.size() > 0){
+            display += " ("+synonyms.get(0);
+            if(synonyms.size() > 1){
+                display += ", "+ synonyms.get(1);
+            }
+            display +=")";
+        }
+        return display;
+    }
 
     @Override
     public boolean mustBePersisted(String replId, String timeStamp) {
