@@ -385,6 +385,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     scrollTo(y = 0) {
         this.winRef.getNativeWindow().scrollTo(0, y);
+        // fix: prevent upscrolling in prod mode
+        setTimeout(() => this.winRef.getNativeWindow().scrollTo(0, y));
     }
 
     handleFocus(event: Event) {
