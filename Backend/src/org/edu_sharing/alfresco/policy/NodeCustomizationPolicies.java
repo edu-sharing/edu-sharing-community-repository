@@ -2,9 +2,11 @@ package org.edu_sharing.alfresco.policy;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies.OnContentUpdatePolicy;
 import org.alfresco.repo.copy.CopyServicePolicies;
@@ -34,6 +36,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -108,7 +111,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
 			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT,
-			CCConstants.CCM_PROP_MAP_REF_TARGET
+			CCConstants.CCM_PROP_MAP_REF_TARGET,
 	};
 	/**
 	 * These are the properties that will be copied to all io_reference nodes inside collections
@@ -512,9 +515,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK("+afterURL+") ON NODE("+nodeRef.getId()+")");
 			
 			String linktype = (String)after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
-			String previewImageBase64 = (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) ? getPreviewFromURL(afterURL) : null;
-			writeBase64Image(nodeRef,previewImageBase64);
-
+			if(linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) {
+				generateWebsitePreview(nodeRef, afterURL);
+			}
 		}
 
 	}
@@ -612,6 +615,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	}
 
 
+	@Deprecated
 	private void writeBase64Image(NodeRef nodeRef, String previewImageBase64) {
 		if (previewImageBase64!=null) {
 
@@ -643,6 +647,29 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			logger.warn("---> NO PREVIEW IMAGE");
 		}
 	}
+	private void writeImage(NodeRef nodeRef, byte[] previewImage) {
+		if (previewImage!=null) {
+			final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName("{http://www.campuscontent.de/model/1.0}userdefined_preview"), true);
+			contentWriter.addListener(new ContentStreamListener() {
+				@Override
+				public void contentStreamClosed() throws ContentIOException {
+					logger.debug("Content Stream of preview Image was closed");
+					logger.debug(" ContentData size:" + contentWriter.getContentData().getSize());
+					logger.debug(" ContentData URL:" + contentWriter.getContentData().getContentUrl());
+					logger.debug(" ContentData MimeTyp:" + contentWriter.getContentData().getMimetype());
+					logger.debug(" ContentData ToString:" + contentWriter.getContentData().toString());
+				}
+			});
+			contentWriter.setMimetype("image/png");
+			try {
+				ByteArrayInputStream is = new ByteArrayInputStream(previewImage);
+				contentWriter.putContent(is);
+			} catch (Exception e) {
+				logger.error("Could not write preview image", e);
+			}
+
+		}
+	}
 
 	public  void generateWebsitePreview(NodeRef nodeRef, String url) {
 		if(nodeRef == null || url == null) {
@@ -651,6 +678,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		String previewImageBase64 = getPreviewFromURL(url);
 		if(previewImageBase64 != null) {
 			writeBase64Image(nodeRef, previewImageBase64);
+		} else {
+			byte[] previewImage = getPreviewFromURLSplash(url);
+			if(previewImage != null){
+				writeImage(nodeRef, previewImage);
+			}
 		}
 	}
 	
@@ -712,16 +744,17 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	/*
 	 * handle NULL when not possible or deactivated
 	 */
+	@Deprecated
 	public static String getPreviewFromURL(String httpURL) {
 		
 		String websitePreviewRenderService = "";
 		try {
 			websitePreviewRenderService = ApplicationInfoList.getHomeRepository().getWebsitepreviewrenderservice();
 		} catch (Exception e) {
-			logger.error(CCConstants.REPOSITORY_FILE_HOME+": Was not able to find or unvalid value '"+ApplicationInfo.WEBSITEPREVIEWRENDERSERVICE+"' - set at least to empty string or 'false' to deactivate",e);
+			logger.debug(CCConstants.REPOSITORY_FILE_HOME+": Was not able to find or unvalid value '"+ApplicationInfo.WEBSITEPREVIEWRENDERSERVICE+"' - set at least to empty string or 'false' to deactivate",e);
 		}
 		if ((websitePreviewRenderService==null) || (websitePreviewRenderService.trim().length()==0) || (!websitePreviewRenderService.trim().startsWith("http"))) {
-			logger.info("No preview Image of Link - websitepreviewrenderservice on "+CCConstants.REPOSITORY_FILE_HOME+" is deactivated");
+			logger.debug("No preview Image of Link - websitepreviewrenderservice on "+CCConstants.REPOSITORY_FILE_HOME+" is deactivated -> Use Splash");
 			return null;
 		} else {
 			logger.info("OK got websitepreviewrenderservice ...");
@@ -758,7 +791,31 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	
 		return result;
 	}
-	
+
+	private static byte[] getPreviewFromURLSplash(String httpURL) {
+		Config splash = LightbendConfigLoader.get().getConfig("repository.communication.splash");
+
+		if(splash != null && splash.hasPath("url")) {
+			try {
+				final StringBuilder url = new StringBuilder(splash.getString("url") + "?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));
+				splash.entrySet().stream().filter((e) -> !"url".equals(e.getKey())).forEach((e) -> {
+					url.append("&").append(e.getKey()).append("=").append(e.getValue().unwrapped().toString());
+				});
+				HttpClient client = new HttpClient();
+				GetMethod method = new GetMethod(url.toString());
+				int statusCode = client.executeMethod(method);
+				if (statusCode == HttpStatus.SC_OK) {
+					return method.getResponseBody();
+				} else {
+					logger.warn("Splash returned non-okay error code " + statusCode + ", " + url.toString());
+				}
+			}catch(Exception e) {
+				logger.warn("Calling Splash service failed: " + e.getMessage(), e);
+			}
+		}
+		return null;
+	}
+
 	public void setPolicyBehaviourFilter(BehaviourFilter policyBehaviourFilter) {
 		this.policyBehaviourFilter = policyBehaviourFilter;
 	}

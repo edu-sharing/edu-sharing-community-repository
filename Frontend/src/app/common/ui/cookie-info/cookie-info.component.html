@@ -1,4 +1,4 @@
-<div
+<!--<div
   *ngIf="show"
   [@fromBottom]="show"
   class="notice"
@@ -13,12 +13,24 @@
   </div>
   <button mat-flat-button (click)="accept()">{{ 'OK' | translate }}</button>
 </div>
-<modal-dialog
-  *ngIf="dialog"
-  [isCancelable]="true"
-  [priority]="10"
-  [title]="'COOKIE_INFO.DIALOG_TITLE'"
-  [message]="'COOKIE_INFO.DIALOG_MESSAGE'"
-  [buttons]="buttons"
-  (onCancel)="dialog = false"
-></modal-dialog>
+-->
+<card *ngIf="show"
+      [isCancelable]="false"
+      height="auto"
+      icon="open_in_browser"
+      [buttons]="buttons"
+      title="{{'COOKIE_INFO.DIALOG_TITLE' | translate }}"
+      >
+  <div class="card-content-padding">
+    <div class="message">
+      {{'COOKIE_INFO.DESCRIPTION' | translate}}
+    </div>
+    <button mat-button color="primary" (click)="details = !details">
+      {{'COOKIE_INFO.MORE_LINK' | translate}}
+      <i [icon]="details ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"></i>
+    </button>
+    <div class="details"
+         *ngIf="details"
+         [@overlay]="details">{{'COOKIE_INFO.DIALOG_MESSAGE' | translate}}</div>
+  </div>
+</card>

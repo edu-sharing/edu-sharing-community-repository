@@ -16,7 +16,6 @@
             <div>{{inbox.name}}</div>
         </div>
     </div>
-    <div class="save" (click)="saveFile()"><i class="material-icons">folder</i><span>{{'SAVE' | translate}}</span></div>
     <div class="collections">
         <div class="addToCollection">
             {{'SHARE_APP.ADD_TO_COLLECTION' | translate}}
@@ -33,5 +32,8 @@
                 [viewType]="2"
                 (clickRow)="saveToCollection($event.node)"
         ></listTable>
+      <div class="save">
+        <button mat-flat-button color="primary" (click)="saveFile()"><i icon="folder"></i><span>{{'SAVE' | translate}}</span></button>
+      </div>
     </div>
 </div>

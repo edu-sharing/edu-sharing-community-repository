@@ -22,6 +22,7 @@
       <mat-tab label="{{'PERMISSIONS.TAB.ORG' | translate}}">
         <ng-template matTabContent>
           <permissions-authorities
+                  [mainNav]="mainNav"
                   [mode]="'ORG'"
                   [searchQuery]="searchQuery"
                   [selected]="selected"
@@ -32,6 +33,7 @@
       <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selected?.length ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
         <ng-template matTabContent>
           <permissions-authorities
+                  [mainNav]="mainNav"
                   [mode]="'GROUP'"
                   [searchQuery]="searchQuery"
                   [org]="selected ? selected[0] : null"
@@ -43,6 +45,7 @@
       <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selected?.length ? ' ('+selected[0].profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
         <ng-template matTabContent>
           <permissions-authorities
+                  [mainNav]="mainNav"
                   [mode]="'USER'"
                   [searchQuery]="searchQuery"
                   [org]="selected ? selected[0] : null"

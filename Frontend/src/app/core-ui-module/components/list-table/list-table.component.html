@@ -275,15 +275,18 @@
             <div *ngFor="let option of getOptionsAlways()"
                  class="more moreAlways column">
               <button mat-icon-button
+                      color="primary"
+                      matTooltip="{{option.name | translate}}"
                       [class.display-none]="!optionIsShown(option, node)"
                       [disabled]="!optionIsValid(option, node)"
                       (click)="optionIsShown(option, node) ? callOption(option,node) : null">
-                <i icon="{{option.icon}}" [aria]="true"></i>
+                <i icon="{{option.icon}}" [aria]="false"></i>
               </button>
             </div>
           </ng-container>
           <div class="more column" *ngIf="_options && _options.length>1" >
             <button mat-icon-button
+                    color="primary"
                     (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
             >
               <i icon="more_vert" [aria]="true"></i>
@@ -291,6 +294,7 @@
           </div>
           <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
             <button mat-icon-button
+                    color="primary"
                     [class.disabled]="!optionIsValid(_options[0],node)"
                     matTooltip="{{_options[0].name | translate}}"
                     (click)="callOption(_options[0],node);$event.stopPropagation();"

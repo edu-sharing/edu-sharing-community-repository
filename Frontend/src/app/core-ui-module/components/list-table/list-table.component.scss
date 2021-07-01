@@ -58,7 +58,6 @@ $previewHeight: 160px;
 .moreAlways {
     transition: $transitionNormal all;
     opacity: 1;
-    color: $primary !important;
 }
 .disabled {
     color: $textVeryLight !important;
@@ -377,12 +376,6 @@ $badgeWidth: 250px;
     padding: 0 5px;
     vertical-align: middle;
     color: $textLight;
-    &.more {
-        color: $primary;
-        > button {
-            color: unset;
-        }
-    }
 }
 .heading > div {
     align-self: flex-end;
@@ -515,11 +508,25 @@ $badgeWidth: 250px;
     background-color: #fff;
 }
 
-.cardList .row {
-    display: flex;
-    flex-direction: column;
-    > a{
-        flex-grow: 1;
+.cardList {
+    .item_with_label.column {
+        .rowInner {
+            max-height: 2.5em;
+        }
+        ::ng-deep app-list-base {
+            label {
+                display: flex;
+                font-size: $fontSizeXSmall;
+            }
+        }
+    }
+    .row {
+        display: flex;
+        flex-direction: column;
+
+        > a {
+            flex-grow: 1;
+        }
     }
 }
 
@@ -1182,7 +1189,7 @@ a.rowInner {
         }
     }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+@media screen and (max-width: ($mobileWidth)) {
     .moreAlways {
         display: none !important;
     }
@@ -1244,7 +1251,7 @@ a.rowInner {
         }
         box-shadow: none;
         .typeicon {
-            top:17px;
+            display: none !important;
         }
         .more a {
             left: 0;
@@ -1293,7 +1300,7 @@ a.rowInner {
     }
     .cardList .childobjectCount {
         right: auto;
-        left: 80px;
+        left: 15px;
         top: 23px;
     }
     .cardList .nodeRatingComments {
@@ -1311,7 +1318,7 @@ a.rowInner {
         display: inherit !important;
         position: absolute;
         top: 25px;
-        left: 108px;
+        left: 120px;
         max-width: 50px;
     }
     .cardList .actionText {

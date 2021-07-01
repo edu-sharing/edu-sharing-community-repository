@@ -62,4 +62,5 @@ public class Values implements Serializable {
 	@XmlElement	public Boolean licenseMandatory;
 	@XmlElement	public ConfigRemote remote;
 	@XmlElement	public String customCSS;
+	@XmlElement	public ConfigPrivacy privacy;
 }

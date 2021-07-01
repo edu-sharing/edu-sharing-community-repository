@@ -9,8 +9,10 @@ export interface DragData {
 }
 
 export interface DropData extends DragData {
-    target: Node;
+    target: DragNodeTarget;
 }
+
+export type DragNodeTarget = Node | 'HOME';
 
 export const dragNodesTransferType = 'application/nodes';
 

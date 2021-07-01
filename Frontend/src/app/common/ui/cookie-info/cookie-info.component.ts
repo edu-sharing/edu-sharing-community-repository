@@ -1,29 +1,41 @@
-import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@angular/core';
-import {UIAnimation} from '../../../core-module/ui/ui-animation';
-import {trigger} from '@angular/animations';
-import {CordovaService} from "../../services/cordova.service";
-import {DialogButton, SessionStorageService} from "../../../core-module/core.module";
+import { trigger } from '@angular/animations';
+import { Component, OnInit } from '@angular/core';
+import { ConfigurationService, DialogButton } from '../../../core-module/core.module';
+import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { CordovaService } from '../../services/cordova.service';
 
 @Component({
-  selector: 'cookie-info',
-  templateUrl: 'cookie-info.component.html',
-  styleUrls: ['cookie-info.component.scss'],
+    selector: 'cookie-info',
+    templateUrl: 'cookie-info.component.html',
+    styleUrls: ['cookie-info.component.scss'],
     animations: [
         trigger('fromBottom', UIAnimation.fromBottom(UIAnimation.ANIMATION_TIME_SLOW)),
-    ]
+        trigger('overlay', UIAnimation.openOverlay()),
+    ],
 })
+export class CookieInfoComponent implements OnInit {
+    readonly buttons = [
+        new DialogButton('COOKIE_INFO.DECLINE', DialogButton.TYPE_CANCEL, () =>
+            window.history.back(),
+        ),
+        new DialogButton('COOKIE_INFO.ACCEPT', DialogButton.TYPE_PRIMARY, () => this.accept()),
+    ];
+    show = false;
+    details = false;
 
+    private readonly storageKey = 'COOKIE_INFO_ACCEPTED';
 
-export class CookieInfoComponent{
-  show=false;
-  dialog=false;
-  buttons : DialogButton[];
-  constructor(private storage : SessionStorageService,private cordova : CordovaService) {
-    this.show=!this.cordova.isRunningCordova() && !this.storage.getCookie("COOKIE_INFO_ACCEPTED",false);
-    this.buttons=[new DialogButton('CLOSE',DialogButton.TYPE_PRIMARY,()=>{this.dialog=false;})];
-  }
-  accept(){
-    this.storage.setCookie("COOKIE_INFO_ACCEPTED",true+"");
-    this.show=false;
-  }
+    constructor(private cordova: CordovaService, private config: ConfigurationService) {}
+
+    async ngOnInit() {
+        this.show =
+            !this.cordova.isRunningCordova() &&
+            localStorage.getItem(this.storageKey) !== 'true' &&
+            (await this.config.get('privacy.cookieDisclaimer', false).toPromise());
+    }
+
+    accept() {
+        localStorage.setItem(this.storageKey, 'true');
+        this.show = false;
+    }
 }

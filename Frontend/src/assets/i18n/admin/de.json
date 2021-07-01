@@ -97,6 +97,7 @@
                 "host": "Öffentliche IP-Adresse des Hosts",
                 "is_home_node": "Beschreibt diese Datei das Heimatrepository? Muss für die homeapplication immer true sein",
                 "metadatasetsV2": "Kommagetrennte Liste möglicher Metadatensets für Home-Nodes. Erster Wert sollte immer \"mds\" für das Standard-Set sein",
+                "import_metadataset": "Metadatenset, was für importierte Objekte von dieser Quelle verwendet wird",
                 "authenticationwebservice": "Absolute URL zum Authentifikationsservice-Endpunkt",
                 "domain": "Die primäre, öffentliche Domain des Systems",
                 "port": "Port für den Zugriff, typischerweise 80 oder 443",

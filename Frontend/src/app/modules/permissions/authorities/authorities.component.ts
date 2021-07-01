@@ -1,24 +1,24 @@
 import {Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {
-  Authority,
-  ConfigurationService,
-  DialogButton,
-  Group,
-  IamAuthorities,
-  IamGroups,
-  IamUsers,
-  ListItem,
-  NodeList,
-  Organization, GroupSignupDetails,
-  OrganizationOrganizations,
-  RestConnectorService,
-  RestConstants,
-  RestIamService,
-  RestNodeService,
-  RestOrganizationService,
-  SharedFolder, UIService,
-  User,
-  UserSimple, Person
+    Authority,
+    ConfigurationService,
+    DialogButton,
+    Group,
+    IamAuthorities,
+    IamGroups,
+    IamUsers,
+    ListItem,
+    NodeList,
+    Organization, GroupSignupDetails,
+    OrganizationOrganizations,
+    RestConnectorService,
+    RestConstants,
+    RestIamService,
+    RestNodeService,
+    RestOrganizationService,
+    SharedFolder, UIService,
+    User,
+    UserSimple, Person, Node
 } from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {Router} from '@angular/router';
@@ -38,6 +38,7 @@ import {ActionbarHelperService} from '../../../common/services/actionbar-helper'
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {ListItemType} from '../../../core-module/ui/list-item';
 import {VCard} from "../../../core-module/ui/VCard";
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({
   selector: 'permissions-authorities',
@@ -73,7 +74,8 @@ export class PermissionsAuthoritiesComponent {
   public _searchQuery: string;
   manageMemberSearch: string;
   public options: CustomOptions= {
-    useDefaultOptions: false,
+    useDefaultOptions: true,
+    supportedOptions: ['OPTIONS.DEBUG'],
     addOptions: []
   };
   public toolpermissionAuthority: any;
@@ -180,6 +182,7 @@ export class PermissionsAuthoritiesComponent {
       }, (error: any) => this.handleError(error));
     }
   }
+  @Input() mainNav: MainNavComponent;
   @Input() set mode(mode: ListItemType){
    this._mode = mode;
    if (mode == 'USER'){
@@ -707,11 +710,8 @@ export class PermissionsAuthoritiesComponent {
     if (this._mode == 'ORG'){
       this.node.getNodeParents(list[0].sharedFolder.id, true).subscribe((data: NodeList) => {
         this.edit = Helper.deepCopy(list[0]);
-        this.edit.folder = '';
         data.nodes = data.nodes.reverse().slice(1);
-        for (const node of data.nodes){
-          this.edit.folder += node.name + '/';
-        }
+        this.edit.folderPath = data.nodes;
         this.editId = this.edit.authorityName;
       }, (error: any) => this.toast.error(error));
     }
@@ -1120,4 +1120,8 @@ export class PermissionsAuthoritiesComponent {
       this.toast.closeModalDialog();
     });
   }
+
+    getLink(mode: 'routerLink' | 'queryParams', folder: Node) {
+        return this.nodeHelper.getNodeLink(mode, folder);
+    }
 }

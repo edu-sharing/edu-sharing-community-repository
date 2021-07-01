@@ -324,7 +324,7 @@ export class WorkspaceExplorerComponent implements OnDestroy {
         });
     }
     canDrop = (event: DropData)=> {
-        return event.target.isDirectory;
+        return event.target === 'HOME' || event.target.isDirectory;
     }
 
     private getRealNodeCount() {

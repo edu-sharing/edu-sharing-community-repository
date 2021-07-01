@@ -205,13 +205,3 @@
                        (onLoading)="globalProgress=$event"
                        (onClose)="closeContributor($event)"
 ></workspace-contributor>
-<modal-dialog
-              *ngIf="dialogTitle"
-              [title]="dialogTitle"
-              [message]="dialogMessage"
-              [messageParameters]="dialogMessageParameters"
-              [node]="dialogNode"
-              [isCancelable]="dialogCancelable"
-              [buttons]="dialogButtons"
-              (onCancel)="dialogTitle=null"
-></modal-dialog>

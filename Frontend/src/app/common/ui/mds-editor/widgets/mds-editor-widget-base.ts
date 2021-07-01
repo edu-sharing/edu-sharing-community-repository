@@ -51,8 +51,9 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
         const validators: ValidatorFn[] = [];
         const widgetDefinition = this.widget.definition;
         if (
-            widgetDefinition.isRequired === RequiredMode.Mandatory ||
-            widgetDefinition.isRequired === RequiredMode.MandatoryForPublish
+            this.mdsEditorInstance.editorMode !== 'search' &&
+            (widgetDefinition.isRequired === RequiredMode.Mandatory ||
+                widgetDefinition.isRequired === RequiredMode.MandatoryForPublish)
         ) {
             validators.push(overrides.requiredValidator ?? Validators.required);
         }

@@ -39,15 +39,13 @@ public class OnCopyCollectionRefSubNodesPolicy  implements OnCopyNodePolicy{
 	@Override
 	public CopyBehaviourCallback getCopyCallback(QName classRef, CopyDetails copyDetails) {
 
-		logger.info("classRef:"+classRef+ " "+copyDetails.getSourceNodeRef()+" "+nodeService.getAspects(copyDetails.getTargetParentNodeRef()).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)));
-		
 		//check if the IO's container is an Collection
 		
 			return new DefaultCopyBehaviourCallback(){	
 				@Override
 				public boolean getMustCopy(QName classQName, CopyDetails copyDetails) {
 
-					if(nodeService.getAspects(nodeService.getPrimaryParent(copyDetails.getTargetParentNodeRef()).getParentRef()).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))){
+					if(nodeService.hasAspect(nodeService.getPrimaryParent(copyDetails.getTargetParentNodeRef()).getParentRef(), QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))){
 							logger.info("getMustCopy returns false");
 							return false;
 					}

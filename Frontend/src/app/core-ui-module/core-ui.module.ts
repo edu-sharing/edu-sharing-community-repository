@@ -20,7 +20,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Ng5SliderModule } from 'ng5-slider';
-import { ToastyModule } from 'ngx-toasty';
 import { RestLocatorService } from '../core-module/rest/services/rest-locator.service';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CardComponent } from './components/card/card.component';
@@ -76,8 +75,10 @@ import { FallbackTranslationHandler } from './translation';
 import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
 import {ImageConfigDirective} from './directives/image-config.directive';
-import {NativeElementInjectorDirective} from './directives/native-element-injector.directive';
+import {ErrorProcessingService} from './error.processing';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
+import { FormatDurationPipe } from './pipes/format-duration.pipe';
+import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
 
 @NgModule({
     declarations: [
@@ -103,7 +104,6 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         SpinnerSmallComponent,
         GlobalProgressComponent,
         VideoControlsComponent,
-        NativeElementInjectorDirective,
         InfoMessageComponent,
         InputPasswordComponent,
         InfiniteScrollDirective,
@@ -121,6 +121,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         NodeImageSizePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
+        OptionTooltipPipe,
         NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
@@ -132,6 +133,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         BitwisePipe,
         ElementRefDirective,
         TitleDirective,
+        FormatDurationPipe,
     ],
     imports: [
         A11yModule,
@@ -153,7 +155,6 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         MatTooltipModule,
         Ng5SliderModule,
         RouterModule,
-        ToastyModule.forRoot(),
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,
@@ -166,7 +167,11 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
             },
         }),
     ],
-    providers: [Toast, NodeHelperService, OptionsHelperService],
+    providers: [
+        Toast,
+        ErrorProcessingService,
+        NodeHelperService,
+        OptionsHelperService],
     exports: [
         TranslateModule,
         ListTableComponent,
@@ -189,9 +194,8 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
         SortDropdownComponent,
         InfoMessageComponent,
         InfiniteScrollDirective,
-        ToastyModule,
         AuthorityNamePipe,
-        NativeElementInjectorDirective,
+        OptionTooltipPipe,
         VCardNamePipe,
         AuthorityColorPipe,
         NodeDatePipe,

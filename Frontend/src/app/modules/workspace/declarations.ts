@@ -14,6 +14,7 @@ import {WorkspaceShareLinkComponent} from "./share-link/share-link.component";
 import {WorkspaceWorkflowComponent} from "./workflow/workflow.component";
 import {WorkspaceUsageComponent} from './share/usage/usage.component';
 import {SharePublishComponent} from './share/share-publish/share-publish.component';
+import {WorkspaceMetadataBlockComponent} from './metadata/metadata-block/metadata-block.component';
 
 export const DECLARATIONS_WORKSPACE = [
   WorkspaceRoutingComponent,
@@ -22,6 +23,7 @@ export const DECLARATIONS_WORKSPACE = [
   WorkspaceSubTreeComponent,
   WorkspaceExplorerComponent,
   WorkspaceMetadataComponent,
+  WorkspaceMetadataBlockComponent,
   WorkspaceAddFolder,
   WorkspaceShareComponent,
   SharePublishComponent,

@@ -16,7 +16,7 @@ import {UIService} from '../../../core-module/core.module';
 import {Helper} from '../../../core-module/rest/helper';
 import {MdsEditorWidgetAuthorComponent} from '../../../common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import {MdsEditorInstanceService} from '../../../common/ui/mds-editor/mds-editor-instance.service';
-import {Values} from '../../../common/ui/mds-editor/types';
+import {UserPresentableError, Values} from '../../../common/ui/mds-editor/types';
 import {Observable} from 'rxjs/Rx';
 
 @Component({
@@ -90,7 +90,17 @@ export class WorkspaceLicenseComponent  {
     @Input() set nodes(nodesIn : Node[]) {
         this.loading = true;
         this.loadNodes(nodesIn).subscribe(async (nodes)=> {
-            await this.mdsEditorInstanceService.initWithNodes(nodes);
+            try {
+                await this.mdsEditorInstanceService.initWithNodes(nodes);
+            } catch(e) {
+                if(e instanceof UserPresentableError || e.message) {
+                    this.toast.error(null, e.message);
+                } else {
+                    this.toast.error(e);
+                }
+                this.cancel();
+                return;
+            }
             this.loadConfig();
             this.checkAllowRelease();
             this.readLicense();

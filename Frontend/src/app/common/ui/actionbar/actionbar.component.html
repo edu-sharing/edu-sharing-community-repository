@@ -18,7 +18,7 @@
     [disabled]="!option.isEnabled"
     [class.display-none]="!option.isEnabled && !showDisabled"
     [class.mat-flat-button]="shouldHighlight(i)"
-    matTooltip="{{ option.showName ? null : (option.name | translate) }}"
+    matTooltip="{{ option | optionTooltip }}"
     [attr.aria-label]="option.name | translate"
     (click)="click(option)"
   >

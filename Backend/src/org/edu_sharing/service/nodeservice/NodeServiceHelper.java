@@ -22,7 +22,7 @@ import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
-import org.edu_sharing.service.permission.RestrictedAccessException;
+import org.edu_sharing.alfresco.RestrictedAccessException;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -433,6 +433,7 @@ public class NodeServiceHelper {
 	public static List<NodeRef> getParentPath(NodeRef target){
 		List<NodeRef> path = new ArrayList<>();
 		NodeRef currentNode = target;
+		path.add(currentNode);
 		while(currentNode != null){
 			String parent=null;
 			try {

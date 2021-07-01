@@ -157,6 +157,29 @@ mat-button-toggle-group{
     // white background, primary as content color
     color: $primary;
 }
+.mat-flat-button,
+.mat-raised-button,
+.mat-fab,
+.mat-mini-fab {
+    // `color="warn"`
+    &.mat-warn {
+        // Red background, same as negative
+        background-color: $warning;
+        color: white;
+    }
+    &.status-negative {
+        background-color: $colorStatusNegative;
+        color: white;
+    }
+    &.status-warning {
+        background-color: $colorStatusWarning;
+        color: white;
+    }
+    &.status-positive {
+        background-color: $colorStatusPositive;
+        color: white;
+    }
+}
 .mat-form-field .mat-button-select-arrow{
     width: 25px;
     height: 25px;
