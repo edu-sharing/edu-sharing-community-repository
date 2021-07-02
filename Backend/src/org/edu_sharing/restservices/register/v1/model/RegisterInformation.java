@@ -10,6 +10,7 @@ public class RegisterInformation {
     private String organization;
     // general flag for indicating if user may receive mail notifications
     private boolean allowNotifications;
+    private String authorityName;
 
     @JsonProperty
     public String getFirstName() {
@@ -68,5 +69,13 @@ public class RegisterInformation {
         if (o == null || getClass() != o.getClass()) return false;
         RegisterInformation that = (RegisterInformation) o;
         return Objects.equals(email, that.email);
+    }
+
+    public void setAuthorityName(String authorityName) {
+        this.authorityName = authorityName;
+    }
+
+    public String getAuthorityName() {
+        return authorityName;
     }
 }
