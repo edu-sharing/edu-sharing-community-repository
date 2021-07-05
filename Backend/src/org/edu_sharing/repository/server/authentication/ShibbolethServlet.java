@@ -52,6 +52,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
+import org.edu_sharing.service.authentication.AuthenticationExceptionMessages;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -248,9 +249,16 @@ public class ShibbolethServlet extends HttpServlet {
 			redirect(resp,req);
 
 		} catch(org.alfresco.repo.security.authentication.AuthenticationException e) {
-			logger.error("INVALID ACCESS!",e);
-			resp.getOutputStream().println("INVALID ACCESS! "+e.getMessage());
-			return;
+			if(e.getMessage() != null
+					&& e.getMessage().contains(AuthenticationExceptionMessages.USER_BLOCKED)){
+				logger.error(e.getMessage());
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+				return;
+			}else{
+				logger.error("INVALID ACCESS!",e);
+				resp.getOutputStream().println("INVALID ACCESS! "+e.getMessage());
+				return;
+			}
 		}
 	}
 
