@@ -27,7 +27,7 @@ import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
-import { Routes } from '@angular/router';
+import {ActivatedRoute, Routes} from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
@@ -213,4 +213,7 @@ export const ROUTES: Routes = [
 
     // embed
     { path: UIConstants.ROUTER_PREFIX + 'embed/:component', component: EmbedComponent },
+
+    // wildcard 404
+    { path: '**', component: MessagesComponent, data: {message: 404} },
 ];
