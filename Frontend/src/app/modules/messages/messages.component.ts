@@ -28,7 +28,7 @@ export class MessagesComponent {
             this.route.params.subscribe(async (data: Params) => {
                 this.setMessage(data);
                 this.route.data.subscribe((routeData) => {
-                    if(routeData) {
+                    if(routeData && Object.keys(routeData).length) {
                         this.setMessage(routeData);
                     }
                 })
