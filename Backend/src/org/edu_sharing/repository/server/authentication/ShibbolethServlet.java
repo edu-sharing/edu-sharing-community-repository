@@ -252,7 +252,7 @@ public class ShibbolethServlet extends HttpServlet {
 			if(e.getMessage() != null
 					&& e.getMessage().contains(AuthenticationExceptionMessages.USER_BLOCKED)){
 				logger.error(e.getMessage());
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, AuthenticationExceptionMessages.USER_BLOCKED);
 				return;
 			}else{
 				logger.error("INVALID ACCESS!",e);
