@@ -271,15 +271,9 @@ public class ShibbolethServlet extends HttpServlet {
 		logger.info("redirectSuccessUrl:"+redirectUrl);
 
 		//so that redirecting to invited trunk works
-		if(req.getParameter(CCConstants.WORKSPACE_PARAM_TRUNK) != null && req.getParameter(CCConstants.WORKSPACE_PARAM_TRUNK).equals(CCConstants.WORKSPACE_PARAM_TRUNK_VALUE_INVITED)){
 
-			//remove trunk param here cause it's only needed cause of anchor is added here (server side does not get anchors)
-			redirectUrl = redirectUrl.replace("&"+CCConstants.WORKSPACE_PARAM_TRUNK+"="+CCConstants.WORKSPACE_PARAM_TRUNK_VALUE_INVITED,"");
-
-			if(!redirectUrl.contains(CCConstants.WORKSPACE_INVITED_ANCHOR)){
-				redirectUrl += CCConstants.WORKSPACE_INVITED_ANCHOR;
-			}
-		}
+		//remove trunk param here cause it's only needed cause of anchor is added here (server side does not get anchors)
+		redirectUrl = UrlTool.setParamEncode(redirectUrl, "redirectFromSSO", "true");
 
 		resp.sendRedirect(redirectUrl);
 	}
