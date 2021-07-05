@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, DoCheck, NgZone, ViewChild, OnInit } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    DoCheck,
+    NgZone,
+    ViewChild,
+    OnInit,
+    HostListener, Injector, EventEmitter
+} from '@angular/core';
 import { MainNavService } from '../common/services/main-nav.service';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
@@ -27,11 +35,12 @@ import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
-import {ActivatedRoute, Routes} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router, Routes, UrlTree} from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
 import { extensionRoutes } from '../extension/extension-routes';
+import {BehaviorSubject} from 'rxjs';
 
 @Component({
     selector: 'router',
@@ -41,6 +50,16 @@ import { extensionRoutes } from '../extension/extension-routes';
 export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 60;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
+    private static history = new BehaviorSubject<string[]>([]);
+
+    public static isRedirectedFromLogin() {
+        const history = RouterComponent.history.value;
+        if(history.length < 2) {
+            return false;
+        }
+        return history[history.length-1].indexOf(UIConstants.ROUTER_PREFIX + 'login') !== -1 ||
+            history[history.length-1].indexOf(UIConstants.ROUTER_PREFIX) === -1;
+    }
 
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
     @ViewChild('accessibility') accessibility: AccessibilityComponent;
@@ -67,12 +86,24 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         }
         return result;
     }
+    @HostListener('window:beforeunload', ['$event'])
+    interceptRoute(event: BeforeUnloadEvent) {
+        console.log(event);
+    }
 
     constructor(
         private mainNavService: MainNavService,
         private ngZone: NgZone,
         private bridge: BridgeService,
+        private injector: Injector,
     ) {
+        this.injector.get(Router).events.subscribe(event => {
+            if (event instanceof NavigationEnd) {
+                RouterComponent.history.value.push(event.url);
+                RouterComponent.history.next(RouterComponent.history.value);
+                console.log(RouterComponent.history.value);
+            }
+        });
         this.ngZone.runOutsideAngular(() => {
             // Do not trigger change detection with setInterval.
             this.checksMonitorInterval = window.setInterval(() => this.monitorChecks(), 1000);
