@@ -101,7 +101,6 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
             if (event instanceof NavigationEnd) {
                 RouterComponent.history.value.push(event.url);
                 RouterComponent.history.next(RouterComponent.history.value);
-                console.log(RouterComponent.history.value);
             }
         });
         this.ngZone.runOutsideAngular(() => {
