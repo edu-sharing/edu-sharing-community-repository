@@ -266,6 +266,10 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 									vards.get(0).put(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE, date);
 									entity = VCardTool.hashMap2VCard((HashMap)vards.get(0));
 								}
+
+								if(role.equals("terminator") && toSafeMap.get(CCConstants.CCM_PROP_IO_LICENSE_TO) == null){
+									toSafeMap.put(CCConstants.CCM_PROP_IO_LICENSE_TO, dateObj);
+								}
 							}
 
 							tmpLCList.add(entity);
