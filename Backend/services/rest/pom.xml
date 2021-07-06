@@ -20,6 +20,7 @@
   <name>edu_sharing-community-repository-backend-services-rest</name>
 
   <modules>
+    <module>api</module>
     <module>client</module>
     <module>server</module>
     <module>webapp</module>

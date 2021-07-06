@@ -27,6 +27,38 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>src/main/webapp/wsdl</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>initialize</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-services-soap-api
+              </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>src/main/webapp/wsdl</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
@@ -50,5 +82,17 @@
     </plugins>
 
   </build>
+
+  <dependencies>
+
+    <!-- provided -->
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-soap-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
 
 </project>

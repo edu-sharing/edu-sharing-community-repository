@@ -25,6 +25,26 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <inherited>false</inherited>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <rules>
+                <dependencyConvergence/>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
@@ -147,6 +167,12 @@
     <dependency>
       <groupId>org.apache.ws.security</groupId>
       <artifactId>wss4j</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.opensaml</groupId>
+          <artifactId>opensaml</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- provided -->
@@ -167,6 +193,12 @@
       <groupId>org.alfresco</groupId>
       <artifactId>alfresco-repository</artifactId>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.hazelcast</groupId>
+          <artifactId>hazelcast</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

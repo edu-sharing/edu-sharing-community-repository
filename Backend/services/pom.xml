@@ -20,7 +20,6 @@
   <name>edu_sharing-community-repository-backend-services</name>
 
   <modules>
-    <module>base</module>
     <module>core</module>
     <module>rest</module>
     <module>soap</module>

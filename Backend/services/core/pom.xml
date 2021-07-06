@@ -52,12 +52,12 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-client-swagger2</artifactId>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-soap-api</artifactId>
+      <artifactId>edu_sharing-community-repository-backend-services-soap-client</artifactId>
     </dependency>
 
     <dependency>
@@ -108,6 +108,12 @@
     <dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-jersey2-jaxrs</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>io.swagger</groupId>
+          <artifactId>swagger-annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- provided -->

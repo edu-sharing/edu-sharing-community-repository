@@ -9,15 +9,15 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend-services-soap</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-services-rest</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-backend-services-soap-api</artifactId>
+  <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
   <packaging>jar</packaging>
 
-  <name>edu_sharing-community-repository-backend-services-soap-api</name>
+  <name>edu_sharing-community-repository-backend-services-rest-api</name>
 
   <build>
 

@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.edu_sharing</groupId>
     <artifactId>edu_sharing-community-parent</artifactId>
-    <version>6.0.1</version>
+    <version>6.0.2</version>
     <relativePath/>
   </parent>
 
@@ -60,7 +60,6 @@
             <phase>validate</phase>
             <configuration>
               <rules>
-                <dependencyConvergence/>
                 <requireJavaVersion>
                   <version>${repository.java.version.range}</version>
                 </requireJavaVersion>
@@ -113,19 +112,19 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-base</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-core</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-swagger2</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -145,6 +144,12 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-soap-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-soap-client</artifactId>
         <version>${project.version}</version>
       </dependency>
 
