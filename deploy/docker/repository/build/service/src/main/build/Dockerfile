@@ -168,15 +168,15 @@ RUN set -eux \
         tomcat/shared/classes/alfresco-global.properties
 
 
-COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${community.repository.version}.jar tomcat/lib/
+COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
 
 
-COPY --chown=worker:worker artifacts/edu_sharing-community-repository-webapp-${community.repository.version}.war tomcat/webapps/
+COPY --chown=worker:worker artifacts/edu_sharing-community-repository-webapp-${org.edu_sharing:edu_sharing-community-repository-webapp:war.version}.war tomcat/webapps/
 
 RUN set -eux \
     && mkdir -p tomcat/webapps/edu-sharing \
-	&& unzip tomcat/webapps/edu_sharing-community-repository-webapp-${community.repository.version}.war -d tomcat/webapps/edu-sharing \
-	&& rm -f tomcat/webapps/edu_sharing-community-repository-webapp-${community.repository.version}.war \
+	&& unzip tomcat/webapps/edu_sharing-community-repository-webapp-${org.edu_sharing:edu_sharing-community-repository-webapp:war.version}.war -d tomcat/webapps/edu-sharing \
+	&& rm -f tomcat/webapps/edu_sharing-community-repository-webapp-${org.edu_sharing:edu_sharing-community-repository-webapp:war.version}.war \
 	&& cp tomcat/webapps/edu-sharing/META-INF/context.xml tomcat/conf/Catalina/localhost/edu-sharing.xml
 
 COPY --chown=worker:worker assets/edu-sharing/log4j2.xml tomcat/webapps/edu-sharing/WEB-INF/log4j2.xml
@@ -203,12 +203,12 @@ RUN set -eux \
     && if [ -d amps/edu-sharing/1 ] && [ -n $(ls -A amps/edu-sharing/1 | wc -l) ]; then java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force; fi
 
 
-COPY --chown=worker:worker artifacts/edu_sharing-community-repository-config-${community.repository.version}.jar tomcat/shared/lib/
+COPY --chown=worker:worker artifacts/edu_sharing-community-repository-config-${org.edu_sharing:edu_sharing-community-repository-config:jar.version}.jar tomcat/shared/lib/
 
 RUN set -eux \
-	&& unzip tomcat/shared/lib/edu_sharing-community-repository-config-${community.repository.version}.jar \
+	&& unzip tomcat/shared/lib/edu_sharing-community-repository-config-${org.edu_sharing:edu_sharing-community-repository-config:jar.version}.jar \
 	    -d tomcat/shared/classes -x META-INF/* \
-	&& rm -f tomcat/shared/lib/edu_sharing-community-repository-config-${community.repository.version}.jar \
+	&& rm -f tomcat/shared/lib/edu_sharing-community-repository-config-${org.edu_sharing:edu_sharing-community-repository-config:jar.version}.jar \
 	&& touch tomcat/shared/classes/config/edu-sharing.conf \
 	&& touch tomcat/shared/classes/config/edu-sharing.deployment.conf \
 	&& touch tomcat/shared/classes/config/edu-sharing.server.conf \

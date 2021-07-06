@@ -6,12 +6,12 @@ RUN set -eux \
     && echo 'deb http://deb.debian.org/debian buster-backports main' >> /etc/apt/sources.list \
 	&& apt-get update -y \
 	&& apt-get install -y --no-install-recommends \
+        ffmpeg \
         redis-tools \
 	&& apt-get install -y --no-install-recommends -t buster-backports \
         ca-certificates \
         curl \
         exiftool \
-        ffmpeg \
         jq \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
@@ -57,7 +57,7 @@ WORKDIR $RS_ROOT
 
 ########################################################################################################################
 
-COPY artifacts/edu_sharing-community-rendering-${community.rendering.version}-bin.tar.gz /tmp/edu_sharing-community-rendering.tar.gz
+COPY artifacts/edu_sharing-community-rendering-${org.edu_sharing:edu_sharing-community-rendering:tar.gz:bin.version}-bin.tar.gz /tmp/edu_sharing-community-rendering.tar.gz
 
 RUN set -eux \
 	&& mkdir -p $RS_ROOT $RS_CACHE \

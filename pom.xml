@@ -24,17 +24,46 @@
 
   <properties>
 
-    <community.rendering.version>${project.version}</community.rendering.version>
-    <community.repository.version>${project.version}</community.repository.version>
+    <community.plattform>${project.version}</community.plattform>
 
     <maven.deploy.releases>https://artifacts.edu-sharing.com/repository/community-releases/</maven.deploy.releases>
     <maven.deploy.snapshots>https://artifacts.edu-sharing.com/repository/community-snapshots/</maven.deploy.snapshots>
 
   </properties>
 
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>io.reformanda.semper</groupId>
+        <artifactId>dependencyversion-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>set-version</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+        </executions>
+
+      </plugin>
+
+    </plugins>
+
+  </build>
+
   <dependencyManagement>
 
     <dependencies>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-bom</artifactId>
+        <version>${community.plattform}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
@@ -108,95 +137,9 @@
         <version>${project.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-rendering</artifactId>
-        <version>${community.rendering.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
-        <version>${community.repository.version}</version>
-        <type>amp</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-search-elastic-tracker</artifactId>
-        <version>${community.repository.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-tomcat</artifactId>
-        <version>${community.repository.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-config</artifactId>
-        <version>${community.repository.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-webapp</artifactId>
-        <version>${community.repository.version}</version>
-        <type>war</type>
-      </dependency>
-
     </dependencies>
 
   </dependencyManagement>
-
-  <profiles>
-
-    <profile>
-
-      <id>plugin-remote</id>
-
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <name>env.PLUGIN_REMOTE_ENABLED</name>
-          <value>true</value>
-        </property>
-      </activation>
-
-      <properties>
-
-        <plugin.remote.repository.version>${project.version}</plugin.remote.repository.version>
-
-      </properties>
-
-      <dependencyManagement>
-
-        <dependencies>
-
-          <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>edu_sharing-plugin-remote-repository-backend-alfresco-module</artifactId>
-            <type>amp</type>
-            <version>${plugin.remote.repository.version}</version>
-          </dependency>
-
-          <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>edu_sharing-plugin-remote-repository-backend-services-module</artifactId>
-            <type>amp</type>
-            <version>${plugin.remote.repository.version}</version>
-          </dependency>
-
-        </dependencies>
-
-      </dependencyManagement>
-
-    </profile>
-
-  </profiles>
 
   <repositories>
 
