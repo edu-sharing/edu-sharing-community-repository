@@ -320,9 +320,12 @@ public class RenderingProxy extends HttpServlet {
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
 				NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
 				details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
-				TrackingServiceFactory.getTrackingService().trackActivityOnNode(
-						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), details,
-						TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+				AuthenticationUtil.runAs(() ->
+								TrackingServiceFactory.getTrackingService().trackActivityOnNode(
+										new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+										details,
+										TrackingService.EventType.VIEW_MATERIAL_EMBEDDED)
+				,usernameDecrypted);
 			}
 		} catch (HttpException e) {
 			throw new RenderingException(e);
