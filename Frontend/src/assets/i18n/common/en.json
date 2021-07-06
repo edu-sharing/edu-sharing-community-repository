@@ -92,6 +92,7 @@
     },
     "ADD_TO_RECENT_COLLECTION": "Add to recent collection",
     "SEARCH_COLLECTIONS": "Search collection...",
+    "SUB_CATEGORY_ARIA": "sub category",
     "ASK_CC_PUBLISH": "Ask",
     "ASK_CC_PUBLISH_SUBJECT": "Request for permissions of element {{name}}",
     "ORIGINAL_DELETE": "Remove",
