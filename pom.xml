@@ -27,8 +27,6 @@
     <community.rendering.version>${project.version}</community.rendering.version>
     <community.repository.version>${project.version}</community.repository.version>
 
-    <license.skipAddThirdParty>true</license.skipAddThirdParty>
-
     <maven.deploy.releases>https://artifacts.edu-sharing.com/repository/community-releases/</maven.deploy.releases>
     <maven.deploy.snapshots>https://artifacts.edu-sharing.com/repository/community-snapshots/</maven.deploy.snapshots>
 
@@ -155,23 +153,6 @@
   </dependencyManagement>
 
   <profiles>
-
-    <profile>
-
-      <id>license.addThirdParty</id>
-
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <name>env.CI_COMMIT_REF_NAME</name>
-        </property>
-      </activation>
-
-      <properties>
-        <license.skipAddThirdParty>false</license.skipAddThirdParty>
-      </properties>
-
-    </profile>
 
     <profile>
 
