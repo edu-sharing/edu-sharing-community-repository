@@ -43,6 +43,7 @@ export class MdsComponent {
   @Input() priority = 1;
   @Input() addWidget=false;
   @Input() embedded=false;
+  @Input() displayJumpmarks=true;
 
   /**
    * bulk behaviour: this controls how the bulk feature shall behave
