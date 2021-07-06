@@ -115,11 +115,11 @@ config:
 
     external:
       threads: 200
-      timeout: 2000
+      timeout: 20000
 
     internal:
       threads: 200
-      timeout: 20000
+      timeout: -1
 
   database:
     driver: org.postgresql.Driver

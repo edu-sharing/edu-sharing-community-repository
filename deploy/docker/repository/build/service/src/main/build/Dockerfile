@@ -64,7 +64,16 @@ RUN set -eux \
         's|^[#]*\s*shared\.loader=.*|shared.loader=${catalina.base}/shared/classes,${catalina.base}/shared/lib/*.jar|' \
         tomcat/conf/catalina.properties \
     && xmlstarlet ed -L \
+        -s '/Context' -t elem -n "Resources" -v "" \
+        --var resources '$prev' \
+        -i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
+        tomcat/conf/context.xml \
+    && xmlstarlet ed -L \
         -i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n 'hostConfigClass' -v 'org.edu_sharing.catalina.startup.OrderedHostConfig' \
+        -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@directory' \
+        -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@prefix' \
+        -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@suffix' \
+        -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@className' -v 'org.edu_sharing.catalina.valves.StdoutAccessLogValve' \
         tomcat/conf/server.xml
 
 

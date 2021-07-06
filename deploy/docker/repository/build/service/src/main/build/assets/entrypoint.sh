@@ -22,12 +22,12 @@ my_path_external="${REPOSITORY_SERVICE_PATH_EXTERNAL:-/edu-sharing}"
 my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}${my_path_external}"
 my_auth_external="${my_base_external}/services/authentication"
 my_pool_external="${REPOSITORY_SERVICE_POOL_EXTERNAL:-200}"
-my_wait_external="${REPOSITORY_SERVICE_WAIT_EXTERNAL:-2000}"
+my_wait_external="${REPOSITORY_SERVICE_WAIT_EXTERNAL:--1}"
 
 my_host_internal="${REPOSITORY_SERVICE_HOST_INTERNAL:-repository-service}"
 my_port_internal="${REPOSITORY_SERVICE_PORT_INTERNAL:-8080}"
 my_pool_internal="${REPOSITORY_SERVICE_POOL_INTERNAL:-200}"
-my_wait_internal="${REPOSITORY_SERVICE_WAIT_INTERNAL:-20000}"
+my_wait_internal="${REPOSITORY_SERVICE_WAIT_INTERNAL:--1}"
 
 my_session_timeout="${REPOSITORY_SERVICE_SESSION_TIMEOUT:-60}"
 
