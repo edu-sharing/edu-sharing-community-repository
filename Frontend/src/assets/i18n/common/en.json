@@ -696,7 +696,7 @@
         "PASSWORD_CORRECT": "Password correct"
     },
     "VIDEO_CONTROLS": {
-        "HEADING": "Select a clip for saving to a collection",
+        "HEADING": "Select a part of the video to be played back in this collection",
         "SAVED": "Saved changes"
     },
     "TOAST": {
