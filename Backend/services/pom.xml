@@ -23,6 +23,7 @@
     <module>core</module>
     <module>rest</module>
     <module>soap</module>
+    <module>webapp</module>
     <module>xoai</module>
   </modules>
 

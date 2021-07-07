@@ -9,15 +9,15 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-services</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-backend-webapp</artifactId>
+  <artifactId>edu_sharing-community-repository-backend-services-webapp</artifactId>
   <packaging>war</packaging>
 
-  <name>edu_sharing-community-repository-backend-webapp</name>
+  <name>edu_sharing-community-repository-backend-services-webapp</name>
 
   <build>
 

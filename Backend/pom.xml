@@ -23,7 +23,6 @@
     <module>alfresco</module>
     <module>services</module>
     <module>tomcat</module>
-    <module>webapp</module>
   </modules>
 
 </project>
