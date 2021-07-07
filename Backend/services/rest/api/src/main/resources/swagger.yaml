@@ -2567,6 +2567,9 @@ definitions:
         type: boolean
       loginUrl:
         type: string
+      recoverPassword:
+        default: false
+        type: boolean
       recoverUrl:
         type: string
       requiredFields:
@@ -2585,6 +2588,8 @@ definitions:
       allowNotifications:
         default: false
         type: boolean
+      authorityName:
+        type: string
       email:
         type: string
       firstName:
@@ -2794,15 +2799,39 @@ definitions:
     type: object
   Service:
     properties:
-      instances:
+      about:
         items:
-          $ref: '#/definitions/ServiceInstance'
+          type: string
         type: array
+      audience:
+        items:
+          $ref: '#/definitions/Audience'
+        type: array
+      description:
+        type: string
+      icon:
+        type: string
+      inLanguage:
+        type: string
+      interfaces:
+        items:
+          $ref: '#/definitions/Interface'
+        type: array
+      isAccessibleForFree:
+        default: false
+        type: boolean
+      logo:
+        type: string
       name:
         type: string
-    required:
-      - instances
-      - name
+      provider:
+        $ref: '#/definitions/Provider'
+      startDate:
+        type: string
+      type:
+        type: string
+      url:
+        type: string
     type: object
   ServiceInstance:
     properties:
@@ -2954,12 +2983,12 @@ definitions:
     type: object
   Statistics:
     properties:
-      groups:
+      entries:
         items:
-          type: string
+          $ref: '#/definitions/StatisticEntry'
         type: array
-      nodeGroup:
-        type: string
+    required:
+      - entries
     type: object
   StatisticsGlobal:
     properties:
