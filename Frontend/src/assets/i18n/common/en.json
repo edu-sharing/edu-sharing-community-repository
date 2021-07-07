@@ -691,7 +691,10 @@
         "ERROR_INVALID_PASSWORD": "invalid password",
         "PASSWORD": "Password",
         "PASSWORD_PLACEHOLDER": "Enter password ...",
-        "PASSWORD_CORRECT": "Password correct"
+        "PASSWORD_CORRECT": "Password correct",
+        "SUBELEMENT_SINGLE": "contains 1 more element",
+        "SUBELEMENT_MULTI": "contains {{count}} more elements"
+
     },
     "VIDEO_CONTROLS": {
         "HEADING": "Select a clip for saving to a collection",

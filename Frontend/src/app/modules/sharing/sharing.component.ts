@@ -132,4 +132,13 @@ export class SharingComponent {
     getPersonName(person:Person) {
         return ConfigurationHelper.getPersonWithConfigDisplayName(person,this.config);
     }
+
+    childCount() {
+        if(this.sharingInfo.node.type === RestConstants.CCM_TYPE_IO) {
+            try {
+                return parseInt(this.sharingInfo.node.properties[RestConstants.VIRTUAL_PROP_CHILDOBJECTCOUNT]?.[0], 10) || 0;
+            } catch(e) {}
+        }
+        return 0;
+    }
 }

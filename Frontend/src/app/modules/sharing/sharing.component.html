@@ -9,6 +9,9 @@
                 <img class="icon" [src]="sharingInfo.node.iconURL" />
                 <div>
                     <div class="name">{{sharingInfo.node.name}}</div>
+                    <div class="subobjects" *ngIf="childCount() > 0">
+                      {{('SHARING.SUBELEMENT_' + (childCount() === 1 ? 'SINGLE' : 'MULTI')) | translate:{count: childCount()} }}
+                    </div>
                     <div *ngIf="inviterIsAuthor()">{{'SHARING.INVITED_AND_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy)} }}</div>
                     <div *ngIf="!inviterIsAuthor()">{{'SHARING.INVITED_PLUS_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy),creator:getPersonName(sharingInfo.node.createdBy)} }}</div>
                 </div>

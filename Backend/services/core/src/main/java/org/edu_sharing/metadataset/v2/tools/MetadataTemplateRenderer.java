@@ -94,7 +94,7 @@ public class MetadataTemplateRenderer {
     }
 
     public String render(String groupName) throws IllegalArgumentException {
-		if(userName == null){
+		if(userName == null || userName.isEmpty()){
 			throw new IllegalArgumentException("No username was given. Can't continue rendering metadata template");
 		}
 		return AuthenticationUtil.runAs(()-> {
