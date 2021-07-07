@@ -302,14 +302,6 @@ public class URLTool{
 		return result;
 	}
 	
-	public static String getWorkspaceInvitedUrl(String locale){
-		String result = getBaseUrl();
-		
-		result = addSSOPathWhenConfigured(result);
-		//trunk param is only for authenticationfilter cause anchors will not be send to server
-		result +="?mode="+CCConstants.MODE_WORKSPACE+"&locale="+locale+"&"+CCConstants.WORKSPACE_PARAM_TRUNK+"="+CCConstants.WORKSPACE_PARAM_TRUNK_VALUE_INVITED + CCConstants.WORKSPACE_INVITED_ANCHOR;
-		return result;
-	}
 	
 	public static String addSSOPathWhenConfigured(String baseUrl){
 		return addSSOPathWhenConfigured(ApplicationInfoList.getHomeRepository().getAppId(), baseUrl);

@@ -43,6 +43,7 @@ public interface AuthenticationExceptionMessages {
 	final public static String INVALID_CLIENT_SESSION = "Invalid client session.";
 	final public static String INVALID_AUTHENTICATION_METHOD = "INVALID_AUTHENTICATION_METHOD";
 	final public static String NOT_IN_WHITELIST = "NOT_IN_WHITELIST";
+	final public static String USER_BLOCKED = "USER_BLOCKED";
 
-	
+
 }

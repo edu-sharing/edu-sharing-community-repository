@@ -169,4 +169,17 @@ export class PermissionsDeleteComponent {
     canSubmit() {
         return this.selectedUsers.length && !this.missingAssigning();
     }
+
+    allAssigning() {
+        return (this.options.homeFolder.folders === 'assign' &&
+            this.options.homeFolder.privateFiles === 'assign' &&
+            this.options.homeFolder.ccFiles === 'assign'
+        );
+    }
+
+    updateForm() {
+        if(!this.allAssigning()) {
+            this.options.homeFolder.keepFolderStructure = false;
+        }
+    }
 }

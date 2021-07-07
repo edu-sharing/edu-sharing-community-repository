@@ -96,7 +96,7 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     protected void setPassword(RegisterInformation info, String newPassword) throws Exception{
-        authService.setAuthentication(info.getEmail(), newPassword.toCharArray());
+        authService.setAuthentication(info.getAuthorityName(), newPassword.toCharArray());
     }
 
     @Override
@@ -132,6 +132,7 @@ public class RegisterServiceImpl implements RegisterService {
         NodeRef ref = personService.getPerson(id,false);
         Map<QName, Serializable> props = nodeService.getProperties(ref);
         RegisterInformation info = new RegisterInformation();
+        info.setAuthorityName((String) props.get(ContentModel.PROP_USERNAME));
         info.setFirstName((String) props.get(ContentModel.PROP_FIRSTNAME));
         info.setLastName((String) props.get(ContentModel.PROP_LASTNAME));
         info.setEmail((String) props.get(ContentModel.PROP_EMAIL));
@@ -175,9 +176,9 @@ public class RegisterServiceImpl implements RegisterService {
 
     private void authenticate(RegisterInformation info) throws Exception {
         AuthenticationTool authTool=new AuthenticationToolAPI();
-        HashMap<String, String> validatedAuth = authTool.createNewSession(info.getEmail(), info.getPassword());
-        authTool.storeAuthInfoInSession(info.getEmail(), validatedAuth.get(CCConstants.AUTH_TICKET),CCConstants.AUTH_TYPE_DEFAULT, Context.getCurrentInstance().getRequest().getSession(true));
-        authService.authenticate(info.getEmail(),info.getPassword().toCharArray());
+        HashMap<String, String> validatedAuth = authTool.createNewSession(info.getAuthorityName(), info.getPassword());
+        authTool.storeAuthInfoInSession(info.getAuthorityName(), validatedAuth.get(CCConstants.AUTH_TICKET),CCConstants.AUTH_TYPE_DEFAULT, Context.getCurrentInstance().getRequest().getSession(true));
+        authService.authenticate(info.getAuthorityName(),info.getPassword().toCharArray());
     }
 
     protected String storeUser(RegisterInformation info) throws Exception {
@@ -204,6 +205,8 @@ public class RegisterServiceImpl implements RegisterService {
     public void register(RegisterInformation info) throws DuplicateAuthorityException, Throwable{
         try {
             AuthenticationUtil.runAsSystem(() -> {
+                // on register, authority name equlas the user name
+                info.setAuthorityName(info.getEmail());
                 if (userExists(info))
                     throw new DuplicateAuthorityException();
                 String value = addToCacheNoDuplicate(info, registerUserCache,true);
@@ -227,7 +230,7 @@ public class RegisterServiceImpl implements RegisterService {
     private String getKeyForMail(String mail,SimpleCache<String,RegisterInformation> cache){
         for (String cacheKey : cache.getKeys()) {
             try {
-                if (cache.get(cacheKey).getEmail().equals(mail))
+                if (cache.get(cacheKey).getAuthorityName().equals(mail))
                     return cacheKey;
             }catch(Throwable t){
                 // it's possible to get class cast exceptions when hot deploying
@@ -236,7 +239,7 @@ public class RegisterServiceImpl implements RegisterService {
         return null;
     }
     private String addToCacheNoDuplicate(RegisterInformation info,SimpleCache cache,boolean override) {
-        String existing=getKeyForMail(info.getEmail(),cache);
+        String existing=getKeyForMail(info.getAuthorityName(),cache);
         if(existing!=null) {
             cache.put(existing,info);
             return existing;

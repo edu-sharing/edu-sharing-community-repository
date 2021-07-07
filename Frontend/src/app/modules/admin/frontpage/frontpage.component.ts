@@ -101,6 +101,10 @@ export class AdminFrontpageComponent {
             for (const key of Object.keys(values)) {
                 values[key] = this.config.frontpage[key];
             }
+            // fix if field is disabled, still fetch value
+            if(!values.timespan) {
+                values.timespan = this.form.get('timespan').value;
+            }
             this.form.setValue(values);
             this.toast.closeModalDialog();
             if (this.config.frontpage.collection) {

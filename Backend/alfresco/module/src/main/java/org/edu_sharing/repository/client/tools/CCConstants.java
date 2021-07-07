@@ -2103,10 +2103,6 @@ public class CCConstants {
 
 	public static final String WORKSPACE_INVITED_ANCHOR = "#workspace@INVITED@INVITED@/INVITED";
 
-	//for servlet level cause anchors are not send to server
-	public static final String WORKSPACE_PARAM_TRUNK = "trunk";
-	public static final String WORKSPACE_PARAM_TRUNK_VALUE_INVITED = "invited";
-
 	public static final String SECURITY_KEY_ALGORITHM = "RSA";
 	public static final String SECURITY_SIGN_ALGORITHM = "SHA1withRSA";
 
