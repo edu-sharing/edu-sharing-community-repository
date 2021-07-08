@@ -5,7 +5,7 @@
   backdropClass="mat-dropdown-menu"
   [xPosition]="position == 'right' ? 'after' : 'before'"
 >
-  <ul>
+  <ul role="menu">
     <li *ngFor="let option of _options; let i = index">
       <button
         mat-menu-item
