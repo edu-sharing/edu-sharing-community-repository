@@ -651,6 +651,7 @@
         "INDETERMINATE_NOTICE": "Klicken sie auf die Marke, um allen Elementen den Wert \"{{ value }}\" hinzuzufügen, oder entfernen Sie sie, um ihn aus allen Elementen zu löschen.",
         "SHOW_OPTIONS_BUTTON": "Zeige Auswahlmöglichkeiten",
         "FILTER_FOR": "Nach \"{{value}}\" filtern ({{count}} passende(s) Element(e))",
+        "FILTER_TREE": "Filtern...",
         "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen"
     },
     "SIMPLE_EDIT": {
