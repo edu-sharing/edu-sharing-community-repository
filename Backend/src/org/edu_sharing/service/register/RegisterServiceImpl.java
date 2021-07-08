@@ -22,6 +22,7 @@ import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.ServletContext;
@@ -104,8 +105,9 @@ public class RegisterServiceImpl implements RegisterService {
         return AuthenticationUtil.runAsSystem(()-> {
             try {
                 RegisterInformation info = getPersonById(id);
-                if(info==null)
-                    return false;
+                if(AuthorityServiceHelper.isAdmin(info.getAuthorityName())) {
+                    throw new SecurityException("Recovering passwords is forbidden for admin users");
+                }
                 String key = addToCacheNoDuplicate(info,recoverPasswordCache,false);
 
                 String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
