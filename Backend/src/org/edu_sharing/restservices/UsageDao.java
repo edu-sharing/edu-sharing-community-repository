@@ -18,6 +18,8 @@ import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
 import org.edu_sharing.restservices.usage.v1.model.Usages.NodeUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.collection.CollectionServiceImpl;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage2Service;
@@ -192,10 +194,21 @@ public class UsageDao {
 					Usages.CollectionUsage collectionUsage = convertUsage(usage, Usages.CollectionUsage.class);
 					collectionUsage
 							.setCollection(CollectionDao.getCollection(repoDao, usage.getCourseId()).asNode());
+					collectionUsage.setCollectionUsageType(Usages.CollectionUsageType.ACTIVE);
 					collections.add(collectionUsage);
 				} catch (Throwable t) {
 				}
 			}
+			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId).forEach((ref) -> {
+				Usages.CollectionUsage usage = new Usages.CollectionUsage();
+				try {
+					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
+					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL);
+					collections.add(usage);
+				} catch (DAOException e) {
+					logger.warn("Could not fetch collection: " + e.getMessage(), e);
+				}
+			});
 			return collections;
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);

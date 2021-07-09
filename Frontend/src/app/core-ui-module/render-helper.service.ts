@@ -88,6 +88,7 @@ export class RenderHelperService {
         this.usageApi.getNodeUsagesCollection(
             RenderHelperService.isCollectionRef(node) ? node.properties[RestConstants.CCM_PROP_IO_ORIGINAL] : node.ref.id,node.ref.repo
         ).subscribe((usages)=> {
+            usages = usages.filter((u) => u.collectionUsageType === 'ACTIVE');
             // @TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
             if(usages.length === 0) {
                 domContainer.parentElement.removeChild(domContainer);

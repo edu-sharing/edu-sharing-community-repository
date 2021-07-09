@@ -447,7 +447,7 @@ export class WorkspaceShareComponent {
         this.usageApi
             .getNodeUsagesCollection(this._nodes[0].ref.id)
             .subscribe(collections => {
-                this.collections = collections;
+                this.collections = collections.filter((c) => c.collectionUsageType === 'ACTIVE');
                 this.usageApi
                     .getNodeUsages(this._nodes[0].ref.id)
                     .subscribe((usages: UsageList) => {

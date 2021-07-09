@@ -22,6 +22,13 @@ public interface CollectionService {
 	public void remove(String collectionId);
 
 
+	/**
+	 * Get the pending proposals for a given collection
+	 * @param parentId
+	 * @return
+	 * @throws InsufficientPermissionException
+	 * @throws Exception
+	 */
     List<AssociationRef> getChildrenProposal(String parentId) throws InsufficientPermissionException, Exception;
 
     void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
@@ -90,4 +97,11 @@ public interface CollectionService {
 	default CollectionProposalInfo getCollectionsContainingProposals(CCConstants.PROPOSAL_STATUS status, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws Throwable {
 		throw new NotImplementedException("collections proposal feature is not supported without elasticsearch");
 	}
+
+	/**
+	 * fetch the collections which have this node as a pending proposal
+	 * Will only provide collections with appropriate permissions
+	 * @param nodeId The node id to check for
+	 */
+    List<NodeRef> getCollectionProposals(String nodeId);
 }
