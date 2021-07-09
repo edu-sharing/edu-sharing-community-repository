@@ -26,7 +26,7 @@ export class MdsEditorCoreComponent {
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
         this.hasExtendedWidgets$ = this.mdsEditorInstance.widgets.pipe(map((widgets) =>
-            widgets.some((widget) => widget.definition.isExtended),
+            widgets.some((widget) => widget.definition.isExtended === 'true' || widget.definition.isExtended === true),
         ));
     }
 

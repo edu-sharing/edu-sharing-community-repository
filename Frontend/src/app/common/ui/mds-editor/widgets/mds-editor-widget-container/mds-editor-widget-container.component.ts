@@ -183,7 +183,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
 
     private registerIsHidden(): void {
         const shouldShowFactors = [this.widget.meetsDynamicCondition];
-        if (this.widget.definition.isExtended) {
+        if (this.widget.definition.isExtended === 'true' || this.widget.definition.isExtended === true) {
             shouldShowFactors.push(this.mdsEditorInstance.shouldShowExtendedWidgets$);
         }
         combineLatest(shouldShowFactors)

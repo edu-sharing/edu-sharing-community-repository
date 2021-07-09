@@ -167,7 +167,7 @@ export interface MdsWidget {
     defaultvalue: string;
     isRequired: RequiredMode;
     isSearchable: boolean;
-    isExtended: boolean;
+    isExtended: boolean|string;
 }
 
 // Incomplete, fill in as needed.
