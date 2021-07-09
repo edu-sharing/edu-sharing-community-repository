@@ -147,7 +147,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		if(appId != null) {
 			SignatureVerifier.Result result = new SignatureVerifier().verifyAppSignature(httpReq);
 			if(result.getStatuscode() != 200){
-				logger.debug("application request could not be verified:" + appId + " "+result.getMessage());
+				logger.warn("application request could not be verified:" + appId + " "+result.getMessage());
 			}else{
 				ApplicationInfo appInfo = result.getAppInfo();
 				accessToolType.set(appInfo.getType());

@@ -349,10 +349,10 @@ public class MigrationJob extends AbstractJob {
     }
 
     private String getIdmMappingEduGroup(String authorityName, String authorityNameDN) throws UnsupportedEncodingException {
-        if(true)
-            return authorityNameDN+"_migrate";
 
         String cleanedAuthorityName = authorityNameDN.replace("Hamburg - ", "");
+        cleanedAuthorityName = cleanedAuthorityName.replace("BSB - ", "");
+
         WebTarget webTargetEduGroup = client
                 .target("http://localhost:8085/migration/mappingSchool?schoolName="
                         + URLEncoder.encode(cleanedAuthorityName, "UTF-8") + "&url=" + url);
@@ -373,8 +373,6 @@ public class MigrationJob extends AbstractJob {
     }
 
     private String getIdmMapping(String authority) {
-        if(true)
-            return authority+"_migrate";
 
         String authorityPur = authority.replace("GROUP_", "");
         WebTarget webTarget = client.target(

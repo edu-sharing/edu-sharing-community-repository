@@ -67,6 +67,7 @@ import {RestTrackingService} from '../../../core-module/rest/services/rest-track
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {CardComponent} from '../../../core-ui-module/components/card/card.component';
 import {CardService} from '../../../core-ui-module/card.service';
+import {RouterComponent} from '../../../router/router.component';
 
 declare var jQuery:any;
 declare var window: any;
@@ -131,9 +132,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         this.connector.setRoute(this.route);
         this.networkService.prepareCache();
         this.route.queryParams.subscribe((params:Params)=> {
-          this.closeOnBack=params.closeOnBack=='true';
+          this.closeOnBack=params.closeOnBack === 'true';
           this.editor=params.editor;
-          this.fromLogin=params.fromLogin=='true';
+          this.fromLogin=params.fromLogin === 'true' || params.redirectFromSSO === 'true';
           this.repository=params.repository ? params.repository : RestConstants.HOME_REPOSITORY;
           this.queryParams=params;
           const childobject = params.childobject_id ? params.childobject_id : null;
@@ -262,7 +263,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
           window.close();
         }
         else {
-          if(this.fromLogin) {
+          if(this.fromLogin && !RouterComponent.isRedirectedFromLogin()) {
             UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, false);
           }
           else {

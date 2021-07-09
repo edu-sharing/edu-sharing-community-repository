@@ -78,8 +78,12 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int[] processed=new int[]{0};
 		runner.setTask((ref)->{
-			migrate(ref);
-			processed[0]++;
+			try{
+				migrate(ref);
+				processed[0]++;
+			}catch (Throwable e){
+				logger.error("problem with noderef:"+ref+". "+e.getMessage());
+			}
 		});
 		runner.run();
 		logInfo("Converted a total of "+processed[0]+" nodes");

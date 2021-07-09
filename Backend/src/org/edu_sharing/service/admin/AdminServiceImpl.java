@@ -531,7 +531,6 @@ public class AdminServiceImpl implements AdminService  {
 				result.add(new ServerUpdateInfo(Release_1_7_SubObjectsToFlatObjects.ID, Release_1_7_SubObjectsToFlatObjects.description));
 				result.add(new ServerUpdateInfo(Release_1_7_UnmountGroupFolders.ID, Release_1_7_UnmountGroupFolders.description));
 				result.add(new ServerUpdateInfo(Edu_SharingAuthoritiesUpdate.ID, Edu_SharingAuthoritiesUpdate.description));
-				result.add(new ServerUpdateInfo(RefreshMimetypPreview.ID,RefreshMimetypPreview.description));
 				result.add(new ServerUpdateInfo(FixMissingUserstoreNode.ID,FixMissingUserstoreNode.description));
 				result.add(new ServerUpdateInfo(KeyGenerator.ID,KeyGenerator.description));
 				result.add(new ServerUpdateInfo(FolderToMap.ID,FolderToMap.description));

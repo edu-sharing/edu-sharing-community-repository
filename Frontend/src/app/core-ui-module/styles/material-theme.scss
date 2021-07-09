@@ -62,6 +62,34 @@ $candy-app-warn:    mat-palette($mat-red);
 // Create the theme object (a Sass map containing all of the palettes).
 $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
 
+// Uncomment the styles below to override the themes foreground colors.
+// WCAG minimums are
+//  - rgba(black, 0.54) for text on white
+//  - rgba(black, 0.42) for non-text on white
+//
+// $dark-dividers: rgba(black, 0.12);
+// $dark-disabled-text: rgba(black, 0.38);
+// $dark-secondary-text: rgba(black, 0.54);
+// $mat-light-theme-foreground: (
+//   base:              black,
+//   divider:           $dark-dividers,
+//   dividers:          $dark-dividers,
+//   disabled:          $dark-disabled-text,
+//   disabled-button:   rgba(black, 0.26),
+//   disabled-text:     $dark-disabled-text,
+//   elevation:         black,
+//   hint-text:         $dark-disabled-text,
+//   secondary-text:    $dark-secondary-text,
+//   icon:              rgba(black, 0.54),
+//   icons:             rgba(black, 0.54),
+//   text:              rgba(black, 0.87),
+//   slider-min:        rgba(black, 0.87),
+//   slider-off:        rgba(black, 0.26),
+//   slider-off-active: rgba(black, 0.38),
+// );
+// $my-app-theme-custom: map-merge($candy-app-theme, (foreground: $mat-light-theme-foreground));
+// @include angular-material-theme($my-app-theme-custom);
+
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
@@ -251,6 +279,9 @@ mat-slide-toggle.mat-primary-bright{
 input.mat-input-element, mat-label, .mat-select-value{
     line-height: normal;
 }
+input.mat-input-element::placeholder {
+    color: $placeholderColor;
+}
 // will better align the border label for the outlined input
 .mat-form-field-appearance-outline {
     $mat-form-field-floating-label-offset: 0.3em;
@@ -290,6 +321,20 @@ input.mat-input-element, mat-label, .mat-select-value{
     color: $textMain;
     > .label-secondary{
         line-height: normal !important;
+    }
+}
+.mat-checkbox-disabled {
+    $disabled-color: #919191; // 3:1 on #fafafa (fill-color of checkmark)
+    &.mat-checkbox-checked,
+    &.mat-checkbox-indeterminate {
+      .mat-checkbox-background {
+        background-color: $disabled-color;
+      }
+    }
+    &:not(.mat-checkbox-checked) {
+      .mat-checkbox-frame {
+        border-color: $disabled-color;
+      }
     }
 }
 .mat-flat-button,.mat-raised-button{

@@ -94,7 +94,7 @@ public class MetadataTemplateRenderer {
     }
 
     public String render(String groupName) throws IllegalArgumentException {
-		if(userName == null){
+		if(userName == null || userName.isEmpty()){
 			throw new IllegalArgumentException("No username was given. Can't continue rendering metadata template");
 		}
 		return AuthenticationUtil.runAs(()-> {
@@ -489,7 +489,8 @@ public class MetadataTemplateRenderer {
 				for (String p : path) {
 					if (j > 0) {
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("<i class='material-icons'>keyboard_arrow_right</i>");
+							widgetHtml.append("<span class='cdk-visually-hidden'>"+ I18nAngular.getTranslationAngular("common", "SUB_CATEGORY_ARIA")+"'</span>");
+							widgetHtml.append("<i class='material-icons' aria-hidden='true'>keyboard_arrow_right</i>");
 						} else if (renderingMode.equals(RenderingMode.TEXT)) {
 							widgetHtml.append(" -> ");
 						}

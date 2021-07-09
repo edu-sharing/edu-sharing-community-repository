@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
@@ -171,6 +172,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 for(String permission : searchToken.getPermissions()){
                     queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
                 }
+            }
+
+            if(NodeServiceInterceptor.getEduSharingScope() == null){
+                queryBuilder = queryBuilder.mustNot(QueryBuilders.existsQuery("properties.ccm:eduscopename"));
+            }else{
+                queryBuilder = queryBuilder.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
             }
 
             if(searchToken.getFacettes() != null) {

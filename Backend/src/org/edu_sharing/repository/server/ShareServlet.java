@@ -3,6 +3,8 @@ package org.edu_sharing.repository.server;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -25,9 +27,11 @@ import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 
 public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
@@ -50,7 +54,7 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			return;
 		}
 
-		final String[] childIds;
+		String[] childIds;
 		if(req.getParameter("childIds")!=null){
 			childIds=req.getParameter("childIds").split(",");
 		}
@@ -66,12 +70,28 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 		ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 		NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
-
+		// childobject? fetch all sub children as zip
+		if(childIds==null) {
+			NodeRef finalNodeRef = nodeRef;
+			childIds = AuthenticationUtil.runAsSystem(() -> {
+				if (NodeServiceHelper.getType(finalNodeRef).equals(CCConstants.CCM_TYPE_IO)) {
+					return AuthenticationUtil.runAsSystem(() ->
+							Stream.concat(
+									Stream.of(finalNodeRef.getId()),
+									NodeServiceHelper.getChildrenChildAssociationRefType(finalNodeRef, CCConstants.CCM_TYPE_IO).
+									stream().map((r) -> r.getChildRef().getId())
+							).toArray(String[]::new)
+					);
+				}
+				return null;
+			});
+		}
 		if(childIds!=null && childIds.length>1){
+			String[] finalChildIds = childIds;
 			NodeRef finalNodeRef = nodeRef;
 			AuthenticationUtil.runAsSystem(() -> {
 				String fileName= (String) serviceRegistry.getNodeService().getProperty(finalNodeRef,QName.createQName(CCConstants.CM_NAME));
-				DownloadServlet.downloadZip(resp,childIds,nodeId,token,password,fileName+".zip");
+				DownloadServlet.downloadZip(resp, finalChildIds,nodeId,token,password,fileName+".zip");
 				return null;
 			});
 			return;

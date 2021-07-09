@@ -91,7 +91,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
-    @ViewChild('sidenav') sidenavRef: ElementRef;
+    @ViewChild('sidenav') sidenavRef: ElementRef<HTMLElement>;
     @ViewChild('sidenavApply') sidenavApplyRef: ElementRef;
     @ViewChild('collections') collectionsRef: ElementRef;
 
@@ -793,8 +793,24 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.mdsMobileRef.loadMds();
             });
         }
-        // recalculate the filter layout
-        setTimeout((() => this.handleScroll()));
+        setTimeout((() => {
+            // recalculate the filter layout
+            this.handleScroll();
+            if (this.searchService.sidenavOpened) {
+                this.focusSidenav();
+            }
+        }));
+
+    }
+
+    private focusSidenav() {
+        this.sidenavRef.nativeElement.setAttribute('tabindex', '-1');
+        this.sidenavRef.nativeElement.focus();
+        const removeTabindex = () => {
+            this.sidenavRef.nativeElement.removeAttribute('tabindex');
+            this.sidenavRef.nativeElement.removeEventListener('blur', removeTabindex);
+        };
+        this.sidenavRef.nativeElement.addEventListener('blur', removeTabindex);
     }
 
     getHasMoreCollections(): boolean {

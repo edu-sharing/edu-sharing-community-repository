@@ -33,6 +33,7 @@ import {
     RestNetworkService,
     SortDefault,
     RequestObject,
+    RestMediacenterService, Mediacenter,
     AbstractList, ProposalNode,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
@@ -169,6 +170,7 @@ export class CollectionsMainComponent {
     private sortCollections: SortDefault;
     // FIXME: `collectionShare` is expected to be of type `Node[]` by `workspace-management` but is
     // of type `Node` here.
+    private adminMediacenters: Mediacenter[];
     set collectionShare(collectionShare: Node[]) {
         this._collectionShare = collectionShare as any as Node;
         this.refreshAll();
@@ -264,6 +266,7 @@ export class CollectionsMainComponent {
         private location: Location,
         private collectionService: RestCollectionService,
         private nodeHelper: NodeHelperService,
+        private mediacenterService: RestMediacenterService,
         private nodeService: RestNodeService,
         private mainNavService: MainNavService,
         private networkService: RestNetworkService,
@@ -299,6 +302,9 @@ export class CollectionsMainComponent {
                         this.addMaterialBinaryOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
                         this.createSubCollectionOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
                         this.isGuest = data.isGuest;
+                        this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
+                            this.adminMediacenters = mediacenters.filter((m)=>m.administrationAccess);
+                        });
                         this.collectionService
                             .getCollectionSubcollections(
                                 RestConstants.ROOT,
@@ -415,18 +421,6 @@ export class CollectionsMainComponent {
             this.contentDetailObject = null;
             this.navigate();
         }
-    }
-
-    selectTabMyCollections(): void {
-        this.selectTab(RestConstants.COLLECTIONSCOPE_MY);
-    }
-
-    selectTabMyOrganizations(): void {
-        this.selectTab(RestConstants.COLLECTIONSCOPE_ORGA);
-    }
-
-    selectTabAllCollections(): void {
-        this.selectTab(RestConstants.COLLECTIONSCOPE_ALL);
     }
 
     isRootLevelCollection(): boolean {
@@ -1271,5 +1265,26 @@ export class CollectionsMainComponent {
             this.toast.closeModalDialog();
             this.mainNavRef.refreshNodeStore();
         });
+    }
+
+    createAllowed() {
+        if(this.isRootLevelCollection()) {
+            let allowed = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
+            if(this.tabSelected === RestConstants.COLLECTIONSCOPE_MY) {
+                return allowed;
+            }
+            // for anything else, the user must be able to invite everyone
+            allowed = allowed && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
+            if(this.tabSelected === RestConstants.COLLECTIONSCOPE_ORGA) {
+                allowed = false;
+            } else if(this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
+                allowed = allowed && this.adminMediacenters?.length === 1;
+            } else if(this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
+                allowed = allowed && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL);
+            }
+            return allowed;
+        } else {
+            return !this.isGuest && this.isAllowedToEditCollection();
+        }
     }
 }
