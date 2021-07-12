@@ -74,6 +74,7 @@ import { OnAttributeChangeDirective } from './common/directives/on-attribute-cha
 import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
+import { MatAutocompleteTriggerAccessorDirective } from './common/directives/mat-autocomplete-trigger-accessor.directive';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -140,6 +141,7 @@ import { extensionImports } from './extension/extension-imports';
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
         extensionDeclarations,
+        MatAutocompleteTriggerAccessorDirective,
     ],
     imports: [
         IMPORTS,
