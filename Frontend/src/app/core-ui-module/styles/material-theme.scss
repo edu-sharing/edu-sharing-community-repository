@@ -452,6 +452,31 @@ mat-label.mat-label-standalone{
     font-size: $fontSizeSmall;
     color: $textLight;
 }
+/* fix for mat select icons */
+.mat-select-icon {
+    .mat-option-text {
+        display: flex;
+        align-items: center;
+        >i {
+            margin-right: 5px;
+        }
+    }
+}
+mat-select.mat-select-icon {
+    mat-select-trigger {
+        max-height: 18px;
+        display: flex;
+        align-items: center;
+        > i {
+            color: $textLight;
+            margin-right: 5px;
+        }
+    }
+    .mat-select-arrow-wrapper {
+        transform: none;
+    }
+}
+
 .mat-select-panel, .mat-autocomplete-panel {
     .mat-option{
         color: $primary;
