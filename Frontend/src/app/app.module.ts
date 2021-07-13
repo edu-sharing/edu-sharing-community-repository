@@ -75,6 +75,7 @@ import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widget
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import { MatAutocompleteTriggerAccessorDirective } from './common/directives/mat-autocomplete-trigger-accessor.directive';
+import {ResizableModule} from 'angular-resizable-element';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -149,6 +150,7 @@ import { MatAutocompleteTriggerAccessorDirective } from './common/directives/mat
         Ng5SliderModule,
         DragDropModule,
         extensionImports,
+        ResizableModule,
     ],
     providers: [
         PROVIDERS,
