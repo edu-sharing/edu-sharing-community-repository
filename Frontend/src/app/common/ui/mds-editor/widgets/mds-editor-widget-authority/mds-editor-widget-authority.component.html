@@ -12,6 +12,7 @@
       #authoritySearchInputComponent
       [label]="widget.definition.caption"
       [placeholder]="widget.definition.placeholder"
+      [globalSearchAllowed]="globalSearchAllowed"
       [showRecent]="false"
       (onChooseAuthority)="add($event)"
     ></authority-search-input>

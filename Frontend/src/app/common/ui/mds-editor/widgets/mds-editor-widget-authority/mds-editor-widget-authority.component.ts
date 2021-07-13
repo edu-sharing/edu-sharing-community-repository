@@ -27,6 +27,8 @@ import {Authority, AuthorityProfile, Group} from '../../../../../core-module/res
 import {AuthorityNamePipe} from '../../../../../core-ui-module/pipes/authority-name.pipe';
 import {AuthorityAffiliationPipe} from '../../../../../core-ui-module/pipes/authority-affiliation.pipe';
 import {async} from '@angular/core/testing';
+import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';
+import {RestConstants} from '../../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'app-mds-editor-widget-authority',
@@ -57,10 +59,12 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
             previousTooltip = tooltip;
         };
     })();
+    globalSearchAllowed: boolean;
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
+        private conntector: RestConnectorService,
         private changeDetectorRef: ChangeDetectorRef,
     ) {
         super(mdsEditorInstance, translate);
@@ -80,6 +84,9 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
         this.indeterminateValues$ = new BehaviorSubject(
             this.widget.getInitialValues().individualValues,
         );
+        this.conntector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((tp) =>
+            this.globalSearchAllowed = tp
+        )
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
