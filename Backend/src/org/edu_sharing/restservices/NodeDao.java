@@ -20,8 +20,11 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.model.CollectionRef;
+import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -94,6 +97,7 @@ public class NodeDao {
 	private final org.edu_sharing.service.model.NodeRef.Preview previewData;
 	// true if the current Dao is the collection home folder
 	private final boolean isCollectionHomePath;
+	private CollectionRef collectionRef;
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
 	 */
@@ -522,6 +526,9 @@ public class NodeDao {
 			}else{
 				this.nodeProps = nodeRef.getProperties();
 			}
+			if(nodeRef instanceof CollectionRef) {
+				this.collectionRef = (CollectionRef)nodeRef;
+			}
 			this.previewData = nodeRef.getPreview();
 
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
@@ -573,8 +580,18 @@ public class NodeDao {
 
 			this.filter = filter;
 
-			for(org.edu_sharing.service.model.NodeRef usedInCollection : nodeRef.getUsedInCollections()){
-				usedInCollections.add(new NodeDao(repoDao, usedInCollection, filter));
+			for(org.edu_sharing.service.model.CollectionRef usedInCollection : nodeRef.getUsedInCollections()){
+				NodeDao collection = new NodeDao(repoDao, usedInCollection, filter);
+				if(usedInCollection.getRelationType()!=null) {
+					if (usedInCollection.getRelationType().equals(CollectionRef.RelationType.Proposal)) {
+						// proposals should only be visible if the current user is organizer of the particular collection
+						if (collection.access.contains(CCConstants.PERMISSION_WRITE)) {
+							usedInCollections.add(collection);
+						}
+					} else {
+						usedInCollections.add(collection);
+					}
+				}
 			}
 
 		}catch(Throwable t){
@@ -992,7 +1009,10 @@ public class NodeDao {
 			return node;
 		}
 		Node data = new Node();
-		if (isCollectionReference() && fetchReference) {
+		if(collectionRef != null) {
+			data = new CollectionRelationReference();
+			((CollectionRelationReference)data).setRelationType(collectionRef.getRelationType());
+		}else if (isCollectionReference() && fetchReference) {
 			data = new CollectionReference();
 			fillNodeReference((CollectionReference) data);
 		}

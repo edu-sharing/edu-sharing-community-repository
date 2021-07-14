@@ -25,6 +25,8 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.model.CollectionRef;
+import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -283,9 +285,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
-        return this.transform(authorities,user,hit.getSourceAsMap(), resolveCollections);
+        try {
+            return this.transform(NodeRefImpl.class, authorities,user,hit.getSourceAsMap(), resolveCollections);
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new RuntimeException(e);
+        }
     }
-    private NodeRef transform(Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections){
+    private <T extends NodeRefImpl> T transform(Class<T> clazz, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
@@ -380,10 +386,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
             props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null, true));
         }
 
-        NodeRef eduNodeRef = new NodeRefImpl(ApplicationInfoList.getHomeRepository().getAppId(),
-                protocol,
-                identifier,
-                nodeId);
+        T eduNodeRef = clazz.newInstance();
+        eduNodeRef.setRepositoryId(ApplicationInfoList.getHomeRepository().getAppId());;
+        eduNodeRef.setStoreProtocol(protocol);
+        eduNodeRef.setStoreId(identifier);
+        eduNodeRef.setNodeId(nodeId);
         eduNodeRef.setProperties(props);
         Map preview = (Map) sourceAsMap.get("preview");
         if(preview != null && preview.get("small") != null) {
@@ -446,7 +453,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if (collections != null) {
                 for (Map<String, Object> collection : collections) {
                     String colOwner = (String) collection.get("owner");
-                    boolean hasPermission = user.equals(colOwner);
+                    boolean hasPermission = user.equals(colOwner) || AuthorityServiceHelper.isAdmin();
                     if (!hasPermission) {
                         Map<String, List<String>> colPermissionsElastic = (Map) collection.get("permissions");
                         for (Map.Entry<String, List<String>> entry : colPermissionsElastic.entrySet()) {
@@ -457,10 +464,24 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         }
                     }
                     if (hasPermission) {
-                        NodeRef transform = transform(authorities, user, collection, resolveCollections);
+                        CollectionRefImpl transform = transform(CollectionRefImpl.class, authorities, user, collection, false);
                         eduNodeRef.getUsedInCollections().add(transform);
                     }
                 }
+            }
+        }
+        if(eduNodeRef instanceof CollectionRefImpl) {
+            CollectionRefImpl collectionRef = (CollectionRefImpl) eduNodeRef;
+            Map<String, Object> relation = (Map) sourceAsMap.get("relation");
+            if(relation != null) {
+                // @TODO: transform relation type
+                Map<String, Object> relationProps = (Map) relation.get("properties");
+                if(relationProps.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS))) {
+                    collectionRef.setRelationType(CollectionRef.RelationType.Proposal);
+                } else {
+                    collectionRef.setRelationType(CollectionRef.RelationType.Usage);
+                }
+                collectionRef.setRelationNode(transform(NodeRefImpl.class, authorities, user, relation, false));
             }
         }
         long permMillisSingle = (System.currentTimeMillis() - millis);
