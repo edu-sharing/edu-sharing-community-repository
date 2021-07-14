@@ -64,7 +64,7 @@
     [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
   >
     <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    {{ 'WORKFLOW.' + $any(getNode()).properties['ccm:wf_status'] | translate }}
+    {{ 'WORKFLOW.' + getWorkflowStatus().id | translate }}
   </span>
   <span
     *ngSwitchCase="'cm:creator'"
