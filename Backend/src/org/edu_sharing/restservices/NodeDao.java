@@ -548,7 +548,13 @@ public class NodeDao {
 			} else if (this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
 				// just fetch dynamic data which needs to be fetched, because the local io already has metadata
 				String originalNodeId = this.getReferenceOriginalId();
-				HashMap<String, HashMap<String, Object>> history = this.nodeService.getVersionHistory(originalNodeId);
+				HashMap<String, HashMap<String, Object>> history = AuthenticationUtil.runAsSystem(() -> {
+					try {
+						return this.nodeService.getVersionHistory(originalNodeId);
+					} catch (Throwable t) {
+						throw new RuntimeException(t);
+					}
+				});
 				Optional<Entry<String, HashMap<String, Object>>> entry = history == null ? Optional.empty() : history.entrySet().stream().findFirst();
 				if(!entry.isPresent() || CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT.equals(entry.get().getValue().get(CCConstants.CCM_PROP_IO_VERSION_COMMENT))) {
 					try {
