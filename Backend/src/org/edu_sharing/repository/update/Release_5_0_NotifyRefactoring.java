@@ -82,7 +82,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 				migrate(ref);
 				processed[0]++;
 			}catch (Throwable e){
-				logger.error("problem with noderef:"+ref+". "+e.getMessage());
+				logger.error("problem with noderef:"+ref+". "+e.getMessage(),e);
 			}
 		});
 		runner.run();
