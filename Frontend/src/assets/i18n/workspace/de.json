@@ -86,7 +86,8 @@
         "INVITE_RECENT_AUTHORITIES": "Zuletzt eingeladen",
         "FILE_LOCATION": "Speicherort der Datei",
         "CHANGE__LOCATION": "Ändern",
-        "CHOOSE_LOCATION": "Speicherort wählen",
+        "CHOOSE_LOCATION_TITLE": "Speicherort",
+        "CHOOSE_LOCATION_DESCRIPTION": "Einen Ordner für die Ablage wählen",
         "TREE_MORE_ITEMS": "+ {{count}} weitere Ordner",
         "SHARE": {
             "TITLE": "Freigaben verwalten",

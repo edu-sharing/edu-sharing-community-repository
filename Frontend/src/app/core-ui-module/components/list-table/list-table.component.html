@@ -144,7 +144,8 @@
             [nodes]="_nodes"
             [scope]="scope"
             [class.node-padding]="_options && _options.length>0"
-            [unclickable]="!createLink"
+            [disabled]="!createLink"
+            [alwaysRipple]="true"
             [aria-describedby]="getDescribedBy(node)"
             #childList
           >

@@ -1114,5 +1114,9 @@
         "tutory": "Tutory",
         "youtube": "YouTube",
         "zum": "ZUM Wiki"
+    },
+    "BREADCRUMBS": {
+        "YOU_ARE_HOME": "Sie befinden sich im Stammverzeichnis",
+        "IN_HOME": "Im Stammverzeichnis"
     }
 }

@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {ConfigurationService, DialogButton, RestConstants} from '../../../core-module/core.module';
-import {IamUser, Node, NodeList, NodeWrapper} from '../../../core-module/core.module';
+import {ConfigurationService, DialogButton, ParentList} from '../../../core-module/core.module';
+import {IamUser, Node} from '../../../core-module/core.module';
 import {RestNodeService} from '../../../core-module/core.module';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
@@ -8,6 +8,8 @@ import {RestSearchService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {RestIamService} from '../../../core-module/core.module';
 import {LinkData} from '../../../core-ui-module/node-helper.service';
+import { map, catchError } from 'rxjs/operators';
+import * as rxjs from 'rxjs';
 
 @Component({
   selector: 'workspace-file-upload-select',
@@ -48,7 +50,11 @@ export class WorkspaceFileUploadSelectComponent  {
    * @type {boolean}
    */
   @Input() showLti=true;
-  breadcrumbs: Node[];
+  breadcrumbs: {
+    nodes: Node[];
+    homeLabel: string;
+    homeIcon: string;
+  }
   ltiAllowed: boolean;
   ltiActivated: boolean;
   ltiConsumerKey: string;
@@ -59,13 +65,8 @@ export class WorkspaceFileUploadSelectComponent  {
   buttons: DialogButton[];
   user: IamUser;
   @Input() set parent(parent: Node){
-    this.breadcrumbs = null;
     this._parent = parent;
-    if (parent) {
-        this.nodeService.getNodeParents(parent.ref.id).subscribe((data: NodeList) => {
-            this.breadcrumbs = data.nodes.reverse();
-        });
-    }
+    this.getBreadcrumbs(parent).subscribe((breadcrumbs) => this.breadcrumbs = breadcrumbs);
   }
   @Output() parentChange = new EventEmitter();
   @Output() onCancel= new EventEmitter();
@@ -164,5 +165,48 @@ export class WorkspaceFileUploadSelectComponent  {
         if (end == -1)
           return null;
         return link.substr(start, end - start);
+    }
+
+    private getBreadcrumbs(node: Node) {
+        if (node) {
+            return this.nodeService.getNodeParents(node.ref.id).pipe(
+                map((parentList) => this.getBreadcrumbsByParentList(parentList)),
+                // FIXME: Hacky workaround. `getNodeParents` fails with 403 when trying to get
+                // parents of the home directory. We rely on any error meaning that this happened.
+                //
+                // TODO: Find a proper way to determine whether `node` is the home directory and
+                // return the breadcrumb config below without calling `getNodeParents`.
+                catchError(() => rxjs.of(this.getBreadcrumbsByParentList({
+                    nodes: [], pagination: null, scope: 'MY_FILES',
+                }))),
+            );
+        } else {
+            return rxjs.of(null)
+        }
+    }
+
+    private getBreadcrumbsByParentList(parentList: ParentList) {
+        const nodes = parentList.nodes.reverse();
+        switch (parentList.scope) {
+            case 'MY_FILES':
+                return {
+                    nodes,
+                    homeLabel: 'WORKSPACE.MY_FILES',
+                    homeIcon: 'person',
+                };
+            case 'SHARED_FILES':
+                return {
+                    nodes,
+                    homeLabel: 'WORKSPACE.SHARED_FILES',
+                    homeIcon: 'group',
+                };
+            default:
+                console.warn(`Unknown scope "${parentList.scope}"`)
+                return {
+                    nodes,
+                    homeLabel: null,
+                    homeIcon: null,
+                };
+        }
     }
 }

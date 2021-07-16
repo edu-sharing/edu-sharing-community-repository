@@ -87,7 +87,8 @@
         "INVITE_RECENT_AUTHORITIES": "Recently invited",
         "FILE_LOCATION": "Storage location",
         "CHANGE__LOCATION": "Change",
-        "CHOOSE_LOCATION": "Choose location",
+        "CHOOSE_LOCATION_TITLE": "Location",
+        "CHOOSE_LOCATION_DESCRIPTION": "Choose a directory for storage",
         "TREE_MORE_ITEMS": "+ {{count}} more folders",
         "SHARE": {
             "TITLE": "Manage Sharing",

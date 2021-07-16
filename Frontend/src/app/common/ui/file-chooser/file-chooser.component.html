@@ -1,38 +1,75 @@
-<card title="{{title | translate }}" [isCancelable]="isCancelable" [priority]="priority" [subtitle]="subtitle" width="normal" height="xxlarge"
-      [buttons]="buttons"
-      (onCancel)="cancel()"
+<card
+  title="{{ title | translate }}"
+  [icon]="cardIcon"
+  [isCancelable]="isCancelable"
+  [priority]="priority"
+  [subtitle]="(subtitle | translate) || defaultSubtitle"
+  width="normal"
+  height="xxlarge"
+  [buttons]="buttons"
+  (onCancel)="cancel()"
 >
-    <div class="fileChooser">
-        <breadcrumbs class="breadcrumbFrame" *ngIf="!searchMode"
-                     [createLink]="false"
-                     [breadcrumbsAsNode]="path"
-                     (onClick)="selectBreadcrumb($event)"
-        ></breadcrumbs>
-        <div *ngIf="searchMode" class="breadcrumbFrame">
-            <form (ngSubmit)="search()" autocomplete="off"><input type="search" name="search" placeholder="{{'NODE_SEARCH' | translate}}" [(ngModel)]="searchQuery"></form>
-        </div>
-        <listTable class="listFrame" *ngIf="isLoading || list.length"
-                   [nodes]="list"
-                   [columns]="columns"
-                   [hasIcon]="true"
-                   [hasCheckbox]="false"
-                   [hasHeading]="hasHeading"
-                   [isClickable]="true"
-                   [viewType]="viewType"
-                   [icon]="icon"
-                   [selectOnClick]="!_pickDirectory"
-                   [isLoading]="isLoading"
-                   [validatePermissions]="writeRequired ? hasWritePermissions : null"
-                   [scrollWindow]="false"
-                   [sortBy]="sortBy"
-                   [sortAscending]="sortAscending"
-                   (selectionChanged)="onSelection($event)"
-                   [listClass]="'fileChooserList'"
-                   (sortListener)="setSorting($event)"
-                   (clickRow)="selectItem($event.node)"
-                   (loadMore)="loadMore()"></listTable>
-        <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchMode">{{'NO_MORE_ELEMENTS' | translate }}</h5>
-        <h5 class="noElements" *ngIf="!isLoading && !list.length && searchMode">{{'NO_MATCHES' | translate }}</h5>
-    </div>
+  <mat-tab-group
+    *ngIf="tabs; else tabContent"
+    mat-stretch-tabs
+    (selectedTabChange)="onTabChange($event)"
+  >
+    <mat-tab *ngFor="let tab of tabs" [label]="tab.label | translate">
+      <ng-container *ngTemplateOutlet="tabContent; context: tab"></ng-container>
+    </mat-tab>
+  </mat-tab-group>
 </card>
 
+<ng-template #tabContent let-homeIcon="homeIcon" let-label="label">
+  <div class="tab-content">
+    <breadcrumbs
+      class="breadcrumbFrame"
+      *ngIf="!searchMode"
+      [createLink]="false"
+      [breadcrumbsAsNode]="path$ | async"
+      (onClick)="selectBreadcrumb($event)"
+      [home]="homeOverride ? homeOverride.label : (label | translate)"
+      [homeIcon]="homeOverride ? homeOverride.icon : homeIcon"
+    ></breadcrumbs>
+    <div *ngIf="searchMode" class="searchInputFrame">
+      <form (ngSubmit)="search()" autocomplete="off">
+        <input
+          type="search"
+          name="search"
+          placeholder="{{ 'NODE_SEARCH' | translate }}"
+          [(ngModel)]="searchQuery"
+        />
+      </form>
+    </div>
+    <listTable
+      class="listFrame"
+      *ngIf="isLoading || list.length"
+      [nodes]="list"
+      [columns]="columns"
+      [hasIcon]="true"
+      [hasCheckbox]="false"
+      [hasHeading]="hasHeading"
+      [isClickable]="true"
+      [viewType]="viewType"
+      [icon]="icon"
+      [selectOnClick]="!_pickDirectory"
+      [isLoading]="isLoading"
+      [validatePermissions]="writeRequired ? hasWritePermissions : null"
+      [scrollWindow]="false"
+      [sortBy]="sortBy"
+      [sortAscending]="sortAscending"
+      (selectionChanged)="onSelection($event)"
+      [listClass]="'fileChooserList'"
+      (sortListener)="setSorting($event)"
+      (clickRow)="selectItem($event.node)"
+      (selectionChanged)="onSelectionChanged($event)"
+      (loadMore)="loadMore()"
+    ></listTable>
+    <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchMode">
+      {{ 'NO_MORE_ELEMENTS' | translate }}
+    </h5>
+    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchMode">
+      {{ 'NO_MATCHES' | translate }}
+    </h5>
+  </div>
+</ng-template>
