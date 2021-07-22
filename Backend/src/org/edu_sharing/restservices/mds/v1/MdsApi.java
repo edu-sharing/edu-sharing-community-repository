@@ -1,11 +1,7 @@
 package org.edu_sharing.restservices.mds.v1;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -32,6 +28,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Path("/mds/v1")
 @Api(tags = {"MDS v1"})
@@ -139,7 +138,7 @@ public class MdsApi {
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = "OK.", response = MdsEntry.class),
+					@ApiResponse(code = 200, message = "OK.", response = Suggestions.class),
 					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
 					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
 					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
@@ -164,6 +163,63 @@ public class MdsApi {
 					suggestionParam.getValueParameters().getProperty(),
 					suggestionParam.getValueParameters().getPattern(),
 					suggestionParam.getCriterias());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	/**
+	 *
+	 */
+
+	@POST
+	@Path("/metadatasetsV2/{repository}/{metadataset}/values_for_keys")
+
+	@ApiOperation(
+			value = "Get values for keys.",
+			notes = "Get values for keys.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = "OK.", response = Suggestions.class),
+					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+			})
+	public Response getValues4KeysV2(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
+			@ApiParam(value = "query") @QueryParam("query") String query,
+			@ApiParam(value = "property") @QueryParam("property") String property,
+			@ApiParam(value = "keys") ArrayList<String> keys,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				throw new Exception("not implemented yet");
+				//return RepoProxyFactory.getRepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
+			}
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MdsDaoV2 mds = MdsDaoV2.getMds(repoDao, mdsId);
+
+			Suggestions response = null;
+			for(String key : keys){
+				Suggestions rs = mds.getSuggestions(query,
+						property,
+						key,
+						null);
+				if(response == null) response = rs;
+				else response.getValues().addAll(rs.getValues());
+			}
+
 
 			return Response.status(Response.Status.OK).entity(response).build();
 
