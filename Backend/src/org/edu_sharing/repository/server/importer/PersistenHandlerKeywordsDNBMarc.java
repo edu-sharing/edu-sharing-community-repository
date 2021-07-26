@@ -5,6 +5,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.writer.CSVWriter;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.service.util.CSVTool;
@@ -26,6 +28,7 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
     static String STATEMENT_UPDATE = "UPDATE edu_factual_term SET factual_term_ident=?, factual_term_value=?, factual_term_synonyms=? WHERE factual_term_ident=?";
 
     static String STATEMENT_MATCHES = "select CASE WHEN factual_term_synonyms IS NULL THEN factual_term_value WHEN array_length(factual_term_synonyms,1) = 1 THEN format('%s (%s)',factual_term_value, factual_term_synonyms[1])  ELSE format('%s (%s, %s)',factual_term_value, factual_term_synonyms[1], factual_term_synonyms[2]) END from edu_factual_term where lower(factual_term_value) like ? order by char_length(factual_term_value) limit 10";
+
 
     static String COL_ID = "factual_term_id";
     static String COL_IDENT = "factual_term_ident";
@@ -224,6 +227,60 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         }
         return result;
     }
+
+
+    public List<HashMap<String,Object>> getEntriesByDisplayValue(String value){
+        value = value.trim();
+
+        String[] splitted = value.split(" \\(");
+        String termValue = splitted[0];
+        String tempSyn = (splitted.length > 1) ? splitted[1].replaceAll("\\)","") : null;
+        String[] termSyns = (tempSyn != null) ? tempSyn.split(", ") : null;
+
+        List<HashMap<String,Object>> result = new ArrayList<>();
+        Connection con = null;
+        PreparedStatement statement = null;
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        try{
+            String statementStr = "select factual_term_ident,factual_term_value from edu_factual_term where factual_term_value=?";
+            if(termSyns != null && termSyns.length > 0){
+                statementStr = "select distinct(factual_term_ident),factual_term_value from (select factual_term_ident,factual_term_value,unnest(factual_term_synonyms) as synonyms from edu_factual_term) s where factual_term_value=?";
+                statementStr+=" AND (";
+                for(int i = 0; i < termSyns.length; i++){
+                    if(i > 0){
+                        statementStr+=" OR ";
+                    }
+                    statementStr += "synonyms like ?";
+                }
+                statementStr+=")";
+            }
+
+            con = dbAlf.getConnection();
+            statement = con.prepareStatement(statementStr);
+            statement.setString(1, termValue);
+            if(termSyns != null) {
+                for(int i = 0; i < termSyns.length;i++){
+                    statement.setString((i+2), "%" + termSyns[i] + "%");
+                }
+            }
+
+            java.sql.ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()){
+                HashMap<String,Object> row = new HashMap<>();
+                int colCount = resultSet.getMetaData().getColumnCount();
+                for(int i = 1; i <= colCount; i++){
+                    row.put(resultSet.getMetaData().getColumnName(i),resultSet.getObject(i));
+                }
+                result.add(row);
+            }
+        } catch (SQLException e) {
+            logger.error(e.getMessage(),e);
+        } finally {
+            dbAlf.cleanUp(con, statement);
+        }
+        return result;
+    }
+
 
     public String fixCombiningDiaresis(String value){
         if(!Normalizer.isNormalized(value,Normalizer.Form.NFC)){
