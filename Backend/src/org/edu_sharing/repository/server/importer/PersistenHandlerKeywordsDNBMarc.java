@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.importer;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVParser;
@@ -9,6 +10,12 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.util.CSVTool;
 
 import java.sql.Array;
@@ -29,6 +36,9 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
 
     static String STATEMENT_MATCHES = "select CASE WHEN factual_term_synonyms IS NULL THEN factual_term_value WHEN array_length(factual_term_synonyms,1) = 1 THEN format('%s (%s)',factual_term_value, factual_term_synonyms[1])  ELSE format('%s (%s, %s)',factual_term_value, factual_term_synonyms[1], factual_term_synonyms[2]) END from edu_factual_term where lower(factual_term_value) like ? order by char_length(factual_term_value) limit 10";
 
+    static String STATEMENT_CHANGED = "select factual_term_ident from edu_factual_term where factual_term_modified IS NOT NULL";
+
+    static String STATEMENT_RESET_MODIFIED = "UPDATE edu_factual_term SET factual_term_modified=NULL WHERE factual_term_ident=?";
 
     static String COL_ID = "factual_term_id";
     static String COL_IDENT = "factual_term_ident";
@@ -288,5 +298,46 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         }
         String result = Normalizer.normalize(value, Normalizer.Form.NFC);
         return result;
+    }
+
+
+    public List<String> getChangedIdents(){
+        Connection con = null;
+        PreparedStatement statement = null;
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        List<String> changedIdents = new ArrayList<>();
+        try{
+            con = dbAlf.getConnection();
+            statement = con.prepareStatement(STATEMENT_CHANGED);
+
+            java.sql.ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()){
+                String s = resultSet.getString(1);
+                changedIdents.add(s);
+            }
+        } catch (SQLException e) {
+            logger.error(e.getMessage(),e);
+        } finally {
+            dbAlf.cleanUp(con, statement);
+        }
+        return changedIdents;
+    }
+
+    public void resetModified(String ident){
+        Connection con = null;
+        PreparedStatement statement = null;
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        List<String> changedIdents = new ArrayList<>();
+        try{
+            con = dbAlf.getConnection();
+            statement = con.prepareStatement(STATEMENT_RESET_MODIFIED);
+            statement.setString(1, ident);
+            statement.executeUpdate();
+            logger.info("reseted modified for:"+ident);
+        } catch (SQLException e) {
+            logger.error(e.getMessage(),e);
+        } finally {
+            dbAlf.cleanUp(con, statement);
+        }
     }
 }
