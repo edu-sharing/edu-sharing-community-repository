@@ -15,6 +15,7 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import {MdsValueList} from '../../../../../core-module/rest/data-object';
 
 @Component({
     selector: 'app-mds-editor-widget-chips',
@@ -215,6 +216,14 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     private toDisplayValues(value: MdsWidgetValue | string): DisplayValue {
         if (typeof value === 'string') {
             const knownValue = this.widget.definition.values?.find((v) => v.id === value);
+            if (!knownValue
+                && this.widget.getInitialDisplayValues()) {
+                const ds = this.widget.getInitialDisplayValues().values?.find(v => v.key === value).displayString;
+                return {
+                    key: value,
+                    label:ds
+                }
+            }
             if (knownValue) {
                 value = knownValue;
             } else {

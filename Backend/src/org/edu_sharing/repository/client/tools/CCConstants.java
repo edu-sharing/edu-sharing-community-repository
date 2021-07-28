@@ -673,6 +673,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPL_TAXONPATH_XML = "{http://www.campuscontent.de/model/1.0}taxonpath_xml";
 
 	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD  = "{http://www.campuscontent.de/model/1.0}classification_keyword";
+	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY  = "{http://www.campuscontent.de/model/1.0}classification_keyword_display";
 	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_PURPOSE  = "{http://www.campuscontent.de/model/1.0}classification_purpose";
 	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER = "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_publisher";
 	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UNKNOWN = "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_unknown";

@@ -49,7 +49,7 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	private String id,type,caption,bottomCaption,icon,
 	placeholder,defaultvalue,template,
-	suggestionSource,suggestionQuery,unit,format,
+	suggestionSource,suggestionQuery,suggestDisplayProperty,unit,format,
 	valuespaceSort="default";
 	private Integer min,max,defaultMin,defaultMax,step;
 	private boolean extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
@@ -89,6 +89,9 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setSuggestionQuery(String suggestionQuery) {
 		this.suggestionQuery = suggestionQuery;
 	}
+	public void setSuggestDisplayProperty(String suggestDisplayProperty) { this.suggestDisplayProperty = suggestDisplayProperty; }
+	public String getSuggestDisplayProperty() { return suggestDisplayProperty; }
+
 	public String getUnit() {
 		return unit;
 	}
