@@ -18,10 +18,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.util.CSVTool;
 
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,6 +36,12 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
     static String STATEMENT_CHANGED = "select factual_term_ident from edu_factual_term where factual_term_modified IS NOT NULL";
 
     static String STATEMENT_RESET_MODIFIED = "UPDATE edu_factual_term SET factual_term_modified=NULL WHERE factual_term_ident=?";
+
+    static String STATEMENT_DISABLE_TRIGGER = "ALTER TABLE edu_factual_term DISABLE TRIGGER update_edu_factual_term_modtime";
+
+    static String STATEMENT_ENABLE_TRIGGER = "ALTER TABLE edu_factual_term ENABLE TRIGGER update_edu_factual_term_modtime";
+
+    static String STATEMENT_TRIGGER_ENABLED = "select tgenabled from pg_trigger where tgname='update_edu_factual_term_modtime'";
 
     static String COL_ID = "factual_term_id";
     static String COL_IDENT = "factual_term_ident";
@@ -330,6 +333,9 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         List<String> changedIdents = new ArrayList<>();
         try{
             con = dbAlf.getConnection();
+            con.createStatement().executeUpdate(STATEMENT_DISABLE_TRIGGER);
+            ResultSet resultSet = con.createStatement().executeQuery(STATEMENT_TRIGGER_ENABLED);
+            resultSet.next();
             statement = con.prepareStatement(STATEMENT_RESET_MODIFIED);
             statement.setString(1, ident);
             statement.executeUpdate();
@@ -337,6 +343,12 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         } catch (SQLException e) {
             logger.error(e.getMessage(),e);
         } finally {
+            try {
+                con.createStatement().executeUpdate(STATEMENT_ENABLE_TRIGGER);
+                con.commit();
+            } catch (SQLException throwables) {
+                logger.error(throwables.getMessage(),throwables);
+            }
             dbAlf.cleanUp(con, statement);
         }
     }
