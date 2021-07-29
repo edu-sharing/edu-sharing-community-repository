@@ -15,6 +15,7 @@ import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.search.Suggestion;
 import org.springframework.context.ApplicationContext;
 
@@ -59,6 +60,7 @@ public class FactualTermDisplayUpdater {
 
                         policyBehaviourFilter.disableBehaviour(nodeRef);
                         nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY),displays);
+                        new RepositoryCache().remove(nodeRef.getId());
                     }finally {
                         policyBehaviourFilter.enableBehaviour(nodeRef);
                     }
