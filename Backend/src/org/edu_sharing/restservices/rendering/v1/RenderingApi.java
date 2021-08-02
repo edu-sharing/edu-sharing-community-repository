@@ -25,6 +25,7 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RenderingDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
+import org.edu_sharing.restservices.rendering.v1.model.RenderingParameter;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
@@ -123,6 +124,7 @@ public class RenderingApi {
 	    	@ApiParam(value = "ID of node",required=true ) @PathParam("node") String node,
 	    	@ApiParam(value = "version of node",required=false) @QueryParam("version") String nodeVersion,
 			@ApiParam(value = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+			// options include: showDownloadButton, showDownloadAdvice, metadataGroup
 			@ApiParam(value = "additional parameters to send to the rendering service",required=false) Map<String,String> parameters,
 			@Context HttpServletRequest req){
 
