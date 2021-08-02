@@ -413,6 +413,10 @@
                 "PDM_INFO": "This object is free of known restrictions covered by copyright law."
             }
         },
+        "FILE_CHOOSER": {
+            "NO_WRITE_PERMISSIONS": "You don't have write permissions for the selected directory. Please select a different one.",
+            "HOME_FOLDER_NO_PERMISSIONS": "You can't store elements in this directory. Please choose a sub-directory."
+        },
         "TOAST": {
             "FOLDER_ADDED": "Folder added",
             "NODE_EXISTS_IN_COLLECTION": "The collection already contains the element {{name}}",

@@ -422,6 +422,10 @@
                 "PDM_INFO": "Das Werk ist frei von bekannten Urheberrechts-Bedingungen"
             }
         },
+        "FILE_CHOOSER": {
+            "NO_WRITE_PERMISSIONS": "Für den gewählten Ordner sind keine Schreibrechte verfügbar. Bitte wählen Sie einen anderen Speicherort.",
+            "HOME_FOLDER_NO_PERMISSIONS": "In diesem Ordner können keine Elemente abgelegt werden. Bitte wählen Sie einen Unterordner."
+        },
         "TOAST": {
             "FOLDER_ADDED": "Ordner wurde erstellt",
             "NODE_EXISTS_IN_COLLECTION": "Das Element {{name}} ist bereits in der Sammlung enthalten",

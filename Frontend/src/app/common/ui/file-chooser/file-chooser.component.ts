@@ -135,7 +135,7 @@ export class FileChooserComponent implements OnInit {
     private offset = 0;
     private homeDirectory: string;
     private currentDirectory: string;
-    private canSelectHome: boolean;
+    canSelectHome: boolean;
     private loadDirectoryTrigger = new Subject<{ directory: string; reset: boolean }>();
 
     constructor(
@@ -163,6 +163,9 @@ export class FileChooserComponent implements OnInit {
             this.cancel();
             return;
         }
+    }
+    folderIsWritable() {
+        return this.path$?.value?.[this.path$?.value?.length - 1]?.access?.indexOf(RestConstants.ACCESS_WRITE) !== -1;
     }
 
     private registerObservables(): void {
@@ -258,7 +261,7 @@ export class FileChooserComponent implements OnInit {
                 // When `scope` is not set, we didn't get the children of our home directory but
                 // instead a path relative to root. This happens for the admin user.
                 if (!data.scope) {
-                    this.homeOverride = { label: null, icon: null }
+                    this.homeOverride = { label: null, icon: data.scope === 'SHARED_FILES' ? 'group' : 'person' }
                 }
             }),
         );
@@ -417,7 +420,7 @@ export class FileChooserComponent implements OnInit {
                 DialogButton.TYPE_PRIMARY,
                 () => this.chooseDirectory(),
             );
-            confirmButton.disabled = !this.path$.value.length && !this.canSelectHome;
+            confirmButton.disabled = (!this.path$.value.length && !this.canSelectHome) || !this.folderIsWritable();
         } else if (this.collections && !this.selectedFiles.length) {
             this.defaultSubtitle = null;
             confirmButton = new DialogButton(
