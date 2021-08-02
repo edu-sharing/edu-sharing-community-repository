@@ -14,6 +14,7 @@ const PROXY_CONFIG = [
     {
         context: ['/edu-sharing/rest'],
         target: process.env.BACKEND_URL,
+        secure: false
     },
 ];
 
