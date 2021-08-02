@@ -281,7 +281,7 @@ public class MetadataSetV2 implements Serializable {
 					  	if(value!=null && value.length > 0 && value[0] != null) {
 							Pattern pattern = Pattern.compile(cond.getPattern());
 							Matcher matcher = pattern.matcher(value[0]);
-							allowed = matcher.matches() == cond.isNegate();
+							allowed = matcher.matches() != cond.isNegate();
 						} else {
 					  		// no value, so fallback to "false"
 					  		allowed = cond.isNegate();
