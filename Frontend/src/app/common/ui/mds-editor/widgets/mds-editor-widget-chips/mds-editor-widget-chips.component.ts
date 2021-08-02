@@ -1,5 +1,12 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    OnInit,
+    ViewChild,
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {
     MatAutocomplete,
@@ -9,8 +16,17 @@ import {
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, EMPTY, from, Observable, timer } from 'rxjs';
-import { debounce, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs/operators';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, from, Observable, Subject, timer } from 'rxjs';
+import {
+    debounce,
+    delay,
+    distinctUntilChanged,
+    filter,
+    map,
+    startWith,
+    switchMap,
+} from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { DisplayValue } from '../DisplayValues';
@@ -22,7 +38,10 @@ import {MdsValueList} from '../../../../../core-module/rest/data-object';
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
 })
-export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implements OnInit {
+export class MdsEditorWidgetChipsComponent
+    extends MdsEditorWidgetBase
+    implements OnInit, AfterViewInit
+{
     @ViewChild('input') input: ElementRef<HTMLInputElement>;
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
     trigger: MatAutocompleteTrigger;
@@ -37,6 +56,7 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     showDropdownArrow: boolean;
 
     private autocompleteIsInhibited = new BehaviorSubject(false);
+    private autoCompleteToggleTrigger = new Subject<'open' | 'close' | 'opened' | 'closed'>();
 
     readonly showTooltip = (() => {
         let previousTooltip: MatTooltip;
@@ -100,6 +120,10 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         );
     }
 
+    ngAfterViewInit(): void {
+        this.registerAutoCompleteToggleTrigger();
+    }
+
     onInputTokenEnd(event: MatChipInputEvent): void {
         if (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges) {
             return;
@@ -112,32 +136,32 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
     }
 
     onBlurInput(event: FocusEvent): void {
-        const tag = (event.relatedTarget as HTMLElement)?.tagName;
+        const target = event.relatedTarget as HTMLElement;
         // ignore mat option focus to prevent resetting before selection is done
-        if (tag === 'MAT-OPTION' || event.relatedTarget === this.input.nativeElement) {
+        if (target?.tagName === 'MAT-OPTION' || target === this.input.nativeElement) {
             return;
         }
         this.inputControl.setValue(null);
-        if (tag === 'MAT-CHIP' || tag === 'INPUT' || tag === 'BUTTON') {
-            // `matAutocomplete` doesn't seem to close the autocomplete panel when focus goes to
-            // chips, however, navigating the autocomplete options by keyboard doesn't work when the
-            // input doesn't have the focus.
-            //
-            // We don't generally close the panel on blur, so the toggle button doesn't get
-            // confused.
-            // Also, we need to close the list when an other element (e.g. a tree input) gets focus
-            this.trigger.closePanel();
+        // `matAutocomplete` doesn't seem to close the autocomplete panel in some situations,
+        // including when focus goes to the component's own chips (breaks keyboard navigation) and
+        // some external elements (produces multiple open overlays).
+        //
+        // We would also get unintended behavior when the input is blurred because the auto-complete
+        // toggle button was pressed, but the `autoCompleteToggleTrigger` mechanism takes care of
+        // that.
+        if (this.trigger.panelOpen) {
+            this.autoCompleteToggleTrigger.next('close');
         }
     }
 
     toggleAutoCompletePanel(): void {
-        // use set timeout because otherwise multiple panels stay open cause of stopPropagation
-        // see https://stackoverflow.com/questions/50491195/open-matautocomplete-with-open-openpanel-method
+        // There are different strategies for doing this (see
+        // https://stackoverflow.com/questions/50491195/open-matautocomplete-with-open-openpanel-method).
+        // We rely on the `autoCompleteToggleTrigger` mechanism.
         if (this.trigger.panelOpen) {
-            setTimeout(() => this.trigger.closePanel());
+            this.autoCompleteToggleTrigger.next('close');
         } else {
-            // this.input.nativeElement.focus();
-            setTimeout(() => this.trigger.openPanel());
+            this.autoCompleteToggleTrigger.next('open');
         }
     }
 
@@ -178,6 +202,55 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
         } else {
             return null;
         }
+    }
+
+    /**
+     * Prevent the auto-complete panel from quickly opening and closing.
+     *
+     * Use `this.autoCompleteToggleTrigger.next('open' | 'close')` to trigger.
+     *
+     * Not using a mechanism like this results in all kinds of flaky behavior when focus moves
+     * around the input. This happens for example when the user clicks on the form field but not on
+     * the <input> element, the mouse button is released above an auto-complete option, or even when
+     * just clicking the toggle button. The behavior differs on browsers, especially Safari.
+     */
+    private registerAutoCompleteToggleTrigger(): void {
+        this.matAutocomplete.opened.subscribe(() => this.autoCompleteToggleTrigger.next('opened'));
+        this.matAutocomplete.closed.subscribe(() => this.autoCompleteToggleTrigger.next('closed'));
+        rxjs.combineLatest([
+            // The panel might close on the `mousedown` event on the button and then open again on
+            // `mouseup`. So we give the user 200ms to release the mouse button, before we assume,
+            // the events are unrelated.
+            this.autoCompleteToggleTrigger.throttleTime(200),
+            this.autoCompleteToggleTrigger,
+        ])
+            .pipe(
+                // Each time, the panel tries to open or close, we enforce our throttled action,
+                // regardless of what is wants to do at the given point. E.g., if it opened and
+                // closed again within 200ms, we just open it again.
+                map(([throttledAction]) => {
+                    if (throttledAction === 'open' || throttledAction === 'opened') {
+                        return 'open';
+                    } else {
+                        // throttledAction === 'close' || throttledAction === 'closed'
+                        return 'close';
+                    }
+                }),
+                // Delay the open event, so the panel doesn't decide it needs to be closed because
+                // of the toggle button press before it even opened.
+                delay(0),
+            )
+            .subscribe((action) => {
+                switch (action) {
+                    case 'open':
+                        this.trigger.openPanel();
+                        this.input.nativeElement.focus();
+                        break;
+                    case 'close':
+                        this.trigger.closePanel();
+                        break;
+                }
+            });
     }
 
     private removeFromIndeterminateValues(key: string): void {
@@ -258,8 +331,8 @@ export class MdsEditorWidgetChipsComponent extends MdsEditorWidgetBase implement
 
     private inhibitAutocomplete() {
         this.autocompleteIsInhibited.next(true);
+        this.autoCompleteToggleTrigger.next('close');
         setTimeout(() => {
-            this.trigger.closePanel();
             this.autocompleteIsInhibited.next(false);
         });
     }

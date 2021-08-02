@@ -61,6 +61,7 @@
     "@types/node": "^12.11.1",
     "babel-loader": "^8.0.6",
     "codelyzer": "^5.1.2",
+    "dotenv": "^10.0.0",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^5.2.3",

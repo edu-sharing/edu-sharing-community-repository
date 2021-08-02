@@ -176,4 +176,8 @@ export class RegisterComponent {
         }
         return btn;
     }
+
+    canRegister() {
+        return this.configService.instant('register.local', true);
+    }
 }
