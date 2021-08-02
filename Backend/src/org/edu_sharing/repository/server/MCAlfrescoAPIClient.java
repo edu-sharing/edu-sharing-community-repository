@@ -2816,6 +2816,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		if (childAssocRef.getParentRef().getId().equals(fromID)) {
 
 			if(!recycle){
+				// unlock the node (in case it was locked by alfresco, e.g. by webdav)
+				if(serviceRegistry.getLockService().isLocked(nodeRef)) {
+					serviceRegistry.getLockService().unlock(nodeRef);
+				}
 				nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
 			}
 			nodeService.deleteNode(nodeRef);
