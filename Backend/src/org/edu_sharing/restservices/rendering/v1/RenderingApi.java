@@ -25,7 +25,6 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RenderingDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
-import org.edu_sharing.restservices.rendering.v1.model.RenderingParameter;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
