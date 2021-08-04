@@ -86,8 +86,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     selection: Node[] = [];
 
     showSelectRoot = false;
-    createConnectorName: string;
-    createConnectorType: Connector;
 
     public allowBinary = true;
     public globalProgress = false;
@@ -162,16 +160,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
         const fromInputField = KeyEvents.eventFromInputField(event);
 
-        if (event.key === 'Escape') {
-            if (this.createConnectorName != null) {
-                this.createConnectorName = null;
-            }
-            else {
-                return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-        }
     }
     onEvent(event: string, data: any): void {
         if (event === FrameEventsService.EVENT_REFRESH) {
@@ -222,19 +210,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private hideDialog(): void {
         this.toast.closeModalDialog();
     }
-    // @ TODO: Move to create menu (probably)
-    showCreateConnector(connector: Connector) {
-        this.createConnectorName = '';
-        this.createConnectorType = connector;
-        this.iam.getUser().subscribe((user) => {
-            if (user.person.quota.enabled && user.person.quota.sizeCurrent >= user.person.quota.sizeQuota) {
-                this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE', 'CONNECTOR_QUOTA_REACHED_MESSAGE', DialogButton.getOk(() => {
-                    this.toast.closeModalDialog();
-                }), true);
-                this.createConnectorName = null;
-            }
-        });
-    }
+
     private editConnector(node: Node = null, type: Filetype = null, win: any = null, connectorType: Connector = null) {
         UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, this.getNodeList(node)[0], type, win, connectorType);
     }
@@ -364,11 +340,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.globalProgress = false;
             this.homeDirectory = data.id;
             this.route.queryParams.subscribe((params: Params) => {
-
-                if (params.connector) {
-                    this.showCreateConnector(this.connectorList.filter((c) => c.id === params.connector)[0]);
-                }
-
                 let needsUpdate = false;
                 if (this.oldParams) {
                     for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {

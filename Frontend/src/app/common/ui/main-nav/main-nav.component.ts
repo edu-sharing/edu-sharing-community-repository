@@ -22,7 +22,7 @@ import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     About,
     ConfigurationHelper,
-    ConfigurationService,
+    ConfigurationService, Connector,
     DialogButton,
     FrameEventsService,
     IamUser,
@@ -259,6 +259,14 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
+                        if(params.connector) {
+                            this.createMenu?.showCreateConnector(
+                                this.createMenu?.connectorList?.filter(
+                                    (c) => c.id === params.connector
+                                )[0]
+                            );
+                        }
+
                         this.showNodeStore = params.nodeStore === 'true';
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
