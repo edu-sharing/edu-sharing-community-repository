@@ -11,6 +11,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	public enum Required{
 		mandatory,
 		mandatoryForPublish,
+		recommended,
 		optional,
 		ignore
 	}

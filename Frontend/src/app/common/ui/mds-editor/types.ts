@@ -192,6 +192,7 @@ export type Suggestions = { [property: string]: MdsWidgetValue[] };
 export enum RequiredMode {
     Mandatory = 'mandatory',
     MandatoryForPublish = 'mandatoryForPublish',
+    Recommended = 'recommended',
     Optional = 'optional',
     Ignore = 'ignore',
 }
