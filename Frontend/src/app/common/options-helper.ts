@@ -1056,7 +1056,7 @@ export class OptionsHelperService {
             }
         }
         if (constrains.indexOf(Constrain.FilesAndFolders) !== -1) {
-            if (objects.some((o) => o.collection || o.type !== RestConstants.CCM_TYPE_IO && o.type !== RestConstants.CCM_TYPE_MAP)) {
+            if (objects.some((o) => o.collection || o.type !== RestConstants.CCM_TYPE_IO && o.type !== RestConstants.CCM_TYPE_TOOLPERMISSION && o.type !== RestConstants.CCM_TYPE_MAP)) {
                 return Constrain.FilesAndFolders;
             }
         }
