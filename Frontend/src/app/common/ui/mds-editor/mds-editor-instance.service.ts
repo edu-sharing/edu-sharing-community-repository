@@ -48,7 +48,7 @@ export interface CompletionStatusEntry {
 
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
 
-type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
+export type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 
 /**
  * NativeWidget and Widget
