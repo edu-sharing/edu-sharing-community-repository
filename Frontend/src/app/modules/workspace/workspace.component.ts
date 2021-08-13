@@ -353,7 +353,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     }
                 } else {
                     needsUpdate = true;
-                    this.explorer.showLoading = true;
+                    if(this.explorer) {
+                        this.explorer.showLoading = true;
+                    }
                 }
                 this.oldParams = params;
                 if (params.viewType != null) {
