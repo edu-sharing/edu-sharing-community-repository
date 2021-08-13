@@ -1,4 +1,5 @@
 <card
+  *ngIf="_connector"
   title="{{'CONNECTOR.'+_connector.id+'.TITLE' | translate }}"
   subtitle="{{'CONNECTOR.'+_connector.id+'.NAME' | translate }}"
   height="auto"
