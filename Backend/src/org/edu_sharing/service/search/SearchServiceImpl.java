@@ -90,18 +90,13 @@ public class SearchServiceImpl implements SearchService {
 		token.setMaxResult(maxItems);
 		token.setSortDefinition(sortDefinition);
 		token.setContentType(contentType);
-		String mdsQuery = MetadataSearchHelper.getLuceneString(
-				"sharedByMe",
-				null
-		);
-		token.setLuceneString(mdsQuery + " AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
+		token.setLuceneString(SearchServiceImpl.getFilesSharedByMeLucene());
 		return search(token);
 	}
 
 
 	@Override
 	public SearchResultNodeRef getFilesSharedToMe(SharedToMeType type, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
-		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 
 		SearchToken token=new SearchToken();
 		token.setFrom(skipCount);
@@ -109,31 +104,7 @@ public class SearchServiceImpl implements SearchService {
 		token.setSortDefinition(sortDefinition);
 		token.setContentType(contentType);
 
-		Set<String> memberships = new HashSet<>();
-		memberships.add(username);
-		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
-		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
-		String mdsQuery = MetadataSearchHelper.getLuceneString(
-				"sharedToMe",
-				null
-		);
-		StringBuilder query= new StringBuilder(mdsQuery + " AND ("
-				+ "NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
-				+ " AND (");
-		int i=0;
-		if(type.equals(SharedToMeType.All)) {
-			for (String m : memberships) {
-				if (i++ > 0)
-					query.append(" OR ");
-				query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
-			}
-		} else if (type.equals(SharedToMeType.Private)){
-			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(username)).append("\"");
-		}
-		query.append(")");
-		query.append(")");
-		token.setLuceneString(query.toString());
-
+		token.setLuceneString(SearchServiceImpl.getFilesSharedToMeLucene(type));
 		return search(token);
 
 		// Done via solr ccm:ph_invited now
@@ -171,6 +142,44 @@ public class SearchServiceImpl implements SearchService {
 			}
 		));
 		*/
+	}
+
+	public static String getFilesSharedToMeLucene(SharedToMeType type) throws Exception{
+		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+		String username = AuthenticationUtil.getFullyAuthenticatedUser();
+		Set<String> memberships = new HashSet<>();
+		memberships.add(username);
+		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
+		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedToMe",
+				null
+		);
+		StringBuilder query= new StringBuilder(mdsQuery + " AND ("
+				+ "NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+				+ " AND (");
+		int i=0;
+		if(type.equals(SharedToMeType.All)) {
+			for (String m : memberships) {
+				if (i++ > 0)
+					query.append(" OR ");
+				query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
+			}
+		} else if (type.equals(SharedToMeType.Private)){
+			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(username)).append("\"");
+		}
+		query.append(")");
+		query.append(")");
+		return query.toString();
+	}
+
+	public static String getFilesSharedByMeLucene() throws Exception{
+		String username = AuthenticationUtil.getFullyAuthenticatedUser();
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedByMe",
+				null
+		);
+		return mdsQuery + " AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"";
 	}
 
 	@Override
@@ -793,6 +802,8 @@ public class SearchServiceImpl implements SearchService {
 			return sr;
 
 		} catch (Throwable e) {
+			e.printStackTrace();
+			if(e.getCause() != null) e.getCause().printStackTrace();
 			logger.error(e.getMessage(), e);
 			throw new RuntimeException(e.getMessage());
 		}
