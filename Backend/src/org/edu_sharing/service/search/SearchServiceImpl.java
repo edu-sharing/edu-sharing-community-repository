@@ -90,11 +90,7 @@ public class SearchServiceImpl implements SearchService {
 		token.setMaxResult(maxItems);
 		token.setSortDefinition(sortDefinition);
 		token.setContentType(contentType);
-		String mdsQuery = MetadataSearchHelper.getLuceneString(
-				"sharedByMe",
-				null
-		);
-		token.setLuceneString(mdsQuery + " AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
+		token.setLuceneString(SearchServiceImpl.getFilesSharedByMeLucene());
 		return search(token);
 	}
 
@@ -175,6 +171,15 @@ public class SearchServiceImpl implements SearchService {
 		query.append(")");
 		query.append(")");
 		return query.toString();
+	}
+
+	public static String getFilesSharedByMeLucene() throws Exception{
+		String username = AuthenticationUtil.getFullyAuthenticatedUser();
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedByMe",
+				null
+		);
+		return mdsQuery + " AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"";
 	}
 
 	@Override

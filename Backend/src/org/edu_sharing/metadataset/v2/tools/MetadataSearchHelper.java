@@ -108,6 +108,13 @@ public class MetadataSearchHelper {
 							} catch (Exception e) {
 								logger.error(e.getMessage(),e);
 							}
+						}else if("workspace".equals(query.getId()) && parameter.getName().equals("parent")
+								&& values[0].startsWith("-my_shared_files")){
+							try {
+								queryString += SearchServiceImpl.getFilesSharedByMeLucene();
+							} catch (Exception e) {
+								logger.error(e.getMessage(),e);
+							}
 						}else {
 							queryString += replaceCommonQueryVariables(getStatmentForValue(parameter, values[0]));
 						}
