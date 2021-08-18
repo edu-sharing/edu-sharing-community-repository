@@ -2814,6 +2814,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		if (childAssocRef.getParentRef().getId().equals(fromID)) {
 
 			if(!recycle){
+				// unlock the node (in case it was locked by alfresco, e.g. by webdav)
+				if(serviceRegistry.getLockService().isLocked(nodeRef)) {
+					serviceRegistry.getLockService().unlock(nodeRef);
+				}
 				nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
 			}
 			nodeService.deleteNode(nodeRef);
@@ -3262,23 +3266,29 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 							
 							NodeRef personNodeRef = null;
 							if(AuthorityType.getAuthorityType(alfAuthority).equals(AuthorityType.OWNER)){
-								personNodeRef = personService.getPerson(serviceRegistry.getOwnableService().getOwner(nodeRef));
+								personNodeRef = personService.getPersonOrNull(serviceRegistry.getOwnableService().getOwner(nodeRef));
 							}else{
-								personNodeRef = personService.getPerson(alfAuthority);
+								personNodeRef = personService.getPersonOrNull(alfAuthority);
 							}
-							
-							Map<QName, Serializable> personProps = nodeService.getProperties(personNodeRef);
-							User user = new User();
-							user.setNodeId(personNodeRef.getId());
-							user.setEmail((String) personProps.get(ContentModel.PROP_EMAIL));
-							user.setGivenName((String) personProps.get(ContentModel.PROP_FIRSTNAME));
-							user.setSurname((String) personProps.get(ContentModel.PROP_LASTNAME));
-							
-							String repository = (String)personProps.get(QName.createQName(CCConstants.PROP_USER_REPOSITORYID));
-							if(repository == null || repository.trim().equals("")) repository = appInfo.getAppId();
-							user.setRepositoryId(repository);
-							user.setUsername((String) personProps.get(ContentModel.PROP_USERNAME));
-							aceResult.setUser(user);
+
+							if(personNodeRef != null) {
+								Map<QName, Serializable> personProps = nodeService.getProperties(personNodeRef);
+								User user = new User();
+								user.setNodeId(personNodeRef.getId());
+								user.setEmail((String) personProps.get(ContentModel.PROP_EMAIL));
+								user.setGivenName((String) personProps.get(ContentModel.PROP_FIRSTNAME));
+								user.setSurname((String) personProps.get(ContentModel.PROP_LASTNAME));
+
+								String repository = (String) personProps.get(QName.createQName(CCConstants.PROP_USER_REPOSITORYID));
+								if (repository == null || repository.trim().equals("")) repository = appInfo.getAppId();
+								user.setRepositoryId(repository);
+								user.setUsername((String) personProps.get(ContentModel.PROP_USERNAME));
+								aceResult.setUser(user);
+							}else{
+								User user = new User();
+								user.setUsername(alfAuthority);
+								aceResult.setUser(user);
+							}
 						}
 						
 			

@@ -56,14 +56,15 @@ declare var noUiSlider: any;
     ],
 })
 export class MdsComponent {
-    /**
-     * priority, useful if the dialog seems not to be in the foreground
-     * Values greater 0 will raise the z-index
-     * Default is 1 for mds
-     */
-    @Input() priority = 1;
-    @Input() addWidget = false;
-    @Input() embedded = false;
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   * Default is 1 for mds
+   */
+  @Input() priority = 1;
+  @Input() addWidget=false;
+  @Input() embedded=false;
+  @Input() displayJumpmarks=true;
 
     /**
      * bulk behaviour: this controls how the bulk feature shall behave
