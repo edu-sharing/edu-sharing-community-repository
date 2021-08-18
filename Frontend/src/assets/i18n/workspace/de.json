@@ -168,7 +168,9 @@
                 "DOI_DISTINCT": "Neuen Handle erzeugen",
                 "DOI_DISTINCT_INFO": "Ein neuer, eindeutiger Handle wird erzeugt. Zukünftige Versionen des Objektes haben eigenständige Identifikatoren. Beachten Sie, dass nach einmaliger Wahl dieser Option nachträglich keine aktualisierten Versionen des Elements unter dem gleichen Handle erfolgen können",
                 "DOI_UPDATE": "Bestehenden Handle aktualisieren",
-                "DOI_UPDATE_INFO": "Die neue Version des Elements wird unter der bestehenden, alten Handle-Adresse zukünftig verfügbar gemacht. Die zuvor veröffentlichte Version ist über die Handle-Adresse nicht mehr direkt zugänglich"
+                "DOI_UPDATE_INFO": "Die neue Version des Elements wird unter der bestehenden, alten Handle-Adresse zukünftig verfügbar gemacht. Die zuvor veröffentlichte Version ist über die Handle-Adresse nicht mehr direkt zugänglich",
+                "LICENSE_REQUIRED": "Um das Material zu veröffentlichen muss zunächst die Lizenz definiert werden",
+                "AUTHOR_REQUIRED": "Um das Material zu veröffentlichen muss der Autor definiert werden"
             },
             "STATE": {
                 "PRIVATE": "Privat",
@@ -386,8 +388,6 @@
             "CURRENT": "Aktuell ausgewählte Lizenz",
             "VERSION": "Version",
             "LOCALE": "Rechtsordnung",
-            "RELEASE_WITHOUT_LICENSE": "Um ein Objekt freizugeben muss eine Lizenz definiert werden",
-            "RELEASE_WITHOUT_AUTHOR":  "Um ein Objekt freizugeben muss der Autor nicht leer sein",
             "CUSTOM_RIGHTS": "GNU GPL oder andere Lizenzen...",
             "RELEASE": "Objekt mit dieser Lizenz veröffentlichen",
             "RELEASE_MULTI": "{{count}} Objekte mit dieser Lizenz veröffentlichen",

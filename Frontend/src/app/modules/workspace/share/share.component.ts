@@ -877,7 +877,10 @@ export class WorkspaceShareComponent {
      * @return true | false | not exist return false
      */
     isLicenseMandatory() {
-        return this.config.instant('licenseMandatory', false);
+        return this.config.instant('publish.licenseMandatory', false);
+    }
+    isAuthorMandatory() {
+        return this.config.instant('publish.authorMandatory', false);
     }
 
     /**
@@ -897,6 +900,9 @@ export class WorkspaceShareComponent {
      * @return true | false | not exist return false
      */
     isAuthorRequired() {
+        if(!this.isAuthorMandatory()) {
+            return false;
+        }
         if (this._nodes !== null) {
             return !this._nodes[0].properties[RestConstants.CCM_PROP_LICENSE]?.includes('CC_0') && !this._nodes[0].properties[RestConstants.CCM_PROP_LICENSE]?.includes('PDM');
         }

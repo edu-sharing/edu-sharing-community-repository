@@ -272,8 +272,8 @@
                 [permissions]="permissions"
                 [inherited]="getPublishInherit()"
                 (onInitCompleted)="setInitialState()"
-                [isAuthorEmtpy]="isAuthorRequired()?isAuthorEmpty():false"
-                [isLicenseEmtpy]="isLicenseMandatory()?isLicenseEmpty():false"
+                           [isAuthorEmpty]="isAuthorRequired() ? isAuthorEmpty() : false"
+                           [isLicenseEmpty]="isLicenseMandatory() ? isLicenseEmpty() : false"
                 (onDisableInherit)="inherited = false"
         ></app-share-publish>
       </div>

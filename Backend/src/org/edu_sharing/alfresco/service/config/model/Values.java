@@ -59,7 +59,7 @@ public class Values implements Serializable {
 	@XmlElement	public SimpleEdit simpleEdit;
 	@XmlElement	public ConfigFrontpage frontpage;
 	@XmlElement	public ConfigUpload upload;
-	@XmlElement	public Boolean licenseMandatory;
+	@XmlElement	public ConfigPublish publish;
 	@XmlElement	public ConfigRemote remote;
 	@XmlElement	public String customCSS;
 	@XmlElement	public ConfigPrivacy privacy;

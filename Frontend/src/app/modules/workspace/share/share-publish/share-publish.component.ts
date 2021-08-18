@@ -37,8 +37,8 @@ export class SharePublishComponent implements OnChanges {
     @Input() node: Node;
     @Input() permissions: Permission[];
     @Input() inherited: boolean;
-    @Input() isAuthorEmtpy: boolean;
-    @Input() isLicenseEmtpy: boolean;
+    @Input() isAuthorEmpty: boolean;
+    @Input() isLicenseEmpty: boolean;
     @Output() onDisableInherit = new EventEmitter<void>();
     @Output() onInitCompleted = new EventEmitter<void>();
     @ViewChild('shareModeCopyRef') shareModeCopyRef: any;
@@ -264,18 +264,11 @@ export class SharePublishComponent implements OnChanges {
             (v) => !v.virtual && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]
         ).map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0])).size === 1;
     }
-
-    onShareModeClick(event: any): void {
-        if (!event._checked) {
-            if (this.isLicenseEmtpy && !this.node.isDirectory) {
-                this.toast.error(null, this.translate.instant('WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE'));
-                event.preventDefaultEvent();
-            }
-            if (this.isAuthorEmtpy && !this.node.isDirectory) {
-                this.toast.error(null, this.translate.instant('WORKSPACE.LICENSE.RELEASE_WITHOUT_AUTHOR'));
-                event.preventDefaultEvent();
-            }
-        }
+    isLicenseMissing() {
+        return !this.getLicense() && this.isLicenseEmpty && !this.node.isDirectory;
+    }
+    isAuthorMissing() {
+        return this.isAuthorEmpty && !this.node.isDirectory;
     }
 }
 export enum ShareMode {
