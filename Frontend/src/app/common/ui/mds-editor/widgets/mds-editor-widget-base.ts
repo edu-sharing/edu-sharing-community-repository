@@ -1,6 +1,7 @@
 import { ValidatorFn, Validators } from '@angular/forms';
 import { MdsEditorWidgetCore } from '../mds-editor-instance.service';
 import { assertUnreachable, InputStatus, RequiredMode } from '../types';
+import { Directive } from "@angular/core";
 
 export enum ValueType {
     String,
@@ -8,6 +9,7 @@ export enum ValueType {
     Range,
 }
 
+@Directive()
 export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     abstract readonly valueType: ValueType;
 
