@@ -1,4 +1,13 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnInit,
+    Output,
+    SimpleChanges,
+    ViewChild
+} from '@angular/core';
 import {UIHelper} from "../../../../core-ui-module/ui-helper";
 import {Node, Permission} from '../../../../core-module/rest/data-object';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
@@ -28,8 +37,12 @@ export class SharePublishComponent implements OnChanges {
     @Input() node: Node;
     @Input() permissions: Permission[];
     @Input() inherited: boolean;
+    @Input() isAuthorEmtpy: boolean;
+    @Input() isLicenseEmtpy: boolean;
     @Output() onDisableInherit = new EventEmitter<void>();
     @Output() onInitCompleted = new EventEmitter<void>();
+    @ViewChild('shareModeCopyRef') shareModeCopyRef: any;
+    @ViewChild('shareModeDirectRef') shareModeDirectRef: any;
     doiPermission: boolean;
     initialState: {
         copy: boolean,
@@ -250,6 +263,19 @@ export class SharePublishComponent implements OnChanges {
         return new Set(this.allPublishedVersions.filter(
             (v) => !v.virtual && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]
         ).map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0])).size === 1;
+    }
+
+    onShareModeClick(event: any): void {
+        if (!event._checked) {
+            if (this.isLicenseEmtpy && !this.node.isDirectory) {
+                this.toast.error(null, this.translate.instant('WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE'));
+                event.preventDefaultEvent();
+            }
+            if (this.isAuthorEmtpy && !this.node.isDirectory) {
+                this.toast.error(null, this.translate.instant('WORKSPACE.LICENSE.RELEASE_WITHOUT_AUTHOR'));
+                event.preventDefaultEvent();
+            }
+        }
     }
 }
 export enum ShareMode {

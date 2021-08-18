@@ -49,6 +49,7 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 })
 export class WorkspaceShareComponent {
     @ViewChild('publish') publishComponent: SharePublishComponent;
+    @ViewChild('inheritRef') inheritRef: any;
     @Input() sendMessages = true;
     @Input() sendToApi = true;
     @Input() currentPermissions: LocalPermissions = null;
@@ -262,7 +263,7 @@ export class WorkspaceShareComponent {
         if (this.currentPermissions) {
             this.originalPermissions = Helper.deepCopy(this.currentPermissions);
             this.setPermissions(this.currentPermissions.permissions);
-            this.inherited = this.currentPermissions.inherited;
+            this.isInherited(this.currentPermissions.inherited)
             this.showLink = false;
         } else {
             this.showLink = true;
@@ -279,8 +280,7 @@ export class WorkspaceShareComponent {
                     this.setPermissions(
                         permissions[0].permissions.localPermissions.permissions,
                     );
-                    this.inherited =
-                        permissions[0].permissions.localPermissions.inherited;
+                    this.isInherited(permissions[0].permissions.localPermissions.inherited);
                     setTimeout(()=>this.setInitialState());
                 }
                 this.toast.closeModalDialog();
@@ -843,6 +843,75 @@ export class WorkspaceShareComponent {
         return this.filterDisabledPermissions(this.newPermissions).filter(
             (p) => p.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
         );
+    }
+
+
+    onCheckInherit(event: any): void {
+        if (!event._checked) {
+            if (this.isLicenseMandatory() && !this.isLicenseEmpty()) {
+                if (this.isAuthorRequired() && this.isAuthorEmpty()) {
+                    this.toast.error(null, this.translate.instant("WORKSPACE.LICENSE.RELEASE_WITHOUT_AUTHOR"));
+                    event.preventDefaultEvent();
+                }
+            } else {
+                this.toast.error(null, this.translate.instant("WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE"));
+                event.preventDefaultEvent();
+            }
+        }
+    }
+
+    private isInherited(inherited: boolean) {
+        if (this.isLicenseMandatory() && !this.isLicenseEmpty()) {
+            if (this.isAuthorRequired() && this.isAuthorEmpty()) {
+                this.inherited = false
+            } else {
+                this.inherited = inherited;
+            }
+        } else {
+            this.inherited = false
+        }
+    }
+
+    /**
+     * Check if license is mandatory
+     * @return true | false | not exist return false
+     */
+    isLicenseMandatory() {
+        return this.config.instant('licenseMandatory', false);
+    }
+
+    /**
+     * Check if license is empty
+     * @return true | false | not exist return false
+     */
+    isLicenseEmpty() {
+        if (this._nodes == null || !this._nodes[0].properties[RestConstants.CCM_PROP_LICENSE]?.[0]) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if author is required
+     * For CC_0 and PDM, Author is not required, and we can share also without author
+     * @return true | false | not exist return false
+     */
+    isAuthorRequired() {
+        if (this._nodes !== null) {
+            return !this._nodes[0].properties[RestConstants.CCM_PROP_LICENSE]?.includes('CC_0') && !this._nodes[0].properties[RestConstants.CCM_PROP_LICENSE]?.includes('PDM');
+        }
+        return false;
+    }
+
+    /**
+     * Check if Author is empty
+     * @return true | false | not exist return false
+     */
+    isAuthorEmpty() {
+        if (this._nodes == null || !this._nodes[0].properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]?.[0]) {
+            return true;
+        }
+        return false;
     }
 }
 /*

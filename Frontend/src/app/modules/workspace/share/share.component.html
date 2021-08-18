@@ -145,7 +145,7 @@
           <div class="groupHeading">
             <div class="groupName">{{'WORKSPACE.SHARE.GROUP_INHERIT' | translate}}</div>
             <div class="inheritCheck">
-              <mat-checkbox [(ngModel)]="inherited" id="inherit">{{'WORKSPACE.SHARE.INHERIT' | translate}}</mat-checkbox>
+              <mat-checkbox #inheritRef (click)="onCheckInherit(inheritRef)"  [(ngModel)]="inherited" id="inherit">{{'WORKSPACE.SHARE.INHERIT' | translate}}</mat-checkbox>
             </div>
           </div>
           <div class="inherit" [class.crossed]="!inherited" *ngIf="inherited && inherit && inherit.length">
@@ -272,6 +272,8 @@
                 [permissions]="permissions"
                 [inherited]="getPublishInherit()"
                 (onInitCompleted)="setInitialState()"
+                [isAuthorEmtpy]="isAuthorRequired()?isAuthorEmpty():false"
+                [isLicenseEmtpy]="isLicenseMandatory()?isLicenseEmpty():false"
                 (onDisableInherit)="inherited = false"
         ></app-share-publish>
       </div>
