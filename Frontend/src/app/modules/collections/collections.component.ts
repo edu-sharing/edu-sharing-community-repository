@@ -1,3 +1,4 @@
+import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
 import {Component, ContentChild, ElementRef, TemplateRef, ViewChild} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
@@ -54,7 +55,6 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
-import { Observable } from 'rxjs';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
@@ -542,7 +542,7 @@ export class CollectionsMainComponent {
                                 this.collectionContent.node.ref.id,
                             ),
                         );
-                        Observable.forkJoin(observables).subscribe(
+                        observableForkJoin(observables).subscribe(
                             () => {
                                 this.toast.closeModalDialog();
                                 this.refreshContent();

@@ -1,3 +1,5 @@
+import {forkJoin as observableForkJoin, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
 import {DialogButton, RestConnectorService, RestIamService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
@@ -17,7 +19,6 @@ import {Helper} from '../../../core-module/rest/helper';
 import {MdsEditorWidgetAuthorComponent} from '../../../common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import {MdsEditorInstanceService} from '../../../common/ui/mds-editor/mds-editor-instance.service';
 import {UserPresentableError, Values} from '../../../common/ui/mds-editor/types';
-import {Observable} from 'rxjs/Rx';
 
 @Component({
     selector: 'workspace-license',
@@ -195,9 +196,9 @@ export class WorkspaceLicenseComponent  {
             || this.getLicenseProperty()=='CC_BY' || this.getLicenseProperty()=='CC_BY_SA';
     }
     public loadNodes(nodes:Node[]) {
-        return Observable.forkJoin(
+        return observableForkJoin(
             nodes.map((n) =>
-                this.nodeApi.getNodeMetadata(n.ref.id, [RestConstants.ALL]).map((n2) => n2.node)
+                this.nodeApi.getNodeMetadata(n.ref.id, [RestConstants.ALL]).pipe(map((n2) => n2.node))
             )
         );
     }

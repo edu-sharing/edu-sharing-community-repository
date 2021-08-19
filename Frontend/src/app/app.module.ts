@@ -25,7 +25,6 @@ import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
-import { MAT_LABEL_GLOBAL_OPTIONS } from "@angular/material/core";
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
 import { MAT_TOOLTIP_DEFAULT_OPTIONS } from "@angular/material/tooltip";
 import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component';
@@ -49,7 +48,7 @@ import { MdsEditorWidgetVersionComponent } from './common/ui/mds-editor/widgets/
 import { MdsEditorWidgetLinkComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-link/mds-editor-widget-link.component';
 import {MdsEditorWidgetSelectComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-select/mds-editor-widget-select.component';
 import {MdsEditorWidgetSliderComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
-import {Ng5SliderModule} from 'ng5-slider';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { MdsEditorWidgetTreeComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetTreeCoreComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import {MdsEditorWidgetAuthorComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
@@ -74,7 +73,6 @@ import { OnAttributeChangeDirective } from './common/directives/on-attribute-cha
 import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
-import { MatAutocompleteTriggerAccessorDirective } from './common/directives/mat-autocomplete-trigger-accessor.directive';
 import {ResizableModule} from 'angular-resizable-element';
 
 
@@ -142,12 +140,11 @@ import {ResizableModule} from 'angular-resizable-element';
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
         extensionDeclarations,
-        MatAutocompleteTriggerAccessorDirective,
     ],
     imports: [
         IMPORTS,
         CommonModule,
-        Ng5SliderModule,
+        NgxSliderModule,
         DragDropModule,
         extensionImports,
         ResizableModule,

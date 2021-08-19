@@ -1,3 +1,4 @@
+import {forkJoin as observableForkJoin, fromEvent, Observable, Subscription} from 'rxjs';
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
@@ -34,7 +35,6 @@ import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Inject, Injectable, InjectionToken, OnDestroy, Optional} from '@angular/core';
 import {CardComponent} from './components/card/card.component';
-import {fromEvent, Observable, Subscription} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {
@@ -1338,7 +1338,7 @@ export class OptionsHelperService implements OnDestroy {
     }
 
     private removeFromCollection(objects: Node[] | any) {
-        Observable.forkJoin(objects.map((o: Node|any) =>
+        observableForkJoin(objects.map((o: Node|any) =>
             this.collectionService.removeFromCollection(o.ref.id, this.data.parent.ref.id)
         )).subscribe(() =>
                 this.listener.onDelete({objects, error: false, count: objects.length})

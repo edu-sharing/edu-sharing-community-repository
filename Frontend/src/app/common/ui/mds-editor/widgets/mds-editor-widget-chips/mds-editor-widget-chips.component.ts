@@ -1,3 +1,14 @@
+
+import {
+    throttleTime, 
+    debounce,
+    delay,
+    distinctUntilChanged,
+    filter,
+    map,
+    startWith,
+    switchMap,
+} from 'rxjs/operators';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import {
     AfterViewInit,
@@ -18,15 +29,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, combineLatest, EMPTY, from, Observable, Subject, timer } from 'rxjs';
-import {
-    debounce,
-    delay,
-    distinctUntilChanged,
-    filter,
-    map,
-    startWith,
-    switchMap,
-} from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { DisplayValue } from '../DisplayValues';
@@ -221,7 +223,7 @@ export class MdsEditorWidgetChipsComponent
             // The panel might close on the `mousedown` event on the button and then open again on
             // `mouseup`. So we give the user 200ms to release the mouse button, before we assume,
             // the events are unrelated.
-            this.autoCompleteToggleTrigger.throttleTime(200),
+            this.autoCompleteToggleTrigger.pipe(throttleTime(200)),
             this.autoCompleteToggleTrigger,
         ])
             .pipe(

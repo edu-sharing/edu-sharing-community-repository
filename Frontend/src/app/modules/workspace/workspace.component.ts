@@ -52,6 +52,7 @@ import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import { CardService } from '../../core-ui-module/card.service';
 import { Observable } from 'rxjs';
+import { delay } from "rxjs/operators";
 import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
@@ -204,7 +205,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         });
         this.connector.setRoute(this.route);
         this.globalProgress = true;
-        this.cardHasOpenModals$ = card.hasOpenModals.delay(0);
+        this.cardHasOpenModals$ = card.hasOpenModals.pipe(delay(0));
     }
 
     private hideDialog(): void {

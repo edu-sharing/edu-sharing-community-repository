@@ -1,3 +1,4 @@
+import {first, filter} from 'rxjs/operators';
 import {Component, Input, OnInit} from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node } from '../../../../../core-module/rest/data-object';
@@ -44,13 +45,13 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes$
-            .filter((n) => n != null)
+        this.mdsEditorValues.nodes$.pipe(
+            filter((n) => n != null))
             .subscribe((nodes) => {
                 this.updateValues(nodes);
             });
-        this.mdsEditorValues.values$
-            .filter((v) => v != null)
+        this.mdsEditorValues.values$.pipe(
+            filter((v) => v != null))
             .subscribe((values) => {
                 this.updateValues([
                     {properties: values}
@@ -70,7 +71,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         this.mainNavService.getDialogs().nodeContributor = this._nodes[0];
         this.mainNavService
             .getDialogs()
-            .nodeContributorChange.first()
+            .nodeContributorChange.pipe(first())
             .subscribe((n) => {
                 if(n) {
                     this.mdsEditorValues.updateNodes([n]);

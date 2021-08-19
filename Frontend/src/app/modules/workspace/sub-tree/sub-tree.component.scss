@@ -1,3 +1,4 @@
+@use 'sass:math';
 @import "../../../core-ui-module/styles/variables";
 .dropdown-dummy{
   position: fixed;
@@ -41,7 +42,7 @@ i.arrow{
   @include fadeRight($workspaceTreeSelectedBackground,70%);
 }
 .moreOpen{
-  left:($workspaceSidebarWidth - $contextMenuWidth)/2;
+  left: math.div($workspaceSidebarWidth - $contextMenuWidth, 2);
   width:$contextMenuWidth;
 }
 .node:hover{

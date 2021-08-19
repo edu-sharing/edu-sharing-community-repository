@@ -1,3 +1,4 @@
+import {forkJoin as observableForkJoin,  Observable, throwError } from 'rxjs';
 import {
     Component,
     ElementRef,
@@ -40,7 +41,6 @@ import {
 } from '../../../core-module/core.module';
 import { CardJumpmark } from '../../../core-ui-module/components/card/card.component';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { Observable } from 'rxjs';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
 import {DateHelper} from '../../../core-ui-module/DateHelper';
@@ -808,12 +808,12 @@ export class MdsComponent {
             );
         } else {
             // can be bulk mode
-                  Observable.forkJoin(this.currentNodes.map((n) => {
+                  observableForkJoin(this.currentNodes.map((n) => {
                     const props = this.getValues(n.properties);
                     if(props) {
                       return this.node.editNodeMetadataNewVersion(n.ref.id, version, this.getValues(n.properties))
                     } else {
-                      return Observable.throwError(null);
+                      return throwError(null);
                     }
                   }))
                       .subscribe((nodes) => {

@@ -1,7 +1,8 @@
+import {forkJoin as observableForkJoin, BehaviorSubject, Observable} from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
-import {BehaviorSubject, Observable} from 'rxjs';
 import {FileChangeEvent} from '@angular/compiler-cli/src/perform_watch';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {RestNodeService} from '../../../../../core-module/rest/services/rest-node.service';
@@ -61,13 +62,13 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
     }
     onSaveNode(nodes: Node[]) {
         if (this.delete) {
-            return Observable.forkJoin(nodes.map((n) => this.nodeService.deleteNodePreview(n.ref.id))).
-                map(() => nodes).toPromise();
+            return observableForkJoin(nodes.map((n) => this.nodeService.deleteNodePreview(n.ref.id))).pipe(
+                map(() => nodes)).toPromise();
         }
         if(this.file == null) {
             return null;
         }
-        return Observable.forkJoin(nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file))).
-                map(() => nodes).toPromise();
+        return observableForkJoin(nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file))).pipe(
+                map(() => nodes)).toPromise();
     }
 }

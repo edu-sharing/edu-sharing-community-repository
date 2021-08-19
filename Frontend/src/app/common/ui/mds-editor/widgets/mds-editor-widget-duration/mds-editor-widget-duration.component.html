@@ -8,11 +8,11 @@
       <mat-label>{{'INPUT_MINUTES' | translate}}</mat-label>
       <input matInput type="number" min="0" max="59" [(ngModel)]="minutes" (ngModelChange)="update('input')">
     </mat-form-field>
-    <ng5-slider
-            class="ng5-slider-small"
+    <ngx-slider
+            class="ngx-slider-small"
             [(value)]="currentValue"
             [options]="sliderOptions"
             (valueChange)="update('slider')"
-    ></ng5-slider>
+    ></ngx-slider>
   </div>
 </app-mds-editor-widget-container>

@@ -1,3 +1,4 @@
+import {first} from 'rxjs/operators';
 import {Component, OnInit, Input, SimpleChanges, OnChanges, NgZone} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
@@ -78,7 +79,7 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         UIHelper.waitForComponent(this.ngZone, this.mainnav.getDialogs(), 'licenseComponent').subscribe(() =>
             this.mainnav.getDialogs().licenseComponent.priority = 2
         );
-        this.mainnav.getDialogs().onRefresh.first().subscribe((nodes: Node[]) =>
+        this.mainnav.getDialogs().onRefresh.pipe(first()).subscribe((nodes: Node[]) =>
             this.nodes = nodes
         );
     }

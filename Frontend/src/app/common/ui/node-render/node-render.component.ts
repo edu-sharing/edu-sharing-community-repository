@@ -1,3 +1,4 @@
+import {filter, skipWhile} from 'rxjs/operators';
 import {
     ChangeDetectorRef,
     Component,
@@ -722,9 +723,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                     option.callback();
                     // wait until a dialog has opened, then, as soon as the particular dialog closed
                     // trigger that the action has been done
-                    this.cardServcie.hasOpenModals
-                        .skipWhile((h) => !h)
-                        .filter((h) => !h)
+                    this.cardServcie.hasOpenModals.pipe(
+                        skipWhile((h) => !h),
+                        filter((h) => !h),)
                         .subscribe(() => this.onQueryActionDone());
                 } else {
                     console.warn('action ' + this.queryParams.action + ' is currently not enabled');

@@ -16,7 +16,8 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "showCircularDependencies": true,
+            "baseHref": "/edu-sharing/",
+            "deployUrl": "/edu-sharing/",
             "assets": [
               { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
               { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "/assets/monaco/" }
@@ -69,8 +70,6 @@
           "options": {
             "browserTarget": "angular-edusharing:build",
             "proxyConfig": "src/proxy.conf.js",
-            "baseHref": "/edu-sharing/",
-            "deployUrl": "/edu-sharing/"
           },
           "configurations": {
             "production": {

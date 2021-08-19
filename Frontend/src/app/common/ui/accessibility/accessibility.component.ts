@@ -3,7 +3,7 @@ import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {DialogButton, SessionStorageService} from '../../../core-module/core.module';
 import {Toast, ToastDuration, ToastType} from '../../../core-ui-module/toast';
-import {Options} from 'ng5-slider/options';
+import {Options} from '@angular-slider/ngx-slider';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
