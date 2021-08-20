@@ -3,6 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject, from } from 'rxjs';
 import { map, shareReplay, switchMap, first, takeUntil, filter, tap } from 'rxjs/operators';
 import {
+    MdsValueList,
     Node,
     RestConnectorService,
     RestConstants,
@@ -47,7 +48,7 @@ export interface CompletionStatusEntry {
 
 export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
 
-type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
+export type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 
 /**
  * NativeWidget and Widget
@@ -101,6 +102,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
         private hasUnsavedDefault: boolean; // fixed after `ready`
         private initialValues: InitialValues;
+        private initialDisplayValues : MdsValueList;
         private readonly value$ = new BehaviorSubject<string[]>(null);
         private isDirty = false;
         /**
@@ -315,6 +317,14 @@ export class MdsEditorInstanceService implements OnDestroy {
             this.mdsEditorInstanceService.updateHasChanges();
         }
 
+        setInitialDisplayValues(value: MdsValueList) {
+            this.initialDisplayValues = value;
+        }
+
+        getInitialDisplayValues() {
+            return this.initialDisplayValues;
+        }
+
         observeValue(): Observable<string[]> {
             return this.value$.asObservable();
         }
@@ -428,6 +438,14 @@ export class MdsEditorInstanceService implements OnDestroy {
                     });
                 })
                 .toPromise();
+        }
+
+        public getValuesForKeys(keys: string[]) {
+             const mdsvl = this.mdsEditorInstanceService.restMdsService
+                .getValuesForKeys(keys,this.mdsEditorInstanceService.mdsId,
+                    RestConstants.DEFAULT_QUERY_NAME,this.definition.id,
+                    RestConstants.HOME_REPOSITORY).toPromise();
+            return mdsvl;
         }
 
         private readNodeValue(node: Node, definition: MdsWidget): string[] {
@@ -678,6 +696,13 @@ export class MdsEditorInstanceService implements OnDestroy {
         await this.initMds(groupId, mdsId, undefined, this.nodes$.value);
         for (const widget of this.widgets.value) {
             widget.initWithNodes(this.nodes$.value);
+            if ((widget.definition.type === MdsWidgetType.MultiValueFixedBadges)
+                && !widget.definition.values && widget.getInitialValues().jointValues) {
+                const mdsValueList = await widget.getValuesForKeys( widget.getInitialValues().jointValues);
+                if(mdsValueList) {
+                    widget.setInitialDisplayValues(mdsValueList);
+                }
+            }
         }
         // to lower case because of remote repos wrong mapping
         return this.getGroup(

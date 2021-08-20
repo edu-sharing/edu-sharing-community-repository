@@ -11,7 +11,7 @@ public class NodeRefImpl implements NodeRef {
 
 	String repositoryId;
 
-	List<NodeRef> usedInCollections = new ArrayList<>();
+	List<CollectionRef> usedInCollections = new ArrayList<>();
 
 	public static class PreviewImpl implements Preview {
 		String mimetype;
@@ -135,12 +135,12 @@ public class NodeRefImpl implements NodeRef {
 	}
 
 	@Override
-	public void setUsedInCollections(List<NodeRef> usedInCollections) {
+	public void setUsedInCollections(List<CollectionRef> usedInCollections) {
 		this.usedInCollections = usedInCollections;
 	}
 
 	@Override
-	public List<NodeRef> getUsedInCollections() {
+	public List<CollectionRef> getUsedInCollections() {
 		return usedInCollections;
 	}
 

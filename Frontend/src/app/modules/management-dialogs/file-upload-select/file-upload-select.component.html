@@ -59,11 +59,12 @@
                     <div class="no-breadcrumbs" *ngIf="!_parent">
                         {{'STORAGE_LOCATION_UNSET' | translate}}
                     </div>
-                    <breadcrumbs *ngIf="_parent"
+                    <breadcrumbs *ngIf="breadcrumbs"
                             short="always"
                             [clickable]="false"
-                            [breadcrumbsAsNode]="breadcrumbs"
-                            [home]="'WORKSPACE.MY_FILES'"
+                            [breadcrumbsAsNode]="breadcrumbs.nodes"
+                            [home]="breadcrumbs.homeLabel"
+                            [homeIcon]="breadcrumbs.homeIcon"
                     ></breadcrumbs>
                     <div class="change">
                         <button mat-button color="primary" (click)="chooseParent=true">{{'CHANGE_STORAGE_LOCATION' | translate}}</button>
@@ -76,7 +77,8 @@
 <file-chooser *ngIf="chooseParent"
               [isCancelable]="true"
               [pickDirectory]="true"
-              [title]="'WORKSPACE.CHOOSE_LOCATION'"
+              [title]="'WORKSPACE.CHOOSE_LOCATION_TITLE'"
+              [subtitle]="'WORKSPACE.CHOOSE_LOCATION_DESCRIPTION'"
               (onCancel)="chooseParent=false"
               (onChoose)="parentChoosed($event)"
 ></file-chooser>

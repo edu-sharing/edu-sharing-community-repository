@@ -60,6 +60,13 @@
     {{ $any(getNode()) | NodeImageSize }}
   </span>
   <span
+    *ngSwitchCase="'ccm:wf_status'"
+    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+  >
+    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    {{ 'WORKFLOW.' + getWorkflowStatus().id | translate }}
+  </span>
+  <span
     *ngSwitchCase="'cm:creator'"
     [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
   >

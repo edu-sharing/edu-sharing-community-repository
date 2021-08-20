@@ -12,15 +12,16 @@ export class InfoMessageComponent {
      * the message to display
      */
     @Input() message:string;
-    @Input() mode: 'info' | 'warning' = 'info';
+    @Input() mode: 'info' | 'warning' | 'error' = 'info';
 
     ICONS:any={
         info:'info_outline',
         warning:'warning_outline',
+        error:'error_outline',
     };
     constructor() {
     }
-    getIcon(){
+    getIcon() {
         return this.ICONS[this.mode];
     }
 }

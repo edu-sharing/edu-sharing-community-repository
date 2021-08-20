@@ -125,7 +125,13 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 
 		try {
 			if(!ConfigServiceFactory.getCurrentConfig(req).getValue("register.local",true)){
-				DISABLED_ENDPOINTS.add("/register");
+				if(ConfigServiceFactory.getCurrentConfig(req).getValue("register.recoverPassword", false)) {
+					DISABLED_ENDPOINTS.add("/register/v1/register");
+					DISABLED_ENDPOINTS.add("/register/v1/activate");
+				} else {
+					// disable whole api range
+					DISABLED_ENDPOINTS.add("/register");
+				}
 			}
 		} catch (Exception e) {}
 

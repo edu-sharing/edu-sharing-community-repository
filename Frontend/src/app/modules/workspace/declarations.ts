@@ -15,6 +15,7 @@ import {WorkspaceWorkflowComponent} from "./workflow/workflow.component";
 import {WorkspaceUsageComponent} from './share/usage/usage.component';
 import {SharePublishComponent} from './share/share-publish/share-publish.component';
 import {WorkspaceMetadataBlockComponent} from './metadata/metadata-block/metadata-block.component';
+import {WorkflowListComponent} from './workflow/workflow-history/workflow-history.component';
 
 export const DECLARATIONS_WORKSPACE = [
   WorkspaceRoutingComponent,
@@ -34,4 +35,5 @@ export const DECLARATIONS_WORKSPACE = [
   WorkspaceHistoryComponent,
   WorkspaceCreateConnector,
   WorkspaceWorkflowComponent,
+  WorkflowListComponent,
 ];

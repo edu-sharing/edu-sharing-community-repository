@@ -21,17 +21,30 @@
       matInput
       #inputElement
       [matAutocomplete]="autoGroup"
+      appMatAutocompleteTriggerAccessor
+      [optionHeight]="66"
       placeholder="{{ placeholder | translate }}"
       name="authoritySearch"
       [formControl]="input"
     />
     <mat-hint *ngIf="hint">{{ hint }}</mat-hint>
-    <mat-autocomplete #autoGroup="matAutocomplete" class="mat-autocomplete-high" (optionSelected)="setOption($event)">
-      <mat-optgroup *ngFor="let group of suggestionGroups$ | async" label="{{ group.label | translate }}">
-        <mat-option class="authority-search-input-option" *ngFor="let suggestion of group.values" [value]="suggestion">
+    <mat-autocomplete
+      #autoGroup="matAutocomplete"
+      class="mat-autocomplete-high"
+      (optionSelected)="setOption($event)"
+    >
+      <mat-optgroup
+        *ngFor="let group of suggestionGroups$ | async"
+        label="{{ group.label | translate }}"
+      >
+        <mat-option
+          class="authority-search-input-option"
+          *ngFor="let suggestion of group.values"
+          [value]="suggestion"
+        >
           <app-authority-row
-                  [authority]="suggestion.originalObject"
-                  [secondaryTitle]="suggestion.secondaryTitle"
+            [authority]="suggestion.originalObject"
+            [secondaryTitle]="suggestion.secondaryTitle"
           ></app-authority-row>
         </mat-option>
       </mat-optgroup>

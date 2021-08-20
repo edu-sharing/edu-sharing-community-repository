@@ -391,7 +391,7 @@ export class Toast implements OnDestroy {
      *
      * @returns false if the error toast should not be shown
      */
-    private parseErrorObject({
+    public parseErrorObject({
         errorObject,
         message,
         translationParameters,

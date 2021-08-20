@@ -16,6 +16,8 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
+import org.codehaus.groovy.reflection.stdclasses.CachedClosureClass;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
 import org.edu_sharing.restservices.ApiService;
@@ -121,6 +123,7 @@ public class RenderingApi {
 	    	@ApiParam(value = "ID of node",required=true ) @PathParam("node") String node,
 	    	@ApiParam(value = "version of node",required=false) @QueryParam("version") String nodeVersion,
 			@ApiParam(value = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+			// options include: showDownloadButton, showDownloadAdvice, metadataGroup
 			@ApiParam(value = "additional parameters to send to the rendering service",required=false) Map<String,String> parameters,
 			@Context HttpServletRequest req){
 
@@ -140,9 +143,18 @@ public class RenderingApi {
 			Node nodeJson = nodeDao.asNode();
 			String mimeType = nodeJson.getMimetype();
 
-			if(repoDao.isHomeRepo())
-				TrackingTool.trackActivityOnNode(node,new NodeTrackingDetails(nodeVersion),TrackingService.EventType.VIEW_MATERIAL);
-
+			if(repoDao.isHomeRepo()) {
+				NodeTrackingDetails details = (NodeTrackingDetails) org.edu_sharing.alfresco.repository.server.authentication.
+						Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_RENDERING_DETAILS);
+				if(details == null || !details.getNodeId().equals(node)) {
+					details = new NodeTrackingDetails(node, nodeVersion);
+				} else {
+					details.setNodeVersion(nodeVersion);
+					org.edu_sharing.alfresco.repository.server.authentication.
+							Context.getCurrentInstance().getRequest().getSession().removeAttribute(CCConstants.SESSION_RENDERING_DETAILS);
+				}
+				TrackingTool.trackActivityOnNode(node, details, TrackingService.EventType.VIEW_MATERIAL);
+			}
 
 			RenderingDetailsEntry response = new RenderingDetailsEntry();
 			response.setDetailsSnippet(detailsSnippet);

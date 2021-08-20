@@ -1197,6 +1197,15 @@
 	         			<tokenised>both</tokenised>
 	         		</index>										
 				</property>
+				<property name="ccm:classification_keyword_display">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>both</tokenised>
+					</index>
+				</property>
 				<property name="ccm:classification_purpose">
 					<type>d:text</type>
 					<multiple>true</multiple>

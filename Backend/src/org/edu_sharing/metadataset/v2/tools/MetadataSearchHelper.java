@@ -237,6 +237,7 @@ public class MetadataSearchHelper {
 				result.add(sqlKw);
 			}	
 		}catch(Throwable e){
+			logger.debug(e.getMessage(),e);
 		}finally {
 			dbAlf.cleanUp(con, statement);
 		}

@@ -505,6 +505,10 @@ public class CCConstants {
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
     		CCConstants.CM_NAME,
 			CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, // Materialart
+			CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,
+			CCConstants.CCM_PROP_IO_LICENSE_DESCRIPTION,
+			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,
+			CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION,
 			CCConstants.CCM_PROP_IO_WWWURL,
 			CCConstants.ALFRESCO_MIMETYPE,
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
@@ -669,6 +673,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPL_TAXONPATH_XML = "{http://www.campuscontent.de/model/1.0}taxonpath_xml";
 
 	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD  = "{http://www.campuscontent.de/model/1.0}classification_keyword";
+	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY  = "{http://www.campuscontent.de/model/1.0}classification_keyword_display";
 	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_PURPOSE  = "{http://www.campuscontent.de/model/1.0}classification_purpose";
 	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER = "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_publisher";
 	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UNKNOWN = "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_unknown";
@@ -2113,10 +2118,6 @@ public class CCConstants {
 
 	public static final String WORKSPACE_INVITED_ANCHOR = "#workspace@INVITED@INVITED@/INVITED";
 
-	//for servlet level cause anchors are not send to server
-	public static final String WORKSPACE_PARAM_TRUNK = "trunk";
-	public static final String WORKSPACE_PARAM_TRUNK_VALUE_INVITED = "invited";
-
 	public static final String SECURITY_KEY_ALGORITHM = "RSA";
 	public static final String SECURITY_SIGN_ALGORITHM = "SHA1withRSA";
 
@@ -2134,6 +2135,9 @@ public class CCConstants {
 	public static final String SESSION_LAST_SEARCH_TOKENS = "LAST_SEARCH_TOKENS";
 
 	public static final String SESSION_REMOTE_AUTHENTICATIONS = "SESSION_REMOTE_AUTHENTICATIONS";
+
+	// Stores the last "window" based rendering data request including information about the lms
+	public static final String SESSION_RENDERING_DETAILS = "SESSION_RENDERING_DETAILS";
 
 	public static final String COLLECTION_ORDER_MODE_CUSTOM = "custom";
 

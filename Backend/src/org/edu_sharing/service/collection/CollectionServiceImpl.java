@@ -25,6 +25,7 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -45,6 +46,7 @@ import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -1002,5 +1004,19 @@ public class CollectionServiceImpl implements CollectionService{
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
 		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_COORDINATOR);
 		return AuthenticationUtil.runAsSystem(()-> nodeService.getChildrenChildAssociationRefType(id, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK).stream().map((ref)->ref.getChildRef().getId()).collect(Collectors.toList()));
+	}
+
+	@Override
+	public List<NodeRef> getCollectionProposals(String nodeId) {
+		Map<String, Object> filters = new HashMap<>();
+		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId).toString());
+		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, CCConstants.PROPOSAL_STATUS.PENDING.toString());
+		List<NodeRef> collections = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, filters);
+		return collections.stream().map(
+				(ref) -> serviceRegistry.getNodeService().getPrimaryParent(ref).getParentRef()
+		).filter((ref) ->
+			PermissionServiceHelper.hasPermission(ref, CCConstants.PERMISSION_ADD_CHILDREN)
+		).collect(Collectors.toList());
+
 	}
 }

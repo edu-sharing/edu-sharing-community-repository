@@ -783,7 +783,6 @@ export class MdsComponent {
                 version = RestConstants.COMMENT_METADATA_UPDATE;
             }
         }
-
         this.globalProgress = true;
         // can only happen for single element
         if (files.length) {
@@ -809,25 +808,24 @@ export class MdsComponent {
             );
         } else {
             // can be bulk mode
-            Observable.forkJoin(
-                this.currentNodes.map((n) =>
-                    this.node.editNodeMetadataNewVersion(
-                        n.ref.id,
-                        version,
-                        this.getValues(n.properties),
-                    ),
-                ),
-            ).subscribe(
-                (nodes) => {
-                    this.currentNodes = nodes.map((n) => n.node);
-                    this.onUpdatePreview(callback);
-                },
-                (error) => {
-                    this.toast.error(error);
-                    this.globalProgress = false;
-                },
-            );
-        }
+                  Observable.forkJoin(this.currentNodes.map((n) => {
+                    const props = this.getValues(n.properties);
+                    if(props) {
+                      return this.node.editNodeMetadataNewVersion(n.ref.id, version, this.getValues(n.properties))
+                    } else {
+                      return Observable.throwError(null);
+                    }
+                  }))
+                      .subscribe((nodes) => {
+                        this.currentNodes = nodes.map((n) => n.node);
+                        this.onUpdatePreview(callback);
+                      },(error) => {
+                        if(error) {
+                          this.toast.error(error);
+                        }
+                        this.globalProgress = false;
+                      });
+                }
     }
     public setValuesByProperty(data: any, properties: any) {
         setTimeout(() => {
@@ -1041,7 +1039,7 @@ export class MdsComponent {
             `
                   <input type="checkbox" id="` +
             id +
-            `" 
+            `"
                     onchange="` +
             this.getWindowComponent() +
             `.toggleBulk('` +
@@ -1605,7 +1603,7 @@ export class MdsComponent {
             (widget.placeholder ? widget.placeholder : '') +
             `" class="suggestInput ` +
             css +
-            `" 
+            `"
             onkeyup="` +
             this.getWindowComponent() +
             `.openSuggestions('` +
@@ -1644,7 +1642,7 @@ export class MdsComponent {
         }
         if (openCallback) {
             html +=
-                `<a class="btn-flat suggestOpen" 
+                `<a class="btn-flat suggestOpen"
               onclick="` +
                 openCallback +
                 `"
@@ -2381,7 +2379,7 @@ export class MdsComponent {
                       <a tabindex="0"
                       onclick="document.getElementById('` +
                 this.getDomId('preview-select') +
-                `').click()" 
+                `').click()"
                       onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="` +
                 this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') +
                 `">file_upload</i></a>
@@ -2394,7 +2392,7 @@ export class MdsComponent {
                 `
                           onclick="` +
                 this.getWindowComponent() +
-                `.deletePreview()" 
+                `.deletePreview()"
                           onkeydown="if(event.keyCode==13) this.click();"
                           class="btn-circle"><i class="material-icons" aria-label="` +
                 this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW') +

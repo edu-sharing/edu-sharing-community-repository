@@ -105,7 +105,7 @@ export class WorkspaceMetadataComponent{
         this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {
             this.usages = usages.usages;
             this.usageApi.getNodeUsagesCollection(this.nodeObject.ref.id).subscribe((collection) => {
-                this.usagesCollection = collection.map((c) => c.collection);
+                this.usagesCollection = collection.filter((c) => c.collectionUsageType === 'ACTIVE').map((c) => c.collection);
                 this.getStats();
             });
         });

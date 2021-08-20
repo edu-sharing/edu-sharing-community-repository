@@ -439,6 +439,8 @@ public class MetadataReaderV2 {
 					widget.setSuggestionSource(value);
 				if(name.equals("suggestionQuery"))
 					widget.setSuggestionQuery(value);
+				if(name.equals("suggestDisplayProperty"))
+					widget.setSuggestDisplayProperty(value);
 				if(name.equals("required")) {
 					if(value.equalsIgnoreCase("true")){
 						widget.setRequired(MetadataWidget.Required.mandatory);
