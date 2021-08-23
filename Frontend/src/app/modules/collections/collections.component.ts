@@ -1209,7 +1209,7 @@ export class CollectionsMainComponent {
                         this.collectionContent,
                     );
                     this.infoTitle = null;
-                    this.toast.toast('COLLECTIONS.ORDER_SAVED');
+                    this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
                     this.toast.closeModalDialog();
                 },
                 (error: any) => {
@@ -1233,7 +1233,7 @@ export class CollectionsMainComponent {
                     );
                     this.infoTitle = null;
                     this.sortCollections.customActive = false;
-                    this.toast.toast('COLLECTIONS.ORDER_SAVED');
+                    this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
                     this.toast.closeModalDialog();
                 },
                 (error: any) => {
@@ -1334,6 +1334,11 @@ export class CollectionsMainComponent {
             this.toast.error(e);
         }
         this.refreshContent();
+        if(sort.name !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
+            this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
+                type: this.translationService.instant('NODE.' + sort.name),
+            });
+        }
         this.sortCollections.customActive = this.sortCollections.name === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
         if(this.sortCollections.customActive) {
             this.toggleCollectionsOrder();
