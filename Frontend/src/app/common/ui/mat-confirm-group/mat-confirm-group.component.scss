@@ -1,0 +1,19 @@
+@import "../../../core-ui-module/styles/variables";
+::ng-deep {
+    .mat-confirm-group-menu {
+        min-width: 0 !important;
+        max-width: unset !important;
+        padding: 0 !important;
+        .mat-menu-content {
+            padding: 0 !important;
+            display: flex;
+            flex-direction: column;
+            .confirm-wrapper {
+                padding: 10px;
+            }
+            .description {
+                padding-bottom: 5px;
+            }
+        }
+    }
+}

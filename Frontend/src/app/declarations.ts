@@ -45,6 +45,7 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
   import {SanitizeHTMLPipe} from './common/ui/sanitizeHTML.pipe';
   import {ColorTransformPipe} from "./common/ui/color-transform.pipe";
   import {AccessibilityComponent} from './common/ui/accessibility/accessibility.component';
+  import {MatConfirmGroupComponent} from './common/ui/mat-confirm-group/mat-confirm-group.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -89,6 +90,7 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
       FooterComponent,
       InputFillProgressComponent,
       CookieInfoComponent,
+      MatConfirmGroupComponent,
       AccessibilityComponent,
       TutorialComponent,
       EmbedComponent,
