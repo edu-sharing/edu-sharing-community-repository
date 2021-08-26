@@ -13,9 +13,14 @@ import { Params, QueryParamsHandling } from '@angular/router';
 })
 export class BreadcrumbsComponent {
     /**
-     * Caption of the home, if not set, an icon is used.
+     * Caption of the home, if not set, a default icon is used.
      */
     @Input() home: string;
+
+    /**
+     * Icon of home, can be used together with `home`.
+     */
+    @Input() homeIcon: string;
 
     /**
      * shall an invisbile description (for screen readers) be generated, similar to

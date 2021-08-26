@@ -9,3 +9,9 @@ a {
         @include removeDefaultFocus();
     }
 }
+button {
+    background-color: unset;
+    border: unset;
+    padding: unset;
+    text-align: unset;
+}

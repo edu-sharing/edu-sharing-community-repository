@@ -5,21 +5,24 @@
   backdropClass="mat-dropdown-menu"
   [xPosition]="position == 'right' ? 'after' : 'before'"
 >
-  <button
-    *ngFor="let option of _options; let i = index"
-    mat-menu-item
-    class="mat-menu-item collection-item-{{
+  <ul role="menu">
+    <li *ngFor="let option of _options; let i = index">
+      <button
+        mat-menu-item
+        class="mat-menu-item collection-item-{{
       option.name | replaceChars: { search: '.', replace: '-' }
     }}"
-    matTooltip="{{ option | optionTooltip }}"
-    matTooltipPosition="right"
-    [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
-    [class.mat-menu-item-selected]="option.isSelected"
-    [disabled]="!option.isEnabled"
-    [class.display-none]="!option.isEnabled && !showDisabled"
-    (click)="click(option)"
-  >
-    <i [icon]="option.icon"></i> {{ option.name | translate }}
-  </button>
+        matTooltip="{{ option | optionTooltip }}"
+        matTooltipPosition="right"
+        [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
+        [class.mat-menu-item-selected]="option.isSelected"
+        [disabled]="!option.isEnabled"
+        [class.display-none]="!option.isEnabled && !showDisabled"
+        (click)="click(option)"
+      >
+        <i [icon]="option.icon"></i> {{ option.name | translate }}
+      </button>
+    </li>
+  </ul>
 </mat-menu>
 <div #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="menu" class="display-none"></div>

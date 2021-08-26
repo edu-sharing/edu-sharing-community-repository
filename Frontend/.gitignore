@@ -1,5 +1,8 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# host configuration (currently only dev)
+.env
+
 # compiled output
 /dist
 /tmp

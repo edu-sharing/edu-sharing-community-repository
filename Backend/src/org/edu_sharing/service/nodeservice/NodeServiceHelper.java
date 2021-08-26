@@ -139,6 +139,9 @@ public class NodeServiceHelper {
 	public static String getType(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}
+	public static List<ChildAssociationRef> getChildrenChildAssociationRefType(NodeRef nodeRef, String type){
+    	return NodeServiceFactory.getLocalService().getChildrenChildAssociationRefType(nodeRef.getId(), type);
+	}
 	public static String[] getAspects(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}

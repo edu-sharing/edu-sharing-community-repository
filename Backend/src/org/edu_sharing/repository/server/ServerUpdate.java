@@ -115,7 +115,6 @@ public class ServerUpdate extends HttpServlet implements SingleThreadModel {
 					new Release_1_7_UnmountGroupFolders(out),
 					new Edu_SharingAuthoritiesUpdate(out),
 					new Release_1_7_SubObjectsToFlatObjects(out),
-					new RefreshMimetypPreview(out),
 					new KeyGenerator(out),
 					new FixMissingUserstoreNode(out),
 					new FolderToMap(out),

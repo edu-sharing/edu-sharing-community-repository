@@ -304,6 +304,21 @@ public class SSOAuthorityMapper {
 					logger.info("PersonMappingCondition is false for user:"+userName+". will not create.");
 					return null;
 				}
+
+				//check active status
+				if(personExsists){
+
+					if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+						String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+						NodeRef nodeRefPerson = personService.getPerson(userName);
+						String personStatus = (String)nodeService.getProperty(nodeRefPerson,QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
+						if(!personActiveStatus.equals(personStatus)){
+							throw new AuthenticationException(AuthenticationExceptionMessages.USER_BLOCKED);
+						}
+					}
+
+				}
+
 				if (personExsists == false) {
 					authenticationService.createAuthentication(userName, new KeyTool().getRandomPassword().toCharArray());
 					//authenticationDao.createUser(userName, new KeyTool().getRandomPassword().toCharArray());
@@ -604,11 +619,13 @@ public class SSOAuthorityMapper {
 				
 			}
 			return userName;
-			
-			} catch(Throwable e) {
-				logger.error(e.getMessage(), e);
-				return null;
-			}
+
+		}catch(AuthenticationException e){
+			throw e;
+		} catch(Throwable e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
 	}
 
 	public void setMappingConfig(MappingRoot mappingConfig) {

@@ -53,6 +53,7 @@ import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import { CardService } from '../../core-ui-module/card.service';
 import { Observable } from 'rxjs';
 import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 @Component({
@@ -85,8 +86,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     selection: Node[] = [];
 
     showSelectRoot = false;
-    createConnectorName: string;
-    createConnectorType: Connector;
 
     public allowBinary = true;
     public globalProgress = false;
@@ -128,7 +127,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
-    viewType: 0|1 = 0;
+    viewType: 0|1|null = null;
     private reurlDirectories: boolean;
     reorderDialog: boolean;
     @HostListener('window:beforeunload', ['$event'])
@@ -161,16 +160,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
         const fromInputField = KeyEvents.eventFromInputField(event);
 
-        if (event.key === 'Escape') {
-            if (this.createConnectorName != null) {
-                this.createConnectorName = null;
-            }
-            else {
-                return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-        }
     }
     onEvent(event: string, data: any): void {
         if (event === FrameEventsService.EVENT_REFRESH) {
@@ -221,19 +210,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private hideDialog(): void {
         this.toast.closeModalDialog();
     }
-    // @ TODO: Move to create menu (probably)
-    showCreateConnector(connector: Connector) {
-        this.createConnectorName = '';
-        this.createConnectorType = connector;
-        this.iam.getUser().subscribe((user) => {
-            if (user.person.quota.enabled && user.person.quota.sizeCurrent >= user.person.quota.sizeQuota) {
-                this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE', 'CONNECTOR_QUOTA_REACHED_MESSAGE', DialogButton.getOk(() => {
-                    this.toast.closeModalDialog();
-                }), true);
-                this.createConnectorName = null;
-            }
-        });
-    }
+
     private editConnector(node: Node = null, type: Filetype = null, win: any = null, connectorType: Connector = null) {
         UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, this.getNodeList(node)[0], type, win, connectorType);
     }
@@ -363,11 +340,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.globalProgress = false;
             this.homeDirectory = data.id;
             this.route.queryParams.subscribe((params: Params) => {
-
-                if (params.connector) {
-                    this.showCreateConnector(this.connectorList.filter((c) => c.id === params.connector)[0]);
-                }
-
                 let needsUpdate = false;
                 if (this.oldParams) {
                     for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
@@ -381,13 +353,15 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     }
                 } else {
                     needsUpdate = true;
-                    this.explorer.showLoading = true;
+                    if(this.explorer) {
+                        this.explorer.showLoading = true;
+                    }
                 }
                 this.oldParams = params;
                 if (params.viewType != null) {
                     this.setViewType(params.viewType, false);
                 } else {
-                    this.setViewType(this.config.instant('workspaceViewType', 0), false);
+                    this.setViewType(this.config.instant('workspaceViewType', ListTableComponent.VIEW_TYPE_LIST), false);
                 }
                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
                     this.root = params.root;
@@ -634,7 +608,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     private refresh(refreshPath = true,nodes: Node[] = null) {
         // only refresh properties in this case
-        if(nodes && nodes.length){
+        if(nodes && nodes.length) {
             this.updateNodes(nodes);
             return;
         }
@@ -663,7 +637,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
     private routeTo(root: string, node: string = null, search: string = null) {
         const params: any = { root, id: node, query: search, mainnav: this.mainnav };
-        params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
+        // tslint:disable-next-line:triple-equals
+        if(this.viewType !== null) {
+            params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
+        }
         if (this.reurl) {
             params.reurl = this.reurl;
         }

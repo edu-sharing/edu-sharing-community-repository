@@ -155,6 +155,13 @@ export class CreateMenuComponent {
                         .getNodeMetadata(id)
                         .subscribe(node => {
                             this.fallbackFolder = node.node;
+                        }, error => {
+                            console.warn('error resolving defaultInboxFolder', error);
+                            this.nodeService
+                                .getNodeMetadata(RestConstants.INBOX)
+                                .subscribe(node => {
+                                    this.fallbackFolder = node.node;
+                                });
                         });
                 }, (error)=> {
                     console.warn('error resolving defaultInboxFolder', error);

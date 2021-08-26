@@ -1,8 +1,10 @@
 @import 'branding';
 
 // All variables can be overridden in `branding.scss`.
+/* replace variables which are may not defined in the branding */
 $primaryVeryLight: lighten($primaryLight, 5%) !default;
 $primaryMediumDark: lighten($primaryDark, 10%) !default;
+
 $tabColor: $primary !default;
 $tabColorDark: $primary !default;
 $tabColorLight: $primaryMediumLight !default;
@@ -77,7 +79,7 @@ $colorStatusWarning: $warningMedium !default;
 $colorStatusNeutral: #777 !default;
 $colorStatusNegative: $warning !default;
 $focusColor: darken($primaryMediumLight, 10%) !default;
-$placeholderColor: #999 !default;
+$placeholderColor: #767676 !default;
 $focusWidth: 2px !default;
 $cardWidth: 200px !default;
 $cardHeight: 300px !default;

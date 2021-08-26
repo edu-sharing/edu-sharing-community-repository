@@ -1,13 +1,13 @@
 import { trigger } from '@angular/animations';
 import {
     AfterContentInit,
-    Component,
+    Component, ContentChild,
     ElementRef,
     EventEmitter,
     HostListener,
     Input,
     OnDestroy,
-    Output,
+    Output, TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
@@ -79,6 +79,10 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * Should the heading be shown
      */
     @Input() header = true;
+    /**
+     * Apply a custom template for the button area (area above the buttons)
+     */
+    @ContentChild('beforeButton') beforeButtonRef: TemplateRef<any>;
     /**
      * Jumpmarks for the left side (used for the mds dialog)
      */

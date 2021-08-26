@@ -38,26 +38,26 @@
       <div class="side-by-side">
         <div>
           <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.FOLDERS_CAPTION' | translate}}</h4>
-          <mat-radio-group [(ngModel)]="options.homeFolder.folders">
+          <mat-radio-group [(ngModel)]="options.homeFolder.folders" (ngModelChange)="updateForm()">
             <mat-radio-button *ngFor="let mode of deleteModesFolder" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
           </mat-radio-group>
         </div>
         <div>
           <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.PRIVATE_FILES_CAPTION' | translate}}</h4>
-          <mat-radio-group [(ngModel)]="options.homeFolder.privateFiles">
+          <mat-radio-group [(ngModel)]="options.homeFolder.privateFiles" (ngModelChange)="updateForm()">
             <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
           </mat-radio-group>
         </div>
         <div>
           <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.CC_FILES_CAPTION' | translate}}</h4>
-          <mat-radio-group [(ngModel)]="options.homeFolder.ccFiles">
+          <mat-radio-group [(ngModel)]="options.homeFolder.ccFiles" (ngModelChange)="updateForm()">
             <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
           </mat-radio-group>
         </div>
       </div>
-      <div class="structure" *ngIf="options.homeFolder.privateFiles == 'assign' || options.homeFolder.ccFiles == 'assign'">
+      <div class="structure">
         <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.FOLDER_STRUCTURE_CAPTION' | translate}}</h4>
-        <mat-radio-group [(ngModel)]="options.homeFolder.keepFolderStructure">
+        <mat-radio-group [(ngModel)]="options.homeFolder.keepFolderStructure" [disabled]="!allAssigning()">
           <mat-radio-button [value]="false">{{'PERMISSIONS.DELETE.FOLDER_STRUCTURE_DISINTEGRATE' | translate}}</mat-radio-button>
           <mat-radio-button [value]="true">{{'PERMISSIONS.DELETE.FOLDER_STRUCTURE_KEEP' | translate}}</mat-radio-button>
         </mat-radio-group>

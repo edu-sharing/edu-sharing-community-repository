@@ -113,7 +113,7 @@ public class EduSharingNodeHelper {
 		//cmNameReadableName = cmNameReadableName.replaceAll("\\.$", "");
 		cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "").trim();
         cmNameReadableName = CharMatcher.JAVA_ISO_CONTROL.removeFrom(cmNameReadableName);
-        cmNameReadableName = cmNameReadableName.replaceAll("[^\\x00-\\x7F]", "");
+        cmNameReadableName = cmNameReadableName.replaceAll("[^\\x00-\\x7FÄäÖöÜüß]", "");
 
 		return cmNameReadableName;
 	}

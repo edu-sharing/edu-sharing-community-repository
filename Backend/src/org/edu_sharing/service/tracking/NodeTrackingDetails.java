@@ -2,13 +2,25 @@ package org.edu_sharing.service.tracking;
 
 import org.edu_sharing.service.usage.Usage;
 
-public class NodeTrackingDetails {
+import java.io.Serializable;
+
+public class NodeTrackingDetails implements Serializable {
+    private String nodeId;
     private String nodeVersion;
     // the lms which initiated the request (if any)
     private NodeTrackingLms lms;
 
-    public NodeTrackingDetails(String nodeVersion) {
+    public NodeTrackingDetails(String nodeId,String nodeVersion) {
+        this.nodeId=nodeId;
         this.nodeVersion=nodeVersion;
+    }
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 
     public String getNodeVersion() {
@@ -27,7 +39,7 @@ public class NodeTrackingDetails {
         this.lms = lms;
     }
 
-    public static class NodeTrackingLms {
+    public static class NodeTrackingLms implements Serializable{
         // since 5.1, usage is used, just a wrapper object
         private final Usage usage;
 

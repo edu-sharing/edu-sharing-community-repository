@@ -583,7 +583,7 @@ public class PersonLifecycleService {
 			}
 			logger.info("Managing folders for "+userName);
 			// handle folders
-			if(folders.size()>0) {
+			if(folders.size()>0 && options.homeFolder.privateFiles.equals(PersonDeleteOptions.DeleteMode.assign)) {
 				NodeRef foldersTarget = getOrCreateTargetFolder(personNodeRef, options, USERHOME_FOLDERS, scope);
 				if (options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)) {
 					setOwnerAndPermissions(folders, userName, options);

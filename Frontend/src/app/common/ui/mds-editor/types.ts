@@ -167,7 +167,7 @@ export interface MdsWidget {
     defaultvalue: string;
     isRequired: RequiredMode;
     isSearchable: boolean;
-    isExtended: boolean;
+    isExtended: boolean|string;
 }
 
 // Incomplete, fill in as needed.
@@ -192,6 +192,7 @@ export type Suggestions = { [property: string]: MdsWidgetValue[] };
 export enum RequiredMode {
     Mandatory = 'mandatory',
     MandatoryForPublish = 'mandatoryForPublish',
+    Recommended = 'recommended',
     Optional = 'optional',
     Ignore = 'ignore',
 }

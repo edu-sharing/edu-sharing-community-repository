@@ -79,6 +79,7 @@ import {ErrorProcessingService} from './error.processing';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
 import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
+import {RenderHelperService} from './render-helper.service';
 
 @NgModule({
     declarations: [
@@ -171,6 +172,7 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         Toast,
         ErrorProcessingService,
         NodeHelperService,
+        RenderHelperService,
         OptionsHelperService],
     exports: [
         TranslateModule,

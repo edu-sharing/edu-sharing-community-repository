@@ -143,7 +143,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             const pos = this._nodes.length;
             setTimeout(() => {
                 // handle focus
-                (this.childList.toArray()[pos] as any as NodeUrlComponent).link.nativeElement.focus();
+                (this.childList.toArray()[pos] as any as NodeUrlComponent).focus();
             });
         }
         this._nodes = nodes;

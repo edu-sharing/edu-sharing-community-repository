@@ -268,6 +268,9 @@ public class MetadataSetV2 implements Serializable {
 					found.add(widget);
 			  }
 		  }
+		  if(found.size()==0) {
+			  throw new IllegalArgumentException("Widget " + widgetId + " was not found in the mds " + id);
+		  }
 		  List<MetadataWidget> result=new ArrayList<>();
 		  for(MetadataWidget widget : found) {
 			  boolean allowed = true;
@@ -281,7 +284,7 @@ public class MetadataSetV2 implements Serializable {
 					  	if(value!=null && value.length > 0 && value[0] != null) {
 							Pattern pattern = Pattern.compile(cond.getPattern());
 							Matcher matcher = pattern.matcher(value[0]);
-							allowed = matcher.matches() == cond.isNegate();
+							allowed = matcher.matches() != cond.isNegate();
 						} else {
 					  		// no value, so fallback to "false"
 					  		allowed = cond.isNegate();
@@ -301,10 +304,9 @@ public class MetadataSetV2 implements Serializable {
 			  }
 		  }
 		// no condition matched
-		if(result.size()==0) result=found;
-
-		if(result.size()==0)
-			throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+		if(result.size()==0) {
+			return null;
+		}
 		if (result.size() > 1) {
 			logger.warn("Widget " + widgetId + " has multiple candidates (" + result.size() + ") when rendered with template " + template + ", will use the first one that matches. Check the metadataset definitions for that widget to ensure only one candidate always matches.");
 		}

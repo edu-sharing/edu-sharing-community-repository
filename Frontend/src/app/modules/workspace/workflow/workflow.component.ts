@@ -61,7 +61,6 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     @Output() onDone = new EventEmitter<Node[]>();
     @Output() onClose = new EventEmitter();
     @Output() onLoading = new EventEmitter();
-    defaultStatus: WorkflowDefinition;
 
     constructor(
         private nodeService: RestNodeService,
@@ -117,10 +116,6 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     addSuggestion(data: UserSimple) {
         this.receivers = [data];
         this.updateButtons();
-    }
-
-    getWorkflowForId(id: string) {
-        return this.nodeHelper.getWorkflowStatusById(id);
     }
 
     removeReceiver(data: WorkflowReceiver) {
@@ -179,9 +174,6 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         const histories = await forkJoin(
             nodes.map((node) => this.nodeService.getWorkflowHistory(node.ref.id)),
         ).toPromise();
-        ({
-            initial: this.defaultStatus
-        } = this.nodeHelper.getDefaultWorkflowStatus(false));
         if (nodes.length > 1) {
             if (histories.some((history) => history.length > 0)) {
                 this.toast.error(null, 'WORKSPACE.WORKFLOW.BULK_WORKFLOWS_EXIST');
