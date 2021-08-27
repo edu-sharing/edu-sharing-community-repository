@@ -69,7 +69,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "angular-edusharing:build",
-            "proxyConfig": "src/proxy.conf.js",
+            "proxyConfig": "src/proxy.conf.js"
           },
           "configurations": {
             "production": {
