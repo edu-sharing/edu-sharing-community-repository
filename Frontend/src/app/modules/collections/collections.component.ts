@@ -1,5 +1,6 @@
 import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
 import {Component, ContentChild, ElementRef, TemplateRef, ViewChild} from '@angular/core';
+import 'rxjs/add/operator/first';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
 import * as EduData from '../../core-module/core.module';
