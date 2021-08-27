@@ -81,6 +81,13 @@
     "NO_CC_PUBLISH": "Kein Recht zum Veröffentlichen",
     "SELECT": "{{ element }} auswählen",
     "EDIT": "{{ thing }} bearbeiten",
+    "EXPAND": "{{ element }} ausklappen",
+    "COLLAPSE": "{{ element }} einklappen",
+    "CHECKBOX_CHECKED": "Kontrollkästchen ausgewählt",
+    "CHECKBOX_NOT_CHECKED": "Kontrollkästchen nicht ausgewählt",
+    "RADIO_BUTTON_SELECTED": "Optionsfeld ausgewählt",
+    "RADIO_BUTTON_NOT_SELECTED": "Optionsfeld nicht ausgewählt",
+    "DISABLED": "deaktiviert",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
         "SEARCH_COLLECTIONS": "Sammlung suchen...",

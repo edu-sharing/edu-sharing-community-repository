@@ -33,6 +33,7 @@ import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -190,8 +191,12 @@ public class RenderingProxy extends HttpServlet {
 		Encryption encryptionTool = new Encryption("RSA");
 
 		try {
-			return encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()),
+			String username = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()),
 					encryptionTool.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey()));
+			if(username == null || username.isEmpty()) {
+				throw new Exception("Username was empty after trying to decrypt, check key chain");
+			}
+			return SSOAuthorityMapper.mapAdminAuthority(username, req.getParameter("app_id"));
 		}catch(Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new SecurityException("Parameter \"u\" (username) could not be decrypted: "+e.getMessage(),e);
@@ -352,9 +357,12 @@ public class RenderingProxy extends HttpServlet {
 			// track inline / lms
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
 				NodeTrackingDetails details = getTrackingDetails(req, usage);
+				AuthenticationUtil.runAs(() ->
 				TrackingServiceFactory.getTrackingService().trackActivityOnNode(
-						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), details,
-						TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+						details,
+						TrackingService.EventType.VIEW_MATERIAL_EMBEDDED)
+				,usernameDecrypted);
 			}
 		} catch (HttpException e) {
 			throw new RenderingException(e);

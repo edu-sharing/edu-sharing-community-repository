@@ -1110,6 +1110,9 @@ export class PermissionsAuthoritiesComponent {
 
   saveGroupSignup() {
     this.toast.showProgressDialog();
+    if(this.groupSignupDetails.signupMethod === 'disabled') {
+        this.groupSignupDetails.signupMethod = null;
+    }
     this.iam.editGroupSignup(this.groupSignup.authorityName, this.groupSignupDetails).subscribe(() => {
       this.groupSignupDetails = null;
       this.refresh();

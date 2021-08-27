@@ -942,6 +942,14 @@ export class CollectionsMainComponent {
                     this.renderBreadcrumbs();
 
                     this.refreshContent(callback);
+                    if(this.feedbackAllowed() && this.params.feedback === 'true') {
+                        this.mainNavRef.management.collectionWriteFeedback = collection.collection;
+                        this.mainNavRef.management.collectionWriteFeedbackChange.first().subscribe(() => {
+                            if(this.params.feedbackClose === 'true') {
+                                window.close();
+                            }
+                        })
+                    }
                     if(this.collectionContent.node.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1) {
                         this.nodeService.getNodePermissions(id).subscribe((permissions) => {
                             this.permissions = permissions.permissions.localPermissions.permissions.
@@ -1041,8 +1049,6 @@ export class CollectionsMainComponent {
                     if (params.mainnav) {
                         this.mainnav = params.mainnav !== 'false';
                     }
-                    // @TODO handle the feedback param, maybe in management-dialogs
-                    // this.feedback = params.feedback === 'true';
 
                     this._orderActive = false;
                     this.infoTitle = null;

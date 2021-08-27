@@ -81,6 +81,13 @@
     "NO_CC_PUBLISH": "no publishing permissions for object",
     "SELECT": "select {{ element }}",
     "EDIT": "edit {{ thing }}",
+    "EXPAND": "expand {{ element }}",
+    "COLLAPSE": "collapse {{ element }}",
+    "CHECKBOX_CHECKED": "checkbox checked",
+    "CHECKBOX_NOT_CHECKED": "checkbox not checked",
+    "RADIO_BUTTON_SELECTED": "radio button selected",
+    "RADIO_BUTTON_NOT_SELECTED": "radio button not selected",
+    "DISABLED": "disabled",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "Add to recently used collections",
         "SEARCH_COLLECTIONS": "Find collection...",
