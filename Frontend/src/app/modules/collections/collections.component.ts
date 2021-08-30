@@ -978,7 +978,7 @@ export class CollectionsMainComponent {
 
                 this.refreshContent(callback);
                     if(this.feedbackAllowed() && this.params.feedback === 'true') {
-                        this.mainNavRef.management.collectionWriteFeedback = collection.collection;
+                        this.mainNavRef.management.collectionWriteFeedback = collection;
                         this.mainNavRef.management.collectionWriteFeedbackChange.first().subscribe(() => {
                             if(this.params.feedbackClose === 'true') {
                                 window.close();
