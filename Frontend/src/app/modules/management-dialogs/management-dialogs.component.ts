@@ -763,7 +763,7 @@ export class WorkspaceManagementDialogsComponent  {
                         references: results.map((r) => r.node)
                     }
                 });
-            })
+            });
         });
     }
 }
