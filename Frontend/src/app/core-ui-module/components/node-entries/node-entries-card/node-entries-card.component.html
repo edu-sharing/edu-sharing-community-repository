@@ -1,0 +1,12 @@
+<div class="grid-card">
+  Card
+  <div
+    *ngFor="let displayPart of entriesService.columns"
+  >{{displayPart.label}}</div>
+  <app-list-base
+    *ngFor="let displayPart of entriesService.columns"
+    [item]="displayPart"
+    [node]="node"
+  >
+  </app-list-base>
+</div>

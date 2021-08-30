@@ -80,11 +80,17 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
 import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
 import {RenderHelperService} from './render-helper.service';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import {NodeEntriesComponent} from './components/node-entries/node-entries.component';
+import {NodeEntriesWrapperComponent} from './components/node-entries-wrapper/node-entries-wrapper.component';
+import {NodeEntriesCardGridComponent} from './components/node-entries/node-entries-card-grid/node-entries-card-grid.component';
+import {NodeEntriesCardComponent} from './components/node-entries/node-entries-card/node-entries-card.component';
 
 @NgModule({
     declarations: [
         CollectionChooserComponent,
         ListTableComponent,
+        NodeEntriesComponent,
         ListBaseComponent,
         ListCollectionInfoComponent,
         ListNodeLicenseComponent,
@@ -135,12 +141,17 @@ import {RenderHelperService} from './render-helper.service';
         ElementRefDirective,
         TitleDirective,
         FormatDurationPipe,
+        NodeEntriesWrapperComponent,
+        NodeEntriesComponent,
+        NodeEntriesCardGridComponent,
+        NodeEntriesCardComponent,
     ],
     imports: [
         A11yModule,
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
+        DragDropModule,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
@@ -177,6 +188,7 @@ import {RenderHelperService} from './render-helper.service';
     exports: [
         TranslateModule,
         ListTableComponent,
+        NodeEntriesComponent,
         SpinnerComponent,
         CustomNodeListWrapperComponent,
         BreadcrumbsComponent,
@@ -217,6 +229,7 @@ import {RenderHelperService} from './render-helper.service';
         TitleDirective,
         SafeHtmlPipe,
         ElementRefDirective,
+        NodeEntriesWrapperComponent,
     ],
 })
 export class CoreUiModule {}

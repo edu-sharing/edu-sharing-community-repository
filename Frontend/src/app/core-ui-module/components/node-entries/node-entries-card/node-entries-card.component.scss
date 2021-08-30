@@ -1,0 +1,6 @@
+@import '../../../styles/variables';
+
+.grid-card {
+    background-color: #fff;
+    @include materialShadowBottom();
+}

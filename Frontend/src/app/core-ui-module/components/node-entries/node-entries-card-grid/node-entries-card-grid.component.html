@@ -1,0 +1,7 @@
+<ul class="card-grid">
+  <app-node-entries-card
+    *ngFor="let node of (entriesService.dataSource?.connect() | async)"
+    [node]="node"
+    role="listitem"
+  ></app-node-entries-card>
+</ul>

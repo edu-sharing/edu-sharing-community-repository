@@ -261,7 +261,7 @@
             <div class="heading-group">
               <h2
                 class="mat-heading-3"
-                *ngIf="isAllowedToEditCollection() || collectionContent.collections.length"
+                *ngIf="isAllowedToEditCollection() || !(dataSourceCollections.isEmpty() | async)"
               >
                 <ng-container *ngIf="isRootLevelCollection()">{{
                   'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate
@@ -274,7 +274,7 @@
                 isAllowedToEditCollection() &&
                 sortCollections &&
                 !isMobile() &&
-                collectionContent.collections?.length &&
+                !(dataSourceCollections.isEmpty() | async) &&
                 !sortReferences?.customActive
               ">
                 <ng-container *ngTemplateOutlet="sortTool; context: {
@@ -287,47 +287,25 @@
             </div>
 
             <!-- COLLECTION CARDS -->
-            <app-custom-node-list-wrapper
-              #listCollections
-              [optionItems]="
-                        createAllowed()
-                        ? [createSubCollectionOptionItem]
-                        : []
-                    "
-              [hasHeading]="false"
-              [isLoading]="isLoading"
-              [orderElements]="sortCollections?.customActive"
-              [orderElementsActive]="sortCollections?.customActive"
-              [viewType]="getCollectionViewType()"
-              [dragDrop]="true"
-              [canDrop]="canDropOnCollection"
-              (onDrop)="dropOnCollection($event)"
+            <app-node-entries-wrapper
+              [dataSource]="dataSourceCollections"
               [columns]="collectionsColumns"
-              [isClickable]="true"
-              (clickRow)="onCollectionsClick($event.node)"
-              (doubleClickRow)="onCollectionsClick($event)"
-              [(nodes)]="collectionContent.collections"
-              [hasMore]="
-                        collectionContent.collections.length <
-                        collectionContent.collectionsPagination.total
-                    "
-              [createLink]="true"
-              (loadMore)="isRootLevelCollection() ? loadMoreCollections() : null"
-              class="no-padding"
-            ></app-custom-node-list-wrapper>
-
-            <!-- when empty at root level -->
-            <div
-              *ngIf="collectionContent.collections.length == 0 && isRootLevelCollection()"
-              class="collection-nocontent-container collection-nocontent-big"
             >
-              <ng-container *ngIf="tabSelected == 'EDU_GROUPS'">
-                {{ 'collections_noOrgaCollections' | translate }}
-              </ng-container>
-              <ng-container *ngIf="tabSelected == 'EDU_ALL'" >
-                {{ 'collections_noCollections' | translate }}
-              </ng-container>
-            </div>
+              <ng-template #empty>
+                <div
+                  *ngIf="isRootLevelCollection() || true"
+                  class="collection-nocontent-container collection-nocontent-big"
+                >
+                  <ng-container *ngIf="tabSelected == 'EDU_GROUPS'">
+                    {{ 'collections_noOrgaCollections' | translate }}
+                  </ng-container>
+                  <ng-container *ngIf="tabSelected == 'EDU_ALL'" >
+                    {{ 'collections_noCollections' | translate }}
+                  </ng-container>
+                </div>
+              </ng-template>
+            </app-node-entries-wrapper>
+            <!-- when empty at root level -->
           </section>
 
       <section
@@ -427,9 +405,8 @@
             <!-- NO CONTENT NOTICE -->
             <div
               *ngIf="
-                        collectionContent.references.length +
-                            collectionContent.collections.length ==
-                        0
+                        collectionContent.references.length === 0 &&
+                            (dataSourceCollections.isEmpty())
                     "
               class="section-headline collection-nocontent-container"
             >

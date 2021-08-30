@@ -76,6 +76,8 @@ import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/cu
 import {
     ListItemSort, SortEvent,
 } from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
+import {DataSource} from '@angular/cdk/collections';
+import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 
 // component class
 @Component({
@@ -116,6 +118,8 @@ export class CollectionsMainComponent {
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
 
+    dataSourceCollections = new NodeDataSource();
+
     viewTypeNodes: 0 | 1 | 2 = ListTableComponent.VIEW_TYPE_GRID;
 
     dialogTitle: string;
@@ -127,12 +131,9 @@ export class CollectionsMainComponent {
     isReady = false;
     collectionContent: {
         node: Node;
-        collections: Node[];
         references: EduData.CollectionReference[];
-        collectionsPagination?: EduData.Pagination;
         referencesPagination?: EduData.Pagination;
         referencesLoading?: boolean;
-        collectionsLoading?: boolean;
     };
     collectionSortEmitter = new EventEmitter<SortEvent>();
     collectionCustomSortEmitter = new EventEmitter<boolean>();
@@ -747,9 +748,7 @@ export class CollectionsMainComponent {
             .subscribe(
                 collection => {
                     // transfere sub collections and content
-                    this.collectionContent.collections = collection.collections;
-                    this.collectionContent.collectionsPagination =
-                        collection.pagination;
+                    this.dataSourceCollections.setData(collection.collections, collection.pagination);
                     if (this.isRootLevelCollection()) {
                         this.finishCollectionLoading(callback);
                         return;
@@ -817,21 +816,18 @@ export class CollectionsMainComponent {
             });
     }
 
-    loadMoreCollections() {
+    async loadMoreCollections() {
         if (
-            this.collectionContent.collections.length ==
-            this.collectionContent.collectionsPagination.total
+            !await this.dataSourceCollections.hasMore() ||
+            this.dataSourceCollections.isLoading
         ) {
-            return;
-        }
-        if (this.collectionContent.collectionsLoading) {
             return;
         }
         const request: any = Helper.deepCopy(
             CollectionsMainComponent.DEFAULT_REQUEST,
         );
-        request.offset = this.collectionContent.collections.length;
-        this.collectionContent.collectionsLoading = true;
+        request.offset = (await this.dataSourceCollections.getData()).length;
+        this.dataSourceCollections.isLoading = true;
         this.collectionService
             .getCollectionSubcollections(
                 this.collectionContent.node.ref.id,
@@ -841,10 +837,8 @@ export class CollectionsMainComponent {
                 this.collectionContent.node.ref.repo,
             )
             .subscribe(refs => {
-                this.collectionContent.collections = this.collectionContent.collections.concat(
-                    refs.collections,
-                );
-                this.collectionContent.collectionsLoading = false;
+                this.dataSourceCollections.appendData(refs.collections);
+                this.dataSourceCollections.isLoading = false;
             });
     }
 
@@ -1226,12 +1220,12 @@ export class CollectionsMainComponent {
             );
     }
 
-    private changeCollectionsOrder() {
+    private async changeCollectionsOrder() {
         this.toast.showProgressDialog();
         this.collectionService
             .setOrder(
                 this.collectionContent.node.ref.id,
-                RestHelper.getNodeIds(this.collectionContent.collections),
+                RestHelper.getNodeIds(await this.dataSourceCollections.getData()),
             )
             .subscribe(
                 () => {
@@ -1274,8 +1268,8 @@ export class CollectionsMainComponent {
     }
 
     private setCollectionId(id: string) {
+        this.dataSourceCollections.reset();
         this.collectionContent = {
-            collections: [],
             references: [],
             node: new Node(),
         };
