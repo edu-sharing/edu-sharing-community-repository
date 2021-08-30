@@ -19,7 +19,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { Ng5SliderModule } from 'ng5-slider';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { RestLocatorService } from '../core-module/rest/services/rest-locator.service';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CardComponent } from './components/card/card.component';
@@ -154,7 +154,7 @@ import {RenderHelperService} from './render-helper.service';
         MatSnackBarModule,
         MatTabsModule,
         MatTooltipModule,
-        Ng5SliderModule,
+        NgxSliderModule,
         RouterModule,
         TranslateModule.forRoot({
             loader: {

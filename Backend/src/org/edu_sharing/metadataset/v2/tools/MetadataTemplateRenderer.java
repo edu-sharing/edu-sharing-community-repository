@@ -503,16 +503,16 @@ public class MetadataTemplateRenderer {
 		}
 		return empty;
 	}
-
 	private String renderWidgetValue(MetadataWidget widget,String value){
 		if(widget.getType()!=null){
 			if(widget.getType().equals("date")){
 				try{
+					Date dateValue = new DateTool().getDate(value);
 					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-						value=new SimpleDateFormat(widget.getFormat()).format(new Date(Long.parseLong(value)));
+						value=new SimpleDateFormat(widget.getFormat()).format(dateValue);
 					}
 					else{
-						value=new DateTool().formatDate(Long.parseLong(value));
+						value=new DateTool().formatDate(dateValue.getTime());
 					}
 				}catch(Throwable t){
 					// wrong data or text

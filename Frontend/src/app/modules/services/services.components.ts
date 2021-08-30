@@ -1,6 +1,5 @@
 
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
-import 'rxjs/add/operator/map';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../core-ui-module/translation";
@@ -9,7 +8,7 @@ import {ConfigurationService} from "../../core-module/core.module";
 import {SessionStorageService} from "../../core-module/core.module";
 import {RestNetworkService} from "../../core-module/core.module";
 import {Toast} from "../../core-ui-module/toast";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 import {AccessScope, Application, LoginResult, Service} from "../../core-module/core.module";
 import {Helper} from "../../core-module/rest/helper";
 import {RestHelper} from "../../core-module/core.module";
@@ -18,6 +17,7 @@ import {RestConstants} from "../../core-module/core.module";
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import { map } from 'rxjs/operators';
 
 
 @Component({
@@ -80,7 +80,7 @@ export class ServicesComponent {
 
     public getJSON(): Observable<any> {
         return this.http.get(this.serviceUrl)
-            .map((res:any) => res.json());
+            .pipe(map((res:any) => res.json()));
     }
 
     hasInterface(service:Service, type:string) {

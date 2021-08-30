@@ -22,8 +22,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { CardService } from '../../card.service';
 import { UIHelper } from '../../ui-helper';
 import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
-import {Observable} from 'rxjs/Rx';
-import {BehaviorSubject} from 'rxjs';
+import {Observable, BehaviorSubject} from 'rxjs';
 
 /**
  * A common edu-sharing modal card

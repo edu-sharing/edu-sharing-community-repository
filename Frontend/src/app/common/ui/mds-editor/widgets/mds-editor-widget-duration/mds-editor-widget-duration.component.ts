@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Options } from 'ng5-slider/options';
+import { Options } from '@angular-slider/ngx-slider';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -26,8 +26,9 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
 
     ngOnInit() {
         this.initCurrentValue();
-        this.sliderOptions.floor = this.msToMin(this.widget.definition.min).valueMin ?? 0;
-        this.sliderOptions.ceil = this.msToMin(this.widget.definition.max).valueMin ?? 599;
+        this.sliderOptions.floor = this.widget.definition.min ?? 0;
+        this.sliderOptions.ceil = this.widget.definition.max ?? 599;
+        console.log(this.widget.definition, this.sliderOptions);
         this.updateInput();
         this.widget.observeIsDisabled().subscribe((isDisabled) => {
             if (isDisabled) {

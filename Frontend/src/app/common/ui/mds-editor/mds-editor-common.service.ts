@@ -64,8 +64,8 @@ export class MdsEditorCommonService {
                 node.ref.id,
                 file,
                 versionComment || RestConstants.COMMENT_CONTENT_UPDATE,
-            )
-            .map((r) => null)
+            ).pipe(
+            map((r) => null))
             .toPromise();
     }
 

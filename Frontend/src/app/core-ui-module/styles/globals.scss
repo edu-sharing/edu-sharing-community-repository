@@ -88,44 +88,44 @@
     }
   }
 }
-ng5-slider.ng5-slider {
-  .ng5-slider-bar {
+ngx-slider.ngx-slider {
+  .ngx-slider-bar {
     background: #e1e1e1;
     border-radius: 2px;
   }
-  .ng5-slider-selection {
+  .ngx-slider-selection {
     background-color: $primary;
   }
-  .ng5-slider-pointer {
+  .ngx-slider-pointer {
     background-color: $primary;
   }
-  .ng5-slider-pointer.ng5-slider-active:after {
+  .ngx-slider-pointer.ngx-slider-active:after {
     background-color: $primaryDark;
   }
-  .ng5-slider-tick.ng5-slider-selected {
+  .ngx-slider-tick.ngx-slider-selected {
     background-color: $primaryMediumLight;
   }
-  .ng5-slider-bubble {
+  .ngx-slider-bubble {
     color: $primaryDark;
   }
-  .ng5-slider-bubble.ng5-slider-limit {
+  .ngx-slider-bubble.ngx-slider-limit {
     display: none;
     color: $primaryDark;
   }
 }
-ng5-slider.ng5-slider-small {
-  .ng5-slider-bubble {
+ngx-slider.ngx-slider-small {
+  .ngx-slider-bubble {
     font-size: $fontSizeSmall;
   }
-  .ng5-slider-bar {
+  .ngx-slider-bar {
     height: 2px;
   }
-  .ng5-slider-pointer {
+  .ngx-slider-pointer {
     width: 16px;
     height: 16px;
     top:-7px
   }
-  .ng5-slider-pointer:after {
+  .ngx-slider-pointer:after {
     display: none;
     /*width: 4px;
     height: 4px;

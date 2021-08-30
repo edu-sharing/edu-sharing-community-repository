@@ -1,3 +1,4 @@
+import {forkJoin as observableForkJoin,  Observable, throwError } from 'rxjs';
 import {
     Component,
     ElementRef,
@@ -40,7 +41,6 @@ import {
 } from '../../../core-module/core.module';
 import { CardJumpmark } from '../../../core-ui-module/components/card/card.component';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { Observable } from 'rxjs';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
 import {DateHelper} from '../../../core-ui-module/DateHelper';
@@ -56,14 +56,15 @@ declare var noUiSlider: any;
     ],
 })
 export class MdsComponent {
-    /**
-     * priority, useful if the dialog seems not to be in the foreground
-     * Values greater 0 will raise the z-index
-     * Default is 1 for mds
-     */
-    @Input() priority = 1;
-    @Input() addWidget = false;
-    @Input() embedded = false;
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   * Default is 1 for mds
+   */
+  @Input() priority = 1;
+  @Input() addWidget=false;
+  @Input() embedded=false;
+  @Input() displayJumpmarks=true;
 
     /**
      * bulk behaviour: this controls how the bulk feature shall behave
@@ -808,12 +809,12 @@ export class MdsComponent {
             );
         } else {
             // can be bulk mode
-                  Observable.forkJoin(this.currentNodes.map((n) => {
+                  observableForkJoin(this.currentNodes.map((n) => {
                     const props = this.getValues(n.properties);
                     if(props) {
                       return this.node.editNodeMetadataNewVersion(n.ref.id, version, this.getValues(n.properties))
                     } else {
-                      return Observable.throwError(null);
+                      return throwError(null);
                     }
                   }))
                       .subscribe((nodes) => {

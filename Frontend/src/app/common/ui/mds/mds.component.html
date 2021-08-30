@@ -4,7 +4,7 @@
     <div class="card-title" *ngIf="currentNode || _groupId">{{currentNode ? currentNode.name : _currentValues['cm:name']}}</div>
     <div class="card-title" *ngIf="!(currentNode || _groupId)">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
   -->
-  <card height="xlarge" width="large" title="{{(customTitle ? customTitle : 'MDS.TITLE') | translate}}" [jumpmarks]="jumpmarks" [node]="currentNodes" [priority]="priority" [buttons]="buttons" (onCancel)="cancel()">
+  <card height="xlarge" width="large" title="{{(customTitle ? customTitle : 'MDS.TITLE') | translate}}" [jumpmarks]="displayJumpmarks ? jumpmarks : null" [node]="currentNodes" [priority]="priority" [buttons]="buttons" (onCancel)="cancel()">
     <div class="mdsCard">
       <spinner class="loading" *ngIf="isLoading"></spinner>
       <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>

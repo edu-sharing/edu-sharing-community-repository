@@ -428,15 +428,15 @@ export class MdsEditorInstanceService implements OnDestroy {
                     this.mdsEditorInstanceService.mdsId,
                     // TODO: Real repo id for search needs to be added
                     RestConstants.HOME_REPOSITORY,
-                )
-                .map(({ values }) => {
+                ).pipe(
+                map(({ values }) => {
                     return values.map((v) => {
                         return {
                             id: v.key,
                             caption: v.displayString ?? v.key,
                         };
                     });
-                })
+                }))
                 .toPromise();
         }
 

@@ -140,7 +140,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         return !!node.children && node.children.length > 0;
     }
 
-    toggleNode(node: TreeNode, checked?: boolean): void {
+    toggleNode(node: TreeNode, checked?: boolean, byUser = true): void {
         checked = checked ?? !node.isChecked;
         if (checked && !this.isMultiValue) {
             this.clearAll();
@@ -158,9 +158,14 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             // node.
             for (const childNode of this.tree.iterate(node.children)) {
                 if (childNode.isChecked) {
-                    this.toggleNode(childNode, false);
+                    this.toggleNode(childNode, false, false);
                 }
             }
+        }
+        if (byUser) {
+            document
+                .getElementById(this.getCheckboxId(node) + '-state')
+                .setAttribute('role', 'alert');
         }
     }
 

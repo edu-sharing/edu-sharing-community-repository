@@ -1,5 +1,6 @@
 import {Component, ViewChild} from "@angular/core";
 import {BehaviorSubject, Observable} from 'rxjs';
+import { filter } from "rxjs/operators";
 
 @Component({
   selector: 'global-container',
@@ -18,7 +19,7 @@ export class GlobalContainerComponent{
     GlobalContainerComponent.instance=this;
   }
   public static subscribePreloading(){
-    return GlobalContainerComponent.preloading.filter((v) => !v);
+    return GlobalContainerComponent.preloading.pipe(filter((v) => !v));
   }
   public static getPreloading(){
     return GlobalContainerComponent.preloading.value;

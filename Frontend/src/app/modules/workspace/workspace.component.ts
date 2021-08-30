@@ -52,6 +52,7 @@ import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import { CardService } from '../../core-ui-module/card.service';
 import { Observable } from 'rxjs';
+import { delay } from "rxjs/operators";
 import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
@@ -73,7 +74,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
-    private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
+    private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files_personal-', '-to_me_shared_files-', '-workflow_receive-'];
+
 
     cardHasOpenModals$: Observable<boolean>;
     private isRootFolder: boolean;
@@ -204,7 +206,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         });
         this.connector.setRoute(this.route);
         this.globalProgress = true;
-        this.cardHasOpenModals$ = card.hasOpenModals.delay(0);
+        this.cardHasOpenModals$ = card.hasOpenModals.pipe(delay(0));
     }
 
     private hideDialog(): void {
@@ -556,6 +558,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
         else {
             this.isRootFolder = true;
+            if(id === '-my_shared_files-'
+                || id === '-to_me_shared_files_personal-'
+                || id === '-to_me_shared_files-') {
+                this.isRootFolder = false;
+            }
+
             if (id === RestConstants.USERHOME) {
                 this.createAllowed = true;
             }

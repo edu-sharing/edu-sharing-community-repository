@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { TranslateLoader } from '@ngx-translate/core';
-import {Observable, Observer, of} from 'rxjs';
-import {tap, switchMap, map, catchError} from 'rxjs/operators';
+import {Observable, Observer, of, concat} from 'rxjs';
+import {tap, switchMap, map, catchError, reduce} from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RestLocatorService } from '../core-module/core.module';
 import { Translation } from './translation';
@@ -44,7 +44,7 @@ export class TranslationLoader implements TranslateLoader {
      */
     getTranslation(lang: string): Observable<Dictionary> {
         if (lang === 'none') {
-            return Observable.of({});
+            return of({});
         }
         return this.getOriginalTranslations(lang).pipe(
             // Default to empty dictionary if we got nothing
@@ -101,7 +101,7 @@ export class TranslationLoader implements TranslateLoader {
     private mergeTranslations(
         translations: Observable<Dictionary>[],
     ): Observable<Dictionary> {
-        return Observable.concat(...translations).reduce(
+        return concat(...translations).pipe(reduce(
             (acc: Dictionary, value: Dictionary) => {
                 for (const prop in value) {
                     if (value.hasOwnProperty(prop)) {
@@ -111,7 +111,7 @@ export class TranslationLoader implements TranslateLoader {
                 return acc;
             },
             {},
-        );
+        ));
     }
 
     private fetchAndApplyOverrides(
@@ -120,7 +120,7 @@ export class TranslationLoader implements TranslateLoader {
     ): Observable<Dictionary> {
         return this.locator
             .getConfigLanguage(Translation.LANGUAGES[lang])
-            .map(overrides => this.applyOverrides(translations, overrides));
+            .pipe(map(overrides => this.applyOverrides(translations, overrides)));
     }
 
     /**

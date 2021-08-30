@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Toast} from './toast';
-import { Observable } from 'rxjs';
-import {Subscription} from 'rxjs/Subscription';
+import { Observable, Subscription} from 'rxjs';
 
 @Injectable()
 export class ErrorProcessingService {

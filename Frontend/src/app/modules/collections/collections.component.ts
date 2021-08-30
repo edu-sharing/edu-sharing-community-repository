@@ -1,3 +1,4 @@
+import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
 import {
     Component,
     ContentChild,
@@ -6,6 +7,7 @@ import {
     TemplateRef,
     ViewChild
 } from '@angular/core';
+import 'rxjs/add/operator/first';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
 import * as EduData from '../../core-module/core.module';
@@ -61,7 +63,6 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
-import { Observable } from 'rxjs';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
@@ -562,7 +563,7 @@ export class CollectionsMainComponent {
                                 this.collectionContent.node.ref.id,
                             ),
                         );
-                        Observable.forkJoin(observables).subscribe(
+                        observableForkJoin(observables).subscribe(
                             () => {
                                 this.toast.closeModalDialog();
                                 this.refreshContent();
@@ -976,6 +977,14 @@ export class CollectionsMainComponent {
                 this.renderBreadcrumbs();
 
                 this.refreshContent(callback);
+                    if(this.feedbackAllowed() && this.params.feedback === 'true') {
+                        this.mainNavRef.management.collectionWriteFeedback = collection.collection;
+                        this.mainNavRef.management.collectionWriteFeedbackChange.first().subscribe(() => {
+                            if(this.params.feedbackClose === 'true') {
+                                window.close();
+                            }
+                        })
+                    }
                 if(this.collectionContent.node.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1) {
                     this.nodeService.getNodePermissions(id).subscribe((permissions) => {
                         this.permissions = permissions.permissions.localPermissions.permissions.
@@ -1073,8 +1082,6 @@ export class CollectionsMainComponent {
                     if (params.mainnav) {
                         this.mainnav = params.mainnav !== 'false';
                     }
-                    // @TODO handle the feedback param, maybe in management-dialogs
-                    // this.feedback = params.feedback === 'true';
 
                     this.infoTitle = null;
                     // get id from route and validate input data

@@ -2,7 +2,7 @@ import {Injectable, Injector, OnDestroy} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ProgressType } from '../common/ui/modal-dialog/modal-dialog.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -10,7 +10,6 @@ import { TemporaryStorageService } from '../core-module/rest/services/temporary-
 import { DialogButton } from '../core-module/ui/dialog-button';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
-import {Subscription} from 'rxjs/Subscription';
 import {SessionStorageService} from '../core-module/rest/services/session-storage.service';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 

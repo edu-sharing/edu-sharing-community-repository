@@ -32,7 +32,7 @@ import {SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
 import {RestOrganizationService} from '../../core-module/core.module';
 import {RestSearchService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
-import {Observable, Observer} from 'rxjs/index';
+import {Observable, Observer} from 'rxjs';
 import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {CustomHelper} from '../../common/custom-helper';

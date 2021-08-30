@@ -1,3 +1,5 @@
+
+import {forkJoin as observableForkJoin, Observable, Observer} from 'rxjs';
 import { trigger } from '@angular/animations';
 import {
     ApplicationRef,
@@ -7,7 +9,6 @@ import {
     Output, ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import {Observable, Observer} from 'rxjs';
 import {
     Collection,
     CollectionUsage,
@@ -269,7 +270,7 @@ export class WorkspaceShareComponent {
             this.showLink = true;
             this.updateNodeLink();
             this.toast.showProgressDialog();
-            Observable.forkJoin(
+            observableForkJoin(
                 this._nodes.map(n => this.nodeApi.getNodePermissions(n.ref.id)),
             ).subscribe(permissions => {
                 this.originalPermissions = Helper.deepCopy(
@@ -640,7 +641,7 @@ export class WorkspaceShareComponent {
                     }
                 })
             });
-            Observable.forkJoin(actions).subscribe(
+            observableForkJoin(actions).subscribe(
                 () => {
                     if(!this.sendToApi) {
                         return;

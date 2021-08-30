@@ -1,5 +1,4 @@
 import {Component, ViewChild} from '@angular/core';
-import 'rxjs/add/operator/map';
 import {ActivatedRoute, Params, Router, RoutesRecognized} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../core-ui-module/translation";
@@ -19,7 +18,7 @@ import {SessionStorageService} from "../../core-module/core.module";
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {RestMdsService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
-import {Observable} from 'rxjs/Rx';
+import {Observable, Subscription} from 'rxjs';
 import {RestStreamService} from "../../core-module/core.module";
 import {RestConnectorsService} from '../../core-module/core.module';
 import {UIAnimation} from '../../core-module/ui/ui-animation';
@@ -29,8 +28,6 @@ import {NodeWrapper} from '../../core-module/core.module';
 import {Filetype} from '../../core-module/core.module';
 import {FrameEventsService} from '../../core-module/core.module';
 import {CordovaService} from '../../common/services/cordova.service';
-import 'rxjs/add/operator/pairwise';
-import {Subscription} from 'rxjs/Subscription';
 import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {RestIamService} from '../../core-module/core.module';
@@ -38,6 +35,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
+import { filter, pairwise } from 'rxjs/operators';
 
 
 @Component({
@@ -129,9 +127,10 @@ export class StreamComponent {
       });
       this.amountToRandomize = 4;
       this.setStreamMode();
-      this.routerSubscription = this.router.events
-      .filter(e => e instanceof RoutesRecognized)
-      .pairwise()
+      this.routerSubscription = this.router.events.pipe(
+        filter(e => e instanceof RoutesRecognized),
+        pairwise(),
+      )
       .subscribe((e: any[]) => {
         document.cookie = "scroll="+"noScroll";
         if (/components\/render/.test(e[0].urlAfterRedirects)) {

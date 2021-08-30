@@ -17,7 +17,7 @@ import {FrameEventsService} from '../../../../core-module/core.module';
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
-import {Observable, Observer} from 'rxjs';
+import {forkJoin, Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {WorkspaceShareComponent} from '../../../workspace/share/share.component';
 import {Helper} from '../../../../core-module/rest/helper';
@@ -101,13 +101,13 @@ export class SimpleEditLicenseComponent {
       });
     }
     const properties = this.getProperties();
-    return Observable.forkJoin(this._nodes.map((n, i) => {
+    return forkJoin(this._nodes.map((n, i) => {
       return this.nodeApi.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, properties);
     }));
   }
 
   prepare(updateInvalid = false) {
-    Observable.forkJoin(this._nodes.map((n) => this.nodeApi.getNodeMetadata(n.ref.id,[RestConstants.ALL])))
+    forkJoin(this._nodes.map((n) => this.nodeApi.getNodeMetadata(n.ref.id,[RestConstants.ALL])))
         .subscribe((nodes) => {
           this._nodes = nodes.map((n) => n.node);
           const license = this.nodeHelper.getValueForAll(this._nodes, RestConstants.CCM_PROP_LICENSE, null, 'NONE',false);

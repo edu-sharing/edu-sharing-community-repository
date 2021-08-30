@@ -30,7 +30,11 @@ public class MetadataQueryPreprocessor {
         return AuthenticationUtil.runAsSystem(()-> {
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-            return serviceRegistry.getNodeService().getPath(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, value)).toPrefixString(serviceRegistry.getNamespaceService());
+            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, value);
+            if(!serviceRegistry.getNodeService().exists(nodeRef)){
+                return null;
+            }
+            return serviceRegistry.getNodeService().getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService());
         });
     }
     // convert values like YYYY-MM-DD to a unix millis string (e.g. for elastic)

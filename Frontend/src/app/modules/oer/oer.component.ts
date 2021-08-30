@@ -1,6 +1,5 @@
 
 import {Component, ViewChild, HostListener, ElementRef, OnDestroy} from '@angular/core';
-import 'rxjs/add/operator/map';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../core-ui-module/translation';

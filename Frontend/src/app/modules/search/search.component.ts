@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import 'rxjs/add/operator/map';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
