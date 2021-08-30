@@ -1,6 +1,5 @@
 import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
 import {Component, ContentChild, ElementRef, TemplateRef, ViewChild} from '@angular/core';
-import 'rxjs/add/operator/first';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
 import * as EduData from '../../core-module/core.module';
@@ -66,6 +65,7 @@ import {
     ManagementEventType
 } from '../management-dialogs/management-dialogs.component';
 import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/custom-node-list-wrapper/custom-node-list-wrapper.component';
+import { first } from 'rxjs/operators';
 
 // component class
 @Component({
@@ -945,7 +945,7 @@ export class CollectionsMainComponent {
                     this.refreshContent(callback);
                     if(this.feedbackAllowed() && this.params.feedback === 'true') {
                         this.mainNavRef.management.collectionWriteFeedback = collection.collection;
-                        this.mainNavRef.management.collectionWriteFeedbackChange.first().subscribe(() => {
+                        this.mainNavRef.management.collectionWriteFeedbackChange.pipe(first()).subscribe(() => {
                             if(this.params.feedbackClose === 'true') {
                                 window.close();
                             }
