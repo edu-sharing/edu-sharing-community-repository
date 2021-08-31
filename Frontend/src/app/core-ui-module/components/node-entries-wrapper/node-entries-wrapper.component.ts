@@ -21,6 +21,11 @@ export enum NodeEntriesDisplayType {
     Grid,
     SmallGrid
 }
+export enum InteractionType {
+    DefaultActionLink,
+    Emitter,
+    None
+}
 @Component({
     selector: 'app-node-entries-wrapper',
     template: `
@@ -36,6 +41,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges {
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
+    @Input() elementInteractionType = InteractionType.DefaultActionLink;
     private componentRef: ComponentRef<any>;
     public customNodeListComponent: Type<NodeEntriesComponent<T>>;
 
@@ -62,6 +68,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges {
         this.entriesService.dataSource = this.dataSource;
         this.entriesService.columns = this.columns;
         this.entriesService.displayType = this.displayType;
+        this.entriesService.elementInteractionType = this.elementInteractionType;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();

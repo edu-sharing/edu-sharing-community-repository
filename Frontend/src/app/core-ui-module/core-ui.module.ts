@@ -85,6 +85,8 @@ import {NodeEntriesComponent} from './components/node-entries/node-entries.compo
 import {NodeEntriesWrapperComponent} from './components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeEntriesCardGridComponent} from './components/node-entries/node-entries-card-grid/node-entries-card-grid.component';
 import {NodeEntriesCardComponent} from './components/node-entries/node-entries-card/node-entries-card.component';
+import {NodeImagePipe} from './pipes/node-image.pipe';
+import {NodeTitlePipe} from './pipes/node-title.pipe';
 
 @NgModule({
     declarations: [
@@ -129,7 +131,9 @@ import {NodeEntriesCardComponent} from './components/node-entries/node-entries-c
         UrlPipe,
         AuthorityAffiliationPipe,
         OptionTooltipPipe,
+        NodeImagePipe,
         NodeSourcePipe,
+        NodeTitlePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         ImageConfigDirective,
@@ -226,6 +230,7 @@ import {NodeEntriesCardComponent} from './components/node-entries/node-entries-c
         ListCollectionInfoComponent,
         ListBaseComponent,
         ListTextComponent,
+        NodeTitlePipe,
         TitleDirective,
         SafeHtmlPipe,
         ElementRefDirective,

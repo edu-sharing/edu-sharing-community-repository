@@ -1,6 +1,78 @@
 @import '../../../styles/variables';
 
+$imageHeight: 150px;
+$cardPadding: 15px;
+$topBarHeight: 40px;
+
 .grid-card {
+    // to prevent click animation to float across the whole screen
+    overflow: hidden;
     background-color: #fff;
     @include materialShadowBottom();
+    display: grid;
+    grid-template-columns: auto;
+    .card-top-bar {
+        background-color: rgba(255,255,255,.8);
+        height: $topBarHeight;
+        display: flex;
+        align-items: center;
+        padding:0 $cardPadding;
+        .card-top-bar-type {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-start;
+            background-color: #fff;
+            padding: 5px;
+            @include materialShadow();
+        }
+        .card-top-bar-empty {
+           width: 0;
+           flex-grow: 1;
+        }
+        mat-checkbox {
+            margin-right: -15px;
+        }
+    }
+    .card-image-area {
+        padding: 0;
+        height: $imageHeight;
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card-collection-image {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            i {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                user-select: none;
+                color: rgba(0,0,0,.75);
+                background-color: rgba(255,255,255,.5);
+                padding: 40px;
+                font-size: 40px;
+                border-radius: 50%;
+            }
+        }
+    }
+    .card-meta {
+        padding: 10px $cardPadding $cardPadding $cardPadding;
+        background-color: rgba(255,255,255, 0.8);
+        display: grid;
+        flex-direction: row;
+        app-list-base {
+            color: #000;
+            &:first-child {
+                font-size: 120%;
+                height: 1.25 * 2em;
+                @include limitLineCount(2, 1.25);
+            }
+        }
+    }
 }

@@ -1,4 +1,3 @@
-Test
 <ng-container *ngIf="(entriesService.dataSource.isEmpty() | async)">
   <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
 </ng-container>
@@ -6,6 +5,5 @@ Test
   Table
 </ng-container>
 <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Grid">
-  Grid
   <app-node-entries-card-grid></app-node-entries-card-grid>
 </ng-container>

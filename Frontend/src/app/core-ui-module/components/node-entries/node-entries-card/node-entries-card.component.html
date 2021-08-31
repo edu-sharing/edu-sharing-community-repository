@@ -1,12 +1,63 @@
-<div class="grid-card">
-  Card
+<div
+  class="grid-card"
+  [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
+  [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+>
+  <!--  [style.color]="getTextColor()"-->
   <div
     *ngFor="let displayPart of entriesService.columns"
   >{{displayPart.label}}</div>
-  <app-list-base
-    *ngFor="let displayPart of entriesService.columns"
-    [item]="displayPart"
-    [node]="node"
+  <div
+    class="card-top-bar"
+    >
+    <div
+      class="card-top-bar-type"
+    >
+      <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
+        <i
+          matTooltip="{{'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate}}"
+          [icon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"></i>
+      </ng-container>
+    </div>
+    <div class="card-top-bar-empty"></div>
+    <mat-checkbox
+      aria-label="{{ 'SELECT' | translate:{element:(node | nodeTitle)} }}"
+    ></mat-checkbox>
+  </div>
+  <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+                [node]="node"
   >
-  </app-list-base>
+    <ng-container *ngTemplateOutlet="image"></ng-container>
+    <ng-container *ngTemplateOutlet="meta"></ng-container>
+  </app-node-url>
+  <ng-container *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
+    <ng-container *ngTemplateOutlet="image"></ng-container>
+    <ng-container *ngTemplateOutlet="meta"></ng-container>
+  </ng-container>
+
 </div>
+<ng-template #image>
+  <div class="card-image-area">
+    <img
+      *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
+      [src]="(node | appNodeImage)"
+      alt=""
+    >
+    <div *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
+         class="card-collection-image"
+         role="img"
+    >
+      <i icon="layers"></i>
+    </div>
+  </div>
+</ng-template>
+<ng-template #meta>
+  <div class="card-meta">
+    <app-list-base
+      *ngFor="let displayPart of entriesService.columns"
+      [item]="displayPart"
+      [node]="node"
+    >
+    </app-list-base>
+  </div>
+</ng-template>
