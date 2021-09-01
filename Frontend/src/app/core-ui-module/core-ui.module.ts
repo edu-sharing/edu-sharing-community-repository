@@ -87,6 +87,7 @@ import {NodeEntriesCardGridComponent} from './components/node-entries/node-entri
 import {NodeEntriesCardComponent} from './components/node-entries/node-entries-card/node-entries-card.component';
 import {NodeImagePipe} from './pipes/node-image.pipe';
 import {NodeTitlePipe} from './pipes/node-title.pipe';
+import {OptionButtonComponent} from './components/option-button/option-button.component';
 
 @NgModule({
     declarations: [
@@ -114,6 +115,7 @@ import {NodeTitlePipe} from './pipes/node-title.pipe';
         GlobalProgressComponent,
         VideoControlsComponent,
         InfoMessageComponent,
+        OptionButtonComponent,
         InputPasswordComponent,
         InfiniteScrollDirective,
         AuthorityNamePipe,

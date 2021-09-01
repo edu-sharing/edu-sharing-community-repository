@@ -20,18 +20,18 @@
 }
 @mixin blurImage($blurStrength:25px){
     position: absolute;
-    left:-$blurStrength;
-    top:-$blurStrength;
-    width:calc(100% + #{$blurStrength*2});
-    height:calc(100% + #{$blurStrength*2});
+    left:-$blurStrength*2;
+    top:-$blurStrength*2;
+    width:calc(100% + #{$blurStrength*4});
+    height:calc(100% + #{$blurStrength*4});
     z-index: 0;
     overflow: hidden;
     filter: blur($blurStrength);
     object-fit: cover;
     opacity: 0.7;
 }
-@mixin materialShadowMediumLarge($important: false){
-  box-shadow:0 0 25px rgba(0,0,0,0.6) if($important,!important,null);
+@mixin materialShadowMediumLarge($important: false, $opacity: 0.6){
+  box-shadow:0 0 25px rgba(0,0,0,$opacity) if($important,!important,null);
 }
 @mixin materialShadowLarge($important: false){
   box-shadow:0 10px 70px rgba(0, 0, 0, 0.15) if($important,!important,null);

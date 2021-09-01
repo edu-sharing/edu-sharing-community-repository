@@ -1,5 +1,6 @@
 import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
 import {
+    AfterViewInit,
     Component,
     ContentChild,
     ElementRef,
@@ -78,6 +79,10 @@ import {
 } from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
 import {DataSource} from '@angular/cdk/collections';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import {
+    ListEventInterface,
+    NodeEntriesWrapperComponent
+} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 
 // component class
 @Component({
@@ -86,9 +91,9 @@ import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapp
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
     providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
-        subscribeEvents: false
-    }}]})
-export class CollectionsMainComponent {
+            subscribeEvents: false
+        }}]})
+export class CollectionsMainComponent implements AfterViewInit{
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -114,11 +119,12 @@ export class CollectionsMainComponent {
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
-    @ViewChild('listReferences') listReferences: CustomNodeListWrapperComponent;
+    @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
 
-    dataSourceCollections = new NodeDataSource();
+    dataSourceCollections = new NodeDataSource<Node>();
+    dataSourceReferences = new NodeDataSource<CollectionReference>();
 
     viewTypeNodes: 0 | 1 | 2 = ListTableComponent.VIEW_TYPE_GRID;
 
@@ -131,9 +137,6 @@ export class CollectionsMainComponent {
     isReady = false;
     collectionContent: {
         node: Node;
-        references: EduData.CollectionReference[];
-        referencesPagination?: EduData.Pagination;
-        referencesLoading?: boolean;
     };
     collectionSortEmitter = new EventEmitter<SortEvent>();
     collectionCustomSortEmitter = new EventEmitter<boolean>();
@@ -184,7 +187,6 @@ export class CollectionsMainComponent {
             this.mainNavRef.createMenu.showUploadSelect = true
         },
     );
-    optionsMaterials: OptionItem[];
     collectionProposals: AbstractList<ProposalNode>;
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
@@ -255,7 +257,7 @@ export class CollectionsMainComponent {
             this.infoButtons = DialogButton.getSingleButton('SAVE', () => {
                 this.changeReferencesOrder();
                 this.sortReferences.customActive = false;
-                this.listReferences.getListTable().selectedNodes = [];
+                this.listReferences.getSelection().clear();
             });
             this.infoClose = () => {
                 this.sortReferences.customActive = false;
@@ -270,10 +272,10 @@ export class CollectionsMainComponent {
     private collectionContentOriginal: any;
     private filteredOutCollections: Array<EduData.Collection> = new Array<
         EduData.Collection
-    >();
+        >();
     private filteredOutReferences: Array<
         EduData.CollectionReference
-    > = new Array<EduData.CollectionReference>();
+        > = new Array<EduData.CollectionReference>();
     private collectionIdParamSubscription: any;
     private contentDetailObject: any = null;
     // real parentCollectionId is only available, if user was browsing
@@ -328,7 +330,6 @@ export class CollectionsMainComponent {
         this.referenceCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleReferencesOrder() : this.changeReferencesOrder());
         this.collectionsColumns.push(new ListItem('COLLECTION', 'title'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
-        this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
         this.setCollectionId(RestConstants.ROOT);
         Translation.initialize(
             this.translationService,
@@ -394,10 +395,13 @@ export class CollectionsMainComponent {
             if(event.event === ManagementEventType.AddCollectionNodes){
                 if(event.data.collection.ref.id === this.collectionContent.node.ref.id) {
                     console.log('add virtual', event.data.references)
-                    this.listReferences.getListTable().addVirtualNodes(event.data.references);
+                    this.listReferences.addVirtualNodes(event.data.references);
                 }
             }
-        })
+        });
+    }
+
+    ngAfterViewInit() {
     }
 
     isMobile() {
@@ -621,11 +625,11 @@ export class CollectionsMainComponent {
                 (event.nodes[0].collection.type ===
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
                     event.target.collection.type !==
-                        RestConstants.COLLECTIONTYPE_EDITORIAL) ||
+                    RestConstants.COLLECTIONTYPE_EDITORIAL) ||
                 (event.nodes[0].collection.type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
                     event.target.collection.type ===
-                        RestConstants.COLLECTIONTYPE_EDITORIAL)
+                    RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }
@@ -755,10 +759,10 @@ export class CollectionsMainComponent {
                     }
                     if(this.isAllowedToEditCollection()) {
                         this.collectionService.
-                            getCollectionProposals(this.collectionContent.node.ref.id).subscribe((proposals) => {
+                        getCollectionProposals(this.collectionContent.node.ref.id).subscribe((proposals) => {
                             proposals.nodes = proposals.nodes.map((p) => {
-                                    p.proposalCollection = this.collectionContent.node;
-                                    return p;
+                                p.proposalCollection = this.collectionContent.node;
+                                return p;
                             });
                             this.collectionProposals = proposals;
                         })
@@ -773,9 +777,7 @@ export class CollectionsMainComponent {
                             this.collectionContent.node.ref.repo,
                         )
                         .subscribe(refs => {
-                            this.collectionContent.references = refs.references;
-                            this.collectionContent.referencesPagination =
-                                refs.pagination;
+                            this.dataSourceReferences.setData(refs.references, refs.pagination);
                             this.finishCollectionLoading(callback);
                         });
                 },
@@ -785,22 +787,18 @@ export class CollectionsMainComponent {
             );
     }
 
-    loadMoreReferences(loadAll = false) {
+    async loadMoreReferences(loadAll = false) {
         if (
-            this.collectionContent.references.length ==
-            this.collectionContent.referencesPagination.total
+            !this.dataSourceReferences.hasMore() || this.dataSourceReferences.isLoading
         ) {
             return;
         }
-        if (this.collectionContent.referencesLoading) {
-            return;
-        }
         const request = this.getReferencesRequest();
-        request.offset = this.collectionContent.references.length;
+        request.offset = (await this.dataSourceReferences.getData()).length;
         if (loadAll) {
             request.count = RestConstants.COUNT_UNLIMITED;
         }
-        this.collectionContent.referencesLoading = true;
+        this.dataSourceReferences.isLoading = true;
         this.collectionService
             .getCollectionReferences(
                 this.collectionContent.node.ref.id,
@@ -809,10 +807,8 @@ export class CollectionsMainComponent {
                 this.collectionContent.node.ref.repo,
             )
             .subscribe(refs => {
-                this.collectionContent.references = this.collectionContent.references.concat(
-                    refs.references,
-                );
-                this.collectionContent.referencesLoading = false;
+                this.dataSourceReferences.appendData(refs.references);
+                this.dataSourceReferences.isLoading = false;
             });
     }
 
@@ -951,26 +947,26 @@ export class CollectionsMainComponent {
 
             this.collectionService.getCollection(id).subscribe(
                 ({collection}) => {
-                // set the collection and load content data by refresh
-                this.setCollectionId(null);
-                const orderCollections = collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
-                this.sortCollections = {
-                    name: orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE,
-                    ascending: orderCollections?.[1] === 'true'
-                };
-                const refMode = collection.collection.orderMode;
-                const refAscending = collection.collection.orderAscending;
-                this.sortReferences = {
-                    // cast old order mode to new parameter
-                    name: (((refMode === RestConstants.COLLECTION_ORDER_MODE_CUSTOM ?
-                        RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION : refMode) || RestConstants.CM_MODIFIED_DATE) as any),
-                    ascending: refAscending
-                };
-                this.collectionContent.node = collection;
+                    // set the collection and load content data by refresh
+                    this.setCollectionId(null);
+                    const orderCollections = collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
+                    this.sortCollections = {
+                        name: orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE,
+                        ascending: orderCollections?.[1] === 'true'
+                    };
+                    const refMode = collection.collection.orderMode;
+                    const refAscending = collection.collection.orderAscending;
+                    this.sortReferences = {
+                        // cast old order mode to new parameter
+                        name: (((refMode === RestConstants.COLLECTION_ORDER_MODE_CUSTOM ?
+                            RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION : refMode) || RestConstants.CM_MODIFIED_DATE) as any),
+                        ascending: refAscending
+                    };
+                    this.collectionContent.node = collection;
 
-                this.renderBreadcrumbs();
+                    this.renderBreadcrumbs();
 
-                this.refreshContent(callback);
+                    this.refreshContent(callback);
                     if(this.feedbackAllowed() && this.params.feedback === 'true') {
                         this.mainNavRef.management.collectionWriteFeedback = collection;
                         this.mainNavRef.management.collectionWriteFeedbackChange.first().subscribe(() => {
@@ -979,26 +975,26 @@ export class CollectionsMainComponent {
                             }
                         })
                     }
-                if(this.collectionContent.node.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1) {
-                    this.nodeService.getNodePermissions(id).subscribe((permissions) => {
-                        this.permissions = permissions.permissions.localPermissions.permissions.
-                        concat(permissions.permissions.inheritedPermissions);
-                    });
-                }
-            },
-            error => {
-                if (id != '-root-') {
-                    this.navigate();
-                }
-                if (error.status == 404) {
-                    this.toast.error(null, 'COLLECTIONS.ERROR_NOT_FOUND');
-                } else {
-                    this.toast.error(error);
-                }
-                this.isLoading = false;
-                GlobalContainerComponent.finishPreloading();
-            },
-        );
+                    if(this.collectionContent.node.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1) {
+                        this.nodeService.getNodePermissions(id).subscribe((permissions) => {
+                            this.permissions = permissions.permissions.localPermissions.permissions.
+                            concat(permissions.permissions.inheritedPermissions);
+                        });
+                    }
+                },
+                error => {
+                    if (id != '-root-') {
+                        this.navigate();
+                    }
+                    if (error.status == 404) {
+                        this.toast.error(null, 'COLLECTIONS.ERROR_NOT_FOUND');
+                    } else {
+                        this.toast.error(error);
+                    }
+                    this.isLoading = false;
+                    GlobalContainerComponent.finishPreloading();
+                },
+            );
         }
     }
 
@@ -1107,21 +1103,20 @@ export class CollectionsMainComponent {
                                 },
                             );
                     } else {*/
-                        this.showCollection = id != '-root-';
-                        this.displayCollectionById(id, () => {
-                            if (params.content) {
-                                for (const content of this.collectionContent
-                                    .references) {
-                                    if (content.ref.id == params.content) {
-                                        this.contentDetailObject = content;
-                                        break;
-                                    }
+                    this.showCollection = id !== '-root-';
+                    this.displayCollectionById(id, async () => {
+                        if (params.content) {
+                            for (const content of (await this.dataSourceReferences.getData())) {
+                                if (content.ref.id === params.content) {
+                                    this.contentDetailObject = content;
+                                    break;
                                 }
                             }
-                            this.frame.broadcastEvent(
-                                FrameEventsService.EVENT_INVALIDATE_HEIGHT,
-                            );
-                        });
+                        }
+                        this.frame.broadcastEvent(
+                            FrameEventsService.EVENT_INVALIDATE_HEIGHT,
+                        );
+                    });
                     // }
                 });
             },
@@ -1198,11 +1193,12 @@ export class CollectionsMainComponent {
         }
     }
 
-    private changeReferencesOrder() {
-        this.toast.showProgressDialog();        this.collectionService
+    private async changeReferencesOrder() {
+        this.toast.showProgressDialog();
+        this.collectionService
             .setOrder(
                 this.collectionContent.node.ref.id,
-                RestHelper.getNodeIds(this.collectionContent.references),
+                RestHelper.getNodeIds(await this.dataSourceReferences.getData()),
             )
             .subscribe(
                 () => {
@@ -1269,8 +1265,8 @@ export class CollectionsMainComponent {
 
     private setCollectionId(id: string) {
         this.dataSourceCollections.reset();
+        this.dataSourceReferences.reset();
         this.collectionContent = {
-            references: [],
             node: new Node(),
         };
         this.collectionContent.node.ref = new NodeRef();
@@ -1311,7 +1307,14 @@ export class CollectionsMainComponent {
         if (callback) {
             callback();
         }
-        setTimeout(() => this.setOptionsCollection());
+        setTimeout(() => {
+            this.setOptionsCollection();
+            this.listReferences?.initOptionsGenerator({
+                scope: Scope.CollectionsReferences,
+                actionbar: this.actionbarReferences,
+                parent: this.collectionContent.node
+            });
+        });
     }
 
     private addToStore(nodes: Node[]) {
@@ -1369,7 +1372,7 @@ export class CollectionsMainComponent {
     private getReferencesRequest(): RequestObject {
         return {
             sortBy: [this.sortReferences.name],
-                sortAscending: [this.sortReferences.ascending]
+            sortAscending: [this.sortReferences.ascending]
         };
     }
 

@@ -60,13 +60,20 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { DistinctClickEvent } from '../../directives/distinct-click.directive';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
-import { CustomOptions, OptionItem, Scope } from '../../option-item';
+import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
 import { Toast } from '../../toast';
 import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
 import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
 import {NodeTitlePipe} from '../../pipes/node-title.pipe';
 import {NodeUrlComponent} from '../node-url/node-url.component';
+import {
+    ListEventInterface,
+    ListOptions,
+    ListOptionsConfig,
+    NodeEntriesDisplayType
+} from '../node-entries-wrapper/node-entries-wrapper.component';
+import {SelectionModel} from '@angular/cdk/collections';
 
 
 @Component({
@@ -116,7 +123,7 @@ import {NodeUrlComponent} from '../node-url/node-url.component';
 /**
  * A provider to render multiple Nodes as a list
  */
-export class ListTableComponent implements OnChanges, AfterViewInit, EventListener {
+export class ListTableComponent implements OnChanges, AfterViewInit, EventListener, ListEventInterface<Node> {
     public static readonly VIEW_TYPE_LIST = 0;
     public static readonly VIEW_TYPE_GRID = 1;
     public static readonly VIEW_TYPE_GRID_SMALL = 2;
@@ -1343,4 +1350,40 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             .filter((_, index) => index > 0)
             .join(' ');
     }
+
+
+    /*
+        from list event interface
+     */
+    getDisplayType(): NodeEntriesDisplayType {
+        return this.viewType;
+    }
+
+    setDisplayType(displayType: NodeEntriesDisplayType): void {
+        this.viewType = displayType;
+    }
+
+    getSelection(): SelectionModel<Node> {
+        return null;
+    }
+
+    setOptions(options: ListOptions): void {
+        this.options = options?.[Target.List];
+        this.dropdownOptions = options?.[Target.ListDropdown];
+    }
+
+    showReorderColumnsDialog(): void {
+        this.reorderDialog = true;
+    }
+
+    /**
+     * @deprecated
+     * config paramter will be ignored
+     * Switch to new @NodeEntriesComponent
+     */
+    async initOptionsGenerator(config: ListOptionsConfig) {
+        await this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+        this.optionsHelper.refreshComponents();
+    }
+
 }

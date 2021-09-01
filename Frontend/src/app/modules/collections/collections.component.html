@@ -261,7 +261,7 @@
             <div class="heading-group">
               <h2
                 class="mat-heading-3"
-                *ngIf="isAllowedToEditCollection() || !(dataSourceCollections.isEmpty() | async)"
+                *ngIf="isAllowedToEditCollection() || !dataSourceCollections.isEmpty()"
               >
                 <ng-container *ngIf="isRootLevelCollection()">{{
                   'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate
@@ -274,7 +274,7 @@
                 isAllowedToEditCollection() &&
                 sortCollections &&
                 !isMobile() &&
-                !(dataSourceCollections.isEmpty() | async) &&
+                !dataSourceCollections.isEmpty() &&
                 !sortReferences?.customActive
               ">
                 <ng-container *ngTemplateOutlet="sortTool; context: {
@@ -308,36 +308,33 @@
             <!-- when empty at root level -->
           </section>
 
-      <section
-        *ngIf="!isLoading && collectionProposals?.nodes?.length"
-        class="collections-cards-div"
-      >
-        <div class="content-header">
-          <h2 class="mat-heading-3">
-            {{ 'COLLECTIONS.PROPOSALS.TITLE' | translate }}
-          </h2>
-        </div>
+          <section
+            *ngIf="!isLoading && collectionProposals?.nodes?.length"
+            class="collections-cards-div"
+          >
+            <div class="content-header">
+              <h2 class="mat-heading-3">
+                {{ 'COLLECTIONS.PROPOSALS.TITLE' | translate }}
+              </h2>
+            </div>
 
-        <app-custom-node-list-wrapper
-          [parent]="collectionContent.node"
-          [hasHeading]="false"
-          [viewType]="1"
-          [dragDrop]="false"
-          [hasIcon]="true"
-          [columns]="proposalColumns"
-          [mainNav]="mainNavRef"
-          [scope]="SCOPES.CollectionsReferences"
-          [isClickable]="true"
-          (clickRow)="onContentClick($event.node)"
-          [createLink]="true"
-          [nodes]="$any(collectionProposals.nodes)"
-          (nodesChange)="collectionProposals.nodes = $any($event)"
-          class="no-padding"
-        ></app-custom-node-list-wrapper>
-      </section>
-
-
-          <!-- content (content cards) if not error -->
+            <app-custom-node-list-wrapper
+              [parent]="collectionContent.node"
+              [hasHeading]="false"
+              [viewType]="1"
+              [dragDrop]="false"
+              [hasIcon]="true"
+              [columns]="proposalColumns"
+              [mainNav]="mainNavRef"
+              [scope]="SCOPES.CollectionsReferences"
+              [isClickable]="true"
+              (clickRow)="onContentClick($event.node)"
+              [createLink]="true"
+              [nodes]="$any(collectionProposals.nodes)"
+              (nodesChange)="collectionProposals.nodes = $any($event)"
+              class="no-padding"
+            ></app-custom-node-list-wrapper>
+          </section>
           <section
             class="collections-cards-div"
             *ngIf="!isLoading && isReady && !isRootLevelCollection()"
@@ -347,7 +344,7 @@
                 {{ 'collections_content' | translate }}
               </h2>
               <ng-container *ngIf="!isMobile() &&
-                          collectionContent.references?.length > 1 &&
+                          dataSourceReferences.getData()?.length > 1 &&
                           isUserAllowedToEdit(collectionContent.node) &&
                           !sortCollections?.customActive">
                 <ng-container *ngTemplateOutlet="sortTool; context: {
@@ -360,54 +357,62 @@
               <actionbar
                 #actionbarReferences
                 class="actionbarMaterials"
-                [options]="optionsMaterials"
                 [numberOfAlwaysVisibleOptions]="1"
               ></actionbar>
             </div>
-
-            <app-custom-node-list-wrapper
-          #listReferences
-              [parent]="collectionContent.node"
-              [optionItems]="
-                        isUserAllowedToEdit(collectionContent.node)
-                            ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
-                            : []
-                    "
-              [hasHeading]="false"
-              [viewType]="viewTypeNodes"
-              [dragDrop]="true"
-              [hasIcon]="true"
-              [orderElements]="sortReferences?.customActive"
-              [orderElementsActive]="sortReferences?.customActive"
+            <app-node-entries-wrapper
+              #listReferences
+              [dataSource]="dataSourceReferences"
               [columns]="referencesColumns"
-              [mainNav]="mainNavRef"
-              [actionbar]="actionbarReferences"
-              [scope]="SCOPES.CollectionsReferences"
-              [isClickable]="true"
-              [hasCheckbox]="!sortReferences?.customActive && !reurl"
-              [canDrop]="canDropOnRef"
-              (clickRow)="onContentClick($event.node)"
-              (onRequestRefresh)="refreshContent()"
-              [canDelete]="canDelete"
-              (onDelete)="deleteReference($event)"
-              [createLink]="true"
-              [nodes]="$any(collectionContent.references)"
-              (nodesChange)="collectionContent.references = $any($event)"
-              [isLoading]="collectionContent.referencesLoading"
-              [hasMore]="
-                        collectionContent.references.length <
-                        collectionContent.referencesPagination.total
-                    "
-              (loadMore)="loadMoreReferences()"
-              class="no-padding"
-            ></app-custom-node-list-wrapper>
-
+              [globalOptions]="
+                      isUserAllowedToEdit(collectionContent.node)
+                          ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
+                          : []
+                  "
+            >
+            </app-node-entries-wrapper>
+            <!--
+          <app-custom-node-list-wrapper
+        #listReferences
+            [parent]="collectionContent.node"
+            [optionItems]="
+                      isUserAllowedToEdit(collectionContent.node)
+                          ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
+                          : []
+                  "
+            [hasHeading]="false"
+            [viewType]="viewTypeNodes"
+            [dragDrop]="true"
+            [hasIcon]="true"
+            [orderElements]="sortReferences?.customActive"
+            [orderElementsActive]="sortReferences?.customActive"
+            [columns]="referencesColumns"
+            [mainNav]="mainNavRef"
+            [actionbar]="actionbarReferences"
+            [scope]="SCOPES.CollectionsReferences"
+            [isClickable]="true"
+            [hasCheckbox]="!sortReferences?.customActive && !reurl"
+            [canDrop]="canDropOnRef"
+            (clickRow)="onContentClick($event.node)"
+            (onRequestRefresh)="refreshContent()"
+            [canDelete]="canDelete"
+            (onDelete)="deleteReference($event)"
+            [createLink]="true"
+            [nodes]="$any(collectionContent.references)"
+            (nodesChange)="collectionContent.references = $any($event)"
+            [isLoading]="collectionContent.referencesLoading"
+            [hasMore]="
+                      collectionContent.references.length <
+                      collectionContent.referencesPagination.total
+                  "
+            (loadMore)="loadMoreReferences()"
+            class="no-padding"
+          ></app-custom-node-list-wrapper>
+          -->
             <!-- NO CONTENT NOTICE -->
             <div
-              *ngIf="
-                        collectionContent.references.length === 0 &&
-                            (dataSourceCollections.isEmpty())
-                    "
+              *ngIf="dataSourceReferences.isEmpty() &&
+              dataSourceCollections.isEmpty()"
               class="section-headline collection-nocontent-container"
             >
               <div class="collection-nocontent-big">
@@ -419,16 +424,6 @@
               >
                 {{ 'collections_howToAddContent' | translate }}
               </div>
-            </div>
-          </section>
-
-          <section
-            class="collections-cards-div"
-            *ngIf="!isLoading && isReady && !isRootLevelCollection()"
-            style="padding-bottom: 10px;"
-          >
-            <div *ngIf="collectionContent.references.length > 0" style="padding-top:8px;">
-              &nbsp;
             </div>
           </section>
         </div>
@@ -463,11 +458,10 @@
   >
     {{ ('NODE.' + sortInfo.name) | translate}}
     <i *ngIf="sortInfo.name !== 'ccm:collection_ordered_position'"
-      [icon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
+       [icon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
   </button>
   <sort-dropdown
     #sortDropdown
-    trigger=""
     [columns]="columns"
     [sortBy]="sortInfo.name"
     [sortAscending]="sortInfo.ascending"

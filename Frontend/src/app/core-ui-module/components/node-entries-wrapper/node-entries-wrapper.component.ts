@@ -1,21 +1,31 @@
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper.service';
+import {OptionsHelperService} from '../../options-helper.service';
 import {
-    AfterViewInit,
     Component,
-    ComponentFactoryResolver, ComponentRef, ContentChild, ElementRef, EventEmitter, Input, NgZone,
+    ComponentFactoryResolver,
+    ComponentRef,
+    ContentChild,
+    ElementRef,
+    EventEmitter,
+    Input,
+    NgZone,
     OnChanges,
     SimpleChange,
-    SimpleChanges, TemplateRef, Type, ViewContainerRef
+    TemplateRef,
+    Type,
+    ViewContainerRef
 } from '@angular/core';
 import {NodeEntriesService} from '../../node-entries.service';
 import {TemporaryStorageService} from '../../../core-module/rest/services/temporary-storage.service';
-import {ListTableComponent} from '../list-table/list-table.component';
 import {UIHelper} from '../../ui-helper';
 import {NodeEntriesComponent} from '../node-entries/node-entries.component';
-import {DataSource} from '@angular/cdk/collections';
 import {NodeDataSource} from './node-data-source';
 import {Node} from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
+import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
+import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {MainNavService} from '../../../common/services/main-nav.service';
+import {SelectionModel} from '@angular/cdk/collections';
+
 export enum NodeEntriesDisplayType {
     Table,
     Grid,
@@ -25,6 +35,33 @@ export enum InteractionType {
     DefaultActionLink,
     Emitter,
     None
+}
+export type ListOptions = { [key in Target]?: OptionItem[]};
+export type ListOptionsConfig = {
+    scope: Scope,
+    actionbar: ActionbarComponent,
+    parent?: Node,
+    customOptions?: CustomOptions,
+};
+export interface ListEventInterface<T extends Node> {
+    updateNodes(nodes: void | T[]): void;
+
+    getDisplayType(): NodeEntriesDisplayType;
+
+    setDisplayType(displayType: NodeEntriesDisplayType): void;
+
+    showReorderColumnsDialog(): void;
+
+    addVirtualNodes(virtual: T[]): void;
+
+    setOptions(options: ListOptions): void;
+
+    /**
+     * activate option (dropdown) generation
+     */
+    initOptionsGenerator(actionbar: ListOptionsConfig): void|Promise<void>;
+
+    getSelection(): SelectionModel<T>;
 }
 @Component({
     selector: 'app-node-entries-wrapper',
@@ -36,14 +73,16 @@ export enum InteractionType {
         NodeEntriesService,
     ]
 })
-export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges {
+export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, ListEventInterface<T> {
     @ContentChild('empty') emptyRef: TemplateRef<any>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
+    @Input() globalOptions: OptionItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
     private componentRef: ComponentRef<any>;
     public customNodeListComponent: Type<NodeEntriesComponent<T>>;
+    private options: ListOptions;
 
     constructor(
         private temporaryStorageService: TemporaryStorageService,
@@ -51,6 +90,8 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges {
         private viewContainerRef: ViewContainerRef,
         private ngZone: NgZone,
         private entriesService: NodeEntriesService<T>,
+        private optionsHelper: OptionsHelperService,
+        private mainNav: MainNavService,
         private elementRef: ElementRef,
     ) {
         // regulary re-bind template since it might have updated without ngChanges trigger
@@ -59,16 +100,25 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges {
             setInterval(() => this.componentRef.instance.emptyRef = this.emptyRef)
         );
         */
+        this.entriesService.selection.changed.subscribe(
+            () => {
+                this.optionsHelper.getData().selectedObjects = this.entriesService.selection.selected;
+                this.optionsHelper.getData().activeObjects = this.entriesService.selection.selected;
+                this.optionsHelper.refreshComponents();
+            }
+        );
+
     }
-    ngOnChanges(changes: { [key: string]: SimpleChange }) {
+    ngOnChanges(changes: { [key: string]: SimpleChange } = {}) {
         if (!this.componentRef) {
             this.init();
         }
-        console.log(this.columns);
         this.entriesService.dataSource = this.dataSource;
         this.entriesService.columns = this.columns;
         this.entriesService.displayType = this.displayType;
         this.entriesService.elementInteractionType = this.elementInteractionType;
+        this.entriesService.options = this.options;
+        this.entriesService.globalOptions = this.globalOptions;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();
@@ -107,4 +157,47 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges {
         }
         return outputBindings;
     }
+
+    getDisplayType(): NodeEntriesDisplayType {
+        return this.displayType;
+    }
+
+    setDisplayType(displayType: NodeEntriesDisplayType): void {
+        this.displayType = displayType;
+        this.ngOnChanges();
+    }
+
+    updateNodes(nodes: void | T[]): void {
+        // @TODO
+    }
+
+    showReorderColumnsDialog(): void {
+    }
+
+    addVirtualNodes(virtual: T[]): void {
+    }
+
+    setOptions(options: ListOptions): void {
+        this.options = options;
+        this.ngOnChanges();
+    }
+
+    getSelection() {
+        return this.entriesService.selection;
+    }
+
+    async initOptionsGenerator(config: ListOptionsConfig) {
+        console.log('init', config, this.mainNav.getMainNav());
+        await this.optionsHelper.initComponents(this.mainNav.getMainNav(), config.actionbar, this);
+        this.optionsHelper.setData({
+            scope: config.scope,
+            activeObjects: this.entriesService.selection.selected,
+            selectedObjects: this.entriesService.selection.selected,
+            allObjects: this.dataSource.getData(),
+            parent: config.parent,
+            customOptions: config.customOptions,
+        });
+        this.optionsHelper.refreshComponents();
+    }
 }
+

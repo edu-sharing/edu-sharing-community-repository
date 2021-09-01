@@ -22,6 +22,7 @@ import { ListTableComponent } from '../list-table/list-table.component';
                 [state]="getState()"
                 [queryParams]="get('queryParams')"
                 queryParamsHandling="merge"
+                cdkMonitorElementFocus
                 [attr.aria-label]="ariaLabel ? listTable?.getPrimaryTitle(node) || node.name : null"
                 [attr.aria-describedby]="ariaDescribedby"
             >

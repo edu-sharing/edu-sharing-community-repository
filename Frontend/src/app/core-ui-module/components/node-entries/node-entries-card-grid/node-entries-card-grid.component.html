@@ -1,7 +1,26 @@
 <ul class="card-grid">
+  <li *ngIf="entriesService.globalOptions"
+      class="global-options"
+  >
+    <button
+      mat-button
+      *ngFor="let option of entriesService.globalOptions"
+      (click)="option.callback()"
+      class="global-option-btn">
+      <ng-container
+        *ngTemplateOutlet="globalOption; context: {option}"
+      ></ng-container>
+    </button>
+  </li>
   <app-node-entries-card
     *ngFor="let node of (entriesService.dataSource?.connect() | async)"
     [node]="node"
     role="listitem"
   ></app-node-entries-card>
 </ul>
+<ng-template #globalOption let-option="option">
+  <div class="global-option">
+  <i [icon]="option.icon"></i>
+  <label>{{option.name | translate}}</label>
+  </div>
+</ng-template>

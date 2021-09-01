@@ -1,4 +1,4 @@
-<ng-container *ngIf="(entriesService.dataSource.isEmpty() | async)">
+<ng-container *ngIf="entriesService.dataSource.isEmpty()">
   <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
 </ng-container>
 <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">

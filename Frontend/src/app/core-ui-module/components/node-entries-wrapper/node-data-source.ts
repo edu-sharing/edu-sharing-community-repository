@@ -1,9 +1,9 @@
 import {DataSource} from '@angular/cdk/collections';
-import {Observable, ReplaySubject} from 'rxjs';
+import {BehaviorSubject, Observable, ReplaySubject} from 'rxjs';
 import {Node, Pagination} from '../../../core-module/rest/data-object';
 
 export class NodeDataSource<T extends Node> extends DataSource<T> {
-    private dataStream = new ReplaySubject<T[]>();
+    private dataStream = new BehaviorSubject<T[]>([]);
     private pagination: Pagination;
     public isLoading: boolean;
 
@@ -41,11 +41,11 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
         return this.pagination?.total < (await this.dataStream.asObservable().toPromise()).length;
     }
 
-    async getData() {
-        return this.dataStream.asObservable().toPromise();
+    getData() {
+        return this.dataStream.value;
     }
 
-    async isEmpty(): Promise<boolean> {
-        return (await this.getData())?.length === 0;
+    isEmpty(): boolean {
+        return this.getData()?.length === 0;
     }
 }
