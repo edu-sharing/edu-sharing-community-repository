@@ -158,6 +158,8 @@ import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
+import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
@@ -1004,6 +1006,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		// performance must be done in getPropertiesCached)
 		// but we need to set the ticket when it's an alfresco generated preview
 		// logger.info("setting Preview");
+		String[] aspects = getAspects(nodeRef);
 		if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
 			String renderServiceUrlPreview = URLTool.getRenderServiceURL(nodeRef.getId(), true);
 			if (renderServiceUrlPreview == null) {
@@ -1022,7 +1025,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			 * for Collections Ref Objects return original nodeid
 			 * @TODO its a association so it could be multivalue
 			 */
-			if(Arrays.asList(getAspects(nodeRef)).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+			if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
 				AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 
 					@Override
@@ -1136,8 +1139,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 
-		logger.debug("returning");
-		return propsCopy;
+		return (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
+				beforeCacheProperties(PropertiesInterceptor.getPropertiesContext(nodeRef,propsCopy,
+						Arrays.asList(aspects)));
 	}
 
 	/**
@@ -1356,10 +1360,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 			if (mdate != null) {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
+				properties = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
+						beforeCacheProperties(PropertiesInterceptor.getPropertiesContext(nodeRef,properties,
+								service.getAspects(nodeRef).stream().map(q -> q.toString()).collect(Collectors.toList())));
 				repCache.put(nodeRef.getId(), properties);
 			}
 		}
-
 		return properties;
 	}
 
@@ -1821,9 +1827,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	 * @param properties
 	 * @return
 	 */
-	public String createNode(StoreRef store, String parentID, String nodeTypeString, HashMap<String, Object> _props) {
+	public String createNode(StoreRef store, String parentID, String nodeType, HashMap<String, Object> properties) {
 
-		return this.createNode(store, parentID, nodeTypeString, CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
+		return this.createNode(store, parentID, nodeType, CCConstants.CM_ASSOC_FOLDER_CONTAINS, properties);
 	}
 
 	@Override
@@ -2274,7 +2280,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	/**
 	 * returns target Assocs NodeIds
 	 * 
-	 * @param nodeID
+	 * @param nodeRef
 	 * @param association
 	 * @return
 	 */
@@ -3150,7 +3156,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	 * and the basket will just get removed from the favorite folder
 	 * 
 	 * @param basketID
-	 * @param authenticationInfo
 	 * @return
 	 * @throws org.apache.axis.AxisFault
 	 * @throws RemoteException
