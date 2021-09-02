@@ -83,7 +83,7 @@ public interface PropertiesInterceptor {
         String requestURI = Context.getCurrentInstance().getRequest().getRequestURI();
         if(requestURI.contains("rest/search")){
             propertiesContext.setSource(PropertiesCallSource.Search);
-        }else if(requestURI.contains("rest/rendering")){
+        }else if(requestURI.contains("components/render") || requestURI.contains("rest/rendering")){
             propertiesContext.setSource(PropertiesCallSource.Render);
         }else{
             propertiesContext.setSource(PropertiesCallSource.Workspace);
