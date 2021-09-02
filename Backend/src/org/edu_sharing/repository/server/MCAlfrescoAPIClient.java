@@ -1140,7 +1140,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 
 		return (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-				beforeCacheProperties(PropertiesInterceptor.getPropertiesContext(nodeRef,propsCopy,
+				beforeDeliverProperties(PropertiesInterceptor.getPropertiesContext(nodeRef,propsCopy,
 						Arrays.asList(aspects)));
 	}
 
