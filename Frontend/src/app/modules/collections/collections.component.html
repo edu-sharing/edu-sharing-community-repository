@@ -275,7 +275,7 @@
                 sortCollections &&
                 !isMobile() &&
                 !dataSourceCollections.isEmpty() &&
-                !sortReferences?.customActive
+                !sortReferences?.userModifyActive
               ">
                 <ng-container *ngTemplateOutlet="sortTool; context: {
                 columns: sortCollectionColumns,
@@ -343,17 +343,6 @@
               <h2 class="mat-heading-3">
                 {{ 'collections_content' | translate }}
               </h2>
-              <ng-container *ngIf="!isMobile() &&
-                          dataSourceReferences.getData()?.length > 1 &&
-                          isUserAllowedToEdit(collectionContent.node) &&
-                          !sortCollections?.customActive">
-                <ng-container *ngTemplateOutlet="sortTool; context: {
-                sortInfo: sortReferences,
-                columns: sortReferencesColumns,
-                callback: referenceSortEmitter,
-                toggleCallback: referenceCustomSortEmitter }">
-                </ng-container>
-              </ng-container>
               <actionbar
                 #actionbarReferences
                 class="actionbarMaterials"
@@ -364,6 +353,15 @@
               #listReferences
               [dataSource]="dataSourceReferences"
               [columns]="referencesColumns"
+              [sort]="{
+                active: sortReferences.active,
+                direction: sortReferences.direction,
+                userModifyActive: sortReferences.userModifyActive,
+                columns: sortReferences.columns,
+                allowed: !isMobile() && dataSourceReferences.getData()?.length > 1 &&
+                          isUserAllowedToEdit(collectionContent.node) && !sortCollections?.userModifyActive
+              }"
+              (sortChange)="setReferenceSort($event)"
               [globalOptions]="
                       isUserAllowedToEdit(collectionContent.node)
                           ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]

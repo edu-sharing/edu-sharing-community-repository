@@ -197,4 +197,11 @@ $topBarHeight: 40px;
             }
         }
     }
+        .grid-card-collection app-node-url {
+            a.cdk-keyboard-focused .card-meta{
+                // @TDOO: better focus visibility is required
+                background-color: #fff;
+            }
+        }
+    }
 }

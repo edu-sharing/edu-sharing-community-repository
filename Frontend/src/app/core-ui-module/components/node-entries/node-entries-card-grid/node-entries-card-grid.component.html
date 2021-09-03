@@ -1,4 +1,38 @@
-<ul class="card-grid">
+<div *ngIf="entriesService.sort?.allowed">
+  <mat-slide-toggle *ngIf="entriesService.sort.active === 'ccm:collection_ordered_position'"
+                    [(ngModel)]="entriesService.sort.userModifyActive"
+                    (ngModelChange)="entriesService.sortChange.emit(entriesService.sort)"
+  >
+    {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
+  </mat-slide-toggle>
+  <button *ngIf="sortDropdown.menu"
+          [matMenuTriggerFor]="sortDropdown.menu"
+          mat-button
+          color="primary"
+  >
+    {{ ('NODE.' + entriesService.sort.active) | translate}}
+    <i *ngIf="entriesService.sort.active !== 'ccm:collection_ordered_position'"
+       [icon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"></i>
+  </button>
+  <sort-dropdown
+    #sortDropdown
+    [columns]="entriesService.sort.columns"
+    [sortBy]="entriesService.sort.active"
+    [sortAscending]="entriesService.sort.direction === 'asc'"
+    (onSort)="changeSort($event)"
+  ></sort-dropdown>
+</div>
+<ul *ngIf="entriesService.sort?.userModifyActive"
+    class="card-grid card-grid-reorder"
+>
+  <ng-container *ngTemplateOutlet="list"></ng-container>
+</ul>
+<ul *ngIf="!entriesService.sort?.userModifyActive"
+    class="card-grid"
+>
+  <ng-container *ngTemplateOutlet="list"></ng-container>
+</ul>
+<ng-template #list>
   <li *ngIf="entriesService.globalOptions"
       class="global-options"
   >
@@ -16,11 +50,13 @@
     *ngFor="let node of (entriesService.dataSource?.connect() | async)"
     [node]="node"
     role="listitem"
+    cdkDrag
   ></app-node-entries-card>
-</ul>
+</ng-template>
+
 <ng-template #globalOption let-option="option">
   <div class="global-option">
-  <i [icon]="option.icon"></i>
-  <label>{{option.name | translate}}</label>
+    <i [icon]="option.icon"></i>
+    <label>{{option.name | translate}}</label>
   </div>
 </ng-template>

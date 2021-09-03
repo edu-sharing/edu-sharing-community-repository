@@ -8,7 +8,7 @@ import {
     EventEmitter,
     Input,
     NgZone,
-    OnChanges,
+    OnChanges, Output,
     SimpleChange,
     TemplateRef,
     Type,
@@ -19,12 +19,14 @@ import {TemporaryStorageService} from '../../../core-module/rest/services/tempor
 import {UIHelper} from '../../ui-helper';
 import {NodeEntriesComponent} from '../node-entries/node-entries.component';
 import {NodeDataSource} from './node-data-source';
-import {Node} from '../../../core-module/rest/data-object';
+import {List, Node, SortColumn} from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
 import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavService} from '../../../common/services/main-nav.service';
 import {SelectionModel} from '@angular/cdk/collections';
+import {Sort} from '@angular/material/sort';
+import {ListItemSort} from '../sort-dropdown/sort-dropdown.component';
 
 export enum NodeEntriesDisplayType {
     Table,
@@ -43,6 +45,11 @@ export type ListOptionsConfig = {
     parent?: Node,
     customOptions?: CustomOptions,
 };
+export interface ListSortConfig extends Sort {
+    columns: ListItemSort[];
+    allowed?: boolean;
+    userModifyActive?: boolean;
+}
 export interface ListEventInterface<T extends Node> {
     updateNodes(nodes: void | T[]): void;
 
@@ -80,6 +87,8 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     @Input() globalOptions: OptionItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
+    @Input() sort: ListSortConfig;
+    @Output() sortChange = new EventEmitter<ListSortConfig>();
     private componentRef: ComponentRef<any>;
     public customNodeListComponent: Type<NodeEntriesComponent<T>>;
     private options: ListOptions;
@@ -119,6 +128,8 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.options = this.options;
         this.entriesService.globalOptions = this.globalOptions;
+        this.entriesService.sort = this.sort;
+        this.entriesService.sortChange = this.sortChange;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();

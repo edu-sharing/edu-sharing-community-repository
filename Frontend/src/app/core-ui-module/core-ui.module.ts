@@ -88,6 +88,8 @@ import {NodeEntriesCardComponent} from './components/node-entries/node-entries-c
 import {NodeImagePipe} from './pipes/node-image.pipe';
 import {NodeTitlePipe} from './pipes/node-title.pipe';
 import {OptionButtonComponent} from './components/option-button/option-button.component';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {NodeEntriesDragDirective} from './directives/node-entries-drag';
 
 @NgModule({
     declarations: [
@@ -101,6 +103,7 @@ import {OptionButtonComponent} from './components/option-button/option-button.co
         ListNodeWorkflowComponent,
         ListTextComponent,
         ListCountsComponent,
+        NodeEntriesDragDirective,
         DropdownComponent,
         SortDropdownComponent,
         IconDirective,
@@ -184,6 +187,7 @@ import {OptionButtonComponent} from './components/option-button/option-button.co
                 useClass: FallbackTranslationHandler,
             },
         }),
+        MatSlideToggleModule,
     ],
     providers: [
         Toast,

@@ -20,6 +20,7 @@
       </ng-container>
       <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
         <img
+          alt=""
           [src]="node.iconURL"
           [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
         >
@@ -96,7 +97,7 @@
       class="card-meta-row"
     >
       <label *ngIf="!first">{{
-        ((displayPart.type === 'NODE_PROPOSAL' ? 'NODE_PROPOSAL' : 'NODE') + '.' + displayPart.name) | translate
+        ((displayPart.type === 'NODE_PROPOSAL' ? 'NODE_PROPOSAL' : 'NODE') + '.' + displayPart.name) | translate:{fallback: ''}
         }}</label>
       <app-list-base
         [item]="displayPart"
