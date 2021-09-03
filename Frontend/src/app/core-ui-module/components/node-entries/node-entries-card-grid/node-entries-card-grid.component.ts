@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
+import {SortEvent} from '../../sort-dropdown/sort-dropdown.component';
 
 @Component({
     selector: 'app-node-entries-card-grid',
@@ -24,5 +25,11 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
+    }
+
+    changeSort(sort: SortEvent) {
+        this.entriesService.sort.active = sort.name;
+        this.entriesService.sort.direction = sort.ascending ? 'asc' : 'desc';
+        this.entriesService.sortChange.emit(this.entriesService.sort);
     }
 }
