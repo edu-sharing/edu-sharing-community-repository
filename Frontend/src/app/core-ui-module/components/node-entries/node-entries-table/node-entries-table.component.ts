@@ -54,12 +54,13 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
 
     ngAfterViewInit(): void {
         Promise.resolve().then(() => {
-            this.registerNavigation();
             this.ready = true;
+            this.registerSortChanges();
         });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
+        this.updateSort();
     }
 
 
@@ -70,7 +71,22 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
         }
     }
 
-    private registerNavigation(): void {
+    private updateSort(): void {
+        console.log(this.entriesService.sort);
+        this.sort.sort({
+            id: this.entriesService.sort?.active,
+            start: (this.entriesService.sort?.direction as 'asc'|'desc'),
+            disableClear: false
+        });
+        // Fix missing sorting indicators. See
+        // https://github.com/angular/components/issues/10242#issuecomment-470726829. Seems
+        // to be fixed upstream with Angular 11.
+        (
+            this.sort.sortables.get(this.entriesService.sort?.active) as MatSortHeader
+        )._setAnimationTransitionState({
+            toState: 'active',
+        });
+        /*
         this.route.queryParams.pipe(first()).subscribe((queryParams: Params) => {
             const sort: Sort = queryParams.sort ? JSON.parse(queryParams.sort) : null;
             if (sort && sort.direction) {
@@ -89,31 +105,7 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
                 this.paginator.pageSize = queryParams.pageSize;
             }
         });
-        this.sort.sortChange.subscribe((sort: Sort) => {
-            console.log('sortChange', sort);
-            this.router.navigate(['.'], {
-                relativeTo: this.route,
-                queryParams: { sort: JSON.stringify(sort) },
-                queryParamsHandling: 'merge',
-                replaceUrl: true,
-            });
-        });
-        this.paginator.page
-            .pipe(
-                // As a response to changes of other parameters, the pageIndex might be reset to 0 and a
-                // page event triggers. This change of other parameters is likely to cause a
-                // `router.navigate()` call elsewhere. When this happens just before our call, our
-                // updates are ignored. To shield against this, we wait a tick.
-                delay(0),
-            )
-            .subscribe(({ pageIndex, pageSize }: PageEvent) => {
-                this.router.navigate(['.'], {
-                    relativeTo: this.route,
-                    queryParams: { pageIndex, pageSize },
-                    queryParamsHandling: 'merge',
-                    replaceUrl: true,
-                });
-            });
+         */
     }
     getVisibleColumns() {
         return ['select', 'icon'].concat(
@@ -135,5 +127,35 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
             this.entriesService.selection.clear();
         }
 
+    }
+
+    private registerSortChanges() {
+        this.sort.sortChange.subscribe((sort: Sort) => {
+            this.entriesService.sort.active = sort.active;
+            this.entriesService.sort.direction = sort.direction;
+            this.entriesService.sortChange.emit(this.entriesService.sort);
+            /*this.router.navigate(['.'], {
+                relativeTo: this.route,
+                queryParams: { sort: JSON.stringify(sort) },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });*/
+        });
+        this.paginator.page
+            .pipe(
+                // As a response to changes of other parameters, the pageIndex might be reset to 0 and a
+                // page event triggers. This change of other parameters is likely to cause a
+                // `router.navigate()` call elsewhere. When this happens just before our call, our
+                // updates are ignored. To shield against this, we wait a tick.
+                delay(0),
+            )
+            .subscribe(({ pageIndex, pageSize }: PageEvent) => {
+                this.router.navigate(['.'], {
+                    relativeTo: this.route,
+                    queryParams: { pageIndex, pageSize },
+                    queryParamsHandling: 'merge',
+                    replaceUrl: true,
+                });
+            });
     }
 }
