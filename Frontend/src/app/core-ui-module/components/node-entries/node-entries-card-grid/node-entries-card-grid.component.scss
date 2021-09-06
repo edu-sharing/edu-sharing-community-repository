@@ -1,11 +1,29 @@
 @import '../../../styles/variables';
 
+.order-panel {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     grid-column-gap: 20px;
     grid-row-gap: 20px;
     grid-template-rows: auto;
+
+    &.card-grid-reorder {
+        > .card-grid-order-wrapper {
+            &.cdk-drop-list-dragging {
+                opacity: 0.75;
+                outline: 3px solid $primary;
+                > app-node-entries-card:last-child {
+                    display: none;
+                }
+
+            }
+        }
+    }
     > li.global-options {
         display: grid;
         grid-template-columns: auto;

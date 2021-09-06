@@ -290,6 +290,7 @@
             <app-node-entries-wrapper
               [dataSource]="dataSourceCollections"
               [columns]="collectionsColumns"
+              [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
             >
               <ng-template #empty>
                 <div

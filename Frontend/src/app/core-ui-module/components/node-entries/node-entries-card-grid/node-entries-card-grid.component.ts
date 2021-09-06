@@ -10,6 +10,8 @@ import {
 import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {SortEvent} from '../../sort-dropdown/sort-dropdown.component';
+import {$e} from 'codelyzer/angular/styles/chars';
+import {CdkDragDrop, CdkDragEnter, moveItemInArray} from '@angular/cdk/drag-drop';
 
 @Component({
     selector: 'app-node-entries-card-grid',
@@ -31,5 +33,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         this.entriesService.sort.active = sort.name;
         this.entriesService.sort.direction = sort.ascending ? 'asc' : 'desc';
         this.entriesService.sortChange.emit(this.entriesService.sort);
+    }
+
+    reorder(drag: CdkDragDrop<number>) {
+        moveItemInArray(this.entriesService.dataSource.getData(), drag.previousContainer.data, drag.container.data);
+
     }
 }

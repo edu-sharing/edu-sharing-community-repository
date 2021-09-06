@@ -71,8 +71,8 @@ $topBarHeight: 40px;
             }
         }
         .card-top-bar-empty {
-           width: 0;
-           flex-grow: 1;
+            width: 0;
+            flex-grow: 1;
         }
 
     }
@@ -197,11 +197,11 @@ $topBarHeight: 40px;
             }
         }
     }
-        .grid-card-collection app-node-url {
-            a.cdk-keyboard-focused .card-meta{
-                // @TDOO: better focus visibility is required
-                background-color: #fff;
-            }
+    .grid-card-collection app-node-url {
+        a.cdk-keyboard-focused .card-meta{
+            // @TDOO: better focus visibility is required
+            background-color: #fff;
         }
     }
 }
+
