@@ -1,4 +1,18 @@
+@use 'sass:math';
 @import '../../../styles/variables';
+
+
+@keyframes OrderAnimationCards {
+    0% {
+        transform: rotate(-0.25deg);
+    }
+    50% {
+        transform: rotate(0.25deg);
+    }
+    100% {
+        transform: rotate(-0.25deg);
+    }
+}
 
 .order-panel {
     display: flex;
@@ -14,10 +28,26 @@
 
     &.card-grid-reorder {
         > .card-grid-order-wrapper {
+            $orderAnimationTime: 0.5s;
+            animation-iteration-count: infinite;
+            animation-duration: $orderAnimationTime;
+            animation-name: OrderAnimationCards;
+            &:nth-of-type(2n) {
+                animation-delay: 0s;
+            }
+            &:nth-of-type(2n + 1) {
+                animation-delay: math.div(-$orderAnimationTime, 2);
+            }
+            &:nth-of-type(3n) {
+                animation-delay: math.div(-$orderAnimationTime, 4);
+            }
+            &:nth-of-type(5n) {
+                animation-delay: math.div(-$orderAnimationTime, 8);
+            }
             &.cdk-drop-list-dragging {
                 opacity: 0.75;
                 outline: 3px solid $primary;
-                > app-node-entries-card:last-child {
+                > *:last-child {
                     display: none;
                 }
 
@@ -27,10 +57,13 @@
     > li.global-options {
         display: grid;
         grid-template-columns: auto;
-        grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
+        grid-template-rows: repeat(auto-fit, minmax(70px, 1fr));
         grid-row-gap: 20px;
         height: 100%;
         min-height: 250px;
+        &.global-options-small {
+            min-height: 130px;
+        }
         .global-option-btn {
             display: flex;
             height: 100%;

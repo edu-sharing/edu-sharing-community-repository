@@ -270,27 +270,24 @@
                   'COLLECTION.INFO_REFERENCES_MULTI' | translate
                   }}</ng-container>
               </h2>
-              <ng-container *ngIf="
-                isAllowedToEditCollection() &&
-                sortCollections &&
-                !isMobile() &&
-                !dataSourceCollections.isEmpty() &&
-                !sortReferences?.userModifyActive
-              ">
-                <ng-container *ngTemplateOutlet="sortTool; context: {
-                columns: sortCollectionColumns,
-                sortInfo: sortCollections,
-                callback: collectionSortEmitter,
-                toggleCallback: collectionCustomSortEmitter }">
-                </ng-container>
-              </ng-container>
             </div>
 
             <!-- COLLECTION CARDS -->
             <app-node-entries-wrapper
               [dataSource]="dataSourceCollections"
               [columns]="collectionsColumns"
+              [displayType]="NodeEntriesDisplayType.SmallGrid"
               [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
+              [sort]="{
+                active: sortCollections.active,
+                direction: sortCollections.direction,
+                userModifyActive: sortCollections.userModifyActive,
+                columns: sortCollections.columns,
+                allowed: !isMobile() && dataSourceCollections.getData()?.length > 1 &&
+                          isUserAllowedToEdit(collectionContent.node) && !sortReferences?.userModifyActive
+              }"
+              (sortChange)="setCollectionSort($event)"
+
             >
               <ng-template #empty>
                 <div
@@ -354,6 +351,7 @@
               #listReferences
               [dataSource]="dataSourceReferences"
               [columns]="referencesColumns"
+              [displayType]="NodeEntriesDisplayType.Grid"
               [sort]="{
                 active: sortReferences.active,
                 direction: sortReferences.direction,

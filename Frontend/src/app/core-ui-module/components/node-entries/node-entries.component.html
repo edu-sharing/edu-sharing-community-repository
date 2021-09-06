@@ -4,6 +4,9 @@
 <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">
   Table
 </ng-container>
+<ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.SmallGrid">
+  <app-node-entries-card-grid [displayType]="entriesService.displayType"></app-node-entries-card-grid>
+</ng-container>
 <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Grid">
-  <app-node-entries-card-grid></app-node-entries-card-grid>
+  <app-node-entries-card-grid [displayType]="entriesService.displayType"></app-node-entries-card-grid>
 </ng-container>

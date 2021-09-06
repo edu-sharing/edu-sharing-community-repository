@@ -1,5 +1,6 @@
 <mat-menu #menu="matMenu" class="sort-dropdown-menu">
   <div class="collection-item-title">{{ 'SORT_BY' | translate }}</div>
+  {{columns.length}}
   <button
     *ngFor="let item of columns"
     mat-menu-item

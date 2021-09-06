@@ -90,6 +90,7 @@ import {NodeTitlePipe} from './pipes/node-title.pipe';
 import {OptionButtonComponent} from './components/option-button/option-button.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {NodeEntriesDragDirective} from './directives/node-entries-drag';
+import {NodeEntriesCardSmallComponent} from './components/node-entries/node-entries-card-small/node-entries-card-small.component';
 
 @NgModule({
     declarations: [
@@ -154,6 +155,7 @@ import {NodeEntriesDragDirective} from './directives/node-entries-drag';
         NodeEntriesComponent,
         NodeEntriesCardGridComponent,
         NodeEntriesCardComponent,
+        NodeEntriesCardSmallComponent
     ],
     imports: [
         A11yModule,

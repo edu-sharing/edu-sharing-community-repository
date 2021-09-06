@@ -36,10 +36,17 @@
     (cdkDropListDropped)="reorder($event)"
   >
     <app-node-entries-card
+      *ngIf="displayType === NodeEntriesDisplayType.Grid"
       [node]="node"
       role="listitem"
       cdkDrag
     ></app-node-entries-card>
+    <app-node-entries-card-small
+      *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+      [node]="node"
+      role="listitem"
+      cdkDrag
+    ></app-node-entries-card-small>
   </div>
 </ul>
 <ul *ngIf="!entriesService.sort?.userModifyActive"
@@ -48,8 +55,9 @@
   <ng-container *ngTemplateOutlet="list"></ng-container>
 </ul>
 <ng-template #list>
-  <li *ngIf="entriesService.globalOptions"
+  <li *ngIf="entriesService.globalOptions?.length"
       class="global-options"
+      [class.global-options-small]="displayType === NodeEntriesDisplayType.SmallGrid"
   >
     <button
       mat-button
@@ -61,11 +69,20 @@
       ></ng-container>
     </button>
   </li>
-  <app-node-entries-card
-    *ngFor="let node of (entriesService.dataSource?.connect() | async)"
-    [node]="node"
-    role="listitem"
-  ></app-node-entries-card>
+  <ng-container *ngIf="displayType === NodeEntriesDisplayType.SmallGrid">
+    <app-node-entries-card-small
+      *ngFor="let node of (entriesService.dataSource?.connect() | async)"
+      [node]="node"
+      role="listitem"
+    ></app-node-entries-card-small>
+  </ng-container>
+  <ng-container *ngIf="displayType === NodeEntriesDisplayType.Grid">
+    <app-node-entries-card
+      *ngFor="let node of (entriesService.dataSource?.connect() | async)"
+      [node]="node"
+      role="listitem"
+    ></app-node-entries-card>
+  </ng-container>
   <!--
   <div style="display: flex; flex-wrap: wrap" cdkDropListGroup>
     <mat-card cdkDropList cdkDropListOrientation="horizontal" (cdkDropListEntered)="debug($event)"

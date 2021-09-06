@@ -3,40 +3,6 @@
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
 >
-  <div
-    class="card-top-bar"
-  >
-    <div
-      class="card-top-bar-type"
-    >
-      <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
-        <i
-          matTooltip="{{'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate}}"
-          [icon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"></i>
-      </ng-container>
-      <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
-        <img
-          alt=""
-          [src]="node.iconURL"
-          [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
-        >
-      </ng-container>
-    </div>
-    <div
-      *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned"
-      class="card-top-bar-flag"
-    >
-      <i icon="edu-pin"></i>
-    </div>
-    <div class="card-top-bar-empty"></div>
-    <div class="card-top-bar-checkbox">
-      <mat-checkbox
-        [checked]="entriesService.selection.isSelected(node)"
-        (change)="entriesService.selection.toggle(node)"
-        aria-label="{{ 'SELECT' | translate:{element:(node | nodeTitle)} }}"
-      ></mat-checkbox>
-    </div>
-  </div>
   <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 [node]="node"
   >

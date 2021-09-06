@@ -80,7 +80,7 @@ import {
 import {DataSource} from '@angular/cdk/collections';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {
-    ListEventInterface, ListSortConfig,
+    ListEventInterface, ListSortConfig, NodeEntriesDisplayType,
     NodeEntriesWrapperComponent
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {Sort} from '@angular/material/sort';
@@ -115,6 +115,7 @@ export class CollectionsMainComponent implements AfterViewInit{
     };
     readonly SCOPES = Scope;
     readonly SkipTarget = SkipTarget;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
@@ -191,12 +192,22 @@ export class CollectionsMainComponent implements AfterViewInit{
     ];
     tutorialElement: ElementRef;
     permissions: Permission[];
-    sortCollections: SortInfo;
     sortReferences: ListSortConfig = {
         active: null,
         direction: 'asc',
         columns: [
-            // new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+            // new ListItemSort('NODE', RestConstants.LOM_PROP_TITLE),
+            new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
+            new ListItemSort('NODE', RestConstants.CM_PROP_C_CREATED),
+            new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'ascending'),
+        ]
+    };
+    sortCollections: ListSortConfig = {
+        active: null,
+        direction: 'asc',
+        columns: [
+            new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
+            new ListItemSort('NODE', RestConstants.CM_PROP_C_CREATED),
             new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
             new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'ascending'),
         ]
@@ -736,8 +747,8 @@ export class CollectionsMainComponent implements AfterViewInit{
             CollectionsMainComponent.DEFAULT_REQUEST,
         );
         if(this.sortCollections) {
-            request.sortBy = [this.sortCollections.name];
-            request.sortAscending = [this.sortCollections.ascending];
+            request.sortBy = [this.sortCollections.active];
+            request.sortAscending = [this.sortCollections.direction === 'asc'];
         } else {
             console.warn('Sort for collections is not defined in the mds!');
         }
@@ -954,10 +965,9 @@ export class CollectionsMainComponent implements AfterViewInit{
                     // set the collection and load content data by refresh
                     this.setCollectionId(null);
                     const orderCollections = collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
-                    this.sortCollections = {
-                        name: orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE,
-                        ascending: orderCollections?.[1] === 'true'
-                    };
+                    this.sortCollections.active = orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
+                    this.sortCollections.direction = orderCollections?.[1] === 'true' ? 'asc' : 'desc';
+
                     const refMode = collection.collection.orderMode;
                     const refAscending = collection.collection.orderAscending;
                     // cast old order mode to new parameter
@@ -1328,27 +1338,26 @@ export class CollectionsMainComponent implements AfterViewInit{
             this.mainNavRef.refreshNodeStore();
         });
     }
-    async setCollectionSort(sort: SortEvent) {
-        this.sortCollections.name = (sort.name as any);
-        this.sortCollections.ascending =
-            sort.name === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION ? true : sort.ascending;
+    async setCollectionSort(sort: ListSortConfig) {
+        console.log(sort);
+        this.sortCollections = sort;
         try {
             await this.nodeService.editNodeProperty(
                 this.collectionContent.node.ref.id,
                 RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
-                [this.sortCollections.name, this.sortCollections.ascending + '']
+                [this.sortCollections.active, (this.sortCollections.direction === 'asc') + '']
             ).toPromise();
         } catch (e) {
             this.toast.error(e);
         }
         this.refreshContent();
-        if(sort.name !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
+        if (sort.active !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
             this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
-                type: this.translationService.instant('NODE.' + sort.name),
+                type: this.translationService.instant('NODE.' + sort.active),
             });
         }
-        this.sortCollections.userModifyActive = this.sortCollections.name === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
-        if(this.sortCollections.userModifyActive) {
+        this.sortCollections.userModifyActive = this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        if (this.sortCollections.userModifyActive) {
             this.toggleCollectionsOrder();
         }
     }

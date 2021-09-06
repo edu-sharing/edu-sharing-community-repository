@@ -128,6 +128,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.options = this.options;
         this.entriesService.globalOptions = this.globalOptions;
+        console.log(this.sort);
         this.entriesService.sort = this.sort;
         this.entriesService.sortChange = this.sortChange;
 
