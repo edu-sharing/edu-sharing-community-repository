@@ -1,0 +1,112 @@
+<mat-table [dataSource]="entriesService.dataSource" matSort xmlns="http://www.w3.org/1999/html">
+  <!-- Checkbox Column -->
+  <ng-container matColumnDef="select">
+    <mat-header-cell *matHeaderCellDef>
+      <mat-checkbox
+        [ngModel]="entriesService.selection.selected.length > 0"
+        [indeterminate]="entriesService.selection.selected.length > 0 && entriesService.selection.selected.length !== entriesService.dataSource.getData().length"
+        (ngModelChange)="toggleAll($event)"
+      ></mat-checkbox>
+    </mat-header-cell>
+    <mat-cell *matCellDef="let node">
+      <mat-checkbox
+        [checked]="entriesService.selection.isSelected(node)"
+        (change)="entriesService.selection.toggle(node)"
+        aria-label="{{ 'SELECT' | translate:{element:(node | nodeTitle)} }}"
+      ></mat-checkbox>
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="icon">
+    <mat-header-cell *matHeaderCellDef class="cell-icon">
+    </mat-header-cell>
+    <mat-cell *matCellDef="let node" class="cell-icon">
+      <ng-container *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink">
+        <ng-container
+          *ngTemplateOutlet="icon; context: {node}"
+        ></ng-container>
+      </ng-container>
+      <ng-container *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
+        <ng-container
+          *ngTemplateOutlet="icon; context: {node}"
+          (click)="entriesService.clickItem.emit({element: node, source: ClickSource.Icon})"
+        ></ng-container>
+      </ng-container>
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="actions">
+    <mat-header-cell *matHeaderCellDef>
+    </mat-header-cell>
+    <mat-cell *matCellDef="let node">
+      <dropdown #dropdown [options]="entriesService.options[Target.ListDropdown]"></dropdown>
+      <button mat-icon-button
+              color="primary"
+              (click)="entriesService.selection.clear(); entriesService.selection.select(node)"
+              [matMenuTriggerFor]="dropdown.menu"
+      >
+        <i icon="more_vert" [aria]="true"></i>
+      </button>
+    </mat-cell>
+  </ng-container>
+  <!-- Data Columns -->
+  <ng-container *ngFor="let column of entriesService.columns" [matColumnDef]="column.name">
+    <ng-container *ngIf="entriesService.sort?.allowed && isSortable(column)">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>{{ column | appListItemLabel }}</mat-header-cell>
+    </ng-container>
+    <ng-container *ngIf="!(entriesService.sort?.allowed && isSortable(column))">
+      <mat-header-cell *matHeaderCellDef>{{ column | appListItemLabel }}</mat-header-cell>
+    </ng-container>
+    <mat-cell *matCellDef="let node" #cell>
+      <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+                    [node]="node"
+      >
+        <app-list-text
+          [node]="node"
+          [item]="column"
+          appCheckTextOverflow
+          #text="appCheckTextOverflow"
+          [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
+        ></app-list-text>
+      </app-node-url>
+      <app-list-text
+        *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+        [node]="node"
+        [item]="column"
+        (click)="entriesService.clickItem.emit({element: node, source: ClickSource.Metadata, attribute: column})"
+        appCheckTextOverflow
+        #text="appCheckTextOverflow"
+        [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
+      ></app-list-text>
+    </mat-cell>
+  </ng-container>
+  <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>
+  <mat-row
+    mat-row
+    matRipple
+    class="mat-row"
+    [class.mat-row-selected]="entriesService.selection.isSelected(node)"
+    *matRowDef="let node; columns: getVisibleColumns()"
+    (contextmenu)="onRowContextMenu({ event: $event, node: node })"
+  ></mat-row>
+</mat-table>
+
+<spinner *ngIf="loading | async"></spinner>
+
+<mat-paginator #paginator [pageSizeOptions]="pageSizeOptions"></mat-paginator>
+
+<!-- Wait for 'ready' state to avoid changed-after-checked error when `columnChooserTrigger` becomes
+available. -->
+<app-column-chooser
+  *ngIf="ready"
+  [columns]="entriesService.columns"
+  [(columnChooserVisible)]="columnChooserVisible"
+  [origin]="columnChooserTrigger"
+></app-column-chooser>
+
+<ng-template #icon let-node="node">
+  <div class="icon-bg">
+    <img
+      [src]="node.iconURL"
+      [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
+    >
+  </div>
+</ng-template>

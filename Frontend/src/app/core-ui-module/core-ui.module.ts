@@ -91,6 +91,14 @@ import {OptionButtonComponent} from './components/option-button/option-button.co
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {NodeEntriesDragDirective} from './directives/node-entries-drag';
 import {NodeEntriesCardSmallComponent} from './components/node-entries/node-entries-card-small/node-entries-card-small.component';
+import {NodeEntriesTableComponent} from './components/node-entries/node-entries-table/node-entries-table.component';
+import {MatTableModule} from '@angular/material/table';
+import {ColumnChooserComponent} from './components/node-entries/node-entries-table/column-chooser/column-chooser.component';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {CheckTextOverflowDirective} from './directives/check-text-overflow.directive';
+import {MatSortModule} from '@angular/material/sort';
+import {OverlayModule} from '@angular/cdk/overlay';
+import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
 
 @NgModule({
     declarations: [
@@ -155,7 +163,11 @@ import {NodeEntriesCardSmallComponent} from './components/node-entries/node-entr
         NodeEntriesComponent,
         NodeEntriesCardGridComponent,
         NodeEntriesCardComponent,
-        NodeEntriesCardSmallComponent
+        NodeEntriesCardSmallComponent,
+        NodeEntriesTableComponent,
+        ColumnChooserComponent,
+        CheckTextOverflowDirective,
+        ListItemLabelPipe
     ],
     imports: [
         A11yModule,
@@ -190,6 +202,10 @@ import {NodeEntriesCardSmallComponent} from './components/node-entries/node-entr
             },
         }),
         MatSlideToggleModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        OverlayModule,
     ],
     providers: [
         Toast,
@@ -243,6 +259,7 @@ import {NodeEntriesCardSmallComponent} from './components/node-entries/node-entr
         SafeHtmlPipe,
         ElementRefDirective,
         NodeEntriesWrapperComponent,
+        CheckTextOverflowDirective
     ],
 })
 export class CoreUiModule {}

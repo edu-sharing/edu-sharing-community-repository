@@ -2,7 +2,7 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {Node} from '../core-module/rest/data-object';
 import {NodeDataSource} from './components/node-entries-wrapper/node-data-source';
 import {
-    InteractionType, ListEventInterface, ListOptions, ListSortConfig,
+    InteractionType, ListEventInterface, ListOptions, ListSortConfig, NodeClickEvent,
     NodeEntriesDisplayType, NodeEntriesWrapperComponent
 } from './components/node-entries-wrapper/node-entries-wrapper.component';
 import {ListItem} from '../core-module/ui/list-item';
@@ -21,4 +21,5 @@ export class NodeEntriesService<T extends Node> {
     globalOptions: OptionItem[];
     sort: ListSortConfig;
     sortChange: EventEmitter<ListSortConfig>;
+    clickItem: EventEmitter<NodeClickEvent<T>>;
 }

@@ -34,6 +34,8 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
         if (always.some((o) => o.showCallback(this.node))) {
            return always;
         }
-        return options.filter((o) => o.showAsAction && o.showCallback(this.node)).slice(0, 3);
+        // we do NOT show any additional actions
+        return [];
+        // return options.filter((o) => o.showAsAction && o.showCallback(this.node)).slice(0, 3);
     }
 }

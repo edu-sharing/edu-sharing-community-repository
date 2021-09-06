@@ -93,8 +93,7 @@
       class="card-meta-row"
     >
       <label *ngIf="!first">{{
-        ((displayPart.type === 'NODE_PROPOSAL' ? 'NODE_PROPOSAL' : 'NODE') + '.' + displayPart.name) | translate:{fallback: ''}
-        }}</label>
+        (displayPart | appListItemLabel)}}</label>
       <app-list-base
         [item]="displayPart"
         [node]="node"

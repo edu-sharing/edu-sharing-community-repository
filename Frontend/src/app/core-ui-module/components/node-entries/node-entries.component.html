@@ -2,7 +2,7 @@
   <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
 </ng-container>
 <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">
-  Table
+  <app-node-entries-table></app-node-entries-table>
 </ng-container>
 <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.SmallGrid">
   <app-node-entries-card-grid [displayType]="entriesService.displayType"></app-node-entries-card-grid>

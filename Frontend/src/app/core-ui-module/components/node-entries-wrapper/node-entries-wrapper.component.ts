@@ -50,6 +50,16 @@ export interface ListSortConfig extends Sort {
     allowed?: boolean;
     userModifyActive?: boolean;
 }
+export enum ClickSource {
+    Preview,
+    Icon,
+    Metadata
+}
+export type NodeClickEvent<T extends Node> = {
+    element: Node,
+    source: ClickSource,
+    attribute?: ListItem // only when source === Metadata
+}
 export interface ListEventInterface<T extends Node> {
     updateNodes(nodes: void | T[]): void;
 
@@ -88,6 +98,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     @Input() displayType = NodeEntriesDisplayType.Grid;
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
     @Input() sort: ListSortConfig;
+    @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() sortChange = new EventEmitter<ListSortConfig>();
     private componentRef: ComponentRef<any>;
     public customNodeListComponent: Type<NodeEntriesComponent<T>>;
@@ -131,6 +142,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         console.log(this.sort);
         this.entriesService.sort = this.sort;
         this.entriesService.sortChange = this.sortChange;
+        this.entriesService.clickItem = this.clickItem;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();

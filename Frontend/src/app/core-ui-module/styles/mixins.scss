@@ -18,6 +18,9 @@
 @mixin materialShadow($important: false){
   box-shadow:0 0 5px rgba(0,0,0,0.3) if($important,!important,null);
 }
+@mixin materialShadowSmall($important: false){
+    box-shadow:0 0 3px rgba(0,0,0,0.3) if($important,!important,null);
+}
 @mixin blurImage($blurStrength:25px){
     position: absolute;
     left:-$blurStrength*2;

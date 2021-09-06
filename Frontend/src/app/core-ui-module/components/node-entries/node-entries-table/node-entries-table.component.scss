@@ -1,0 +1,66 @@
+@import '../../../styles/variables';
+
+:host {
+    display: flex;
+    flex-direction: column;
+    ::ng-deep {
+        mat-cell app-node-url a {
+            color: #000;
+        }
+        app-list-text {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: block;
+        }
+    }
+}
+.mat-column-icon {
+    flex: 0 65px;
+    justify-content: center;
+}
+.mat-column-actions {
+    flex: 0 50px;
+}
+.mat-row {
+    &:hover {
+        background-color: $listItemSelectedBackground;
+    }
+    &.mat-row-selected {
+        background: $listItemSelectedBackgroundEffect;
+    }
+}
+.cell-icon {
+    > .icon-bg {
+        width: 30px;
+        height: 30px;
+        padding: 3px;
+        margin: 1px 0;
+        background-color: #fff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        @include materialShadowSmall();
+        > img {
+            width: 18px;
+            height: auto;
+        }
+    }
+}
+
+.mat-row {
+    cursor: pointer;
+}
+
+.mat-column-select {
+    flex: 0 54px;
+}
+
+.mat-column-link {
+    flex: 0 60px;
+    a {
+        display: flex;
+        justify-content: center;
+    }
+}
