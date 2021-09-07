@@ -20,6 +20,7 @@ import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
@@ -295,9 +296,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         HashMap<String, Object> props = new HashMap<>();
 
-        MetadataSetV2 mds = null;
-        try{mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),metadataSet);}catch(Exception e){};
-
         for (Map.Entry<String, Serializable> entry : properties.entrySet()) {
 
             Serializable value = null;
@@ -329,9 +327,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
             /**
              * metadataset translation
              */
-            String[] displayNames = MetadataHelper.getDisplayNames(mds, entry.getKey(), value);
-            if(displayNames != null){
-                props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
+            String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+            Map<String,Serializable> i18n = (Map<String,Serializable>)sourceAsMap.get("i18n");
+            if(i18n != null){
+                Map<String,Serializable> i18nProps = (Map<String,Serializable>)i18n.get(currentLocale);
+                if(i18nProps != null){
+                   List<String> displayNames = (List<String> )i18nProps.get(entry.getKey());
+                    if(displayNames != null){
+                        props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
+                    }
+                }
             }
         }
         props.put(CCConstants.NODETYPE, sourceAsMap.get("type"));
