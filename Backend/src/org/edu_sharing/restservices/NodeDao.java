@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -1479,7 +1480,7 @@ public class NodeDao {
 	 */
 	private boolean checkUserHasPermissionToSeeMail(String userName) {
 		try {
-			if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterMetadataEmail") &&
+			if(LightbendConfigCache.getBoolean("repository.privacy.filterMetadataEmail") &&
 					(access== null || !access.contains(CCConstants.PERMISSION_WRITE))){
 				return false;
 			}
@@ -1754,7 +1755,7 @@ public class NodeDao {
 		}
 
 		HashMap<String,String[]> properties = new HashMap<String,String[]>();
-		if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterVCardEmail")) {
+		if(LightbendConfigCache.getBoolean("repository.privacy.filterVCardEmail")) {
 			List<String> cleanup = new ArrayList<>();
 			for (Entry<String, Object> entry : props.entrySet()) {
 				if (CCConstants.getLifecycleContributerPropsMap().containsValue(entry.getKey()) || CCConstants.getMetadataContributerPropsMap().containsValue(entry.getKey())) {
