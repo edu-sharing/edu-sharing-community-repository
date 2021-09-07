@@ -33,13 +33,10 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.*;
-import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -73,7 +70,7 @@ public class DownloadServlet extends HttpServlet{
 
 	}
 
-	private void downloadNode(String nodeId, String repositoryId, HttpServletRequest req, HttpServletResponse resp, String fileName, Mode mode) throws IOException {
+	private void downloadNode(String nodeId, String repositoryId, HttpServletRequest req, HttpServletResponse resp, String fileName, Mode mode) throws ServletException {
 		try {
 			// allow signature based auth from connector to bypass the download/content access
 			NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
@@ -82,8 +79,7 @@ public class DownloadServlet extends HttpServlet{
 					!NodeServiceHelper.downloadAllowed(nodeId) &&
 					!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())) {
 				logger.info("Download forbidden for node " + nodeId);
-				resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_FORBIDDEN));
-				return;
+				throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_FORBIDDEN);
 			}
 			String version=req.getParameter("version");
 			if(version!=null && version.isEmpty())
@@ -147,7 +143,7 @@ public class DownloadServlet extends HttpServlet{
 
 		}catch(Throwable t){
 			logger.error(t);
-			resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
+			throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
 		}
 	}
 
@@ -301,8 +297,7 @@ public class DownloadServlet extends HttpServlet{
                             work.doWork();
 					}catch(Throwable t){
                         logger.warn(t.getMessage(),t);
-						resp.sendRedirect(URLTool.getNgErrorUrl(""+HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
-						return false;
+                        throw t;
 					}
 				}
 				if(errors.size()>0){
