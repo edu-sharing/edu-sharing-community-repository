@@ -1191,7 +1191,16 @@ export class MdsComponent {
             </div>`
         );
     }
+  escapeUnsafeData(unsafe: string) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+  }
     private getMultivalueBadge(value: string, caption: string = value) {
+        caption = this.escapeUnsafeData(caption)
         return (
             '<div class="badge" data-value="' +
             value +
