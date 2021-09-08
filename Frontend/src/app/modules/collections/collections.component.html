@@ -281,10 +281,10 @@
               [sort]="{
                 active: sortCollections.active,
                 direction: sortCollections.direction,
-                userModifyActive: sortCollections.userModifyActive,
+                customSortingInProgress: sortCollections.customSortingInProgress,
                 columns: sortCollections.columns,
                 allowed: !isMobile() && dataSourceCollections.getData()?.length > 1 &&
-                          isUserAllowedToEdit(collectionContent.node) && !sortReferences?.userModifyActive
+                          isUserAllowedToEdit(collectionContent.node) && !sortReferences?.customSortingInProgress
               }"
               (sortChange)="setCollectionSort($event)"
 
@@ -355,10 +355,10 @@
               [sort]="{
                 active: sortReferences.active,
                 direction: sortReferences.direction,
-                userModifyActive: sortReferences.userModifyActive,
+                customSortingInProgress: sortReferences.customSortingInProgress,
                 columns: sortReferences.columns,
                 allowed: !isMobile() && dataSourceReferences.getData()?.length > 1 &&
-                          isUserAllowedToEdit(collectionContent.node) && !sortCollections?.userModifyActive
+                          isUserAllowedToEdit(collectionContent.node) && !sortCollections?.customSortingInProgress
               }"
               (sortChange)="setReferenceSort($event)"
               [globalOptions]="
@@ -366,6 +366,7 @@
                           ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
                           : []
                   "
+              (fetchData)="loadMoreReferences()"
             >
             </app-node-entries-wrapper>
             <!--

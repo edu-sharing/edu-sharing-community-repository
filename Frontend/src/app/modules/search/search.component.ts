@@ -52,9 +52,9 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {OPEN_URL_MODE, UIConstants} from '../../core-module/ui/ui-constants';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {
-    CustomOptions, DefaultGroups,
+    CustomOptions,
+    DefaultGroups,
     ElementType,
-    OptionGroup,
     OptionItem,
     Scope
 } from '../../core-ui-module/option-item';
@@ -71,6 +71,13 @@ import {takeUntil} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
+import {
+    InteractionType,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent
+} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 
 @Component({
     selector: 'app-search',
@@ -82,6 +89,8 @@ import {OptionsHelperService} from '../../core-ui-module/options-helper.service'
 export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly SkipTarget = SkipTarget;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
 
     @ViewChild('mdsMobile') mdsMobileRef: MdsEditorWrapperComponent;
     @ViewChild('mdsDesktop') mdsDesktopRef: MdsEditorWrapperComponent;
@@ -93,9 +102,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('sidenav') sidenavRef: ElementRef<HTMLElement>;
     @ViewChild('sidenavApply') sidenavApplyRef: ElementRef;
     @ViewChild('collections') collectionsRef: ElementRef;
-
+    @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
+    @ViewChild(NodeEntriesWrapperComponent) nodeEntriesWrapperComponent: NodeEntriesWrapperComponent<Node>;
     toolPermissions: string[];
-    searchFail: boolean = false;
     innerWidth: number = 0;
     breakpoint: number = 800;
     initalized: boolean;
@@ -203,7 +212,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.searchService.reinit) {
             this.searchService.init();
             this.initalized = false;
-            this.searchService.showspinner = true;
+            this.searchService.dataSourceSearchResult[0].isLoading = true;
         }
         this.savedSearchColumns.push(
             new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
@@ -229,11 +238,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     }
                 }
                 this.printListener();
-                if (this.searchService.viewType == -1) {
-                    this.setViewType(
+                if (this.searchService.displayType == null) {
+                    this.setDisplayType(
                         this.config.instant(
                             'searchViewType',
-                            this.config.instant('searchViewType', 1),
+                            this.config.instant('searchViewType', NodeEntriesDisplayType.Grid),
                         ),
                     );
                 }
@@ -324,7 +333,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.searchService.dataSourceSearchResult[0]);
         this.destroyed$.next();
         this.destroyed$.complete();
     }
@@ -516,17 +525,17 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         this.isSearching = true;
-        this.searchService.showspinner = true;
+        this.searchService.dataSourceSearchResult[0].isLoading = true;
         if (searchString == null) searchString = this.searchService.searchTerm;
         if (searchString == null) searchString = '';
         this.searchService.searchTerm = searchString;
         if (init) {
             this.searchService.init();
         } else if (
-            this.searchService.searchResult.length >
+            this.searchService.dataSourceSearchResult[0]?.getData()?.length >
             SearchComponent.MAX_ITEMS_COUNT
         ) {
-            this.searchService.showspinner = false;
+            this.searchService.dataSourceSearchResult[0].isLoading = false;
             this.searchService.complete = true;
             this.isSearching = false;
             return;
@@ -541,7 +550,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchRepository(repos, criterias, init);
 
         if (init) {
-            this.searchService.searchResultCollections = [];
+            this.searchService.dataSourceCollections.reset();
             if (
                 this.isHomeRepository() ||
                 this.currentRepository == RestConstants.ALL
@@ -568,11 +577,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     .subscribe(
                         (data: NodeList) => {
                             this.isSearchingCollections = false;
-                            this.searchService.searchResultCollections =
-                                data.nodes;
-                            this.searchService.resultCount.collections =
-                                data.pagination.total;
-                            this.checkFail();
+                            this.searchService.dataSourceCollections.setData(data.nodes, data.pagination);
                         },
                         (error: any) => {
                             this.isSearchingCollections = false;
@@ -635,40 +640,24 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    setViewType(type: number) {
-        this.searchService.viewType = type;
-        this.temporaryStorageService.set('view', type);
-        if (this.viewToggle)
-            this.viewToggle.icon =
-                type == ListTableComponent.VIEW_TYPE_GRID
-                    ? 'list'
-                    : 'view_module';
-    }
-
-    toggleView() {
-        if (this.searchService.viewType == ListTableComponent.VIEW_TYPE_LIST) {
-            this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
-        } else {
-            this.setViewType(ListTableComponent.VIEW_TYPE_LIST);
-        }
+    setDisplayType(type: NodeEntriesDisplayType) {
+        this.searchService.displayType = type;
     }
 
     processSearchResult(data: SearchList, init: boolean) {
-        this.searchFail = false;
+        /*
         if (this.currentRepository == RestConstants.ALL && this.groupResults) {
             this.searchService.searchResultRepositories.push(data.nodes);
         } else {
-            this.searchService.searchResult = this.searchService.searchResult.concat(
-                data.nodes,
-            );
+            this.searchService.dataSourceSearchResult.appendData(data.nodes)
         }
+        */
         this.searchService.ignored = data.ignored;
-        this.checkFail();
         if (
             data.nodes.length < 1 &&
             this.currentRepository != RestConstants.ALL
         ) {
-            this.searchService.showspinner = false;
+            this.searchService.dataSourceSearchResult[0].isLoading = false;
             this.isSearching = false;
             this.searchService.complete = true;
             return;
@@ -720,11 +709,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 );
             }
         }
-        if (
-            this.searchService.searchResult.length == data.pagination.total &&
-            this.currentRepository != RestConstants.ALL
-        )
-            this.searchService.complete = true;
     }
 
     updateMds() {
@@ -812,10 +796,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.sidenavRef.nativeElement.addEventListener('blur', removeTabindex);
     }
 
-    getHasMoreCollections(): boolean {
-        return this.collectionsPerRow() < this.searchService.searchResultCollections.length;
-    }
-
+    // @TODO
+    /*
     getSearchResultCollections(): Node[] {
         if (this.collectionsMore) {
             return this.searchService.searchResultCollections;
@@ -823,6 +805,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             return this.searchService.searchResultCollections.slice(0, this.collectionsPerRow());
         }
     }
+     */
 
     private collectionsPerRow(): number {
         return Math.floor(
@@ -833,11 +816,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    private checkFail() {
-        this.searchFail =
-            this.searchService.searchResult.length < 1; // &&
-            //this.searchService.searchResultCollections.length < 1;
-    }
 
     private updateSortMds() {
         // when mds is not ready, we can't update just now
@@ -981,7 +959,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.currentMdsSet = mds;
         this.updateColumns();
         this.updateSort();
-        if (this.searchService.searchResult.length < 1) {
+        if (!this.searchService.dataSourceSearchResult[0] || this.searchService.dataSourceSearchResult[0]?.isEmpty()) {
             this.initalized = true;
             if (!this.currentValues && this.getActiveMds()) {
                 this.currentValues = await this.getMdsValues();
@@ -1067,7 +1045,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
         if (position > 0 && position >= repos.length) {
             this.searchService.numberofresults = count;
-            this.searchService.showspinner = false;
+            this.searchService.dataSourceSearchResult[0].isLoading = false;
             this.isSearching = false;
             return;
         }
@@ -1120,7 +1098,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     ),
                     )
                     : null,
-            offset: this.searchService.skipcount[position],
+            offset: this.searchService.dataSourceSearchResult[position]?.getData()?.length || 0,
             propertyFilter: [properties],
         };
         let permissions;
@@ -1151,11 +1129,18 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             queryRequest.subscribe(
                 (data: SearchList) => {
-                    if (!this.searchService.skipcount[position])
-                        this.searchService.skipcount[position] = 0;
-                    this.searchService.skipcount[position] += data.nodes.length;
-                    this.searchService.resultCount.materials =
-                        data.pagination.total;
+                    if (!this.searchService.dataSourceSearchResult[position]) {
+                        this.searchService.dataSourceSearchResult[position] = new NodeDataSource<Node>();
+                        this.searchService.dataSourceSearchResult[position].setData(data.nodes, data.pagination);
+                    } else {
+                        this.searchService.dataSourceSearchResult[position].appendData(data.nodes);
+                        this.searchService.dataSourceSearchResult[position].setPagination(data.pagination);
+                    }
+                    this.nodeEntriesWrapperComponent.initOptionsGenerator({
+                        actionbar: this.actionbarComponent,
+                        customOptions: this.customOptions,
+                        scope: Scope.Search
+                    });
                     this.processSearchResult(data, init);
                     this.searchService.showchosenfilters = true;
                     this.searchRepository(
@@ -1432,8 +1417,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 GlobalContainerComponent.finishPreloading();
                 this.hasCheckbox = true;
                 this.searchService.reurl = null;
-                if (param.viewType != null) {
-                    this.setViewType(parseInt(param.viewType, 10));
+                if (param.displayType != null) {
+                    this.setDisplayType(parseInt(param.viewType, 10));
                 }
                 if (param.addToCollection) {
                     const addTo = new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT','layers', (node) => {
@@ -1444,19 +1429,20 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     });
                     addTo.elementType = OptionsHelperService.ElementTypesAddToCollection;
                     addTo.group = DefaultGroups.Reuse;
+                    addTo.showAlways = true;
                     const cancel = new OptionItem('CANCEL', 'close', () => {
                         this.router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], {queryParams: {id: this.addToCollection.ref.id}});
                     });
                     cancel.group = DefaultGroups.Delete;
-                    cancel.elementType = OptionsHelperService.ElementTypesAddToCollection.concat(ElementType.Unknown);
+                    cancel.elementType = [ElementType.Unknown];
                     this.collectionApi
                         .getCollection(param.addToCollection)
                         .subscribe(
                             (data: CollectionWrapper) => {
                                 this.addToCollection = data.collection;
                                 // add to collection layout is only designed for GRIDS, otherwise missing permission info will fail
-                                this.setViewType(
-                                    ListTableComponent.VIEW_TYPE_GRID,
+                                this.setDisplayType(
+                                    NodeEntriesDisplayType.Grid
                                 );
                                 this.customOptions = {
                                     useDefaultOptions: false,

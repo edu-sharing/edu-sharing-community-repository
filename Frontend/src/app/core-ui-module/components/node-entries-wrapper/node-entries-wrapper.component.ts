@@ -48,7 +48,7 @@ export type ListOptionsConfig = {
 export interface ListSortConfig extends Sort {
     columns: ListItemSort[];
     allowed?: boolean;
-    userModifyActive?: boolean;
+    customSortingInProgress?: boolean;
 }
 export enum ClickSource {
     Preview,
@@ -59,6 +59,13 @@ export type NodeClickEvent<T extends Node> = {
     element: Node,
     source: ClickSource,
     attribute?: ListItem // only when source === Metadata
+}
+export type FetchEvent = {
+    offset: number,
+    amount?: number;
+}
+export type GridConfig = {
+    maxCols?: number
 }
 export interface ListEventInterface<T extends Node> {
     updateNodes(nodes: void | T[]): void;
@@ -98,6 +105,8 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     @Input() displayType = NodeEntriesDisplayType.Grid;
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
     @Input() sort: ListSortConfig;
+    @Input() gridConfig: GridConfig;
+    @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() sortChange = new EventEmitter<ListSortConfig>();
     private componentRef: ComponentRef<any>;
@@ -137,12 +146,14 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         this.entriesService.columns = this.columns;
         this.entriesService.displayType = this.displayType;
         this.entriesService.elementInteractionType = this.elementInteractionType;
+        this.entriesService.gridConfig = this.gridConfig;
         this.entriesService.options = this.options;
         this.entriesService.globalOptions = this.globalOptions;
         console.log(this.sort);
         this.entriesService.sort = this.sort;
         this.entriesService.sortChange = this.sortChange;
         this.entriesService.clickItem = this.clickItem;
+        this.entriesService.fetchData = this.fetchData;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();

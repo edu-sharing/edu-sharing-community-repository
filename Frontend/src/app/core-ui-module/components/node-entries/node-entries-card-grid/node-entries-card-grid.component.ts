@@ -2,10 +2,10 @@ import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../options-help
 import {
     AfterViewInit,
     Component,
-    ContentChild, Input,
+    ContentChild, ElementRef, Input,
     OnChanges,
     SimpleChanges,
-    TemplateRef
+    TemplateRef, ViewChild
 } from '@angular/core';
 import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
@@ -22,6 +22,7 @@ import {NodeEntriesDisplayType} from '../../node-entries-wrapper/node-entries-wr
 export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
+    @ViewChild('grid') gridRef: ElementRef;
     @Input() displayType: NodeEntriesDisplayType;
 
     constructor(
@@ -41,5 +42,38 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     reorder(drag: CdkDragDrop<number>) {
         moveItemInArray(this.entriesService.dataSource.getData(), drag.previousContainer.data, drag.container.data);
 
+    }
+
+    loadData() {
+        if (this.entriesService.dataSource.hasMore()) {
+            this.entriesService.fetchData.emit({
+                offset: this.entriesService.dataSource.getData().length
+            });
+        }
+    }
+    getItemsPerRow(): number|undefined {
+        if (!this.gridRef?.nativeElement) {
+            return undefined;
+        }
+        return getComputedStyle(this.gridRef.nativeElement).getPropertyValue("grid-template-columns").split(' ').length;
+        /*
+        const grid: HTMLElement[] = Array.from(this.gridRef?.nativeElement?.children);
+        if (grid?.length <= 1) {
+            return undefined;
+        }
+        const baseOffset = grid[0].offsetTop;
+        const breakIndex = grid.findIndex((item) => item.offsetTop > baseOffset);
+        console.log(breakIndex);
+        return (breakIndex === -1 ? grid.length : breakIndex);
+        */
+    }
+    getVisibleNodes(nodes: T[]) {
+        if (this.entriesService.gridConfig?.maxCols > 0 && this.getItemsPerRow() !== undefined) {
+            const count = this.getItemsPerRow() * this.entriesService.gridConfig.maxCols;
+            this.entriesService.dataSource.setDisplayCount(count);
+            return nodes.slice(0, this.entriesService.dataSource.getDisplayCount());
+        }
+        this.entriesService.dataSource.setDisplayCount();
+        return nodes;
     }
 }

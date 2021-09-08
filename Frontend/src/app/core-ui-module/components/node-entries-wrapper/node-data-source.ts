@@ -6,10 +6,12 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
     private pagination: Pagination;
     public isLoading: boolean;
+    private displayCount: number|null = null;
 
     constructor(initialData: T[] = []) {
         super();
         this.setData(initialData);
+
     }
 
     connect(): Observable<T[]> {
@@ -24,12 +26,13 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
     }
 
     async appendData(appendData: T[]) {
-        let data = await this.dataStream.asObservable().toPromise();
+        console.log('append', appendData);
+        let data = this.getData();
         data = data.concat(appendData);
         this.dataStream.next(data);
     }
 
-    private setPagination(pagination: Pagination) {
+    setPagination(pagination: Pagination) {
         this.pagination = pagination;
     }
 
@@ -47,5 +50,33 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
 
     isEmpty(): boolean {
         return this.getData()?.length === 0;
+    }
+
+    getTotal() {
+        return this.pagination.total ?? this.getData()?.length ?? 0;
+    }
+
+    /**
+     * true if the underlying rendering component is currently displaying all data
+     * false otherwise
+     * useful to trigger visibility of "show/hide more" elements
+     */
+    areAllDisplayed() {
+        return this.displayCount === null || this.displayCount === this.getData()?.length;
+    }
+
+    /**
+     * get the actual visible count
+     * will return null if no visiblity constrain limit was set to the underlying rendering component
+     */
+    getDisplayCount() {
+        return this.displayCount;
+    }
+    setDisplayCount(displayCount: number|null = null) {
+        if(displayCount === null) {
+            this.displayCount = null;
+        } else {
+            this.displayCount = Math.min(this.getData()?.length, displayCount);
+        }
     }
 }

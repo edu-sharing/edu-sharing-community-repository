@@ -50,7 +50,8 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     constructor(private route: ActivatedRoute,
                 public entriesService: NodeEntriesService<T>,
                 private router: Router
-    ) {}
+    ) {
+    }
 
     ngAfterViewInit(): void {
         Promise.resolve().then(() => {

@@ -1,6 +1,6 @@
 <div *ngIf="entriesService.sort?.allowed" class="order-panel">
   <mat-slide-toggle *ngIf="entriesService.sort.active === 'ccm:collection_ordered_position'"
-                    [(ngModel)]="entriesService.sort.userModifyActive"
+                    [(ngModel)]="entriesService.sort.customSortingInProgress"
                     (ngModelChange)="entriesService.sortChange.emit(entriesService.sort)"
   >
     {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
@@ -22,38 +22,53 @@
     (onSort)="changeSort($event)"
   ></sort-dropdown>
 </div>
-<ul *ngIf="entriesService.sort?.userModifyActive"
+
+<ul *ngIf="entriesService.sort?.customSortingInProgress"
     class="card-grid card-grid-reorder"
     cdkDropListGroup
 >
-  <div
-    class="card-grid-order-wrapper"
-    *ngFor="let node of (entriesService.dataSource?.connect() | async); let i = index"
-    role="none"
-    cdkDropList
-    cdkDropListOrientation="horizontal"
-    [cdkDropListData]="i"
-    (cdkDropListDropped)="reorder($event)"
-  >
-    <app-node-entries-card
-      *ngIf="displayType === NodeEntriesDisplayType.Grid"
-      [node]="node"
-      role="listitem"
-      cdkDrag
-    ></app-node-entries-card>
-    <app-node-entries-card-small
-      *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
-      [node]="node"
-      role="listitem"
-      cdkDrag
-    ></app-node-entries-card-small>
-  </div>
+  <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+    <div
+      class="card-grid-order-wrapper"
+      *ngFor="let node of getVisibleNodes(nodes); let i = index"
+      role="none"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="i"
+      (cdkDropListDropped)="reorder($event)"
+    >
+      <app-node-entries-card
+        *ngIf="displayType === NodeEntriesDisplayType.Grid"
+        [node]="node"
+        role="listitem"
+        cdkDrag
+      ></app-node-entries-card>
+      <app-node-entries-card-small
+        *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+        [node]="node"
+        role="listitem"
+        cdkDrag
+      ></app-node-entries-card-small>
+    </div>
+  </ng-container>
 </ul>
-<ul *ngIf="!entriesService.sort?.userModifyActive"
+<ul *ngIf="!entriesService.sort?.customSortingInProgress"
     class="card-grid"
+    #grid
+    infiniteScroll
+    (scrolled)="loadData()"
 >
   <ng-container *ngTemplateOutlet="list"></ng-container>
 </ul>
+<ng-container *ngIf="entriesService.dataSource.isLoading">
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+</ng-container>
+
+
+
+<ng-template #loading>
+  <spinner></spinner>
+</ng-template>
 <ng-template #list>
   <li *ngIf="entriesService.globalOptions?.length"
       class="global-options"
@@ -69,19 +84,21 @@
       ></ng-container>
     </button>
   </li>
-  <ng-container *ngIf="displayType === NodeEntriesDisplayType.SmallGrid">
-    <app-node-entries-card-small
-      *ngFor="let node of (entriesService.dataSource?.connect() | async)"
-      [node]="node"
-      role="listitem"
-    ></app-node-entries-card-small>
-  </ng-container>
-  <ng-container *ngIf="displayType === NodeEntriesDisplayType.Grid">
-    <app-node-entries-card
-      *ngFor="let node of (entriesService.dataSource?.connect() | async)"
-      [node]="node"
-      role="listitem"
-    ></app-node-entries-card>
+  <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+    <ng-container *ngIf="displayType === NodeEntriesDisplayType.SmallGrid">
+      <app-node-entries-card-small
+        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        [node]="node"
+        role="listitem"
+      ></app-node-entries-card-small>
+    </ng-container>
+    <ng-container *ngIf="displayType === NodeEntriesDisplayType.Grid">
+      <app-node-entries-card
+        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        [node]="node"
+        role="listitem"
+      ></app-node-entries-card>
+    </ng-container>
   </ng-container>
   <!--
   <div style="display: flex; flex-wrap: wrap" cdkDropListGroup>
@@ -96,7 +113,6 @@
   -->
 
 </ng-template>
-
 <ng-template #globalOption let-option="option">
   <div class="global-option">
     <i [icon]="option.icon"></i>

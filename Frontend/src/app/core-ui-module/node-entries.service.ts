@@ -2,6 +2,7 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {Node} from '../core-module/rest/data-object';
 import {NodeDataSource} from './components/node-entries-wrapper/node-data-source';
 import {
+    FetchEvent, GridConfig,
     InteractionType, ListEventInterface, ListOptions, ListSortConfig, NodeClickEvent,
     NodeEntriesDisplayType, NodeEntriesWrapperComponent
 } from './components/node-entries-wrapper/node-entries-wrapper.component';
@@ -22,4 +23,6 @@ export class NodeEntriesService<T extends Node> {
     sort: ListSortConfig;
     sortChange: EventEmitter<ListSortConfig>;
     clickItem: EventEmitter<NodeClickEvent<T>>;
+    fetchData: EventEmitter<FetchEvent>;
+    gridConfig: GridConfig;
 }

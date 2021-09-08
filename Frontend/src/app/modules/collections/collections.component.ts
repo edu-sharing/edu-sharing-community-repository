@@ -250,14 +250,14 @@ export class CollectionsMainComponent implements AfterViewInit{
         return pos;
     }
     toggleCollectionsOrder() {
-        if (this.sortCollections.userModifyActive) {
+        if (this.sortCollections.customSortingInProgress) {
             this.infoTitle = 'COLLECTIONS.ORDER_COLLECTIONS';
             this.infoMessage = 'COLLECTIONS.ORDER_COLLECTIONS_INFO';
             this.infoButtons = DialogButton.getSingleButton('SAVE', () => {
                 this.changeCollectionsOrder();
             });
             this.infoClose = () => {
-                this.sortCollections.userModifyActive = false;
+                this.sortCollections.customSortingInProgress = false;
                 this.toggleCollectionsOrder();
             };
         } else {
@@ -266,16 +266,16 @@ export class CollectionsMainComponent implements AfterViewInit{
         }
     }
     toggleReferencesOrder() {
-        if (this.sortReferences.userModifyActive) {
+        if (this.sortReferences.customSortingInProgress) {
             this.infoTitle = 'COLLECTIONS.ORDER_ELEMENTS';
             this.infoMessage = 'COLLECTIONS.ORDER_ELEMENTS_INFO';
             this.infoButtons = DialogButton.getSingleButton('SAVE', () => {
                 this.changeReferencesOrder();
-                this.sortReferences.userModifyActive = false;
+                this.sortReferences.customSortingInProgress = false;
                 this.listReferences.getSelection().clear();
             });
             this.infoClose = () => {
-                this.sortReferences.userModifyActive = false;
+                this.sortReferences.customSortingInProgress = false;
                 this.toggleReferencesOrder();
             };
         } else {
@@ -1243,7 +1243,7 @@ export class CollectionsMainComponent implements AfterViewInit{
                         this.collectionContent,
                     );
                     this.infoTitle = null;
-                    this.sortCollections.userModifyActive = false;
+                    this.sortCollections.customSortingInProgress = false;
                     this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
                     this.toast.closeModalDialog();
                 },
@@ -1356,14 +1356,28 @@ export class CollectionsMainComponent implements AfterViewInit{
                 type: this.translationService.instant('NODE.' + sort.active),
             });
         }
-        this.sortCollections.userModifyActive = this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
-        if (this.sortCollections.userModifyActive) {
+        this.sortCollections.customSortingInProgress = this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        if (this.sortCollections.customSortingInProgress) {
             this.toggleCollectionsOrder();
         }
     }
     async setReferenceSort(sort: ListSortConfig) {
-        console.log([sort.active, (sort.direction === 'asc') + ''], this.collectionContent, sort);
+        const diff = Helper.getKeysWithDifferentValues(this.sortReferences, sort);
         this.sortReferences = sort;
+        // auto activate the custom sorting when the users switches to "custom order"
+        if(diff.includes('active')) {
+            this.sortReferences.customSortingInProgress = this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        }
+        this.toggleReferencesOrder();
+        if (this.sortReferences.customSortingInProgress) {
+            await this.loadMoreReferences(true);
+        }
+        console.log(diff, sort, diff.includes('customSortingInProgress'));
+        if(diff.includes('customSortingInProgress') && sort.customSortingInProgress) {
+            return;
+        }
+
+        console.log([sort.active, (sort.direction === 'asc') + ''], this.collectionContent, sort);
         try {
             await this.nodeService.editNodeProperty(
                 this.collectionContent.node.ref.id,
@@ -1374,10 +1388,6 @@ export class CollectionsMainComponent implements AfterViewInit{
             this.toast.error(e);
         }
         this.refreshContent();
-        this.sortReferences.userModifyActive = this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
-        if (this.sortReferences.userModifyActive) {
-            this.toggleReferencesOrder();
-        }
     }
 
     private getReferencesRequest(): RequestObject {
