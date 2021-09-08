@@ -1246,7 +1246,7 @@ a.rowInner {
     left: 0;
     right: 0;
     border-radius: 5px;
-    top: math.div($previewHeight - 60px), 2);
+    top: math.div($previewHeight - 60px, 2);
 }
 .cardSmallList .item-order-overlay{
     background-color: #fff;
