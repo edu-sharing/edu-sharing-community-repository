@@ -4,24 +4,43 @@ import com.google.gson.Gson;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.DAOMissingException;
+import org.edu_sharing.restservices.DAOSecurityException;
+import org.edu_sharing.restservices.DAOValidationException;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 
 
 public class ErrorFilter implements Filter {
 	public static class ErrorFilterException extends ServletException {
 		private int statusCode;
-		public ErrorFilterException(int statusCode, Throwable t) {
+		public ErrorFilterException(Throwable t) {
 			super(t);
-			this.statusCode = statusCode;
+			this.statusCode = mapStatusCode(t);
 		}
 		public ErrorFilterException(int statusCode) {
 			super();
 			this.statusCode = statusCode;
+		}
+
+		private int mapStatusCode(Throwable t) {
+			DAOException dao = DAOException.mapping(t);
+			if(dao instanceof DAOValidationException) {
+				return HttpServletResponse.SC_BAD_REQUEST;
+			}
+			if(dao instanceof DAOSecurityException) {
+				return HttpServletResponse.SC_FORBIDDEN;
+			}
+			if(dao instanceof DAOMissingException) {
+				return HttpServletResponse.SC_NOT_FOUND;
+			}
+			return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
 
 		public int getStatusCode() {
@@ -72,7 +91,10 @@ public class ErrorFilter implements Filter {
 			} else {
 				response.setMessage("LogLevel is > INFO");
 			}
-			resp.setStatus(500);
+			if(t != null) {
+				Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
+			}
+			resp.setStatus(statusCode);
 			String accept = req.getHeader("accept");
 			if (accept!=null && accept.toLowerCase().contains("text/html")) {
 				resp.getWriter().print("<script>window.location.href=\"" + URLTool.getNgErrorUrl(statusCode + "") + "\";</script>");

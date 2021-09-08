@@ -143,7 +143,7 @@ public class DownloadServlet extends HttpServlet{
 
 		}catch(Throwable t){
 			logger.error(t);
-			throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
+			throw new ErrorFilter.ErrorFilterException(t);
 		}
 	}
 
