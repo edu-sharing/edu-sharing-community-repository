@@ -1044,7 +1044,16 @@ export class MdsComponent {
             <span>`+caption+`</span>
             </div>`;
   }
+  escapeUnsafeData(unsafe: string) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+  }
   private getMultivalueBadge(value:string,caption:string=value){
+    caption = this.escapeUnsafeData(caption)
     return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" tabindex="0" onkeyup="if(event.keyCode==13){this.click()}" onclick="
     this.parentNode.parentNode.removeChild(this.parentNode);
     `+this.getWindowComponent()+`.applySuggestions();
