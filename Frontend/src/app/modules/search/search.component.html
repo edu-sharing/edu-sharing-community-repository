@@ -339,6 +339,8 @@
 
                 </div>
                 <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories">
+                  Feature not implemented in 6.1
+                  <!--
                     <div *ngFor="let repo of groupedRepositories;let i=index">
                         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
                         <a tabindex="0" class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)" (keyup.enter)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
@@ -365,6 +367,7 @@
                                    [isLoading]="searchService.dataSourceSearchResult[0]?.isLoading"></listTable>
                     </div>
                 </div>
+                -->
             </div>
         </div>
         <app-footer [scope]="'search'" class="alignWithBanner"></app-footer>

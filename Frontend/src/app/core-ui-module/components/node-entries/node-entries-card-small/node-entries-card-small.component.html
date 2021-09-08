@@ -13,22 +13,6 @@
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </ng-container>
-  <div class="card-options" *ngIf="entriesService.options">
-    <dropdown #dropdown [options]="entriesService.options[Target.ListDropdown]"></dropdown>
-    <app-option-button *ngFor="let option of optionsOnCard()"
-                       class="card-options-always"
-                       [option]="option"
-                       [node]="node"
-    ></app-option-button>
-    <div class="card-options-spacer"></div>
-    <button mat-icon-button
-            color="primary"
-            (click)="entriesService.selection.clear(); entriesService.selection.select(node)"
-            [matMenuTriggerFor]="dropdown.menu"
-    >
-      <i icon="more_vert" [aria]="true"></i>
-    </button>
-  </div>
 </div>
 <ng-template #image>
   <div class="card-image-area">
