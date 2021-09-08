@@ -149,7 +149,6 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         this.entriesService.gridConfig = this.gridConfig;
         this.entriesService.options = this.options;
         this.entriesService.globalOptions = this.globalOptions;
-        console.log(this.sort);
         this.entriesService.sort = this.sort;
         this.entriesService.sortChange = this.sortChange;
         this.entriesService.clickItem = this.clickItem;
@@ -222,7 +221,6 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     }
 
     async initOptionsGenerator(config: ListOptionsConfig) {
-        console.log('init', config, this.mainNav.getMainNav());
         await this.optionsHelper.initComponents(this.mainNav.getMainNav(), config.actionbar, this);
         this.optionsHelper.setData({
             scope: config.scope,

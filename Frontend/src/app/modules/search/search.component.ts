@@ -103,7 +103,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('sidenavApply') sidenavApplyRef: ElementRef;
     @ViewChild('collections') collectionsRef: ElementRef;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
-    @ViewChild(NodeEntriesWrapperComponent) nodeEntriesWrapperComponent: NodeEntriesWrapperComponent<Node>;
+    @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
     toolPermissions: string[];
     innerWidth: number = 0;
     breakpoint: number = 800;
@@ -1128,7 +1128,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
             }
             queryRequest.subscribe(
-                (data: SearchList) => {
+                async (data: SearchList) => {
                     if (!this.searchService.dataSourceSearchResult[position]) {
                         this.searchService.dataSourceSearchResult[position] = new NodeDataSource<Node>();
                         this.searchService.dataSourceSearchResult[position].setData(data.nodes, data.pagination);
@@ -1136,7 +1136,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.searchService.dataSourceSearchResult[position].appendData(data.nodes);
                         this.searchService.dataSourceSearchResult[position].setPagination(data.pagination);
                     }
-                    this.nodeEntriesWrapperComponent.initOptionsGenerator({
+                    console.log('init options')
+                    await this.nodeEntriesResults.initOptionsGenerator({
                         actionbar: this.actionbarComponent,
                         customOptions: this.customOptions,
                         scope: Scope.Search

@@ -41,7 +41,10 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
     }
 
     async hasMore() {
-        return this.pagination?.total < (await this.dataStream.asObservable().toPromise()).length;
+        if(!this.pagination) {
+            return undefined;
+        }
+        return this.pagination.total < (await this.dataStream.asObservable().toPromise()).length;
     }
 
     getData() {

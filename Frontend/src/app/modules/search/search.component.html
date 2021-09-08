@@ -291,7 +291,7 @@
                   </div>
                     <div class="heading" *ngIf="!searchService.dataSourceCollections.isEmpty() && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
                   <app-node-entries-wrapper
-                    #nodeEntriesWrapperComponent
+                    #nodeEntriesResults
                     *ngIf="searchService.dataSourceSearchResult[0]"
                     [dataSource]="searchService.dataSourceSearchResult[0]"
                     [columns]="searchService.columns"

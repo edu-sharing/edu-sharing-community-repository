@@ -4,7 +4,7 @@ import {
     Component,
     ContentChild,
     ElementRef,
-    EventEmitter,
+    EventEmitter, OnDestroy,
     TemplateRef,
     ViewChild
 } from '@angular/core';
@@ -94,7 +94,7 @@ import {Sort} from '@angular/material/sort';
     providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
             subscribeEvents: false
         }}]})
-export class CollectionsMainComponent implements AfterViewInit{
+export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -406,7 +406,6 @@ export class CollectionsMainComponent implements AfterViewInit{
             );
         });
         this.mainNavService.getDialogs().onEvent.subscribe((event: ManagementEvent) => {
-            console.log(event, this.collectionContent.node);
             if(event.event === ManagementEventType.AddCollectionNodes){
                 if(event.data.collection.ref.id === this.collectionContent.node.ref.id) {
                     console.log('add virtual', event.data.references)
@@ -414,6 +413,11 @@ export class CollectionsMainComponent implements AfterViewInit{
                 }
             }
         });
+    }
+
+
+    ngOnDestroy() {
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.dataSourceReferences);
     }
 
     ngAfterViewInit() {
@@ -804,7 +808,7 @@ export class CollectionsMainComponent implements AfterViewInit{
 
     async loadMoreReferences(loadAll = false) {
         if (
-            !this.dataSourceReferences.hasMore() || this.dataSourceReferences.isLoading
+            !(await this.dataSourceReferences.hasMore()) || this.dataSourceReferences.isLoading
         ) {
             return;
         }
@@ -1339,7 +1343,6 @@ export class CollectionsMainComponent implements AfterViewInit{
         });
     }
     async setCollectionSort(sort: ListSortConfig) {
-        console.log(sort);
         this.sortCollections = sort;
         try {
             await this.nodeService.editNodeProperty(
@@ -1372,12 +1375,10 @@ export class CollectionsMainComponent implements AfterViewInit{
         if (this.sortReferences.customSortingInProgress) {
             await this.loadMoreReferences(true);
         }
-        console.log(diff, sort, diff.includes('customSortingInProgress'));
         if(diff.includes('customSortingInProgress') && sort.customSortingInProgress) {
             return;
         }
 
-        console.log([sort.active, (sort.direction === 'asc') + ''], this.collectionContent, sort);
         try {
             await this.nodeService.editNodeProperty(
                 this.collectionContent.node.ref.id,
