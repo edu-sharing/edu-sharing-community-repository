@@ -1,10 +1,4 @@
-import {
-    animate,
-    sequence,
-    style,
-    transition,
-    trigger,
-} from '@angular/animations';
+import {animate, sequence, style, transition, trigger,} from '@angular/animations';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -15,19 +9,17 @@ import {
     HostListener,
     Input,
     Output,
+    SecurityContext,
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { MatMenuTrigger } from '@angular/material/menu';
-import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../../common/options-helper';
-import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
+import {MatMenuTrigger} from '@angular/material/menu';
+import {ActivatedRoute, Router} from '@angular/router';
+import {TranslateService} from '@ngx-translate/core';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService,} from '../../../common/options-helper';
+import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
     DialogButton,
@@ -45,17 +37,17 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
-import { Helper } from '../../../core-module/rest/helper';
-import { ColorHelper } from '../../../core-module/ui/color-helper';
-import { KeyEvents } from '../../../core-module/ui/key-events';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { DistinctClickEvent } from '../../directives/distinct-click.directive';
-import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
-import { NodeHelper } from '../../node-helper';
-import { CustomOptions, OptionItem, Scope } from '../../option-item';
-import { Toast } from '../../toast';
-import { UIHelper } from '../../ui-helper';
+import {Helper} from '../../../core-module/rest/helper';
+import {ColorHelper} from '../../../core-module/ui/color-helper';
+import {KeyEvents} from '../../../core-module/ui/key-events';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
+import {UIConstants} from '../../../core-module/ui/ui-constants';
+import {DistinctClickEvent} from '../../directives/distinct-click.directive';
+import {DragData, DropData} from '../../directives/drag-nodes/drag-nodes';
+import {NodeHelper} from '../../node-helper';
+import {CustomOptions, OptionItem, Scope} from '../../option-item';
+import {Toast} from '../../toast';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
 @Component({
     selector: 'listTable',
@@ -492,6 +484,7 @@ export class ListTableComponent implements EventListener {
         private translate: TranslateService,
         private cd: ChangeDetectorRef,
         private config: ConfigurationService,
+        private sanitizer: DomSanitizer,
         private changes: ChangeDetectorRef,
         private storage: TemporaryStorageService,
         private network: RestNetworkService,
@@ -737,9 +730,24 @@ export class ListTableComponent implements EventListener {
         }
         this.onDrop.emit({ target, source: nodes, event, type: dropAction });
     }
-
-    getAttribute(data: any, item: ListItem): string {
-        return NodeHelper.getAttribute(this.translate, this.config, data, item);
+    attributeRequiresHTML(item: ListItem) {
+        return [
+            RestConstants.CCM_PROP_REPLICATIONSOURCE,
+            RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN,
+            RestConstants.CCM_PROP_LICENSE,
+            RestConstants.CCM_PROP_WF_STATUS,
+            // collections
+            'info',
+            'scope',
+        ].indexOf(item.name) !== -1;
+    }
+    getAttribute(data: any, item: ListItem): SafeHtml {
+        const html = NodeHelper.getAttribute(this.translate, this.config, data, item);
+        if(this.attributeRequiresHTML(item)) {
+            return this.sanitizer.bypassSecurityTrustHtml(html);
+        } else {
+            return this.sanitizer.sanitize(SecurityContext.HTML, html);
+        }
     }
 
     onDistinctClick(event: DistinctClickEvent, node: Node, region?: string) {
