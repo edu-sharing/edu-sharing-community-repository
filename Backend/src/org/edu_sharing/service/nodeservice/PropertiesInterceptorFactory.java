@@ -16,7 +16,7 @@ public class PropertiesInterceptorFactory {
         if(propertiesInterceptor == null){
             synchronized (PropertiesInterceptorFactory.class){
                 try{
-                    String className = LightbendConfigLoader.get().getString("propertiesInterceptor");
+                    String className = LightbendConfigLoader.get().getString("repository.interceptors.properties");
                     Class clazz = Class.forName(className);
                     propertiesInterceptor =  (PropertiesInterceptor) clazz.newInstance();
                 }catch(Throwable t) {

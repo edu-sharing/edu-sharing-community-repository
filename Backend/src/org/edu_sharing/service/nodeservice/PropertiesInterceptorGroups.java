@@ -7,12 +7,11 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PropertiesInterceptorGroups extends PropertiesInterceptorImpl{
+public class PropertiesInterceptorGroups extends PropertiesInterceptorDefault {
 
     @Override
     public Map<String, Object> beforeDeliverProperties(PropertiesContext context) {
