@@ -196,6 +196,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private nodeHelper: NodeHelperService,
         private config: ConfigurationService,
         private uiService: UIService,
+        private optionsHelper: OptionsHelperService,
         private storage: SessionStorageService,
         private network: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
@@ -217,6 +218,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.savedSearchColumns.push(
             new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
         );
+        this.optionsHelper.setListener({
+           onDisplayTypeChange: (type) => this.setDisplayType(type)
+        });
         this.connector.setRoute(this.activatedRoute).subscribe(() => {
             Translation.initialize(
                 this.translate,
@@ -641,7 +645,15 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setDisplayType(type: NodeEntriesDisplayType) {
-        this.searchService.displayType = type;
+        console.log(type);
+        this.nodeEntriesResults.displayType = type;
+        this.router.navigate(['./'], {
+            relativeTo: this.activatedRoute,
+            queryParams: {
+                'displayType': type ?? null,
+            },
+            queryParamsHandling: 'merge'
+        });
     }
 
     processSearchResult(data: SearchList, init: boolean) {
@@ -1419,7 +1431,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.hasCheckbox = true;
                 this.searchService.reurl = null;
                 if (param.displayType != null) {
-                    this.setDisplayType(parseInt(param.viewType, 10));
+                    this.setDisplayType(parseInt(param.displayType, 10));
                 }
                 if (param.addToCollection) {
                     const addTo = new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT','layers', (node) => {

@@ -1048,7 +1048,7 @@ export class OptionsHelperService implements OnDestroy {
         feedbackCollectionView.group = DefaultGroups.View;
         feedbackCollectionView.priority = 20;
 
-        const setDisplayType = (viewType: number) => {
+        const setDisplayType = (viewType: number, emit = true) => {
             switch (viewType) {
                 case NodeEntriesDisplayType.Table:
                     this.list.setDisplayType(NodeEntriesDisplayType.Table);
@@ -1061,6 +1061,10 @@ export class OptionsHelperService implements OnDestroy {
                     toggleViewType.icon = 'list';
                     break;
             }
+            console.log(emit, this.list.getDisplayType());
+            if(emit) {
+                this.listener?.onDisplayTypeChange?.(this.list.getDisplayType());
+            }
         };
         const toggleViewType = new OptionItem('', '', () => {
             switch (this.list.getDisplayType()) {
@@ -1068,7 +1072,7 @@ export class OptionsHelperService implements OnDestroy {
                 case NodeEntriesDisplayType.Grid: setDisplayType(NodeEntriesDisplayType.Table); break;
             }
         });
-        setDisplayType(this.list?.getDisplayType());
+        setDisplayType(this.list?.getDisplayType(), false);
         toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
         toggleViewType.constrains = [Constrain.NoSelection];
         toggleViewType.group = DefaultGroups.Toggles;
@@ -1407,6 +1411,7 @@ export interface OptionsListener {
     onVirtualNodes?: (nodes: Node[]) => void;
     onRefresh?: (nodes: Node[]|void) => void;
     onDelete?: (result: { objects: Node[] | any; count: number; error: boolean }) => void;
+    onDisplayTypeChange?: (displayType: NodeEntriesDisplayType) => void;
 }
 export interface OptionData {
     scope: Scope;
