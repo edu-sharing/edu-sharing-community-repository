@@ -27,6 +27,10 @@ public class PropertiesInterceptorFactory {
         return propertiesInterceptor;
     }
 
+    public static void refresh(){
+        propertiesInterceptor = null;
+    }
+
     public static PropertiesInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){
         PropertiesInterceptor.PropertiesContext propertiesContext = new PropertiesInterceptor.PropertiesContext();
         propertiesContext.setProperties(properties);
