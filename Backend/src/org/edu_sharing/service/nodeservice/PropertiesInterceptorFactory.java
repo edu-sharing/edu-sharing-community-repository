@@ -39,7 +39,10 @@ public class PropertiesInterceptorFactory {
         String requestURI = Context.getCurrentInstance().getRequest().getRequestURI();
         if(requestURI.contains("rest/search")){
             propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Search);
-        }else if(requestURI.contains("components/render") || requestURI.contains("rest/rendering")){
+        }else if(requestURI.contains("components/render")
+                || requestURI.contains("rest/rendering")
+                || requestURI.contains("eduservlet/render")
+                || requestURI.contains("/content")){
             propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Render);
         }else{
             propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Workspace);
