@@ -2,6 +2,7 @@
   class="grid-card"
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+  (contextmenu)="openContextmenu($event)"
 >
   <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 [node]="node"
@@ -42,9 +43,9 @@
       *ngFor="let displayPart of entriesService.columns; let first = first;"
       class="card-meta-row"
     >
-      <label *ngIf="!first">{{
+      <!--<label *ngIf="!first">{{
         ((displayPart.type === 'NODE_PROPOSAL' ? 'NODE_PROPOSAL' : 'NODE') + '.' + displayPart.name) | translate:{fallback: ''}
-        }}</label>
+        }}</label>-->
       <app-list-base
         [item]="displayPart"
         [node]="node"

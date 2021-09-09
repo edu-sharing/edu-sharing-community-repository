@@ -9,6 +9,9 @@
     @include materialShadowBottom();
     display: grid;
     grid-template-columns: auto;
+    .dropdown-dummy {
+        position: fixed;
+    }
     .card-options {
         display: flex;
         align-items: center;

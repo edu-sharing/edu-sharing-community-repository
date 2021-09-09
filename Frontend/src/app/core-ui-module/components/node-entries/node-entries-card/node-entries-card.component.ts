@@ -1,10 +1,12 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
 import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../node-helper.service';
 import {ColorHelper, PreferredColor} from '../../../../core-module/ui/color-helper';
 import {InteractionType} from '../../node-entries-wrapper/node-entries-wrapper.component';
 import {OptionItem, Target} from '../../../option-item';
+import {DropdownComponent} from '../../dropdown/dropdown.component';
+import {MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
     selector: 'app-node-entries-card',
@@ -14,7 +16,12 @@ import {OptionItem, Target} from '../../../option-item';
 export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
     readonly InteractionType = InteractionType;
     readonly Target = Target;
+    @ViewChild(DropdownComponent) dropdown: DropdownComponent;
+    @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
+
     @Input() node: T;
+    dropdownLeft: number;
+    dropdownTop: number;
     constructor(
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
@@ -37,5 +44,15 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
         // we do NOT show any additional actions
         return [];
         // return options.filter((o) => o.showAsAction && o.showCallback(this.node)).slice(0, 3);
+    }
+
+    openContextmenu(event: MouseEvent) {
+        event.stopPropagation();
+        event.preventDefault();
+        this.dropdownLeft = event.clientX;
+        this.dropdownTop = event.clientY;
+        this.entriesService.selection.clear();
+        this.entriesService.selection.select(this.node);
+        this.menuTrigger.openMenu();
     }
 }

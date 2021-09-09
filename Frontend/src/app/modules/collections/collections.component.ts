@@ -345,6 +345,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         // this.referenceCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleReferencesOrder() : this.changeReferencesOrder());
         this.collectionsColumns.push(new ListItem('COLLECTION', 'title'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
+        this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
         this.setCollectionId(RestConstants.ROOT);
         Translation.initialize(
             this.translationService,

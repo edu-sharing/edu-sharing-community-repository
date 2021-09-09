@@ -2,7 +2,18 @@
   class="grid-card"
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+  (contextmenu)="openContextmenu($event)"
 >
+  <button
+    #menuTrigger="matMenuTrigger"
+    mat-button
+    class="dropdown-dummy"
+    [style.left.px]="dropdownLeft"
+    [style.top.px]="dropdownTop"
+    [matMenuTriggerFor]="dropdown.menu"
+    tabindex="-1"
+    aria-hidden="true"
+  ></button>
   <div
     class="card-top-bar"
   >
@@ -47,8 +58,8 @@
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </ng-container>
+  <dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
   <div class="card-options" *ngIf="entriesService.options">
-    <dropdown #dropdown [options]="entriesService.options[Target.ListDropdown]"></dropdown>
     <app-option-button *ngFor="let option of optionsOnCard()"
                        class="card-options-always"
                        [option]="option"
