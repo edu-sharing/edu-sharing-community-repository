@@ -1,6 +1,11 @@
 package org.edu_sharing.service.nodeservice;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
+
+import java.util.List;
+import java.util.Map;
 
 public class PropertiesInterceptorFactory {
 
@@ -20,5 +25,21 @@ public class PropertiesInterceptorFactory {
             }
         }
         return propertiesInterceptor;
+    }
+
+    public static PropertiesInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){
+        PropertiesInterceptor.PropertiesContext propertiesContext = new PropertiesInterceptor.PropertiesContext();
+        propertiesContext.setProperties(properties);
+        propertiesContext.setAspects(aspects);
+        propertiesContext.setNodeRef(nodeRef);
+        String requestURI = Context.getCurrentInstance().getRequest().getRequestURI();
+        if(requestURI.contains("rest/search")){
+            propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Search);
+        }else if(requestURI.contains("components/render") || requestURI.contains("rest/rendering")){
+            propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Render);
+        }else{
+            propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Workspace);
+        }
+        return propertiesContext;
     }
 }

@@ -1,11 +1,8 @@
 package org.edu_sharing.service.nodeservice;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 
-import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public interface PropertiesInterceptor {
@@ -74,20 +71,4 @@ public interface PropertiesInterceptor {
      * e.g. if the current user might not have all permissions to access them
      */
     Map<String, Object> beforeDeliverProperties(PropertiesContext context);
-
-    public static PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){
-        PropertiesContext propertiesContext = new PropertiesContext();
-        propertiesContext.setProperties(properties);
-        propertiesContext.setAspects(aspects);
-        propertiesContext.setNodeRef(nodeRef);
-        String requestURI = Context.getCurrentInstance().getRequest().getRequestURI();
-        if(requestURI.contains("rest/search")){
-            propertiesContext.setSource(PropertiesCallSource.Search);
-        }else if(requestURI.contains("components/render") || requestURI.contains("rest/rendering")){
-            propertiesContext.setSource(PropertiesCallSource.Render);
-        }else{
-            propertiesContext.setSource(PropertiesCallSource.Workspace);
-        }
-        return propertiesContext;
-    }
 }

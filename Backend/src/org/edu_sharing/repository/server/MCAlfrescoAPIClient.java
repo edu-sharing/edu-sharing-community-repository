@@ -1140,7 +1140,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 
 		return (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-				beforeDeliverProperties(PropertiesInterceptor.getPropertiesContext(nodeRef,propsCopy,
+				beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,propsCopy,
 						Arrays.asList(aspects)));
 	}
 
@@ -1361,7 +1361,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if (mdate != null) {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
 				properties = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-						beforeCacheProperties(PropertiesInterceptor.getPropertiesContext(nodeRef,properties,
+						beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,properties,
 								service.getAspects(nodeRef).stream().map(q -> q.toString()).collect(Collectors.toList())));
 				repCache.put(nodeRef.getId(), properties);
 			}
