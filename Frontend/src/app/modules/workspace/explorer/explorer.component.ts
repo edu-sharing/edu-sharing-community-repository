@@ -9,6 +9,7 @@ import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
 import {DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_version';
+import {WorkspaceRoot} from '../workspace.component';
 
 @Component({
     selector: 'workspace-explorer',
@@ -17,6 +18,7 @@ import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_v
 })
 export class WorkspaceExplorerComponent implements OnDestroy {
     public readonly SCOPES = Scope;
+    possibleSortByFields = RestConstants.POSSIBLE_SORT_BY_FIELDS;
     @ViewChild('list') list: ListTableComponent;
     public _nodes: Node[] = [];
     @Input() customOptions: CustomOptions;
@@ -53,6 +55,24 @@ export class WorkspaceExplorerComponent implements OnDestroy {
     private lastRequestSearch : boolean;
 
     @Input() selection : Node[];
+    _root: WorkspaceRoot;
+    @Input() set root (root: WorkspaceRoot) {
+        this._root = root;
+        if(['MY_FILES', 'SHARED_FILES'].includes(root)) {
+            this.possibleSortByFields = RestConstants.POSSIBLE_SORT_BY_FIELDS;
+        } else {
+            this.possibleSortByFields = RestConstants.POSSIBLE_SORT_BY_FIELDS_SOLR;
+        }
+        this.storage.get(SessionStorageService.KEY_WORKSPACE_SORT + root, null).subscribe((data) => {
+            if (data?.sortBy != null) {
+                this.sortBy = data.sortBy;
+                this.sortAscending = data.sortAscending;
+            } else {
+                this.sortBy = RestConstants.CM_NAME;
+                this.sortAscending = RestConstants.DEFAULT_SORT_ASCENDING;
+            }
+        });
+    }
     @Input() set current(current : Node) {
         this.setNode(current);
 
@@ -176,12 +196,6 @@ export class WorkspaceExplorerComponent implements OnDestroy {
         private nodeApi : RestNodeService) {
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
-        this.storage.get(SessionStorageService.KEY_WORKSPACE_SORT, null).subscribe((sort) => {
-            if(sort?.sortBy != null) {
-                this.setSorting(sort);
-            }
-        });
-
     }
     public getColumns(customColumns:any[],configColumns:string[]) {
         let defaultColumns:ListItem[]=[];
@@ -269,7 +283,7 @@ export class WorkspaceExplorerComponent implements OnDestroy {
     public setSorting(data:any) {
         this.sortBy=data.sortBy;
         this.sortAscending=data.sortAscending;
-        this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT, data);
+        this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT + this._root, data);
         this.load(true);
     }
     public onSelection(event : Node[]) {
