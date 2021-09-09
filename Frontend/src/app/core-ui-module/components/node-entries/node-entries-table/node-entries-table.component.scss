@@ -1,4 +1,5 @@
 @import '../../../styles/variables';
+$defaultColumnWidth: 120px;
 
 :host {
     display: flex;
@@ -15,13 +16,24 @@
         }
     }
 }
-.mat-column-icon {
-    flex: 0 65px;
-    justify-content: center;
+mat-header-cell,
+mat-cell {
+    // do not fix the "primary/title" column
+    &:not(:nth-child(3)) {
+        flex: 0 $defaultColumnWidth;
+    }
+    &.mat-column-select {
+        flex: 0 54px;
+    }
+    &.mat-column-icon {
+        flex: 0 65px;
+        justify-content: center;
+    }
+    &.mat-column-actions {
+        flex: 0 50px;
+    }
 }
-.mat-column-actions {
-    flex: 0 50px;
-}
+
 .mat-row {
     &:hover {
         background-color: $listItemSelectedBackground;
@@ -51,10 +63,6 @@
 
 .mat-row {
     cursor: pointer;
-}
-
-.mat-column-select {
-    flex: 0 54px;
 }
 
 .mat-column-link {
