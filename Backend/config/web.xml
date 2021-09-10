@@ -82,9 +82,13 @@
 		    </init-param>
       -->
    </filter>
-  
-   
-	<filter>
+
+    <filter>
+        <filter-name>Edu Error Filter</filter-name>
+        <filter-class>org.edu_sharing.repository.server.authentication.ErrorFilter</filter-class>
+    </filter>
+
+    <filter>
 		<filter-name>Edu Context Management Filter</filter-name>
 		<filter-class>org.edu_sharing.repository.server.authentication.ContextManagementFilter</filter-class>
 	</filter>
@@ -183,7 +187,10 @@
       <filter-name>REST Origin Filter</filter-name>
       <url-pattern>/oauth2/*</url-pattern>
    </filter-mapping>
-
+    <filter-mapping>
+        <filter-name>Edu Error Filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <filter-mapping>
       <filter-name>Edu Context Management Filter</filter-name>
       <url-pattern>/webdav/*</url-pattern>
@@ -851,12 +858,17 @@
         <location>/error.html</location>
     </error-page>
     <error-page>
+        <error-code>405</error-code>
+        <location>/error.html</location>
+    </error-page>
+    <error-page>
         <error-code>500</error-code>
         <location>/error.html</location>
     </error-page>
-
+    <!--
     <error-page>
         <exception-type>org.edu_sharing.repository.server.rendering.RenderingException</exception-type>
         <location>/rendering-error</location>
     </error-page>
+    -->
 </web-app>

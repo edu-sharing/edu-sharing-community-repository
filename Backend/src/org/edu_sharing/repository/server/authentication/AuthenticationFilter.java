@@ -141,20 +141,22 @@ public class AuthenticationFilter implements javax.servlet.Filter {
   		
 	    
 	    //find out if the user is already authenticated
+		boolean isValidated = false;
 	    try{
 			
 			String ticket = authTool.getTicketFromSession( httpReq.getSession());
 			log.debug("ticket from session:"+ticket);
-			
-			if(authTool.validateTicket(ticket)){
-						
-				//default stuff
-				chain.doFilter(req,res);
-				return;
-			}
+			isValidated = authTool.validateTicket(ticket);
 			
 		}catch(Throwable e){
 			e.printStackTrace();
+		}
+
+		if(isValidated){
+
+			//default stuff
+			chain.doFilter(req,res);
+			return;
 		}
 		
 		//for async GWT calls

@@ -10,6 +10,7 @@ import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.json.JSONObject;
+import org.springframework.validation.Errors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,16 +28,10 @@ public class NgErrorServlet extends HttpServlet {
 		try {
 			Object errorMessage=req.getAttribute("javax.servlet.error.message");
 			Object errorCode=req.getAttribute("javax.servlet.error.status_code");
-			logger.info("Redirect to error page: "+errorCode+" "+errorMessage);
-			if("application/json".equals(req.getHeader("accept"))){
-				ErrorResponse response = new ErrorResponse();
-				response.setError(errorMessage.toString());
-				resp.setHeader("Content-Type","application/json");
-				resp.setStatus(Integer.parseInt(errorCode.toString()));
-				resp.getWriter().print(new Gson().toJson(response));
-			} else {
-				resp.sendRedirect(URLTool.getNgErrorUrl(errorCode.toString()));
-			}
+			ErrorFilter.handleError(req, resp, new Throwable(
+					errorMessage.toString()),
+					Integer.parseInt(errorCode.toString())
+			);
 		}catch(Throwable t) {
 			logger.error(t);
 			resp.sendError(500, "Fatal error preparing error.html: "+t.getMessage());
@@ -47,13 +42,9 @@ public class NgErrorServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		Object errorMessage=req.getAttribute("javax.servlet.error.message");
 		Object errorCode=req.getAttribute("javax.servlet.error.status_code");
-		logger.info("Redirect to error page: "+errorCode+" "+errorMessage);
-		if("application/json".equals(req.getHeader("accept"))){
-			ErrorResponse response = new ErrorResponse();
-			response.setError(errorMessage.toString());
-			resp.setHeader("Content-Type","application/json");
-			resp.setStatus(Integer.parseInt(errorCode.toString()));
-			resp.getWriter().print(new Gson().toJson(response));
-		}
+		ErrorFilter.handleError(req, resp, new Throwable(
+						errorMessage.toString()),
+				Integer.parseInt(errorCode.toString())
+		);
 	}
 }
