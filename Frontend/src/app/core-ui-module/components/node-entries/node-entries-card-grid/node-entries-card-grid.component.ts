@@ -21,7 +21,7 @@ import {NodeEntriesDisplayType} from '../../node-entries-wrapper/node-entries-wr
 })
 export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
-    @ContentChild('empty') emptyRef: TemplateRef<any>;
+    @ContentChild('title') titleRef: TemplateRef<any>;
     @ViewChild('grid') gridRef: ElementRef;
     @Input() displayType: NodeEntriesDisplayType;
 

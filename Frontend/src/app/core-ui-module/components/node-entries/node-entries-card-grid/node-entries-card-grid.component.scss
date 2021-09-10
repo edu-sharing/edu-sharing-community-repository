@@ -13,13 +13,20 @@
         transform: rotate(-0.25deg);
     }
 }
-
-.order-panel {
+.grid-top {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    > mat-slide-toggle {
-        margin-right: 10px;
+    .title {
+        display: flex;
+        flex-grow: 1;
+    }
+    .order-panel {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        > mat-slide-toggle {
+            margin-right: 10px;
+        }
     }
 }
 .card-grid {

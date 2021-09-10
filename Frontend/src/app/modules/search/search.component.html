@@ -249,19 +249,7 @@
             <h1 appTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
               <div *ngIf="!searchService.dataSourceCollections.isEmpty() && !addToCollection">
-                    <div class="collectionsHeading">
-                        <div class="heading">
-                          <h2>
-                            {{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.dataSourceCollections.getTotal()}})
-                          </h2>
-                          <button
-                            *ngIf="!searchService.dataSourceCollections.areAllDisplayed() || collectionsMore"
-                            mat-button
-                            color="primary"
-                            class="toggle"
-                            (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</button>
-                          </div>
-                    </div>
+
                     <div #collections class="collections">
                         <app-node-entries-wrapper
                                 class="collections"
@@ -272,7 +260,21 @@
                                 [gridConfig]="{
                                     maxCols: collectionsMore ? -1 : 1
                                 }"
-                        ></app-node-entries-wrapper>
+                        >
+                          <ng-template #title>
+                            <div class="heading">
+                              <h2>
+                                {{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.dataSourceCollections.getTotal()}})
+                              </h2>
+                              <button
+                                *ngIf="!searchService.dataSourceCollections.areAllDisplayed() || collectionsMore"
+                                mat-button
+                                color="primary"
+                                class="toggle"
+                                (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</button>
+                            </div>
+                          </ng-template>
+                        </app-node-entries-wrapper>
                     </div>
                 </div>
                 <div *ngIf="!(currentRepository=='-all-' && groupResults && !searchService.dataSourceSearchResult[0]?.isLoading)" class="searchUngrouped">
@@ -280,24 +282,36 @@
                         <i class="material-icons">search</i>
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
-                  <div class="heading" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty()">
-                    <h2>
-                      {{ 'SEARCH.MATERIALS' | translate }}
-                      <ng-container *ngIf="searchService.dataSourceSearchResult[0] && !searchService.dataSourceSearchResult[0]?.isEmpty() && currentRepository!='-all-'">
-                        ({{searchService.dataSourceSearchResult[0]?.getTotal()}})
-                      </ng-container>
-                    </h2>
-                    <!-- TODO: make popup menu usable with keyboard -->
-                  </div>
-                    <div class="heading" *ngIf="!searchService.dataSourceCollections.isEmpty() && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
                   <app-node-entries-wrapper
                     #nodeEntriesResults
                     *ngIf="searchService.dataSourceSearchResult[0]"
                     [dataSource]="searchService.dataSourceSearchResult[0]"
                     [columns]="searchService.columns"
+                    [sort]="{
+                      allowed: true,
+                      active: searchService.sort?.active,
+                      direction: searchService.sort?.direction,
+                      columns: searchService.sort?.columns
+                    }"
+                    (sortChange)="updateSort($event)"
                     [displayType]="searchService.displayType"
                     (fetchData)="getMoreResults()"
                   >
+                    <ng-template #title>
+                      <div class="heading" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty()">
+                        <h2>
+                          {{ 'SEARCH.MATERIALS' | translate }}
+                          <ng-container *ngIf="searchService.dataSourceSearchResult[0] && !searchService.dataSourceSearchResult[0]?.isEmpty() && currentRepository!='-all-'">
+                            ({{searchService.dataSourceSearchResult[0]?.getTotal()}})
+                          </ng-container>
+                        </h2>
+                        <!-- TODO: make popup menu usable with keyboard -->
+                      </div>
+                      <!-- TODO: Ignored params -->
+                      <ng-container *ngIf="searchService.ignored && searchService.ignored.length">
+                        {{ 'SEARCH.IGNORED_PARAMETERS' | translate}}
+                      </ng-container>
+                    </ng-template>
                     <ng-template #empty>
                       <div class="noResults" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">
                         <i class="material-icons">search</i>

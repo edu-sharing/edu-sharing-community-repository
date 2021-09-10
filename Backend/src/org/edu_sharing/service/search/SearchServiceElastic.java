@@ -29,6 +29,8 @@ import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
+import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
@@ -391,6 +393,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setStoreProtocol(protocol);
         eduNodeRef.setStoreId(identifier);
         eduNodeRef.setNodeId(nodeId);
+
+        eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
+                stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
+
+        PropertiesInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(alfNodeRef,props,eduNodeRef.getAspects());
+        props = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().beforeDeliverProperties(propertiesContext);
+
+
         eduNodeRef.setProperties(props);
         Map preview = (Map) sourceAsMap.get("preview");
         if(preview != null && preview.get("small") != null) {
@@ -399,8 +409,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             Base64.getDecoder().decode((String) preview.get("small")))
             );
         }
-        eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
-                stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
+
 
         HashMap<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);

@@ -9,7 +9,7 @@ import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
-import {WorkspaceMainComponent} from '../workspace.component';
+import {WorkspaceMainComponent, WorkspaceRoot} from '../workspace.component';
 
 @Component({
     selector: 'workspace-tree',
@@ -17,7 +17,7 @@ import {WorkspaceMainComponent} from '../workspace.component';
     styleUrls: ['tree.component.scss'],
 })
 export class WorkspaceTreeComponent {
-    @Input() root: string;
+    @Input() root: WorkspaceRoot;
     @Input() workspace: WorkspaceMainComponent;
     @Input() isSafe: boolean;
     @Input() mainNav: MainNavComponent;

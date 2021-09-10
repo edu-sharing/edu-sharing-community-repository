@@ -18,6 +18,7 @@ import {NodeEntriesDisplayType} from '../node-entries-wrapper/node-entries-wrapp
 })
 export class NodeEntriesComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    @ContentChild('title') titleRef: TemplateRef<any>;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
 
     constructor(

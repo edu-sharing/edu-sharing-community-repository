@@ -84,6 +84,7 @@ import {
     NodeEntriesWrapperComponent
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {Sort} from '@angular/material/sort';
+import {first} from 'rxjs/operators';
 
 // component class
 @Component({
@@ -988,7 +989,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                     this.refreshContent(callback);
                     if(this.feedbackAllowed() && this.params.feedback === 'true') {
                         this.mainNavRef.management.collectionWriteFeedback = collection;
-                        this.mainNavRef.management.collectionWriteFeedbackChange.first().subscribe(() => {
+                        this.mainNavRef.management.collectionWriteFeedbackChange.pipe(first()).subscribe(() => {
                             if(this.params.feedbackClose === 'true') {
                                 window.close();
                             }
@@ -1278,6 +1279,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.optionsService.initComponents(
             this.mainNavRef,
             this.actionbarCollection,
+            this.listReferences,
         );
         this.optionsService.refreshComponents();
     }

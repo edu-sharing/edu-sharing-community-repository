@@ -930,6 +930,8 @@ public class CCConstants {
 
 	public final static String VIRT_PROP_CHILDOBJECTCOUNT = "{virtualproperty}childobjectcount";
 
+	public final static String VIRT_PROP_MEDIACENTERS = "{virtualproperty}mediacenters";
+
 	/**
 	 * says if this set of properties is from an remote repository that was linked in the local repo by an remoteobject
 	 * values are all that can be used in new Boolean(value)

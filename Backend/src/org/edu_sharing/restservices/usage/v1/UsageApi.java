@@ -16,6 +16,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.usage.v1.model.CreateUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
 import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
@@ -233,7 +234,7 @@ public class UsageApi {
 					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 			})
 	public Response setUsage(@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-							 @ApiParam(value = " usage date",required = true) Usage usage){
+							 @ApiParam(value = " usage date",required = true) CreateUsage usage){
 		try {
 			RepositoryDao homeRepo = RepositoryDao.getRepository(RepositoryDao.HOME);
 			if(RepositoryDao.HOME.equals(repository)) {

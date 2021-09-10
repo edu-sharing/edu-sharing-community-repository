@@ -274,18 +274,20 @@ section {
         }
     }
 }
+.actionbarMaterials {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 10px 20px 0;
+}
 .content-header {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    margin-bottom: 5px;
+    width: 100%;
     > h2.mat-heading-3 {
         flex-grow: 1;
         margin: 5px 10px 0 0;
     }
     > .actionbarMaterials {
-        margin-top: -5px;
-        margin-right: -5px;
+        margin-right: 20px;
     }
 }
 :host ::ng-deep {

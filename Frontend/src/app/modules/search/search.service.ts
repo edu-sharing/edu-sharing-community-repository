@@ -3,7 +3,10 @@ import { Node } from '../../core-module/core.module';
 import { ListItem } from '../../core-module/core.module';
 import { BehaviorSubject } from 'rxjs';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+import {
+    ListSortConfig,
+    NodeEntriesDisplayType
+} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 
 /**
  * Session state for search.component.
@@ -39,7 +42,7 @@ export class SearchService {
         return this.sidenavOpened$.value;
     }
     ex: boolean;
-    sort: any = {};
+    sort: ListSortConfig;
     extendedSearchUsed = false;
 
     constructor() {}
@@ -54,6 +57,7 @@ export class SearchService {
         }
         this.offset = 0;
         this.dataSourceSearchResult = [new NodeDataSource<Node>()];
+        this.dataSourceSearchResult[0].isLoading = true;
         this.dataSourceCollections.reset();
         this.searchResultRepositories = [];
         this.complete = false;

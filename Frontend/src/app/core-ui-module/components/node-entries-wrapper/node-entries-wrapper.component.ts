@@ -92,12 +92,16 @@ export interface ListEventInterface<T extends Node> {
     template: `
         <app-node-entries
             *ngIf="!customNodeListComponent"
-        ></app-node-entries>`,
+        >
+            <ng-template #title><ng-container *ngTemplateOutlet="titleRef"></ng-container></ng-template>
+            <ng-template #empty><ng-container *ngTemplateOutlet="emptyRef"></ng-container></ng-template>
+        </app-node-entries>`,
     providers: [
         NodeEntriesService,
     ]
 })
 export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, ListEventInterface<T> {
+    @ContentChild('title') titleRef: TemplateRef<any>;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];

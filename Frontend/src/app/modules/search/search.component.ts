@@ -42,7 +42,6 @@ import {
     SearchList,
     SearchRequestCriteria,
     SessionStorageService,
-    SortItem,
     TemporaryStorageService,
     UIService
 } from '../../core-module/core.module';
@@ -72,12 +71,13 @@ import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {
-    InteractionType,
+    InteractionType, ListSortConfig,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {ListItemSort} from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
 
 @Component({
     selector: 'app-search',
@@ -506,9 +506,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 repository: repository,
                 mdsExtended: this.mdsExtended,
                 sidenav: this.searchService.sidenavOpened,
-                materialsSortBy: this.searchService.sort.materialsSortBy,
-                materialsSortAscending: this.searchService.sort
-                    .materialsSortAscending,
+                materialsSortBy: this.searchService.sort.active,
+                materialsSortAscending: this.searchService.sort.direction === 'asc',
                 reurl: this.searchService.reurl,
             },
         });
@@ -733,10 +732,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    sortMaterials(sort: any) {
-        this.searchService.sort.materialsSortBy = sort.name || sort.sortBy;
-        this.searchService.sort.materialsSortAscending =
-            sort.ascending || sort.sortAscending;
+    updateSort(sort: ListSortConfig) {
+        this.searchService.sort = sort;
         this.routeSearch();
     }
 
@@ -834,35 +831,34 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.currentMdsSet == null) {
             return null;
         }
-        let sort = MdsHelper.getSortInfo(this.currentMdsSet, 'search');
-        if (sort && sort.columns && sort.columns.length) {
-            this.searchService.sort.materialsColumns = [];
-            for (let column of sort.columns) {
-                let item = new SortItem('NODE', column.id);
-                item.mode = column.mode;
-                this.searchService.sort.materialsColumns.push(item);
-            }
-        } else {
-            this.searchService.sort.materialsColumns = null;
-        }
-        return sort;
+        return MdsHelper.getSortInfo(this.currentMdsSet, 'search');
     }
 
-    private updateSort() {
-        let state = this.currentRepository + ':' + this.mdsId;
+    private updateSortState() {
+        console.log('sort state');
         let sort = this.updateSortMds();
-        // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
-        // exception: if there is no state at all, refresh it with the default
-        if (
-            state == this.searchService.sort.state &&
-            !(sort && !this.searchService.sort.materialsSortBy)
-        )
-            return;
-        this.searchService.sort.state = state;
         if (sort) {
-            this.searchService.sort.materialsSortBy = sort.default.sortBy;
-            this.searchService.sort.materialsSortAscending =
-                sort.default.sortAscending;
+            const columns = sort.columns.map((c) =>
+                new ListItemSort('NODE', c.id, (c.mode as any))
+            );
+            // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
+            // exception: if there is no state at all, refresh it with the default
+            if (this.searchService.sort) {
+                this.searchService.sort.columns = columns;
+                return;
+            }
+            console.log(sort);
+            this.searchService.sort = {
+                active: sort.default.sortBy,
+                direction: sort.default.sortAscending ? 'asc' : 'desc',
+                columns
+            };
+        } else {
+            this.searchService.sort = {
+                active: null,
+                direction: undefined,
+                columns: []
+            };
         }
     }
 
@@ -970,7 +966,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     async onMdsReady(mds: any = null) {
         this.currentMdsSet = mds;
         this.updateColumns();
-        this.updateSort();
+        this.updateSortState();
         if (!this.searchService.dataSourceSearchResult[0] || this.searchService.dataSourceSearchResult[0]?.isEmpty()) {
             this.initalized = true;
             if (!this.currentValues && this.getActiveMds()) {
@@ -1014,11 +1010,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.mdsExtended = param['mdsExtended'] == 'true';
             if (param['materialsSortBy']) {
                 // set a valid state first
-                this.updateSort();
-                this.searchService.sort.materialsSortBy =
-                    param['materialsSortBy'];
-                this.searchService.sort.materialsSortAscending =
-                    param['materialsSortAscending'] == 'true';
+                this.updateSortState();
+                this.searchService.sort.active = param['materialsSortBy'];
+                this.searchService.sort.direction = param['materialsSortAscending'] === 'true' ? 'asc' : 'desc';
             }
             if (param.parameters) {
                 this.searchService.extendedSearchUsed = true;
@@ -1061,7 +1055,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.isSearching = false;
             return;
         }
-
+        this.searchService.dataSourceSearchResult[0].isLoading = true;
         let repo = repos[position];
         if (!repo.enabled) {
             this.searchRepository(repos, criterias, init, position + 1, count);
@@ -1077,12 +1071,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // order set by user and order is not of type score (which would be the default mode)
         if (
-            this.searchService.sort.materialsSortBy &&
-            this.searchService.sort.materialsSortBy !=
-                RestConstants.LUCENE_SCORE
+            this.searchService.sort.active &&
+            this.searchService.sort.active !== RestConstants.LUCENE_SCORE
         ) {
-            sortBy = [this.searchService.sort.materialsSortBy];
-            sortAscending = [this.searchService.sort.materialsSortAscending];
+            sortBy = [this.searchService.sort.active];
+            sortAscending = [this.searchService.sort.direction === 'asc'];
         }
         let mdsId = this.mdsId;
         if (this.currentRepository == RestConstants.ALL) {

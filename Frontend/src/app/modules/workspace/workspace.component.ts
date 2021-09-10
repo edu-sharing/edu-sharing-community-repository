@@ -57,6 +57,7 @@ import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 
+export type WorkspaceRoot = 'MY_FILES' | 'SHARED_FILES' | 'MY_SHARED_FILES' | 'TO_ME_SHARED_FILES' | 'WORKFLOW_RECEIVE' | 'RECYCLE' | 'ALL_FILES';
 @Component({
     selector: 'workspace-main',
     templateUrl: 'workspace.component.html',
@@ -83,7 +84,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private sharedFolders: Node[] = [];
     path: Node[] = [];
     private parameterNode: Node;
-    root = 'MY_FILES';
+    root: WorkspaceRoot = 'MY_FILES';
 
     selection: Node[] = [];
 
@@ -479,7 +480,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.node.getNodeMetadata(folder.id).subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
         }
     }
-    setRoot(root: string) {
+    setRoot(root: WorkspaceRoot) {
         this.root = root;
         this.searchQuery = null;
         this.routeTo(root, null, null);
