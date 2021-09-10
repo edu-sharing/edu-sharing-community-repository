@@ -31,8 +31,6 @@ import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.springframework.context.ApplicationContext;
 
@@ -144,26 +142,19 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 			@Override
 			public Usage doWork() throws Exception {
 				try{
-					String localNodeId = parentNodeId;
-					String repoIdMapped = repoId;
-					if(repoId!=null && !ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
-						// create or fetch a remote object repesentation
-						localNodeId = new RemoteObjectService().getRemoteObject(repoId, parentNodeId);
-					} else {
-						repoIdMapped = ApplicationInfoList.getHomeRepository().getAppId();
-					}
 					logger.info("before alfServicesWrapper.hasPermissions");
 
-					HashMap<String, Object> usage = usageDao.getUsage(lmsId, courseId, localNodeId, resourceId);
+					HashMap<String, Object> usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
 
 					//only check publish permission for new content so that an teacher who modifies the course/wysiwyg can safe changes of permission
 					if(usage == null){
-						String usageNodeId = localNodeId;
+						String usageNodeId=parentNodeId;
 						// for collection references, we always rely on the main object permissions
-						if(NodeServiceFactory.getNodeService(repoIdMapped).hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),usageNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+						if(NodeServiceFactory.getLocalService().hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),usageNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
 							usageNodeId=NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,usageNodeId),CCConstants.CCM_PROP_IO_ORIGINAL);
 						}
-						boolean hasPublishPerm = PermissionServiceFactory.getPermissionService(repoIdMapped).hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), usageNodeId, user, CCConstants.PERMISSION_CC_PUBLISH);
+						boolean hasPublishPerm = ((MCAlfrescoClient)RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(),
+								(HashMap)null)).hasPermissions(usageNodeId, user, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
 
 						if(!hasPublishPerm){
 							logger.info("User "+user+" has no publish permission on " + usageNodeId);
@@ -174,7 +165,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 						}
 					}
 
-					Usage result = setUsageInternal(repoIdMapped,user,lmsId,courseId,localNodeId,userMail,fromUsed,toUsed,distinctPersons,_version,resourceId,xmlParams);
+					Usage result = setUsageInternal(repoId,user,lmsId,courseId,parentNodeId,userMail,fromUsed,toUsed,distinctPersons,_version,resourceId,xmlParams);
 					
 					return result;
 				}catch(Throwable e){

@@ -141,7 +141,7 @@ public class PermissionServiceAdapter implements PermissionService {
 
 	@Override
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission) {
-		return hasPermission(storeProtocol, storeId, nodeId, permission);
+		return false;
 	}
 
 	@Override

@@ -95,11 +95,7 @@ public interface NodeService {
 	public HashMap<String, Object> getPropertiesPersisting(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
 	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
-		String[] aspects = getAspects(storeProtocol, storeId, nodeId);
-		if(aspects == null) {
-			return false;
-		}
-		return Arrays.asList(aspects).contains(aspect);
+		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);
 	}
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId);
 
