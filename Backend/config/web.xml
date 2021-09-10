@@ -85,7 +85,7 @@
 
     <filter>
         <filter-name>Edu Error Filter</filter-name>
-        <filter-class>org.edu_sharing.repository.server.authentication.ErrorFilter</filter-class>
+        <filter-class>org.edu_sharing.repository.server.ErrorFilter</filter-class>
     </filter>
 
     <filter>
