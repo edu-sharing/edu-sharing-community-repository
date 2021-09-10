@@ -233,7 +233,7 @@ public class UsageApi {
 					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 			})
-	public Response setUsage(@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	public Response setUsage(@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repositoryId") String repository,
 							 @ApiParam(value = " usage date",required = true) CreateUsage usage){
 		try {
 			RepositoryDao homeRepo = RepositoryDao.getRepository(RepositoryDao.HOME);
