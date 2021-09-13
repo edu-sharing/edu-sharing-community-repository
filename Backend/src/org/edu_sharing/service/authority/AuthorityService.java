@@ -9,6 +9,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.MD5;
 import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
 
@@ -75,6 +76,7 @@ public interface AuthorityService {
 	}
 	boolean authorityExists(String authority);
 	Map<String, Serializable> getUserInfo(String userName) throws Exception;
+	User getUser(String userName);
 	void createOrUpdateUser(Map<String, Serializable> userInfo) throws Exception;
 
 	NodeRef getAuthorityNodeRef(String authority);
