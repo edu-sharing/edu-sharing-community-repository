@@ -477,7 +477,7 @@ export class CollectionNewComponent {
             this.newCollectionStep = this.availableSteps[pos + 1];
             // support for legacy mds
             setTimeout(() => {
-                this.mds?.loadMds();
+                this.mds?.loadMds(true);
             });
         }
         this.updateButtons();
@@ -510,7 +510,7 @@ export class CollectionNewComponent {
             this.newCollectionStep = this.availableSteps[pos - 1];
             // support for legacy mds
             setTimeout(() => {
-                this.mds?.loadMds();
+                this.mds?.loadMds(true);
             });
         }
         this.updateButtons();
