@@ -46,6 +46,8 @@ import {MdsMetadatasets} from '../../../core-module/core.module';
 import {ConfigurationHelper} from '../../../core-module/core.module';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import { SkipTarget } from '../../../common/ui/skip-nav/skip-nav.service';
+import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import {Values} from '../../../common/ui/mds-editor/types';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -58,7 +60,7 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
 export class CollectionNewComponent {
   readonly SkipTarget = SkipTarget;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
-  @ViewChild('mds') mds : MdsComponent;
+  @ViewChild('mds') mds : MdsEditorWrapperComponent;
   @ViewChild('share') shareRef : WorkspaceShareComponent;
   public hasCustomScope: boolean;
   public COLORS:string[];
@@ -67,9 +69,7 @@ export class CollectionNewComponent {
   public showPermissions = false;
   currentCollection: EduData.Node;
   public newCollectionType:string;
-  public properties:any;
-  public reloadMds:Boolean;
-  private hasUserAnyOrgasYet = false;
+  public properties: Values = {};
   user : User;
   public mainnav = true;
   public editPermissionsId: string;
@@ -283,7 +283,6 @@ export class CollectionNewComponent {
         this.editPermissionsDummy.aspects=[RestConstants.CCM_ASPECT_COLLECTION];
         this.editPermissionsDummy.isDirectory=true;
       }
-      console.log(this.permissions);
       this.showPermissions=true;
       // update state after changing different bindings
       this.uiService.waitForComponent(this, 'shareRef').subscribe(()=> this.shareRef.refresh());
@@ -457,27 +456,31 @@ export class CollectionNewComponent {
       let pos=this.currentStepPosition();
       return pos>=this.availableSteps.length-1;
     }
-    public goToNextStep(){
-      if(this.newCollectionStep==this.STEP_GENERAL){
-          if(!this.currentCollection.title){
-              this.toast.error(null,'COLLECTIONS.ENTER_NAME');
-              return;
-          }
-      }
-      if(this.newCollectionStep==this.STEP_METADATA){
-          this.properties=this.mds.getValues({},true);
-          if(this.properties==null)
-              return;
-      }
-      if(this.isLastStep()){
-        this.save();
-      }
-      else{
-        let pos=this.currentStepPosition();
-        this.newCollectionStep=this.availableSteps[pos+1];
-        this.reloadMds=new Boolean(true);
-      }
-      this.updateButtons();
+    public async goToNextStep() {
+        if (this.newCollectionStep == this.STEP_GENERAL) {
+            if (!this.currentCollection.title) {
+                this.toast.error(null, 'COLLECTIONS.ENTER_NAME');
+                return;
+            }
+        }
+        if (this.newCollectionStep == this.STEP_METADATA) {
+            const props = await this.mds.getValues();
+            if (props == null) {
+                return;
+            }
+            this.properties = props;
+        }
+        if (this.isLastStep()) {
+            this.save();
+        } else {
+            const pos = this.currentStepPosition();
+            this.newCollectionStep = this.availableSteps[pos + 1];
+            // support for legacy mds
+            setTimeout(() => {
+                this.mds?.loadMds();
+            });
+        }
+        this.updateButtons();
     }
     setCollectionGeneral(){
 
@@ -485,30 +488,32 @@ export class CollectionNewComponent {
     currentStepPosition(){
       return this.availableSteps.indexOf(this.newCollectionStep);
     }
-    goBack(){
-      if(this.newCollectionStep==this.STEP_METADATA){
-          this.properties=this.mds.getValues({},false);
-      }
-       let pos=this.currentStepPosition();
-       if(pos==-1){
-         this.navigateToCollectionId(this.parentId);
-       }
-       else if(pos==0){
-         if(this.editId) {
-           this.navigateToCollectionId(this.editId);
-         }
-         else if(this.parentCollection && this.parentCollection.collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL){
-           this.navigateToCollectionId(this.parentId);
-         }
-         else {
-           this.newCollectionStep = this.STEP_NEW;
-         }
-       }
-       else{
-         this.newCollectionStep = this.availableSteps[pos - 1];
-         this.reloadMds=new Boolean(true);
-       }
-       this.updateButtons();
+    async goBack() {
+        if (this.newCollectionStep == this.STEP_METADATA) {
+            const props = await this.mds.getValues();
+            if (props != null) {
+                this.properties = props;
+            }
+        }
+        let pos = this.currentStepPosition();
+        if (pos == -1) {
+            this.navigateToCollectionId(this.parentId);
+        } else if (pos == 0) {
+            if (this.editId) {
+                this.navigateToCollectionId(this.editId);
+            } else if (this.parentCollection && this.parentCollection.collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL) {
+                this.navigateToCollectionId(this.parentId);
+            } else {
+                this.newCollectionStep = this.STEP_NEW;
+            }
+        } else {
+            this.newCollectionStep = this.availableSteps[pos - 1];
+            // support for legacy mds
+            setTimeout(() => {
+                this.mds?.loadMds();
+            });
+        }
+        this.updateButtons();
     }
     navigateToCollectionId(id:string) : void {
       this.isLoading = false;
