@@ -152,6 +152,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.Cache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
@@ -3066,11 +3067,20 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	
 	public User getOwner(String storeId,String storeProtocol,String nodeId){
 		String owner = this.serviceRegistry.getOwnableService().getOwner(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId));
-		User user = new User();
-		user.setUsername(owner);
+		return getUser(owner);
+	}
+
+	public User getUser(String username){
+		User user = UserCache.get(username);
+		if(user != null){
+			return user;
+		}
+
+		user = new User();
+		user.setUsername(username);
 		NodeRef persNoderef = null;
 		try {
-			persNoderef = personService.getPerson(owner,false);
+			persNoderef = personService.getPerson(username,false);
 		} catch(NoSuchPersonException e) {
 			//ie the system user
 		}
@@ -3081,6 +3091,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			user.setSurname(((String)props.get(QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME))));
 			user.setNodeId(persNoderef.getId());
 		}
+		UserCache.put(username,user);
 		return user;
 	}
 

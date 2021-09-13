@@ -30,6 +30,7 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.PropertyRequiredException;
@@ -477,7 +478,13 @@ public EduGroup getEduGroup(String authority){
 
 
 		}
-		@Override
+
+	@Override
+	public User getUser(String userName) {
+		return new MCAlfrescoAPIClient().getUser(userName);
+	}
+
+	@Override
 		public void createOrUpdateUser(Map<String, Serializable> userInfo) throws Exception {
 
 			String currentUser = AuthenticationUtil.getRunAsUser();

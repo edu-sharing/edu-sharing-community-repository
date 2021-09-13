@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.cache.UserCache;
 
 /**
  * create the edu-sharing default folders like "documents" and "images"
@@ -68,9 +69,10 @@ public class OnUpdatePersonPropertiesPolicy implements OnCreateNodePolicy, OnUpd
 	
 	@Override
 	public void onUpdateProperties(NodeRef nodeRef, Map<QName, Serializable> before, Map<QName, Serializable> after) {
-		
+
 		//NodeRef homefolder = (NodeRef) nodeService.getProperty(personNodeRef, ContentModel.PROP_HOMEFOLDER);
 		String username = (String)after.get(ContentModel.PROP_USERNAME);
+		UserCache.refresh(username);
 		logger.debug("username:"+username);
 		NodeRef homeFolderNodeRef = (NodeRef)before.get(ContentModel.PROP_HOMEFOLDER);
 
