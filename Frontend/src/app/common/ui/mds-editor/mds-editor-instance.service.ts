@@ -212,7 +212,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         initWithNodes(nodes: Node[]): void {
-            const nodeValues = nodes.map((node) => this.readNodeValue(node, this.definition));
+            const nodeValues = nodes.map((node) => this.readPropertyValue(node.properties, this.definition));
             if (nodeValues.every((nodeValue) => nodeValue === undefined)) {
                 const defaultValue = this.definition.defaultvalue
                     ? [this.definition.defaultvalue]
@@ -235,11 +235,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                this.initialValues = {
-                    jointValues:
-                        values?.[this.definition.id] ||
-                        (this.definition.defaultvalue ? [this.definition.defaultvalue] : []),
-                };
+                const nodeValues = this.readPropertyValue(values, this.definition);
+                this.initialValues =  this.calculateInitialValues([nodeValues]);
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
@@ -425,17 +422,17 @@ export class MdsEditorInstanceService implements OnDestroy {
                 .toPromise();
         }
 
-        private readNodeValue(node: Node, definition: MdsWidget): string[] {
+        private readPropertyValue(properties: Values, definition: MdsWidget): string[] {
             if (definition.type === MdsWidgetType.Range) {
-                const from: string[] = node.properties[`${definition.id}_from`];
-                const to: string[] = node.properties[`${definition.id}_to`];
+                const from: string[] = properties[`${definition.id}_from`];
+                const to: string[] = properties[`${definition.id}_to`];
                 if (from !== undefined && to !== undefined) {
                     return [from?.[0], to?.[0]];
                 } else {
                     return undefined;
                 }
             } else {
-                return node.properties[definition.id];
+                return properties[definition.id];
             }
         }
     };
