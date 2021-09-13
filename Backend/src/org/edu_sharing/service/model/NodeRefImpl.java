@@ -52,6 +52,8 @@ public class NodeRefImpl implements NodeRef {
 	Map<String, Boolean> permissions;
 	private List<String> aspects;
 
+	String owner;
+
 	public NodeRefImpl(){
 		
 	}
@@ -153,4 +155,10 @@ public class NodeRefImpl implements NodeRef {
 	public Preview getPreview() {
 		return preview;
 	}
+
+	@Override
+	public String getOwner() { return owner;}
+
+	@Override
+	public void setOwner(String owner) { this.owner = owner; }
 }

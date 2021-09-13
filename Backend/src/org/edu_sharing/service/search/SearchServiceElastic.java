@@ -387,6 +387,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 identifier,
                 nodeId);
         eduNodeRef.setProperties(props);
+
+        eduNodeRef.setOwner((String)sourceAsMap.get("owner"));
+
         Map preview = (Map) sourceAsMap.get("preview");
         if(preview != null && preview.get("small") != null) {
             eduNodeRef.setPreview(

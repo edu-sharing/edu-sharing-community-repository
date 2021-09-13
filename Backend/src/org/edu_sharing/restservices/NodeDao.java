@@ -21,6 +21,7 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -72,6 +73,7 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -91,6 +93,7 @@ public class NodeDao {
 	};
 	final List<String> access;
 	private final org.edu_sharing.service.model.NodeRef.Preview previewData;
+	private final String ownerUsername;
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
 	 */
@@ -342,6 +345,7 @@ public class NodeDao {
 	private final String storeId;
 	
 	NodeService nodeService;
+	AuthorityService authorityService;
 	CommentService commentService;
 
 	final Filter filter;
@@ -491,7 +495,7 @@ public class NodeDao {
 			}
 			this.previewData = nodeRef.getPreview();
 			refreshPermissions(nodeRef);
-			
+
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
 				this.type = (String) nodeProps.get(CCConstants.NODETYPE);
 			}
@@ -532,6 +536,8 @@ public class NodeDao {
 			for(org.edu_sharing.service.model.NodeRef usedInCollection : nodeRef.getUsedInCollections()){
 				usedInCollections.add(new NodeDao(repoDao, usedInCollection, filter));
 			}
+
+			this.ownerUsername = nodeRef.getOwner();
 
 		}catch(Throwable t){
 			throw DAOException.mapping(t,nodeRef.getNodeId());
@@ -685,7 +691,7 @@ public class NodeDao {
 			
 			nodeService.moveNode(nodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS,
 					sourceId);
-	
+
 			return new NodeDao(repoDao, sourceId, Filter.createShowAllFilter());
 			
 		} catch (Throwable t) {
@@ -1384,7 +1390,11 @@ public class NodeDao {
 	}
 	
 	private Person getOwner() {
-		User owner=nodeService.getOwner(storeId, storeProtocol, nodeId);
+		User owner = null;
+		if(ownerUsername != null && !ownerUsername.trim().equals("")){
+			owner = authorityService.getUser(ownerUsername);
+		}
+		owner = (owner == null) ? nodeService.getOwner(storeId, storeProtocol, nodeId) : owner;
 		if(owner==null)
 			return null;
 		Person ref = new Person();

@@ -97,4 +97,8 @@
     <bean name="eduSharingLightBendConfigCache" factory-bean="cacheFactory" factory-method="createCache">
         <constructor-arg value="cache.eduSharingLightBendConfigCache"/>
     </bean>
+
+    <bean name="eduSharingUserCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingUserCache"/>
+    </bean>
 </beans>
