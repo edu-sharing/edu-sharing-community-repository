@@ -158,7 +158,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
      *
      * Use `reInit()` and make sure inputs are prepared before calling.
      */
-    loadMds(): void {
+    loadMds(onlyLegacy = false): void {
         // In case of `SearchComponent`, `currentValues` is not ready when `loadMds` is called. So
         // we wait tick before initializing.
         setTimeout(() => {
@@ -171,6 +171,9 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                         });
                         return;
                     case 'angular':
+                        if(onlyLegacy) {
+                            return;
+                        }
                         this.mdsEditorInstance.mdsDefinition$
                             .pipe(first((definition) => definition !== null))
                             .subscribe((definition) => this.onMdsLoaded.emit(definition));

@@ -8,6 +8,7 @@ import {MdsWidgetComponent} from "./widget/mds-widget.component";
 import {RestConstants, RestMdsService} from "../../../core-module/core.module";
 import {DomSanitizer} from "@angular/platform-browser";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
+import {MdsEditorViewComponent} from '../mds-editor/mds-editor-view/mds-editor-view.component';
 
 @Component({
   selector: 'mds-viewer',
@@ -73,9 +74,11 @@ export class MdsViewerComponent{
         this.container.toArray().forEach((c) => {
           let element = c.nativeElement.getElementsByTagName(w.id);
           if (element && element[0]) {
+            MdsEditorViewComponent.updateWidgetWithHTMLAttributes(element[0], w);
             UIHelper.injectAngularComponent(this.factoryResolver, this.containerRef, MdsWidgetComponent, element[0], {
               widget: w,
-              data: this._data[w.id]
+              data: w.type === 'range' ? [this._data[w.id + '_from'], this._data[w.id + '_to']] :
+                  this._data[w.id]
             });
           }
         });
