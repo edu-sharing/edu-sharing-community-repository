@@ -851,11 +851,10 @@ export class WorkspaceShareComponent {
         if (!event._checked) {
             if (this.isLicenseMandatory() && !this.isLicenseEmpty()) {
                 if (this.isAuthorRequired() && this.isAuthorEmpty()) {
-                    this.toast.error(null, this.translate.instant("WORKSPACE.LICENSE.RELEASE_WITHOUT_AUTHOR"));
-                    event.preventDefaultEvent();
+                    this.toast.error(null, this.translate.instant('WORKSPACE.LICENSE.RELEASE_WITHOUT_AUTHOR'));
+                } else {
+                    this.toast.error(null, this.translate.instant('WORKSPACE.SHARE.PUBLISH.LICENSE_REQUIRED'));
                 }
-            } else {
-                this.toast.error(null, this.translate.instant("WORKSPACE.LICENSE.RELEASE_WITHOUT_LICENSE"));
                 event.preventDefaultEvent();
             }
         }
@@ -869,7 +868,7 @@ export class WorkspaceShareComponent {
                 this.inherited = inherited;
             }
         } else {
-            this.inherited = false
+            this.inherited = inherited
         }
     }
 
