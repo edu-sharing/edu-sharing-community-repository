@@ -10,6 +10,16 @@
             flex-direction: column;
             .confirm-wrapper {
                 padding: 10px;
+                display: flex;
+                justify-content: center;
+                flex-direction: column;
+                > div {
+                    text-align: center;
+                }
+                > button {
+                    display: flex;
+                    justify-content: center;
+                }
             }
             .description {
                 padding-bottom: 5px;
