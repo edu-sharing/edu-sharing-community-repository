@@ -454,13 +454,18 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	}
 
 	void addCurrentContext(NodeRef eduNodeRef) {
-		QName type = nodeService.getType(eduNodeRef);
-		if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString())){
-			String context = getEduSharingContext();
-			nodeService.setProperty(
-					eduNodeRef,
-					QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME),
-					context);
+		try{
+			policyBehaviourFilter.disableBehaviour(eduNodeRef);
+			QName type = nodeService.getType(eduNodeRef);
+			if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString())){
+				String context = getEduSharingContext();
+				nodeService.setProperty(
+						eduNodeRef,
+						QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME),
+						context);
+			}
+		}finally{
+			policyBehaviourFilter.enableBehaviour(eduNodeRef);
 		}
 	}
 
@@ -523,7 +528,12 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			logger.info("collectionType:" +collectionType);
 			if(collectionType == null){
 				if(nameAfter != null && !nameAfter.equals(nameBefore)){
-					nodeService.setProperty(nodeRef, ContentModel.PROP_TITLE, nameAfter);
+					try{
+						policyBehaviourFilter.disableBehaviour(nodeRef);
+						nodeService.setProperty(nodeRef, ContentModel.PROP_TITLE, nameAfter);
+					}finally{
+						policyBehaviourFilter.enableBehaviour(nodeRef);
+					}
 				}
 			}
 		}
