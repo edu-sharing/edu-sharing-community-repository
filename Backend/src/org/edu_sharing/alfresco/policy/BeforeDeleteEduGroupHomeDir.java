@@ -28,14 +28,12 @@ public class BeforeDeleteEduGroupHomeDir implements NodeServicePolicies.BeforeDe
 	
 	@Override
 	public void beforeDeleteNode(NodeRef nodeRef) {
-		List<NodeRef> eduGroupFolderList = EduGroupCache.getAllEduGoupFolder();
-		if(eduGroupFolderList != null && eduGroupFolderList.contains(nodeRef)) {
+		if(EduGroupCache.isAnOrganisationFolder(nodeRef)) {
 			if(!new Helper(authorityService).isAdmin(authenticationService.getCurrentUserName()) 
 					&& !AuthenticationUtil.isRunAsUserTheSystemUser()){
 				throw new SystemFolderDeleteDeniedException("you are not allowed to remove this folder!");
 			}
 		}
-		
 	}
 	
 	public void setAuthenticationService(AuthenticationService authenticationService) {
