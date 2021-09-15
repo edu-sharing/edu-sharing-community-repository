@@ -5,24 +5,14 @@ import {
     HostListener,
     Input,
     OnInit,
-    Output,
+    Output
 } from '@angular/core';
-import { Observable } from 'rxjs';
 import {
-    ConfigurationHelper,
-    ConfigurationService,
-    IamUser,
-    LoginResult,
-    RestConnectorService,
-    RestIamService,
-    UIConstants,
-    RestConstants,
+    ConfigurationService, LoginResult,
+    RestConnectorService, RestConstants, RestIamService,
+    UIConstants
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import {
-    MainMenuEntriesService,
-} from '../../services/main-menu-entries.service';
-import {ConfigEntry} from '../../../core-ui-module/node-helper.service';
 
 @Component({
     selector: 'app-main-menu-sidebar',
@@ -42,7 +32,6 @@ export class MainMenuSidebarComponent implements OnInit {
 
     // Internal state
     show = false;
-    entries$: Observable<ConfigEntry[]>;
 
     // Global state, set on init
     loginInfo: LoginResult;
@@ -51,10 +40,7 @@ export class MainMenuSidebarComponent implements OnInit {
         private configService: ConfigurationService,
         private connector: RestConnectorService,
         public iam: RestIamService,
-        mainMenuEntries: MainMenuEntriesService,
-    ) {
-        this.entries$ = mainMenuEntries.entries$;
-    }
+    ) {}
 
     // Public methods, meant for invocation from outside this component.
 
