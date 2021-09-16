@@ -58,6 +58,10 @@ public class EduGroupCache {
 		return EduGroupCache.cache.get(nodeRef);
 	}
 
+	public static Map<QName,Serializable> getByEduGroupfolder(NodeRef nodeRef){
+		return EduGroupCache.cacheWithFolderAsKey.get(nodeRef);
+	}
+
 	public static void remove(NodeRef nodeRef) {
 		synchronized(EduGroupCache.cache){
 			EduGroupCache.cacheWithFolderAsKey.remove((NodeRef)EduGroupCache.cache.get(nodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)));
@@ -68,6 +72,10 @@ public class EduGroupCache {
 	public static Collection<NodeRef> getKeys(){
 		return EduGroupCache.cache.getKeys();
 	}
+
+	public static Collection<NodeRef> getKeysEduGroupFolder(){
+		return EduGroupCache.cacheWithFolderAsKey.getKeys();
+	}
 	
 	public static String[] getNames(){
 		ArrayList<String> names = new ArrayList<String>();
@@ -75,30 +83,6 @@ public class EduGroupCache {
 			names.add((String)cache.get(nodeRef).get(ContentModel.PROP_AUTHORITY_NAME));
 		}
 		return names.toArray(new String[names.size()]);
-	}
-
-	/**
-	 * 
-	 * @return Map keys: EduGroup HomeFolder NodeRef, Values EduGroup Properties 
-	 */
-	public static Map<NodeRef,Map<QName,Serializable>> getAllEduGroupFolderAndEduGroupProps(){
-		/*Map<NodeRef,Map<QName,Serializable>> result = new HashMap<NodeRef,Map<QName,Serializable>>();
-		for(NodeRef groupNodeRef : EduGroupCache.cache.getKeys()){
-
-			NodeRef homeDirNodeRef = (NodeRef)EduGroupCache.cache.get(groupNodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
-			if(homeDirNodeRef != null) {
-				result.put(homeDirNodeRef,
-						EduGroupCache.cache.get(groupNodeRef));
-			}else{
-				logger.error("homeDirNodeRef is null for " + EduGroupCache.cache.get(groupNodeRef).get(ContentModel.PROP_AUTHORITY_NAME));
-			}
-		}
-		return result;*/
-		Map<NodeRef,Map<QName,Serializable>> result = new HashMap<NodeRef,Map<QName,Serializable>>();
-		for(NodeRef nodeRef : EduGroupCache.cacheWithFolderAsKey.getKeys()){
-			result.put(nodeRef,EduGroupCache.cacheWithFolderAsKey.get(nodeRef));
-		}
-		return result;
 	}
 
 	public static boolean isAnOrganisationFolder(NodeRef nodeRef){
