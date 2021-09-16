@@ -735,6 +735,8 @@ export class ListTableComponent implements EventListener {
             RestConstants.CCM_PROP_REPLICATIONSOURCE,
             RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN,
             RestConstants.CCM_PROP_LICENSE,
+            RestConstants.CM_PROP_C_CREATED,
+            RestConstants.CM_MODIFIED_DATE,
             RestConstants.CCM_PROP_WF_STATUS,
             // collections
             'info',
@@ -746,7 +748,7 @@ export class ListTableComponent implements EventListener {
         if(this.attributeRequiresHTML(item)) {
             return this.sanitizer.bypassSecurityTrustHtml(html);
         } else {
-            return this.sanitizer.sanitize(SecurityContext.HTML, html);
+            return html;//this.sanitizer.sanitize(SecurityContext.HTML, html);
         }
     }
 
