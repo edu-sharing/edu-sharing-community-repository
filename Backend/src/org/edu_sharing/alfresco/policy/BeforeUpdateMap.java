@@ -26,13 +26,12 @@ public class BeforeUpdateMap implements NodeServicePolicies.BeforeUpdateNodePoli
 
     @Override
     public void beforeUpdateNode(NodeRef nodeRef) {
-        List<NodeRef> allEduGoupFolder = EduGroupCache.getAllEduGoupFolder();
-        if(allEduGoupFolder == null) return;
-        if(allEduGoupFolder.contains(nodeRef)){
-            if(!AuthenticationUtil.isRunAsUserTheSystemUser()
-                    && !authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())){
-                throw new AccessDeniedException("Organisation Folder should not be modified!");
-            }
+        if(AuthenticationUtil.isRunAsUserTheSystemUser()
+                || authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())){
+            return;
+        }
+        if(EduGroupCache.isAnOrganisationFolder(nodeRef)){
+            throw new AccessDeniedException("Organisation Folder should not be modified!");
         }
     }
 
