@@ -103,7 +103,8 @@
             </div>
           </div>
           <div [class.stat-link]="canActivateLinks()"
-               [routerLink]=" canActivateLinks() ? ['/' + ROUTER_PREFIX + 'workspace'] : []">
+               [routerLink]=" canActivateLinks() ? ['/' + ROUTER_PREFIX + 'search'] : []"
+               [queryParams]="canActivateLinks() ? { parameters:this.queryParamsForCCMaterials()} : {}" >
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS_CC' | translate}}
             </div>

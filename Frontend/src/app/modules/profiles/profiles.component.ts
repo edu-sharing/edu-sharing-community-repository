@@ -272,5 +272,17 @@ export class ProfilesComponent {
         );
     }
 
+
+    /**
+     * function that build a query params for CC materials, and owner of those material
+     */
+    public queryParamsForCCMaterials():string{
+         const params=JSON.stringify({
+             'cm:creator': [this.user.userName],
+             license: ['CC_*']
+         });
+        return params;
+    }
+
 }
 
