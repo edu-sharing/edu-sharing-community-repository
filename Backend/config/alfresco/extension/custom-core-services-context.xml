@@ -395,9 +395,12 @@
    	 	<property name="policyComponent">
             <ref bean="policyComponent"/>
         </property>
-          <property name="nodeService">
+        <property name="nodeService">
             <ref bean="NodeService" />
         </property>
+         <property name="policyBehaviourFilter">
+             <ref bean="policyBehaviourFilter" />
+         </property>
    	 </bean>
    	 <bean id="onCopyCollectionRefSubNodesPolicy" class="org.edu_sharing.alfresco.policy.OnCopyCollectionRefSubNodesPolicy" init-method="init">
    	 	<property name="policyComponent">
