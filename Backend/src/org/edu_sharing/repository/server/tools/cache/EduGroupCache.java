@@ -89,10 +89,6 @@ public class EduGroupCache {
 		if(EduGroupCache.cacheWithFolderAsKey.contains(nodeRef)) return true;
 		else return false;
 	}
-
-	public static Map<QName,Serializable> getOrganisationPropsByOrgFolder(NodeRef nodeRef){
-		return EduGroupCache.cacheWithFolderAsKey.get(nodeRef);
-	}
 	
 	protected static void setCache(Map<NodeRef,Map<QName,Serializable>> cache) {
 		synchronized(EduGroupCache.cache){

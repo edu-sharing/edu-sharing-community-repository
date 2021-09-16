@@ -89,7 +89,7 @@ public class OnCreateNodePolicyOrgAdministrators implements OnCreateNodePolicy, 
 		
 		if(organisationNode != null){
 			
-			Map<QName, Serializable> eduGroupProps = EduGroupCache.getOrganisationPropsByOrgFolder(organisationNode);
+			Map<QName, Serializable> eduGroupProps = EduGroupCache.getByEduGroupfolder(organisationNode);
 			NodeRef eduGroupNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String)eduGroupProps.get(ContentModel.PROP_NODE_UUID));
 			List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
 			for(ChildAssociationRef childGroup : childGroups){
