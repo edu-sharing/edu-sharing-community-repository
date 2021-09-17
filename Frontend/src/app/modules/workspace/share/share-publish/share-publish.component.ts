@@ -138,7 +138,7 @@ export class SharePublishComponent implements OnChanges {
 
 
 
-    updateShareMode(force = false) {
+    updateShareMode(type: 'copy' | 'direct', force = false) {
         if((this.shareModeCopy  || this.shareModeDirect) && !force) {
             if (this.config.instant('publishingNotice', false)) {
                 let cancel = () => {
@@ -150,7 +150,7 @@ export class SharePublishComponent implements OnChanges {
                     'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
                     'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
                     DialogButton.getYesNo(cancel, () => {
-                        this.updateShareMode(true);
+                        this.updateShareMode(type, true);
                         this.toast.closeModalDialog();
                     }),
                     true,
@@ -159,7 +159,7 @@ export class SharePublishComponent implements OnChanges {
                 return;
             }
         }
-        if(this.shareModeCopy && this.doiPermission) {
+        if(this.shareModeCopy && this.doiPermission && type === 'copy') {
             this.doiActive = true;
         }
         this.updatePublishedVersions();
