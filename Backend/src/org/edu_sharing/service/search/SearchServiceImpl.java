@@ -872,19 +872,12 @@ public class SearchServiceImpl implements SearchService {
 		if(globalContext && !searchingSignupGroups) {
 			checkGlobalSearchPermission();
 		}
-		List<String> searchFields = new ArrayList<>();
 
 		// fields to search in - also using username as admin (6.0 or later)
-		if(AuthorityServiceHelper.isAdmin()) {
-			searchFields.add("userName");
-		}
-		searchFields.add("email");
-		searchFields.add("firstName");
-		searchFields.add("lastName");
-		
+
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
-		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,searchFields, globalContext);
+		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,AuthorityServiceHelper.getDefaultAuthoritySearchFields(), globalContext);
 		// we're skipping TP checks when the search requested signup groups -> it's possible to see them even without GLOBAL_AUTHORITY_SEARCH permissions
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext, searchingSignupGroups);
 		
@@ -938,7 +931,7 @@ public class SearchServiceImpl implements SearchService {
 			}
 		}
 
-		System.out.println("finalQuery:" + finalQuery);
+		logger.debug("finalQuery:" + finalQuery);
 
 		List<Authority> data = new ArrayList<Authority>();
 
@@ -950,8 +943,7 @@ public class SearchServiceImpl implements SearchService {
 		searchParameters.setSkipCount(from);
 		searchParameters.setMaxItems(nrOfResults);
 		if(sort==null || !sort.hasContent()) {
-		searchParameters.addSort("@" + CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME, true);
-		searchParameters.addSort("@" + CCConstants.PROP_USER_FIRSTNAME, true);
+			searchParameters.addSort("score", false);
 		}
 		else {
 			sort.applyToSearchParameters(searchParameters);
@@ -975,6 +967,7 @@ public class SearchServiceImpl implements SearchService {
 		return new SearchResult<String>(result, from, (int) resultSet.getNumberFound());
 
 	}
+
 	private static String getLuceneSuggestionQuery(MetadataQueryParameter parameter,String value){
 		//return "("+queries.getBasequery()+") AND ("+parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*")+")";
 		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");

@@ -27,8 +27,8 @@
         </span>
         <span *ngIf="!authority.organizations">&nbsp;</span>
       </div>
-      <div class="affiliation" *ngIf="authority.profile.primaryAffiliation">
-        {{ authority | authorityAffiliation }}
+      <div class="affiliation" *ngIf="authority.authorityType === 'USER'">
+        {{ (authority | authorityAffiliation) || '&nbsp;' }}
       </div>
       <div
         class="affiliation affiliation-group"
