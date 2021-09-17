@@ -23,9 +23,11 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
+import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.alfresco.service.config.model.AvailableMds;
 import org.edu_sharing.service.usage.Usage;
@@ -106,6 +108,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			NodeServiceInterceptor.setEduSharingScope((String)null);
 			NodeCustomizationPolicies.setEduSharingContext(null);
 			QueryUtils.setUserInfo(null);
+			NodeDao.setIsGlobalAdmin(null);
 			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
 			SubsystemChainingAuthenticationService.setCurrentPath((String)null);
 
