@@ -9,14 +9,17 @@ public class UserCache {
             (SimpleCache<String, User>) AlfAppContextGate.getApplicationContext().getBean("eduSharingUserCache");
 
     public static final User get(String username){
+        if(username == null) return null;
         return userCache.get(username);
     }
 
     public static final void put(String username, User user){
+        if(username == null) return;
         userCache.put(username,user);
     }
 
     public static final void refresh(String username){
+        if(username == null) return;
         userCache.remove(username);
     }
 }
