@@ -14,6 +14,7 @@ public class User extends Authority {
 	String repositoryId;
 	String username;
 	Map<String, Serializable> profileSettings;
+	HashMap<String, Serializable> properties;
 
 	public User() {
 		super("USER");
@@ -85,5 +86,13 @@ public class User extends Authority {
 
 	public void setProfileSettings(Map<String, Serializable> profileSettings) {
 		this.profileSettings = profileSettings;
+	}
+
+    public void setProperties(HashMap<String, Serializable> userProperties) {
+		this.properties = userProperties;
+    }
+
+	public HashMap<String, Serializable> getProperties() {
+		return properties;
 	}
 }

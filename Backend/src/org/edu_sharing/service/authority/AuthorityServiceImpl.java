@@ -450,35 +450,10 @@ public EduGroup getEduGroup(String authority){
 	 */
 	@Override
 	public Map<String, Serializable> getUserInfo(String userName) throws Exception {
-
-		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-                new RetryingTransactionCallback<Map<String, Serializable>>()
-                {
-                    public Map<String, Serializable> execute() throws Throwable
-                    {
-                		NodeRef personRef = serviceRegistry.getPersonService().getPerson(userName, false);
-                		if (personRef == null) {
-                			return null;
-                		}
-
-                		Map<QName, Serializable> tmpProps = nodeService.getProperties(personRef);
-                		HashMap<String, Serializable> result = new HashMap<String, Serializable>();
-                		for (Map.Entry<QName, Serializable> entry : tmpProps.entrySet()) {
-
-                			Serializable value = entry.getValue();
-
-                			result.put(
-                					entry.getKey().toString(),
-                					value);
-                		}
-                		return result;
-                    }
-                }, true);
-
-
-
-		}
+		User user = getUser(userName);
+		if(user == null) return null;
+		return user.getProperties();
+	}
 
 	@Override
 	public User getUser(String userName) {
