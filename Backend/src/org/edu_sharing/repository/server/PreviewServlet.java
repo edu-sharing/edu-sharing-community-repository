@@ -657,13 +657,17 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 
 	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId){
+		return getPreview(nodeService,storeProtocol,storeIdentifier,nodeId,null);
+	}
+	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId,HashMap<String, Object> nodeProps){
 		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
 		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
 		if(!nodeService.getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
 			return null;
 		}
 
-		String extThumbnail = nodeService.getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL);
+		String extThumbnail =(nodeProps == null) ? nodeService.getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL)
+				: (String) nodeProps.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
 			return new PreviewDetail(extThumbnail, PreviewDetail.TYPE_EXTERNAL, false);
 		}
