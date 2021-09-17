@@ -3069,7 +3069,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId), nodeId);
 		String owner = this.serviceRegistry.getOwnableService().getOwner(nodeRef);
 		if(owner == null){
-			owner = (String)this.serviceRegistry.getNodeService().getProperty(nodeRef,ContentModel.PROP_CREATOR);
+			return null;
 		}
 		return getUser(owner);
 	}
