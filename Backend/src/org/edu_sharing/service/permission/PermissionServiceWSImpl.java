@@ -124,7 +124,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public org.edu_sharing.repository.client.rpc.Result<List<User>> findUsers(String query, List<String> searchFields,
+	public Result<List<User>> findUsers(String query, Map<String, Double> searchFields,
 			boolean globalContext, int from, int nrOfResults) {
 
 		try {
@@ -132,7 +132,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 
 			// mapping to new findUsers method signature
 			List<KeyValue> wsParam = new ArrayList<KeyValue>();
-			for (String entry : searchFields) {
+			for (String entry : searchFields.keySet()) {
 				wsParam.add(new KeyValue(entry, query));
 			}
 			org.edu_sharing.webservices.alfresco.extension.SearchResult wsResult = naw
@@ -190,7 +190,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public StringBuffer getFindUsersSearchString(String query, List<String> searchFields, boolean globalContext) {
+	public StringBuffer getFindUsersSearchString(String query, Map<String, Double> searchFields, boolean globalContext) {
 		return null;
 	}
 

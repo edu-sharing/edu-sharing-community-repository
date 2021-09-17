@@ -22,6 +22,7 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.model.CollectionRef;
@@ -107,6 +108,8 @@ public class NodeDao {
 	private RepositoryDao remoteRepository;
 
 	private String version;
+
+	private static ThreadLocal<Boolean> isGlobalAdmin = new ThreadLocal<>();
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
@@ -509,7 +512,7 @@ public class NodeDao {
 			} else {
 				isCollectionHomePath = false;
 			}
-	
+
 			this.repoDao = repoDao;
 			this.nodeId = nodeRef.getNodeId();
 			
@@ -1517,7 +1520,22 @@ public class NodeDao {
 	 * @return TRUE if is ADMIN or Same USER || FALSE in other cases
 	 */
 	public boolean isCurrentUserAdminOrSameUserAsUserName(String userName) {
-		if (AuthorityServiceFactory.getLocalService().isGlobalAdmin()) // if userLogin is ADMIN, don't need to countinue;
+		boolean globalAdmin;
+		String runAsUser = AuthenticationUtil.getRunAsUser();
+		String fullyUser = AuthenticationUtil.getFullyAuthenticatedUser();
+		if(runAsUser.equals(fullyUser)
+				&& !AuthenticationUtil.isRunAsUserTheSystemUser()){
+			if(isGlobalAdmin.get() ==null){
+				globalAdmin = AuthorityServiceFactory.getLocalService().isGlobalAdmin();
+				isGlobalAdmin.set(globalAdmin);
+			}else{
+				globalAdmin = isGlobalAdmin.get();
+			}
+		}else{
+			globalAdmin = AuthorityServiceFactory.getLocalService().isGlobalAdmin();
+		}
+
+		if (globalAdmin) // if userLogin is ADMIN, don't need to countinue;
 			return true;
 		else {
 			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -2281,5 +2299,9 @@ public class NodeDao {
 		}catch(RuntimeException e){
 			throw DAOException.mapping(e.getCause());
 		}
+	}
+
+	public static void setIsGlobalAdmin(Boolean isGlobalAdmin){
+		NodeDao.isGlobalAdmin.set(isGlobalAdmin);
 	}
 }
