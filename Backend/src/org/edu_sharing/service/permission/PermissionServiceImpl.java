@@ -900,7 +900,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public StringBuffer getFindUsersSearchString(String query,List<String> searchFields, boolean globalContext) {
+	public StringBuffer getFindUsersSearchString(String query,Map<String, Double> searchFields, boolean globalContext) {
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
@@ -929,11 +929,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 							}
 						}
 						StringBuffer fieldQuery=new StringBuffer();
-						for(String field : searchFields) {
+						for(Map.Entry<String, Double> field : searchFields.entrySet()) {
 							if(fieldQuery.length()>0) {
 								fieldQuery.append(" OR ");
 							}
-							fieldQuery.append("@cm\\:").append(field).append(":").append("\"").append(token).append("\"");
+							fieldQuery.append("@cm\\:").append(field.getKey()).append(":").append("\"").append(token).append("\"^").append(field.getValue());
 						}
 						subQuery.append(subQuery.length() > 0 ? " AND " : "").append("(").append(fieldQuery).append(")");
 					}
@@ -1090,8 +1090,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						boolean furtherToken = (subQuery.length() > 0);
 						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
 						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
-						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:").append("\"")
-								.append(token).append("\"");
+
+						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:")
+								.append("\"").append(token).append("\"").
+								// boost groups so that they'll appear before users
+								append("^10");
 						subQuery.append(")");
 	
 					}
@@ -1175,7 +1178,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults) {
+	public Result<List<User>> findUsers(String query,Map<String, Double> searchFields, boolean globalContext, int from, int nrOfResults) {
 
 		StringBuffer searchQuery = null;
 		searchQuery = getFindUsersSearchString(query, searchFields, globalContext);
@@ -1240,12 +1243,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			int nrOfResults) {
 
 		// fields to search in - not using username
-		List<String> searchFields = new ArrayList<>();
-		searchFields.add("email");
-		searchFields.add("firstName");
-		searchFields.add("lastName");
 
-		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,searchFields, globalContext);
+		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,AuthorityServiceHelper.getDefaultAuthoritySearchFields(), globalContext);
 		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext, false);
 
 		/**
