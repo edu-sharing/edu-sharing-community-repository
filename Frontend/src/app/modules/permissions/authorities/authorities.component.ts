@@ -294,7 +294,7 @@ export class PermissionsAuthoritiesComponent {
       );
       createGroup.elementType = [ElementType.Unknown];
       createGroup.group = DefaultGroups.Primary;
-      createGroup.constrains = [Constrain.Admin, Constrain.NoSelection];
+      createGroup.constrains = [Constrain.NoSelection];
       options.push(createGroup);
     }
     if (this._mode === 'USER') {
@@ -394,7 +394,7 @@ export class PermissionsAuthoritiesComponent {
     }
     if (this._mode === 'GROUP' || this.orgs && this.orgs.canCreate) {
       const editGroup = new OptionItem('PERMISSIONS.MENU_EDIT_GROUP', 'edit', (data: any) => this.editAuthority(data));
-      editGroup.constrains = [Constrain.Admin, Constrain.NoBulk];
+      editGroup.constrains = [Constrain.NoBulk];
       editGroup.elementType = [ElementType.Group];
       editGroup.group = DefaultGroups.Edit;
       editGroup.priority = 10;
@@ -421,7 +421,7 @@ export class PermissionsAuthoritiesComponent {
       const removeGroup = new OptionItem('PERMISSIONS.MENU_DELETE', 'delete', (data: any) =>
           this.deleteAuthority(data, (list: any) => this.startDelete(list))
       );
-      removeGroup.constrains = [Constrain.Admin];
+      removeGroup.constrains = [Constrain.User];
       removeGroup.elementType = [ElementType.Group];
       removeGroup.group = DefaultGroups.Delete;
       options.push(removeGroup);
