@@ -84,7 +84,7 @@
       <div class="statsBackground">
         <div class="stats">
           <div [class.stat-link]="canActivateLinks()"
-               [routerLink]=" canActivateLinks()? ['/' + ROUTER_PREFIX + 'workspace'] : []">
+               (click)="canActivateLinks() && queryParamsForCCMaterials('workspace')" >
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS' | translate}}
             </div>
@@ -93,8 +93,7 @@
             </div>
           </div>
           <div [class.stat-link]="canActivateLinks()"
-               [routerLink]=" canActivateLinks() ? ['/' + ROUTER_PREFIX + 'collections'] : []"
-               [queryParams]="canActivateLinks() ? { scope: 'MY' } : {}">
+               (click)="canActivateLinks() && queryParamsForCCMaterials('collections')" >
             <div class="stat">
               {{'PROFILES.STATS.COLLECTIONS' | translate}}
             </div>
@@ -103,8 +102,7 @@
             </div>
           </div>
           <div [class.stat-link]="canActivateLinks()"
-               [routerLink]=" canActivateLinks() ? ['/' + ROUTER_PREFIX + 'search'] : []"
-               [queryParams]="canActivateLinks() ? { parameters:this.queryParamsForCCMaterials()} : {}" >
+               (click)="canActivateLinks() && queryParamsForCCMaterials('search')" >
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS_CC' | translate}}
             </div>
