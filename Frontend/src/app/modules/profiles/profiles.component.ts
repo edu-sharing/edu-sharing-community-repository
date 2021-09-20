@@ -51,6 +51,7 @@ export class ProfilesComponent {
       route.params.subscribe((params)=> {
         this.editProfileUrl=this.config.instant('editProfileUrl');
         this.editProfile=this.config.instant('editProfile',true);
+        this.activateLinks = this.config.instant('activateProfileLinks', true);
         this.loadUser(params.authority);
         this.getProfileSetting(params.authority);
       });
@@ -78,6 +79,7 @@ export class ProfilesComponent {
   // is editing allowed at all (via global config)
   editProfile: boolean;
   private editProfileUrl: string;
+  private activateLinks = false;
   avatarImage: any;
   profileSettings: ProfileSettings;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
@@ -256,7 +258,7 @@ export class ProfilesComponent {
      * Check if USER has permissions to activate the Links in statistics section
      */
     public canActivateLinks(): boolean {
-        return this.isMe && this.hasAccessWorkspace;
+        return this.isMe && this.hasAccessWorkspace && this.activateLinks;
     }
 
     /**
