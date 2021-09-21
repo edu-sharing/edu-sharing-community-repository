@@ -18,10 +18,10 @@ import {
 })
 export class MdsWidgetComponent{
   _data:string[];
-  value:any;
+  value:string[];
   @Input() widget:any;
   @Input() set data(data:string[]){
-    this._data=data; 
+    this._data=data;
     this.value=this.getValue();
   }
 
@@ -42,6 +42,8 @@ export class MdsWidgetComponent{
         return 'array';
       case 'slider':
         return 'slider';
+      case 'range':
+        return 'range';
     }
     return 'unknown';
   }
@@ -62,9 +64,14 @@ export class MdsWidgetComponent{
 
     click() {
         if(this.widget.link === '_BLANK') {
-          window.open(this.value);
+          window.open(this.value[0]);
         } else {
           console.warn('Unsupported link type ' + this.widget.link);
         }
+    }
+
+    isEmpty() {
+        console.log(this.value);
+        return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
     }
 }

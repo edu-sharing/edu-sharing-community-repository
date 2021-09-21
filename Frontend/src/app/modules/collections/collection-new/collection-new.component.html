@@ -245,13 +245,13 @@
         [buttons]="buttons"
         class="collection-metadata">
       <div class="card-content">
-        <mds #mds
+        <app-mds-editor-wrapper #mds
           [groupId]="'collection_'+newCollectionType.toLowerCase()"
           [setId]="mdsSet"
+          [editorMode]="'form'"
           [embedded]="true"
           [currentValues]="properties"
-          [invalidate]="reloadMds"
-        ></mds>
+        ></app-mds-editor-wrapper>
       </div>
   </card>
   <card *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS"

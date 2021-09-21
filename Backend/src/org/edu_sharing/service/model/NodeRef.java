@@ -6,6 +6,10 @@ import java.util.Map;
 
 public interface NodeRef {
 
+    String getOwner();
+
+	void setOwner(String owner);
+
 	interface Preview{
 		String getMimetype();
 		byte[] getData();

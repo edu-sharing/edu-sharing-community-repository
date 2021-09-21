@@ -16,15 +16,16 @@ import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.model.CollectionRef;
-import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -75,7 +76,6 @@ import org.json.JSONObject;
 
 import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.Authentication;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -97,6 +97,7 @@ public class NodeDao {
 	private final org.edu_sharing.service.model.NodeRef.Preview previewData;
 	// true if the current Dao is the collection home folder
 	private final boolean isCollectionHomePath;
+	private final String ownerUsername;
 	private CollectionRef collectionRef;
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
@@ -107,6 +108,8 @@ public class NodeDao {
 	private RepositoryDao remoteRepository;
 
 	private String version;
+
+	private static ThreadLocal<Boolean> isGlobalAdmin = new ThreadLocal<>();
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
@@ -349,6 +352,7 @@ public class NodeDao {
 	private final String storeId;
 	
 	NodeService nodeService;
+	AuthorityService authorityService;
 	CollectionService collectionService;
 	CommentService commentService;
 
@@ -508,7 +512,7 @@ public class NodeDao {
 			} else {
 				isCollectionHomePath = false;
 			}
-	
+
 			this.repoDao = repoDao;
 			this.nodeId = nodeRef.getNodeId();
 			
@@ -517,6 +521,7 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
+			this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId());
 			/**
 			 * call getProperties on demand
 			 */
@@ -593,6 +598,8 @@ public class NodeDao {
 					}
 				}
 			}
+
+			this.ownerUsername = nodeRef.getOwner();
 
 		}catch(Throwable t){
 			throw DAOException.mapping(t,nodeRef.getNodeId());
@@ -1457,7 +1464,11 @@ public class NodeDao {
 	}
 	
 	private Person getOwner() {
-		User owner=nodeService.getOwner(storeId, storeProtocol, nodeId);
+		User owner = null;
+		if(ownerUsername != null && !ownerUsername.trim().equals("")){
+			owner = authorityService.getUser(ownerUsername);
+		}
+		owner = (owner == null) ? nodeService.getOwner(storeId, storeProtocol, nodeId) : owner;
 		if(owner==null)
 			return null;
 		Person ref = new Person();
@@ -1479,7 +1490,7 @@ public class NodeDao {
 	 */
 	private boolean checkUserHasPermissionToSeeMail(String userName) {
 		try {
-			if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterMetadataEmail") &&
+			if(LightbendConfigCache.getBoolean("repository.privacy.filterMetadataEmail") &&
 					(access== null || !access.contains(CCConstants.PERMISSION_WRITE))){
 				return false;
 			}
@@ -1509,7 +1520,22 @@ public class NodeDao {
 	 * @return TRUE if is ADMIN or Same USER || FALSE in other cases
 	 */
 	public boolean isCurrentUserAdminOrSameUserAsUserName(String userName) {
-		if (AuthorityServiceFactory.getLocalService().isGlobalAdmin()) // if userLogin is ADMIN, don't need to countinue;
+		boolean globalAdmin;
+		String runAsUser = AuthenticationUtil.getRunAsUser();
+		String fullyUser = AuthenticationUtil.getFullyAuthenticatedUser();
+		if(runAsUser.equals(fullyUser)
+				&& !AuthenticationUtil.isRunAsUserTheSystemUser()){
+			if(isGlobalAdmin.get() ==null){
+				globalAdmin = AuthorityServiceFactory.getLocalService().isGlobalAdmin();
+				isGlobalAdmin.set(globalAdmin);
+			}else{
+				globalAdmin = isGlobalAdmin.get();
+			}
+		}else{
+			globalAdmin = AuthorityServiceFactory.getLocalService().isGlobalAdmin();
+		}
+
+		if (globalAdmin) // if userLogin is ADMIN, don't need to countinue;
 			return true;
 		else {
 			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -1754,7 +1780,7 @@ public class NodeDao {
 		}
 
 		HashMap<String,String[]> properties = new HashMap<String,String[]>();
-		if(LightbendConfigLoader.get().getBoolean("repository.privacy.filterVCardEmail")) {
+		if(LightbendConfigCache.getBoolean("repository.privacy.filterVCardEmail")) {
 			List<String> cleanup = new ArrayList<>();
 			for (Entry<String, Object> entry : props.entrySet()) {
 				if (CCConstants.getLifecycleContributerPropsMap().containsValue(entry.getKey()) || CCConstants.getMetadataContributerPropsMap().containsValue(entry.getKey())) {
@@ -2273,5 +2299,9 @@ public class NodeDao {
 		}catch(RuntimeException e){
 			throw DAOException.mapping(e.getCause());
 		}
+	}
+
+	public static void setIsGlobalAdmin(Boolean isGlobalAdmin){
+		NodeDao.isGlobalAdmin.set(isGlobalAdmin);
 	}
 }

@@ -27,7 +27,7 @@ import {
     Constraints,
     InputStatus,
     MdsEditorWidgetComponent,
-    MdsView,
+    MdsView, MdsWidget,
     MdsWidgetType,
     NativeWidgetType,
     Values,
@@ -73,6 +73,20 @@ type NativeWidgetClass = {
     ],
 })
 export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+
+    constructor(
+        private sanitizer: DomSanitizer,
+        private factoryResolver: ComponentFactoryResolver,
+        private containerRef: ViewContainerRef,
+        private applicationRef: ApplicationRef,
+        private mdsEditorInstance: MdsEditorInstanceService,
+    ) {
+        this.isEmbedded = this.mdsEditorInstance.isEmbedded;
+        this.knownWidgetTags = [
+            ...Object.values(NativeWidgetType),
+            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
+        ];
+    }
     private static readonly nativeWidgets: {
         [widgetType in NativeWidgetType]: NativeWidgetClass;
     } = {
@@ -131,18 +145,31 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     show = true;
     private destroyed = new ReplaySubject<void>(1);
 
-    constructor(
-        private sanitizer: DomSanitizer,
-        private factoryResolver: ComponentFactoryResolver,
-        private containerRef: ViewContainerRef,
-        private applicationRef: ApplicationRef,
-        private mdsEditorInstance: MdsEditorInstanceService,
-    ) {
-        this.isEmbedded = this.mdsEditorInstance.isEmbedded;
-        this.knownWidgetTags = [
-            ...Object.values(NativeWidgetType),
-            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
-        ];
+    /**
+     * Overrides widget definition using inline parameters.
+     */
+    public static updateWidgetWithHTMLAttributes(htmlRef: Element, widget: MdsWidget): void {
+        if (htmlRef) {
+            for (let attribute of htmlRef.getAttributeNames()) {
+                // map the extended attribute
+                let value: string|boolean = htmlRef.getAttribute(attribute);
+                if (attribute === 'isextended' || attribute === 'extended') {
+                    attribute = 'isExtended';
+                } else if (attribute === 'isrequired' || attribute === 'required') {
+                    attribute = 'isRequired';
+                } else if (attribute === 'bottomcaption') {
+                    attribute = 'bottomCaption';
+                } else if (attribute === 'defaultmin') {
+                    attribute = 'defaultMin';
+                } else if (attribute === 'defaultmax') {
+                    attribute = 'defaultMax';
+                } else if (attribute === 'hideifempty') {
+                    attribute = 'hideIfEmpty';
+                    value = Boolean(value);
+                }
+                (widget as any)[attribute] = value;
+            }
+        }
     }
 
     ngOnInit(): void {
@@ -281,7 +308,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     private injectWidget(widget: Widget, element: Element): void {
-        this.updateWidgetWithHTMLAttributes(widget);
+        const htmlRef = this.container.nativeElement.querySelector(
+            widget.definition.id.replace(':', '\\:'),
+        );
+        MdsEditorViewComponent.updateWidgetWithHTMLAttributes(htmlRef, widget.definition);
         this.mdsEditorInstance.updateWidgetDefinition();
         const WidgetComponent = this.getWidgetComponent(widget);
         if (WidgetComponent === undefined) {
@@ -317,33 +347,6 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             return MdsEditorViewComponent.suggestionWidgetComponents[widget.definition.type];
         } else {
             return MdsEditorViewComponent.widgetComponents[widget.definition.type];
-        }
-    }
-
-    /**
-     * Overrides widget definition using inline parameters.
-     */
-    private updateWidgetWithHTMLAttributes(widget: Widget): void {
-        const htmlRef = this.container.nativeElement.querySelector(
-            widget.definition.id.replace(':', '\\:'),
-        );
-        if (htmlRef) {
-            for (let attribute of htmlRef.getAttributeNames()) {
-                // map the extended attribute
-                const value = htmlRef.getAttribute(attribute);
-                if (attribute === 'isextended' || attribute === 'extended') {
-                    attribute = 'isExtended';
-                } else if (attribute === 'isrequired' || attribute === 'required') {
-                    attribute = 'isRequired';
-                } else if (attribute === 'bottomcaption') {
-                    attribute = 'bottomCaption';
-                } else if (attribute === 'defaultmin') {
-                    attribute = 'defaultMin';
-                } else if (attribute === 'defaultmax') {
-                    attribute = 'defaultMax';
-                }
-                (widget.definition as any)[attribute] = value;
-            }
         }
     }
 

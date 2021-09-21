@@ -130,7 +130,9 @@ export class AuthoritySearchInputComponent {
     private getUsersAndGroupsSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
         const observables: Observable<SuggestionGroup>[] = [];
         observables.push(
-            this.iam.searchAuthorities(inputValue, false, this.groupType).pipe(
+            this.iam.searchAuthorities(inputValue, false, this.groupType, '', {
+                count: 50,
+            }).pipe(
                 map(({ authorities }) => ({
                     label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
                     values: this.convertData(authorities),
@@ -139,7 +141,9 @@ export class AuthoritySearchInputComponent {
         );
         if (this.globalSearchAllowed) {
             observables.push(
-                this.iam.searchAuthorities(inputValue, true, this.groupType).pipe(
+                this.iam.searchAuthorities(inputValue, true, this.groupType, '', {
+                    count: 100,
+                }).pipe(
                     map(({ authorities }) => ({
                         label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
                         values: this.convertData(authorities),

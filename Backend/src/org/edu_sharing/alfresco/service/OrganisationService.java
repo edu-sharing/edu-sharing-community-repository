@@ -155,11 +155,12 @@ public class OrganisationService {
 
 
 	public void syncOrganisationFolderName(boolean execute){
-		for(Map.Entry<NodeRef, Map<QName, Serializable>> entry : EduGroupCache.getAllEduGroupFolderAndEduGroupProps().entrySet()){
-			NodeRef organisationNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,(String)entry.getValue().get(ContentModel.PROP_NODE_UUID));
-			String authorityName = (String)entry.getValue().get(ContentModel.PROP_AUTHORITY_NAME);
+		for(NodeRef eduGroupFolder : EduGroupCache.getKeysEduGroupFolder()){
+			Map<QName, Serializable> eduGroupProps = EduGroupCache.getByEduGroupfolder(eduGroupFolder);
+			NodeRef organisationNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,(String)eduGroupProps.get(ContentModel.PROP_NODE_UUID));
+			String authorityName = (String)eduGroupProps.get(ContentModel.PROP_AUTHORITY_NAME);
 			String displayName = (String)nodeService.getProperty(organisationNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
-			String folderName = (String)nodeService.getProperty(entry.getKey(), ContentModel.PROP_NAME);
+			String folderName = (String)nodeService.getProperty(eduGroupFolder, ContentModel.PROP_NAME);
 			if (displayName == null || displayName.trim().equals("")) {
 				logger.error("display name of authority is null or empty "+ authorityName);
 				continue;
@@ -173,16 +174,16 @@ public class OrganisationService {
 					this.transactionService.getRetryingTransactionHelper().doInTransaction(()->{
 
 						try {
-							policyBehaviourFilter.disableBehaviour(entry.getKey());
-							nodeService.setProperty(entry.getKey(), ContentModel.PROP_NAME, newFolderName);
-							nodeService.setProperty(entry.getKey(), ContentModel.PROP_TITLE, newFolderName);
-							repCache.remove(entry.getKey().getId());
+							policyBehaviourFilter.disableBehaviour(eduGroupFolder);
+							nodeService.setProperty(eduGroupFolder, ContentModel.PROP_NAME, newFolderName);
+							nodeService.setProperty(eduGroupFolder, ContentModel.PROP_TITLE, newFolderName);
+							repCache.remove(eduGroupFolder.getId());
 						} catch (DuplicateChildNodeNameException e) {
 								logger.error("duplicate organisation name: \"" + newFolderName + "\" for " + authorityName + ". fix by hand");
 						}catch(Throwable e){
 							logger.error(e.getMessage(),e);
 						} finally {
-							policyBehaviourFilter.enableBehaviour(entry.getKey());
+							policyBehaviourFilter.enableBehaviour(eduGroupFolder);
 						}
 						return null;
 					});

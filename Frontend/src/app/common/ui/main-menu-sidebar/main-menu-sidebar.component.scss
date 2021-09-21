@@ -58,30 +58,6 @@ $licenseInfoHeight: 40px;
                 }
             }
         }
-        .entry {
-            padding: 20px 30px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            border-radius: 0;
-            color: $textMain;
-            transition: all $transitionNormal;
-            &:hover {
-                background-color: $workspaceTreeSelectedBackground;
-            }
-            &.disabled {
-                cursor: default;
-                color: $textVeryLight;
-            }
-            &.selected {
-                color: $primary;
-                font-weight: bold;
-                background: $workspaceTreeSelectedBackgroundEffect !important;
-            }
-            i {
-                padding-right: 10px;
-            }
-        }
         button.close,
         .top .profile .username {
             text-shadow: 0 0 30px rgba(0, 0, 0, 0.5);

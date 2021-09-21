@@ -271,7 +271,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         this.jumpmarkActive = jumpmark;
         this.shouldUpdateJumpmarkOnScroll = false;
         this.onScrollToJumpmark.emit(jumpmark);
-        await UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 2);
+        await UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 0.5);
         // Leave a little time for the last scroll event to propagate before enabling updates again.
         window.setTimeout(() => (this.shouldUpdateJumpmarkOnScroll = true), 20);
     }

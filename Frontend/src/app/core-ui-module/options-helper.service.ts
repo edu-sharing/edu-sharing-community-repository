@@ -700,6 +700,20 @@ export class OptionsHelperService implements OnDestroy {
                     true
         );
 
+        const streamNode = new OptionItem('OPTIONS.STREAM', 'event',(object) =>
+            management.addNodesStream = this.getObjects(object)
+        );
+        streamNode.elementType = [ElementType.Node];
+        streamNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+        streamNode.permissionsMode = HideMode.Hide;
+        streamNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        streamNode.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE_STREAM];
+        streamNode.group = DefaultGroups.Edit;
+        streamNode.priority = 15;
+        streamNode.customShowCallback = ((objects) =>
+                this.configService.instant('stream.enabled', false)
+        );
+
         const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) =>
             management.nodeLicense = this.getObjects(object)
         );
@@ -1135,6 +1149,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(createNodeVariant);
         options.push(templateNode);
         options.push(inviteNode);
+        options.push(streamNode);
         options.push(licenseNode);
         options.push(contributorNode);
         options.push(workflowNode);

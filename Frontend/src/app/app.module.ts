@@ -74,6 +74,7 @@ import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widget
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import {ResizableModule} from 'angular-resizable-element';
+import { MainMenuButtonsComponent } from './common/ui/main-menu-buttons/main-menu-buttons.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -139,6 +140,7 @@ import {ResizableModule} from 'angular-resizable-element';
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
         extensionDeclarations,
+        MainMenuButtonsComponent,
     ],
     imports: [
         IMPORTS,
