@@ -23,6 +23,7 @@ export class NodeEntriesService<T extends Node> {
     sort: ListSortConfig;
     sortChange: EventEmitter<ListSortConfig>;
     clickItem: EventEmitter<NodeClickEvent<T>>;
+    dblClickItem: EventEmitter<NodeClickEvent<T>>;
     fetchData: EventEmitter<FetchEvent>;
     gridConfig: GridConfig;
 }

@@ -1,7 +1,7 @@
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
-import { ListItem } from '../../../core-module/core.module';
+import {ListItem, ListItemSort} from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {ListItemType} from '../../../core-module/ui/list-item';
 
@@ -41,13 +41,8 @@ export class SortDropdownComponent {
         this.onSort.emit(item);
     }
 }
-export class ListItemSort extends ListItem {
-    constructor(public type : ListItemType,public name : string, public mode : 'ascending' | 'descending' | null = null, public config = {
-        showLabel: false
-    }) {
-        super(type ,name, config);
-    }
-}
+
 export class SortEvent extends ListItemSort {
     ascending: boolean;
 }
+

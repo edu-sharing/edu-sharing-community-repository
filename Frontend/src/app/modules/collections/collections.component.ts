@@ -44,7 +44,7 @@ import {
     SortDefault,
     RequestObject,
     RestMediacenterService, Mediacenter,
-    AbstractList, ProposalNode,
+    AbstractList, ProposalNode, ListItemSort,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
 import {CustomOptions, DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
@@ -75,7 +75,7 @@ import {
 } from '../management-dialogs/management-dialogs.component';
 import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/custom-node-list-wrapper/custom-node-list-wrapper.component';
 import {
-    ListItemSort, SortEvent,
+    SortEvent,
 } from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
 import {DataSource} from '@angular/cdk/collections';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';

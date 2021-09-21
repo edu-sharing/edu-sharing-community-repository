@@ -21,7 +21,7 @@ import {
     ConfigurationHelper,
     ConfigurationService,
     DialogButton,
-    ListItem,
+    ListItem, ListItemSort,
     LoginResult,
     MdsInfo,
     MdsMetadatasets,
@@ -77,7 +77,6 @@ import {
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
-import {ListItemSort} from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
 
 @Component({
     selector: 'app-search',

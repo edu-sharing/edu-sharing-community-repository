@@ -82,4 +82,8 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
             this.displayCount = Math.min(this.getData()?.length, displayCount);
         }
     }
+
+    isFullyLoaded() {
+        return this.getTotal() <= this.getData()?.length;
+    }
 }

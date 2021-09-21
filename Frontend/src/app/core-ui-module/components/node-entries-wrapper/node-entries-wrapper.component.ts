@@ -19,14 +19,13 @@ import {TemporaryStorageService} from '../../../core-module/rest/services/tempor
 import {UIHelper} from '../../ui-helper';
 import {NodeEntriesComponent} from '../node-entries/node-entries.component';
 import {NodeDataSource} from './node-data-source';
-import {List, Node, SortColumn} from '../../../core-module/rest/data-object';
+import {List, ListItemSort, Node, SortColumn} from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
 import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavService} from '../../../common/services/main-nav.service';
 import {SelectionModel} from '@angular/cdk/collections';
 import {Sort} from '@angular/material/sort';
-import {ListItemSort} from '../sort-dropdown/sort-dropdown.component';
 
 export enum NodeEntriesDisplayType {
     Table,
@@ -112,6 +111,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     @Input() gridConfig: GridConfig;
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
+    @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() sortChange = new EventEmitter<ListSortConfig>();
     private componentRef: ComponentRef<any>;
     public customNodeListComponent: Type<NodeEntriesComponent<T>>;
@@ -156,6 +156,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         this.entriesService.sort = this.sort;
         this.entriesService.sortChange = this.sortChange;
         this.entriesService.clickItem = this.clickItem;
+        this.entriesService.dblClickItem = this.dblClickItem;
         this.entriesService.fetchData = this.fetchData;
 
         if (this.componentRef) {
