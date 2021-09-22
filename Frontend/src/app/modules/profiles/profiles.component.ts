@@ -276,11 +276,11 @@ export class ProfilesComponent {
 
 
     /**
-     * function that build a query params for CC materials, and owner of those material
+     * This function will build query and navigate to specific Profile links
      */
-    public queryParamsForCCMaterials(component: string): void {
+    public navigateTo(component: string): void {
         if (component.toLowerCase() === 'search')
-            this.router.navigate([UIConstants.ROUTER_PREFIX, 'search'], {
+            this.router.navigate([UIConstants.ROUTER_PREFIX, component.toLowerCase()], {
                 queryParams: {
                     parameters: JSON.stringify({'cm:creator': [this.user.userName],license: ['CC_*']})
                 }
@@ -292,7 +292,7 @@ export class ProfilesComponent {
                 }
             });
         else if (component.toLowerCase() === 'collections')
-            this.router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], {queryParams: {scope: 'MY'}});
+            this.router.navigate([UIConstants.ROUTER_PREFIX, component.toLowerCase()], {queryParams: {scope: 'MY'}});
     }
 
 }
