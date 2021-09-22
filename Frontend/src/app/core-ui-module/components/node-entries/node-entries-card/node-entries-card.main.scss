@@ -142,6 +142,7 @@
                 margin: 5px 0;
                 display: flex;
                 justify-content: flex-end;
+                text-align: end;
                 word-break: break-word;
                 // height: 1em;
                 // @include limitLineCount(1);
@@ -151,6 +152,7 @@
                 > app-list-base {
                     font-size: 120%;
                     height: 1.25 * 2em;
+                    text-align: left;
                     @include limitLineCount(2, 1.25);
                 }
             }

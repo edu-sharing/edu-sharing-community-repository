@@ -1099,6 +1099,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(reorder);
         return options;
          */
+        /*
         const configureList = new OptionItem('OPTIONS.LIST_SETTINGS', 'settings', (node: Node) =>
             this.list.showReorderColumnsDialog()
         );
@@ -1108,6 +1109,8 @@ export class OptionsHelperService implements OnDestroy {
         configureList.elementType = [ElementType.Unknown];
         configureList.priority = 20;
         configureList.isToggle = true;
+         */
+
         /*
 
             this.infoToggle = new OptionItem('WORKSPACE.OPTION.METADATA', 'info_outline', (node: Node) => this.openMetadata(node));
@@ -1166,7 +1169,6 @@ export class OptionsHelperService implements OnDestroy {
         options.push(removeNodeRef);
         options.push(reportNode);
         options.push(toggleViewType);
-        options.push(configureList);
         options.push(metadataSidebar);
 
         return options;

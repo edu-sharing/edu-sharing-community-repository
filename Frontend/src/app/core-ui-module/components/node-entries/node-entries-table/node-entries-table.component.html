@@ -39,6 +39,16 @@
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
       <dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
+      <button
+        #menuTrigger="matMenuTrigger"
+        mat-button
+        class="dropdown-dummy"
+        [style.left.px]="dropdownLeft"
+        [style.top.px]="dropdownTop"
+        [matMenuTriggerFor]="dropdown.menu"
+        tabindex="-1"
+        aria-hidden="true"
+      ></button>
       <button mat-icon-button
               color="primary"
               (click)="entriesService.selection.clear(); entriesService.selection.select(node)"
@@ -86,14 +96,19 @@
     matRipple
     class="mat-row"
     [class.mat-row-selected]="entriesService.selection.isSelected(node)"
-    *matRowDef="let node; columns: getVisibleColumns()"
+    [class.mat-row-virtual]="node.virtual"
+    [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"
+    *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"
-  ></mat-row>
+  >
+  </mat-row>
 </mat-table>
 
 <spinner *ngIf="loading | async"></spinner>
 
+<!--
 <mat-paginator #paginator [pageSizeOptions]="pageSizeOptions"></mat-paginator>
+-->
 
 <!-- Wait for 'ready' state to avoid changed-after-checked error when `columnChooserTrigger` becomes
 available. -->

@@ -1,5 +1,6 @@
 @import '../../../styles/variables';
 $defaultColumnWidth: 120px;
+$rowHeight: 58px;
 
 :host {
     display: flex;
@@ -12,12 +13,16 @@ $defaultColumnWidth: 120px;
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
-            display: block;
+            display: flex;
+            width: 100%;
+            height: $rowHeight;
+            align-items: center;
         }
     }
 }
 mat-header-cell,
 mat-cell {
+    margin: 0 3px;
     // do not fix the "primary/title" column
     &:not(:nth-child(3)) {
         flex: 0 $defaultColumnWidth;
@@ -35,6 +40,17 @@ mat-cell {
 }
 
 .mat-row {
+    &.mat-row-virtual {
+        background:  linear-gradient(
+                to right,
+                $nodeVirtualColor 0,
+                $nodeVirtualColor 5px,
+                rgba(255,255,255,0.0001) 5px
+        );
+    }
+    &.mat-row-virtual-seperator {
+        border-bottom: 2px dashed lighten($nodeVirtualColor, 10%);
+    }
     &:hover {
         background-color: $listItemSelectedBackground;
     }

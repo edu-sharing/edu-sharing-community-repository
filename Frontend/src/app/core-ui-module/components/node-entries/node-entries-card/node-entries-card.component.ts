@@ -3,7 +3,10 @@ import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../node-helper.service';
 import {ColorHelper, PreferredColor} from '../../../../core-module/ui/color-helper';
-import {InteractionType} from '../../node-entries-wrapper/node-entries-wrapper.component';
+import {
+    ClickSource,
+    InteractionType
+} from '../../node-entries-wrapper/node-entries-wrapper.component';
 import {OptionItem, Target} from '../../../option-item';
 import {DropdownComponent} from '../../dropdown/dropdown.component';
 import {MatMenuTrigger} from '@angular/material/menu';
@@ -16,6 +19,7 @@ import {MatMenuTrigger} from '@angular/material/menu';
 export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
     readonly InteractionType = InteractionType;
     readonly Target = Target;
+    readonly ClickSource = ClickSource;
     @ViewChild(DropdownComponent) dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
 
@@ -51,8 +55,14 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
         event.preventDefault();
         this.dropdownLeft = event.clientX;
         this.dropdownTop = event.clientY;
-        this.entriesService.selection.clear();
-        this.entriesService.selection.select(this.node);
+        if (!this.entriesService.selection.selected.includes(this.node)) {
+            this.entriesService.selection.clear();
+            this.entriesService.selection.select(this.node)
+        }
         this.menuTrigger.openMenu();
+    }
+
+    getVisibleColumns() {
+        return this.entriesService.columns.filter((c) => c.visible);
     }
 }

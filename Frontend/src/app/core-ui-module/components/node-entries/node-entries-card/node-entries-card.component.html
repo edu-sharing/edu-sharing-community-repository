@@ -54,10 +54,20 @@
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </app-node-url>
-  <ng-container *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
+  <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+       class="clickable"
+       (click)="entriesService.clickItem.emit({
+          element: node,
+          source: ClickSource.Metadata
+       })"
+       (dblclick)="entriesService.dblClickItem.emit({
+          element: node,
+          source: ClickSource.Metadata
+       })"
+  >
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
-  </ng-container>
+  </div>
   <dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
   <div class="card-options" *ngIf="entriesService.options">
     <app-option-button *ngFor="let option of optionsOnCard()"
@@ -100,7 +110,7 @@
 <ng-template #meta>
   <div class="card-meta">
     <div
-      *ngFor="let displayPart of entriesService.columns; let first = first;"
+      *ngFor="let displayPart of getVisibleColumns(); let first = first;"
       class="card-meta-row"
     >
       <label *ngIf="!first">{{

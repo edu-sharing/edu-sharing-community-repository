@@ -25,10 +25,14 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
         this.setPagination(pagination);
     }
 
-    async appendData(appendData: T[]) {
+    async appendData(appendData: T[], location: 'before' | 'after' = 'after') {
         console.log('append', appendData);
         let data = this.getData();
-        data = data.concat(appendData);
+        if(location === 'after') {
+            data = data.concat(appendData);
+        } else {
+            data = appendData.concat(data);
+        }
         this.dataStream.next(data);
     }
 

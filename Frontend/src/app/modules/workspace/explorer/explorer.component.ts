@@ -2,9 +2,9 @@ import {
     AfterViewInit,
     Component,
     EventEmitter,
-    Input,
+    Input, OnChanges,
     OnDestroy,
-    Output,
+    Output, SimpleChanges,
     ViewChild
 } from '@angular/core';
 import {
@@ -41,7 +41,7 @@ import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wr
     templateUrl: 'explorer.component.html',
     styleUrls: ['explorer.component.scss']
 })
-export class WorkspaceExplorerComponent implements OnDestroy, AfterViewInit {
+export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
     public readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
     @ViewChild('list') list: ListTableComponent;
@@ -61,6 +61,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, AfterViewInit {
 
     public columns : ListItem[]=[];
     @Input() displayType = NodeEntriesDisplayType.Table;
+    @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() reorderDialog = false;
     @Output() reorderDialogChange = new EventEmitter<boolean>();
     @Input() preventKeyevents:boolean;
@@ -177,6 +178,13 @@ export class WorkspaceExplorerComponent implements OnDestroy, AfterViewInit {
     ngOnDestroy(): void {
         this.temporaryStorage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this._dataSource);
     }
+
+    async ngOnChanges(changes: SimpleChanges) {
+        if (changes.displayType) {
+            await this.initOptions();
+        }
+    }
+
     private handleError(error: any) {
         if (error.status == 404)
             this.toast.error(null, 'WORKSPACE.TOAST.NOT_FOUND', {id: this._node.ref.id})
@@ -209,11 +217,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, AfterViewInit {
     }
 
     async ngAfterViewInit() {
-        await this.nodeEntries.initOptionsGenerator({
-            actionbar: this.actionbar,
-            customOptions: this.customOptions,
-            scope: Scope.WorkspaceList,
-        });
+        await this.initOptions();
     }
     public getColumns(customColumns:any[],configColumns:string[]) {
         let defaultColumns:ListItem[]=[];
@@ -374,7 +378,17 @@ export class WorkspaceExplorerComponent implements OnDestroy, AfterViewInit {
     }
 
     select(event: NodeClickEvent<Node>) {
-        this.nodeEntries.getSelection().clear();
+        if(!(this.nodeEntries.getSelection().selected.length === 1 && this.nodeEntries.getSelection().selected[0] === event.element)) {
+            this.nodeEntries.getSelection().clear();
+        }
         this.nodeEntries.getSelection().toggle(event.element);
+    }
+
+    private async initOptions() {
+        await this.nodeEntries?.initOptionsGenerator({
+            actionbar: this.actionbar,
+            customOptions: this.customOptions,
+            scope: Scope.WorkspaceList,
+        });
     }
 }

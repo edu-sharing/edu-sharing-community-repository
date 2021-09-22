@@ -24,6 +24,8 @@ import {
     InteractionType
 } from '../../node-entries-wrapper/node-entries-wrapper.component';
 import {Target} from '../../../option-item';
+import {DropdownComponent} from '../../dropdown/dropdown.component';
+import {MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
     selector: 'app-node-entries-table',
@@ -38,6 +40,11 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
+    @ViewChild(DropdownComponent) dropdown: DropdownComponent;
+    @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
+
+    dropdownLeft: number;
+    dropdownTop: number;
 
     loading: Observable<boolean>;
     isPageSelected = new BehaviorSubject(false);
@@ -70,6 +77,11 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
             this.entriesService.selection.clear();
             this.entriesService.selection.select(node)
         }
+        event.stopPropagation();
+        event.preventDefault();
+        this.dropdownLeft = event.clientX;
+        this.dropdownTop = event.clientY;
+        this.menuTrigger.openMenu();
     }
 
     private updateSort(): void {
@@ -142,6 +154,7 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
                 replaceUrl: true,
             });*/
         });
+        /*
         this.paginator.page
             .pipe(
                 // As a response to changes of other parameters, the pageIndex might be reset to 0 and a
@@ -158,5 +171,6 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
                     replaceUrl: true,
                 });
             });
+         */
     }
 }

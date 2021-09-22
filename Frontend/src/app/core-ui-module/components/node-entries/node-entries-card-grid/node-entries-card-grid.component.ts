@@ -76,4 +76,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         this.entriesService.dataSource.setDisplayCount();
         return nodes;
     }
+
+    getSortColumns() {
+        return this.entriesService.sort.columns.filter((c) => this.entriesService.columns.some(
+            (c2) => c2.name === c.name)
+        );
+    }
 }

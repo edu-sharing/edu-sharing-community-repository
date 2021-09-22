@@ -357,7 +357,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 }
                 this.oldParams = params;
                 if (params.displayType != null) {
-                    this.setDisplayType(parseInt(params.displayType, 10), false);
+                    this.setDisplayType(parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10), false);
                 } else {
                     this.setDisplayType(this.config.instant('workspaceViewType', NodeEntriesDisplayType.Table) as NodeEntriesDisplayType, false);
                 }
@@ -628,13 +628,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         });
     }
 
-    private refreshRoute() {
-        this.routeTo(
-            this.root,
-            !this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,
-            this.searchQuery ? this.searchQuery.query : null
-        );
-    }
     private routeTo(root: string, node: string = null, search: string = null) {
         const params: any = { root, id: node, query: search, mainnav: this.mainnav };
         // tslint:disable-next-line:triple-equals
@@ -787,14 +780,17 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.customOptions.addOptions = [toggle];
     }
 
-    /**
-     * function to add value to viewType
-     * @param viewType as params accept number, in this case we want just 0|1
-     */
-    private setDisplayType(viewType: NodeEntriesDisplayType, refreshRoute = true) {
-        this.displayType = viewType;
+    setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {
+        this.displayType = displayType;
         if(refreshRoute) {
-            this.refreshRoute();
+            this.router.navigate(['./'], {
+                relativeTo: this.route,
+                replaceUrl: true,
+                queryParamsHandling: 'merge',
+                queryParams: {
+                    [UIConstants.QUERY_PARAM_LIST_VIEW_TYPE]: displayType
+                }
+            });
         }
     }
 }

@@ -55,7 +55,7 @@ export enum ClickSource {
     Metadata
 }
 export type NodeClickEvent<T extends Node> = {
-    element: Node,
+    element: T,
     source: ClickSource,
     attribute?: ListItem // only when source === Metadata
 }
@@ -106,6 +106,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     @Input() columns: ListItem[];
     @Input() globalOptions: OptionItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
+    @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
     @Input() sort: ListSortConfig;
     @Input() gridConfig: GridConfig;
@@ -203,7 +204,9 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
 
     setDisplayType(displayType: NodeEntriesDisplayType): void {
         this.displayType = displayType;
+        this.entriesService.displayType = displayType;
         this.ngOnChanges();
+        this.displayTypeChange.emit(displayType);
     }
 
     updateNodes(nodes: void | T[]): void {
@@ -214,6 +217,13 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     }
 
     addVirtualNodes(virtual: T[]): void {
+        virtual = virtual.map((o) => {
+            o.virtual = true;
+            return o;
+        });
+        this.dataSource.appendData(virtual, 'before');
+        this.entriesService.selection.clear();
+        this.entriesService.selection.select(...virtual);
     }
 
     setOptions(options: ListOptions): void {

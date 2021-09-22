@@ -20,7 +20,7 @@
     </button>
     <sort-dropdown
       #sortDropdown
-      [columns]="entriesService.sort.columns"
+      [columns]="getSortColumns()"
       [sortBy]="entriesService.sort.active"
       [sortAscending]="entriesService.sort.direction === 'asc'"
       (onSort)="changeSort($event)"
