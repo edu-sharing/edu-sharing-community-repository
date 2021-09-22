@@ -51,7 +51,7 @@ export class ProfilesComponent {
       route.params.subscribe((params)=> {
         this.editProfileUrl=this.config.instant('editProfileUrl');
         this.editProfile=this.config.instant('editProfile',true);
-        this.activateLinks = this.config.instant('activateProfileLinks', true);
+        this.activateLinks = this.config.instant('activateProfileLinks', false);
         this.loadUser(params.authority);
         this.getProfileSetting(params.authority);
       });
