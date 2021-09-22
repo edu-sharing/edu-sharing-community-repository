@@ -134,9 +134,9 @@ $addToWidth:350px;
 .list{
   overflow-y: auto;
   position:fixed;
-  top: 175px;
+  top: $mainnavHeight + 105px;
   width:100%;
-  height: calc(100% - 175px);
+  height: calc(100% - #{$mainnavHeight + 105px});
 }
 .searchEmbedded{
   padding:10px;
