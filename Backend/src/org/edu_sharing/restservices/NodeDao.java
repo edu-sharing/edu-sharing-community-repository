@@ -487,7 +487,7 @@ public class NodeDao {
 			
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
 			this.permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
-			this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId());
+			try { this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getId()); }catch (RuntimeException e){}
 			/**
 			 * call getProperties on demand
 			 */
@@ -1396,7 +1396,9 @@ public class NodeDao {
 	private Person getOwner() {
 		User owner = null;
 		if(ownerUsername != null && !ownerUsername.trim().equals("")){
-			owner = authorityService.getUser(ownerUsername);
+			if(authorityService != null) {
+				owner = authorityService.getUser(ownerUsername);
+			}
 		}
 		owner = (owner == null) ? nodeService.getOwner(storeId, storeProtocol, nodeId) : owner;
 		if(owner==null)
