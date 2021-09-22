@@ -99,6 +99,7 @@ import {CheckTextOverflowDirective} from './directives/check-text-overflow.direc
 import {MatSortModule} from '@angular/material/sort';
 import {OverlayModule} from '@angular/cdk/overlay';
 import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
+import {DragCursorDirective} from './directives/drag-cursor.directive';
 
 @NgModule({
     declarations: [
@@ -167,7 +168,8 @@ import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
         NodeEntriesTableComponent,
         ColumnChooserComponent,
         CheckTextOverflowDirective,
-        ListItemLabelPipe
+        ListItemLabelPipe,
+        DragCursorDirective
     ],
     imports: [
         A11yModule,

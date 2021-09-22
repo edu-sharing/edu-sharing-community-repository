@@ -49,6 +49,15 @@ export interface ListSortConfig extends Sort {
     allowed?: boolean;
     customSortingInProgress?: boolean;
 }
+export interface DropSource<T extends Node> {
+    element: T;
+    sourceList: ListEventInterface<T>;
+}
+export interface ListDragGropConfig<T extends Node> {
+    dragAllowed: boolean;
+    dropAllowed?: (target: T, source: DropSource<T>) => boolean;
+    dropped?: () => void;
+}
 export enum ClickSource {
     Preview,
     Icon,
@@ -109,6 +118,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
     @Input() sort: ListSortConfig;
+    @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -147,6 +157,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         if (!this.componentRef) {
             this.init();
         }
+        this.entriesService.list = this;
         this.entriesService.dataSource = this.dataSource;
         this.entriesService.columns = this.columns;
         this.entriesService.displayType = this.displayType;
@@ -156,6 +167,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         this.entriesService.globalOptions = this.globalOptions;
         this.entriesService.sort = this.sort;
         this.entriesService.sortChange = this.sortChange;
+        this.entriesService.dragDrop = this.dragDrop;
         this.entriesService.clickItem = this.clickItem;
         this.entriesService.dblClickItem = this.dblClickItem;
         this.entriesService.fetchData = this.fetchData;

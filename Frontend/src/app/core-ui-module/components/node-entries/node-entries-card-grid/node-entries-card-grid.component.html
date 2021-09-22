@@ -56,14 +56,57 @@
     </div>
   </ng-container>
 </ul>
-<ul *ngIf="!entriesService.sort?.customSortingInProgress"
-    class="card-grid"
-    #grid
-    infiniteScroll
-    (scrolled)="loadData()"
->
-  <ng-container *ngTemplateOutlet="list"></ng-container>
-</ul>
+<ng-container *ngIf="!entriesService.sort?.customSortingInProgress">
+  <ul *ngIf="!entriesService.dragDrop?.dragAllowed"
+      class="card-grid"
+      #grid
+      infiniteScroll
+      (scrolled)="loadData()"
+  >
+    <ng-container *ngTemplateOutlet="list"></ng-container>
+  </ul>
+  <ul *ngIf="entriesService.dragDrop?.dragAllowed"
+      class="card-grid"
+      #grid
+      infiniteScroll
+      cdkDropListGroup
+      (scrolled)="loadData()"
+  >
+    <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+      <div
+        class="card-grid-drag-wrapper"
+        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        role="none"
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        [class.card-grid-drop-allowed]="dragDropState?.element === node && dragDropState.dropAllowed"
+        [cdkDropListData]="node"
+        (cdkDropListEntered)="dragEnter($event)"
+        (cdkDropListExited)="dragDropState = null"
+        (cdkDropListDropped)="dragDropState = null; entriesService.dragDrop.dropped()"
+      >
+        <app-node-entries-card
+          *ngIf="displayType === NodeEntriesDisplayType.Grid"
+          [node]="node"
+          role="listitem"
+          cdkDrag
+          appDragCursor
+        ></app-node-entries-card>
+        <app-node-entries-card-small
+          *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+          [node]="node"
+          role="listitem"
+          cdkDrag
+          appDragCursor
+        ></app-node-entries-card-small>
+        <div *ngIf="dragDropState?.element === node && !dragDropState.dropAllowed"
+             class="card-grid-drop-blocked">
+          <i icon="cancel"></i>
+        </div>
+      </div>
+    </ng-container>
+  </ul>
+</ng-container>
 <ng-container *ngIf="entriesService.dataSource.isLoading">
   <ng-container *ngTemplateOutlet="loading"></ng-container>
 </ng-container>

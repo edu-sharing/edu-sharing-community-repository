@@ -43,6 +43,9 @@
   (displayTypeChange)="displayTypeChange.emit($event)"
   [elementInteractionType]="InteractionType.Emitter"
   [sort]="sort"
+  [dragDrop]="{
+    dragAllowed: true
+  }"
   (sortChange)="setSorting($event)"
   (clickItem)="select($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"

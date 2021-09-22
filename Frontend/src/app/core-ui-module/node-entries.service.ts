@@ -2,9 +2,16 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {Node} from '../core-module/rest/data-object';
 import {NodeDataSource} from './components/node-entries-wrapper/node-data-source';
 import {
-    FetchEvent, GridConfig,
-    InteractionType, ListEventInterface, ListOptions, ListSortConfig, NodeClickEvent,
-    NodeEntriesDisplayType, NodeEntriesWrapperComponent
+    FetchEvent,
+    GridConfig,
+    InteractionType,
+    ListDragGropConfig,
+    ListEventInterface,
+    ListOptions,
+    ListSortConfig,
+    NodeClickEvent,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent
 } from './components/node-entries-wrapper/node-entries-wrapper.component';
 import {ListItem} from '../core-module/ui/list-item';
 import {SelectionModel} from '@angular/cdk/collections';
@@ -13,6 +20,7 @@ import {Sort} from '@angular/material/sort';
 
 @Injectable()
 export class NodeEntriesService<T extends Node> {
+    list: ListEventInterface<T>;
     dataSource: NodeDataSource<T>;
     columns: ListItem[];
     displayType: NodeEntriesDisplayType;
@@ -22,6 +30,7 @@ export class NodeEntriesService<T extends Node> {
     globalOptions: OptionItem[];
     sort: ListSortConfig;
     sortChange: EventEmitter<ListSortConfig>;
+    dragDrop: ListDragGropConfig<T>;
     clickItem: EventEmitter<NodeClickEvent<T>>;
     dblClickItem: EventEmitter<NodeClickEvent<T>>;
     fetchData: EventEmitter<FetchEvent>;

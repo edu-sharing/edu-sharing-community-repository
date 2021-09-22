@@ -36,6 +36,34 @@
     grid-row-gap: 20px;
     grid-template-rows: auto;
 
+    > .card-grid-drag-wrapper {
+        position: relative;
+        .card-grid-drop-blocked {
+            backdrop-filter: blur(10px);
+            position: absolute;
+            z-index: 1;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            outline: 2px dashed $colorStatusNegative;
+            > i {
+                color: $colorStatusNegative;
+                font-size: 80px;
+            }
+        }
+        &.card-grid-drop-allowed {
+            outline: 2px dashed $colorStatusPositive;
+        }
+        &.cdk-drop-list-dragging {
+            > *:first-child {
+                display: none;
+            }
+        }
+    }
     &.card-grid-reorder {
         > .card-grid-order-wrapper {
             $orderAnimationTime: 0.5s;

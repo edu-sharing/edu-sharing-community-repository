@@ -25,6 +25,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     @ViewChild('grid') gridRef: ElementRef;
     @Input() displayType: NodeEntriesDisplayType;
 
+    dragDropState: {
+        element: T,
+        dropAllowed: boolean
+    }
     constructor(
         public entriesService: NodeEntriesService<T>,
     ) {
@@ -81,5 +85,18 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         return this.entriesService.sort.columns.filter((c) => this.entriesService.columns.some(
             (c2) => c2.name === c.name)
         );
+    }
+
+    dragEnter(drag: CdkDragEnter<T>) {
+        console.log(drag.container.data, drag.item.data);
+        const allowed = this.entriesService.dragDrop.dropAllowed?.(drag.container.data, {
+            element: drag.item.data,
+            sourceList: this.entriesService.list,
+        });
+        this.dragDropState = {
+            element: drag.container.data,
+            dropAllowed: allowed
+        }
+
     }
 }
