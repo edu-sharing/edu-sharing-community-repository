@@ -36,6 +36,9 @@
             background-color: $primaryMediumLight;
         }
     }
+    &.grid-card-virtual {
+        outline: 2px dashed $nodeVirtualColor;
+    }
     .card-top-bar {
         background-color: rgba(255,255,255,.5);
         height: $topBarHeight;
@@ -160,7 +163,7 @@
 
     }
     &:hover {
-        @include materialShadowMediumLarge(false, 0.3);
+        @include materialShadowMediumLarge(false, 0.2);
         .card-meta, .card-options {
             background-color: $primaryVeryLight;
         }
