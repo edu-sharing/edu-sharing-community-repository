@@ -20,7 +20,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     readonly ClickSource = ClickSource;
-    @ViewChild(DropdownComponent) dropdown: DropdownComponent;
+    @Input() dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
 
     @Input() node: T;

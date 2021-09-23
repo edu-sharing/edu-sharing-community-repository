@@ -204,4 +204,12 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     dragExit(exit: CdkDragExit<T>|any) {
         this.dragDropState.element = null
     }
+
+    loadData() {
+        if (this.entriesService.dataSource.hasMore()) {
+            this.entriesService.fetchData.emit({
+                offset: this.entriesService.dataSource.getData().length
+            });
+        }
+    }
 }

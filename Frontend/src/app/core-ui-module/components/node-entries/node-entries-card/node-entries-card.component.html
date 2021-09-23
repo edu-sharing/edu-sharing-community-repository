@@ -68,7 +68,6 @@
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </div>
-  <dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
   <div class="card-options" *ngIf="entriesService.options">
     <app-option-button *ngFor="let option of optionsOnCard()"
                        class="card-options-always"

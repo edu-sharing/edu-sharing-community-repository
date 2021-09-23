@@ -342,6 +342,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             if(Helper.objectEquals(this._node,current))
                 return;
             this._node=current;
+            this.initOptions();
             this.load(true);
         });
     }
@@ -394,6 +395,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             actionbar: this.actionbar,
             customOptions: this.customOptions,
             scope: Scope.WorkspaceList,
+            parent: this._node,
         });
     }
 }

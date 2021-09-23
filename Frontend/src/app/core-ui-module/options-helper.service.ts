@@ -58,7 +58,7 @@ import {PlatformLocation} from '@angular/common';
 
 
 export class OptionsHelperConfig {
-    subscribeEvents ? = true;
+    subscribeEvents? = true;
 }
 export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('OptionsHelperConfig');
 
@@ -101,7 +101,8 @@ export class OptionsHelperService implements OnDestroy {
         if (!event.composedPath().some(
             (t) => {
                 const name = (t as HTMLElement)?.nodeName;
-                return ['LISTTABLE', 'ACTIONBAR'].indexOf(name) !== -1;
+                console.log(name);
+                return ['LISTTABLE', 'ACTIONBAR', 'APP-NODE-ENTRIES'].indexOf(name) !== -1;
             })) {
             return;
         }
@@ -250,7 +251,6 @@ export class OptionsHelperService implements OnDestroy {
      * refresh all bound components with available menu options
      */
     refreshComponents(refreshListOptions = true) {
-        console.log(this.data);
         if (this.data == null) {
             console.warn('options helper refresh called but no data previously bound');
             return;
@@ -282,7 +282,6 @@ export class OptionsHelperService implements OnDestroy {
             this.dropdown.options = this.getAvailableOptions(Target.ListDropdown);
         }
         if (this.actionbar) {
-            console.log(this.data.selectedObjects, this.actionbar, this.globalOptions);
             this.actionbar.options = this.globalOptions;
         }
     }
@@ -1075,7 +1074,6 @@ export class OptionsHelperService implements OnDestroy {
                     toggleViewType.icon = 'list';
                     break;
             }
-            console.log(emit, this.list.getDisplayType());
             if(emit) {
                 this.listener?.onDisplayTypeChange?.(this.list.getDisplayType());
             }

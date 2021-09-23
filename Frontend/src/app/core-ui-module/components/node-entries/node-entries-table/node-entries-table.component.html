@@ -1,8 +1,21 @@
+<dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
+<button
+  #menuTrigger="matMenuTrigger"
+  mat-button
+  class="dropdown-dummy"
+  [style.left.px]="dropdownLeft"
+  [style.top.px]="dropdownTop"
+  [matMenuTriggerFor]="dropdown.menu"
+  tabindex="-1"
+  aria-hidden="true"
+></button>
 <mat-table [dataSource]="entriesService.dataSource"
            xmlns="http://www.w3.org/1999/html"
            matSort
            cdkDropList
            [cdkDropListSortPredicate]="dragEnter"
+           infiniteScroll
+           (scrolled)="loadData()"
 >
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select">
@@ -43,17 +56,6 @@
     <mat-header-cell *matHeaderCellDef>
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
-      <dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
-      <button
-        #menuTrigger="matMenuTrigger"
-        mat-button
-        class="dropdown-dummy"
-        [style.left.px]="dropdownLeft"
-        [style.top.px]="dropdownTop"
-        [matMenuTriggerFor]="dropdown.menu"
-        tabindex="-1"
-        aria-hidden="true"
-      ></button>
       <button mat-icon-button
               color="primary"
               (click)="entriesService.selection.clear(); entriesService.selection.select(node)"
@@ -119,22 +121,23 @@
     </mat-row>
   </ng-container>
   <ng-container *ngIf="!entriesService.dragDrop?.dragAllowed">
-  <mat-row
-    mat-row
-    matRipple
-    class="mat-row"
-    [class.mat-row-selected]="entriesService.selection.isSelected(node)"
-    [class.mat-row-virtual]="node.virtual"
-    [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"
-    *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
-    (contextmenu)="onRowContextMenu({ event: $event, node: node })"
-  >
-  </mat-row>
+    <mat-row
+      mat-row
+      matRipple
+      class="mat-row"
+      [class.mat-row-selected]="entriesService.selection.isSelected(node)"
+      [class.mat-row-virtual]="node.virtual"
+      [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"
+      *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
+      (contextmenu)="onRowContextMenu({ event: $event, node: node })"
+    >
+    </mat-row>
   </ng-container>
 </mat-table>
-
-<spinner *ngIf="loading | async"></spinner>
-
+<ng-container *ngIf="entriesService.dataSource.isLoading">
+  <ng-container *ngTemplateOutlet="loading">
+  </ng-container>
+</ng-container>
 <!--
 <mat-paginator #paginator [pageSizeOptions]="pageSizeOptions"></mat-paginator>
 -->
@@ -147,7 +150,9 @@ available. -->
   [(columnChooserVisible)]="columnChooserVisible"
   [origin]="columnChooserTrigger"
 ></app-column-chooser>
-
+<ng-template #loading>
+  <spinner></spinner>
+</ng-template>
 <ng-template #icon let-node="node">
   <div class="icon-bg">
     <img

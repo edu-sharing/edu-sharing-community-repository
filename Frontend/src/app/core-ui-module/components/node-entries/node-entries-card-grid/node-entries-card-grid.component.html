@@ -27,6 +27,7 @@
     ></sort-dropdown>
   </div>
 </div>
+<dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
 <ul *ngIf="entriesService.sort?.customSortingInProgress"
     class="card-grid card-grid-reorder"
     cdkDropListGroup
@@ -44,6 +45,7 @@
       <app-node-entries-card
         *ngIf="displayType === NodeEntriesDisplayType.Grid"
         [node]="node"
+        [dropdown]="dropdown"
         role="listitem"
         cdkDrag
       ></app-node-entries-card>
@@ -91,6 +93,7 @@
         <app-node-entries-card
           *ngIf="displayType === NodeEntriesDisplayType.Grid"
           [node]="node"
+          [dropdown]="dropdown"
           role="listitem"
           cdkDrag
           [cdkDragData]="node"
@@ -151,6 +154,7 @@
       <app-node-entries-card
         *ngFor="let node of getVisibleNodes(nodes); let i = index"
         [node]="node"
+        [dropdown]="dropdown"
         role="listitem"
       ></app-node-entries-card>
     </ng-container>

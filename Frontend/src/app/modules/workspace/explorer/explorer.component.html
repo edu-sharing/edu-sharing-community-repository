@@ -42,6 +42,7 @@
   [displayType]="displayType"
   (displayTypeChange)="displayTypeChange.emit($event)"
   [elementInteractionType]="InteractionType.Emitter"
+  (fetchData)="load(false)"
   [sort]="sort"
   [dragDrop]="{
     dragAllowed: true,

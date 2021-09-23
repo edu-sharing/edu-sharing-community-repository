@@ -14,6 +14,7 @@ import {$e} from 'codelyzer/angular/styles/chars';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray} from '@angular/cdk/drag-drop';
 import {NodeEntriesDisplayType} from '../../node-entries-wrapper/node-entries-wrapper.component';
 import {DragDropState} from '../../../directives/drag-cursor.directive';
+import {Target} from '../../../option-item';
 
 @Component({
     selector: 'app-node-entries-card-grid',
@@ -22,6 +23,7 @@ import {DragDropState} from '../../../directives/drag-cursor.directive';
 })
 export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly Target = Target;
     @ContentChild('title') titleRef: TemplateRef<any>;
     @ViewChild('grid') gridRef: ElementRef;
     @Input() displayType: NodeEntriesDisplayType;
