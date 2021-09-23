@@ -70,6 +70,7 @@
       #grid
       infiniteScroll
       cdkDropListGroup
+      (dragleave)="dragExit($event)"
       (scrolled)="loadData()"
   >
     <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
@@ -78,30 +79,39 @@
         *ngFor="let node of getVisibleNodes(nodes); let i = index"
         role="none"
         cdkDropList
-        cdkDropListOrientation="horizontal"
+        cdkDropListOrientation="vertical"
         [class.card-grid-drop-allowed]="dragDropState?.element === node && dragDropState.dropAllowed"
+        [class.card-grid-drop-blocked]="dragDropState?.element === node && !dragDropState.dropAllowed"
         [cdkDropListData]="node"
+        [cdkDropListSortingDisabled]="true"
         (cdkDropListEntered)="dragEnter($event)"
-        (cdkDropListExited)="dragDropState = null"
-        (cdkDropListDropped)="dragDropState = null; entriesService.dragDrop.dropped()"
+        (cdkDropListExited)="dragExit($event)"
+        (cdkDropListDropped)="drop($event)"
       >
         <app-node-entries-card
           *ngIf="displayType === NodeEntriesDisplayType.Grid"
           [node]="node"
           role="listitem"
           cdkDrag
+          [cdkDragData]="node"
           appDragCursor
+          [dragState]="dragDropState"
         ></app-node-entries-card>
         <app-node-entries-card-small
           *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
           [node]="node"
           role="listitem"
           cdkDrag
+          [cdkDragData]="node"
           appDragCursor
         ></app-node-entries-card-small>
         <div *ngIf="dragDropState?.element === node && !dragDropState.dropAllowed"
-             class="card-grid-drop-blocked">
+             class="card-grid-drop-blocked-container">
           <i icon="cancel"></i>
+        </div>
+        <div *ngIf="dragDropState?.element === node && dragDropState.dropAllowed"
+             class="card-grid-drop-allowed-container">
+          <i [icon]="dragDropState.mode === 'copy' ? 'add_circle_outline' : 'archive'"></i>
         </div>
       </div>
     </ng-container>

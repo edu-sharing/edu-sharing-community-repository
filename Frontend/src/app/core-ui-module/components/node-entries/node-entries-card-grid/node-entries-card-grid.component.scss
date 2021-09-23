@@ -38,8 +38,8 @@
 
     > .card-grid-drag-wrapper {
         position: relative;
-        .card-grid-drop-blocked {
-            backdrop-filter: blur(10px);
+        .card-grid-drop-allowed-container,
+        .card-grid-drop-blocked-container {
             position: absolute;
             z-index: 1;
             left: 0;
@@ -49,11 +49,29 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            outline: 2px dashed $colorStatusNegative;
+            > i {
+                background: radial-gradient(circle, #fff 30%, rgba(255,255,255,0.0001) 70%);
+                width: 200px;
+                height: 200px;
+                font-size: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+        .card-grid-drop-allowed-container {
+            > i {
+                color: $colorStatusPositive;
+            }
+        }
+        .card-grid-drop-blocked-container {
+            backdrop-filter: blur(5px);
             > i {
                 color: $colorStatusNegative;
-                font-size: 80px;
             }
+        }
+        &.card-grid-drop-blocked {
+            outline: 2px dashed $colorStatusNegative;
         }
         &.card-grid-drop-allowed {
             outline: 2px dashed $colorStatusPositive;

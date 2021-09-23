@@ -54,10 +54,12 @@ import {Observable} from 'rxjs';
 import {delay} from 'rxjs/operators';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+import {
+    DropSource, DropTarget,
+    NodeEntriesDisplayType, NodeRoot
+} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 
-export type WorkspaceRoot = 'MY_FILES' | 'SHARED_FILES' | 'MY_SHARED_FILES' | 'TO_ME_SHARED_FILES' | 'WORKFLOW_RECEIVE' | 'RECYCLE' | 'ALL_FILES';
 @Component({
     selector: 'workspace-main',
     templateUrl: 'workspace.component.html',
@@ -84,7 +86,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private sharedFolders: Node[] = [];
     path: Node[] = [];
     private parameterNode: Node;
-    root: WorkspaceRoot = 'MY_FILES';
+    root: NodeRoot = 'MY_FILES';
 
     showSelectRoot = false;
 
@@ -215,25 +217,26 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private editConnector(node: Node = null, type: Filetype = null, win: any = null, connectorType: Connector = null) {
         UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, this.getNodeList(node)[0], type, win, connectorType);
     }
-    handleDrop(event: any) {
-        for (const s of event.source) {
-            if (event.target?.ref?.id === s.ref.id || event.target?.ref?.id === s.parent.id) {
+    handleDrop(event: {target: DropTarget, source: DropSource<Node>}) {
+        for (const s of event.source.element) {
+            if ((event.target as Node).ref?.id === s.ref.id || (event.target as Node).ref?.id === s.parent.id) {
                 this.toast.error(null, 'WORKSPACE.SOURCE_TARGET_IDENTICAL');
                 return;
             }
         }
-        if (event.target !== 'HOME' && !event.target.isDirectory) {
+        console.log(event);
+        if (event.target !== 'MY_FILES' && !(event.target as Node).isDirectory) {
             this.toast.error(null, 'WORKSPACE.TARGET_NO_DIRECTORY');
             return;
         }
-        if (event.event.altKey) {
+        if (event.source.mode === 'link') {
             this.toast.error(null, 'WORKSPACE.FEATURE_NOT_IMPLEMENTED');
         }
-        else if (event.type === 'copy') {
-            this.copyNode(event.target, event.source);
+        else if (event.source.mode === 'copy') {
+            this.copyNode(event.target, event.source.element);
         }
         else {
-            this.moveNode(event.target, event.source);
+            this.moveNode(event.target, event.source.element);
         }
         /*
         this.dialogTitle="WORKSPACE.DRAG_DROP_TITLE";
@@ -250,7 +253,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         return event.target === 'HOME' ? this.root === 'MY_FILES' :
             event.target?.ref?.id !== this.currentFolder.ref.id;
     };
-    private moveNode(target: DragNodeTarget, source: Node[], position = 0) {
+    private moveNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
             this.finishMoveCopy(target, source, false);
@@ -266,7 +269,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.moveNode(target, source, position + 1);
             });
     }
-    private copyNode(target: DragNodeTarget, source: Node[], position = 0) {
+    private copyNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
             this.finishMoveCopy(target, source, true);
@@ -282,7 +285,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.copyNode(target, source, position + 1);
             });
     }
-    private finishMoveCopy(target: DragNodeTarget, source: Node[], copy: boolean) {
+    private finishMoveCopy(target: DropTarget, source: Node[], copy: boolean) {
         this.toast.closeModalDialog();
         const info: any = {
             to: (target as Node).name || this.translate.instant('WORKSPACE.MY_FILES'),
@@ -475,7 +478,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.node.getNodeMetadata(folder.id).subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
         }
     }
-    setRoot(root: WorkspaceRoot) {
+    setRoot(root: NodeRoot) {
         this.root = root;
         this.searchQuery = null;
         this.routeTo(root, null, null);

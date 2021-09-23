@@ -40,6 +40,12 @@ mat-cell {
 }
 
 .mat-row {
+    &.mat-row-drop-allowed {
+        border: 2px dashed $colorStatusPositive;
+    }
+    &.mat-row-drop-blocked {
+        border: 2px dashed $colorStatusNegative;
+    }
     &.mat-row-virtual {
         background:  linear-gradient(
                 to right,
@@ -75,10 +81,6 @@ mat-cell {
             height: auto;
         }
     }
-}
-
-.mat-row {
-    cursor: pointer;
 }
 
 .mat-column-link {

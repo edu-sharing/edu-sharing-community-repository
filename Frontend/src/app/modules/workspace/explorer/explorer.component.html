@@ -44,7 +44,9 @@
   [elementInteractionType]="InteractionType.Emitter"
   [sort]="sort"
   [dragDrop]="{
-    dragAllowed: true
+    dragAllowed: true,
+    dropAllowed: canDrop,
+    dropped: drop
   }"
   (sortChange)="setSorting($event)"
   (clickItem)="select($event)"

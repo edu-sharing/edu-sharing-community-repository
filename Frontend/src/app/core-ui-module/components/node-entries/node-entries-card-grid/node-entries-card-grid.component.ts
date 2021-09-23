@@ -11,8 +11,9 @@ import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {SortEvent} from '../../sort-dropdown/sort-dropdown.component';
 import {$e} from 'codelyzer/angular/styles/chars';
-import {CdkDragDrop, CdkDragEnter, moveItemInArray} from '@angular/cdk/drag-drop';
+import {CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray} from '@angular/cdk/drag-drop';
 import {NodeEntriesDisplayType} from '../../node-entries-wrapper/node-entries-wrapper.component';
+import {DragDropState} from '../../../directives/drag-cursor.directive';
 
 @Component({
     selector: 'app-node-entries-card-grid',
@@ -25,10 +26,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     @ViewChild('grid') gridRef: ElementRef;
     @Input() displayType: NodeEntriesDisplayType;
 
-    dragDropState: {
-        element: T,
-        dropAllowed: boolean
-    }
+    dragDropState: DragDropState<T> = {
+        element: null,
+        dropAllowed: false
+    };
     constructor(
         public entriesService: NodeEntriesService<T>,
     ) {
@@ -88,15 +89,26 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     }
 
     dragEnter(drag: CdkDragEnter<T>) {
-        console.log(drag.container.data, drag.item.data);
         const allowed = this.entriesService.dragDrop.dropAllowed?.(drag.container.data, {
-            element: drag.item.data,
+            element: [drag.item.data],
             sourceList: this.entriesService.list,
+            mode: this.dragDropState.mode
         });
-        this.dragDropState = {
-            element: drag.container.data,
-            dropAllowed: allowed
-        }
+        this.dragDropState.element = drag.container.data;
+        this.dragDropState.dropAllowed = allowed;
+    }
 
+    drop(drop: CdkDragDrop<T, any>) {
+        this.entriesService.dragDrop.dropped(drop.container.data,{
+            element: [drop.item.data],
+            sourceList: this.entriesService.list,
+            mode: this.dragDropState.mode
+        });
+        this.dragDropState.element = null;
+    }
+
+    dragExit(exit: CdkDragExit<T>|any) {
+        console.log(exit);
+        this.dragDropState.element = null
     }
 }

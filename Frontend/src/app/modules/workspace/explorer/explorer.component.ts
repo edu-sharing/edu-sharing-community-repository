@@ -27,12 +27,12 @@ import {Helper} from '../../../core-module/rest/helper';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
-import {DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
+import {DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_version';
-import {WorkspaceRoot} from '../workspace.component';
 import {
+    DropSource, DropTarget,
     InteractionType, ListSortConfig, NodeClickEvent,
-    NodeEntriesDisplayType, NodeEntriesWrapperComponent
+    NodeEntriesDisplayType, NodeEntriesWrapperComponent, NodeRoot
 } from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 
@@ -74,8 +74,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     _node : Node;
     private lastRequestSearch : boolean;
 
-    _root: WorkspaceRoot;
-    @Input() set root (root: WorkspaceRoot) {
+    _root: NodeRoot;
+    @Input() set root (root: NodeRoot) {
         this._root = root;
         if(['MY_FILES', 'SHARED_FILES'].includes(root)) {
             this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS;
@@ -104,12 +104,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     @Output() onSelectionChanged=new EventEmitter();
     @Output() onSelectNode=new EventEmitter<Node>();
     @Output() onSearchGlobal=new EventEmitter();
-    @Output() onDrop=new EventEmitter();
+    @Output() onDrop=new EventEmitter<{target: DropTarget, source: DropSource<Node>}>();
     @Output() onReset=new EventEmitter();
     private path : Node[];
-    public drop(event : any) {
-        this.onDrop.emit(event);
-    }
     searchGlobal() {
         this.onSearchGlobal.emit(this._searchQuery);
     }
@@ -361,8 +358,16 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             }
         });
     }
-    canDrop = (event: DropData)=> {
-        return event.target === 'HOME' || event.target.isDirectory;
+    canDrop = (target: DropTarget, source: DropSource<Node>) => {
+        return (target as Node).isDirectory &&
+            (target as Node).access?.includes(RestConstants.ACCESS_WRITE) &&
+            source.element.every((s) => s.access.includes(RestConstants.ACCESS_WRITE));
+    }
+    drop = (target: DropTarget, source: DropSource<Node>) => {
+        this.onDrop.emit({
+            target,
+            source
+        });
     }
 
     private getRealNodeCount() {

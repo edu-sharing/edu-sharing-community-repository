@@ -26,7 +26,10 @@ import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.compone
 import {MainNavService} from '../../../common/services/main-nav.service';
 import {SelectionModel} from '@angular/cdk/collections';
 import {Sort} from '@angular/material/sort';
+import {DragDropState} from '../../directives/drag-cursor.directive';
+import {DropAction} from '../../directives/drag-nodes/drag-nodes';
 
+export type NodeRoot = 'MY_FILES' | 'SHARED_FILES' | 'MY_SHARED_FILES' | 'TO_ME_SHARED_FILES' | 'WORKFLOW_RECEIVE' | 'RECYCLE' | 'ALL_FILES';
 export enum NodeEntriesDisplayType {
     Table,
     Grid,
@@ -49,14 +52,16 @@ export interface ListSortConfig extends Sort {
     allowed?: boolean;
     customSortingInProgress?: boolean;
 }
+export type DropTarget = Node | NodeRoot;
 export interface DropSource<T extends Node> {
-    element: T;
+    element: T[];
     sourceList: ListEventInterface<T>;
+    mode: DropAction;
 }
 export interface ListDragGropConfig<T extends Node> {
     dragAllowed: boolean;
     dropAllowed?: (target: T, source: DropSource<T>) => boolean;
-    dropped?: () => void;
+    dropped?: (target: T, source: DropSource<T>) => void;
 }
 export enum ClickSource {
     Preview,

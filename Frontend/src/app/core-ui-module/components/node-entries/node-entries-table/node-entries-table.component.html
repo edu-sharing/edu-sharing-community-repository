@@ -1,4 +1,9 @@
-<mat-table [dataSource]="entriesService.dataSource" matSort xmlns="http://www.w3.org/1999/html">
+<mat-table [dataSource]="entriesService.dataSource"
+           xmlns="http://www.w3.org/1999/html"
+           matSort
+           cdkDropList
+           [cdkDropListSortPredicate]="dragEnter"
+>
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select">
     <mat-header-cell *matHeaderCellDef>
@@ -91,6 +96,29 @@
     </mat-cell>
   </ng-container>
   <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>
+  <ng-container *ngIf="entriesService.dragDrop?.dragAllowed">
+    <mat-row
+      mat-row
+      matRipple
+      cdkDrag
+      appDragCursor
+      [dragState]="dragDropState"
+      [cdkDragData]="node"
+      (cdkDragStarted)="dragSource = node"
+      (cdkDragExited)="dragExit($event)"
+      (cdkDragDropped)="drop($event)"
+      class="mat-row"
+      [class.mat-row-drop-allowed]="dragDropState?.element === node && dragDropState.dropAllowed"
+      [class.mat-row-drop-blocked]="dragDropState?.element === node && !dragDropState.dropAllowed"
+      [class.mat-row-selected]="entriesService.selection.isSelected(node)"
+      [class.mat-row-virtual]="node.virtual"
+      [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"
+      *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
+      (contextmenu)="onRowContextMenu({ event: $event, node: node })"
+    >
+    </mat-row>
+  </ng-container>
+  <ng-container *ngIf="!entriesService.dragDrop?.dragAllowed">
   <mat-row
     mat-row
     matRipple
@@ -102,6 +130,7 @@
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"
   >
   </mat-row>
+  </ng-container>
 </mat-table>
 
 <spinner *ngIf="loading | async"></spinner>

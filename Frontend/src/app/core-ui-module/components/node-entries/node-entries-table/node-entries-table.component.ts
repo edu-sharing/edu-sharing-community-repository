@@ -26,6 +26,9 @@ import {
 import {Target} from '../../../option-item';
 import {DropdownComponent} from '../../dropdown/dropdown.component';
 import {MatMenuTrigger} from '@angular/material/menu';
+import {CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDropList} from '@angular/cdk/drag-drop';
+import {DragDropState} from '../../../directives/drag-cursor.directive';
+import {CdkDrag} from '@angular/cdk/drag-drop/directives/drag';
 
 @Component({
     selector: 'app-node-entries-table',
@@ -37,6 +40,10 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     readonly ClickSource = ClickSource;
     readonly Target = Target;
 
+    dragDropState: DragDropState<T> = {
+        element: null,
+        dropAllowed: false
+    };
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
@@ -53,6 +60,7 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     ready = false;
     error: Observable<any>;
     pageSizeOptions = [25, 50, 100];
+    dragSource: T;
 
     constructor(private route: ActivatedRoute,
                 public entriesService: NodeEntriesService<T>,
@@ -172,5 +180,31 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
                 });
             });
          */
+    }
+
+    dragEnter = (index: number, drag: CdkDrag, drop: CdkDropList) => {
+        const target = this.entriesService.dataSource.getData()[index];
+        console.log(target.name);
+        const allowed = this.entriesService.dragDrop.dropAllowed?.(target, {
+            element: [this.dragSource],
+            sourceList: this.entriesService.list,
+            mode: this.dragDropState.mode
+        });
+        this.dragDropState.element = target;
+        this.dragDropState.dropAllowed = allowed;
+        return false;
+    }
+
+    drop(drop: CdkDragDrop<T, any>) {
+        this.entriesService.dragDrop.dropped(this.dragDropState.element,{
+            element: [this.dragSource],
+            sourceList: this.entriesService.list,
+            mode: this.dragDropState.mode
+        });
+        this.dragDropState.element = null;
+    }
+
+    dragExit(exit: CdkDragExit<T>|any) {
+        this.dragDropState.element = null
     }
 }
