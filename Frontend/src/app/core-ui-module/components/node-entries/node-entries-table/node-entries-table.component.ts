@@ -93,7 +93,6 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     }
 
     private updateSort(): void {
-        console.log(this.entriesService.sort);
         this.sort.sort({
             id: this.entriesService.sort?.active,
             start: (this.entriesService.sort?.direction as 'asc'|'desc'),
@@ -142,7 +141,6 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
 
     toggleAll(checked: boolean) {
         if(checked) {
-            console.log('checked');
             this.entriesService.selection.select(...this.entriesService.dataSource.getData());
         } else {
             this.entriesService.selection.clear();
@@ -184,7 +182,6 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
 
     dragEnter = (index: number, drag: CdkDrag, drop: CdkDropList) => {
         const target = this.entriesService.dataSource.getData()[index];
-        console.log(target.name);
         const allowed = this.entriesService.dragDrop.dropAllowed?.(target, {
             element: [this.dragSource],
             sourceList: this.entriesService.list,
