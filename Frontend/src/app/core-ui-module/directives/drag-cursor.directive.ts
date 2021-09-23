@@ -69,7 +69,6 @@ export class DragCursorDirective implements OnInit, OnDestroy {
     }
 
     private updateCursor() {
-        console.log('cursor', this.dragging);
         if (this.dragging) {
             document.body.style.cursor = this.dragState?.dropAllowed ?
                 this.dragState?.element ?
