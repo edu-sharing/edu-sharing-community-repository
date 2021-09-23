@@ -40,11 +40,14 @@ mat-cell {
 }
 
 .mat-row {
+    cursor: pointer;
     &.mat-row-drop-allowed {
         border: 2px dashed $colorStatusPositive;
+        cursor: inherit;
     }
     &.mat-row-drop-blocked {
         border: 2px dashed $colorStatusNegative;
+        cursor: inherit;
     }
     &.mat-row-virtual {
         background:  linear-gradient(
@@ -64,6 +67,9 @@ mat-cell {
         background: $listItemSelectedBackgroundEffect;
     }
 }
+.dropdown-dummy {
+    position: fixed;
+}
 .cell-icon {
     > .icon-bg {
         width: 30px;
@@ -82,7 +88,6 @@ mat-cell {
         }
     }
 }
-
 .mat-column-link {
     flex: 0 60px;
     a {
