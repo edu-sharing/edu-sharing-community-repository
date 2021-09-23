@@ -126,6 +126,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             private mdsEditorInstanceService: MdsEditorInstanceService,
             public readonly definition: MdsWidget,
             public readonly viewId: string,
+            public readonly repositoryId: string,
             public readonly relation: ViewRelation = null,
             public readonly variables: string[] = null,
         ) {
@@ -408,8 +409,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                         ),*/
                     },
                     this.mdsEditorInstanceService.mdsId,
-                    // TODO: Real repo id for search needs to be added
-                    RestConstants.HOME_REPOSITORY,
+                    this.repositoryId,
                 )
                 .map(({ values }) => {
                     return values.map((v) => {
@@ -961,6 +961,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     this,
                     widgetDefinition,
                     view.id,
+                    this.repository,
                     view.rel,
                     variables,
                 );
