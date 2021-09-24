@@ -429,7 +429,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     this.mdsEditorInstanceService.mdsId,
                     this.repositoryId,
                 )
-                .map(({ values }) => {
+                .pipe(map(({ values }) => {
                     return values.map((v) => {
                         return {
                             id: v.key,
