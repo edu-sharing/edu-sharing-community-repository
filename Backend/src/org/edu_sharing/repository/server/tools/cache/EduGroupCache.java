@@ -49,9 +49,19 @@ public class EduGroupCache {
 		
 		synchronized(EduGroupCache.cache){
 			EduGroupCache.cache.put(nodeRef, props);
-			EduGroupCache.cacheWithFolderAsKey.put((NodeRef)props.get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),props);
+			EduGroupCache.putEduGroupFolder((NodeRef)props.get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),props);
 		}
 		
+	}
+
+	private static void putEduGroupFolder(NodeRef nodeRef, Map<QName,Serializable> props){
+		if(nodeRef == null){
+			String message = "got a null value for edugroupfolder of edu group:";
+			if(props != null) message += props.get(ContentModel.PROP_AUTHORITY_NAME);
+			logger.error(message);
+			return;
+		}
+		EduGroupCache.cacheWithFolderAsKey.put(nodeRef,props);
 	}
 
 	public static Map<QName,Serializable> get(NodeRef nodeRef) {
@@ -89,28 +99,22 @@ public class EduGroupCache {
 		if(EduGroupCache.cacheWithFolderAsKey.contains(nodeRef)) return true;
 		else return false;
 	}
-	
-	protected static void setCache(Map<NodeRef,Map<QName,Serializable>> cache) {
-		synchronized(EduGroupCache.cache){
-			EduGroupCache.cache.clear();
-			for(Map.Entry<NodeRef,Map<QName,Serializable>> entry : cache.entrySet()){
-				EduGroupCache.cache.put(entry.getKey(), entry.getValue());
-				EduGroupCache.cacheWithFolderAsKey.put((NodeRef)entry.getValue().get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),entry.getValue());
-			}
-		}
-	}
-	
+
 	public static void refresh(){
 		synchronized(EduGroupCache.cache){
 			logger.info("size before refresh:"+EduGroupCache.cache.getKeys().size());
-			EduGroupCache.cache.clear();
+			clear();
 			for(NodeRef eduGroupNodeRef : getEduGroupNodeRefs()){
 				Map<QName, Serializable> properties = serviceRegistry.getNodeService().getProperties(eduGroupNodeRef);
-				EduGroupCache.cache.put(eduGroupNodeRef,properties);
-				EduGroupCache.cacheWithFolderAsKey.put((NodeRef)properties.get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),properties);
+				EduGroupCache.put(eduGroupNodeRef,properties);
 			}
 			logger.info("size after refresh:"+EduGroupCache.cache.getKeys().size());
 		}		
+	}
+
+	private static void clear(){
+		EduGroupCache.cache.clear();
+		EduGroupCache.cacheWithFolderAsKey.clear();
 	}
 	
 	public static void refreshByKeepExisting(){
@@ -120,8 +124,7 @@ public class EduGroupCache {
 			for(NodeRef eduGroupNodeRef : getEduGroupNodeRefs()){
 				if(!EduGroupCache.cache.contains(eduGroupNodeRef)) {
 					Map<QName, Serializable> properties = serviceRegistry.getNodeService().getProperties(eduGroupNodeRef);
-					EduGroupCache.cache.put(eduGroupNodeRef, properties);
-					EduGroupCache.cacheWithFolderAsKey.put((NodeRef)properties.get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),properties);
+					EduGroupCache.put(eduGroupNodeRef, properties);
 				}
 			}
 			logger.info("size after refresh:"+EduGroupCache.cache.getKeys().size());
