@@ -4,11 +4,11 @@
   <button *ngIf="view.isExtended" mat-button
           (click)="toggleShow()"
           [attr.aria-label]="'MDS.OPEN_CLOSE_EXTENDED' | translate">
-    <i [aria]="false" [icon]="'keyboard_arrow_' + (show ? 'up' : 'down')"></i>
+    <i [aria]="false" [icon]="'keyboard_arrow_' + (isExpanded ? 'up' : 'down')"></i>
   </button>
 </h3>
 <div class="content" #container
-     [class.content-hidden]="!show"
+     [class.content-hidden]="!isExpanded"
      [innerHTML]="html"
-     [@openOverlay]="show"
+     [@openOverlay]="isExpanded"
 ></div>

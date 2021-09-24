@@ -769,6 +769,7 @@ export class UIHelper {
         targetElement: Element,
         bindings: { [key: string]: any } = null,
         { delay = 0, replace = true } = {},
+        injector?: Injector, 
     ): ComponentRef<T> {
         if (targetElement == null) {
             return null;
@@ -777,7 +778,7 @@ export class UIHelper {
             componentName,
         );
         const component: ComponentRef<T> = viewContainerRef.createComponent(
-            factory
+            factory, undefined, injector,
         );
         if (bindings) {
             const instance: { [key: string]: any } = component.instance;

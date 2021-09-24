@@ -5,6 +5,7 @@ import {
     ComponentFactoryResolver,
     ElementRef,
     HostBinding,
+    Injector,
     Input,
     OnChanges,
     OnDestroy,
@@ -51,6 +52,7 @@ import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import {MdsEditorWidgetAuthorityComponent} from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
+import { ViewInstanceService } from '../view-instance.service';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -71,15 +73,17 @@ type NativeWidgetClass = {
     animations: [
         trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_NORMAL)),
     ],
+    providers: [ViewInstanceService],
 })
 export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
-
     constructor(
         private sanitizer: DomSanitizer,
         private factoryResolver: ComponentFactoryResolver,
         private containerRef: ViewContainerRef,
         private applicationRef: ApplicationRef,
         private mdsEditorInstance: MdsEditorInstanceService,
+        private viewInstance: ViewInstanceService,
+        private injector: Injector,
     ) {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
         this.knownWidgetTags = [
@@ -140,9 +144,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     @Input() view: MdsView;
     html: SafeHtml;
     isEmbedded: boolean;
+    isExpanded: boolean;
+    readonly isExpanded$ = this.viewInstance.isExpanded$;
 
     private knownWidgetTags: string[];
-    show = true;
     private destroyed = new ReplaySubject<void>(1);
 
     /**
@@ -152,7 +157,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         if (htmlRef) {
             for (let attribute of htmlRef.getAttributeNames()) {
                 // map the extended attribute
-                let value: string|boolean = htmlRef.getAttribute(attribute);
+                let value: string | boolean = htmlRef.getAttribute(attribute);
                 if (attribute === 'isextended' || attribute === 'extended') {
                     attribute = 'isExtended';
                 } else if (attribute === 'isrequired' || attribute === 'required') {
@@ -180,22 +185,24 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 map((activeViews) => activeViews.some((view) => view.id === this.view.id)),
             )
             .subscribe((isActive) => (this.isHidden = !isActive));
-        this.core.card?.onScrollToJumpmark
-            .pipe(
-                takeUntil(this.destroyed),
-            )
-            .subscribe(async (j) => {
-                if(j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX && !this.show) {
-                    this.show = true;
-                    await this.applicationRef.tick();
-                    this.core.card.scrollSmooth(j);
-                }
-            });
+        this.core.card?.onScrollToJumpmark.pipe(takeUntil(this.destroyed)).subscribe(async (j) => {
+            if (
+                j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX &&
+                !this.isExpanded$.value
+            ) {
+                this.isExpanded$.next(true);
+                await this.applicationRef.tick();
+                this.core.card.scrollSmooth(j);
+            }
+        });
+        this.isExpanded$
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((isExpanded) => (this.isExpanded = isExpanded));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (this.view) {
-            this.show = !this.view.isExtended;
+            this.isExpanded$.next(!this.view.isExtended);
         }
     }
 
@@ -256,6 +263,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 widgetName,
                 reason: 'Widget definition missing in MDS',
             },
+            {},
+            this.injector,
         );
     }
 
@@ -275,6 +284,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     widgetName,
                     reason: 'Not implemented',
                 },
+                {},
+                this.injector,
             );
             return;
         }
@@ -290,6 +301,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     reason: constraintViolation,
                 },
                 { replace: false },
+                this.injector,
             );
             return;
         }
@@ -303,6 +315,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 widget,
             },
             { replace: false },
+            this.injector,
         );
         this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance, this.view.id);
     }
@@ -325,6 +338,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     reason: `Widget for type ${widget.definition.type} is not implemented`,
                 },
                 { replace: false },
+                this.injector,
             );
             return;
         } else if (WidgetComponent === null) {
@@ -339,6 +353,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 widget,
             },
             { replace: false },
+            this.injector,
         );
     }
 
@@ -365,17 +380,15 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     toggleShow() {
-        if (this.show) {
-            this.show = false;
-        } else {
-            setTimeout(() =>
+        this.isExpanded$.next(!this.isExpanded$.value);
+        if (this.isExpanded$.value) {
+            setTimeout(() => {
                 this.core.card?.scrollSmooth(
                     this.core.card?.jumpmarks.filter(
                         (j) => j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
                     )[0],
-                ),
-            );
-            this.show = true;
+                );
+            });
         }
     }
 }

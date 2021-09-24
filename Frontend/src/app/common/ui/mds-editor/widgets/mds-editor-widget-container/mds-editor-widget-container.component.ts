@@ -25,6 +25,7 @@ import { BulkBehavior } from '../../../mds/mds.component';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { BulkMode, EditorBulkMode, InputStatus, RequiredMode } from '../../types';
+import { ViewInstanceService } from '../../view-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
@@ -139,6 +140,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
         private mdsEditorInstance: MdsEditorInstanceService,
         private cdr: ChangeDetectorRef,
         private formFieldRegistration: FormFieldRegistrationService,
+        private viewInstance: ViewInstanceService,
     ) {
         this.editorBulkMode = this.mdsEditorInstance.editorBulkMode;
         const id = Math.random().toString(36).substr(2);
@@ -225,15 +227,29 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
         this.widget.onShowMissingRequired((shouldScrollIntoView) => {
             formControl.markAllAsTouched();
             if (formControl.errors?.required && shouldScrollIntoView) {
-                this.elementRef.nativeElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start',
-                });
-                this.injectedView?.focus();
+                this.scrollIntoViewAndFocus();
                 return true;
             } else {
                 return false;
             }
+        });
+    }
+
+    private scrollIntoViewAndFocus(): void {
+        new Promise((resolve) => {
+            // Expand section (view) if needed.
+            if (this.viewInstance.isExpanded$.value) {
+                resolve(null);
+            } else {
+                this.viewInstance.isExpanded$.next(true);
+                setTimeout(() => resolve(null));
+            }
+        }).then(() => {
+            this.elementRef.nativeElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+            });
+            this.injectedView?.focus();
         });
     }
 
