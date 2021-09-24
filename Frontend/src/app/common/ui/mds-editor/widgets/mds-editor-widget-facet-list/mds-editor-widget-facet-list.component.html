@@ -1,0 +1,24 @@
+<app-mds-editor-widget-container
+  #container
+  [widget]="widget"
+  [label]="true"
+  [valueType]="valueType"
+  [control]="formArray"
+  [wrapInFormField]="false"
+>
+  <ul *ngIf="formArray" [formGroup]="$any(formArray)" class="checkboxes-group">
+    <li *ngFor="let control of formArray.controls; let i = index">
+      <mat-checkbox
+        [formControlName]="i"
+        appCheckTextOverflow=".caption"
+        #text="appCheckTextOverflow"
+        [matTooltip]="text.hasTextOverflow() ? facetValuesSubject.value[i].caption : null"
+      >
+        <span class="label">
+          <span class="caption">{{ facetValuesSubject.value[i].caption }}</span>
+          <span class="count">{{ facetValuesSubject.value[i].count }}</span>
+        </span>
+      </mat-checkbox>
+    </li>
+  </ul>
+</app-mds-editor-widget-container>

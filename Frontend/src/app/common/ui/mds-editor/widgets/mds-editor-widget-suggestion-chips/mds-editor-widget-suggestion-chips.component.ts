@@ -41,7 +41,7 @@ export class MdsEditorWidgetSuggestionChipsComponent implements OnInit {
      * Returns an observable of suggestions, excluding the ones already included in the primary
      * widget's value.
      */
-    private getFilteredSuggestions(primaryWidget: Widget): Observable<MdsWidgetValue[]> {
+    private getFilteredSuggestions(primaryWidget: Widget): Observable<MdsWidgetFacetValue[]> {
         // Suggestions, relevant for this widget.
         const widgetSuggestions$ = this.mdsEditorInstance.suggestions$.pipe(
             map((suggestions) => suggestions[this.widget.definition.id]),

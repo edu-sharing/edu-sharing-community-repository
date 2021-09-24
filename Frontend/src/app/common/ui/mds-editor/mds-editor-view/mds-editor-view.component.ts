@@ -53,6 +53,7 @@ import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import {MdsEditorWidgetAuthorityComponent} from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { ViewInstanceService } from '../view-instance.service';
+import { MdsEditorWidgetFacetListComponent } from '../widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -129,6 +130,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.SingleValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.DefaultValue]: null,
+        [MdsWidgetType.FacetList]: MdsEditorWidgetFacetListComponent,
     };
     private static readonly suggestionWidgetComponents: {
         [type in MdsWidgetType]?: Type<object>;
