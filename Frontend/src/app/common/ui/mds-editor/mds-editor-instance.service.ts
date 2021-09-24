@@ -358,7 +358,7 @@ export class MdsEditorInstanceService implements OnDestroy {
          * @returns whether the the widget was scrolled into view
          */
         showMissingRequired(shouldScrollIntoView: boolean): boolean {
-            if (this.showMissingRequiredFunction) {
+            if (this.showMissingRequiredFunction && this.meetsDynamicCondition.value) {
                 return this.showMissingRequiredFunction(shouldScrollIntoView);
             } else {
                 return false;
