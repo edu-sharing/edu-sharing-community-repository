@@ -80,6 +80,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
 import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
 import {RenderHelperService} from './render-helper.service';
+import {MdsDurationPipe} from './pipes/mds-duration.pipe';
 
 @NgModule({
     declarations: [
@@ -131,6 +132,7 @@ import {RenderHelperService} from './render-helper.service';
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
+        MdsDurationPipe,
         BitwisePipe,
         ElementRefDirective,
         TitleDirective,
@@ -190,6 +192,7 @@ import {RenderHelperService} from './render-helper.service';
         CardComponent,
         UserAvatarComponent,
         UserTileComponent,
+        MdsDurationPipe,
         LinkComponent,
         CollectionChooserComponent,
         DropdownComponent,

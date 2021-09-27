@@ -984,6 +984,15 @@ export class MdsEditorInstanceService implements OnDestroy {
         return group.views.map((viewId) => mdsDefinition.views.find((v) => v.id === viewId));
     }
 
+    createWidget(widgetDefinition: MdsWidget, viewId: string, repository = RestConstants.HOME_REPOSITORY) {
+        return new MdsEditorInstanceService.Widget(
+            this,
+            widgetDefinition,
+            viewId,
+            repository
+        );
+    }
+
     private async generateWidgets(
         mdsDefinition: MdsDefinition,
         views: MdsView[],

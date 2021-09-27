@@ -169,6 +169,8 @@ export interface MdsWidget {
     isRequired: RequiredMode;
     isSearchable: boolean;
     isExtended: boolean|string;
+    hideIfEmpty: boolean;
+    interactionType: 'Input' | 'None';
 }
 
 // Incomplete, fill in as needed.

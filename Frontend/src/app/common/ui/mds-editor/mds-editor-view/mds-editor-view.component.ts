@@ -54,6 +54,7 @@ import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-ve
 import {MdsEditorWidgetAuthorityComponent} from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { ViewInstanceService } from '../view-instance.service';
 import { MdsEditorWidgetFacetListComponent } from '../widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
+import {MdsWidgetComponent} from '../../mds-viewer/widget/mds-widget.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -168,6 +169,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     attribute = 'bottomCaption';
                 } else if (attribute === 'defaultmin') {
                     attribute = 'defaultMin';
+                } else if (attribute === 'interactiontype') {
+                    attribute = 'interactionType';
                 } else if (attribute === 'defaultmax') {
                     attribute = 'defaultMax';
                 } else if (attribute === 'hideifempty') {
@@ -362,6 +365,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     private getWidgetComponent(widget: Widget): Type<object> {
         if (this.view.rel === 'suggestions') {
             return MdsEditorViewComponent.suggestionWidgetComponents[widget.definition.type];
+        } else if(widget.definition.interactionType === 'None') {
+            return MdsWidgetComponent;
         } else {
             return MdsEditorViewComponent.widgetComponents[widget.definition.type];
         }

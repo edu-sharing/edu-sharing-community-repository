@@ -1,77 +1,73 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  NgZone,
-  HostListener,
-  ViewChild,
-  ElementRef,
-  Sanitizer
-} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {MdsEditorWidgetBase, ValueType} from '../../mds-editor/widgets/mds-editor-widget-base';
+import {Widget} from '../../mds-editor/mds-editor-instance.service';
 
 @Component({
-  selector: 'mds-widget',
-  templateUrl: 'mds-widget.component.html',
-  styleUrls: ['mds-widget.component.scss'],
+    selector: 'mds-widget',
+    templateUrl: 'mds-widget.component.html',
+    styleUrls: ['mds-widget.component.scss'],
 })
-export class MdsWidgetComponent{
-  _data:string[];
-  value:string[];
-  @Input() widget:any;
-  @Input() set data(data:string[]){
-    this._data=data;
-    this.value=this.getValue();
-  }
-
-  getBasicType() {
-    switch(this.widget.type) {
-      case 'text':
-      case 'number':
-      case 'email':
-      case 'month':
-      case 'color':
-      case 'textarea':
-      case 'singleoption':
-        return 'text';
-      case 'multivalueFixedBadges':
-      case 'multivalueSuggestBadges':
-      case 'multivalueBadges':
-      case 'multivalueTree':
-        return 'array';
-      case 'slider':
-        return 'slider';
-      case 'range':
-        return 'range';
+export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
+    readonly valueType = ValueType.String;
+    value:string[];
+    @Input() widget: Widget;
+    @Input() set data(data:string[]){
+        this.value=this.getValue(data);
     }
-    return 'unknown';
-  }
 
-  getValue() {
-    if(!this._data || !this._data[0]) {
-      return null;
+    getBasicType() {
+        switch(this.widget.definition.type) {
+            case 'text':
+            case 'number':
+            case 'email':
+            case 'month':
+            case 'color':
+            case 'textarea':
+            case 'singleoption':
+                return 'text';
+            case 'multivalueFixedBadges':
+            case 'multivalueSuggestBadges':
+            case 'multivalueBadges':
+            case 'multivalueTree':
+                return 'array';
+            case 'slider':
+                return 'slider';
+            case 'duration':
+                return 'duration';
+            case 'range':
+                return 'range';
+        }
+        return 'unknown';
     }
-    if(this.widget.values) {
-      console.log(this._data, this.widget.values);
-        const mapping=this.widget.values.filter((v:any) => this._data.filter((d) => d === v.id).length > 0).map((v:any) => v.caption);
-        if(mapping){
-          return mapping;
+    ngOnInit(): void {
+        if(this.widget.getInitialValues()?.jointValues) {
+            console.log(this.widget.getInitialValues());
+            this.value = this.getValue(this.widget.getInitialValues().jointValues);
         }
     }
-    return this._data;
-  }
+    getValue(data: string[]) {
+        let value = data;
+        if(!value || !value[0]) {
+            return null;
+        }
+        if(this.widget.definition.values) {
+            const mapping=this.widget.definition.values.filter((v:any) => data.filter((d) => d === v.id).length > 0).map((v) => v.caption);
+            if(mapping){
+                return mapping;
+            }
+        }
+        return data;
+    }
 
     click() {
-        if(this.widget.link === '_BLANK') {
-          window.open(this.value[0]);
+        if(this.widget.definition.link === '_BLANK') {
+            window.open(this.value[0]);
         } else {
-          console.warn('Unsupported link type ' + this.widget.link);
+            console.warn('Unsupported link type ' + this.widget.definition.link);
         }
     }
 
     isEmpty() {
-        console.log(this.value);
         return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
     }
 }
