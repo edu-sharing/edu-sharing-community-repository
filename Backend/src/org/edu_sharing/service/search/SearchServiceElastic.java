@@ -168,7 +168,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias);
+            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias,true);
             BoolQueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
                     ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
                     : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
@@ -203,9 +203,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
              */
             searchSourceBuilder.aggregation(AggregationBuilders.cardinality("original_count").field("properties.ccm:original"));
 
+            BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+            bqb.filter(queryBuilder);
+            bqb.must(MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias,false));
 
+            searchSourceBuilder.query(bqb);
 
-            searchSourceBuilder.query(queryBuilder);
             searchSourceBuilder.from(searchToken.getFrom());
             searchSourceBuilder.size(searchToken.getMaxResult());
             searchSourceBuilder.trackTotalHits(true);

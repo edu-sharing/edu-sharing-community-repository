@@ -15,7 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
+
     public static QueryBuilder getElasticSearchQuery(MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
+        return getElasticSearchQuery(queries,query,parameters,true);
+    }
+
+    public static QueryBuilder getElasticSearchQuery(MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters, Boolean asFilter) throws IllegalArgumentException {
 
         /**
          * @TODO basequery
@@ -23,11 +28,13 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
          * cause collection request needs solr basequery
          */
         String baseQuery = query.getBasequery().get(null);
-        WrapperQueryBuilder baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
-
-
         BoolQueryBuilder result = QueryBuilders.boolQuery();
-        result.must(baseQueryBuilder);
+
+        if(asFilter == null || (asFilter.booleanValue() == query.getBasequeryAsFilter())){
+            WrapperQueryBuilder baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
+            result.must(baseQueryBuilder);
+        }
+
         for (String name : parameters.keySet()) {
             MetadataQueryParameter parameter = query.findParameterByName(name);
             if (parameter == null)
@@ -39,6 +46,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
              */
             if ((values == null || values.length == 0)) {
                 //if(parameter.getIgnorable()==0)
+                continue;
+            }
+
+            if(asFilter != null && parameter.isAsFilter() != asFilter.booleanValue()){
                 continue;
             }
 
