@@ -1286,6 +1286,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.put(CCConstants.CCM_ASSOC_RELTARGET, relTargetList.get(0).getTargetRef().getId());
 			}
 		}
+		Set<QName> aspects = service.getAspects(nodeRef);
+		NodeServiceHelper.addVirtualProperties(
+				nodeType,
+				aspects.stream().map(QName::toString).collect(Collectors.toList()),
+				properties
+		);
 
 		// Preview
 		if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
@@ -1363,7 +1369,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
 				properties = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
 						beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,properties,
-								service.getAspects(nodeRef).stream().map(q -> q.toString()).collect(Collectors.toList())));
+								aspects.stream().map(q -> q.toString()).collect(Collectors.toList())));
 				repCache.put(nodeRef.getId(), properties);
 			}
 		}
