@@ -47,7 +47,9 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.SearchModule;
 import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
@@ -185,12 +187,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 queryBuilder = queryBuilder.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
             }
 
-            if(searchToken.getFacettes() != null) {
-                for (String facette : searchToken.getFacettes()) {
-                    searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
-                }
-            }
-
             /**
              * add collapse builder
              */
@@ -202,6 +198,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
              * https://github.com/elastic/elasticsearch/issues/24130
              */
             searchSourceBuilder.aggregation(AggregationBuilders.cardinality("original_count").field("properties.ccm:original"));
+
+            SearchResponse searchResponseAggregations = null;
+            if(searchToken.getFacettes() != null) {
+                Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criterias, searchToken.getFacettes());
+                List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL), queryData, criterias, searchToken.getFacettes(), excludeOwnFacets);
+                if(excludeOwnFacets.size() > 0){
+                    SearchRequest searchRequestAggs = new SearchRequest("workspace");
+                    SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
+                    searchSourceBuilderAggs.from(0);
+                    searchSourceBuilderAggs.size(0);
+                    searchSourceBuilderAggs.collapse(collapseBuilder);
+                    for(AggregationBuilder ab : aggregations){
+                        searchSourceBuilderAggs.aggregation(ab);
+                    }
+                    searchRequestAggs.source(searchSourceBuilderAggs);
+                    logger.info("query aggs: "+searchSourceBuilderAggs.toString());
+                    searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
+                }else{
+                    for(AggregationBuilder ab : aggregations){
+                        searchSourceBuilder.aggregation(ab);
+                    }
+                }
+            }
+
 
             BoolQueryBuilder bqb = QueryBuilders.boolQuery();
             bqb.filter(queryBuilder);
@@ -240,7 +260,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
             Map<String,Map<String,Integer>> facettesResult = new HashMap<String,Map<String,Integer>>();
 
             Long total = null;
-           for(Aggregation a : searchResponse.getAggregations()){
+
+            List<Aggregation> aggregations = new ArrayList<>();
+            if(searchResponseAggregations != null){
+                aggregations.addAll(searchResponseAggregations.getAggregations().asList());
+            }
+            aggregations.addAll(searchResponse.getAggregations().asList());
+           for(Aggregation a : aggregations){
                if(a instanceof  ParsedStringTerms) {
                    ParsedStringTerms pst = (ParsedStringTerms) a;
                    Map<String, Integer> f = new HashMap<>();
@@ -260,6 +286,20 @@ public class SearchServiceElastic extends SearchServiceImpl {
                        logger.error("unknown cardinality aggregation");
                    }
 
+               }else if(a instanceof ParsedFilter){
+                   ParsedFilter pf = (ParsedFilter)a;
+                   for(Aggregation aggregation : pf.getAggregations().asList()){
+                      if(aggregation instanceof ParsedStringTerms){
+                          ParsedStringTerms pst = (ParsedStringTerms) aggregation;
+                          Map<String, Integer> f = new HashMap<>();
+                          facettesResult.put(a.getName(), f);
+                          for (Terms.Bucket b : pst.getBuckets()) {
+                              String key = b.getKeyAsString();
+                              long count = b.getDocCount();
+                              f.put(key, (int) count);
+                          }
+                      }
+                   }
                }else{
                    logger.error("non supported aggreagtion "+a.getName());
                }

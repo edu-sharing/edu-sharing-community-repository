@@ -7,12 +7,13 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.WrapperQueryBuilder;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
@@ -144,5 +145,36 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         }
         return boolQuery.toString();
+    }
+
+    public static Set<MetadataQueryParameter> getExcludeOwnFacets(MetadataQuery query, Map<String,String[]> parameters, List<String> facets){
+        Set<MetadataQueryParameter> excludeOwn = new HashSet<>();
+        for (String name : facets) {
+            MetadataQueryParameter parameter = query.findParameterByName(name);
+            if(parameter == null) continue;
+            if((parameter.getMultiplejoin() != null && parameter.getMultiplejoin().equals("OR"))) excludeOwn.add(parameter);
+        }
+        return excludeOwn;
+    }
+
+    public static List<AggregationBuilder> getAggregations(MetadataQueries queries, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn) throws IllegalArgumentException {
+        List<AggregationBuilder> result = new ArrayList<>();
+        if(excludeOwn.size() == 0) {
+            for (String facet : facets) {
+                result.add(AggregationBuilders.terms(facet).field("properties_aggregated." + facet));
+            }
+        }else {
+            for (String facet : facets) {
+
+                Map<String, String[]> tmp = new HashMap<>(parameters);
+                if (excludeOwn.stream().anyMatch(mdqp -> mdqp.getName().equals(facet))) {
+                    tmp.remove(facet);
+                }
+
+                QueryBuilder qb = getElasticSearchQuery(queries, query, tmp, null);
+                result.add(AggregationBuilders.filter(facet, qb).subAggregation(AggregationBuilders.terms(facet).field("properties_aggregated." + facet)));
+            }
+        }
+        return result;
     }
 }
