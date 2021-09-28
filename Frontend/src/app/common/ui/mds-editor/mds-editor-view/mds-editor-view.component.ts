@@ -156,9 +156,12 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     /**
      * Overrides widget definition using inline parameters.
      */
-    public static updateWidgetWithHTMLAttributes(htmlRef: Element, widget: MdsWidget): void {
-        if (htmlRef) {
-            for (let attribute of htmlRef.getAttributeNames()) {
+    public static updateWidgetWithHTMLAttributes(htmlRef: Element, widget: MdsWidget): MdsWidget {
+        const attributes = htmlRef?.getAttributeNames();
+        if (attributes?.length > 0) {
+            // Make a shallow copy to not override the original definition.
+            widget = { ...widget };
+            for (let attribute of attributes) {
                 // map the extended attribute
                 let value: string | boolean = htmlRef.getAttribute(attribute);
                 if (attribute === 'isextended' || attribute === 'extended') {
@@ -180,6 +183,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 (widget as any)[attribute] = value;
             }
         }
+        return widget;
     }
 
     ngOnInit(): void {
@@ -329,7 +333,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         const htmlRef = this.container.nativeElement.querySelector(
             widget.definition.id.replace(':', '\\:'),
         );
-        MdsEditorViewComponent.updateWidgetWithHTMLAttributes(htmlRef, widget.definition);
+        widget.definition = MdsEditorViewComponent.updateWidgetWithHTMLAttributes(
+            htmlRef,
+            widget.definition,
+        );
         this.mdsEditorInstance.updateWidgetDefinition();
         const WidgetComponent = this.getWidgetComponent(widget);
         if (WidgetComponent === undefined) {

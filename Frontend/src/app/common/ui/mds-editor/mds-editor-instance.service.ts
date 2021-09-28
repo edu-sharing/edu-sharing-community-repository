@@ -131,7 +131,9 @@ export class MdsEditorInstanceService implements OnDestroy {
 
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
-            public readonly definition: MdsWidget,
+            // The definition is updated once with attribute overrides by `mds-editor-view`
+            // component, but should not be touched after initialization.
+            public definition: MdsWidget,
             public readonly viewId: string,
             public readonly repositoryId: string,
             public readonly relation: ViewRelation = null,
