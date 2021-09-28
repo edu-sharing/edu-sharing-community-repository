@@ -713,7 +713,7 @@ export class MainNavComponent implements AfterViewInit {
 
     private updateUserOptions() {
         this.userMenuOptions = [];
-        if (!this.isGuest) {
+        if (!this.isGuest && !this.connector.getCurrentLogin()?.currentScope) {
             this.userMenuOptions.push(
                 new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
                     this.openProfile(),
