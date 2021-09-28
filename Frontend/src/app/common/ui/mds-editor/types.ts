@@ -180,7 +180,7 @@ export interface MdsWidgetValue {
     description?: string;
     parent?: string;
 }
-export type MdsWidgetFacetValue = MdsWidgetValue & { count: string };
+export type MdsWidgetFacetValue = MdsWidgetValue & { count: number };
 
 export interface MdsWidgetCondition {
     dynamic: boolean;
@@ -190,7 +190,7 @@ export interface MdsWidgetCondition {
     pattern?: string;
 }
 
-export type Suggestions = { [property: string]: MdsWidgetFacetValue[] };
+export type FacetValues = { [property: string]: MdsWidgetFacetValue[] };
 
 export enum RequiredMode {
     Mandatory = 'mandatory',

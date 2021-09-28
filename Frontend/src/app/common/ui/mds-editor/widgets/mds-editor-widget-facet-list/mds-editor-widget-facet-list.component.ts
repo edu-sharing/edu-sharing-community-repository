@@ -26,8 +26,8 @@ export class MdsEditorWidgetFacetListComponent extends MdsEditorWidgetBase imple
     }
 
     private registerFacetValuesSubject(): void {
-        this.mdsEditorInstance.suggestions$
-            .pipe(map((suggestions) => suggestions[this.widget.definition.id]))
+        this.mdsEditorInstance.facets$
+            .pipe(map((facets) => facets[this.widget.definition.id]))
             .subscribe((values) => this.facetValuesSubject.next(values));
     }
 

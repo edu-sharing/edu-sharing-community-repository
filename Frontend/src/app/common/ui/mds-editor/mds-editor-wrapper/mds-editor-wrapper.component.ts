@@ -17,7 +17,7 @@ import {
     EditorMode,
     EditorType,
     MdsWidget,
-    Suggestions,
+    FacetValues,
     UserPresentableError,
     Values,
 } from '../types';
@@ -61,7 +61,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() editorMode: EditorMode;
     @Input() setId: string;
-    @Input() suggestions: Suggestions;
+    @Input() facets: FacetValues;
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
@@ -89,8 +89,8 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if ('suggestions' in changes) {
-            this.mdsEditorInstance.suggestions$.next(changes.suggestions.currentValue);
+        if ('facets' in changes) {
+            this.mdsEditorInstance.facets$.next(changes.facets.currentValue);
         }
     }
 
@@ -206,11 +206,13 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     async reInit(): Promise<void> {
-        this.mdsEditorInstance.mdsInflated.next(false);
         return this.init();
     }
 
     private async init(): Promise<void> {
+        if (this.mdsEditorInstance.mdsInflatedValue) {
+            this.mdsEditorInstance.mdsInflated.next(false);
+        }
         this.isLoading = true;
         try {
             if (this.nodes) {

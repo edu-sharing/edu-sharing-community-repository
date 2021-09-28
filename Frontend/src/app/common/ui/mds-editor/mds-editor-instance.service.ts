@@ -1,7 +1,7 @@
 import { Directive, EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject, from } from 'rxjs';
-import { map, shareReplay, switchMap, first, takeUntil, filter, tap } from 'rxjs/operators';
+import { map, shareReplay, switchMap, first, takeUntil, filter } from 'rxjs/operators';
 import {
     MdsValueList,
     Node,
@@ -30,7 +30,7 @@ import {
     MdsWidgetValue,
     NativeWidgetType,
     RequiredMode,
-    Suggestions,
+    FacetValues,
     Values,
     ViewRelation,
 } from './types';
@@ -498,7 +498,8 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Will set to `false` during re-initialization.
      */
     mdsInflated = new ReplaySubject<boolean>(1);
-    suggestions$ = new BehaviorSubject<Suggestions>(null);
+    mdsInflatedValue: boolean;
+    facets$ = new BehaviorSubject<FacetValues>(null);
     /** Views that have at least one widget, that is not hidden due to dynamic conditions. */
     activeViews = new ReplaySubject<MdsView[]>(1);
     /** Updated widget values, not considering nodes. */
@@ -540,6 +541,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restConnector: RestConnectorService,
         private searchService: SearchService,
     ) {
+        this.mdsInflated.subscribe((mdsInflated) => this.mdsInflatedValue = mdsInflated);
         // TODO: register all dynamic properties via observable pipes as done here. This way, new
         // properties can easily be derived from existing ones without having to get all the points
         // right where we have to call the respective `updateX` methods.
@@ -1196,6 +1198,34 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     resetWidgets() {
         this.nativeWidgets.next([]);
+    }
+
+    /**
+     * Returns a list of properties for which the MDS editor requires facet values.
+     */
+    // It would be nice to provide this functionality without the need to load an MDS editor into
+    // the DOM, but for now, the way the MDS definition is processed requires the DOM representation
+    // to parse attributes.
+    getNeededFacets(): Observable<string[]> {
+        return this.mdsInflated.pipe(
+            first((isInflated) => isInflated),
+            map(() => this.getNeededFacetsInstant()),
+        );
+    }
+
+    private getNeededFacetsInstant(): string[] {
+        const facets = this.widgets.value
+            .filter((widget) => this.needsFacets(widget))
+            .map((widget) => widget.definition.id);
+        return removeDuplicates(facets);
+    }
+
+    /** Wether the given widget needs facet values for its property to be passed to `mds-editor`. */
+    private needsFacets(widget: Widget): boolean {
+        return widget.relation === 'suggestions' || [
+            'facetList',
+            // Add any widget types that need facet values to this list.
+        ].includes(widget.definition.type);
     }
 }
 
