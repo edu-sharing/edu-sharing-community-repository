@@ -9,10 +9,10 @@
         <img [src]="_customImage" class="userImage sizable" alt="user image">
       </div>
       <div *ngIf="!_customImage">
-        <img *ngIf="_user?.profile?.avatar" [src]="_user.profile.avatar+'&crop=true&width=200&height=200'" class="userImage sizable" alt="">
+        <img *ngIf="_user?.profile?.avatar && !isSafe()" [src]="_user.profile.avatar+'&crop=true&width=200&height=200'" class="userImage sizable" alt="">
         <div class="user-letter"
              style.background-color="{{ _user | authorityColor}}"
-             *ngIf="!icon && _user && !(_user.profile && _user.profile.avatar)">{{getLetter(_user)}}</div>
+             *ngIf="!icon && _user && !(_user?.profile?.avatar && !isSafe())">{{getLetter(_user)}}</div>
         <i class="user-icon" icon [iconId]="icon" style.background-color="{{ _user | authorityColor}}" *ngIf="icon"></i>
       </div>
     </div>
