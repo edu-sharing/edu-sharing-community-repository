@@ -25,7 +25,7 @@ import { BulkBehavior } from '../../../mds/mds.component';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { BulkMode, EditorBulkMode, InputStatus, RequiredMode } from '../../types';
-import { ViewInstanceService } from '../../view-instance.service';
+import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
