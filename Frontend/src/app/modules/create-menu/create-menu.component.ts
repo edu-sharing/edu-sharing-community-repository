@@ -81,10 +81,6 @@ export class CreateMenuComponent {
      */
     @Input() allowed = true;
     /**
-     * Current search query
-     */
-    @Input() searchQuery: string;
-    /**
      * Allow upload of binary files
      */
     @Input() allowBinary = true;

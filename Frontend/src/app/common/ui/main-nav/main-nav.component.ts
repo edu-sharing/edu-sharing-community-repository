@@ -55,6 +55,7 @@ import { GlobalContainerComponent } from '../global-container/global-container.c
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
 import {MainNavService} from '../../services/main-nav.service';
+import { SearchFieldComponent } from '../search-field/search-field.component';
 
 /**
  * The main nav (top bar + menus)
@@ -108,7 +109,7 @@ import {MainNavService} from '../../services/main-nav.service';
 export class MainNavComponent implements AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
-    @ViewChild('search') search: ElementRef;
+    @ViewChild(SearchFieldComponent) searchField: SearchFieldComponent;
     @ViewChild('topbar') topbar: ElementRef;
     @ViewChild('userRef') userRef: ElementRef;
     @ViewChild('tabNav') tabNav: ElementRef;
@@ -586,8 +587,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     }
 
     clearSearch() {
-        this.searchQuery = '';
-        this.searchQueryChange.emit('');
         this.onSearch.emit({ query: '', cleared: true });
     }
 
@@ -606,7 +605,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     }
 
     doSearch(
-        value = this.search.nativeElement.value,
+        value = this.searchQuery,
         broadcast = true,
     ) {
         if (broadcast) {

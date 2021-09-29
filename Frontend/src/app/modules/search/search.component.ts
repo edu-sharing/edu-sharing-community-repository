@@ -195,7 +195,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnInit() {
         setTimeout(() => {
-            this.tutorialElement = this.mainNavRef.search;
+            this.tutorialElement = this.mainNavRef.searchField.input;
             this.handleScroll();
         });
         this.searchService.clear();

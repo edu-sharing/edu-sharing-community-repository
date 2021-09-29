@@ -1,0 +1,96 @@
+<form role="search" autocomplete="off" (ngSubmit)="onSubmit()">
+  <div
+    class="search-field-wrapper"
+    cdkOverlayOrigin
+    #trigger="cdkOverlayOrigin"
+    cdkMonitorSubtreeFocus
+    [class.input-has-focus]="inputHasFocus()"
+  >
+    <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
+      <mat-label></mat-label>
+      <mat-chip-list #chipList>
+        <div class="chips-wrapper" *ngIf="filters$ | async as filters">
+          <ng-container *ngFor="let category of categories$ | async">
+            <mat-chip
+              *ngFor="let filter of filters[category.property]"
+              [style.background-color]="category.color"
+              [removable]="true"
+              (removed)="onRemoveFilter(category.property, filter)"
+            >
+              {{ filter.label }}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+          </ng-container>
+        </div>
+        <div class="search-field-input-wrapper">
+          <input
+            class="search-input"
+            #input
+            name="search"
+            type="search"
+            matInput
+            [matChipInputFor]="chipList"
+            autocomplete="off"
+            [(ngModel)]="searchString"
+            (change)="searchStringChange.emit(searchString)"
+            placeholder="{{ placeholder | translate }}"
+            [attr.aria-label]="placeholder | translate"
+            (focus)="showOverlay = true"
+            (blur)="onInputBlur($event)"
+            (keydown.tab)="focusOverlayIfOpen($event)"
+            (keydown.enter)="onSubmit()"
+          />
+          <button
+            class="clear-button"
+            *ngIf="searchString"
+            mat-icon-button
+            type="button"
+            (click)="onClear()"
+          >
+            <i icon="clear"></i>
+          </button>
+          <button
+            class="submit-button"
+            mat-icon-button
+            attr.aria-label="{{ 'WORKSPACE.SEARCH_ACTION' | translate }}"
+          >
+            <i icon="search" [aria]="false"></i>
+          </button>
+        </div>
+      </mat-chip-list>
+    </mat-form-field>
+  </div>
+</form>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="showOverlay && hasSuggestions"
+  [cdkConnectedOverlayPositions]="overlayPositions"
+  [cdkConnectedOverlayWidth]="trigger.elementRef.nativeElement.getBoundingClientRect().width"
+  (overlayOutsideClick)="onOutsideClick($event)"
+  (detach)="onDetach()"
+>
+  <div
+    class="suggestion-card mat-elevation-z2"
+    *ngIf="suggestions$ | async as suggestions"
+    cdkTrapFocus
+  >
+    <ng-container *ngFor="let category of categories$ | async">
+      <div class="suggestion-group" *ngIf="suggestions[category.property]?.length > 0">
+        <label class="category-label">{{ category.label }}</label>
+        <mat-chip-list>
+          <mat-chip
+            *ngFor="let suggestion of suggestions[category.property]"
+            #suggestionChip
+            [style.background-color]="category.color"
+            (click)="onAddFilter(category.property, suggestion)"
+            [selectable]="false"
+          >
+            {{ suggestion.label }}
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+    </ng-container>
+  </div>
+</ng-template>
