@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {MdsEditorWidgetBase, ValueType} from '../../mds-editor/widgets/mds-editor-widget-base';
 import {Widget} from '../../mds-editor/mds-editor-instance.service';
+import {RestConstants} from '../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'mds-widget',
@@ -11,9 +12,6 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
     readonly valueType = ValueType.String;
     value:string[];
     @Input() widget: Widget;
-    @Input() set data(data:string[]){
-        this.value=this.getValue(data);
-    }
 
     getBasicType() {
         switch(this.widget.definition.type) {
@@ -40,8 +38,11 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
         return 'unknown';
     }
     ngOnInit(): void {
-        if(this.widget.getInitialValues()?.jointValues) {
-            console.log(this.widget.getInitialValues());
+        if(this.widget.definition.type === 'range') {
+            const id = this.widget.definition.id;
+            const values = this.mdsEditorInstance.values$.value;
+            this.value = [values[id + '_from']?.[0], values[id + '_to']?.[0]];
+        } else if (this.widget.getInitialValues()?.jointValues) {
             this.value = this.getValue(this.widget.getInitialValues().jointValues);
         }
     }

@@ -5,23 +5,29 @@ import {
     Sanitizer, ViewContainerRef, ComponentFactoryResolver, QueryList, ViewChildren, Injector
 } from '@angular/core';
 import {MdsWidgetComponent} from './widget/mds-widget.component';
-import {RestConstants, RestMdsService} from '../../../core-module/core.module';
+import {
+    RestConnectorService,
+    RestConstants,
+    RestMdsService
+} from '../../../core-module/core.module';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {MdsEditorViewComponent} from '../mds-editor/mds-editor-view/mds-editor-view.component';
 import {MdsEditorInstanceService, Widget} from '../mds-editor/mds-editor-instance.service';
+import {Values} from '../mds-editor/types';
+import {ViewInstanceService} from '../mds-editor/mds-editor-view/view-instance.service';
 
 @Component({
     selector: 'mds-viewer',
     templateUrl: 'mds-viewer.component.html',
     styleUrls: ['mds-viewer.component.scss'],
-    providers: [MdsEditorInstanceService]
+    providers: [MdsEditorInstanceService, ViewInstanceService]
 })
 export class MdsViewerComponent {
     @ViewChildren('container') container: QueryList<ElementRef>;
     _groupId: string;
     _setId: string;
-    _data: any;
+    _data: Values;
     mds: any;
     templates: any[];
     @Input() set groupId(groupId: string) {
@@ -35,17 +41,17 @@ export class MdsViewerComponent {
             this.inflate();
         });
     }
-    @Input() set data(data: any) {
+    @Input() set data(data: Values) {
         this._data = data;
         if (this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] != null) {
-            this.mdsService.getSet(this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0]).subscribe((mds) => {
+            this.mdsService.getSet(this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0]).subscribe(async (mds) => {
                 this.mds = mds;
-                this.inflate();
+                await this.inflate();
             });
         } else {
-            this.mdsService.getSet().subscribe((mds) => {
+            this.mdsService.getSet().subscribe(async (mds) => {
                 this.mds = mds;
-                this.inflate();
+                await this.inflate();
             });
         }
     }
@@ -59,9 +65,19 @@ export class MdsViewerComponent {
     getView(id: string) {
         return this.mds.views.find((v: any) => v.id == id);
     }
-    private inflate() {
+    private async inflate() {
         if (!this.mds) {
             setTimeout(() => this.inflate(), 1000 / 60);
+            return;
+        }
+        const editor = await this.mdsEditorInstanceService.initWithoutNodes(this._groupId,
+            this._setId,
+            RestConstants.HOME_REPOSITORY,
+            'nodes',
+            this._data
+        );
+        if(editor === 'legacy') {
+            console.error('mds viewer component is only supported for groups with angular rendering');
             return;
         }
         this.templates = [];
@@ -71,20 +87,15 @@ export class MdsViewerComponent {
         }
         // wait for angular to inflate the new binding
         setTimeout(() => {
-            for (const w of this.mds.widgets) {
+            for (const widget of this.mdsEditorInstanceService.widgets.value) {
                 // @TODO: it would be better to filter by widgets based on template and condition, should be implemented in 5.1
                 this.container.toArray().forEach((c) => {
-                    const element = c.nativeElement.getElementsByTagName(w.id);
+                    const element = c.nativeElement.getElementsByTagName(widget.definition.id);
                     if (element && element[0]) {
-                        MdsEditorViewComponent.updateWidgetWithHTMLAttributes(element[0], w);
+                        // MdsEditorViewComponent.updateWidgetWithHTMLAttributes(element[0], w);
 
                         UIHelper.injectAngularComponent(this.factoryResolver, this.containerRef, MdsWidgetComponent, element[0], {
-                            widget: this.mdsEditorInstanceService.createWidget(
-                                w,
-                                null
-                            ),
-                            data: w.type === 'range' ? [this._data[w.id + '_from'], this._data[w.id + '_to']] :
-                                this._data[w.id]
+                            widget
                         },
                             {},
                             this.injector

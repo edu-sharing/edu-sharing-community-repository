@@ -852,6 +852,7 @@
 		</group>
 		<group>
 			<id>collection_sidebar</id>
+			<rendering>angular</rendering>
 			<views>
 				<view>collection_sidebar</view>
 			</views>
