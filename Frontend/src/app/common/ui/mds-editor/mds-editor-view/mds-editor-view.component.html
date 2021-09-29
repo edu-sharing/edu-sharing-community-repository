@@ -1,5 +1,5 @@
 <h3 *ngIf="view.caption" id="{{ view.id }}_header" class="heading">
-  <i class="material-icons">{{ view.icon }}</i>
+  <i [icon]="view.icon"></i>
   <span>{{ view.caption }}</span>
   <button *ngIf="view.isExtended" mat-button
           (click)="toggleShow()"
