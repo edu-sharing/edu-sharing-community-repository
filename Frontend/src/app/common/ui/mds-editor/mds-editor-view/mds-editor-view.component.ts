@@ -6,7 +6,7 @@ import {
     ElementRef,
     HostBinding,
     Injector,
-    Input,
+    Input, NgZone,
     OnChanges,
     OnDestroy,
     OnInit,
@@ -84,6 +84,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         private containerRef: ViewContainerRef,
         private applicationRef: ApplicationRef,
         private mdsEditorInstance: MdsEditorInstanceService,
+        private ngZone: NgZone,
         private viewInstance: ViewInstanceService,
         private injector: Injector,
     ) {
@@ -314,59 +315,63 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             );
             return;
         }
-        const nativeWidget = UIHelper.injectAngularComponent(
-            this.factoryResolver,
-            this.containerRef,
-            WidgetComponent,
-            element,
-            {
-                widgetName,
-                widget,
-            },
-            { replace: false },
-            this.injector,
-        );
-        this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance, this.view.id);
+        this.ngZone.runOutsideAngular(() => {
+            const nativeWidget = UIHelper.injectAngularComponent(
+                this.factoryResolver,
+                this.containerRef,
+                WidgetComponent,
+                element,
+                {
+                    widgetName,
+                    widget,
+                },
+                {replace: false},
+                this.injector,
+            );
+            this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance, this.view.id);
+        });
     }
 
     private injectWidget(widget: Widget, element: Element): void {
-        const htmlRef = this.container.nativeElement.querySelector(
-            widget.definition.id.replace(':', '\\:'),
-        );
-        widget.definition = MdsEditorViewComponent.updateWidgetWithHTMLAttributes(
-            htmlRef,
-            widget.definition,
-        );
-        this.mdsEditorInstance.updateWidgetDefinition();
-        const WidgetComponent = this.getWidgetComponent(widget);
-        if (WidgetComponent === undefined) {
+        this.ngZone.runOutsideAngular(() => {
+            const htmlRef = this.container.nativeElement.querySelector(
+                widget.definition.id.replace(':', '\\:'),
+            );
+            widget.definition = MdsEditorViewComponent.updateWidgetWithHTMLAttributes(
+                htmlRef,
+                widget.definition,
+            );
+            this.mdsEditorInstance.updateWidgetDefinition();
+            const WidgetComponent = this.getWidgetComponent(widget);
+            if (WidgetComponent === undefined) {
+                UIHelper.injectAngularComponent(
+                    this.factoryResolver,
+                    this.containerRef,
+                    MdsEditorWidgetErrorComponent,
+                    element,
+                    {
+                        widgetName: widget.definition.caption,
+                        reason: `Widget for type ${widget.definition.type} is not implemented`,
+                    },
+                    {replace: false},
+                    this.injector,
+                );
+                return;
+            } else if (WidgetComponent === null) {
+                return;
+            }
             UIHelper.injectAngularComponent(
                 this.factoryResolver,
                 this.containerRef,
-                MdsEditorWidgetErrorComponent,
+                WidgetComponent,
                 element,
                 {
-                    widgetName: widget.definition.caption,
-                    reason: `Widget for type ${widget.definition.type} is not implemented`,
+                    widget,
                 },
-                { replace: false },
+                {replace: false},
                 this.injector,
             );
-            return;
-        } else if (WidgetComponent === null) {
-            return;
-        }
-        UIHelper.injectAngularComponent(
-            this.factoryResolver,
-            this.containerRef,
-            WidgetComponent,
-            element,
-            {
-                widget,
-            },
-            { replace: false },
-            this.injector,
-        );
+        });
     }
 
     private getWidgetComponent(widget: Widget): Type<object> {

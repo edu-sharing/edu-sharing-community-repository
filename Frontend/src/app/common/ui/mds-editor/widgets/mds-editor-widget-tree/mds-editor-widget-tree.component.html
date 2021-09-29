@@ -59,7 +59,11 @@
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"
 >
-  <div class="suggestion-card" role="dialog" [attr.aria-labelledby]="container.labelId">
+  <div *ngIf="overlayIsVisible"
+       class="suggestion-card"
+       role="dialog"
+       [attr.aria-labelledby]="container.labelId"
+  >
     <app-mds-editor-widget-tree-core
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
