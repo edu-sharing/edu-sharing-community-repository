@@ -403,6 +403,16 @@
 			<icon>chat_bubble</icon>
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
+		<widget>
+			<id>ccm:classification_keyword</id>
+			<type>multivalueFixedBadges</type>
+			<caption>lom_prop_classification_keyword</caption>
+			<placeholder>lom_prop_classification_keyword_placeholder</placeholder>
+			<suggestionSource>Sql</suggestionSource>
+			<suggestionQuery>select factual_term_ident, CASE WHEN factual_term_synonyms IS NULL THEN factual_term_value WHEN array_length(factual_term_synonyms,1) = 1 THEN format('%s (%s)',factual_term_value, factual_term_synonyms[1])  ELSE format('%s (%s, %s)',factual_term_value, factual_term_synonyms[1], factual_term_synonyms[2]) END from edu_factual_term where (lower(factual_term_value) like ? OR lower(factual_term_synonyms[0]) like ? OR lower(factual_term_synonyms[1]) like ? OR lower(factual_term_ident) like ?) order by char_length(factual_term_value) limit 100</suggestionQuery>
+			<suggestDisplayProperty>ccm:classification_keyword_display</suggestDisplayProperty>
+			<textEscapingPolicy>all</textEscapingPolicy>
+		</widget>
 	</widgets>
 	<templates>
 		<template>
