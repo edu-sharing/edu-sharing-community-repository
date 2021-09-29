@@ -52,6 +52,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.collapse.CollapseBuilder;
@@ -170,22 +171,29 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias,true);
-            BoolQueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
-                    ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
-                    : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
-            queryBuilder = queryBuilder.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
+            QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias,true);
+            QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias,false);
+            BoolQueryBuilder queryBuilderGlobalConditions = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
+                    ? getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope()))
+                    : getReadPermissionsQuery();
+            queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
             if(searchToken.getPermissions() != null){
                 for(String permission : searchToken.getPermissions()){
-                    queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
+                    queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
                 }
             }
 
             if(NodeServiceInterceptor.getEduSharingScope() == null){
-                queryBuilder = queryBuilder.mustNot(QueryBuilders.existsQuery("properties.ccm:eduscopename"));
+                queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.existsQuery("properties.ccm:eduscopename"));
             }else{
-                queryBuilder = queryBuilder.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
+                queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
             }
+
+            BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+            BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
+            queryBuilder = queryBuilder.filter(filterBuilder);
+            queryBuilder = queryBuilder.must(metadataQueryBuilderAsQuery);
+
 
             /**
              * add collapse builder
@@ -197,12 +205,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
              *
              * https://github.com/elastic/elasticsearch/issues/24130
              */
-            searchSourceBuilder.aggregation(AggregationBuilders.cardinality("original_count").field("properties.ccm:original"));
+            CardinalityAggregationBuilder original_count = AggregationBuilders.cardinality("original_count").field("properties.ccm:original");
+            searchSourceBuilder.aggregation(original_count);
 
             SearchResponse searchResponseAggregations = null;
             if(searchToken.getFacettes() != null) {
                 Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criterias, searchToken.getFacettes());
-                List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL), queryData, criterias, searchToken.getFacettes(), excludeOwnFacets);
+                List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL), queryData, criterias, searchToken.getFacettes(), excludeOwnFacets,queryBuilderGlobalConditions);
                 if(excludeOwnFacets.size() > 0){
                     SearchRequest searchRequestAggs = new SearchRequest("workspace");
                     SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
@@ -223,11 +232,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             }
 
 
-            BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-            bqb.filter(queryBuilder);
-            bqb.must(MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias,false));
-
-            searchSourceBuilder.query(bqb);
+            searchSourceBuilder.query(queryBuilder);
 
             searchSourceBuilder.from(searchToken.getFrom());
             searchSourceBuilder.size(searchToken.getMaxResult());

@@ -157,7 +157,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         return excludeOwn;
     }
 
-    public static List<AggregationBuilder> getAggregations(MetadataQueries queries, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn) throws IllegalArgumentException {
+    public static List<AggregationBuilder> getAggregations(MetadataQueries queries, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, QueryBuilder globalConditions) throws IllegalArgumentException {
         List<AggregationBuilder> result = new ArrayList<>();
         if(excludeOwn.size() == 0) {
             for (String facet : facets) {
@@ -171,8 +171,11 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     tmp.remove(facet);
                 }
 
-                QueryBuilder qb = getElasticSearchQuery(queries, query, tmp, null);
-                result.add(AggregationBuilders.filter(facet, qb).subAggregation(AggregationBuilders.terms(facet).field("properties_aggregated." + facet)));
+                QueryBuilder qbFilter = getElasticSearchQuery(queries, query, tmp, true);
+                QueryBuilder qbNoFilter = getElasticSearchQuery(queries, query, tmp, false);
+                BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+                bqb = bqb.must(qbFilter).must(qbNoFilter).must(globalConditions);
+                result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet).field("properties_aggregated." + facet)));
             }
         }
         return result;
