@@ -198,15 +198,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
             /**
              * add collapse builder
              */
-            CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
-            searchSourceBuilder.collapse(collapseBuilder);
+            //CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
+            //searchSourceBuilder.collapse(collapseBuilder);
             /**
              * cardinality aggregation to get correct total count
              *
              * https://github.com/elastic/elasticsearch/issues/24130
              */
-            CardinalityAggregationBuilder original_count = AggregationBuilders.cardinality("original_count").field("properties.ccm:original");
-            searchSourceBuilder.aggregation(original_count);
+            /*CardinalityAggregationBuilder original_count = AggregationBuilders.cardinality("original_count").field("properties.ccm:original");
+            searchSourceBuilder.aggregation(original_count);*/
 
             SearchResponse searchResponseAggregations = null;
             if(searchToken.getFacettes() != null) {
@@ -217,7 +217,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
                     searchSourceBuilderAggs.from(0);
                     searchSourceBuilderAggs.size(0);
-                    searchSourceBuilderAggs.collapse(collapseBuilder);
+                    //searchSourceBuilderAggs.collapse(collapseBuilder);
                     for(AggregationBuilder ab : aggregations){
                         searchSourceBuilderAggs.aggregation(ab);
                     }
@@ -270,7 +270,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             if(searchResponseAggregations != null){
                 aggregations.addAll(searchResponseAggregations.getAggregations().asList());
             }
-            aggregations.addAll(searchResponse.getAggregations().asList());
+            if(searchResponse.getAggregations() != null) aggregations.addAll(searchResponse.getAggregations().asList());
            for(Aggregation a : aggregations){
                if(a instanceof  ParsedStringTerms) {
                    ParsedStringTerms pst = (ParsedStringTerms) a;
