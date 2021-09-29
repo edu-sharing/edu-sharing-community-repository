@@ -404,7 +404,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
-			<id>ccm:classification_keyword</id>
+			<id>cclom:classification_keyword</id>
 			<type>multivalueFixedBadges</type>
 			<caption>lom_prop_classification_keyword</caption>
 			<placeholder>lom_prop_classification_keyword_placeholder</placeholder>
