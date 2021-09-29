@@ -348,6 +348,7 @@
 			<html><![CDATA[
 		  <ccm:educationalcontext>
 		  <cclom:general_keyword>
+		  <ccm:taxonid>
 		]]></html>
 		</template>
 		<template>
@@ -448,6 +449,11 @@
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 				<statement>{"term":{"properties_aggregated.ccm:educationalcontext":"${value}"}}</statement>
+			</property>
+			<property name="cclom:general_keyword">
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<statement>{"term":{"properties_aggregated.cclom:general_keyword":"${value}"}}</statement>
 			</property>
 			<property name="ccm:educationallearningresourcetype">
 				<multiple>true</multiple>
