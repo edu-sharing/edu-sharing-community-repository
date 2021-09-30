@@ -141,6 +141,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         BoolQueryBuilder audienceQueryBuilder = getPermissionsQuery("permissions.read");
         audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
+
+        //enhance to collection permissions
+        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read");
+        collectionPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        BoolQueryBuilder audienceQueryBuilderCollections = QueryBuilders.boolQuery()
+                .mustNot(QueryBuilders.termQuery("properties.ccm:restricted_access",true))
+                .must(collectionPermissions);
+        audienceQueryBuilder.should(audienceQueryBuilderCollections);
+
         return audienceQueryBuilder;
     }
     @Override
