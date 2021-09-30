@@ -344,6 +344,24 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return authorities;
     }
 
+    public boolean hasReadPermissionOnNode(String nodeId){
+        BoolQueryBuilder query = QueryBuilders.boolQuery()
+                .must(getReadPermissionsQuery())
+                .must(QueryBuilders.termQuery("properties.sys:node-uuid", nodeId));
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(query);
+        searchSourceBuilder.size(0);
+        SearchRequest request = new SearchRequest("workspace");
+        request.source(searchSourceBuilder);
+        try {
+            SearchResponse searchResult = client.search(request, RequestOptions.DEFAULT);
+            return searchResult.getHits().getTotalHits().value > 0;
+        } catch (IOException e) {
+           logger.error(e.getMessage(),e);
+        }
+        return false;
+    }
+
     public NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
         try {
             return this.transform(NodeRefImpl.class, authorities,user,hit.getSourceAsMap(), resolveCollections);
