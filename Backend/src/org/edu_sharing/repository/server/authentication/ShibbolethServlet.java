@@ -87,6 +87,10 @@ public class ShibbolethServlet extends HttpServlet {
 
 		}
 
+		if(!req.isRequestedSessionIdValid()) {
+			req.getSession(true);
+		}
+
 		String headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
 		if (req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
