@@ -320,7 +320,7 @@ public class SSOAuthorityMapper {
 					if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
 						String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
 						//if configured initialize with active status
-						if (personActiveStatus != null) {
+						if (personActiveStatus != null && !personActiveStatus.trim().isEmpty()) {
 							personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS), personActiveStatus);
 						}
 					}
@@ -333,15 +333,27 @@ public class SSOAuthorityMapper {
 					personProperties.remove(ContentModel.PROP_USERNAME);
 					personService.setPersonProperties(userName, personProperties);
 				}
-				
-				if(!authenticationService.authenticationExists(userName)){
-					authenticationService.createAuthentication(userName, new KeyTool().getRandomPassword().toCharArray());
-				}
+
 				
 			} else {
 				logger.warn("no personproperties delivered by sso context for user " + userName);
 			}
 
+			/**
+			 * get the existent username, this can be different to the parameter username
+			 * when this has another case(lower/upper) than the person object username
+			 */
+			NodeRef personNodeRef = personService.getPersonOrNull(userName);
+			if(personNodeRef == null) {
+				logger.error("person " + userName + " does not exist. can not create authentication object in userstore." );
+				return null;
+			}
+			String existentUserName = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
+
+			if(!authenticationService.authenticationExists(existentUserName)){
+				logger.info("no authentication object for " +userName +" trying to create!");
+				authenticationService.createAuthentication(existentUserName, new KeyTool().getRandomPassword().toCharArray());
+			}
 			// group memberships
 			List<MappingGroup> mappingGroups = new ArrayList<MappingGroup>(mappingConfig.getGroupMapping());
 			
