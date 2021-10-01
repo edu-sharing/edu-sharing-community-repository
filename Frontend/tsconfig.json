@@ -1,11 +1,17 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
     "noImplicitAny": true,
     "noImplicitReturns": true,
+    "paths": {
+      "edu-sharing-api": [
+        "dist/edu-sharing-api/edu-sharing-api",
+        "dist/edu-sharing-api"
+      ]
+    },
     "declaration": false,
     "experimentalDecorators": true,
     "lib": ["es2018", "dom"],
-    "mapRoot": "./src",
     "module": "es2020",
     "moduleResolution": "node",
     "outDir": "./dist/out-tsc",

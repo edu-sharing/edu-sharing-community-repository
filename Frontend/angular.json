@@ -137,6 +137,37 @@
           }
         }
       }
+    },
+    "edu-sharing-api": {
+      "projectType": "library",
+      "root": "projects/edu-sharing-api",
+      "sourceRoot": "projects/edu-sharing-api/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/edu-sharing-api/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/edu-sharing-api/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/edu-sharing-api/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/edu-sharing-api/src/test.ts",
+            "tsConfig": "projects/edu-sharing-api/tsconfig.spec.json",
+            "karmaConfig": "projects/edu-sharing-api/karma.conf.js"
+          }
+        }
+      }
     }
   },
   "defaultProject": "angular-edusharing",
