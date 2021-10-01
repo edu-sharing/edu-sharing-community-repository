@@ -220,7 +220,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchResponse searchResponseAggregations = null;
             if(searchToken.getFacettes() != null) {
                 Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criterias, searchToken.getFacettes());
-                List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL), queryData, criterias, searchToken.getFacettes(), excludeOwnFacets,queryBuilderGlobalConditions);
+                List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(
+                        mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),
+                        queryData,
+                        criterias,
+                        searchToken.getFacettes(),
+                        excludeOwnFacets,
+                        queryBuilderGlobalConditions,
+                        searchToken);
                 if(excludeOwnFacets.size() > 0){
                     SearchRequest searchRequestAggs = new SearchRequest("workspace");
                     SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
