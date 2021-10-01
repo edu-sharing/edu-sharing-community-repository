@@ -6,10 +6,14 @@ public class CallSourceHelper {
     enum CallSource {
         Search,
         Render,
-        Workspace
+        Workspace,
+        Unknown
     }
 
     public static CallSource getCallSource(){
+        if(Context.getCurrentInstance() == null || Context.getCurrentInstance().getRequest() == null){
+            return CallSource.Unknown;
+        }
         String requestURI = Context.getCurrentInstance().getRequest().getRequestURI();
         if(requestURI.contains("rest/search")){
             return CallSource.Search;
