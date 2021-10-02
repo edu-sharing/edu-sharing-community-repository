@@ -9,13 +9,6 @@ cache:
   paths:
     - .m2/repository/
 
-before_script:
-  - if [ -n "$CI_COMMIT_TAG" ]; then
-      export VERSIONING_GIT_TAG=$CI_COMMIT_TAG;
-    else
-      export VERSIONING_GIT_BRANCH=$CI_COMMIT_REF_NAME;
-    fi
-
 deploy:
   stage: deploy
   script:
