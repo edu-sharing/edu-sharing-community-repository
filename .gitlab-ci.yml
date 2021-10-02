@@ -9,7 +9,6 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_TLS_CERTDIR: ""
-  GIT_SUBMODULE_STRATEGY: recursive
   MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS -s .mvn/settings.xml --batch-mode --errors --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   PLUGIN_REMOTE_ENABLED: "false"
@@ -17,13 +16,6 @@ variables:
 cache:
   paths:
     - .m2/repository/
-
-before_script:
-  - if [ -n "$CI_COMMIT_TAG" ]; then
-      export VERSIONING_GIT_TAG=$CI_COMMIT_TAG;
-    else
-      export VERSIONING_GIT_BRANCH=$CI_COMMIT_REF_NAME;
-    fi
 
 deploy:
   stage: deploy

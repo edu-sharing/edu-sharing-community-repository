@@ -1,66 +1,23 @@
-<gitVersioning>
-  <preferTags>true</preferTags>
-  <tag>
-    <pattern><![CDATA[[v]?(?<major>[0-9]+)]]></pattern>
-    <versionFormat>${major}</versionFormat>
-  </tag>
-  <tag>
-    <pattern><![CDATA[[v]?(?<major>[0-9]+)[-_\\.](?<minor>[0-9]+)]]></pattern>
-    <versionFormat>${major}.${minor}</versionFormat>
-  </tag>
-  <tag>
-    <pattern><![CDATA[[v]?(?<major>[0-9]+)[-_\\.](?<minor>[0-9]+)[-_\\.](?<patch>[0-9]+)]]></pattern>
-    <versionFormat>${major}.${minor}.${patch}</versionFormat>
-  </tag>
-  <tag>
-    <pattern><![CDATA[[v]?(?<major>[0-9]+)[-_\\.](?<minor>[0-9]+)[-_\\.](?<patch>[0-9]+)[-_\\.](?<build>.+)]]></pattern>
-    <versionFormat>${major}.${minor}.${patch}-${build}</versionFormat>
-  </tag>
-  <tag>
-    <pattern><![CDATA[[v]?(?<major>[0-9]+)[-_\\.](?<minor>[0-9]+)[-_\\.](?<patch>[0-9]+)(?<build>[^-_\\.].+)]]></pattern>
-    <versionFormat>${major}.${minor}.${patch}-${build}</versionFormat>
-  </tag>
-  <branch>
-    <pattern><![CDATA[master]]></pattern>
-    <versionFormat>master-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[develop]]></pattern>
-    <versionFormat>develop-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[release/(?<major>[0-9]+)]]></pattern>
-    <versionFormat>${major}-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[release/(?<major>[0-9]+)[-_\\.](?<minor>[0-9]+)]]></pattern>
-    <versionFormat>${major}.${minor}-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[release/(?<major>[0-9]+)[-_\\.](?<minor>[0-9]+)[-_\\.](?<patch>[0-9]+)]]></pattern>
-    <versionFormat>${major}.${minor}.${patch}-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[release/(?<major>[0-9]+)[-_\\.](?<minor>[0-9]+)[-_\\.](?<patch>[0-9]+)[-_\\.](?<build>.+)]]></pattern>
-    <versionFormat>${major}.${minor}.${patch}-${build}-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[release/(?<major>[0-9]+)[-_\\.](?<minor>[0-9]+)[-_\\.](?<patch>[0-9]+)(?<build>[^-_\\.].+)]]></pattern>
-    <versionFormat>${major}.${minor}.${patch}-${build}-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[feature/(?<feature>.+)]]></pattern>
-    <versionFormat>feature-${feature}-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[hotfix/(?<feature>.+)]]></pattern>
-    <versionFormat>hotfix-${feature}-SNAPSHOT</versionFormat>
-  </branch>
-  <branch>
-    <pattern><![CDATA[(?<other>.+)]]></pattern>
-    <versionFormat>branch-${other}-SNAPSHOT</versionFormat>
-  </branch>
-  <commit>
-    <versionFormat>commit-${commit.short}-SNAPSHOT</versionFormat>
-  </commit>
-</gitVersioning>
+<configuration xmlns="https://github.com/qoomon/maven-git-versioning-extension"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="https://github.com/qoomon/maven-git-versioning-extension https://qoomon.github.io/maven-git-versioning-extension/configuration-7.0.0.xsd">
+
+  <refs considerTagsOnBranches="true">
+
+    <ref type="tag">
+      <pattern>.+</pattern>
+      <version>${ref.slug}</version>
+    </ref>
+
+    <ref type="branch">
+      <pattern>.+</pattern>
+      <version>${ref.slug}-SNAPSHOT</version>
+    </ref>
+
+  </refs>
+
+  <rev>
+    <version>${commit.short}${dirty.snapshot}</version>
+  </rev>
+
+</configuration>
