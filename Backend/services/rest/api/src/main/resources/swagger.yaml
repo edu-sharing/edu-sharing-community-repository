@@ -1,4 +1,3 @@
----
 basePath: /edu-sharing/rest
 definitions:
   ACE:
@@ -286,7 +285,7 @@ definitions:
       x:
         format: int32
         type: integer
-      'y':
+      y:
         format: int32
         type: integer
       z:
@@ -4097,7 +4096,8 @@ paths:
       tags:
         - ADMIN v1
     put:
-      description: if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit
+      description: if the key exists, it will be overwritten. Otherwise, it will be
+        created. You only need to transfer keys you want to edit
       operationId: updateApplicationXML
       parameters:
         - description: Properties Filename (*.xml)
@@ -4729,12 +4729,14 @@ paths:
       description: xml file must be structured as defined by the xsd standard
       operationId: importCollections
       parameters:
-        - description: Id of the root to initialize the collection structure, or '-root-' to inflate them on the first level
+        - description: Id of the root to initialize the collection structure, or '-root-'
+            to inflate them on the first level
           in: query
           name: parent
           required: false
           type: string
-        - description: XML file to parse (or zip file containing exactly 1 xml file to parse)
+        - description: XML file to parse (or zip file containing exactly 1 xml file
+            to parse)
           in: formData
           name: xml
           required: true
@@ -4940,7 +4942,8 @@ paths:
           name: until
           required: false
           type: string
-        - description: 'periodInDays: internal sets from and until. only effective if from/until not set)'
+        - description: 'periodInDays: internal sets from and until. only effective
+            if from/until not set)'
           in: query
           name: periodInDays
           required: false
@@ -5059,7 +5062,7 @@ paths:
       description: Refresh importer cache.
       operationId: refreshCache
       parameters:
-        - default: '-userhome-'
+        - default: -userhome-
           description: refresh cache root folder id
           in: path
           name: folder
@@ -5337,7 +5340,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -5348,7 +5352,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -5419,7 +5423,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -5427,7 +5432,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: properties to fetch, use parent::<property> to include parent property values
+          description: properties to fetch, use parent::<property> to include parent
+            property values
           in: query
           items:
             type: string
@@ -5809,7 +5815,8 @@ paths:
         - ADMIN v1
   /admin/v1/toolpermissions/{authority}:
     get:
-      description: Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission
+      description: Returns explicit (rights set for this authority) + effective (resulting
+        rights for this authority) toolpermission
       operationId: getAllToolpermissions
       parameters:
         - description: Authority to load (user or group)
@@ -5848,7 +5855,8 @@ paths:
       tags:
         - ADMIN v1
     put:
-      description: If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority
+      description: If a toolpermission has status UNDEFINED, it will remove explicit
+        permissions for the authority
       operationId: setToolpermissions
       parameters:
         - description: Authority to set (user or group)
@@ -5899,7 +5907,8 @@ paths:
         - ADMIN v1
   /admin/v1/upload/temp/{name}:
     put:
-      description: Upload a file to tomcat temp directory, to use it on the server (e.g. an update)
+      description: Upload a file to tomcat temp directory, to use it on the server
+        (e.g. an update)
       operationId: uploadTemp
       parameters:
         - description: filename
@@ -5945,7 +5954,7 @@ paths:
       description: Searches for archive nodes.
       operationId: purge
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -5989,10 +5998,12 @@ paths:
         - ARCHIVE v1
   /archive/v1/restore/{repository}:
     post:
-      description: 'restores archived nodes. restoreStatus can have the following values: FALLBACK_PARENT_NOT_EXISTS, FALLBACK_PARENT_NO_PERMISSION, DUPLICATENAME, FINE'
+      description: 'restores archived nodes. restoreStatus can have the following
+        values: FALLBACK_PARENT_NOT_EXISTS, FALLBACK_PARENT_NO_PERMISSION, DUPLICATENAME,
+        FINE'
       operationId: restore
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6044,7 +6055,7 @@ paths:
       description: Searches for archive nodes.
       operationId: search
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6126,7 +6137,7 @@ paths:
       description: Searches for archive nodes.
       operationId: search
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6137,7 +6148,7 @@ paths:
           name: pattern
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: person
           in: path
           name: person
@@ -6211,7 +6222,8 @@ paths:
         - ARCHIVE v1
   /authentication/v1/appauth/{userId}:
     post:
-      description: 'headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts'
+      description: 'headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed,
+        X-Edu-App-Ts'
       operationId: authenticate
       parameters:
         - description: User Id
@@ -6300,7 +6312,8 @@ paths:
           description: OK.
           schema:
             $ref: '#/definitions/Login'
-      summary: Validates the Basic Auth Credentials and check if the session is a logged in user
+      summary: Validates the Basic Auth Credentials and check if the session is a
+        logged in user
       tags:
         - AUTHENTICATION v1
   /authentication/v1/validateSession:
@@ -6313,12 +6326,14 @@ paths:
           description: OK.
           schema:
             $ref: '#/definitions/Login'
-      summary: Validates the Basic Auth Credentials and check if the session is a logged in user
+      summary: Validates the Basic Auth Credentials and check if the session is a
+        logged in user
       tags:
         - AUTHENTICATION v1
   /bulk/v1/find:
     post:
-      description: Get a given node based on the posted, multiple criterias. Make sure that they'll provide an unique result
+      description: Get a given node based on the posted, multiple criterias. Make
+        sure that they'll provide an unique result
       operationId: find
       parameters:
         - description: properties that must match (with "AND" concatenated)
@@ -6361,16 +6376,19 @@ paths:
         - BULK v1
   /bulk/v1/sync/{group}:
     put:
-      description: Depending on the given "match" properties either a new node will be created or the existing one will be updated
+      description: Depending on the given "match" properties either a new node will
+        be created or the existing one will be updated
       operationId: sync
       parameters:
-        - description: The group to which this node belongs to. Used for internal structuring. Please use simple names only
+        - description: The group to which this node belongs to. Used for internal
+            structuring. Please use simple names only
           in: path
           name: group
           required: true
           type: string
         - collectionFormat: multi
-          description: The properties that must match to identify if this node exists. Multiple properties will be and combined and compared
+          description: The properties that must match to identify if this node exists.
+            Multiple properties will be and combined and compared
           in: query
           items:
             type: string
@@ -6378,14 +6396,16 @@ paths:
           required: true
           type: array
         - collectionFormat: multi
-          description: The properties on which the imported nodes should be grouped (for each value, a folder with the corresponding data is created)
+          description: The properties on which the imported nodes should be grouped
+            (for each value, a folder with the corresponding data is created)
           in: query
           items:
             type: string
           name: groupBy
           required: false
           type: array
-        - description: type of node. If the node already exists, this will not change the type afterwards
+        - description: type of node. If the node already exists, this will not change
+            the type afterwards
           in: query
           name: type
           required: true
@@ -6398,7 +6418,8 @@ paths:
           name: aspects
           required: false
           type: array
-        - description: properties, they'll not get filtered via mds, so be careful what you add here
+        - description: properties, they'll not get filtered via mds, so be careful
+            what you add here
           in: body
           name: body
           required: true
@@ -6408,7 +6429,8 @@ paths:
                 type: string
               type: array
             type: object
-        - description: reset all versions (like a complete reimport), all data inside edu-sharing will be lost
+        - description: reset all versions (like a complete reimport), all data inside
+            edu-sharing will be lost
           in: query
           name: resetVersion
           required: false
@@ -6481,10 +6503,11 @@ paths:
         - CLIENTUTILS v1
   /collection/v1/collections/{repository}/pinning:
     post:
-      description: Remove all currently pinned collections and set them in the order send. Requires TOOLPERMISSION_COLLECTION_PINNING
+      description: Remove all currently pinned collections and set them in the order
+        send. Requires TOOLPERMISSION_COLLECTION_PINNING
       operationId: setPinnedCollections
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6529,7 +6552,7 @@ paths:
       description: Search collections.
       operationId: search
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6563,7 +6586,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -6603,7 +6627,7 @@ paths:
       description: Delete a collection.
       operationId: deleteCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6644,7 +6668,7 @@ paths:
       description: Get a collection.
       operationId: getCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6687,7 +6711,7 @@ paths:
       description: Update a collection.
       operationId: updateCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6730,7 +6754,7 @@ paths:
       description: Create a new collection.
       operationId: createCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6780,7 +6804,7 @@ paths:
       description: ''
       operationId: getCollectionsSubcollections
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6805,7 +6829,9 @@ paths:
           required: true
           type: string
         - default: 'true'
-          description: fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data
+          description: fetch counts of collections (materials and subcollections).
+            This parameter will decrease performance so only enable if if you need
+            this data
           in: query
           name: fetchCounts
           required: false
@@ -6833,7 +6859,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -6881,7 +6908,7 @@ paths:
       description: ''
       operationId: getCollectionsReferences
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -6915,7 +6942,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -6963,7 +6991,7 @@ paths:
       description: Requires permission "???" on the specific permission
       operationId: getFeedbackOfCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7008,7 +7036,7 @@ paths:
       description: Requires permission "Feedback" on the specific collection
       operationId: addFeedbackToCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7059,7 +7087,7 @@ paths:
       description: Deletes Preview Image of a collection.
       operationId: removeIconOfCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7102,7 +7130,7 @@ paths:
       description: Writes Preview Image of a collection.
       operationId: changeIconOfCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7152,10 +7180,11 @@ paths:
         - COLLECTION v1
   /collection/v1/collections/{repository}/{collection}/order:
     post:
-      description: Current order will be overriden. Requires full permissions for the parent collection
+      description: Current order will be overriden. Requires full permissions for
+        the parent collection
       operationId: setCollectionOrder
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7166,7 +7195,8 @@ paths:
           name: collection
           required: true
           type: string
-        - description: List of nodes in the order to be saved. If empty, custom order of the collection will be disabled
+        - description: List of nodes in the order to be saved. If empty, custom order
+            of the collection will be disabled
           in: body
           name: body
           required: false
@@ -7197,7 +7227,8 @@ paths:
           description: Fatal error occured.
           schema:
             $ref: '#/definitions/ErrorResponse'
-      summary: Set order of nodes in a collection. In order to work as expected, provide a list of all nodes in this collection
+      summary: Set order of nodes in a collection. In order to work as expected, provide
+        a list of all nodes in this collection
       tags:
         - COLLECTION v1
   /collection/v1/collections/{repository}/{collection}/references/{node}:
@@ -7205,7 +7236,7 @@ paths:
       description: Delete a node from a collection.
       operationId: deleteFromCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7251,7 +7282,7 @@ paths:
       description: Add a node to a collection.
       operationId: addToCollection
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7273,7 +7304,8 @@ paths:
           required: false
           type: string
         - default: 'false'
-          description: Allow that a node that already is inside the collection can be added again
+          description: Allow that a node that already is inside the collection can
+            be added again
           in: query
           name: allowDuplicate
           required: false
@@ -7315,7 +7347,7 @@ paths:
       description: Delete the comment with the given id
       operationId: deleteComment
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7356,7 +7388,7 @@ paths:
       description: Edit the comment with the given id
       operationId: editComment
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7404,7 +7436,7 @@ paths:
       description: List all comments
       operationId: getComments
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7447,7 +7479,7 @@ paths:
       description: Adds a comment to the given node
       operationId: addComment
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7651,7 +7683,9 @@ paths:
         - CONFIG v1
   /config/v1/values:
     get:
-      description: Current is the actual (context-based) active config. Global is the default global config if no context is active (may be identical to the current)
+      description: Current is the actual (context-based) active config. Global is
+        the default global config if no context is active (may be identical to the
+        current)
       operationId: getConfig
       parameters: []
       responses:
@@ -7720,7 +7754,7 @@ paths:
       description: ''
       operationId: listConnectors
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7759,7 +7793,7 @@ paths:
       description: Search authorities.
       operationId: searchAuthorities
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7771,7 +7805,8 @@ paths:
           required: true
           type: string
         - default: 'true'
-          description: global search context, defaults to true, otherwise just searches for users within the organizations
+          description: global search context, defaults to true, otherwise just searches
+            for users within the organizations
           in: query
           name: global
           required: false
@@ -7781,7 +7816,8 @@ paths:
           name: groupType
           required: false
           type: string
-        - description: find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)
+        - description: find a specific signupMethod for groups (or asterisk for all
+            including one) (does nothing for persons)
           in: query
           name: signupMethod
           required: false
@@ -7833,7 +7869,7 @@ paths:
       description: Get the authorities the current user has recently invited.
       operationId: getRecentlyInvited
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7872,7 +7908,7 @@ paths:
       description: Search groups. (admin rights are required.)
       operationId: searchGroups
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -7888,13 +7924,15 @@ paths:
           name: groupType
           required: false
           type: string
-        - description: find a specific signupMethod for groups (or asterisk for all including one)
+        - description: find a specific signupMethod for groups (or asterisk for all
+            including one)
           in: query
           name: signupMethod
           required: false
           type: string
         - default: 'true'
-          description: global search context, defaults to true, otherwise just searches for groups within the organizations
+          description: global search context, defaults to true, otherwise just searches
+            for groups within the organizations
           in: query
           name: global
           required: false
@@ -7922,7 +7960,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -7962,7 +8001,7 @@ paths:
       description: Delete the group. (admin rights are required.)
       operationId: deleteGroup
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8003,7 +8042,7 @@ paths:
       description: Get the group. (To get foreign profiles, admin rights are required.)
       operationId: getGroup
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8046,7 +8085,7 @@ paths:
       description: Create a new group. (admin rights are required.)
       operationId: createGroup
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8057,7 +8096,8 @@ paths:
           name: group
           required: true
           type: string
-        - description: parent (will be added to this parent, also for name hashing), may be null
+        - description: parent (will be added to this parent, also for name hashing),
+            may be null
           in: query
           name: parent
           required: false
@@ -8101,7 +8141,7 @@ paths:
       description: Get all members of the group. (admin rights are required.)
       operationId: getMembership
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8145,7 +8185,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -8185,7 +8226,7 @@ paths:
       description: Delete member from the group. (admin rights are required.)
       operationId: deleteMembership
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8231,7 +8272,7 @@ paths:
       description: Add member to the group. (admin rights are required.)
       operationId: addMembership
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8282,7 +8323,7 @@ paths:
       description: Set profile of the group. (admin rights are required.)
       operationId: changeGroupProfile
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8330,7 +8371,7 @@ paths:
       description: ''
       operationId: signupGroup
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8384,7 +8425,7 @@ paths:
       description: ' requires admin rights'
       operationId: signupGroupDetails
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8432,7 +8473,7 @@ paths:
       description: Requires admin rights or org administrator on this group
       operationId: signupGroupList
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8478,7 +8519,7 @@ paths:
       description: Requires admin rights or org administrator on this group
       operationId: rejectSignup
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8524,7 +8565,7 @@ paths:
       description: Requires admin rights or org administrator on this group
       operationId: confirmSignup
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8571,7 +8612,7 @@ paths:
       description: Get a subgroup by the specified type
       operationId: getSubgroupByType
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8620,7 +8661,7 @@ paths:
       description: Search users. (admin rights are required.)
       operationId: searchUser
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8632,7 +8673,8 @@ paths:
           required: true
           type: string
         - default: 'true'
-          description: global search context, defaults to true, otherwise just searches for users within the organizations
+          description: global search context, defaults to true, otherwise just searches
+            for users within the organizations
           in: query
           name: global
           required: false
@@ -8669,7 +8711,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -8709,7 +8752,7 @@ paths:
       description: Delete the user. (admin rights are required.)
       operationId: deleteUser
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8721,7 +8764,8 @@ paths:
           required: true
           type: string
         - default: 'false'
-          description: force the deletion (if false then only persons which are previously marked for deletion are getting deleted)
+          description: force the deletion (if false then only persons which are previously
+            marked for deletion are getting deleted)
           in: query
           name: force
           required: false
@@ -8753,16 +8797,17 @@ paths:
       tags:
         - IAM v1
     get:
-      description: Get the user. (Not all information are feteched for foreign profiles if current user is not an admin)
+      description: Get the user. (Not all information are feteched for foreign profiles
+        if current user is not an admin)
       operationId: getUser
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -8800,7 +8845,7 @@ paths:
       description: Create a new user. (admin rights are required.)
       operationId: createUser
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -8852,16 +8897,17 @@ paths:
         - IAM v1
   /iam/v1/people/{repository}/{person}/avatar:
     delete:
-      description: Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)
+      description: Remove avatar of the user. (To Remove foreign avatars, admin rights
+        are required.)
       operationId: removeUserAvatar
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -8894,16 +8940,17 @@ paths:
       tags:
         - IAM v1
     put:
-      description: Set avatar of the user. (To set foreign avatars, admin rights are required.)
+      description: Set avatar of the user. (To set foreign avatars, admin rights are
+        required.)
       operationId: changeUserAvatar
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -8942,16 +8989,17 @@ paths:
         - IAM v1
   /iam/v1/people/{repository}/{person}/credential:
     put:
-      description: Change/Set password of the user. (To change foreign passwords or set passwords, admin rights are required.)
+      description: Change/Set password of the user. (To change foreign passwords or
+        set passwords, admin rights are required.)
       operationId: changeUserPassword
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -8994,7 +9042,7 @@ paths:
       description: ''
       operationId: getUserGroups
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -9033,7 +9081,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -9070,16 +9119,17 @@ paths:
         - IAM v1
   /iam/v1/people/{repository}/{person}/nodeList/{list}:
     get:
-      description: For guest users, the list will be temporary stored in the current session
+      description: For guest users, the list will be temporary stored in the current
+        session
       operationId: getNodeList
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9094,7 +9144,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -9108,7 +9158,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -9145,16 +9196,17 @@ paths:
         - IAM v1
   /iam/v1/people/{repository}/{person}/nodeList/{list}/{node}:
     delete:
-      description: For guest users, the list will be temporary stored in the current session
+      description: For guest users, the list will be temporary stored in the current
+        session
       operationId: removeNodeList
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9197,16 +9249,17 @@ paths:
       tags:
         - IAM v1
     put:
-      description: For guest users, the list will be temporary stored in the current session
+      description: For guest users, the list will be temporary stored in the current
+        session
       operationId: addNodeList
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9253,13 +9306,13 @@ paths:
       description: Will fail for guest
       operationId: getPreferences
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9297,13 +9350,13 @@ paths:
       description: Will fail for guest
       operationId: setPreferences
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9314,7 +9367,7 @@ paths:
           name: body
           required: true
           schema:
-            default: '-me-'
+            default: -me-
             type: string
       responses:
         '200':
@@ -9344,16 +9397,17 @@ paths:
         - IAM v1
   /iam/v1/people/{repository}/{person}/profile:
     put:
-      description: Set profile of the user. (To set foreign profiles, admin rights are required.)
+      description: Set profile of the user. (To set foreign profiles, admin rights
+        are required.)
       operationId: changeUserProfile
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9396,13 +9450,13 @@ paths:
       description: Will fail for guest
       operationId: getProfileSettings
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9440,13 +9494,13 @@ paths:
       description: Will fail for guest
       operationId: setProfileSettings
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9489,13 +9543,13 @@ paths:
       description: Get the user stats (e.g. publicly created material count)
       operationId: getUserStats
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-me-'
+        - default: -me-
           description: username (or "-me-" for current user)
           in: path
           name: person
@@ -9534,7 +9588,7 @@ paths:
       description: update the user status. (admin rights are required.)
       operationId: updateUserStatus
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -9591,7 +9645,7 @@ paths:
       description: Get metadata sets V2 of repository.
       operationId: getMetadataSetsV2
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -9630,13 +9684,13 @@ paths:
       description: Get metadata set new.
       operationId: getMetadataSetV2
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-default-'
+        - default: -default-
           description: ID of metadataset (or "-default-" for default metadata set)
           in: path
           name: metadataset
@@ -9675,13 +9729,13 @@ paths:
       description: Get values.
       operationId: getValuesV2
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-default-'
+        - default: -default-
           description: ID of metadataset (or "-default-" for default metadata set)
           in: path
           name: metadataset
@@ -9843,10 +9897,11 @@ paths:
         - MEDIACENTER v1
   /mediacenter/v1/mediacenter/{repository}:
     get:
-      description: Only shows the one available/managing the current user (only admin can access all)
+      description: Only shows the one available/managing the current user (only admin
+        can access all)
       operationId: getMediacenters
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -9891,7 +9946,7 @@ paths:
       description: admin rights are required.
       operationId: deleteMediacenter
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -9936,7 +9991,7 @@ paths:
       description: admin rights are required.
       operationId: createMediacenter
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -9988,7 +10043,7 @@ paths:
       description: ''
       operationId: editMediacenter
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10041,7 +10096,7 @@ paths:
       description: ''
       operationId: getMediacenterLicensedNodes
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10070,7 +10125,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -10081,7 +10137,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -10141,7 +10197,7 @@ paths:
       description: ''
       operationId: getMediacenterGroups
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10191,7 +10247,7 @@ paths:
       description: admin rights are required.
       operationId: removeMediacenterGroup
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10202,7 +10258,8 @@ paths:
           name: mediacenter
           required: true
           type: string
-        - description: authorityName of the group that should not longer be managed by that mediacenter
+        - description: authorityName of the group that should not longer be managed
+            by that mediacenter
           in: path
           name: group
           required: true
@@ -10242,10 +10299,11 @@ paths:
       tags:
         - MEDIACENTER v1
     put:
-      description: although not restricted, it is recommended that the group is an edu-sharing organization (admin rights are required)
+      description: although not restricted, it is recommended that the group is an
+        edu-sharing organization (admin rights are required)
       operationId: addMediacenterGroup
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10490,7 +10548,7 @@ paths:
       description: Searching nodes.
       operationId: getNodes
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10532,7 +10590,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -10543,7 +10602,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -10581,7 +10640,7 @@ paths:
       description: Delete node.
       operationId: delete
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10639,7 +10698,7 @@ paths:
       description: Add aspect to node.
       operationId: addAspects
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10691,7 +10750,7 @@ paths:
       description: Get nodes related based on an assoc.
       operationId: getAssocs
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -10725,7 +10784,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -10749,7 +10809,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -10787,13 +10847,17 @@ paths:
       description: Get children of node.
       operationId: getChildren
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - description: ID of parent node (or "-userhome-" for home directory of current user, "-shared_files-" for shared folders, "-to_me_shared_files" for shared files for the user,"-my_shared_files-" for files shared by the user, "-inbox-" for the inbox, "-workflow_receive-" for files assigned by workflow, "-saved_search-" for saved searches of the user)
+        - description: ID of parent node (or "-userhome-" for home directory of current
+            user, "-shared_files-" for shared folders, "-to_me_shared_files" for shared
+            files for the user,"-my_shared_files-" for files shared by the user, "-inbox-"
+            for the inbox, "-workflow_receive-" for files assigned by workflow, "-saved_search-"
+            for saved searches of the user)
           in: path
           name: node
           required: true
@@ -10829,7 +10893,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -10845,7 +10910,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -10882,13 +10947,14 @@ paths:
       description: Create a new child.
       operationId: createChild
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - description: ID of parent node use -userhome- for userhome or -inbox- for inbox node
+        - description: ID of parent node use -userhome- for userhome or -inbox- for
+            inbox node
           in: path
           name: node
           required: true
@@ -10917,7 +10983,8 @@ paths:
           name: versionComment
           required: false
           type: string
-        - description: 'properties, example: {"{http://www.alfresco.org/model/content/1.0}name": ["test"]}'
+        - description: 'properties, example: {"{http://www.alfresco.org/model/content/1.0}name":
+            ["test"]}'
           in: body
           name: body
           required: true
@@ -10969,7 +11036,7 @@ paths:
       description: Create a new child by copying.
       operationId: createChildByCopying
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11027,7 +11094,7 @@ paths:
       description: ''
       operationId: createForkOfNode
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11085,7 +11152,7 @@ paths:
       description: Create a new child by moving.
       operationId: createChildByMoving
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11140,7 +11207,7 @@ paths:
       description: Change content of node.
       operationId: changeContent
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11151,7 +11218,8 @@ paths:
           name: node
           required: true
           type: string
-        - description: comment, leave empty = no new version, otherwise new version is generated
+        - description: comment, leave empty = no new version, otherwise new version
+            is generated
           in: query
           name: versionComment
           required: false
@@ -11208,7 +11276,8 @@ paths:
           name: node
           required: true
           type: string
-        - description: Parent node where to store it locally, may also use -userhome- or -inbox-
+        - description: Parent node where to store it locally, may also use -userhome-
+            or -inbox-
           in: query
           name: parent
           required: true
@@ -11246,7 +11315,7 @@ paths:
       description: locked status of a node.
       operationId: islocked
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11290,7 +11359,7 @@ paths:
       description: unlock node.
       operationId: unlock
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11332,7 +11401,7 @@ paths:
       description: Get metadata of node.
       operationId: getMetadata
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11347,7 +11416,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -11384,7 +11453,7 @@ paths:
       description: Change metadata of node (new version).
       operationId: changeMetadataWithVersioning
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11446,7 +11515,7 @@ paths:
       description: Change metadata of node.
       operationId: changeMetadata
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11504,7 +11573,7 @@ paths:
       description: All the given metadata will be inherited to child nodes.
       operationId: getTemplateMetadata
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11551,7 +11620,7 @@ paths:
       description: All the given metadata will be inherited to child nodes.
       operationId: changeTemplateMetadata
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11614,7 +11683,7 @@ paths:
       description: Ordered by the time of each notify
       operationId: getNotifyList
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11660,7 +11729,7 @@ paths:
       description: Set owner of node.
       operationId: setOwner
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11704,10 +11773,11 @@ paths:
         - NODE v1
   /node/v1/nodes/{repository}/{node}/parents:
     get:
-      description: Get all parents metadata + own metadata of node. Index 0 is always the current node
+      description: Get all parents metadata + own metadata of node. Index 0 is always
+        the current node
       operationId: getParents
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11726,7 +11796,8 @@ paths:
           name: propertyFilter
           required: false
           type: array
-        - description: activate to return the full alfresco path, otherwise the path for the user home is resolved
+        - description: activate to return the full alfresco path, otherwise the path
+            for the user home is resolved
           in: query
           name: fullPath
           required: false
@@ -11764,7 +11835,7 @@ paths:
       description: Get all permission of node.
       operationId: getPermission
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11807,7 +11878,7 @@ paths:
       description: Set local permissions of node.
       operationId: setPermission
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11867,10 +11938,11 @@ paths:
         - NODE v1
   /node/v1/nodes/{repository}/{node}/permissions/{user}:
     get:
-      description: Check for actual permissions (also when user is in groups) for a specific node
+      description: Check for actual permissions (also when user is in groups) for
+        a specific node
       operationId: hasPermission
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11921,7 +11993,7 @@ paths:
       description: create remote object and get properties.
       operationId: prepareUsage
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -11965,7 +12037,7 @@ paths:
       description: ''
       operationId: deletePreview
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12010,7 +12082,7 @@ paths:
       description: Change preview of node.
       operationId: changePreview
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12063,7 +12135,7 @@ paths:
       description: When the property is unset (null), it will be removed
       operationId: setProperty
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12118,7 +12190,7 @@ paths:
       description: Get all published copies of the current node
       operationId: getPublishedCopies
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12161,7 +12233,7 @@ paths:
       description: 'Create a published copy of the current node '
       operationId: publishCopy
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12172,7 +12244,8 @@ paths:
           name: node
           required: true
           type: string
-        - description: handle mode, if a handle should be created. Skip this parameter if you don't want an handle
+        - description: handle mode, if a handle should be created. Skip this parameter
+            if you don't want an handle
           enum:
             - distinct
             - update
@@ -12213,7 +12286,7 @@ paths:
       description: Report a node to notify the admin about an issue)
       operationId: reportNode
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12270,7 +12343,7 @@ paths:
       description: Get list of shares (via mail/token) for a node.
       operationId: getShares
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12320,7 +12393,7 @@ paths:
       description: Create a new share for a node
       operationId: createShare
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12376,7 +12449,7 @@ paths:
       description: Remove the specified share id
       operationId: removeShare
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12422,7 +12495,7 @@ paths:
       description: update the specified share id
       operationId: updateShare
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12445,7 +12518,8 @@ paths:
           name: expiryDate
           required: false
           type: integer
-        - description: new password for share, leave empty if you don't want to change it
+        - description: new password for share, leave empty if you don't want to change
+            it
           in: query
           name: password
           required: false
@@ -12483,7 +12557,7 @@ paths:
       description: May fails with 500 if the node can not be read.
       operationId: getTextContent
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12528,7 +12602,7 @@ paths:
       description: Change content of node as text.
       operationId: changeContentAsText
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12539,7 +12613,8 @@ paths:
           name: node
           required: true
           type: string
-        - description: comment, leave empty = no new version, otherwise new version is generated
+        - description: comment, leave empty = no new version, otherwise new version
+            is generated
           in: query
           name: versionComment
           required: false
@@ -12588,7 +12663,7 @@ paths:
       description: Get all versions of node.
       operationId: getVersions
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12632,7 +12707,7 @@ paths:
       description: Revert to node version.
       operationId: revertVersion
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12688,7 +12763,7 @@ paths:
       description: Get metadata of node version.
       operationId: getVersionMetadata
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12715,7 +12790,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -12753,7 +12828,7 @@ paths:
       description: Get workflow history of node.
       operationId: getWorkflowHistory
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12798,7 +12873,7 @@ paths:
       description: Add workflow entry to node.
       operationId: addWorkflowHistory
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12809,7 +12884,8 @@ paths:
           name: node
           required: true
           type: string
-        - description: The history entry to put (editor and time can be null and will be filled automatically)
+        - description: The history entry to put (editor and time can be null and will
+            be filled automatically)
           in: body
           name: body
           required: true
@@ -12846,7 +12922,7 @@ paths:
       description: ''
       operationId: storeXApiData
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12897,10 +12973,11 @@ paths:
         - NODE v1
   /organization/v1/organizations/{repository}:
     get:
-      description: Get organizations of repository the current user is member. May returns an empty list.
+      description: Get organizations of repository the current user is member. May
+        returns an empty list.
       operationId: getOrganizations
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -12934,7 +13011,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -12980,7 +13058,7 @@ paths:
       description: Delete organization of repository.
       operationId: deleteOrganizations
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13021,7 +13099,7 @@ paths:
       description: Get organization by id.
       operationId: getOrganization
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13064,7 +13142,7 @@ paths:
       description: create organization in repository.
       operationId: createOrganizations
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13117,7 +13195,7 @@ paths:
       description: Remove member from organization.
       operationId: removeFromOrganization
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13164,7 +13242,7 @@ paths:
       description: Delete the comment with the given id
       operationId: deleteRating
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13202,10 +13280,11 @@ paths:
       tags:
         - RATING v1
     put:
-      description: Adds the rating. If the current user already rated that element, the rating will be altered
+      description: Adds the rating. If the current user already rated that element,
+        the rating will be altered
       operationId: addOrUpdateRating
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13338,10 +13417,12 @@ paths:
         - REGISTER v1
   /register/v1/resend/{mail}:
     post:
-      description: The method will return false if there is no pending registration for the given mail
+      description: The method will return false if there is no pending registration
+        for the given mail
       operationId: resendMail
       parameters:
-        - description: The mail a registration is pending for and should be resend to
+        - description: The mail a registration is pending for and should be resend
+            to
           in: path
           name: mail
           required: true
@@ -13386,7 +13467,7 @@ paths:
       description: Get metadata of node.
       operationId: getDetailsSnippet
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13439,7 +13520,7 @@ paths:
       description: Get metadata of node.
       operationId: getDetailsSnippetWithParameters
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13503,7 +13584,7 @@ paths:
       description: e.g. property=cm:name, value:*Test*
       operationId: searchByProperty
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13530,7 +13611,8 @@ paths:
           required: false
           type: string
         - collectionFormat: multi
-          description: One (or more) properties to search for, will be combined by specified combine mode
+          description: One (or more) properties to search for, will be combined by
+            specified combine mode
           in: query
           items:
             type: string
@@ -13538,7 +13620,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: One (or more) values to search for, matching the properties defined before
+          description: One (or more) values to search for, matching the properties
+            defined before
           in: query
           items:
             type: string
@@ -13546,7 +13629,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: (Optional) comparator, only relevant for date or numerical fields, currently allowed =, <=, >=
+          description: (Optional) comparator, only relevant for date or numerical
+            fields, currently allowed =, <=, >=
           in: query
           items:
             type: string
@@ -13576,7 +13660,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -13587,7 +13672,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -13627,7 +13712,7 @@ paths:
       description: Perform queries based on metadata sets.
       operationId: searchFingerprint
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13661,7 +13746,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -13672,7 +13758,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -13752,7 +13838,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -13771,7 +13858,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -13811,7 +13898,7 @@ paths:
       description: ''
       operationId: searchContributor
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -13832,7 +13919,8 @@ paths:
           required: true
           type: string
         - collectionFormat: multi
-          description: 'define which authority fields should be searched: [''firstname'', ''lastname'', ''email'', ''uuid'', ''url'']'
+          description: 'define which authority fields should be searched: [''firstname'',
+            ''lastname'', ''email'', ''uuid'', ''url'']'
           in: query
           items:
             type: string
@@ -13840,7 +13928,9 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: 'define which contributor props should be searched: [''ccm:lifecyclecontributer_author'', ''ccm:lifecyclecontributer_publisher'', ..., ''ccm:metadatacontributer_creator'', ''ccm:metadatacontributer_validator'']'
+          description: 'define which contributor props should be searched: [''ccm:lifecyclecontributer_author'',
+            ''ccm:lifecyclecontributer_publisher'', ..., ''ccm:metadatacontributer_creator'',
+            ''ccm:metadatacontributer_validator'']'
           in: query
           items:
             type: string
@@ -13884,13 +13974,13 @@ paths:
       description: Perform queries based on metadata sets V2.
       operationId: searchV2
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-default-'
+        - default: -default-
           description: ID of metadataset (or "-default-" for default metadata set)
           in: path
           name: metadataset
@@ -13936,7 +14026,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -13953,7 +14044,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -13993,13 +14084,13 @@ paths:
       description: Save a search query.
       operationId: saveSearch
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
           required: true
           type: string
-        - default: '-default-'
+        - default: -default-
           description: ID of metadataset (or "-default-" for default metadata set)
           in: path
           name: metadataset
@@ -14064,7 +14155,7 @@ paths:
       description: ''
       operationId: getRelevantNodes
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14074,7 +14165,7 @@ paths:
           description: property filter for result nodes (or "-all-" for all properties)
           in: query
           items:
-            default: '-all-'
+            default: -all-
             type: string
           name: propertyFilter
           required: false
@@ -14126,7 +14217,7 @@ paths:
       description: ''
       operationId: getInfo
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14180,7 +14271,7 @@ paths:
       description: Only valid for shared folders
       operationId: getChildren
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14224,7 +14315,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -14264,7 +14356,7 @@ paths:
       description: Statistics.
       operationId: get
       parameters:
-        - default: '-root-'
+        - default: -root-
           description: context, the node where to start
           in: path
           name: context
@@ -14323,7 +14415,8 @@ paths:
           required: false
           type: string
         - collectionFormat: multi
-          description: additional properties to build facettes and count+sub-group values
+          description: additional properties to build facettes and count+sub-group
+            values
           in: query
           items:
             type: string
@@ -14348,7 +14441,8 @@ paths:
         - STATISTIC v1
   /statistic/v1/statistics/nodes:
     post:
-      description: requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_NODES for global stats or to be admin of the requested mediacenter
+      description: requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_NODES
+        for global stats or to be admin of the requested mediacenter
       operationId: getStatisticsNode
       parameters:
         - description: Grouping type (by date)
@@ -14380,7 +14474,8 @@ paths:
           required: false
           type: string
         - collectionFormat: multi
-          description: additionals fields of the custom json object stored in each query that should be returned
+          description: additionals fields of the custom json object stored in each
+            query that should be returned
           in: query
           items:
             type: string
@@ -14388,7 +14483,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)
+          description: grouping fields of the custom json object stored in each query
+            (currently only meant to be combined with no grouping by date)
           in: query
           items:
             type: string
@@ -14522,7 +14618,8 @@ paths:
         - STATISTIC v1
   /statistic/v1/statistics/users:
     post:
-      description: requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_USER for global stats or to be admin of the requested mediacenter
+      description: requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_USER
+        for global stats or to be admin of the requested mediacenter
       operationId: getStatisticsUser
       parameters:
         - description: Grouping type (by date)
@@ -14554,7 +14651,8 @@ paths:
           required: false
           type: string
         - collectionFormat: multi
-          description: additionals fields of the custom json object stored in each query that should be returned
+          description: additionals fields of the custom json object stored in each
+            query that should be returned
           in: query
           items:
             type: string
@@ -14562,7 +14660,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)
+          description: grouping fields of the custom json object stored in each query
+            (currently only meant to be combined with no grouping by date)
           in: query
           items:
             type: string
@@ -14612,7 +14711,7 @@ paths:
       description: ''
       operationId: canAccess
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14655,10 +14754,11 @@ paths:
         - STREAM v1
   /stream/v1/add/{repository}:
     put:
-      description: will return the object and add the id to the object if creation succeeded
+      description: will return the object and add the id to the object if creation
+        succeeded
       operationId: addEntry
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14703,7 +14803,7 @@ paths:
       description: the current user must be author of the given stream object
       operationId: deleteEntry
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14745,7 +14845,7 @@ paths:
       description: ''
       operationId: getPropertyValues
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14791,7 +14891,7 @@ paths:
       description: ''
       operationId: search
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14830,7 +14930,8 @@ paths:
               type: string
             type: object
         - collectionFormat: multi
-          description: 'sort properties, currently supported: created, priority, default: priority desc, created desc'
+          description: 'sort properties, currently supported: created, priority, default:
+            priority desc, created desc'
           in: query
           items:
             type: string
@@ -14838,7 +14939,8 @@ paths:
           required: false
           type: array
         - collectionFormat: multi
-          description: sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+          description: sort ascending, true if not set. Use multiple values to change
+            the direction according to the given property at the same index
           in: query
           items:
             type: boolean
@@ -14878,7 +14980,7 @@ paths:
       description: ''
       operationId: updateEntry
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14930,7 +15032,7 @@ paths:
       description: Get all ToolDefinitions.
       operationId: getAllToolDefinitions
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14968,7 +15070,7 @@ paths:
       description: Create a new tool definition object.
       operationId: createToolDefintition
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -14985,7 +15087,8 @@ paths:
           name: versionComment
           required: false
           type: string
-        - description: 'properties, example: {"{http://www.alfresco.org/model/content/1.0}name": ["test"]}'
+        - description: 'properties, example: {"{http://www.alfresco.org/model/content/1.0}name":
+            ["test"]}'
           in: body
           name: body
           required: true
@@ -15032,7 +15135,7 @@ paths:
       description: Get Instances of a ToolDefinition.
       operationId: getInstance
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -15076,7 +15179,7 @@ paths:
       description: Get Instances of a ToolDefinition.
       operationId: getInstances
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -15119,7 +15222,7 @@ paths:
       description: Create a new tool Instance object.
       operationId: createToolInstance
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -15141,7 +15244,8 @@ paths:
           name: versionComment
           required: false
           type: string
-        - description: 'properties, example: {"{http://www.alfresco.org/model/content/1.0}name": ["test"]}'
+        - description: 'properties, example: {"{http://www.alfresco.org/model/content/1.0}name":
+            ["test"]}'
           in: body
           name: body
           required: true
@@ -15188,7 +15292,7 @@ paths:
       description: Create a new tool object for a given tool instance.
       operationId: createToolObject
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -15210,7 +15314,8 @@ paths:
           name: versionComment
           required: false
           type: string
-        - description: 'properties, example: {"{http://www.alfresco.org/model/content/1.0}name": ["test"]}'
+        - description: 'properties, example: {"{http://www.alfresco.org/model/content/1.0}name":
+            ["test"]}'
           in: body
           name: body
           required: true
@@ -15257,7 +15362,7 @@ paths:
       description: Currently limited to video / audio play interactions
       operationId: trackEvent
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -15278,7 +15383,8 @@ paths:
           name: event
           required: true
           type: string
-        - description: node id for which the event is tracked. For some event, this can be null
+        - description: node id for which the event is tracked. For some event, this
+            can be null
           in: query
           name: node
           required: false
@@ -15475,10 +15581,11 @@ paths:
         - USAGE v1
   /usage/v1/usages/repository/{repositoryId}:
     post:
-      description: 'headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts'
+      description: 'headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed,
+        X-Edu-App-Ts'
       operationId: setUsage
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository (or "-home-" for home repository)
           in: path
           name: repository
@@ -15515,20 +15622,21 @@ paths:
           description: Fatal error occured.
           schema:
             $ref: '#/definitions/ErrorResponse'
-      summary: Set a usage for a node. app signature headers and authenticated user required.
+      summary: Set a usage for a node. app signature headers and authenticated user
+        required.
       tags:
         - USAGE v1
   /usage/v1/usages/repository/{repositoryId}/{nodeid}:
     get:
       operationId: getUsages
       parameters:
-        - default: '-home-'
+        - default: -home-
           description: ID of repository
           in: path
           name: repositoryId
           required: true
           type: string
-        - default: '-all-'
+        - default: -all-
           description: ID of node. Use -all- for getting usages of all nodes
           in: path
           name: nodeId
