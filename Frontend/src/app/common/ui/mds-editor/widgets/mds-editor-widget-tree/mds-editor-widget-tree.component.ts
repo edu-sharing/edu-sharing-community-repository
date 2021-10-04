@@ -68,18 +68,18 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
         }
         this.tree = Tree.generateTree(
             this.widget.definition.values,
-            this.widget.getInitialValues().jointValues,
-            this.widget.getInitialValues().individualValues,
+            this.widget.getInitialValues()?.jointValues ?? [],
+            this.widget.getInitialValues()?.individualValues,
         );
         this.chipsControl = new FormControl(
             [
-                ...this.widget.getInitialValues().jointValues,
-                ...(this.widget.getInitialValues().individualValues ?? []),
+                ...this.widget.getInitialValues()?.jointValues ?? [],
+                ...(this.widget.getInitialValues()?.individualValues ?? []),
             ].map((value) => this.tree.idToDisplayValue(value)),
             this.getStandardValidators(),
         );
         this.indeterminateValues$ = new BehaviorSubject(
-            this.widget.getInitialValues().individualValues,
+            this.widget.getInitialValues()?.individualValues,
         );
         this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) => {
             this.setValue(values.map((value) => value.key));
