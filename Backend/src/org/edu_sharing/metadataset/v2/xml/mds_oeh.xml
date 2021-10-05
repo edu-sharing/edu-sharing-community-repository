@@ -435,7 +435,7 @@
 			<property name="ccm:taxonid">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
-				<statement>{"term":{"properties_aggregated.ccm:taxonid":"${value}"}}</statement>
+				<statement>{"term":{"properties.ccm:taxonid":"${value}"}}</statement>
 			</property>
 			<property name="ccm:educationalintendedenduserrole">
 				<multiple>true</multiple>
@@ -448,12 +448,12 @@
 			<property name="ccm:educationalcontext">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
-				<statement>{"term":{"properties_aggregated.ccm:educationalcontext":"${value}"}}</statement>
+				<statement>{"term":{"properties.ccm:educationalcontext.keyword":"${value}"}}</statement>
 			</property>
 			<property name="cclom:general_keyword">
 				<multiple>true</multiple>
 				<multiplejoin>AND</multiplejoin>
-				<statement>{"term":{"properties_aggregated.cclom:general_keyword":"${value}"}}</statement>
+				<statement>{"term":{"properties.cclom:general_keyword.keyword":"${value}"}}</statement>
 			</property>
 			<property name="ccm:educationallearningresourcetype">
 				<multiple>true</multiple>
