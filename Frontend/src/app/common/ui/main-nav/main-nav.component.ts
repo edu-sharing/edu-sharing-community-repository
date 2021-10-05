@@ -123,6 +123,10 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
      */
     @Input() searchEnabled: boolean;
     /**
+     * Show a suggestions overlay as the user types into the search field.
+     */
+    @Input() searchSuggestionsEnabled = false;
+    /**
      * Shows the current location
      */
     @Input() showScope = true;

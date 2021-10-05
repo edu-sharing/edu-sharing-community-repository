@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, switchMap } from 'rxjs';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { LabeledValue } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
-import * as rxjs from 'rxjs';
+import { MdsLabelService, RawValuesDict } from './mds-label.service';
 
 /** Configuration for `SearchService`. */
 export class SearchConfig {
@@ -23,18 +26,14 @@ export interface SearchParams {
     /** Free text search string entered by a user. */
     searchString?: string;
     /** Property filters to narrow search results. */
-    filters?: Filters;
+    filters?: RawValuesDict;
 }
-
-export type Filters = { [property: string]: string[] };
 
 export type SearchResults = Pick<apiModels.SearchResultNode, 'nodes' | 'pagination'>;
 
 /** A singe entry of a given facet, including its localized display name. */
-export interface FacetValue {
+export interface FacetValue extends LabeledValue {
     count: number;
-    id: string;
-    displayName: string;
 }
 
 /** The aggregation of all facet values of a given facet. */
@@ -44,7 +43,7 @@ export interface FacetAggregation {
 }
 
 /** Values of all facets by property. */
-export type Facets = {
+export type FacetsDict = {
     [property: string]: FacetAggregation;
 };
 
@@ -56,7 +55,7 @@ export class SearchService {
     private config: SearchConfig | null = null;
     private params: SearchParams = {};
 
-    constructor(private searchV1: SearchV1Service) {}
+    constructor(private searchV1: SearchV1Service, private valueMapping: MdsLabelService) {}
 
     /**
      * Configure `SearchService`.
@@ -87,7 +86,7 @@ export class SearchService {
         return this.requestSearch({ pageIndex, requestFacets: false });
     }
 
-    getAsYouTypeFacetSuggestions(inputString: string): Observable<Facets> {
+    getAsYouTypeFacetSuggestions(inputString: string, facets: string[]): Observable<FacetsDict> {
         // This is a placeholder implementation with non-final results.
         const config = this.getConfig();
         return this.searchV1
@@ -99,7 +98,7 @@ export class SearchService {
                 maxItems: 0,
                 body: {
                     criterias: this.getSearchCriteria(this.params),
-                    facettes: config.facets,
+                    facettes: facets,
                 },
             })
             .pipe(switchMap((response) => this.mapFacets(response.facettes)));
@@ -126,26 +125,33 @@ export class SearchService {
         return [];
     }
 
-    private mapFacets(results: apiModels.SearchResultNode['facettes']): Observable<Facets> {
-        return rxjs.of(
+    private mapFacets(results: apiModels.SearchResultNode['facettes']): Observable<FacetsDict> {
+        if (results.length === 0) {
+            return rxjs.of({});
+        }
+        return rxjs.forkJoin(
             results.reduce((acc, facet) => {
                 acc[facet.property] = this.mapFacet(facet);
                 return acc;
-            }, {} as Facets),
+            }, {} as { [property: string]: Observable<FacetAggregation> }),
         );
     }
 
-    private mapFacet(facet: apiModels.Facette): FacetAggregation {
-        return {
-            values: facet.values.map((value) => this.mapFacetValue(value)),
-        };
+    private mapFacet(facet: apiModels.Facette): Observable<FacetAggregation> {
+        if (facet.values.length === 0) {
+            return rxjs.of({ values: [] });
+        }
+        return rxjs
+            .forkJoin(facet.values.map((value) => this.mapFacetValue(facet.property, value)))
+            .pipe(map((values) => ({ values })));
     }
 
-    private mapFacetValue(value: apiModels.Value): FacetValue {
-        return {
-            count: value.count,
-            id: value.value,
-            displayName: value.value, // TODO: correct mapping
-        };
+    private mapFacetValue(
+        property: string,
+        { count, value }: apiModels.Value,
+    ): Observable<FacetValue> {
+        return this.valueMapping
+            .getLabel(this.getConfig(), property, value)
+            .pipe(map((label) => ({ count, value, label })));
     }
 }

@@ -1,5 +1,16 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { EventEmitter, Injectable } from '@angular/core';
+import {
+    FacetsDict,
+    LabeledValue,
+    LabeledValuesDict,
+    MdsIdentifier,
+    MdsLabelService,
+    RawValuesDict,
+    SearchConfig,
+    SearchService,
+} from 'edu-sharing-api';
+import { BehaviorSubject, EMPTY, Observable, of, ReplaySubject, Subject, timer } from 'rxjs';
+import { debounce, map, shareReplay, switchMap } from 'rxjs/operators';
 
 export interface Category {
     property: string;
@@ -7,82 +18,169 @@ export interface Category {
     color: string;
 }
 
-export interface Filter {
-    value: string;
-    label: string;
-}
-
-export type Filters = { [property: string]: Filter[] };
-export type Suggestions = Filters;
-
 const DUMMY_CATEGORIES: Category[] = [
-    { property: 'ccm:foo', label: 'foo', color: 'rgb(214, 166, 214)' },
+    {
+        property: 'ccm:educationalcontext',
+        label: 'educationalcontext',
+        color: 'rgb(214, 166, 214)',
+    },
     { property: 'ccm:bar', label: 'bar', color: 'rgb(166, 192, 214)' },
 ];
-
-const DUMMY_FILTERS: Filters = {
-    'ccm:foo': [
-        { value: 'fooValue', label: 'foo' },
-        { value: 'barValue', label: 'bar' },
-    ],
-    'ccm:bar': [
-        { value: 'fooValue', label: 'foo' },
-        { value: 'bazValue', label: 'bazzzzzzzzzz' },
-    ],
-};
-
-const DUMMY_SUGGESTIONS: Suggestions = {
-    'ccm:foo': [
-        { value: 'fufuValue', label: 'fufu' },
-        { value: 'babaValue', label: 'baba' },
-    ],
-    'ccm:bar': [
-        { value: 'fufuValue', label: 'fufu' },
-        { value: 'bazzValue', label: 'bazz' },
-    ],
-};
 
 @Injectable({
     providedIn: 'root',
 })
 export class SearchFieldService {
+    /** Active categories for use by search field. */
     readonly categories$: Observable<Category[]>;
-    readonly filters$: Observable<Filters>;
-    readonly suggestions$: Observable<Suggestions>;
+    /** Active filters for use by search field. */
+    readonly filters$: Observable<LabeledValuesDict>;
+    /** Active suggestions for use by search field. */
+    readonly suggestions$: Observable<FacetsDict>;
+    /** Emits when the user added or removed filters through the search field. */
+    readonly filterValuesChange = new EventEmitter<RawValuesDict>();
 
-    private readonly filtersSubject = new BehaviorSubject<Filters>(DUMMY_FILTERS);
-    // private readonly filtersSubject = new BehaviorSubject<Filters>({});
+    private readonly searchConfigSubject = new BehaviorSubject<Partial<SearchConfig>>({});
+    private readonly suggestionsInputStringSubject = new ReplaySubject<string>(1);
+    private readonly filtersSubject = new BehaviorSubject<LabeledValuesDict>({});
+    private readonly enableFiltersAndSuggestionsSubject = new BehaviorSubject(false);
 
-    constructor() {
-        this.filters$ = this.filtersSubject.asObservable();
-        this.categories$ = of(DUMMY_CATEGORIES);
-        this.suggestions$ = of(DUMMY_SUGGESTIONS);
+    constructor(private search: SearchService, private mdsLabel: MdsLabelService) {
+        this.searchConfigSubject.subscribe((searchConfig) => this.search.configure(searchConfig));
+        this.filters$ = this.enableFiltersAndSuggestionsSubject.pipe(
+            switchMap((enabled) => (enabled ? this.filtersSubject : of(null))),
+        );
+        this.categories$ = of(DUMMY_CATEGORIES); // Needs to replay
+        this.suggestions$ = this.enableFiltersAndSuggestionsSubject.pipe(
+            switchMap((enabled) =>
+                enabled
+                    ? this.categories$.pipe(
+                          map((categories) => categories.map((c) => c.property)),
+                          switchMap((facets) =>
+                              this.suggestionsInputStringSubject.pipe(
+                                  map((inputString) =>
+                                      inputString?.length >= 3 ? inputString : null,
+                                  ),
+                                  debounce((inputString) => (inputString ? timer(200) : EMPTY)),
+                                  map((inputString) => ({ facets, inputString })),
+                              ),
+                          ),
+                          switchMap(({ facets, inputString }) =>
+                              inputString
+                                  ? this.search.getAsYouTypeFacetSuggestions(inputString, facets)
+                                  : of(null),
+                          ),
+                      )
+                    : of(null),
+            ),
+            shareReplay(1),
+        );
     }
 
-    addFilter(property: string, filter: Filter): void {
+    /**
+     * Enables or disables the filters and suggestions functions.
+     *
+     * When disabled, `filters$` and `suggestions$` will not emit values and suggestions will not be
+     * fetched.
+     *
+     * To be called by the search-field component.
+     */
+    setEnableFiltersAndSuggestions(enabled: boolean): void {
+        this.enableFiltersAndSuggestionsSubject.next(enabled);
+        if (!enabled) {
+            this.suggestionsInputStringSubject.next('');
+            this.filtersSubject.next({});
+        }
+    }
+
+    /**
+     * Updates the input string as the user types to fetch matching as-you-type suggestions.
+     *
+     * To be called by the search-field component.
+     */
+    updateSuggestions(inputString: string): void {
+        this.suggestionsInputStringSubject.next(inputString);
+    }
+
+    /**
+     * Adds a filter to the active-filters dictionary as the user clicks on a suggestion chip.
+     *
+     * To be called by the search-field component.
+     */
+    addFilter(property: string, filter: LabeledValue): void {
         const filterList = this.filtersSubject.value[property] ?? [];
         if (!filterList.some((f) => f.value === filter.value)) {
-            this.filtersSubject.next({
+            const newFilters = {
                 ...this.filtersSubject.value,
                 [property]: [...filterList, filter],
-            });
+            };
+            this.filtersSubject.next(newFilters);
+            this.filterValuesChange.emit(this.mdsLabel.getRawValuesDict(newFilters));
         }
-        this.triggerSearch();
     }
 
-    removeFilter(property: string, filter: Filter): void {
+    /**
+     * Removes a filter from the active-filters dictionary as the user clicks on a chip's remove
+     * button.
+     *
+     * To be called by the search-field component.
+     */
+    removeFilter(property: string, filter: LabeledValue): void {
         const filterList = this.filtersSubject.value[property];
         const index = filterList?.findIndex((f) => f.value === filter.value);
         if (index >= 0) {
             const filterCopy = filterList.slice();
             filterCopy.splice(index, 1);
-            this.filtersSubject.next({ ...this.filtersSubject.value, [property]: filterCopy });
+            const newFilters = { ...this.filtersSubject.value, [property]: filterCopy };
+            this.filtersSubject.next(newFilters);
+            this.filterValuesChange.emit(this.mdsLabel.getRawValuesDict(newFilters));
         }
-        this.triggerSearch();
     }
 
-    private triggerSearch(): void {
-        console.log('trigger search');
-        // TODO
+    /**
+     * Sets the active filters to be displayed as chips.
+     *
+     * To be called by the component or service controlling the search logic.
+     */
+    setFilterValues(values: RawValuesDict): void {
+        const mdsId = this.getCurrentMdsIdentifier();
+        if (mdsId) {
+            this.mdsLabel
+                .labelValuesDict(mdsId, values)
+                .subscribe((filterValues) => this.filtersSubject.next(filterValues));
+        } else {
+            console.warn('Called setFilterValues when mds was not configured.');
+        }
+    }
+
+    /**
+     * Sets the repository to be used for suggestions and value lookups.
+     *
+     * To be called by the component or service controlling the search logic.
+     */
+    setRepository(repository: string): void {
+        if (this.searchConfigSubject.value.repository !== repository) {
+            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, repository });
+        }
+    }
+
+    /**
+     * Sets the metadata set to be used for suggestions and value lookups.
+     *
+     * To be called by the component or service controlling the search logic.
+     */
+    setMetadataSet(metadataSet: string): void {
+        if (this.searchConfigSubject.value.metadataSet !== metadataSet) {
+            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, metadataSet });
+        }
+    }
+
+    private getCurrentMdsIdentifier(): MdsIdentifier | null {
+        const { repository, metadataSet } = this.searchConfigSubject.value;
+        if (repository && metadataSet) {
+            return { repository, metadataSet };
+        } else {
+            return null;
+        }
     }
 }

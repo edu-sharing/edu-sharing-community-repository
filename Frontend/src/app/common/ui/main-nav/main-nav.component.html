@@ -156,6 +156,7 @@
             [(searchString)]="searchQuery"
             (searchStringChange)="searchQueryChange.emit($event)"
             [placeholder]="searchPlaceholder"
+            [enableFiltersAndSuggestions]="searchSuggestionsEnabled"
             (search)="doSearch($event)"
             (clear)="clearSearch()"
           ></app-search-field>

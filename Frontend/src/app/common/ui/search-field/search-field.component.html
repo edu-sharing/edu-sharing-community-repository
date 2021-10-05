@@ -29,10 +29,9 @@
             name="search"
             type="search"
             matInput
+            [formControl]="inputControl"
             [matChipInputFor]="chipList"
             autocomplete="off"
-            [(ngModel)]="searchString"
-            (change)="searchStringChange.emit(searchString)"
             placeholder="{{ placeholder | translate }}"
             [attr.aria-label]="placeholder | translate"
             (focus)="showOverlay = true"
@@ -42,7 +41,7 @@
           />
           <button
             class="clear-button"
-            *ngIf="searchString"
+            *ngIf="inputControl.value"
             mat-icon-button
             type="button"
             (click)="onClear()"
@@ -77,14 +76,15 @@
     cdkTrapFocus
   >
     <ng-container *ngFor="let category of categories$ | async">
-      <div class="suggestion-group" *ngIf="suggestions[category.property]?.length > 0">
+      <div class="suggestion-group" *ngIf="suggestions[category.property]?.values.length > 0">
         <label class="category-label">{{ category.label }}</label>
         <mat-chip-list>
           <mat-chip
-            *ngFor="let suggestion of suggestions[category.property]"
+            *ngFor="let suggestion of suggestions[category.property].values"
             #suggestionChip
             [style.background-color]="category.color"
             (click)="onAddFilter(category.property, suggestion)"
+            (keydown.enter)="onAddFilter(category.property, suggestion)"
             [selectable]="false"
           >
             {{ suggestion.label }}

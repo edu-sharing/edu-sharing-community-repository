@@ -72,6 +72,7 @@ import {switchMap, takeUntil} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
+import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
 
 @Component({
     selector: 'app-search',
@@ -130,6 +131,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     set mdsId(mdsId: string) {
         this._mdsId = mdsId;
+        this.searchField.setMetadataSet(mdsId);
     }
     selection: Node[];
     extendedRepositorySelected = false;
@@ -191,6 +193,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private storage: SessionStorageService,
         private network: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
+        private searchField: SearchFieldService,
     ) {}
 
     ngOnInit() {
@@ -316,6 +319,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.sidenavOpened$
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.extendedSearchTabGroup?.realignInkBar());
+        this.searchField.filterValuesChange
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((filterValues) => this.applyParameters(filterValues));
     }
 
     ngAfterViewInit() {
@@ -543,6 +549,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.currentRepository == RestConstants.ALL
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
+        this.searchField.setFilterValues(this.currentValues);
         this.searchRepository(repos, criterias, init);
 
         if (init) {
@@ -1601,6 +1608,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
             this.currentRepository = this.currentRepositoryObject.id;
         }
+        this.searchField.setRepository(this.currentRepository);
     }
 
     private getEnabledRepositories() {

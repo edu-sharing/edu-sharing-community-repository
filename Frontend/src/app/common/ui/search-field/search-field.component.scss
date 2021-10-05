@@ -113,5 +113,8 @@ mat-form-field {
             color: $textLight;
             padding-bottom: 6px;
         }
+        mat-chip {
+            cursor: pointer;
+        }
     }
 }
