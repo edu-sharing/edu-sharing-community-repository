@@ -477,7 +477,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             parameters = await this.getMdsValues();
         }
         this.scrollTo();
-        this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+        const result = await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
             queryParams: {
                 addToCollection: this.addToCollection
                     ? this.addToCollection.ref.id
@@ -498,6 +498,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 reurl: this.searchService.reurl,
             },
         });
+        if(result !== true) {
+            this.invalidateMds();
+            this.searchService.init();
+        }
     }
 
     getSearch(
@@ -1144,7 +1148,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             );
             const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed &&
                 this.isHomeRepository() && this.config.instant('frontpage.enabled', true);
-            // console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
             }
