@@ -121,6 +121,51 @@ public class SearchApi {
 
 	}
 
+
+	@POST
+	@Path("/queriesV2/{repository}/{metadataset}/{query}/facets")
+	@Consumes({ "application/json" })
+
+	@ApiOperation(value = "Search in facets", notes = "Perform queries based on metadata sets V2.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response searchFacets(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, defaultValue = "-default-") @PathParam("metadataset") String mdsId,
+			@ApiParam(value = "ID of query", required = true) @PathParam("query") String query,
+			@ApiParam(value = "facet min count", defaultValue = "10") @QueryParam("facetsMinCount") Integer facetMinCount,
+			@ApiParam(value = "facet limit", defaultValue = "0") @QueryParam("facetsLimit") Integer facetLimit,
+			@ApiParam(value = "facets", required = true) @QueryParam("facets") List<String> facets,
+			@ApiParam(value = "searchWord", required = false) @QueryParam("searchWord") String searchWord,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, mdsId);
+
+			SearchToken token = new SearchToken();
+			token.setFacettes(facets);
+			token.setFrom(0);
+			token.setMaxResult(0);
+			token.setFacettesLimit(facetLimit);
+			token.setFacettesMinCount(facetMinCount);
+			token.setQueryString(searchWord);
+
+			return Response.status(Response.Status.OK).entity(NodeDao.searchFacettes(repoDao,mdsDao,query,token)).build();
+
+		}  catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
 	@POST
 	@Path("/queriesV2/{repository}/{metadataset}/{query}/save")
 	@Consumes({ "application/json" })

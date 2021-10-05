@@ -65,6 +65,7 @@ import org.edu_sharing.service.rating.RatingDetails;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
@@ -211,6 +212,21 @@ public class NodeDao {
 			}
 			return result;
 		} catch (Throwable e) {
+			throw DAOException.mapping(e);
+		}
+	}
+
+	public static Map<String, Map<String, Integer>> searchFacettes(RepositoryDao repoDao, MdsDaoV2 mdsDao, String query,
+																   SearchToken token) throws DAOException {
+		SearchService ss=SearchServiceFactory.getSearchService(repoDao.getId());
+		if(!(ss instanceof SearchServiceElastic)){
+			logger.error("not implemented for non elastic searchengine");
+			return new HashMap<>();
+		}
+		SearchServiceElastic searchService = (SearchServiceElastic)ss;
+		try {
+			return searchService.searchFacets(mdsDao.getMds(), query, token);
+		}catch (Throwable e){
 			throw DAOException.mapping(e);
 		}
 	}

@@ -4,10 +4,7 @@ import com.sun.star.lang.IllegalArgumentException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.service.search.model.SearchToken;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.WrapperQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -158,7 +155,8 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         return excludeOwn;
     }
 
-    public static List<AggregationBuilder> getAggregations(MetadataQueries queries, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, QueryBuilder globalConditions, SearchToken searchToken) throws IllegalArgumentException {
+    public static List<AggregationBuilder> getAggregations(MetadataSetV2 mds, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, QueryBuilder globalConditions, SearchToken searchToken) throws IllegalArgumentException {
+        MetadataQueries queries = mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL);
         List<AggregationBuilder> result = new ArrayList<>();
         if(excludeOwn.size() == 0) {
             for (String facet : facets) {
@@ -176,10 +174,34 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 QueryBuilder qbNoFilter = getElasticSearchQuery(queries, query, tmp, false);
                 BoolQueryBuilder bqb = QueryBuilders.boolQuery();
                 bqb = bqb.must(qbFilter).must(qbNoFilter).must(globalConditions);
+                if(searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()){
+
+                    boolean isi18nProp = false;
+                    MetadataWidget mdw = mds.findWidget(facet);
+                    if(mdw != null){
+                        if(mdw.getType().equals("multivalueFixedBadges")){
+                            isi18nProp = true;
+                        }
+                    }
+
+                    MultiMatchQueryBuilder mmqb = null;
+                    if(isi18nProp){
+                        mmqb = QueryBuilders
+                                .multiMatchQuery(searchToken.getQueryString(),"i18n.de_DE."+facet,"collections.i18n.de_DE."+facet);
+                    }else{
+                        mmqb = QueryBuilders
+                                .multiMatchQuery(searchToken.getQueryString(),"properties."+facet);
+                    }
+                    mmqb.type(MultiMatchQueryBuilder.Type.BOOL_PREFIX).operator(Operator.AND);
+                    bqb.must(mmqb);
+                }
+
                 result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet)
                         .size(searchToken.getFacettesLimit())
                         .minDocCount(searchToken.getFacettesMinCount())
                         .field("properties." + facet+".keyword")));
+
+
             }
         }
         return result;
