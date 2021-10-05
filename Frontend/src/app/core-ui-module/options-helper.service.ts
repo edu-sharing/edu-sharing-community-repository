@@ -548,7 +548,7 @@ export class OptionsHelperService implements OnDestroy {
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
         editConnectorNode.showAsAction = true;
-        editConnectorNode.constrains = [Constrain.Files, Constrain.NoBulk];
+        editConnectorNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
 
         /**
          if (this.connector.getCurrentLogin() && !this.connector.getCurrentLogin().isGuest) {
