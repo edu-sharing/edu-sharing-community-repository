@@ -83,6 +83,9 @@ public class SearchApi {
 
 			SearchToken token = new SearchToken();
 			token.setFacettes(parameters.getFacettes());
+			token.setFacettesLimit((parameters.getFacetLimit() > 0) ? parameters.getFacetLimit() : 10);
+			token.setFacettesMinCount((parameters.getFacetMinCount() >= 0 ) ? parameters.getFacetMinCount(): 5);
+			token.setQueryString(parameters.getFacetSuggest());
 			token.setPermissions(parameters.getPermissions());
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 			token.setFrom(skipCount != null ? skipCount : 0);
