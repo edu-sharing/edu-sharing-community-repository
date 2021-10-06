@@ -20,6 +20,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
+import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
@@ -139,10 +140,7 @@ public class SearchApi {
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, defaultValue = "-default-") @PathParam("metadataset") String mdsId,
 			@ApiParam(value = "ID of query", required = true) @PathParam("query") String query,
-			@ApiParam(value = "facet min count", defaultValue = "5") @QueryParam("facetsMinCount") Integer facetMinCount,
-			@ApiParam(value = "facet limit", defaultValue = "10") @QueryParam("facetsLimit") Integer facetLimit,
-			@ApiParam(value = "facets", required = true) @QueryParam("facets") List<String> facets,
-			@ApiParam(value = "searchWord", required = false) @QueryParam("searchWord") String searchWord,
+			@ApiParam(value = "facet parameters", required = true) SearchParametersFacets parameters,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -151,12 +149,12 @@ public class SearchApi {
 			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, mdsId);
 
 			SearchToken token = new SearchToken();
-			token.setFacettes(facets);
+			token.setFacettes(parameters.getFacettes());
 			token.setFrom(0);
 			token.setMaxResult(0);
-			token.setFacettesLimit((facetLimit > 0) ? facetLimit : 10);
-			token.setFacettesMinCount((facetMinCount >= 0 ) ? facetMinCount: 5);
-			token.setQueryString(searchWord);
+			token.setFacettesLimit((parameters.getFacetLimit() > 0) ? parameters.getFacetLimit() : 10);
+			token.setFacettesMinCount((parameters.getFacetMinCount() >= 0 ) ? parameters.getFacetMinCount(): 5);
+			token.setQueryString(parameters.getFacetSuggest());
 
 			return Response.status(Response.Status.OK).entity(NodeDao.searchFacettes(repoDao,mdsDao,query,token)).build();
 

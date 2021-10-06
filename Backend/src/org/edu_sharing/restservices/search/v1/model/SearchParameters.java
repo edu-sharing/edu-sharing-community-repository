@@ -10,11 +10,10 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @ApiModel(description = "")
-public class SearchParameters {
+public class SearchParameters extends SearchParametersFacets{
 
 	private List<String> permissions;
 	private List<MdsQueryCriteria> criterias;
-	private List<String> facettes;
 	private boolean resolveCollections = false;
 
 	@ApiModelProperty(required = true, value = "")
@@ -25,16 +24,6 @@ public class SearchParameters {
 
 	public void setCriterias(List<MdsQueryCriteria> criterias) {
 		this.criterias = criterias;
-	}
-
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("facettes")
-	public List<String> getFacettes() {
-		return facettes;
-	}
-
-	public void setFacettes(List<String> facettes) {
-		this.facettes = facettes;
 	}
 
 	@JsonProperty
