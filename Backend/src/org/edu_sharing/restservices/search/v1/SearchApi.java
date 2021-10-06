@@ -139,8 +139,8 @@ public class SearchApi {
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, defaultValue = "-default-") @PathParam("metadataset") String mdsId,
 			@ApiParam(value = "ID of query", required = true) @PathParam("query") String query,
-			@ApiParam(value = "facet min count", defaultValue = "10") @QueryParam("facetsMinCount") Integer facetMinCount,
-			@ApiParam(value = "facet limit", defaultValue = "0") @QueryParam("facetsLimit") Integer facetLimit,
+			@ApiParam(value = "facet min count", defaultValue = "5") @QueryParam("facetsMinCount") Integer facetMinCount,
+			@ApiParam(value = "facet limit", defaultValue = "10") @QueryParam("facetsLimit") Integer facetLimit,
 			@ApiParam(value = "facets", required = true) @QueryParam("facets") List<String> facets,
 			@ApiParam(value = "searchWord", required = false) @QueryParam("searchWord") String searchWord,
 			@Context HttpServletRequest req) {
@@ -154,8 +154,8 @@ public class SearchApi {
 			token.setFacettes(facets);
 			token.setFrom(0);
 			token.setMaxResult(0);
-			token.setFacettesLimit(facetLimit);
-			token.setFacettesMinCount(facetMinCount);
+			token.setFacettesLimit((facetLimit > 0) ? facetLimit : 10);
+			token.setFacettesMinCount((facetMinCount >= 0 ) ? facetMinCount: 5);
 			token.setQueryString(searchWord);
 
 			return Response.status(Response.Status.OK).entity(NodeDao.searchFacettes(repoDao,mdsDao,query,token)).build();
