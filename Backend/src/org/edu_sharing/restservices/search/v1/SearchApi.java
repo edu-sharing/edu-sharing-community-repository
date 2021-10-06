@@ -83,8 +83,10 @@ public class SearchApi {
 
 			SearchToken token = new SearchToken();
 			token.setFacettes(parameters.getFacettes());
-			token.setFacettesLimit((parameters.getFacetLimit() > 0) ? parameters.getFacetLimit() : 10);
-			token.setFacettesMinCount((parameters.getFacetMinCount() >= 0 ) ? parameters.getFacetMinCount(): 5);
+			token.setFacettesLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+					? parameters.getFacetLimit() : 10);
+			token.setFacettesMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0 )
+					? parameters.getFacetMinCount(): 5);
 			token.setQueryString(parameters.getFacetSuggest());
 			token.setPermissions(parameters.getPermissions());
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
@@ -155,8 +157,10 @@ public class SearchApi {
 			token.setFacettes(parameters.getFacettes());
 			token.setFrom(0);
 			token.setMaxResult(0);
-			token.setFacettesLimit((parameters.getFacetLimit() > 0) ? parameters.getFacetLimit() : 10);
-			token.setFacettesMinCount((parameters.getFacetMinCount() >= 0 ) ? parameters.getFacetMinCount(): 5);
+			token.setFacettesLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+					? parameters.getFacetLimit() : 10);
+			token.setFacettesMinCount((parameters.getFacetMinCount()  != null && parameters.getFacetMinCount() >= 0 )
+					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 
 			return Response.status(Response.Status.OK).entity(NodeDao.searchFacettes(repoDao,mdsDao,query,token)).build();
