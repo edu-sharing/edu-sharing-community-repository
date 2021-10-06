@@ -257,15 +257,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchResponse searchResponseAggregations = null;
             if(searchToken.getFacettes() != null) {
                 Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criterias, searchToken.getFacettes());
-                List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(
-                        mds,
-                        queryData,
-                        criterias,
-                        searchToken.getFacettes(),
-                        excludeOwnFacets,
-                        queryBuilderGlobalConditions,
-                        searchToken);
                 if(excludeOwnFacets.size() > 0){
+                    List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(
+                            mds,
+                            queryData,
+                            criterias,
+                            searchToken.getFacettes(),
+                            excludeOwnFacets,
+                            queryBuilderGlobalConditions,
+                            searchToken);
                     SearchRequest searchRequestAggs = new SearchRequest("workspace");
                     SearchSourceBuilder searchSourceBuilderAggs = new SearchSourceBuilder();
                     searchSourceBuilderAggs.from(0);
@@ -278,8 +278,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     logger.info("query aggs: "+searchSourceBuilderAggs.toString());
                     searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
                 }else{
-                    for(AggregationBuilder ab : aggregations){
-                        searchSourceBuilder.aggregation(ab);
+                    for (String facet : searchToken.getFacettes()) {
+                        searchSourceBuilder.aggregation(AggregationBuilders.terms(facet).size(searchToken.getFacettesLimit()).minDocCount(searchToken.getFacettesMinCount()).field("properties." + facet+".keyword"));
                     }
                 }
             }
