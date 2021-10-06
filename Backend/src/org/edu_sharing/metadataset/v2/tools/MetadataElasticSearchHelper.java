@@ -3,6 +3,7 @@ package org.edu_sharing.metadataset.v2.tools;
 import com.sun.star.lang.IllegalArgumentException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.restservices.mds.v1.model.WidgetV2;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.elasticsearch.index.query.*;
@@ -171,7 +172,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     public static List<AggregationBuilder> getAggregations(MetadataSetV2 mds, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, QueryBuilder globalConditions, SearchToken searchToken) throws IllegalArgumentException {
         MetadataQueries queries = mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL);
         List<AggregationBuilder> result = new ArrayList<>();
-
+        String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
         for (String facet : facets) {
 
             Map<String, String[]> tmp = new HashMap<>(parameters);
@@ -192,9 +193,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 }
 
                 MultiMatchQueryBuilder mmqb = null;
+
                 if(isi18nProp){
                     mmqb = QueryBuilders
-                            .multiMatchQuery(searchToken.getQueryString(),"i18n.de_DE."+facet,"collections.i18n.de_DE."+facet);
+                            .multiMatchQuery(searchToken.getQueryString(),"i18n."+currentLocale+"."+facet,"collections.i18n."+currentLocale+"."+facet);
                 }else{
                     mmqb = QueryBuilders
                             .multiMatchQuery(searchToken.getQueryString(),"properties."+facet);
