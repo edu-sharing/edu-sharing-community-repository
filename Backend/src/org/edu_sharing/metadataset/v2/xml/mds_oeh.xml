@@ -435,7 +435,7 @@
 			<property name="ccm:taxonid">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
-				<statement>{"term":{"properties.ccm:taxonid":"${value}"}}</statement>
+				<statement>{"term":{"properties.ccm:taxonid.keyword":"${value}"}}</statement>
 			</property>
 			<property name="ccm:educationalintendedenduserrole">
 				<multiple>true</multiple>
