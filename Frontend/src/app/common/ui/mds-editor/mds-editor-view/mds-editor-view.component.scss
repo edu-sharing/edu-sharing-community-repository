@@ -42,7 +42,7 @@ h3 {
     flex-direction: column;
     opacity: 1;
     transition: all $transitionNormal;
-    &.content-hidden{
+    &.content-hidden {
         overflow: hidden;
         margin: 0;
         height: 0;

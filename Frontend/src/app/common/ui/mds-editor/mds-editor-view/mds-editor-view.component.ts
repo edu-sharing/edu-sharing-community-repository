@@ -1,12 +1,14 @@
 import { trigger } from '@angular/animations';
 import {
-    AfterViewInit, ApplicationRef,
+    AfterViewInit,
+    ApplicationRef,
     Component,
     ComponentFactoryResolver,
     ElementRef,
     HostBinding,
     Injector,
-    Input, NgZone,
+    Input,
+    NgZone,
     OnChanges,
     OnDestroy,
     OnInit,
@@ -21,6 +23,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { MdsEditorCardComponent } from '../mds-editor-card/mds-editor-card.component';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
@@ -28,18 +31,21 @@ import {
     Constraints,
     InputStatus,
     MdsEditorWidgetComponent,
-    MdsView, MdsWidget,
+    MdsView,
+    MdsWidget,
     MdsWidgetType,
     NativeWidgetType,
     Values,
 } from '../types';
 import { MdsEditorWidgetAuthorComponent } from '../widgets/mds-editor-widget-author/mds-editor-widget-author.component';
+import { MdsEditorWidgetAuthorityComponent } from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { MdsEditorWidgetCheckboxComponent } from '../widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
 import { MdsEditorWidgetCheckboxesComponent } from '../widgets/mds-editor-widget-checkboxes/mds-editor-widget-checkboxes.component';
 import { MdsEditorWidgetChildobjectsComponent } from '../widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
 import { MdsEditorWidgetChipsComponent } from '../widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
 import { MdsEditorWidgetDurationComponent } from '../widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
 import { MdsEditorWidgetErrorComponent } from '../widgets/mds-editor-widget-error/mds-editor-widget-error.component';
+import { MdsEditorWidgetFacetListComponent } from '../widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
 import { MdsEditorWidgetFileUploadComponent } from '../widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 import { MdsEditorWidgetLicenseComponent } from '../widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 import { MdsEditorWidgetLinkComponent } from '../widgets/mds-editor-widget-link/mds-editor-widget-link.component';
@@ -51,10 +57,7 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/mds-editor-widget-text.component';
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {MdsEditorWidgetAuthorityComponent} from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { ViewInstanceService } from './view-instance.service';
-import { MdsEditorWidgetFacetListComponent } from '../widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
-import {MdsWidgetComponent} from '../../mds-viewer/widget/mds-widget.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -325,7 +328,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     widgetName,
                     widget,
                 },
-                {replace: false},
+                { replace: false },
                 this.injector,
             );
             this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance, this.view.id);
@@ -353,7 +356,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                         widgetName: widget.definition.caption,
                         reason: `Widget for type ${widget.definition.type} is not implemented`,
                     },
-                    {replace: false},
+                    { replace: false },
                     this.injector,
                 );
                 return;
@@ -368,7 +371,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 {
                     widget,
                 },
-                {replace: false},
+                { replace: false },
                 this.injector,
             );
         });
@@ -377,7 +380,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     private getWidgetComponent(widget: Widget): Type<object> {
         if (this.view.rel === 'suggestions') {
             return MdsEditorViewComponent.suggestionWidgetComponents[widget.definition.type];
-        } else if(widget.definition.interactionType === 'None') {
+        } else if (widget.definition.interactionType === 'None') {
             return MdsWidgetComponent;
         } else {
             return MdsEditorViewComponent.widgetComponents[widget.definition.type];

@@ -102,7 +102,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
         private hasUnsavedDefault: boolean; // fixed after `ready`
         private initialValues: InitialValues;
-        private initialDisplayValues : MdsValueList;
+        private initialDisplayValues: MdsValueList;
         private readonly value$ = new BehaviorSubject<string[]>(null);
         private isDirty = false;
         /**
@@ -431,22 +431,29 @@ export class MdsEditorInstanceService implements OnDestroy {
                     this.mdsEditorInstanceService.mdsId,
                     this.repositoryId,
                 )
-                .pipe(map(({ values }) => {
-                    return values.map((v) => {
-                        return {
-                            id: v.key,
-                            caption: v.displayString ?? v.key,
-                        };
-                    });
-                }))
+                .pipe(
+                    map(({ values }) => {
+                        return values.map((v) => {
+                            return {
+                                id: v.key,
+                                caption: v.displayString ?? v.key,
+                            };
+                        });
+                    }),
+                )
                 .toPromise();
         }
 
         public getValuesForKeys(keys: string[]) {
-             const mdsvl = this.mdsEditorInstanceService.restMdsService
-                .getValuesForKeys(keys,this.mdsEditorInstanceService.mdsId,
-                    RestConstants.DEFAULT_QUERY_NAME,this.definition.id,
-                    RestConstants.HOME_REPOSITORY).toPromise();
+            const mdsvl = this.mdsEditorInstanceService.restMdsService
+                .getValuesForKeys(
+                    keys,
+                    this.mdsEditorInstanceService.mdsId,
+                    RestConstants.DEFAULT_QUERY_NAME,
+                    this.definition.id,
+                    RestConstants.HOME_REPOSITORY,
+                )
+                .toPromise();
             return mdsvl;
         }
 
@@ -541,7 +548,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restConnector: RestConnectorService,
         private searchService: SearchService,
     ) {
-        this.mdsInflated.subscribe((mdsInflated) => this.mdsInflatedValue = mdsInflated);
+        this.mdsInflated.subscribe((mdsInflated) => (this.mdsInflatedValue = mdsInflated));
         // TODO: register all dynamic properties via observable pipes as done here. This way, new
         // properties can easily be derived from existing ones without having to get all the points
         // right where we have to call the respective `updateX` methods.
@@ -700,10 +707,15 @@ export class MdsEditorInstanceService implements OnDestroy {
         await this.initMds(groupId, mdsId, undefined, this.nodes$.value);
         for (const widget of this.widgets.value) {
             widget.initWithNodes(this.nodes$.value);
-            if ((widget.definition.type === MdsWidgetType.MultiValueFixedBadges)
-                && !widget.definition.values && widget.getInitialValues().jointValues) {
-                const mdsValueList = await widget.getValuesForKeys( widget.getInitialValues().jointValues);
-                if(mdsValueList) {
+            if (
+                widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
+                !widget.definition.values &&
+                widget.getInitialValues().jointValues
+            ) {
+                const mdsValueList = await widget.getValuesForKeys(
+                    widget.getInitialValues().jointValues,
+                );
+                if (mdsValueList) {
                     widget.setInitialDisplayValues(mdsValueList);
                 }
             }
@@ -886,7 +898,11 @@ export class MdsEditorInstanceService implements OnDestroy {
                 const property = widget.definition.id;
                 const newValue = this.getNewPropertyValue(widget, node?.properties[property]);
                 // filter null values in search
-                if(this.editorMode === 'search' && newValue?.length === 1 && newValue[0] === null) {
+                if (
+                    this.editorMode === 'search' &&
+                    newValue?.length === 1 &&
+                    newValue[0] === null
+                ) {
                     return acc;
                 } else if (newValue) {
                     if (widget.definition.type === MdsWidgetType.Range) {
@@ -987,13 +1003,12 @@ export class MdsEditorInstanceService implements OnDestroy {
         return group.views.map((viewId) => mdsDefinition.views.find((v) => v.id === viewId));
     }
 
-    createWidget(widgetDefinition: MdsWidget, viewId: string, repository = RestConstants.HOME_REPOSITORY) {
-        return new MdsEditorInstanceService.Widget(
-            this,
-            widgetDefinition,
-            viewId,
-            repository
-        );
+    createWidget(
+        widgetDefinition: MdsWidget,
+        viewId: string,
+        repository = RestConstants.HOME_REPOSITORY,
+    ) {
+        return new MdsEditorInstanceService.Widget(this, widgetDefinition, viewId, repository);
     }
 
     private async generateWidgets(
@@ -1221,10 +1236,13 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     /** Wether the given widget needs facet values for its property to be passed to `mds-editor`. */
     private needsFacets(widget: Widget): boolean {
-        return widget.relation === 'suggestions' || [
-            'facetList',
-            // Add any widget types that need facet values to this list.
-        ].includes(widget.definition.type);
+        return (
+            widget.relation === 'suggestions' ||
+            [
+                'facetList',
+                // Add any widget types that need facet values to this list.
+            ].includes(widget.definition.type)
+        );
     }
 }
 

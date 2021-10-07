@@ -1,8 +1,13 @@
-import {Injectable} from '@angular/core';
-import {forkJoin} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {Node, RestConstants, RestMdsService, RestNodeService,} from '../../../core-module/core.module';
-import {MdsDefinition, MdsType, Values} from './types';
+import { Injectable } from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
+import {
+    Node,
+    RestConstants,
+    RestMdsService,
+    RestNodeService,
+} from '../../../core-module/core.module';
+import { MdsDefinition, MdsType, Values } from './types';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -65,8 +70,8 @@ export class MdsEditorCommonService {
                 node.ref.id,
                 file,
                 versionComment || RestConstants.COMMENT_CONTENT_UPDATE,
-            ).pipe(
-            map((r) => null))
+            )
+            .pipe(map((r) => null))
             .toPromise();
     }
 
@@ -84,7 +89,10 @@ export class MdsEditorCommonService {
         if (!areAllEqual(requestedMdsIds)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_MDS_COMBINATION');
         }
-        if(nodes.filter((n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]).length > 0) {
+        if (
+            nodes.filter((n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]).length >
+            0
+        ) {
             throw new UserPresentableError('MDS.ERROR_ELEMENT_TYPE_UNSUPPORTED');
         }
         return requestedMdsIds[0];
@@ -101,7 +109,7 @@ export class MdsEditorCommonService {
     getGroupId(nodes: Node[]): MdsType {
         const node = nodes[0];
         let nodeGroup: MdsType = node.isDirectory ? MdsType.Map : MdsType.Io;
-        if(node.mediatype == 'folder-link') {
+        if (node.mediatype == 'folder-link') {
             nodeGroup = MdsType.MapRef;
         }
         if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {

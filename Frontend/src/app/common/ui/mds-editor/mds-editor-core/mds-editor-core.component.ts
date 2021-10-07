@@ -1,9 +1,9 @@
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { CardComponent } from '../../../../core-ui-module/components/card/card.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../types';
-import {CardComponent} from '../../../../core-ui-module/components/card/card.component';
 
 @Component({
     selector: 'app-mds-editor-core',
@@ -11,10 +11,9 @@ import {CardComponent} from '../../../../core-ui-module/components/card/card.com
     styleUrls: ['./mds-editor-core.component.scss'],
 })
 export class MdsEditorCoreComponent {
-    /**
-     * reference to the card component it is embedded in (if any)
-     */
+    /** Reference to the card component it is embedded in (if any). */
     @Input('card') card: CardComponent;
+
     views: MdsView[];
     suggestionsViews: MdsView[];
     hasExtendedWidgets$: Observable<boolean>;
@@ -25,9 +24,15 @@ export class MdsEditorCoreComponent {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());
-        this.hasExtendedWidgets$ = this.mdsEditorInstance.widgets.pipe(map((widgets) =>
-            widgets.some((widget) => widget.definition.isExtended === 'true' || widget.definition.isExtended === true),
-        ));
+        this.hasExtendedWidgets$ = this.mdsEditorInstance.widgets.pipe(
+            map((widgets) =>
+                widgets.some(
+                    (widget) =>
+                        widget.definition.isExtended === 'true' ||
+                        widget.definition.isExtended === true,
+                ),
+            ),
+        );
     }
 
     clear(): void {
