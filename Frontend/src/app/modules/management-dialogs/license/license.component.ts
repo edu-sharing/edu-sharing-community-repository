@@ -19,12 +19,16 @@ import {Helper} from '../../../core-module/rest/helper';
 import {MdsEditorWidgetAuthorComponent} from '../../../common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import {MdsEditorInstanceService} from '../../../common/ui/mds-editor/mds-editor-instance.service';
 import {UserPresentableError, Values} from '../../../common/ui/mds-editor/types';
+import {ViewInstanceService} from '../../../common/ui/mds-editor/mds-editor-view/view-instance.service';
 
 @Component({
     selector: 'workspace-license',
     templateUrl: 'license.component.html',
     styleUrls: ['license.component.scss'],
-    providers: [MdsEditorInstanceService],
+    providers: [
+        MdsEditorInstanceService,
+        ViewInstanceService
+    ],
     animations: [
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
