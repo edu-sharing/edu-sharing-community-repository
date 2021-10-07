@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import javax.ws.rs.QueryParam;
 import java.util.List;
@@ -14,6 +15,7 @@ public class SearchParametersFacets {
     Integer facetMinCount;
     Integer facetLimit;
     String facetSuggest;
+    private List<MdsQueryCriteria> criterias;
 
     @ApiModelProperty(required = true, value = "")
     @JsonProperty("facettes")
@@ -34,4 +36,14 @@ public class SearchParametersFacets {
     @JsonProperty("facetSuggest")
     public String getFacetSuggest() { return facetSuggest; }
     public void setFacetSuggest(String facetSuggest) { this.facetSuggest = facetSuggest; }
+
+    @ApiModelProperty(required = true, value = "")
+    @JsonProperty("criterias")
+    public List<MdsQueryCriteria> getCriterias() {
+        return criterias;
+    }
+
+    public void setCriterias(List<MdsQueryCriteria> criterias) {
+        this.criterias = criterias;
+    }
 }

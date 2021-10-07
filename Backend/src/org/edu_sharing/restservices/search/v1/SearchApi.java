@@ -163,7 +163,7 @@ public class SearchApi {
 					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 
-			return Response.status(Response.Status.OK).entity(NodeDao.searchFacettes(repoDao,mdsDao,query,token)).build();
+			return Response.status(Response.Status.OK).entity(NodeDao.searchFacettes(repoDao,mdsDao,query,parameters.getCriterias(),token)).build();
 
 		}  catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

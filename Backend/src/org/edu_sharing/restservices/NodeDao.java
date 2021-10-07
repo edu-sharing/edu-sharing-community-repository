@@ -217,6 +217,7 @@ public class NodeDao {
 	}
 
 	public static Map<String, Map<String, Integer>> searchFacettes(RepositoryDao repoDao, MdsDaoV2 mdsDao, String query,
+																   List<MdsQueryCriteria> criterias,
 																   SearchToken token) throws DAOException {
 		SearchService ss=SearchServiceFactory.getSearchService(repoDao.getId());
 		if(!(ss instanceof SearchServiceElastic)){
@@ -225,7 +226,8 @@ public class NodeDao {
 		}
 		SearchServiceElastic searchService = (SearchServiceElastic)ss;
 		try {
-			return searchService.searchFacets(mdsDao.getMds(), query, token);
+			Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
+			return searchService.searchFacets(mdsDao.getMds(), query, criteriasMap, token);
 		}catch (Throwable e){
 			throw DAOException.mapping(e);
 		}

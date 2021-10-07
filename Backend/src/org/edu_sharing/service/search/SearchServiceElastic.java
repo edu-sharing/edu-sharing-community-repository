@@ -153,7 +153,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return audienceQueryBuilder;
     }
 
-    public Map<String, Map<String, Integer>> searchFacets(MetadataSetV2 mds, String query, SearchToken searchToken) throws Throwable {
+    public Map<String, Map<String, Integer>> searchFacets(MetadataSetV2 mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
         Map<String, Map<String, Integer>> facetsResult = new HashMap<>();
         BoolQueryBuilder globalConditions = getGlobalConditions(searchToken);
 
@@ -162,7 +162,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(
                 mds,
                 queryData,
-                new HashMap<>(),
+                criterias,
                 searchToken.getFacettes(),
                 excludeOwnFacets,
                 globalConditions,
