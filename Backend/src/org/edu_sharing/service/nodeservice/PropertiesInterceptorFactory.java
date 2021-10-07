@@ -36,7 +36,11 @@ public class PropertiesInterceptorFactory {
         propertiesContext.setProperties(properties);
         propertiesContext.setAspects(aspects);
         propertiesContext.setNodeRef(nodeRef);
-        String requestURI = Context.getCurrentInstance().getRequest().getRequestURI();
+
+        String requestURI = "";
+        if(Context.getCurrentInstance() != null) {
+            requestURI = Context.getCurrentInstance().getRequest().getRequestURI();
+        }
         if(requestURI.contains("rest/search")){
             propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Search);
         }else if(requestURI.contains("components/render")
