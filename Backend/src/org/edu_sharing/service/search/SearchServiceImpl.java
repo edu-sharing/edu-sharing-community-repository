@@ -672,7 +672,7 @@ public class SearchServiceImpl implements SearchService {
 		HashMap<ContentType, SearchToken> lastTokens = getLastSearchTokens();
 		lastTokens.put(searchToken.getContentType(),searchToken);
 		Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
-
+		List<String> facettes = searchToken.getFacettes();
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
@@ -726,9 +726,13 @@ public class SearchServiceImpl implements SearchService {
 			}
 
 			List<String> facettes = searchToken.getFacettes();
+
 			if (facettes != null && facettes.size() > 0) {
 				for (String facetteProp : facettes) {
-					String fieldFacette = "@" + facetteProp;
+					String fieldFacette = facetteProp;
+					if(!fieldFacette.startsWith("@")) {
+						fieldFacette = "@" + facetteProp;
+					}
 					FieldFacet fieldFacet = new FieldFacet(fieldFacette);
 					fieldFacet.setLimit(searchToken.getFacettesLimit());
 					fieldFacet.setMinCount(searchToken.getFacettesMinCount());
@@ -765,12 +769,12 @@ public class SearchServiceImpl implements SearchService {
 			// process facette
 			if (facettes != null && facettes.size() > 0) {
 				Map<String, Map<String, Integer>> newCountPropsMap = new HashMap<String, Map<String, Integer>>();
-				for (String facetteProp : facettes) {
-					Map<String, Integer> resultPairs = newCountPropsMap.get(facetteProp);
+				for (FieldFacet facetteProp : searchParameters.getFieldFacets()) {
+					Map<String, Integer> resultPairs = newCountPropsMap.get(facetteProp.getField());
 					if (resultPairs == null) {
 						resultPairs = new HashMap<String, Integer>();
 					}
-					String fieldFacette = "@" + facetteProp;
+					String fieldFacette = facetteProp.getField();
 
 					List<Pair<String, Integer>> facettPairs = resultSet.getFieldFacet(fieldFacette);
 					Integer subStringCount = null;
@@ -794,10 +798,16 @@ public class SearchServiceImpl implements SearchService {
 						}
 					}
 
-					if (resultPairs.size() > 0)
-						newCountPropsMap.put(facetteProp, resultPairs);
+					if (resultPairs.size() > 0) {
+						String prop = facetteProp.getField();
+						if(prop.startsWith("@")) {
+							prop = prop.substring(1);
+						}
+						newCountPropsMap.put(prop, resultPairs);
+					}
 				}
-				sr.setCountedProps(newCountPropsMap);
+
+				sr.setCountedProps(searchToken.aggregateFacettes(newCountPropsMap));
 
 			}
 			SearchLogger.logSearch(searchToken,sr);
