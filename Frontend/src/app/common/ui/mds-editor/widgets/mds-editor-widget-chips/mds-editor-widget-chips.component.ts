@@ -80,13 +80,13 @@ export class MdsEditorWidgetChipsComponent
     ngOnInit(): void {
         this.chipsControl = new FormControl(
             [
-                ...this.widget.getInitialValues().jointValues,
-                ...(this.widget.getInitialValues().individualValues ?? []),
+                ...this.widget.getInitialValues()?.jointValues ?? [],
+                ...(this.widget.getInitialValues()?.individualValues ?? []),
             ].map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),
         );
         this.indeterminateValues$ = new BehaviorSubject(
-            this.widget.getInitialValues().individualValues,
+            this.widget.getInitialValues()?.individualValues,
         );
         if (
             this.widget.definition.type === MdsWidgetType.MultiValueBadges ||

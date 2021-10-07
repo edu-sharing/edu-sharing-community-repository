@@ -136,7 +136,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
-            this.connector.logoutSync();
+            this.connector.logout().toPromise();
         }
     }
     @HostListener('window:scroll', ['$event'])
