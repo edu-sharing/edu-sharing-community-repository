@@ -75,7 +75,13 @@
     *ngIf="suggestions$ | async as suggestions"
     cdkTrapFocus
   >
-    <ng-container *ngFor="let category of categories$ | async">
+    <app-mds-editor
+      *ngIf="mdsInfo$ | async as mdsInfo"
+      [repository]="mdsInfo.repository"
+      [metadataSet]="mdsInfo.metadataSet"
+      group="search_input"
+    ></app-mds-editor>
+    <!-- <ng-container *ngFor="let category of categories$ | async">
       <div class="suggestion-group" *ngIf="suggestions[category.property]?.values.length > 0">
         <label class="category-label">{{ category.label }}</label>
         <mat-chip-list>
@@ -91,6 +97,6 @@
           </mat-chip>
         </mat-chip-list>
       </div>
-    </ng-container>
+    </ng-container> -->
   </div>
 </ng-template>

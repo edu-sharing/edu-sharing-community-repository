@@ -47,7 +47,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     readonly categories$ = this.searchField.categories$;
     readonly suggestions$ = this.searchField.suggestions$;
     showOverlay = false;
-    hasSuggestions = false;
+    hasSuggestions = true;
     readonly overlayPositions: ConnectedPosition[] = [
         {
             originX: 'center',
@@ -58,6 +58,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             overlayY: 'top',
         },
     ];
+    readonly mdsInfo$ = this.searchField.mdsInfo$;
 
     private readonly destroyed$ = new Subject<void>();
 
@@ -65,17 +66,17 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.searchField.setEnableFiltersAndSuggestions(this.enableFiltersAndSuggestions);
-        this.searchField.updateSuggestions(this.inputControl.value);
-        this.inputControl.valueChanges.subscribe((inputString) => {
-            this.searchField.updateSuggestions(inputString);
-            this.searchStringChange.emit(inputString);
-        });
-        this.suggestions$
-            .pipe(
-                takeUntil(this.destroyed$),
-                map((suggestions) => this.getHasSuggestions(suggestions)),
-            )
-            .subscribe((hasSuggestions) => (this.hasSuggestions = hasSuggestions));
+        // this.searchField.updateSuggestions(this.inputControl.value);
+        // this.inputControl.valueChanges.subscribe((inputString) => {
+        //     this.searchField.updateSuggestions(inputString);
+        //     this.searchStringChange.emit(inputString);
+        // });
+        // this.suggestions$
+        //     .pipe(
+        //         takeUntil(this.destroyed$),
+        //         map((suggestions) => this.getHasSuggestions(suggestions)),
+        //     )
+        //     .subscribe((hasSuggestions) => (this.hasSuggestions = hasSuggestions));
     }
 
     ngOnDestroy(): void {

@@ -10,7 +10,7 @@ import {
     SearchService,
 } from 'edu-sharing-api';
 import { BehaviorSubject, EMPTY, Observable, of, ReplaySubject, Subject, timer } from 'rxjs';
-import { debounce, map, shareReplay, switchMap } from 'rxjs/operators';
+import { debounce, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 export interface Category {
     property: string;
@@ -44,6 +44,10 @@ export class SearchFieldService {
     private readonly suggestionsInputStringSubject = new ReplaySubject<string>(1);
     private readonly filtersSubject = new BehaviorSubject<LabeledValuesDict>({});
     private readonly enableFiltersAndSuggestionsSubject = new BehaviorSubject(false);
+
+    readonly mdsInfo$ = this.searchConfigSubject.pipe(
+        filter((config): config is SearchConfig => !!config.repository && !!config.metadataSet),
+    );
 
     constructor(private search: SearchService, private mdsLabel: MdsLabelService) {
         this.searchConfigSubject.subscribe((searchConfig) => this.search.configure(searchConfig));

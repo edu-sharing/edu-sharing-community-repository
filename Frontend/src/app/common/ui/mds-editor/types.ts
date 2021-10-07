@@ -15,10 +15,17 @@ export class UserPresentableError extends Error {
 }
 
 /**
- * - `nodes`: Supports bulk, only returns changed values
- * - `search`: No bulk, all values returned, Trees sub-children are auto-selected if root is
- *   selected, required errors and -warnings are disabled
- * - `form`: No bulk, all values returned
+ * - `nodes`:
+ *   - Supports bulk.
+ *   - Returns only changed values.
+ * - `search`:
+ *   - No bulk.
+ *   - All values returned.
+ *   - Trees sub-children are auto-selected if root is selected.
+ *   - Required errors and -warnings are disabled.
+ * - `form`:
+ *   - No bulk.
+ *   - All values returned.
  */
 export type EditorMode = 'nodes' | 'search' | 'form';
 
