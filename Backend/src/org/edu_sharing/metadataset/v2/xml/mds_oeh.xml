@@ -343,6 +343,17 @@
 		]]></html>
 		</template>
 		<template>
+			<id>search_input</id>
+			<rel>suggestions</rel>
+			<html><![CDATA[
+			  <<ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalcontext>
+		  	  <ccm:educationalintendedenduserrole>
+		      <ccm:educationallearningresourcetype>
+				]]></html>
+		</template>
+		<template>
 			<id>search_suggestions</id>
 			<rel>suggestions</rel>
 			<html><![CDATA[
