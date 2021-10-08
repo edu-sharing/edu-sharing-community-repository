@@ -214,7 +214,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
             return false;
         }
-        boolean result = ((SearchServiceElastic)providerByApp.getSearchService()).hasReadPermissionOnNode(nodeId);
+        boolean result = ((SearchServiceElastic)providerByApp.getSearchService()).isAllowedToRead(nodeId);
         logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
         return result;
     }
