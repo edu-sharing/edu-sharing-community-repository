@@ -80,6 +80,7 @@ import {
 import {DataSource} from '@angular/cdk/collections';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {
+    DropSource, DropTarget,
     ListEventInterface, ListSortConfig, NodeEntriesDisplayType,
     NodeEntriesWrapperComponent
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
@@ -546,18 +547,21 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     getScopeInfo() {
         return this.nodeHelper.getCollectionScopeInfo(this.collectionContent.node);
     }
-    dropOnCollection(event: any) {
-        console.log(event);
-        const target = event.target;
-        const source = event.source[0];
+    dropOnRef = (target: Node, source: DropSource<Node>) => {
+        return;
+    }
+    dropOnCollection = (target: Node, source: DropSource<Node>) => {
+        if(source.element[0] === target) {
+            return;
+        }
         this.toast.showProgressDialog();
-        if (source.mediatype === 'collection') {
-            if (event.type === 'copy') {
+        if (source.element[0].mediatype === 'collection') {
+            if (source.mode === 'copy') {
                 this.toast.error(null, 'INVALID_OPERATION');
                 this.toast.closeModalDialog();
                 return;
             }
-            this.nodeService.moveNode(target?.ref?.id || RestConstants.COLLECTIONHOME, source.ref.id).subscribe(
+            this.nodeService.moveNode(target?.ref?.id || RestConstants.COLLECTIONHOME, source.element[0].ref.id).subscribe(
                 () => {
                     this.toast.closeModalDialog();
                     this.refreshContent();
@@ -573,17 +577,17 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                 this.collectionService,
                 this.router,
                 this.bridge,
-                event.target,
-                event.source,
+                target,
+                source.element,
                 false,
                 nodes => {
-                    if (event.type === 'copy') {
+                    if (source.mode === 'copy') {
                         this.toast.closeModalDialog();
                         this.refreshContent();
                         return;
                     }
-                    if (event.source.length === nodes.length) {
-                        const observables = event.source.map((n: any) =>
+                    if (source.element.length === nodes.length) {
+                        const observables = source.element.map((n: any) =>
                             this.collectionService.removeFromCollection(
                                 n.ref.id,
                                 this.collectionContent.node.ref.id,
@@ -623,48 +627,47 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         );
     }
 
-    canDropOnCollection = (event: DropData) => {
+    canDropOnCollection = (target: DropTarget, source: DropSource<Node>) => {
         // drop to "home"
-        if(event.target === 'HOME') {
-            return event.dropAction === 'move' &&
-                event.nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1 &&
-                this.nodeHelper.getNodesRight(event.nodes, RestConstants.ACCESS_WRITE);
+        if(target === 'MY_FILES') {
+            return source.mode === 'move' &&
+                source.element[0].aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1 &&
+                this.nodeHelper.getNodesRight(source.element, RestConstants.ACCESS_WRITE);
         }
-        console.log(event);
-        if (event.nodes[0].ref.id === event.target.ref.id) {
+        if (source.element[0].ref.id === (target as Node).ref.id) {
             return false;
         }
-        if (event.target.ref.id === this.collectionContent.node.ref.id) {
+        if ((target as Node).ref.id === this.collectionContent.node.ref.id) {
             return false;
         }
-        if(event.nodes[0].collection && event.dropAction === 'copy') {
+        if(source.element[0].collection && source.mode === 'copy') {
             return false;
         }
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
-        if (event.nodes[0].collection?.hasOwnProperty('childCollectionsCount')) {
+        if (source.element[0].collection?.hasOwnProperty('childCollectionsCount')) {
             if (
-                (event.nodes[0].collection.type ===
+                (source.element[0].collection.type ===
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.collection.type !==
+                    (target as Node).collection.type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL) ||
-                (event.nodes[0].collection.type !==
+                (source.element[0].collection.type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.collection.type ===
+                    (target as Node).collection.type ===
                     RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }
         }
         if (
-            event.dropAction === 'copy' &&
+            source.mode === 'copy' &&
             !this.nodeHelper.getNodesRight(
-                event.nodes,
+                source.element,
                 RestConstants.ACCESS_CC_PUBLISH,
                 NodesRightMode.Original,
             )
-            || event.dropAction === 'move' &&
+            || source.mode === 'move' &&
             !this.nodeHelper.getNodesRight(
-                event.nodes,
+                source.element,
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Original,
             )
@@ -674,7 +677,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
 
         if (
             !this.nodeHelper.getNodesRight(
-                [event.target],
+                [target],
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Local,
             )
@@ -685,7 +688,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         return true;
     };
 
-    canDropOnRef(event: DropData) {
+    canDropOnRef(target: Node, source: DropSource<Node>) {
         // do not allow to drop here
         return false;
     }

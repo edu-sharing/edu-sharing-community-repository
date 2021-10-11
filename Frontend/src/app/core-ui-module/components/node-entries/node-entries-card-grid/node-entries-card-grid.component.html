@@ -30,7 +30,6 @@
 <dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
 <ul *ngIf="entriesService.sort?.customSortingInProgress"
     class="card-grid card-grid-reorder"
-    cdkDropListGroup
 >
   <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
     <div
@@ -71,10 +70,12 @@
       class="card-grid"
       #grid
       infiniteScroll
-      cdkDropListGroup
       (dragleave)="dragExit($event)"
       (scrolled)="loadData()"
   >
+    <ng-container
+      *ngTemplateOutlet="globalOptions"
+    ></ng-container>
     <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
       <div
         class="card-grid-drag-wrapper"
@@ -82,8 +83,8 @@
         role="none"
         cdkDropList
         cdkDropListOrientation="vertical"
-        [class.card-grid-drop-allowed]="dragDropState?.element === node && dragDropState.dropAllowed"
-        [class.card-grid-drop-blocked]="dragDropState?.element === node && !dragDropState.dropAllowed"
+        [class.card-grid-drop-allowed]="getDragState()?.element === node && getDragState()?.dropAllowed"
+        [class.card-grid-drop-blocked]="getDragState()?.element === node && !getDragState()?.dropAllowed"
         [cdkDropListData]="node"
         [cdkDropListSortingDisabled]="true"
         (cdkDropListEntered)="dragEnter($event)"
@@ -98,7 +99,6 @@
           cdkDrag
           [cdkDragData]="node"
           appDragCursor
-          [dragState]="dragDropState"
         ></app-node-entries-card>
         <app-node-entries-card-small
           *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
@@ -108,13 +108,13 @@
           [cdkDragData]="node"
           appDragCursor
         ></app-node-entries-card-small>
-        <div *ngIf="dragDropState?.element === node && !dragDropState.dropAllowed"
+        <div *ngIf="getDragState()?.element === node && !getDragState().dropAllowed"
              class="card-grid-drop-blocked-container">
           <i icon="cancel"></i>
         </div>
-        <div *ngIf="dragDropState?.element === node && dragDropState.dropAllowed"
+        <div *ngIf="getDragState()?.element === node && getDragState().dropAllowed"
              class="card-grid-drop-allowed-container">
-          <i [icon]="dragDropState.mode === 'copy' ? 'add_circle_outline' : 'archive'"></i>
+          <i [icon]="getDragState().mode === 'copy' ? 'add_circle_outline' : 'archive'"></i>
         </div>
       </div>
     </ng-container>
@@ -128,20 +128,9 @@
   <spinner></spinner>
 </ng-template>
 <ng-template #list>
-  <li *ngIf="entriesService.globalOptions?.length"
-      class="global-options"
-      [class.global-options-small]="displayType === NodeEntriesDisplayType.SmallGrid"
-  >
-    <button
-      mat-button
-      *ngFor="let option of entriesService.globalOptions"
-      (click)="option.callback()"
-      class="global-option-btn">
-      <ng-container
-        *ngTemplateOutlet="globalOption; context: {option}"
-      ></ng-container>
-    </button>
-  </li>
+  <ng-container
+    *ngTemplateOutlet="globalOptions"
+  ></ng-container>
   <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
     <ng-container *ngIf="displayType === NodeEntriesDisplayType.SmallGrid">
       <app-node-entries-card-small
@@ -171,6 +160,22 @@
   </div>
   -->
 
+</ng-template>
+<ng-template #globalOptions>
+  <li *ngIf="entriesService.globalOptions?.length"
+      class="global-options"
+      [class.global-options-small]="displayType === NodeEntriesDisplayType.SmallGrid"
+  >
+    <button
+      mat-button
+      *ngFor="let option of entriesService.globalOptions"
+      (click)="option.callback()"
+      class="global-option-btn">
+      <ng-container
+        *ngTemplateOutlet="globalOption; context: {option}"
+      ></ng-container>
+    </button>
+  </li>
 </ng-template>
 <ng-template #globalOption let-option="option">
   <div class="global-option">

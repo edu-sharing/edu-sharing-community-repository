@@ -8,13 +8,14 @@ import {
     TemplateRef, ViewChild
 } from '@angular/core';
 import {NodeEntriesService} from '../../../node-entries.service';
-import {Node} from '../../../../core-module/rest/data-object';
+import {ListItemSort, Node} from '../../../../core-module/rest/data-object';
 import {SortEvent} from '../../sort-dropdown/sort-dropdown.component';
 import {$e} from 'codelyzer/angular/styles/chars';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray} from '@angular/cdk/drag-drop';
 import {NodeEntriesDisplayType} from '../../node-entries-wrapper/node-entries-wrapper.component';
-import {DragDropState} from '../../../directives/drag-cursor.directive';
+import {DragCursorDirective, DragDropState} from '../../../directives/drag-cursor.directive';
 import {Target} from '../../../option-item';
+import {RestConstants} from '../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'app-node-entries-card-grid',
@@ -28,10 +29,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     @ViewChild('grid') gridRef: ElementRef;
     @Input() displayType: NodeEntriesDisplayType;
 
-    dragDropState: DragDropState<T> = {
-        element: null,
-        dropAllowed: false
-    };
     constructor(
         public entriesService: NodeEntriesService<T>,
     ) {
@@ -85,7 +82,13 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     }
 
     getSortColumns() {
-        return this.entriesService.sort.columns.filter((c) => this.entriesService.columns.some(
+        return this.entriesService.sort?.columns?.filter((c) =>
+            this.entriesService.columns.concat(
+                new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),
+                new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
+                new ListItemSort('NODE', RestConstants.CM_NAME),
+                new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE)
+            ).some(
             (c2) => c2.name === c.name)
         );
     }
@@ -94,23 +97,27 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         const allowed = this.entriesService.dragDrop.dropAllowed?.(drag.container.data, {
             element: [drag.item.data],
             sourceList: this.entriesService.list,
-            mode: this.dragDropState.mode
+            mode: DragCursorDirective.dragState.mode
         });
-        this.dragDropState.element = drag.container.data;
-        this.dragDropState.dropAllowed = allowed;
+        DragCursorDirective.dragState.element = drag.container.data;
+        DragCursorDirective.dragState.dropAllowed = allowed;
     }
 
     drop(drop: CdkDragDrop<T, any>) {
         this.entriesService.dragDrop.dropped(drop.container.data,{
             element: [drop.item.data],
             sourceList: this.entriesService.list,
-            mode: this.dragDropState.mode
+            mode: DragCursorDirective.dragState.mode
         });
-        this.dragDropState.element = null;
+        DragCursorDirective.dragState.element = null;
     }
 
     dragExit(exit: CdkDragExit<T>|any) {
         console.log(exit);
-        this.dragDropState.element = null
+        DragCursorDirective.dragState.element = null
+    }
+
+    getDragState() {
+        return DragCursorDirective.dragState;
     }
 }

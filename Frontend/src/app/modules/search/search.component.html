@@ -72,7 +72,7 @@
                   class="pointed filtertoggler"
                 >
                   <span id="extended-search-label">{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
-                  <span class="mobile" *ngIf="!selection || !selection.length">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
+                  <span class="mobile" *ngIf="!getSelection() || !getSelection()?.length">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
                   <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i>
                 </button>
             </div>

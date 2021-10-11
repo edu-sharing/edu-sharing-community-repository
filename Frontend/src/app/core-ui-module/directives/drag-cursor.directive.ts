@@ -19,9 +19,12 @@ export type DragDropState<T extends Node> = {
  * Must be used in cominbation with cdkDrag
  */
 export class DragCursorDirective implements OnInit, OnDestroy {
+    static dragState: DragDropState<Node|any> = {
+        element: null,
+        dropAllowed: false
+    };
     private unsubscribe$: Subject<void> = new Subject();
     private dragging = false;
-    @Input() dragState: DragDropState<Node>;
     private interval: number;
     constructor(
         private cdkDrag: CdkDrag,
@@ -30,13 +33,13 @@ export class DragCursorDirective implements OnInit, OnDestroy {
 
     keyDownListener = (e: KeyboardEvent) => {
         if (e.key === 'Control' || e.keyCode == 91 || e.keyCode == 93) {
-            this.dragState.mode = 'copy';
+            DragCursorDirective.dragState.mode = 'copy';
             this.updateCursor();
         }
     }
     keyUpListener = (e: KeyboardEvent) => {
         if (e.key === 'Control' || e.keyCode == 91 || e.keyCode == 93) {
-            this.dragState.mode = 'move';
+            DragCursorDirective.dragState.mode = 'move';
             this.updateCursor();
         }
     }
@@ -70,9 +73,9 @@ export class DragCursorDirective implements OnInit, OnDestroy {
 
     private updateCursor() {
         if (this.dragging) {
-            document.body.style.cursor = this.dragState?.dropAllowed ?
-                this.dragState?.element ?
-                    this.dragState?.mode === 'copy' ? 'copy' : 'default'
+            document.body.style.cursor = DragCursorDirective.dragState?.dropAllowed ?
+                DragCursorDirective.dragState?.element ?
+                    DragCursorDirective.dragState?.mode === 'copy' ? 'copy' : 'default'
                     : null
                 : 'no-drop';
         } else {

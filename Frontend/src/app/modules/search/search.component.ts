@@ -139,7 +139,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     set mdsId(mdsId: string) {
         this._mdsId = mdsId;
     }
-    selection: Node[];
     extendedRepositorySelected = false;
     savedSearch: Node[] = [];
     savedSearchColumns: ListItem[] = [];
@@ -383,7 +382,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     updateSelection(selection: Node[]) {
-        this.selection = selection;
+        this.nodeEntriesResults.getSelection().clear();
+        this.nodeEntriesResults.getSelection().select(...selection);
         this.setFixMobileNav();
     }
 
@@ -940,7 +940,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private addToStream(node: Node) {
-        let nodes = ActionbarHelperService.getNodes(this.selection, node);
+        let nodes = ActionbarHelperService.getNodes(this.getSelection(), node);
         this.addNodesStream = nodes;
     }
 
@@ -965,7 +965,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.globalProgress = true;
         RestHelper.addToStore(selection, this.bridge, this.iam, () => {
             this.globalProgress = false;
-            this.updateSelection([]);
+            this.nodeEntriesResults.getSelection().clear();
             this.mainNavRef.refreshNodeStore();
         });
     }
@@ -1045,7 +1045,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private getCurrentNode(node: Node) {
-        return node ? node : this.selection[0];
+        return node ? node : this.getSelection()[0];
     }
 
     private searchRepository(
@@ -1432,7 +1432,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 if (param.addToCollection) {
                     const addTo = new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT','layers', (node) => {
                         this.mainNavRef.management.addToCollectionList(this.addToCollection,
-                            ActionbarHelperService.getNodes(this.selection,node), true, () => {
+                            ActionbarHelperService.getNodes(this.getSelection(),node), true, () => {
                                 this.switchToCollections(this.addToCollection.ref.id);
                             });
                     });
@@ -1608,7 +1608,11 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private setFixMobileNav() {
         this.mainNavRef.setFixMobileElements(
             this.searchService.sidenavOpened ||
-                (this.selection && this.selection.length > 0),
+                (this.getSelection()?.length > 0),
         );
+    }
+
+    getSelection() {
+        return this.nodeEntriesResults?.getSelection()?.selected;
     }
 }

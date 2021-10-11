@@ -83,7 +83,9 @@
   </ng-template>
 </div>
 
-<div class="alignWithBanner">
+<div class="alignWithBanner"
+     cdkDropListGroup
+>
   <div class="collections-footer-group">
     <div [class.collectionsContainerTabs]="showTabs()" [class.collectionsContainerNoSidebar]="isRootLevelCollection()" class="collectionsContainer">
       <div
@@ -237,8 +239,7 @@
               [home]="'COLLECTIONS.TAB.' + tabSelected"
               [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
               [breadcrumbsAsNode]="path"
-              [canDrop]="canDropOnCollection"
-              (onDrop)="dropOnCollection($event)"
+              (onDrop)="dropOnCollection($event.target, $event.source)"
             ></breadcrumbs>
           </div>
 
@@ -264,6 +265,11 @@
               [columns]="collectionsColumns"
               [displayType]="NodeEntriesDisplayType.SmallGrid"
               [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
+              [dragDrop]="{
+                dragAllowed: isAllowedToEditCollection(),
+                dropAllowed: canDropOnCollection,
+                dropped: dropOnCollection
+              }"
               [sort]="{
                 active: sortCollections.active,
                 direction: sortCollections.direction,
@@ -348,6 +354,11 @@
               [dataSource]="dataSourceReferences"
               [columns]="referencesColumns"
               [displayType]="NodeEntriesDisplayType.Grid"
+              [dragDrop]="{
+                dragAllowed: isAllowedToEditCollection(),
+                dropAllowed: canDropOnRef,
+                dropped: dropOnRef
+              }"
               [sort]="{
                 active: sortReferences.active,
                 direction: sortReferences.direction,

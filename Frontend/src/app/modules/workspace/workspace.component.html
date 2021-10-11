@@ -1,4 +1,4 @@
-<div class="frame">
+<div class="frame" cdkDropListGroup>
 
   <main-nav
     #mainNav
@@ -55,7 +55,6 @@
           [breadcrumbsAsNode]="path"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.'+root"
-          [canDrop]="canDropBreadcrumbs"
           (onDrop)="handleDrop($event)"
           (onClick)="openBreadcrumb($event)"
         ></breadcrumbs>

@@ -104,14 +104,13 @@
       matRipple
       cdkDrag
       appDragCursor
-      [dragState]="dragDropState"
       [cdkDragData]="node"
       (cdkDragStarted)="dragSource = node"
       (cdkDragExited)="dragExit($event)"
       (cdkDragDropped)="drop($event)"
       class="mat-row"
-      [class.mat-row-drop-allowed]="dragDropState?.element === node && dragDropState.dropAllowed"
-      [class.mat-row-drop-blocked]="dragDropState?.element === node && !dragDropState.dropAllowed"
+      [class.mat-row-drop-allowed]="getDragState()?.element === node && getDragState().dropAllowed"
+      [class.mat-row-drop-blocked]="getDragState()?.element === node && !getDragState().dropAllowed"
       [class.mat-row-selected]="entriesService.selection.isSelected(node)"
       [class.mat-row-virtual]="node.virtual"
       [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"

@@ -224,7 +224,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 return;
             }
         }
-        console.log(event);
         if (event.target !== 'MY_FILES' && !(event.target as Node).isDirectory) {
             this.toast.error(null, 'WORKSPACE.TARGET_NO_DIRECTORY');
             return;

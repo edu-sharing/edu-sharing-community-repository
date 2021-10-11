@@ -27,7 +27,7 @@ import {Target} from '../../../option-item';
 import {DropdownComponent} from '../../dropdown/dropdown.component';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDropList} from '@angular/cdk/drag-drop';
-import {DragDropState} from '../../../directives/drag-cursor.directive';
+import {DragCursorDirective, DragDropState} from '../../../directives/drag-cursor.directive';
 import {CdkDrag} from '@angular/cdk/drag-drop/directives/drag';
 
 @Component({
@@ -40,10 +40,6 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     readonly ClickSource = ClickSource;
     readonly Target = Target;
 
-    dragDropState: DragDropState<T> = {
-        element: null,
-        dropAllowed: false
-    };
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
@@ -185,24 +181,24 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
         const allowed = this.entriesService.dragDrop.dropAllowed?.(target, {
             element: [this.dragSource],
             sourceList: this.entriesService.list,
-            mode: this.dragDropState.mode
+            mode: DragCursorDirective.dragState.mode
         });
-        this.dragDropState.element = target;
-        this.dragDropState.dropAllowed = allowed;
+        DragCursorDirective.dragState.element = target;
+        DragCursorDirective.dragState.dropAllowed = allowed;
         return false;
     }
 
     drop(drop: CdkDragDrop<T, any>) {
-        this.entriesService.dragDrop.dropped(this.dragDropState.element,{
+        this.entriesService.dragDrop.dropped(DragCursorDirective.dragState.element,{
             element: [this.dragSource],
             sourceList: this.entriesService.list,
-            mode: this.dragDropState.mode
+            mode: DragCursorDirective.dragState.mode
         });
-        this.dragDropState.element = null;
+        DragCursorDirective.dragState.element = null;
     }
 
     dragExit(exit: CdkDragExit<T>|any) {
-        this.dragDropState.element = null
+        DragCursorDirective.dragState.element = null
     }
 
     loadData() {
@@ -211,5 +207,9 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
                 offset: this.entriesService.dataSource.getData().length
             });
         }
+    }
+
+    getDragState() {
+        return DragCursorDirective.dragState;
     }
 }

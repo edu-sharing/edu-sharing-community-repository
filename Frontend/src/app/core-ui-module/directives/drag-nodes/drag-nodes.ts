@@ -3,9 +3,9 @@ import { Node } from "../../../core-module/core.module";
 export type DropAction = 'move' | 'copy' | 'link';
 
 export interface DragData {
-    event: DragEvent;
-    nodes: Node[];
-    dropAction: DropAction;
+    event?: DragEvent;
+    nodes?: Node[];
+    dropAction?: DropAction;
 }
 
 export interface DropData extends DragData {

@@ -264,7 +264,8 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
         SafeHtmlPipe,
         ElementRefDirective,
         NodeEntriesWrapperComponent,
-        CheckTextOverflowDirective
+        CheckTextOverflowDirective,
+        DragCursorDirective
     ],
 })
 export class CoreUiModule {}
