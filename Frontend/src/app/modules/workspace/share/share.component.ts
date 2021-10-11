@@ -313,7 +313,7 @@ export class WorkspaceShareComponent {
                 (data) => {
                     //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
                     // changed in 4.1 to keep inherit state of collections
-                    this.inheritAllowed = data.nodes.length > 1;
+                    this.inheritAllowed = data.scope === 'MY_FILES' || data.nodes.length > 1;
                     this.isSharedScope = data.scope === 'SHARED_FILES';
                     this.updateToolpermissions();
                 },
