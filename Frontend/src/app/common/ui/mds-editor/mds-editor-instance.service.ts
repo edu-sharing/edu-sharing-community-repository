@@ -34,6 +34,7 @@ import {
     Values,
     ViewRelation,
 } from './types';
+import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 
 export interface CompletionStatusField {
@@ -131,9 +132,7 @@ export class MdsEditorInstanceService implements OnDestroy {
 
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
-            // The definition is updated once with attribute overrides by `mds-editor-view`
-            // component, but should not be touched after initialization.
-            public definition: MdsWidget,
+            public readonly definition: MdsWidget,
             public readonly viewId: string,
             public readonly repositoryId: string,
             public readonly relation: ViewRelation = null,
@@ -940,9 +939,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         });
     }
 
-    updateWidgetDefinition(): void {
-        this.widgets.next(this.widgets.value);
-    }
     private async initMds(
         groupId: string,
         mdsId: string,
@@ -1023,7 +1019,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             .filter((widget) => this.meetsCondition(widget, nodes, values, false));
         const variables = await this.restLocator.getConfigVariables().toPromise();
         for (const view of views) {
-            for (const widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
+            for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
+                widgetDefinition = parseAttributes(view.html, widgetDefinition);
                 const widget = new MdsEditorInstanceService.Widget(
                     this,
                     widgetDefinition,
@@ -1217,14 +1214,8 @@ export class MdsEditorInstanceService implements OnDestroy {
     /**
      * Returns a list of properties for which the MDS editor requires facet values.
      */
-    // It would be nice to provide this functionality without the need to load an MDS editor into
-    // the DOM, but for now, the way the MDS definition is processed requires the DOM representation
-    // to parse attributes.
     getNeededFacets(): Observable<string[]> {
-        return this.mdsInflated.pipe(
-            first((isInflated) => isInflated),
-            map(() => this.getNeededFacetsInstant()),
-        );
+        return this.mdsInitDone.pipe(map(() => this.getNeededFacetsInstant()));
     }
 
     private getNeededFacetsInstant(): string[] {

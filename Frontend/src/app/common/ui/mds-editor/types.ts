@@ -164,7 +164,7 @@ export interface MdsWidget {
     template: null;
     hasValues: boolean;
     values: MdsWidgetValue[];
-    placeholder: null;
+    placeholder: string;
     unit: string;
     min: number;
     max: number;

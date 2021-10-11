@@ -81,22 +81,6 @@ type NativeWidgetClass = {
     providers: [ViewInstanceService],
 })
 export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
-    constructor(
-        private sanitizer: DomSanitizer,
-        private factoryResolver: ComponentFactoryResolver,
-        private containerRef: ViewContainerRef,
-        private applicationRef: ApplicationRef,
-        private mdsEditorInstance: MdsEditorInstanceService,
-        private ngZone: NgZone,
-        private viewInstance: ViewInstanceService,
-        private injector: Injector,
-    ) {
-        this.isEmbedded = this.mdsEditorInstance.isEmbedded;
-        this.knownWidgetTags = [
-            ...Object.values(NativeWidgetType),
-            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
-        ];
-    }
     private static readonly nativeWidgets: {
         [widgetType in NativeWidgetType]: NativeWidgetClass;
     } = {
@@ -109,6 +93,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         fileupload: MdsEditorWidgetFileUploadComponent,
         workflow: null as null,
     };
+
     private static readonly widgetComponents: {
         [type in MdsWidgetType]: MdsEditorWidgetComponent;
     } = {
@@ -137,6 +122,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.DefaultValue]: null,
         [MdsWidgetType.FacetList]: MdsEditorWidgetFacetListComponent,
     };
+
     private static readonly suggestionWidgetComponents: {
         [type in MdsWidgetType]?: Type<object>;
     } = {
@@ -157,37 +143,21 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     private knownWidgetTags: string[];
     private destroyed = new ReplaySubject<void>(1);
 
-    /**
-     * Overrides widget definition using inline parameters.
-     */
-    public static updateWidgetWithHTMLAttributes(htmlRef: Element, widget: MdsWidget): MdsWidget {
-        const attributes = htmlRef?.getAttributeNames();
-        if (attributes?.length > 0) {
-            // Make a shallow copy to not override the original definition.
-            widget = { ...widget };
-            for (let attribute of attributes) {
-                // map the extended attribute
-                let value: string | boolean = htmlRef.getAttribute(attribute);
-                if (attribute === 'isextended' || attribute === 'extended') {
-                    attribute = 'isExtended';
-                } else if (attribute === 'isrequired' || attribute === 'required') {
-                    attribute = 'isRequired';
-                } else if (attribute === 'bottomcaption') {
-                    attribute = 'bottomCaption';
-                } else if (attribute === 'defaultmin') {
-                    attribute = 'defaultMin';
-                } else if (attribute === 'interactiontype') {
-                    attribute = 'interactionType';
-                } else if (attribute === 'defaultmax') {
-                    attribute = 'defaultMax';
-                } else if (attribute === 'hideifempty') {
-                    attribute = 'hideIfEmpty';
-                    value = Boolean(value);
-                }
-                (widget as any)[attribute] = value;
-            }
-        }
-        return widget;
+    constructor(
+        private sanitizer: DomSanitizer,
+        private factoryResolver: ComponentFactoryResolver,
+        private containerRef: ViewContainerRef,
+        private applicationRef: ApplicationRef,
+        private mdsEditorInstance: MdsEditorInstanceService,
+        private ngZone: NgZone,
+        private viewInstance: ViewInstanceService,
+        private injector: Injector,
+    ) {
+        this.isEmbedded = this.mdsEditorInstance.isEmbedded;
+        this.knownWidgetTags = [
+            ...Object.values(NativeWidgetType),
+            ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
+        ];
     }
 
     ngOnInit(): void {
@@ -340,11 +310,6 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             const htmlRef = this.container.nativeElement.querySelector(
                 widget.definition.id.replace(':', '\\:'),
             );
-            widget.definition = MdsEditorViewComponent.updateWidgetWithHTMLAttributes(
-                htmlRef,
-                widget.definition,
-            );
-            this.mdsEditorInstance.updateWidgetDefinition();
             const WidgetComponent = this.getWidgetComponent(widget);
             if (WidgetComponent === undefined) {
                 UIHelper.injectAngularComponent(
