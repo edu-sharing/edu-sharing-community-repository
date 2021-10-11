@@ -9,15 +9,18 @@
     <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
       <mat-label></mat-label>
       <mat-chip-list #chipList>
-        <div class="chips-wrapper" *ngIf="filters$ | async as filters">
-          <ng-container *ngFor="let category of categories$ | async">
+        <div class="chips-wrapper" *ngIf="filters$ | async as filtersDict">
+          <ng-container *ngFor="let filters of filtersDict | keyvalue">
+            <!-- We considered injecting the chip list from the mds editor like the suggestions
+            panel, but `mat-chip-list` needs direct access to `mat-chip`s as child components for
+            keyboard interaction to work. -->
             <mat-chip
-              *ngFor="let filter of filters[category.property]"
-              [style.background-color]="category.color"
+              *ngFor="let filterValue of filters.value"
+              class="filter-chip-{{ filters.key | propertySlug }}"
               [removable]="true"
-              (removed)="onRemoveFilter(category.property, filter)"
+              (removed)="onRemoveFilter(filters.key, filterValue)"
             >
-              {{ filter.label }}
+              {{ filterValue.label }}
               <mat-icon matChipRemove>cancel</mat-icon>
             </mat-chip>
           </ng-container>
@@ -70,33 +73,18 @@
   (overlayOutsideClick)="onOutsideClick($event)"
   (detach)="onDetach()"
 >
-  <div
-    class="suggestion-card mat-elevation-z2"
-    *ngIf="suggestions$ | async as suggestions"
-    cdkTrapFocus
-  >
-    <app-mds-editor
-      *ngIf="mdsInfo$ | async as mdsInfo"
-      [repository]="mdsInfo.repository"
-      [metadataSet]="mdsInfo.metadataSet"
-      group="search_input"
-    ></app-mds-editor>
-    <!-- <ng-container *ngFor="let category of categories$ | async">
-      <div class="suggestion-group" *ngIf="suggestions[category.property]?.values.length > 0">
-        <label class="category-label">{{ category.label }}</label>
-        <mat-chip-list>
-          <mat-chip
-            *ngFor="let suggestion of suggestions[category.property].values"
-            #suggestionChip
-            [style.background-color]="category.color"
-            (click)="onAddFilter(category.property, suggestion)"
-            (keydown.enter)="onAddFilter(category.property, suggestion)"
-            [selectable]="false"
-          >
-            {{ suggestion.label }}
-          </mat-chip>
-        </mat-chip-list>
-      </div>
-    </ng-container> -->
+  <div class="suggestion-card mat-elevation-z2" cdkTrapFocus>
+    <ng-container *ngTemplateOutlet="facets.suggestionsPanel"></ng-container>
   </div>
 </ng-template>
+
+<app-search-field-facets
+  #facets
+  [repository]="(mdsInfo$ | async)?.repository"
+  [metadataSet]="(mdsInfo$ | async)?.metadataSet"
+  group="search_input"
+  [values]="rawFilters$ | async"
+  (valuesChange)="onValuesChange($event)"
+  [suggestions]="suggestions$ | async"
+  (categories)="onCategories($event)"
+></app-search-field-facets>

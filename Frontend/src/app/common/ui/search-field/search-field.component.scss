@@ -65,6 +65,13 @@ mat-form-field {
     &::-webkit-scrollbar-thumb {
         background-color: $textMediumLight;
     }
+    .mat-chip.mat-standard-chip {
+        @each $property, $color in $chip-colors {
+            &.filter-chip-#{$property} {
+                background-color: $color;
+            }
+        }
+    }
 }
 
 .search-field-input-wrapper {

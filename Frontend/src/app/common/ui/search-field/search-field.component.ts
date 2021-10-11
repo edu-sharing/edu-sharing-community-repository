@@ -13,6 +13,8 @@ import { FormControl } from '@angular/forms';
 import { FacetsDict, LabeledValue } from 'edu-sharing-api';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { SearchFieldFacetsComponent } from '../mds-editor/search-field-facets/search-field-facets.component';
+import { Values } from '../mds-editor/types';
 import { SearchFieldService } from './search-field.service';
 
 @Component({
@@ -39,12 +41,12 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     @ViewChild('input') input: ElementRef;
     @ViewChild(CdkConnectedOverlay) private overlay: CdkConnectedOverlay;
-    @ViewChild('suggestionChip', { read: ElementRef })
-    private firstSuggestionChip: ElementRef<HTMLElement>;
+    @ViewChild(SearchFieldFacetsComponent) private searchFieldFacets: SearchFieldFacetsComponent;
 
     readonly inputControl = new FormControl('');
     readonly filters$ = this.searchField.filters$;
-    readonly categories$ = this.searchField.categories$;
+    readonly rawFilters$ = this.searchField.rawFilters$;
+    readonly categories$ = this.searchField.categoriesSubject;
     readonly suggestions$ = this.searchField.suggestions$;
     showOverlay = false;
     hasSuggestions = true;
@@ -66,17 +68,17 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.searchField.setEnableFiltersAndSuggestions(this.enableFiltersAndSuggestions);
-        // this.searchField.updateSuggestions(this.inputControl.value);
-        // this.inputControl.valueChanges.subscribe((inputString) => {
-        //     this.searchField.updateSuggestions(inputString);
-        //     this.searchStringChange.emit(inputString);
-        // });
-        // this.suggestions$
-        //     .pipe(
-        //         takeUntil(this.destroyed$),
-        //         map((suggestions) => this.getHasSuggestions(suggestions)),
-        //     )
-        //     .subscribe((hasSuggestions) => (this.hasSuggestions = hasSuggestions));
+        this.searchField.updateSuggestions(this.inputControl.value);
+        this.inputControl.valueChanges.subscribe((inputString) => {
+            this.searchField.updateSuggestions(inputString);
+            this.searchStringChange.emit(inputString);
+        });
+        this.suggestions$
+            .pipe(
+                takeUntil(this.destroyed$),
+                map((suggestions) => this.getHasSuggestions(suggestions)),
+            )
+            .subscribe((hasSuggestions) => (this.hasSuggestions = hasSuggestions));
     }
 
     ngOnDestroy(): void {
@@ -94,13 +96,15 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         this.clear.emit();
     }
 
-    inputHasFocus(): boolean {
-        return document.activeElement === this.input?.nativeElement;
+    onValuesChange(values: Values): void {
+        // A `valuesChange` event from the mds editor means, a suggestion card has been added as
+        // filter.
+        this.inputControl.setValue('');
+        this.searchField.setFilterValues(values, { emitValuesChange: true });
     }
 
-    onAddFilter(property: string, filter: LabeledValue): void {
-        this.inputControl.setValue('');
-        this.searchField.addFilter(property, filter);
+    inputHasFocus(): boolean {
+        return document.activeElement === this.input?.nativeElement;
     }
 
     onRemoveFilter(property: string, filter: LabeledValue): void {
@@ -115,8 +119,8 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     focusOverlayIfOpen(event: Event): void {
-        if (this.firstSuggestionChip) {
-            this.firstSuggestionChip.nativeElement.focus();
+        if (this.showOverlay && this.hasSuggestions) {
+            this.searchFieldFacets.focus();
             event.stopPropagation();
             event.preventDefault();
         }
@@ -141,6 +145,10 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         if (!this.overlay.overlayRef?.overlayElement.contains(event.relatedTarget as HTMLElement)) {
             this.showOverlay = false;
         }
+    }
+
+    onCategories(properties: string[]): void {
+        this.searchField.categoriesSubject.next(properties);
     }
 
     private getHasSuggestions(suggestions: FacetsDict): boolean {

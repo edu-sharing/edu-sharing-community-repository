@@ -55,7 +55,7 @@ export class SearchService {
     private config: SearchConfig | null = null;
     private params: SearchParams = {};
 
-    constructor(private searchV1: SearchV1Service, private valueMapping: MdsLabelService) {}
+    constructor(private searchV1: SearchV1Service, private mdsLabel: MdsLabelService) {}
 
     /**
      * Configure `SearchService`.
@@ -150,7 +150,7 @@ export class SearchService {
         property: string,
         { count, value }: apiModels.Value,
     ): Observable<FacetValue> {
-        return this.valueMapping
+        return this.mdsLabel
             .getLabel(this.getConfig(), property, value)
             .pipe(map((label) => ({ count, value, label })));
     }

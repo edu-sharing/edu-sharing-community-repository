@@ -135,6 +135,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
     @Input() core: MdsEditorCoreComponent;
     @Input() view: MdsView;
+    @Input() overrideWidget?: Type<object>;
     html: SafeHtml;
     isEmbedded: boolean;
     isExpanded: boolean;
@@ -168,7 +169,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 map((activeViews) => activeViews.some((view) => view.id === this.view.id)),
             )
             .subscribe((isActive) => (this.isHidden = !isActive));
-        this.core.card?.onScrollToJumpmark.pipe(takeUntil(this.destroyed)).subscribe(async (j) => {
+        this.core?.card?.onScrollToJumpmark.pipe(takeUntil(this.destroyed)).subscribe(async (j) => {
             if (
                 j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX &&
                 !this.isExpanded$.value
@@ -343,7 +344,9 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     private getWidgetComponent(widget: Widget): Type<object> {
-        if (this.view.rel === 'suggestions') {
+        if (this.overrideWidget) {
+            return this.overrideWidget;
+        } else if (this.view.rel === 'suggestions') {
             return MdsEditorViewComponent.suggestionWidgetComponents[widget.definition.type];
         } else if (widget.definition.interactionType === 'None') {
             return MdsWidgetComponent;

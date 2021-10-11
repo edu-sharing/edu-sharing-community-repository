@@ -9,30 +9,15 @@ import {
     SearchConfig,
     SearchService,
 } from 'edu-sharing-api';
-import { BehaviorSubject, EMPTY, Observable, of, ReplaySubject, Subject, timer } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, of, ReplaySubject, timer } from 'rxjs';
 import { debounce, filter, map, shareReplay, switchMap } from 'rxjs/operators';
-
-export interface Category {
-    property: string;
-    label: string;
-    color: string;
-}
-
-const DUMMY_CATEGORIES: Category[] = [
-    {
-        property: 'ccm:educationalcontext',
-        label: 'educationalcontext',
-        color: 'rgb(214, 166, 214)',
-    },
-    { property: 'ccm:bar', label: 'bar', color: 'rgb(166, 192, 214)' },
-];
 
 @Injectable({
     providedIn: 'root',
 })
 export class SearchFieldService {
-    /** Active categories for use by search field. */
-    readonly categories$: Observable<Category[]>;
+    /** Properties for which to fetch suggestions. */
+    readonly categoriesSubject = new BehaviorSubject<string[]>(null);
     /** Active filters for use by search field. */
     readonly filters$: Observable<LabeledValuesDict>;
     /** Active suggestions for use by search field. */
@@ -48,18 +33,19 @@ export class SearchFieldService {
     readonly mdsInfo$ = this.searchConfigSubject.pipe(
         filter((config): config is SearchConfig => !!config.repository && !!config.metadataSet),
     );
+    readonly rawFilters$ = this.filtersSubject.pipe(
+        map((filters) => this.mdsLabel.getRawValuesDict(filters)),
+    );
 
     constructor(private search: SearchService, private mdsLabel: MdsLabelService) {
         this.searchConfigSubject.subscribe((searchConfig) => this.search.configure(searchConfig));
         this.filters$ = this.enableFiltersAndSuggestionsSubject.pipe(
             switchMap((enabled) => (enabled ? this.filtersSubject : of(null))),
         );
-        this.categories$ = of(DUMMY_CATEGORIES); // Needs to replay
         this.suggestions$ = this.enableFiltersAndSuggestionsSubject.pipe(
             switchMap((enabled) =>
                 enabled
-                    ? this.categories$.pipe(
-                          map((categories) => categories.map((c) => c.property)),
+                    ? this.categoriesSubject.pipe(
                           switchMap((facets) =>
                               this.suggestionsInputStringSubject.pipe(
                                   map((inputString) =>
@@ -107,23 +93,6 @@ export class SearchFieldService {
     }
 
     /**
-     * Adds a filter to the active-filters dictionary as the user clicks on a suggestion chip.
-     *
-     * To be called by the search-field component.
-     */
-    addFilter(property: string, filter: LabeledValue): void {
-        const filterList = this.filtersSubject.value[property] ?? [];
-        if (!filterList.some((f) => f.value === filter.value)) {
-            const newFilters = {
-                ...this.filtersSubject.value,
-                [property]: [...filterList, filter],
-            };
-            this.filtersSubject.next(newFilters);
-            this.filterValuesChange.emit(this.mdsLabel.getRawValuesDict(newFilters));
-        }
-    }
-
-    /**
      * Removes a filter from the active-filters dictionary as the user clicks on a chip's remove
      * button.
      *
@@ -144,14 +113,18 @@ export class SearchFieldService {
     /**
      * Sets the active filters to be displayed as chips.
      *
-     * To be called by the component or service controlling the search logic.
+     * To be called  by the search-field component and by the component or service controlling the
+     * search logic.
      */
-    setFilterValues(values: RawValuesDict): void {
+    setFilterValues(values: RawValuesDict, { emitValuesChange = false } = {}): void {
         const mdsId = this.getCurrentMdsIdentifier();
         if (mdsId) {
-            this.mdsLabel
-                .labelValuesDict(mdsId, values)
-                .subscribe((filterValues) => this.filtersSubject.next(filterValues));
+            this.mdsLabel.labelValuesDict(mdsId, values).subscribe((filterValues) => {
+                this.filtersSubject.next(filterValues);
+                if (emitValuesChange) {
+                    this.filterValuesChange.emit(values);
+                }
+            });
         } else {
             console.warn('Called setFilterValues when mds was not configured.');
         }

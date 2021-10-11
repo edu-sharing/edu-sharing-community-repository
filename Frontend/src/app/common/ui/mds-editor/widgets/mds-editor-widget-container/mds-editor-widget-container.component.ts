@@ -10,6 +10,7 @@ import {
     Injectable,
     Input,
     OnChanges,
+    OnDestroy,
     OnInit,
     SimpleChanges,
     ViewChild,
@@ -18,8 +19,8 @@ import { AbstractControl } from '@angular/forms';
 import { MatRipple } from '@angular/material/core';
 import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { BulkBehavior } from '../../../mds/mds.component';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
@@ -94,7 +95,9 @@ export class RegisterFormFieldDirective {
         ]),
     ],
 })
-export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, AfterContentInit {
+export class MdsEditorWidgetContainerComponent
+    implements OnInit, OnChanges, AfterContentInit, OnDestroy
+{
     readonly RequiredMode = RequiredMode;
     readonly ValueType = ValueType;
     @ViewChild(MatRipple) ripple: MatRipple;
@@ -134,6 +137,8 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
     bulkMode: BehaviorSubject<BulkMode>;
     missingRequired: RequiredMode | null;
     isHidden: boolean;
+
+    private readonly destroyed$ = new Subject<void>();
 
     constructor(
         private elementRef: ElementRef,
@@ -181,11 +186,24 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
             this.initFormControl(this.control);
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
+        if (this.widget) {
+            this.widget.focusTrigger
+                .pipe(takeUntil(this.destroyed$))
+                .subscribe(() => this.injectedView?.focus());
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
     private registerIsHidden(): void {
         const shouldShowFactors = [this.widget.meetsDynamicCondition];
-        if (this.widget.definition.isExtended === 'true' || this.widget.definition.isExtended === true) {
+        if (
+            this.widget.definition.isExtended === 'true' ||
+            this.widget.definition.isExtended === true
+        ) {
             shouldShowFactors.push(this.mdsEditorInstance.shouldShowExtendedWidgets$);
         }
         combineLatest(shouldShowFactors)
@@ -224,7 +242,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
             .subscribe((status: InputStatus) => {
                 this.handleStatus(status);
             });
-        this.widget.onShowMissingRequired((shouldScrollIntoView) => {
+        this.widget.registerShowMissingRequired((shouldScrollIntoView) => {
             formControl.markAllAsTouched();
             if (formControl.errors?.required && shouldScrollIntoView) {
                 this.scrollIntoViewAndFocus();

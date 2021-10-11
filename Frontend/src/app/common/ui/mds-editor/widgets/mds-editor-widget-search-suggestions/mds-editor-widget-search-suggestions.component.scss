@@ -1,0 +1,9 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+.mat-chip.mat-standard-chip {
+    @each $property, $color in $chip-colors {
+        &.filter-chip-#{$property} {
+            background-color: $color;
+        }
+    }
+}

@@ -78,6 +78,10 @@ import { MainMenuButtonsComponent } from './common/ui/main-menu-buttons/main-men
 import { MdsEditorWidgetFacetListComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
 import { SearchFieldComponent } from './common/ui/search-field/search-field.component';
 import { MdsEditorComponent } from './common/ui/mds-editor/mds-editor.component';
+import { SearchFieldFacetsComponent } from './common/ui/mds-editor/search-field-facets/search-field-facets.component';
+import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
+import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pipe';
+import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -148,6 +152,10 @@ import { MdsEditorComponent } from './common/ui/mds-editor/mds-editor.component'
         MdsEditorWidgetFacetListComponent,
         SearchFieldComponent,
         MdsEditorComponent,
+        SearchFieldFacetsComponent,
+        LabelPipe,
+        PropertySlugPipe,
+        MdsEditorWidgetSearchSuggestionsComponent,
     ],
     imports: [
         IMPORTS,

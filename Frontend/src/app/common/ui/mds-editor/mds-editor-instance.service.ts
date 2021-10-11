@@ -1,7 +1,17 @@
 import { Directive, EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject, from } from 'rxjs';
-import { map, shareReplay, switchMap, first, takeUntil, filter } from 'rxjs/operators';
+import { FacetsDict } from 'edu-sharing-api';
+import {
+    BehaviorSubject,
+    combineLatest,
+    Observable,
+    of,
+    ReplaySubject,
+    Subject,
+    from,
+    EMPTY,
+} from 'rxjs';
+import { map, shareReplay, switchMap, first, takeUntil, filter, tap, skip } from 'rxjs/operators';
 import {
     MdsValueList,
     Node,
@@ -101,6 +111,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
         readonly status = new BehaviorSubject<InputStatus>(null);
         readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
+        readonly focusTrigger = new Subject<void>();
         private hasUnsavedDefault: boolean; // fixed after `ready`
         private initialValues: InitialValues;
         private initialDisplayValues: MdsValueList;
@@ -129,6 +140,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             map(() => this.getJointProperty()),
             shareReplay(1),
         );
+
+        private readonly _new_inputValues$ =
+            this.mdsEditorInstanceService._new_inputValuesSubject.pipe(
+                map((values) => values[this.definition.id]),
+            );
 
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
@@ -306,6 +322,26 @@ export class MdsEditorInstanceService implements OnDestroy {
             this.mdsEditorInstanceService.updateHasChanges();
         }
 
+        _new_getValue(): string[] {
+            return this.mdsEditorInstanceService._new_valuesSubject.value?.[this.definition.id];
+        }
+
+        _new_observeValue(): Observable<string[]> {
+            return this.mdsEditorInstanceService._new_valuesSubject.pipe(
+                map((values) => values?.[this.definition.id]),
+            );
+        }
+
+        _new_setValue(value: string[]): void {
+            this.mdsEditorInstanceService._new_patchValues({
+                [this.definition.id]: value,
+            });
+        }
+
+        _new_setCustomValues(values: Values): void {
+            this.mdsEditorInstanceService._new_patchValues(values);
+        }
+
         setIndeterminateValues(indeterminateValues?: string[]): void {
             this.indeterminateValues = indeterminateValues;
         }
@@ -349,7 +385,7 @@ export class MdsEditorInstanceService implements OnDestroy {
          * @param f reveals the required hint if the field is required and has no value; returns
          * whether the field was missing and scrolled into view
          */
-        onShowMissingRequired(f: (shouldScrollIntoView: boolean) => boolean) {
+        registerShowMissingRequired(f: (shouldScrollIntoView: boolean) => boolean) {
             if (this.showMissingRequiredFunction) {
                 throw new Error('onShowMissingRequired was called more than once');
             }
@@ -506,6 +542,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     mdsInflated = new ReplaySubject<boolean>(1);
     mdsInflatedValue: boolean;
     facets$ = new BehaviorSubject<FacetValues>(null);
+    suggestionsSubject = new BehaviorSubject<FacetsDict>(null);
     /** Views that have at least one widget, that is not hidden due to dynamic conditions. */
     activeViews = new ReplaySubject<MdsView[]>(1);
     /** Updated widget values, not considering nodes. */
@@ -540,6 +577,27 @@ export class MdsEditorInstanceService implements OnDestroy {
     private lastScrolledIntoViewIndex: number = null;
     private isDestroyed = false;
 
+    private readonly initMdsTrigger = new Subject<{
+        groupId: string;
+        mdsId: string;
+        repository?: string;
+        nodes?: Node[];
+        values?: Values;
+    }>();
+
+    /**
+     * Values changed by user input or through application of default values or value constraints.
+     *
+     * Does not trigger when values are set from outside.
+     *
+     * Methods and functions with the `_new_` prefix are introducing a new system of tracking
+     * values, which is currently **not** broadly **supported**.
+     */
+    readonly _new_valuesChange = new EventEmitter<Values>();
+    private readonly _new_inputValuesSubject = new BehaviorSubject<Values>(null);
+    private readonly _new_valuesSubject = new BehaviorSubject<Values>(null);
+    private readonly _new_initializingSubject = new BehaviorSubject(false);
+
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
         private restLocator: RestLocatorService,
@@ -547,6 +605,9 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restConnector: RestConnectorService,
         private searchService: SearchService,
     ) {
+        this.registerInitMds();
+        this.register_new_valuesChange();
+        this.register_new_inputValuesSubject();
         this.mdsInflated.subscribe((mdsInflated) => (this.mdsInflatedValue = mdsInflated));
         // TODO: register all dynamic properties via observable pipes as done here. This way, new
         // properties can easily be derived from existing ones without having to get all the points
@@ -653,7 +714,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     ...widgets
                         .filter(
                             (widget): widget is NativeWidget =>
-                                'component' in widget && !!widget.component.getValues,
+                                !(widget instanceof MdsEditorInstanceService.Widget),
                         )
                         .map((nativeWidget) =>
                             nativeWidget.component.hasChanges.pipe(
@@ -736,7 +797,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
-        await this.initMds(groupId, mdsId, repository, null, initialValues);
+        const hasInitialized = await this.initMds(groupId, mdsId, repository, null, initialValues);
+        if (!hasInitialized) {
+            return null;
+        }
         for (const widget of this.widgets.value) {
             widget.initWithValues(initialValues);
         }
@@ -939,31 +1003,87 @@ export class MdsEditorInstanceService implements OnDestroy {
         });
     }
 
+    /**
+     * @returns `true` if the MDS was initialized and `false` if initialization was canceled due to
+     * a new call to `initMds`.
+     */
     private async initMds(
         groupId: string,
         mdsId: string,
         repository?: string,
         nodes?: Node[],
         values?: Values,
-    ): Promise<void> {
+    ): Promise<boolean> {
+        // Use a trigger to be able to cancel the init process when `initMds` is called a second
+        // time before the first call could complete.
+        this.initMdsTrigger.next({
+            groupId,
+            mdsId,
+            repository,
+            nodes,
+            values,
+        });
+        return new Promise((resolve) => {
+            this._new_initializingSubject
+                .pipe(
+                    // _new_initializingSubject will be set to `true` as reaction to the trigger.
+                    skip(1),
+                    // If it becomes `false` next, the initialization went through. If it is set to
+                    // `true` again, `initMds` was called again, before the run completed.
+                    first(),
+                )
+                .subscribe((initializing) => resolve(!initializing));
+        });
+    }
+
+    private registerInitMds(): void {
+        this.initMdsTrigger
+            .pipe(
+                tap(() => this._new_initializingSubject.next(true)),
+                switchMap((args) =>
+                    this.doInitMds(
+                        args.groupId,
+                        args.mdsId,
+                        args.repository,
+                        args.nodes,
+                        args.values,
+                    ),
+                ),
+            )
+            .subscribe(({ mdsId, repository, groupId, mdsDefinition, views, widgets }) => {
+                if (this.mdsDefinition$.value !== mdsDefinition) {
+                    this.mdsDefinition$.next(mdsDefinition);
+                }
+                this.mdsId = mdsId;
+                this.repository = repository;
+                this.groupId = groupId;
+                this.views = views;
+                this.widgets.next(widgets);
+                this.mdsInitDone.next();
+                this._new_initializingSubject.next(false);
+            });
+    }
+
+    private async doInitMds(
+        groupId: string,
+        mdsId: string,
+        repository?: string,
+        nodes?: Node[],
+        values?: Values,
+    ) {
+        let mdsDefinition = this.mdsDefinition$.value;
         if (
             this.mdsId !== mdsId ||
             this.repository !== repository ||
             this.groupId !== groupId ||
             !this.mdsDefinition$.value
         ) {
-            this.mdsId = mdsId;
-            this.repository = repository;
-            this.groupId = groupId;
-            this.mdsDefinition$.next(
-                await this.mdsEditorCommonService.fetchMdsDefinition(mdsId, repository),
-            );
+            mdsDefinition = await this.mdsEditorCommonService.fetchMdsDefinition(mdsId, repository);
         }
-        const mdsDefinition = this.mdsDefinition$.value;
         const group = this.getGroup(mdsDefinition, groupId);
-        this.views = this.getViews(mdsDefinition, group);
-        this.widgets.next(await this.generateWidgets(mdsDefinition, this.views, nodes, values));
-        this.mdsInitDone.next();
+        const views = this.getViews(mdsDefinition, group);
+        const widgets = await this.generateWidgets(mdsDefinition, views, nodes, values);
+        return { mdsId, repository, groupId, mdsDefinition, views, widgets };
     }
 
     private getIsBulk(nodes: Node[]): boolean {
@@ -1111,7 +1231,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 !this.restConnector.hasToolPermissionInstant(widget.condition.value);
             if (!result) {
                 // tslint:disable-next-line:no-console
-                console.info(
+                console.debug(
                     'hide widget ' +
                         widget.id +
                         ' because toolpermission ' +
@@ -1234,6 +1354,54 @@ export class MdsEditorInstanceService implements OnDestroy {
                 // Add any widget types that need facet values to this list.
             ].includes(widget.definition.type)
         );
+    }
+
+    /**
+     * Set all widget values from outside.
+     *
+     * Methods and functions with the `_new_` prefix are introducing a new system of tracking
+     * values, which is currently **not** broadly **supported**.
+     */
+    _new_setValues(values: Values): void {
+        this._new_inputValuesSubject.next(values);
+        // for (const widget of this.widgets.value) {
+        //     console.log('widget', widget, values?.[widget.definition.id]);
+        //     widget.setValue(values?.[widget.definition.id] ?? null);
+        // }
+    }
+
+    private register_new_inputValuesSubject(): void {
+        this._new_inputValuesSubject.subscribe((values) => this._new_valuesSubject.next(values));
+    }
+
+    private register_new_valuesChange(): void {
+        this._new_initializingSubject
+            .pipe(
+                // Don't emit values while initializing. Wait for all widgets to propagate any
+                // default values and value changes due to constraints and then emit a single time.
+                switchMap((initializing) => (initializing ? EMPTY : this._new_valuesSubject)),
+                // Skip the initial `null` value.
+                filter((values) => values !== null),
+                // Don't emit values set from outside.
+                filter((values) => values !== this._new_inputValuesSubject.value),
+            )
+            .subscribe((values) => this._new_valuesChange.emit(values));
+    }
+
+    private _new_patchValues(values: Values): void {
+        this._new_valuesSubject.next({
+            ...(this._new_valuesSubject.value ?? {}),
+            ...values,
+        });
+    }
+
+    focusFirstWidget(): void {
+        for (const widget of this.widgets.value) {
+            if (widget.focusTrigger.observers.length > 0) {
+                widget.focusTrigger.next();
+                break;
+            }
+        }
     }
 }
 
