@@ -80,6 +80,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
 import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
 import {RenderHelperService} from './render-helper.service';
+import {MdsDurationPipe} from './pipes/mds-duration.pipe';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import {NodeEntriesComponent} from './components/node-entries/node-entries.component';
 import {NodeEntriesWrapperComponent} from './components/node-entries-wrapper/node-entries-wrapper.component';
@@ -156,6 +157,7 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
+        MdsDurationPipe,
         BitwisePipe,
         ElementRefDirective,
         TitleDirective,
@@ -232,6 +234,7 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
         CardComponent,
         UserAvatarComponent,
         UserTileComponent,
+        MdsDurationPipe,
         LinkComponent,
         CollectionChooserComponent,
         DropdownComponent,

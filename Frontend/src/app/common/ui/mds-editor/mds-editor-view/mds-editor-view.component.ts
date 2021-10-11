@@ -5,7 +5,8 @@ import {
     ComponentFactoryResolver,
     ElementRef,
     HostBinding,
-    Input,
+    Injector,
+    Input, NgZone,
     OnChanges,
     OnDestroy,
     OnInit,
@@ -51,6 +52,9 @@ import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import {MdsEditorWidgetAuthorityComponent} from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
+import { ViewInstanceService } from './view-instance.service';
+import { MdsEditorWidgetFacetListComponent } from '../widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
+import {MdsWidgetComponent} from '../../mds-viewer/widget/mds-widget.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -71,15 +75,18 @@ type NativeWidgetClass = {
     animations: [
         trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_NORMAL)),
     ],
+    providers: [ViewInstanceService],
 })
 export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
-
     constructor(
         private sanitizer: DomSanitizer,
         private factoryResolver: ComponentFactoryResolver,
         private containerRef: ViewContainerRef,
         private applicationRef: ApplicationRef,
         private mdsEditorInstance: MdsEditorInstanceService,
+        private ngZone: NgZone,
+        private viewInstance: ViewInstanceService,
+        private injector: Injector,
     ) {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
         this.knownWidgetTags = [
@@ -125,6 +132,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.SingleValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,
         [MdsWidgetType.DefaultValue]: null,
+        [MdsWidgetType.FacetList]: MdsEditorWidgetFacetListComponent,
     };
     private static readonly suggestionWidgetComponents: {
         [type in MdsWidgetType]?: Type<object>;
@@ -140,19 +148,23 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     @Input() view: MdsView;
     html: SafeHtml;
     isEmbedded: boolean;
+    isExpanded: boolean;
+    readonly isExpanded$ = this.viewInstance.isExpanded$;
 
     private knownWidgetTags: string[];
-    show = true;
     private destroyed = new ReplaySubject<void>(1);
 
     /**
      * Overrides widget definition using inline parameters.
      */
-    public static updateWidgetWithHTMLAttributes(htmlRef: Element, widget: MdsWidget): void {
-        if (htmlRef) {
-            for (let attribute of htmlRef.getAttributeNames()) {
+    public static updateWidgetWithHTMLAttributes(htmlRef: Element, widget: MdsWidget): MdsWidget {
+        const attributes = htmlRef?.getAttributeNames();
+        if (attributes?.length > 0) {
+            // Make a shallow copy to not override the original definition.
+            widget = { ...widget };
+            for (let attribute of attributes) {
                 // map the extended attribute
-                let value: string|boolean = htmlRef.getAttribute(attribute);
+                let value: string | boolean = htmlRef.getAttribute(attribute);
                 if (attribute === 'isextended' || attribute === 'extended') {
                     attribute = 'isExtended';
                 } else if (attribute === 'isrequired' || attribute === 'required') {
@@ -161,6 +173,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     attribute = 'bottomCaption';
                 } else if (attribute === 'defaultmin') {
                     attribute = 'defaultMin';
+                } else if (attribute === 'interactiontype') {
+                    attribute = 'interactionType';
                 } else if (attribute === 'defaultmax') {
                     attribute = 'defaultMax';
                 } else if (attribute === 'hideifempty') {
@@ -170,6 +184,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 (widget as any)[attribute] = value;
             }
         }
+        return widget;
     }
 
     ngOnInit(): void {
@@ -180,22 +195,24 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 map((activeViews) => activeViews.some((view) => view.id === this.view.id)),
             )
             .subscribe((isActive) => (this.isHidden = !isActive));
-        this.core.card?.onScrollToJumpmark
-            .pipe(
-                takeUntil(this.destroyed),
-            )
-            .subscribe(async (j) => {
-                if(j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX && !this.show) {
-                    this.show = true;
-                    await this.applicationRef.tick();
-                    this.core.card.scrollSmooth(j);
-                }
-            });
+        this.core.card?.onScrollToJumpmark.pipe(takeUntil(this.destroyed)).subscribe(async (j) => {
+            if (
+                j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX &&
+                !this.isExpanded$.value
+            ) {
+                this.isExpanded$.next(true);
+                await this.applicationRef.tick();
+                this.core.card.scrollSmooth(j);
+            }
+        });
+        this.isExpanded$
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((isExpanded) => (this.isExpanded = isExpanded));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (this.view) {
-            this.show = !this.view.isExtended;
+            this.isExpanded$.next(!this.view.isExtended);
         }
     }
 
@@ -256,6 +273,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 widgetName,
                 reason: 'Widget definition missing in MDS',
             },
+            {},
+            this.injector,
         );
     }
 
@@ -275,6 +294,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     widgetName,
                     reason: 'Not implemented',
                 },
+                {},
+                this.injector,
             );
             return;
         }
@@ -290,61 +311,74 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     reason: constraintViolation,
                 },
                 { replace: false },
+                this.injector,
             );
             return;
         }
-        const nativeWidget = UIHelper.injectAngularComponent(
-            this.factoryResolver,
-            this.containerRef,
-            WidgetComponent,
-            element,
-            {
-                widgetName,
-                widget,
-            },
-            { replace: false },
-        );
-        this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance, this.view.id);
+        this.ngZone.runOutsideAngular(() => {
+            const nativeWidget = UIHelper.injectAngularComponent(
+                this.factoryResolver,
+                this.containerRef,
+                WidgetComponent,
+                element,
+                {
+                    widgetName,
+                    widget,
+                },
+                {replace: false},
+                this.injector,
+            );
+            this.mdsEditorInstance.registerNativeWidget(nativeWidget.instance, this.view.id);
+        });
     }
 
     private injectWidget(widget: Widget, element: Element): void {
-        const htmlRef = this.container.nativeElement.querySelector(
-            widget.definition.id.replace(':', '\\:'),
-        );
-        MdsEditorViewComponent.updateWidgetWithHTMLAttributes(htmlRef, widget.definition);
-        this.mdsEditorInstance.updateWidgetDefinition();
-        const WidgetComponent = this.getWidgetComponent(widget);
-        if (WidgetComponent === undefined) {
+        this.ngZone.runOutsideAngular(() => {
+            const htmlRef = this.container.nativeElement.querySelector(
+                widget.definition.id.replace(':', '\\:'),
+            );
+            widget.definition = MdsEditorViewComponent.updateWidgetWithHTMLAttributes(
+                htmlRef,
+                widget.definition,
+            );
+            this.mdsEditorInstance.updateWidgetDefinition();
+            const WidgetComponent = this.getWidgetComponent(widget);
+            if (WidgetComponent === undefined) {
+                UIHelper.injectAngularComponent(
+                    this.factoryResolver,
+                    this.containerRef,
+                    MdsEditorWidgetErrorComponent,
+                    element,
+                    {
+                        widgetName: widget.definition.caption,
+                        reason: `Widget for type ${widget.definition.type} is not implemented`,
+                    },
+                    {replace: false},
+                    this.injector,
+                );
+                return;
+            } else if (WidgetComponent === null) {
+                return;
+            }
             UIHelper.injectAngularComponent(
                 this.factoryResolver,
                 this.containerRef,
-                MdsEditorWidgetErrorComponent,
+                WidgetComponent,
                 element,
                 {
-                    widgetName: widget.definition.caption,
-                    reason: `Widget for type ${widget.definition.type} is not implemented`,
+                    widget,
                 },
-                { replace: false },
+                {replace: false},
+                this.injector,
             );
-            return;
-        } else if (WidgetComponent === null) {
-            return;
-        }
-        UIHelper.injectAngularComponent(
-            this.factoryResolver,
-            this.containerRef,
-            WidgetComponent,
-            element,
-            {
-                widget,
-            },
-            { replace: false },
-        );
+        });
     }
 
     private getWidgetComponent(widget: Widget): Type<object> {
         if (this.view.rel === 'suggestions') {
             return MdsEditorViewComponent.suggestionWidgetComponents[widget.definition.type];
+        } else if(widget.definition.interactionType === 'None') {
+            return MdsWidgetComponent;
         } else {
             return MdsEditorViewComponent.widgetComponents[widget.definition.type];
         }
@@ -365,17 +399,15 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     toggleShow() {
-        if (this.show) {
-            this.show = false;
-        } else {
-            setTimeout(() =>
+        this.isExpanded$.next(!this.isExpanded$.value);
+        if (this.isExpanded$.value) {
+            setTimeout(() => {
                 this.core.card?.scrollSmooth(
                     this.core.card?.jumpmarks.filter(
                         (j) => j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
                     )[0],
-                ),
-            );
-            this.show = true;
+                );
+            });
         }
     }
 }

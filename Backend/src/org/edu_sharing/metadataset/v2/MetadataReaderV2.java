@@ -467,6 +467,9 @@ public class MetadataReaderV2 {
 				if(name.equals("valuespaceClient")){
 					widget.setValuespaceClient(value.equalsIgnoreCase("true"));				
 				}
+				if(name.equals("interactionType")){
+					widget.setInteractionType(MetadataWidget.InteractionType.valueOf(value));
+				}
 				if(name.equals("searchable")){
 					widget.setSearchable(value.equalsIgnoreCase("true"));
 				}

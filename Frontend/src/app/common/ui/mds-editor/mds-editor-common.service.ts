@@ -58,6 +58,7 @@ export class MdsEditorCommonService {
             }),
         ).toPromise();
     }
+
     async saveNodeContent(node: Node, file: File, versionComment?: string): Promise<void> {
         return this.restNode
             .uploadNodeContent(

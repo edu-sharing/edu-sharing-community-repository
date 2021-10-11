@@ -91,6 +91,7 @@ public class WidgetV2 {
 		private boolean isSearchable;
 		private WidgetCondition condition;
 		private int maxlength;
+		private MetadataWidget.InteractionType interactionType;
 
 	public WidgetV2(){}
 		public WidgetV2(MetadataWidget widget) {
@@ -103,6 +104,7 @@ public class WidgetV2 {
 			this.defaultvalue=widget.getDefaultvalue();
 			this.placeholder=widget.getPlaceholder();
 			this.maxlength=widget.getMaxlength();
+			this.interactionType=widget.getInteractionType();
 			this.unit=widget.getUnit();
 			this.min=widget.getMin();
 			this.max=widget.getMax();
@@ -311,6 +313,15 @@ public class WidgetV2 {
 
 		public void setMaxlength(int maxlength) {
 			this.maxlength = maxlength;
+		}
+
+		@JsonProperty
+		public MetadataWidget.InteractionType getInteractionType() {
+			return interactionType;
+		}
+
+		public void setInteractionType(MetadataWidget.InteractionType interactionType) {
+			this.interactionType = interactionType;
 		}
 }
 

@@ -159,7 +159,6 @@ import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
@@ -857,7 +856,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
 		// when there is a signed request from the connector, the download (binary content delivery) is allowed
-		if(ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())) {
+		if(ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get())) {
 			return true;
 		}
 		boolean downloadAllowed;
@@ -1286,6 +1285,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.put(CCConstants.CCM_ASSOC_RELTARGET, relTargetList.get(0).getTargetRef().getId());
 			}
 		}
+		Set<QName> aspects = service.getAspects(nodeRef);
+		NodeServiceHelper.addVirtualProperties(
+				nodeType,
+				aspects.stream().map(QName::toString).collect(Collectors.toList()),
+				properties
+		);
 
 		// Preview
 		if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
@@ -1363,7 +1368,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
 				properties = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
 						beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,properties,
-								service.getAspects(nodeRef).stream().map(q -> q.toString()).collect(Collectors.toList())));
+								aspects.stream().map(q -> q.toString()).collect(Collectors.toList())));
 				repCache.put(nodeRef.getId(), properties);
 			}
 		}

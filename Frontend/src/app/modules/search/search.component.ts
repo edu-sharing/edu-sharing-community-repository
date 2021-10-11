@@ -21,6 +21,7 @@ import {
     ConfigurationHelper,
     ConfigurationService,
     DialogButton,
+    Facette,
     ListItem, ListItemSort,
     LoginResult,
     MdsInfo,
@@ -62,11 +63,11 @@ import {Translation} from '../../core-ui-module/translation';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SearchService} from './search.service';
 import {WindowRefService} from './window-ref.service';
-import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
+import {MdsDefinition, FacetValues, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
 import {ReplaySubject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import {switchMap, takeUntil} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
@@ -108,7 +109,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     breakpoint: number = 800;
     initalized: boolean;
     tutorialElement: ElementRef;
-    mdsSuggestions: any = {};
+    mdsFacets: FacetValues = {};
     mdsExtended = false;
     collectionsMore = false;
     nodeReport: Node;
@@ -490,7 +491,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             parameters = await this.getMdsValues();
         }
         this.scrollTo();
-        this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+        const result = await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
             queryParams: {
                 addToCollection: this.addToCollection
                     ? this.addToCollection.ref.id
@@ -510,6 +511,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 reurl: this.searchService.reurl,
             },
         });
+        if(result !== true) {
+            this.invalidateMds();
+            this.searchService.init();
+        }
     }
 
     getSearch(
@@ -674,22 +679,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (init) {
             this.searchService.facettes = data.facettes;
-            this.mdsSuggestions = {};
-            if (data.facettes) {
-                for (let facette of data.facettes) {
-                    facette.values = facette.values.slice(0, 5);
-                    this.mdsSuggestions[facette.property] = [];
-                    const widget = MdsHelper.getWidget(facette.property, null, this.currentMdsSet?.widgets);
-                    for (let value of facette.values) {
-                        const cap =  widget?.values?.find((v: any) => v.id === value.value);
-                        this.mdsSuggestions[facette.property].push({
-                            id: value.value,
-                            caption: cap ? cap.caption : value.value,
-                            count: value.count
-                        });
-                    }
-                }
-            }
+            this.mdsFacets = this.getMdsFacets(data.facettes);
             if (this.searchService.facettes && this.searchService.facettes[0]) {
                 if (
                     this.searchService.autocompleteData.keyword &&
@@ -719,6 +709,24 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 );
             }
         }
+    }
+
+    private getMdsFacets(facets: Facette[]): FacetValues {
+        // TODO: consider doing this in an MDS service.
+        const result: FacetValues = {};
+        for (const facet of facets ?? []) {
+            result[facet.property] = [];
+            const widget = MdsHelper.getWidget(facet.property, null, this.currentMdsSet?.widgets);
+            for (let value of facet.values) {
+                const cap = widget?.values?.find((v: any) => v.id === value.value);
+                result[facet.property].push({
+                    id: value.value,
+                    caption: cap ? cap.caption : value.value,
+                    count: value.count,
+                });
+            }
+        }
+        return result;
     }
 
     updateMds() {
@@ -1105,29 +1113,25 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             offset: this.searchService.dataSourceSearchResult[position]?.getData()?.length || 0,
             propertyFilter: [properties],
         };
-        let permissions;
+        let permissions: string[];
         if(this.applyMode){
             permissions = [RestConstants.ACCESS_CC_PUBLISH];
         }
-        let facettes;
-        try {
-            facettes = MdsHelper.getUsedWidgets(this.currentMdsSet, 'search_suggestions').map((w: any) => w.id);
-        } catch(e) {
-            console.warn('Could not load used facettes from search_suggestions', e);
-            facettes = [RestConstants.LOM_PROP_GENERAL_KEYWORD];
-        }
-        let queryRequest =
-        this.search
-            .searchWithBody(
-                {criterias, facettes, permissions},
-                request,
-                RestConstants.CONTENT_TYPE_FILES,
-                repo ? repo.id : RestConstants.HOME_REPOSITORY,
-                mdsId,
+        let queryRequest = this.mdsDesktopRef.mdsEditorInstance
+            .getNeededFacets()
+            .pipe(
+                switchMap((facettes) =>
+                    this.search.searchWithBody(
+                        { criterias, facettes, permissions },
+                        request,
+                        RestConstants.CONTENT_TYPE_FILES,
+                        repo ? repo.id : RestConstants.HOME_REPOSITORY,
+                        mdsId,
+                    ),
+                ),
             );
             const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed &&
                 this.isHomeRepository() && this.config.instant('frontpage.enabled', true);
-            // console.log('useFrontpage: ' + useFrontpage, !this.searchService.searchTerm, !this.searchService.extendedSearchUsed, this.isHomeRepository());
             if(useFrontpage && tryFrontpage) {
                 queryRequest = this.nodeApi.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL], request);
             }

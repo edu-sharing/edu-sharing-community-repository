@@ -333,6 +333,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
                 value = ValueTool.toMultivalue(result.toArray(new String[result.size()]));
             }
+            if(entry.getKey().equals("cm:created") || entry.getKey().equals("cm:modified") && value != null){
+                props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.LONG_DATE_SUFFIX , ((Long)value).toString());
+            }
             props.put(CCConstants.getValidGlobalName(entry.getKey()), value);
 
             /**

@@ -75,6 +75,7 @@ import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import {ResizableModule} from 'angular-resizable-element';
 import { MainMenuButtonsComponent } from './common/ui/main-menu-buttons/main-menu-buttons.component';
+import { MdsEditorWidgetFacetListComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -141,6 +142,7 @@ import { MainMenuButtonsComponent } from './common/ui/main-menu-buttons/main-men
         OnAttributeChangeDirective,
         extensionDeclarations,
         MainMenuButtonsComponent,
+        MdsEditorWidgetFacetListComponent,
     ],
     imports: [
         IMPORTS,

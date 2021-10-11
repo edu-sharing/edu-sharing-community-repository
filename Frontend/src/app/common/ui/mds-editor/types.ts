@@ -87,6 +87,7 @@ export enum MdsWidgetType {
     SingleValueTree = 'singlevalueTree',
     MultiValueTree = 'multivalueTree',
     DefaultValue = 'defaultvalue',
+    FacetList = 'facetList',
 }
 
 // Entries must be lowercase only.
@@ -168,6 +169,8 @@ export interface MdsWidget {
     isRequired: RequiredMode;
     isSearchable: boolean;
     isExtended: boolean|string;
+    hideIfEmpty: boolean;
+    interactionType: 'Input' | 'None';
 }
 
 // Incomplete, fill in as needed.
@@ -177,7 +180,7 @@ export interface MdsWidgetValue {
     description?: string;
     parent?: string;
 }
-export type MdsWidgetFacetValue = MdsWidgetValue & { count?: string };
+export type MdsWidgetFacetValue = MdsWidgetValue & { count: number };
 
 export interface MdsWidgetCondition {
     dynamic: boolean;
@@ -187,7 +190,7 @@ export interface MdsWidgetCondition {
     pattern?: string;
 }
 
-export type Suggestions = { [property: string]: MdsWidgetValue[] };
+export type FacetValues = { [property: string]: MdsWidgetFacetValue[] };
 
 export enum RequiredMode {
     Mandatory = 'mandatory',
