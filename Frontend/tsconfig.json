@@ -7,6 +7,15 @@
       "edu-sharing-api": [
         "dist/edu-sharing-api/edu-sharing-api",
         "dist/edu-sharing-api"
+      ],
+      "@angular/*": [
+        "./node_modules/@angular/*"
+      ],
+      "rxjs": [
+        "./node_modules/rxjs"
+      ],
+      "rxjs/*": [
+        "./node_modules/rxjs/*"
       ]
     },
     "declaration": false,

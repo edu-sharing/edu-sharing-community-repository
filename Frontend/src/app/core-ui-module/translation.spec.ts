@@ -1,6 +1,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import {
     ConfigurationService,
@@ -10,7 +11,7 @@ import { Translation } from './translation';
 
 class ConfigurationStubService {
     get(key: string, defaultValue?: any) {
-        return Observable.of(defaultValue);
+        return rxjs.of(defaultValue);
     }
     instant(key: string, defaultValue?: any) {
         return defaultValue;
@@ -26,13 +27,13 @@ class ConfigurationStubService {
 
 class SessionStorageStubService {
     get(key: string) {
-        return Observable.of(null);
+        return rxjs.of(null);
     }
     set(key: string, value: string) {}
 }
 
 class ActivatedRouteStub {
-    queryParams = Observable.of({});
+    queryParams = rxjs.of({});
 }
 
 describe('Translation', () => {
@@ -51,10 +52,10 @@ describe('Translation', () => {
                 'getTranslation',
             ]);
             translateServiceSpy.getTranslation.and.callFake(() =>
-                Observable.of(null),
+                rxjs.of(null),
             );
             translateServiceSpy.use.and.callFake(() =>
-                Observable.of(null),
+                rxjs.of(null),
             );
             configurationStubService = new ConfigurationStubService();
             sessionStorageStubService = new SessionStorageStubService();
@@ -125,7 +126,7 @@ describe('Translation', () => {
             const storageGetSpy = spyOn(
                 sessionStorageStubService,
                 'get',
-            ).and.returnValue(Observable.of('en'));
+            ).and.returnValue(rxjs.of('en'));
             const lang = await callInitialize();
             expect(storageGetSpy.calls.count()).toBe(
                 1,
@@ -156,8 +157,8 @@ describe('Translation', () => {
             const storageGetSpy = spyOn(
                 sessionStorageStubService,
                 'get',
-            ).and.returnValue(Observable.of('de'));
-            activatedRouteStub.queryParams = Observable.of({ locale: 'en' });
+            ).and.returnValue(rxjs.of('de'));
+            activatedRouteStub.queryParams = rxjs.of({ locale: 'en' });
             const lang = await callInitialize();
             expect(lang).toBe('en');
         });
