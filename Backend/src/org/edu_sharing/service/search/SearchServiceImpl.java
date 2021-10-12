@@ -159,7 +159,8 @@ public class SearchServiceImpl implements SearchService {
 				null
 		);
 		StringBuilder query= new StringBuilder(mdsQuery + " AND ("
-				+ "NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+				+ "NOT (@ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+				+ 		"OR @cm\\:creator:\"" + QueryParser.escape(username) + "\")"
 				+ " AND (");
 		int i=0;
 		if(type.equals(SharedToMeType.All)) {
