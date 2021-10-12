@@ -414,6 +414,7 @@
     },
     "AUTHORITY_TYPE_GROUP": "Group",
     "AUTHORITY_TYPE_ORG": "Organisation",
+    "CHILDOBJECT_COUNT": "{{count}} elements (series)",
     "GROUP": {
         "displayName": "group name",
         "authorityName": "system name",

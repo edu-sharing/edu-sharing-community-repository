@@ -66,7 +66,8 @@ export interface ListDragGropConfig<T extends Node> {
 export enum ClickSource {
     Preview,
     Icon,
-    Metadata
+    Metadata,
+    Comments
 }
 export type NodeClickEvent<T extends Node> = {
     element: T,

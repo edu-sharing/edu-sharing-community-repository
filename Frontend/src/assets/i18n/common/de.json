@@ -484,6 +484,7 @@
     },
     "AUTHORITY_TYPE_GROUP": "Gruppe",
     "AUTHORITY_TYPE_ORG": "Organisation",
+    "CHILDOBJECT_COUNT": "{{count}} Elemente (Serienobjekt)",
     "GROUP": {
         "displayName": "Gruppenname",
         "authorityName": "Systemname",

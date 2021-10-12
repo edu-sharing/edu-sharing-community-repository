@@ -8,7 +8,7 @@ $collectionIconSize: 25px;
 @import '../node-entries-card/node-entries-card.main';
 .grid-card {
     .card-meta {
-        grid-template-columns: 50%;
+        // grid-template-columns: 50%;
         padding-bottom: $entriesCardPaddingVertical;
 
         .card-meta-row {

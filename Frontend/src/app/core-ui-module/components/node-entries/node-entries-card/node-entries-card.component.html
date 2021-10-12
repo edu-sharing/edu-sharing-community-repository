@@ -41,6 +41,30 @@
       <i icon="edu-pin"></i>
     </div>
     <div class="card-top-bar-empty"></div>
+    <div class="card-top-bar-comments"
+    >
+      <div
+        class="node-comments"
+        *ngIf="node.type === 'ccm:io'"
+        (appDistinctClick)="entriesService.clickItem.emit({
+          element: node,
+          source: ClickSource.Comments
+       })"
+        [matTooltip]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
+      >
+        <i icon="comment"></i>
+        <span>{{node.commentCount}}</span>
+      </div>
+    </div>
+    <div class="card-top-bar-childobjects"
+         *ngIf="node.properties?.['virtual:childobjectcount'] > 0"
+    >
+      <div class="childobject-count"
+           matTooltip="{{'CHILDOBJECT_COUNT' | translate:{count: node.properties['virtual:childobjectcount'] * 1 + 1} }}"
+      >
+        <span>{{node.properties['virtual:childobjectcount'] * 1 + 1}}</span><i icon="filter_none"></i>
+      </div>
+    </div>
     <div class="card-top-bar-checkbox">
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
