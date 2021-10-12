@@ -1476,7 +1476,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						userAddAcesList.put(notify.getNotifyUser(),new ArrayList<>(Arrays.asList(notify.getAcl().getAces())));
 						predecessor = notify;
 					}else{
-						List<ACE> notifyAces = Arrays.asList(notify.getAcl().getAces());
+						List<ACE> notifyAces = new ArrayList(Arrays.asList(notify.getAcl().getAces()));
 						boolean isDiff = notifyAces.removeAll(Arrays.asList(predecessor.getAcl().getAces()));
 						if(isDiff){
 							List<ACE> addedAcesForUser = userAddAcesList.get(notify.getNotifyUser());
