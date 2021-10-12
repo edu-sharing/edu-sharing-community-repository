@@ -65,6 +65,8 @@ import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
 
+import static java.util.stream.Collectors.toList;
+
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
 
@@ -432,7 +434,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			} else {
 				return (String)nodeService.getProperty(n, QName.createQName(CCConstants.CM_PROP_AUTHORITY_NAME));
 			}
-		}).collect(Collectors.toList());
+		}).collect(toList());
 	}
 	@Override
 	public ArrayList<NodeRef> getRecentProperty(String property) {
@@ -1438,6 +1440,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					}
 					history.add(jsonStringACL);
 					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
+					fixSharedByMe(nodeRef);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -1447,6 +1450,80 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 			return null;
 		});
+	}
+
+	private void fixSharedByMe(NodeRef nodeRef){
+
+		try {
+			ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+			if(phUsers == null || phUsers.size() == 0){
+				return;
+			}
+			List<Notify> notifyList = getNotifyList(nodeRef.getId());
+			Notify predecessor = null;
+			Map<String,List<ACE>> userAddAcesList = new HashMap<>();
+			/**
+			 * collect user addes ace's
+			 */
+			for(Notify notify : notifyList){
+				logger.info("Notify e:" + notify.getNotifyEvent()
+						+" a:"+notify.getNotifyAction()
+						+" u:"+notify.getNotifyUser()
+						+" c:"+notify.getChange()
+						+" date:"+notify.getCreatedFormated());
+				if(CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD.equals(notify.getNotifyAction())){
+					if(predecessor == null){
+						userAddAcesList.put(notify.getNotifyUser(),new ArrayList<>(Arrays.asList(notify.getAcl().getAces())));
+						predecessor = notify;
+					}else{
+						List<ACE> notifyAces = Arrays.asList(notify.getAcl().getAces());
+						boolean isDiff = notifyAces.removeAll(Arrays.asList(predecessor.getAcl().getAces()));
+						if(isDiff){
+							List<ACE> addedAcesForUser = userAddAcesList.get(notify.getNotifyUser());
+							if(addedAcesForUser == null) addedAcesForUser = new ArrayList<>();
+							addedAcesForUser.addAll(notifyAces);
+							userAddAcesList.put(notify.getNotifyUser(),addedAcesForUser);
+						}
+					}
+				}
+			}
+			/**
+			 * find out if current aces still contains at least one user added ace
+			 * if not collect the user in remove list
+			 */
+			Notify currentNotify = notifyList.get(notifyList.size() - 1);
+			List<String> removePhUsers = new ArrayList<>();
+			for(Map.Entry<String, List<ACE>> entry: userAddAcesList.entrySet()){
+				if(entry.getValue() == null || entry.getValue().size() == 0){
+					removePhUsers.add(entry.getKey());
+					continue;
+				}
+				if(currentNotify.getAcl() == null
+						|| currentNotify.getAcl().getAces() == null
+						|| currentNotify.getAcl().getAces().length == 0){
+					removePhUsers.add(entry.getKey());
+					continue;
+				}
+
+				List<ACE> userAddedAces = entry.getValue();
+				List<ACE> remainingUserAddedAces = (List<ACE>)new ArrayList(Arrays.asList(currentNotify.getAcl().getAces()))
+						.stream()
+						.filter(userAddedAces::contains)
+						.collect(toList());
+				if(remainingUserAddedAces == null || remainingUserAddedAces.size() == 0){
+					removePhUsers.add(entry.getKey());
+				}
+			}
+			/**
+			 * remove users from PH_USERS property
+			 */
+			if(phUsers.removeAll(removePhUsers)){
+				nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_PH_USERS),phUsers);
+			}
+
+		} catch (Throwable e) {
+			logger.error(e.getMessage(),e);
+		}
 	}
 
 	@Override
