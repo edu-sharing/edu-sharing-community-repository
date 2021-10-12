@@ -1462,6 +1462,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			List<Notify> notifyList = getNotifyList(nodeRef.getId());
 			Notify predecessor = null;
 			Map<String,List<ACE>> userAddAcesList = new HashMap<>();
+
+			notifyList.sort(Comparator.comparing(Notify::getCreated));
 			/**
 			 * collect user addes ace's
 			 */
@@ -1470,10 +1472,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						+" a:"+notify.getNotifyAction()
 						+" u:"+notify.getNotifyUser()
 						+" c:"+notify.getChange()
-						+" date:"+notify.getCreatedFormated());
+						+" date:"+notify.getCreated());
 				if(CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD.equals(notify.getNotifyAction())){
 					if(predecessor == null){
-						userAddAcesList.put(notify.getNotifyUser(),new ArrayList<>(Arrays.asList(notify.getAcl().getAces())));
+						List<ACE> addedAcesForUser = new ArrayList<>(Arrays.asList(notify.getAcl().getAces()));
+						addedAcesForUser = filterACEList(addedAcesForUser,notify.getNotifyUser());
+						userAddAcesList.put(notify.getNotifyUser(),addedAcesForUser);
 						predecessor = notify;
 					}else{
 						List<ACE> notifyAces = new ArrayList(Arrays.asList(notify.getAcl().getAces()));
@@ -1482,6 +1486,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 							List<ACE> addedAcesForUser = userAddAcesList.get(notify.getNotifyUser());
 							if(addedAcesForUser == null) addedAcesForUser = new ArrayList<>();
 							addedAcesForUser.addAll(notifyAces);
+							addedAcesForUser = filterACEList(addedAcesForUser,notify.getNotifyUser());
 							userAddAcesList.put(notify.getNotifyUser(),addedAcesForUser);
 						}
 					}
@@ -1524,6 +1529,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		} catch (Throwable e) {
 			logger.error(e.getMessage(),e);
 		}
+	}
+
+	private List<ACE> filterACEList(List<ACE> aces, String user){
+		return aces.stream().filter(ace -> !"ROLE_OWNER".equals(ace.getAuthority()) && !user.equals(ace.getAuthority()))
+				.collect(Collectors.toList());
 	}
 
 	@Override
