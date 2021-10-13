@@ -69,14 +69,7 @@ public class Group extends Authority {
 	public void setProfile(GroupProfile profile) {
 		this.profile = profile;
 	}
-	
-	public boolean isEditable() {
-		return editable;
-	}
-	
-	public void setEditable(boolean editable) {
-		this.editable = editable;
-	}
+
 	@JsonProperty
 	public NodeRef getRef() {
 		return ref;
