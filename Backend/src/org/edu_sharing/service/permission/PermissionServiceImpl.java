@@ -1497,7 +1497,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			 * if not collect the user in remove list
 			 */
 			Notify currentNotify = notifyList.get(notifyList.size() - 1);
-			List<String> removePhUsers = new ArrayList<>();
+			Set<String> removePhUsers = new HashSet<>();
 			for(Map.Entry<String, List<ACE>> entry: userAddAcesList.entrySet()){
 				if(entry.getValue() == null || entry.getValue().size() == 0){
 					removePhUsers.add(entry.getKey());
@@ -1519,6 +1519,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					removePhUsers.add(entry.getKey());
 				}
 			}
+			/**
+			 * remove users that are in ph_users but never added an permission.
+			 * i.e. only did "change permission", "remove permission"
+			 */
+			removePhUsers.addAll(phUsers.stream().filter(u -> !userAddAcesList.keySet().contains(u)).collect(Collectors.toList()));
+
 			/**
 			 * remove users from PH_USERS property
 			 */
