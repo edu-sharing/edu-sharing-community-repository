@@ -29,7 +29,7 @@
     <mat-cell *matCellDef="let node">
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
-        (change)="entriesService.selection.toggle(node)"
+        (change)="entriesService.handleSelectionEvent(node)"
         aria-label="{{ 'SELECT' | translate:{element:(node | nodeTitle)} }}"
       ></mat-checkbox>
     </mat-cell>

@@ -68,7 +68,7 @@
     <div class="card-top-bar-checkbox">
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
-        (change)="entriesService.selection.toggle(node)"
+        (change)="entriesService.handleSelectionEvent(node)"
         aria-label="{{ 'SELECT' | translate:{element:(node | nodeTitle)} }}"
       ></mat-checkbox>
     </div>

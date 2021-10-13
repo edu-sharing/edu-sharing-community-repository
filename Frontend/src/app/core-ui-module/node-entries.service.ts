@@ -17,6 +17,7 @@ import {ListItem} from '../core-module/ui/list-item';
 import {SelectionModel} from '@angular/cdk/collections';
 import {OptionItem} from './option-item';
 import {Sort} from '@angular/material/sort';
+import {UIService} from '../core-module/rest/services/ui.service';
 
 @Injectable()
 export class NodeEntriesService<T extends Node> {
@@ -35,4 +36,26 @@ export class NodeEntriesService<T extends Node> {
     dblClickItem: EventEmitter<NodeClickEvent<T>>;
     fetchData: EventEmitter<FetchEvent>;
     gridConfig: GridConfig;
+
+    constructor(
+        private uiService: UIService,
+    ) {
+    }
+
+    handleSelectionEvent(node: T) {
+        if(this.selection.isSelected(node)) {
+            this.selection.toggle(node);
+        } else {
+            if(this.uiService.isShiftCmd()) {
+                const selected = this.selection.selected.map((s) => this.dataSource.getData().indexOf(s)).sort(
+                    (a,b) => a > b ? 1 : -1
+                );
+                for(let i = selected[0]; i <= this.dataSource.getData().indexOf(node); i++) {
+                    this.selection.select(this.dataSource.getData()[i]);
+                }
+            } else {
+                this.selection.toggle(node);
+            }
+        }
+    }
 }
