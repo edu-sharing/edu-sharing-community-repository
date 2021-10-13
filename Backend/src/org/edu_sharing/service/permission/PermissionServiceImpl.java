@@ -860,6 +860,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						continue;
 					}
 
+					if(!AuthorityServiceFactory.getLocalService().isGlobalAdmin()){
+						String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+						if(fullyAuthenticatedUser != null){
+							String owner = serviceRegistry.getOwnableService().getOwner(nodeRef);
+							if(ace.getAuthority().equals(fullyAuthenticatedUser) && !fullyAuthenticatedUser.equals(owner)){
+								logger.warn("user should not uninvite himself");
+								continue;
+							}
+						}
+					}
+
 					// logger.info("ace.getAuthority():"+ace.getAuthority()+"
 					// ace.getPermission():"+ace.getPermission());
 					if (ace.getAuthority().equals(authority) && ace.getPermission().equals(permission)) {
