@@ -7,11 +7,11 @@ import { SortV2 } from './sort-v-2';
 import { ViewV2 } from './view-v-2';
 import { WidgetV2 } from './widget-v-2';
 export interface MdsV2 {
-  create?: Create;
-  groups?: Array<GroupV2>;
-  lists?: Array<ListV2>;
-  name?: string;
-  sorts?: Array<SortV2>;
-  views?: Array<ViewV2>;
-  widgets?: Array<WidgetV2>;
+    create?: Create;
+    groups?: Array<GroupV2>;
+    lists?: Array<ListV2>;
+    name?: string;
+    sorts?: Array<SortV2>;
+    views?: Array<ViewV2>;
+    widgets?: Array<WidgetV2>;
 }

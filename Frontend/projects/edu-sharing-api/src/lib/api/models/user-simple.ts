@@ -4,13 +4,13 @@ import { Organization } from './organization';
 import { UserProfile } from './user-profile';
 import { UserStatus } from './user-status';
 export interface UserSimple {
-  authorityName: string;
-  authorityType?: 'USER' | 'GROUP' | 'OWNER' | 'EVERYONE' | 'GUEST';
-  organizations?: Array<Organization>;
-  profile?: UserProfile;
-  properties?: {
-[key: string]: Array<string>;
-};
-  status?: UserStatus;
-  userName?: string;
+    authorityName: string;
+    authorityType?: 'USER' | 'GROUP' | 'OWNER' | 'EVERYONE' | 'GUEST';
+    organizations?: Array<Organization>;
+    profile?: UserProfile;
+    properties?: {
+        [key: string]: Array<string>;
+    };
+    status?: UserStatus;
+    userName?: string;
 }

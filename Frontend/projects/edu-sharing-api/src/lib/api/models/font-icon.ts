@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export interface FontIcon {
-  original?: string;
-  replace?: string;
+    original?: string;
+    replace?: string;
 }

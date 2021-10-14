@@ -12,219 +12,224 @@ import { map, filter } from 'rxjs/operators';
 import { RenderingDetailsEntry } from '../models/rendering-details-entry';
 
 @Injectable({
-  providedIn: 'root',
+    providedIn: 'root',
 })
 export class RenderingV1Service extends BaseService {
-  constructor(
-    config: ApiConfiguration,
-    http: HttpClient
-  ) {
-    super(config, http);
-  }
-
-  /**
-   * Path part for operation getDetailsSnippet
-   */
-  static readonly GetDetailsSnippetPath = '/rendering/v1/details/{repository}/{node}';
-
-  /**
-   * Get metadata of node.
-   *
-   * Get metadata of node.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getDetailsSnippet()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getDetailsSnippet$Response(params: {
-
-    /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
-     */
-    repository: string;
-
-    /**
-     * ID of node
-     */
-    node: string;
-
-    /**
-     * version of node
-     */
-    version?: string;
-
-    /**
-     * Rendering displayMode
-     */
-    displayMode?: string;
-  }): Observable<StrictHttpResponse<RenderingDetailsEntry>> {
-
-    const rb = new RequestBuilder(this.rootUrl, RenderingV1Service.GetDetailsSnippetPath, 'get');
-    if (params) {
-      rb.path('repository', params.repository, {"style":"simple","explode":false});
-      rb.path('node', params.node, {"style":"simple","explode":false});
-      rb.query('version', params.version, {"style":"form","explode":true});
-      rb.query('displayMode', params.displayMode, {"style":"form","explode":true});
+    constructor(config: ApiConfiguration, http: HttpClient) {
+        super(config, http);
     }
 
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<RenderingDetailsEntry>;
-      })
-    );
-  }
-
-  /**
-   * Get metadata of node.
-   *
-   * Get metadata of node.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getDetailsSnippet$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getDetailsSnippet(params: {
+    /**
+     * Path part for operation getDetailsSnippet
+     */
+    static readonly GetDetailsSnippetPath = '/rendering/v1/details/{repository}/{node}';
 
     /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
+     * Get metadata of node.
+     *
+     * Get metadata of node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getDetailsSnippet()` instead.
+     *
+     * This method doesn't expect any request body.
      */
-    repository: string;
+    getDetailsSnippet$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
-    /**
-     * ID of node
-     */
-    node: string;
+        /**
+         * ID of node
+         */
+        node: string;
 
-    /**
-     * version of node
-     */
-    version?: string;
+        /**
+         * version of node
+         */
+        version?: string;
 
-    /**
-     * Rendering displayMode
-     */
-    displayMode?: string;
-  }): Observable<RenderingDetailsEntry> {
+        /**
+         * Rendering displayMode
+         */
+        displayMode?: string;
+    }): Observable<StrictHttpResponse<RenderingDetailsEntry>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            RenderingV1Service.GetDetailsSnippetPath,
+            'get',
+        );
+        if (params) {
+            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.query('version', params.version, { style: 'form', explode: true });
+            rb.query('displayMode', params.displayMode, { style: 'form', explode: true });
+        }
 
-    return this.getDetailsSnippet$Response(params).pipe(
-      map((r: StrictHttpResponse<RenderingDetailsEntry>) => r.body as RenderingDetailsEntry)
-    );
-  }
-
-  /**
-   * Path part for operation getDetailsSnippetWithParameters
-   */
-  static readonly GetDetailsSnippetWithParametersPath = '/rendering/v1/details/{repository}/{node}';
-
-  /**
-   * Get metadata of node.
-   *
-   * Get metadata of node.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getDetailsSnippetWithParameters()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  getDetailsSnippetWithParameters$Response(params: {
-
-    /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
-     */
-    repository: string;
-
-    /**
-     * ID of node
-     */
-    node: string;
-
-    /**
-     * version of node
-     */
-    version?: string;
-
-    /**
-     * Rendering displayMode
-     */
-    displayMode?: string;
-
-    /**
-     * additional parameters to send to the rendering service
-     */
-    body?: {
-[key: string]: string;
-}
-  }): Observable<StrictHttpResponse<RenderingDetailsEntry>> {
-
-    const rb = new RequestBuilder(this.rootUrl, RenderingV1Service.GetDetailsSnippetWithParametersPath, 'post');
-    if (params) {
-      rb.path('repository', params.repository, {"style":"simple","explode":false});
-      rb.path('node', params.node, {"style":"simple","explode":false});
-      rb.query('version', params.version, {"style":"form","explode":true});
-      rb.query('displayMode', params.displayMode, {"style":"form","explode":true});
-      rb.body(params.body, 'application/json');
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<RenderingDetailsEntry>;
+                }),
+            );
     }
 
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<RenderingDetailsEntry>;
-      })
-    );
-  }
+    /**
+     * Get metadata of node.
+     *
+     * Get metadata of node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getDetailsSnippet$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getDetailsSnippet(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
-  /**
-   * Get metadata of node.
-   *
-   * Get metadata of node.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getDetailsSnippetWithParameters$Response()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  getDetailsSnippetWithParameters(params: {
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * version of node
+         */
+        version?: string;
+
+        /**
+         * Rendering displayMode
+         */
+        displayMode?: string;
+    }): Observable<RenderingDetailsEntry> {
+        return this.getDetailsSnippet$Response(params).pipe(
+            map((r: StrictHttpResponse<RenderingDetailsEntry>) => r.body as RenderingDetailsEntry),
+        );
+    }
 
     /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
+     * Path part for operation getDetailsSnippetWithParameters
      */
-    repository: string;
+    static readonly GetDetailsSnippetWithParametersPath =
+        '/rendering/v1/details/{repository}/{node}';
 
     /**
-     * ID of node
+     * Get metadata of node.
+     *
+     * Get metadata of node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getDetailsSnippetWithParameters()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
-    node: string;
+    getDetailsSnippetWithParameters$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * version of node
+         */
+        version?: string;
+
+        /**
+         * Rendering displayMode
+         */
+        displayMode?: string;
+
+        /**
+         * additional parameters to send to the rendering service
+         */
+        body?: {
+            [key: string]: string;
+        };
+    }): Observable<StrictHttpResponse<RenderingDetailsEntry>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            RenderingV1Service.GetDetailsSnippetWithParametersPath,
+            'post',
+        );
+        if (params) {
+            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.query('version', params.version, { style: 'form', explode: true });
+            rb.query('displayMode', params.displayMode, { style: 'form', explode: true });
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<RenderingDetailsEntry>;
+                }),
+            );
+    }
 
     /**
-     * version of node
+     * Get metadata of node.
+     *
+     * Get metadata of node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getDetailsSnippetWithParameters$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
-    version?: string;
+    getDetailsSnippetWithParameters(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
-    /**
-     * Rendering displayMode
-     */
-    displayMode?: string;
+        /**
+         * ID of node
+         */
+        node: string;
 
-    /**
-     * additional parameters to send to the rendering service
-     */
-    body?: {
-[key: string]: string;
-}
-  }): Observable<RenderingDetailsEntry> {
+        /**
+         * version of node
+         */
+        version?: string;
 
-    return this.getDetailsSnippetWithParameters$Response(params).pipe(
-      map((r: StrictHttpResponse<RenderingDetailsEntry>) => r.body as RenderingDetailsEntry)
-    );
-  }
+        /**
+         * Rendering displayMode
+         */
+        displayMode?: string;
 
+        /**
+         * additional parameters to send to the rendering service
+         */
+        body?: {
+            [key: string]: string;
+        };
+    }): Observable<RenderingDetailsEntry> {
+        return this.getDetailsSnippetWithParameters$Response(params).pipe(
+            map((r: StrictHttpResponse<RenderingDetailsEntry>) => r.body as RenderingDetailsEntry),
+        );
+    }
 }

@@ -3,6 +3,6 @@
 import { CollectionReference } from './collection-reference';
 import { Pagination } from './pagination';
 export interface ReferenceEntries {
-  pagination?: Pagination;
-  references: Array<CollectionReference>;
+    pagination?: Pagination;
+    references: Array<CollectionReference>;
 }

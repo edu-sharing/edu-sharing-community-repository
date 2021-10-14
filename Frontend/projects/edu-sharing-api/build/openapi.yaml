@@ -6,32 +6,32 @@ info:
 servers:
 - url: /edu-sharing/rest
 tags:
-- name: USAGE v1
-- name: CLIENTUTILS v1
-- name: ABOUT
 - name: COMMENT v1
-- name: NETWORK v1
-- name: ORGANIZATION v1
 - name: REGISTER v1
-- name: STREAM v1
-- name: ADMIN v1
-- name: IAM v1
-- name: RENDERING v1
-- name: CONFIG v1
-- name: MEDIACENTER v1
-- name: BULK v1
-- name: CONNECTOR v1
 - name: COLLECTION v1
-- name: RATING v1
-- name: AUTHENTICATION v1
-- name: ARCHIVE v1
-- name: TOOL v1
-- name: TRACKING v1
 - name: SHARING v1
+- name: CONNECTOR v1
+- name: IAM v1
+- name: NETWORK v1
+- name: BULK v1
+- name: ORGANIZATION v1
 - name: SEARCH v1
-- name: NODE v1
+- name: ARCHIVE v1
+- name: TRACKING v1
+- name: ABOUT
+- name: USAGE v1
+- name: TOOL v1
 - name: MDS v1
+- name: RATING v1
+- name: ADMIN v1
+- name: MEDIACENTER v1
+- name: AUTHENTICATION v1
+- name: CONFIG v1
+- name: CLIENTUTILS v1
+- name: STREAM v1
+- name: NODE v1
 - name: STATISTIC v1
+- name: RENDERING v1
 paths:
   /_about:
     get:
@@ -3678,11 +3678,11 @@ paths:
         explode: true
         schema:
           type: string
-          default: PENDING
           enum:
           - PENDING
           - ACCEPTED
           - DECLINED
+          default: PENDING
       - name: fetchCounts
         in: query
         description: fetch counts of collections (materials and subcollections). This
@@ -4216,7 +4216,6 @@ paths:
         explode: true
         schema:
           type: string
-          default: MY
           enum:
           - EDU_ALL
           - EDU_GROUPS
@@ -4224,6 +4223,7 @@ paths:
           - TYPE_MEDIA_CENTER
           - MY
           - RECENT
+          default: MY
       - name: fetchCounts
         in: query
         description: fetch counts of collections (materials and subcollections). This
@@ -14241,10 +14241,10 @@ paths:
         explode: true
         schema:
           type: string
-          default: PERSON
           enum:
           - PERSON
           - ORGANIZATION
+          default: PERSON
       - name: fields
         in: query
         description: "define which authority fields should be searched: ['firstname',\
@@ -14422,6 +14422,88 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/SearchResultNode'
+        "400":
+          description: Preconditions are not present.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Authorization failed.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "403":
+          description: Session user has insufficient rights to perform this operation.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Ressources are not found.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Fatal error occured.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: body
+  /search/v1/queriesV2/{repository}/{metadataset}/{query}/facets:
+    post:
+      tags:
+      - SEARCH v1
+      summary: Search in facets
+      description: Perform queries based on metadata sets V2.
+      operationId: searchFacets
+      parameters:
+      - name: repository
+        in: path
+        description: ID of repository (or "-home-" for home repository)
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: -home-
+      - name: metadataset
+        in: path
+        description: ID of metadataset (or "-default-" for default metadata set)
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: -default-
+      - name: query
+        in: path
+        description: ID of query
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: facet parameters
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchParametersFacets'
+        required: true
+      responses:
+        "200":
+          description: OK.
+          content:
+            'application/json':
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties: {}
         "400":
           description: Preconditions are not present.
           content:
@@ -16545,7 +16627,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/Usage'
+              $ref: '#/components/schemas/CreateUsage'
         required: true
       responses:
         "200":
@@ -17186,6 +17268,13 @@ components:
           - OWNER
           - EVERYONE
           - GUEST
+    DynamicConfig:
+      type: object
+      properties:
+        nodeId:
+          type: string
+        value:
+          type: string
     StreamEntry:
       type: object
       properties:
@@ -17213,13 +17302,6 @@ components:
         modified:
           type: integer
           format: int64
-    DynamicConfig:
-      type: object
-      properties:
-        nodeId:
-          type: string
-        value:
-          type: string
     StatisticsSubGroup:
       type: object
       properties:
@@ -17532,6 +17614,11 @@ components:
         maxlength:
           type: integer
           format: int32
+        interactionType:
+          type: string
+          enum:
+          - Input
+          - None
         id:
           type: string
         caption:
@@ -17827,12 +17914,6 @@ components:
           $ref: '#/components/schemas/Person'
         originalId:
           type: string
-    MediacentersImportResult:
-      type: object
-      properties:
-        rows:
-          type: integer
-          format: int32
     AbstractEntries:
       required:
       - nodes
@@ -17846,6 +17927,12 @@ components:
             properties: {}
         pagination:
           $ref: '#/components/schemas/Pagination'
+    MediacentersImportResult:
+      type: object
+      properties:
+        rows:
+          type: integer
+          format: int32
     NotifyEntry:
       required:
       - action
@@ -17862,6 +17949,19 @@ components:
         user:
           $ref: '#/components/schemas/User'
         action:
+          type: string
+    CreateUsage:
+      type: object
+      properties:
+        appId:
+          type: string
+        courseId:
+          type: string
+        resourceId:
+          type: string
+        nodeId:
+          type: string
+        nodeVersion:
           type: string
     JobInfo:
       type: object
@@ -17940,6 +18040,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Usage'
+    Collections:
+      type: object
+      properties:
+        colors:
+          type: array
+          items:
+            type: string
     WebsiteInformation:
       type: object
       properties:
@@ -17952,13 +18059,6 @@ components:
         license:
           type: string
         keywords:
-          type: array
-          items:
-            type: string
-    Collections:
-      type: object
-      properties:
-        colors:
           type: array
           items:
             type: string
@@ -18731,6 +18831,11 @@ components:
         isLocked:
           type: boolean
           default: false
+    Subwidget:
+      type: object
+      properties:
+        id:
+          type: string
     CollectionOptions:
       type: object
       properties:
@@ -18746,11 +18851,6 @@ components:
           - none
           - assign
           - delete
-    Subwidget:
-      type: object
-      properties:
-        id:
-          type: string
     GroupEntries:
       required:
       - groups
@@ -19098,6 +19198,32 @@ components:
           $ref: '#/components/schemas/ServiceVersion'
         endpoint:
           type: string
+    SearchParametersFacets:
+      required:
+      - criterias
+      - facetLimit
+      - facetMinCount
+      - facettes
+      type: object
+      properties:
+        facettes:
+          type: array
+          items:
+            type: string
+        facetMinCount:
+          type: integer
+          description: "5"
+          format: int32
+        facetLimit:
+          type: integer
+          description: "10"
+          format: int32
+        facetSuggest:
+          type: string
+        criterias:
+          type: array
+          items:
+            $ref: '#/components/schemas/MdsQueryCriteria'
     Profile:
       type: object
       properties:
@@ -19524,6 +19650,40 @@ components:
             attribute: true
         value:
           type: string
+    UserQuota:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+        sizeCurrent:
+          type: integer
+          format: int64
+        sizeQuota:
+          type: integer
+          format: int64
+    RestoreResult:
+      required:
+      - archiveNodeId
+      - name
+      - nodeId
+      - parent
+      - path
+      - restoreStatus
+      type: object
+      properties:
+        archiveNodeId:
+          type: string
+        nodeId:
+          type: string
+        parent:
+          type: string
+        path:
+          type: string
+        name:
+          type: string
+        restoreStatus:
+          type: string
     PersonDeleteOptions:
       type: object
       properties:
@@ -19550,46 +19710,12 @@ components:
           type: string
         receiverGroup:
           type: string
-    UserQuota:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          default: false
-        sizeCurrent:
-          type: integer
-          format: int64
-        sizeQuota:
-          type: integer
-          format: int64
     Guest:
       type: object
       properties:
         enabled:
           type: boolean
           default: false
-    RestoreResult:
-      required:
-      - archiveNodeId
-      - name
-      - nodeId
-      - parent
-      - path
-      - restoreStatus
-      type: object
-      properties:
-        archiveNodeId:
-          type: string
-        nodeId:
-          type: string
-        parent:
-          type: string
-        path:
-          type: string
-        name:
-          type: string
-        restoreStatus:
-          type: string
     StatisticsGroup:
       type: object
       properties:
@@ -19814,13 +19940,6 @@ components:
         executedAt:
           type: integer
           format: int64
-    Counts:
-      type: object
-      properties:
-        elements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Element'
     User:
       required:
       - authorityName
@@ -19861,6 +19980,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NodeRef'
+    Counts:
+      type: object
+      properties:
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Element'
     UserProfile:
       type: object
       properties:
@@ -19937,6 +20063,8 @@ components:
     SearchParameters:
       required:
       - criterias
+      - facetLimit
+      - facetMinCount
       - facettes
       type: object
       properties:
@@ -19947,14 +20075,24 @@ components:
         resolveCollections:
           type: boolean
           default: false
-        criterias:
-          type: array
-          items:
-            $ref: '#/components/schemas/MdsQueryCriteria'
         facettes:
           type: array
           items:
             type: string
+        facetMinCount:
+          type: integer
+          description: "5"
+          format: int32
+        facetLimit:
+          type: integer
+          description: "10"
+          format: int32
+        facetSuggest:
+          type: string
+        criterias:
+          type: array
+          items:
+            $ref: '#/components/schemas/MdsQueryCriteria'
     Create:
       type: object
       properties:
@@ -19967,6 +20105,21 @@ components:
         enabled:
           type: boolean
           default: false
+    WidgetCondition:
+      type: object
+      properties:
+        value:
+          type: string
+        type:
+          type: string
+        negate:
+          type: boolean
+          default: false
+        dynamic:
+          type: boolean
+          default: false
+        pattern:
+          type: string
     SharedFolderOptions:
       type: object
       properties:
@@ -19990,21 +20143,6 @@ components:
         move:
           type: boolean
           default: false
-    WidgetCondition:
-      type: object
-      properties:
-        value:
-          type: string
-        type:
-          type: string
-        negate:
-          type: boolean
-          default: false
-        dynamic:
-          type: boolean
-          default: false
-        pattern:
-          type: string
     LogEntry:
       type: object
       properties:
@@ -20057,42 +20195,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Comment'
-    Service:
-      type: object
-      properties:
-        name:
-          type: string
-        url:
-          type: string
-        icon:
-          type: string
-        logo:
-          type: string
-        inLanguage:
-          type: string
-        type:
-          type: string
-        description:
-          type: string
-        audience:
-          type: array
-          items:
-            $ref: '#/components/schemas/Audience'
-        provider:
-          $ref: '#/components/schemas/Provider'
-        startDate:
-          type: string
-        interfaces:
-          type: array
-          items:
-            $ref: '#/components/schemas/Interface'
-        about:
-          type: array
-          items:
-            type: string
-        isAccessibleForFree:
-          type: boolean
-          default: false
     Preview:
       required:
       - height
@@ -20125,6 +20227,18 @@ components:
         height:
           type: integer
           format: int32
+    Service:
+      required:
+      - instances
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        instances:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceInstance'
     NodePermissionEntry:
       required:
       - permissions

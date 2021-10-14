@@ -1,4 +1,3 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface SessionExpiredDialog {
-}
+export interface SessionExpiredDialog {}

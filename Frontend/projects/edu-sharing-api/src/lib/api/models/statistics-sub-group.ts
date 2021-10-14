@@ -2,6 +2,6 @@
 /* eslint-disable */
 import { SubGroupItem } from './sub-group-item';
 export interface StatisticsSubGroup {
-  count?: Array<SubGroupItem>;
-  id?: string;
+    count?: Array<SubGroupItem>;
+    id?: string;
 }

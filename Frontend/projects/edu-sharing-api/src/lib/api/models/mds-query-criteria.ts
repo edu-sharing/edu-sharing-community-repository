@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export interface MdsQueryCriteria {
-  property: string;
-  values: Array<string>;
+    property: string;
+    values: Array<string>;
 }

@@ -2,5 +2,5 @@
 /* eslint-disable */
 import { FilterEntry } from './filter-entry';
 export interface Filter {
-  entries: Array<FilterEntry>;
+    entries: Array<FilterEntry>;
 }

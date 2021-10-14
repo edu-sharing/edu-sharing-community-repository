@@ -2,5 +2,5 @@
 /* eslint-disable */
 import { Frontpage } from './frontpage';
 export interface RepositoryConfig {
-  frontpage?: Frontpage;
+    frontpage?: Frontpage;
 }

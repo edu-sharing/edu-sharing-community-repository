@@ -1,4 +1,3 @@
 /* tslint:disable */
 /* eslint-disable */
-export interface ConfigRemoteRocketchat {
-}
+export interface ConfigRemoteRocketchat {}

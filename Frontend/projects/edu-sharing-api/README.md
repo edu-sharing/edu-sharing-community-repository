@@ -2,10 +2,16 @@
 
 ## Update And Generate Edu-Sharing API Code
 
+Download an updated `swagger.json` to `build`, e.g.:
+
 ```sh
-SWAGGER_URL=<swagger_json_url> npm run generate-api
-# For example
-SWAGGER_URL=https://redaktion-staging.openeduhub.net/edu-sharing/rest/swagger.json npm run generate-api
+wget https://redaktion-staging.openeduhub.net/edu-sharing/rest/swagger.json -O build/swagger.json
+```
+
+Generate API Code:
+
+```sh
+npm run generate-api
 ```
 
 ## Code scaffolding

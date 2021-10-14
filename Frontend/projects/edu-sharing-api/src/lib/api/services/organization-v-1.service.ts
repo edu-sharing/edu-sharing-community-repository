@@ -13,456 +13,480 @@ import { Organization } from '../models/organization';
 import { OrganizationEntries } from '../models/organization-entries';
 
 @Injectable({
-  providedIn: 'root',
+    providedIn: 'root',
 })
 export class OrganizationV1Service extends BaseService {
-  constructor(
-    config: ApiConfiguration,
-    http: HttpClient
-  ) {
-    super(config, http);
-  }
-
-  /**
-   * Path part for operation getOrganizations
-   */
-  static readonly GetOrganizationsPath = '/organization/v1/organizations/{repository}';
-
-  /**
-   * Get organizations of repository.
-   *
-   * Get organizations of repository the current user is member. May returns an empty list.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getOrganizations()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getOrganizations$Response(params: {
-
-    /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
-     */
-    repository: string;
-
-    /**
-     * pattern
-     */
-    pattern?: string;
-
-    /**
-     * maximum items per page
-     */
-    maxItems?: number;
-
-    /**
-     * skip a number of items
-     */
-    skipCount?: number;
-
-    /**
-     * sort properties
-     */
-    sortProperties?: Array<string>;
-
-    /**
-     * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-     */
-    sortAscending?: Array<boolean>;
-
-    /**
-     * search only in memberships, false can only be done by admin
-     */
-    onlyMemberships?: boolean;
-  }): Observable<StrictHttpResponse<OrganizationEntries>> {
-
-    const rb = new RequestBuilder(this.rootUrl, OrganizationV1Service.GetOrganizationsPath, 'get');
-    if (params) {
-      rb.path('repository', params.repository, {"style":"simple","explode":false});
-      rb.query('pattern', params.pattern, {"style":"form","explode":true});
-      rb.query('maxItems', params.maxItems, {"style":"form","explode":true});
-      rb.query('skipCount', params.skipCount, {"style":"form","explode":true});
-      rb.query('sortProperties', params.sortProperties, {"style":"form","explode":true});
-      rb.query('sortAscending', params.sortAscending, {"style":"form","explode":true});
-      rb.query('onlyMemberships', params.onlyMemberships, {"style":"form","explode":true});
+    constructor(config: ApiConfiguration, http: HttpClient) {
+        super(config, http);
     }
 
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<OrganizationEntries>;
-      })
-    );
-  }
-
-  /**
-   * Get organizations of repository.
-   *
-   * Get organizations of repository the current user is member. May returns an empty list.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getOrganizations$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getOrganizations(params: {
+    /**
+     * Path part for operation getOrganizations
+     */
+    static readonly GetOrganizationsPath = '/organization/v1/organizations/{repository}';
 
     /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
+     * Get organizations of repository.
+     *
+     * Get organizations of repository the current user is member. May returns an empty list.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getOrganizations()` instead.
+     *
+     * This method doesn't expect any request body.
      */
-    repository: string;
+    getOrganizations$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
-    /**
-     * pattern
-     */
-    pattern?: string;
+        /**
+         * pattern
+         */
+        pattern?: string;
 
-    /**
-     * maximum items per page
-     */
-    maxItems?: number;
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
 
-    /**
-     * skip a number of items
-     */
-    skipCount?: number;
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
 
-    /**
-     * sort properties
-     */
-    sortProperties?: Array<string>;
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
 
-    /**
-     * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-     */
-    sortAscending?: Array<boolean>;
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
 
-    /**
-     * search only in memberships, false can only be done by admin
-     */
-    onlyMemberships?: boolean;
-  }): Observable<OrganizationEntries> {
+        /**
+         * search only in memberships, false can only be done by admin
+         */
+        onlyMemberships?: boolean;
+    }): Observable<StrictHttpResponse<OrganizationEntries>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            OrganizationV1Service.GetOrganizationsPath,
+            'get',
+        );
+        if (params) {
+            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.query('pattern', params.pattern, { style: 'form', explode: true });
+            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
+            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
+            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
+            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
+            rb.query('onlyMemberships', params.onlyMemberships, { style: 'form', explode: true });
+        }
 
-    return this.getOrganizations$Response(params).pipe(
-      map((r: StrictHttpResponse<OrganizationEntries>) => r.body as OrganizationEntries)
-    );
-  }
-
-  /**
-   * Path part for operation getOrganization
-   */
-  static readonly GetOrganizationPath = '/organization/v1/organizations/{repository}/{organization}';
-
-  /**
-   * Get organization by id.
-   *
-   * Get organization by id.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getOrganization()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getOrganization$Response(params: {
-
-    /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
-     */
-    repository: string;
-
-    /**
-     * ID of organization
-     */
-    organization: string;
-  }): Observable<StrictHttpResponse<Organization>> {
-
-    const rb = new RequestBuilder(this.rootUrl, OrganizationV1Service.GetOrganizationPath, 'get');
-    if (params) {
-      rb.path('repository', params.repository, {"style":"simple","explode":false});
-      rb.path('organization', params.organization, {"style":"simple","explode":false});
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<OrganizationEntries>;
+                }),
+            );
     }
 
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Organization>;
-      })
-    );
-  }
-
-  /**
-   * Get organization by id.
-   *
-   * Get organization by id.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getOrganization$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getOrganization(params: {
-
     /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
+     * Get organizations of repository.
+     *
+     * Get organizations of repository the current user is member. May returns an empty list.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getOrganizations$Response()` instead.
+     *
+     * This method doesn't expect any request body.
      */
-    repository: string;
+    getOrganizations(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
-    /**
-     * ID of organization
-     */
-    organization: string;
-  }): Observable<Organization> {
+        /**
+         * pattern
+         */
+        pattern?: string;
 
-    return this.getOrganization$Response(params).pipe(
-      map((r: StrictHttpResponse<Organization>) => r.body as Organization)
-    );
-  }
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
 
-  /**
-   * Path part for operation createOrganizations
-   */
-  static readonly CreateOrganizationsPath = '/organization/v1/organizations/{repository}/{organization}';
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
 
-  /**
-   * create organization in repository.
-   *
-   * create organization in repository.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `createOrganizations()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  createOrganizations$Response(params: {
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
 
-    /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
-     */
-    repository: string;
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
 
-    /**
-     * organization name
-     */
-    organization: string;
-
-    /**
-     * eduscope (may be null)
-     */
-    eduscope?: string;
-  }): Observable<StrictHttpResponse<Organization>> {
-
-    const rb = new RequestBuilder(this.rootUrl, OrganizationV1Service.CreateOrganizationsPath, 'put');
-    if (params) {
-      rb.path('repository', params.repository, {"style":"simple","explode":false});
-      rb.path('organization', params.organization, {"style":"simple","explode":false});
-      rb.query('eduscope', params.eduscope, {"style":"form","explode":true});
+        /**
+         * search only in memberships, false can only be done by admin
+         */
+        onlyMemberships?: boolean;
+    }): Observable<OrganizationEntries> {
+        return this.getOrganizations$Response(params).pipe(
+            map((r: StrictHttpResponse<OrganizationEntries>) => r.body as OrganizationEntries),
+        );
     }
 
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Organization>;
-      })
-    );
-  }
-
-  /**
-   * create organization in repository.
-   *
-   * create organization in repository.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `createOrganizations$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  createOrganizations(params: {
+    /**
+     * Path part for operation getOrganization
+     */
+    static readonly GetOrganizationPath =
+        '/organization/v1/organizations/{repository}/{organization}';
 
     /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
+     * Get organization by id.
+     *
+     * Get organization by id.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getOrganization()` instead.
+     *
+     * This method doesn't expect any request body.
      */
-    repository: string;
+    getOrganization$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
-    /**
-     * organization name
-     */
-    organization: string;
+        /**
+         * ID of organization
+         */
+        organization: string;
+    }): Observable<StrictHttpResponse<Organization>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            OrganizationV1Service.GetOrganizationPath,
+            'get',
+        );
+        if (params) {
+            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('organization', params.organization, { style: 'simple', explode: false });
+        }
 
-    /**
-     * eduscope (may be null)
-     */
-    eduscope?: string;
-  }): Observable<Organization> {
-
-    return this.createOrganizations$Response(params).pipe(
-      map((r: StrictHttpResponse<Organization>) => r.body as Organization)
-    );
-  }
-
-  /**
-   * Path part for operation deleteOrganizations
-   */
-  static readonly DeleteOrganizationsPath = '/organization/v1/organizations/{repository}/{organization}';
-
-  /**
-   * Delete organization of repository.
-   *
-   * Delete organization of repository.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `deleteOrganizations()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  deleteOrganizations$Response(params: {
-
-    /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
-     */
-    repository: string;
-
-    /**
-     * groupname
-     */
-    organization: string;
-  }): Observable<StrictHttpResponse<void>> {
-
-    const rb = new RequestBuilder(this.rootUrl, OrganizationV1Service.DeleteOrganizationsPath, 'delete');
-    if (params) {
-      rb.path('repository', params.repository, {"style":"simple","explode":false});
-      rb.path('organization', params.organization, {"style":"simple","explode":false});
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<Organization>;
+                }),
+            );
     }
 
-    return this.http.request(rb.build({
-      responseType: 'text',
-      accept: '*/*'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return (r as HttpResponse<any>).clone({ body: undefined }) as StrictHttpResponse<void>;
-      })
-    );
-  }
-
-  /**
-   * Delete organization of repository.
-   *
-   * Delete organization of repository.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `deleteOrganizations$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  deleteOrganizations(params: {
-
     /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
+     * Get organization by id.
+     *
+     * Get organization by id.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getOrganization$Response()` instead.
+     *
+     * This method doesn't expect any request body.
      */
-    repository: string;
+    getOrganization(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
-    /**
-     * groupname
-     */
-    organization: string;
-  }): Observable<void> {
-
-    return this.deleteOrganizations$Response(params).pipe(
-      map((r: StrictHttpResponse<void>) => r.body as void)
-    );
-  }
-
-  /**
-   * Path part for operation removeFromOrganization
-   */
-  static readonly RemoveFromOrganizationPath = '/organization/v1/organizations/{repository}/{organization}/member/{member}';
-
-  /**
-   * Remove member from organization.
-   *
-   * Remove member from organization.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `removeFromOrganization()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  removeFromOrganization$Response(params: {
-
-    /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
-     */
-    repository: string;
-
-    /**
-     * groupname
-     */
-    organization: string;
-
-    /**
-     * authorityName of member
-     */
-    member: string;
-  }): Observable<StrictHttpResponse<void>> {
-
-    const rb = new RequestBuilder(this.rootUrl, OrganizationV1Service.RemoveFromOrganizationPath, 'delete');
-    if (params) {
-      rb.path('repository', params.repository, {"style":"simple","explode":false});
-      rb.path('organization', params.organization, {"style":"simple","explode":false});
-      rb.path('member', params.member, {"style":"simple","explode":false});
+        /**
+         * ID of organization
+         */
+        organization: string;
+    }): Observable<Organization> {
+        return this.getOrganization$Response(params).pipe(
+            map((r: StrictHttpResponse<Organization>) => r.body as Organization),
+        );
     }
 
-    return this.http.request(rb.build({
-      responseType: 'text',
-      accept: '*/*'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return (r as HttpResponse<any>).clone({ body: undefined }) as StrictHttpResponse<void>;
-      })
-    );
-  }
-
-  /**
-   * Remove member from organization.
-   *
-   * Remove member from organization.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `removeFromOrganization$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  removeFromOrganization(params: {
+    /**
+     * Path part for operation createOrganizations
+     */
+    static readonly CreateOrganizationsPath =
+        '/organization/v1/organizations/{repository}/{organization}';
 
     /**
-     * ID of repository (or &quot;-home-&quot; for home repository)
+     * create organization in repository.
+     *
+     * create organization in repository.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `createOrganizations()` instead.
+     *
+     * This method doesn't expect any request body.
      */
-    repository: string;
+    createOrganizations$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * organization name
+         */
+        organization: string;
+
+        /**
+         * eduscope (may be null)
+         */
+        eduscope?: string;
+    }): Observable<StrictHttpResponse<Organization>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            OrganizationV1Service.CreateOrganizationsPath,
+            'put',
+        );
+        if (params) {
+            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('organization', params.organization, { style: 'simple', explode: false });
+            rb.query('eduscope', params.eduscope, { style: 'form', explode: true });
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<Organization>;
+                }),
+            );
+    }
 
     /**
-     * groupname
+     * create organization in repository.
+     *
+     * create organization in repository.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `createOrganizations$Response()` instead.
+     *
+     * This method doesn't expect any request body.
      */
-    organization: string;
+    createOrganizations(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * organization name
+         */
+        organization: string;
+
+        /**
+         * eduscope (may be null)
+         */
+        eduscope?: string;
+    }): Observable<Organization> {
+        return this.createOrganizations$Response(params).pipe(
+            map((r: StrictHttpResponse<Organization>) => r.body as Organization),
+        );
+    }
 
     /**
-     * authorityName of member
+     * Path part for operation deleteOrganizations
      */
-    member: string;
-  }): Observable<void> {
+    static readonly DeleteOrganizationsPath =
+        '/organization/v1/organizations/{repository}/{organization}';
 
-    return this.removeFromOrganization$Response(params).pipe(
-      map((r: StrictHttpResponse<void>) => r.body as void)
-    );
-  }
+    /**
+     * Delete organization of repository.
+     *
+     * Delete organization of repository.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `deleteOrganizations()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    deleteOrganizations$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
+        /**
+         * groupname
+         */
+        organization: string;
+    }): Observable<StrictHttpResponse<void>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            OrganizationV1Service.DeleteOrganizationsPath,
+            'delete',
+        );
+        if (params) {
+            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('organization', params.organization, { style: 'simple', explode: false });
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'text',
+                    accept: '*/*',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return (r as HttpResponse<any>).clone({
+                        body: undefined,
+                    }) as StrictHttpResponse<void>;
+                }),
+            );
+    }
+
+    /**
+     * Delete organization of repository.
+     *
+     * Delete organization of repository.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `deleteOrganizations$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    deleteOrganizations(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * groupname
+         */
+        organization: string;
+    }): Observable<void> {
+        return this.deleteOrganizations$Response(params).pipe(
+            map((r: StrictHttpResponse<void>) => r.body as void),
+        );
+    }
+
+    /**
+     * Path part for operation removeFromOrganization
+     */
+    static readonly RemoveFromOrganizationPath =
+        '/organization/v1/organizations/{repository}/{organization}/member/{member}';
+
+    /**
+     * Remove member from organization.
+     *
+     * Remove member from organization.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `removeFromOrganization()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    removeFromOrganization$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * groupname
+         */
+        organization: string;
+
+        /**
+         * authorityName of member
+         */
+        member: string;
+    }): Observable<StrictHttpResponse<void>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            OrganizationV1Service.RemoveFromOrganizationPath,
+            'delete',
+        );
+        if (params) {
+            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('organization', params.organization, { style: 'simple', explode: false });
+            rb.path('member', params.member, { style: 'simple', explode: false });
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'text',
+                    accept: '*/*',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return (r as HttpResponse<any>).clone({
+                        body: undefined,
+                    }) as StrictHttpResponse<void>;
+                }),
+            );
+    }
+
+    /**
+     * Remove member from organization.
+     *
+     * Remove member from organization.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `removeFromOrganization$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    removeFromOrganization(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * groupname
+         */
+        organization: string;
+
+        /**
+         * authorityName of member
+         */
+        member: string;
+    }): Observable<void> {
+        return this.removeFromOrganization$Response(params).pipe(
+            map((r: StrictHttpResponse<void>) => r.body as void),
+        );
+    }
 }

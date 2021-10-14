@@ -3,7 +3,7 @@
 import { Organization } from './organization';
 import { Pagination } from './pagination';
 export interface OrganizationEntries {
-  canCreate?: boolean;
-  organizations: Array<Organization>;
-  pagination: Pagination;
+    canCreate?: boolean;
+    organizations: Array<Organization>;
+    pagination: Pagination;
 }

@@ -2,5 +2,5 @@
 /* eslint-disable */
 import { ConfigRemoteRocketchat } from './config-remote-rocketchat';
 export interface ConfigRemote {
-  rocketchat?: ConfigRemoteRocketchat;
+    rocketchat?: ConfigRemoteRocketchat;
 }

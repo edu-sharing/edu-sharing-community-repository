@@ -3,9 +3,9 @@
 import { Node } from './node';
 import { Person } from './person';
 export interface SharingInfo {
-  expired?: boolean;
-  invitedBy?: Person;
-  node?: Node;
-  password?: boolean;
-  passwordMatches?: boolean;
+    expired?: boolean;
+    invitedBy?: Person;
+    node?: Node;
+    password?: boolean;
+    passwordMatches?: boolean;
 }
