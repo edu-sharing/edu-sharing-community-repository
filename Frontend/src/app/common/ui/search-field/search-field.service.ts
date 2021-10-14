@@ -12,6 +12,8 @@ import {
 import { BehaviorSubject, EMPTY, Observable, of, ReplaySubject, timer } from 'rxjs';
 import { debounce, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
+const NUMBER_OF_FACET_SUGGESTIONS = 5;
+
 @Injectable({
     providedIn: 'root',
 })
@@ -57,7 +59,11 @@ export class SearchFieldService {
                           ),
                           switchMap(({ facets, inputString }) =>
                               inputString
-                                  ? this.search.getAsYouTypeFacetSuggestions(inputString, facets)
+                                  ? this.search.getAsYouTypeFacetSuggestions(
+                                        inputString,
+                                        facets,
+                                        NUMBER_OF_FACET_SUGGESTIONS,
+                                    )
                                   : of(null),
                           ),
                       )

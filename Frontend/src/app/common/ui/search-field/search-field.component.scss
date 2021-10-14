@@ -108,20 +108,4 @@ mat-form-field {
     background-color: $backgroundColor;
     border-radius: 2px;
     padding: 10px;
-    .suggestion-group {
-        &:not(:last-of-type) {
-            padding-bottom: 20px;
-        }
-        .category-label {
-            display: block;
-            text-transform: uppercase;
-            font-weight: 500;
-            font-size: 90%;
-            color: $textLight;
-            padding-bottom: 6px;
-        }
-        mat-chip {
-            cursor: pointer;
-        }
-    }
 }

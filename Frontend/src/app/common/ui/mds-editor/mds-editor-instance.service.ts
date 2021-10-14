@@ -1335,7 +1335,10 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Returns a list of properties for which the MDS editor requires facet values.
      */
     getNeededFacets(): Observable<string[]> {
-        return this.mdsInitDone.pipe(map(() => this.getNeededFacetsInstant()));
+        return this.mdsInitDone.pipe(
+            first(),
+            map(() => this.getNeededFacetsInstant()),
+        );
     }
 
     private getNeededFacetsInstant(): string[] {

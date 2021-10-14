@@ -123,10 +123,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
      */
     @Input() searchEnabled: boolean;
     /**
-     * Show a suggestions overlay as the user types into the search field.
-     */
-    @Input() searchSuggestionsEnabled = false;
-    /**
      * Shows the current location
      */
     @Input() showScope = true;
@@ -163,12 +159,16 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         folder: false,
     };
     @Input() searchQuery: string;
-    @Input() set currentScope(currentScope: string) {
+    @Input()
+    set currentScope(currentScope: string) {
         this._currentScope = currentScope;
         this.event.broadcastEvent(
             FrameEventsService.EVENT_VIEW_OPENED,
             currentScope,
         );
+    }
+    get currentScope() {
+        return this._currentScope;
     }
 
     /**
