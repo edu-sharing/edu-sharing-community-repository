@@ -41,6 +41,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SearchServiceOersiImpl extends SearchServiceAdapter {
 
@@ -201,8 +203,19 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
       } else if (licenseUrl.startsWith("https://creativecommons.org/publicdomain/mark/1.0")) {
         licenseKey = CCConstants.COMMON_LICENSE_PDM;
       }
+      Matcher versionMatcher = Pattern.compile("https?:\\/\\/creativecommons.org\\/(?:licenses|licences|publicdomain)\\/(?:[a-zA-Z-]+)\\/([0-9.]+)(\\/.+)?").matcher(licenseUrl);
+      if (versionMatcher.matches()) {
+        String licenseVersion = versionMatcher.group(1);
+        eduProperties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION, licenseVersion);
+      }
+      Matcher countryMatcher = Pattern.compile("https?:\\/\\/creativecommons.org\\/(?:licenses|licences|publicdomain)\\/(?:[a-zA-Z-]+)\\/(?:[0-9.]+)\\/([a-z][a-z])(\\/.+)?").matcher(licenseUrl);
+      if (countryMatcher.matches()) {
+        String countryCode = countryMatcher.group(1).toUpperCase();
+        eduProperties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE, countryCode);
+      }
       if (licenseKey != null) {
         eduProperties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, licenseKey);
+        eduProperties.put(CCConstants.VIRT_PROP_LICENSE_URL, licenseUrl);
       }
     }
   }
