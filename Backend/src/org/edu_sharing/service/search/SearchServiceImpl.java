@@ -38,6 +38,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
+import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
@@ -764,12 +765,12 @@ public class SearchServiceImpl implements SearchService {
 
 			// process facette
 			if (facettes != null && facettes.size() > 0) {
-				Map<String, Map<String, Integer>> newCountPropsMap = new HashMap<String, Map<String, Integer>>();
+				List<NodeSearch.Facette> facetsResult = new ArrayList<>();
 				for (String facetteProp : facettes) {
-					Map<String, Integer> resultPairs = newCountPropsMap.get(facetteProp);
-					if (resultPairs == null) {
-						resultPairs = new HashMap<String, Integer>();
-					}
+					NodeSearch.Facette facet = new NodeSearch.Facette();
+					facetsResult.add(facet);
+					List<NodeSearch.Facette.Value> values = new ArrayList<>();
+					facet.setValues(values);
 					String fieldFacette = "@" + facetteProp;
 
 					List<Pair<String, Integer>> facettPairs = resultSet.getFieldFacet(fieldFacette);
@@ -790,14 +791,14 @@ public class SearchServiceImpl implements SearchService {
 						 * --> pair.getSecond() > 0
 						 */
 						if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
-							resultPairs.put(first, pair.getSecond());
+							NodeSearch.Facette.Value value = new NodeSearch.Facette.Value();
+							value.setValue(first);
+							value.setCount(pair.getSecond());
+							facet.getValues().add(value);
 						}
 					}
-
-					if (resultPairs.size() > 0)
-						newCountPropsMap.put(facetteProp, resultPairs);
 				}
-				sr.setCountedProps(newCountPropsMap);
+				sr.setFacets(facetsResult);
 
 			}
 			SearchLogger.logSearch(searchToken,sr);

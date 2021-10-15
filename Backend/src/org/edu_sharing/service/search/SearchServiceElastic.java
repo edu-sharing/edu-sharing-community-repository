@@ -25,6 +25,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
@@ -154,7 +155,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     public SearchResultNodeRef searchFacets(MetadataSetV2 mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
-        Map<String, Map<String, Integer>> facetsResult = new HashMap<>();
+        List<NodeSearch.Facette> facetsResult = new ArrayList<>();
         BoolQueryBuilder globalConditions = getGlobalConditions(searchToken);
 
         MetadataQuery queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
@@ -180,19 +181,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
         logger.info("query aggs: "+searchSourceBuilderAggs.toString());
         SearchResponse resp = LogTime.log("Searching elastic for facets", () -> client.search(searchRequestAggs, RequestOptions.DEFAULT));
 
+
         for(Aggregation a : resp.getAggregations()) {
             if(a instanceof ParsedFilter){
                 ParsedFilter pf = (ParsedFilter)a;
                 for(Aggregation aggregation : pf.getAggregations().asList()){
                     if(aggregation instanceof ParsedStringTerms){
                         ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                        Map<String, Integer> f = new HashMap<>();
-                        facetsResult.put(a.getName(), f);
-                        for (Terms.Bucket b : pst.getBuckets()) {
-                            String key = b.getKeyAsString();
-                            long count = b.getDocCount();
-                            f.put(key, (int) count);
-                        }
+                        facetsResult.add(getFacet(pst));
                     }
                 }
             }else{
@@ -202,7 +198,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
         searchResultNodeRef.setData(new ArrayList<>());
-        searchResultNodeRef.setCountedProps(facetsResult);
+        searchResultNodeRef.setFacets(facetsResult);
         searchResultNodeRef.setStartIDX(searchToken.getFrom());
         searchResultNodeRef.setNodeCount(0);
 
@@ -322,7 +318,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             }
             logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
 
-            Map<String,Map<String,Integer>> facettesResult = new HashMap<String,Map<String,Integer>>();
+            List<NodeSearch.Facette> facetsResult = new ArrayList<>();
 
             Long total = null;
 
@@ -334,15 +330,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
            for(Aggregation a : aggregations){
                if(a instanceof  ParsedStringTerms) {
                    ParsedStringTerms pst = (ParsedStringTerms) a;
-                   Map<String, Integer> f = new HashMap<>();
-                   facettesResult.put(a.getName(), f);
-                   for (Terms.Bucket b : pst.getBuckets()) {
-                       String key = b.getKeyAsString();
-                       long count = b.getDocCount();
-                       f.put(key, (int) count);
-
-
-                   }
+                   facetsResult.add(getFacet(pst));
                }else if (a instanceof ParsedCardinality){
                    ParsedCardinality pc = (ParsedCardinality)a;
                    if (a.getName().equals("original_count")) {
@@ -356,13 +344,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                    for(Aggregation aggregation : pf.getAggregations().asList()){
                       if(aggregation instanceof ParsedStringTerms){
                           ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                          Map<String, Integer> f = new HashMap<>();
-                          facettesResult.put(a.getName(), f);
-                          for (Terms.Bucket b : pst.getBuckets()) {
-                              String key = b.getKeyAsString();
-                              long count = b.getDocCount();
-                              f.put(key, (int) count);
-                          }
+                          facetsResult.add(getFacet(pst));
                       }
                    }
                }else{
@@ -372,7 +354,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
            if(total == null){
                total = hits.getTotalHits().value;
            }
-            sr.setCountedProps(facettesResult);
+            sr.setFacets(facetsResult);
             sr.setStartIDX(searchToken.getFrom());
             sr.setNodeCount((int)total.longValue());
             //client.close();
@@ -383,6 +365,25 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         logger.info("returning");
         return sr;
+    }
+
+    private NodeSearch.Facette getFacet(ParsedStringTerms pst){
+        NodeSearch.Facette facet = new NodeSearch.Facette();
+        facet.setProperty(pst.getName());
+        List<NodeSearch.Facette.Value> values = new ArrayList<>();
+        facet.setValues(values);
+
+        for (Terms.Bucket b : pst.getBuckets()) {
+            String key = b.getKeyAsString();
+            long count = b.getDocCount();
+            NodeSearch.Facette.Value value = new NodeSearch.Facette.Value();
+            value.setValue(key);
+            value.setCount((int)count);
+            values.add(value);
+        }
+
+        facet.setSumOtherDocCount(pst.getSumOfOtherDocCounts());
+        return facet;
     }
 
     /**

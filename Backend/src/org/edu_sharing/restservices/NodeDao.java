@@ -311,40 +311,19 @@ public class NodeDao {
 		result.setCount(search.getNodeCount());
 		result.setSkip(search.getStartIDX());
 	
-		Map<String, Map<String, Integer>> countedProps = search
-				.getCountedProps();
-		if (countedProps != null) {
-			List<Facette> resultFacettes = new ArrayList<Facette>();
-			for (Entry<String, Map<String, Integer>> entry : countedProps
-					.entrySet()) {
 
-				Facette facette = new Facette();
-				facette.setProperty(entry.getKey());
-
-				List<Value> values = new ArrayList<Value>();
-				for (Entry<String, Integer> entryValue : entry.getValue()
-						.entrySet()) {
-
-					Value value = new Value();
-					value.setValue(entryValue.getKey());
-					value.setCount(entryValue.getValue());
-
-					values.add(value);
+		if (search.getFacets() != null) {
+			for(Facette facet : search.getFacets()){
+				if(facet.getValues() != null){
+					Collections.sort(facet.getValues(),new Comparator<Value>(){
+						@Override
+						public int compare(Value o1, Value o2) {
+							return o2.getCount().compareTo(o1.getCount());
+						}
+					});
 				}
-
-				Collections.sort(values,new Comparator<Value>(){
-
-					@Override
-					public int compare(Value o1, Value o2) {
-						return o2.getCount().compareTo(o1.getCount());
-					}
-
-				});
-				facette.setValues(values);
-
-				resultFacettes.add(facette);
 			}
-			result.setFacettes(resultFacettes);
+			result.setFacettes(search.getFacets());
 		}
 
 		return result;
