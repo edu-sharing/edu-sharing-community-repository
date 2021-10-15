@@ -806,11 +806,7 @@ export class SearchV1Service extends BaseService {
          * facet parameters
          */
         body: SearchParametersFacets;
-    }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
+    }): Observable<StrictHttpResponse<SearchResultNode>> {
         const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchFacetsPath, 'post');
         if (params) {
             rb.path('repository', params.repository, { style: 'simple', explode: false });
@@ -829,9 +825,7 @@ export class SearchV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
+                    return r as StrictHttpResponse<SearchResultNode>;
                 }),
             );
     }
@@ -866,20 +860,9 @@ export class SearchV1Service extends BaseService {
          * facet parameters
          */
         body: SearchParametersFacets;
-    }): Observable<{
-        [key: string]: {};
-    }> {
+    }): Observable<SearchResultNode> {
         return this.searchFacets$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
+            map((r: StrictHttpResponse<SearchResultNode>) => r.body as SearchResultNode),
         );
     }
 

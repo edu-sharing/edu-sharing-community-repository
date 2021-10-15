@@ -6,32 +6,32 @@ info:
 servers:
 - url: /edu-sharing/rest
 tags:
-- name: COMMENT v1
-- name: REGISTER v1
-- name: COLLECTION v1
-- name: SHARING v1
 - name: CONNECTOR v1
-- name: IAM v1
-- name: NETWORK v1
-- name: BULK v1
-- name: ORGANIZATION v1
-- name: SEARCH v1
-- name: ARCHIVE v1
-- name: TRACKING v1
-- name: ABOUT
-- name: USAGE v1
-- name: TOOL v1
-- name: MDS v1
-- name: RATING v1
-- name: ADMIN v1
-- name: MEDIACENTER v1
-- name: AUTHENTICATION v1
-- name: CONFIG v1
-- name: CLIENTUTILS v1
-- name: STREAM v1
-- name: NODE v1
-- name: STATISTIC v1
 - name: RENDERING v1
+- name: BULK v1
+- name: STREAM v1
+- name: COLLECTION v1
+- name: MEDIACENTER v1
+- name: ABOUT
+- name: AUTHENTICATION v1
+- name: TOOL v1
+- name: ARCHIVE v1
+- name: CLIENTUTILS v1
+- name: STATISTIC v1
+- name: NETWORK v1
+- name: RATING v1
+- name: ORGANIZATION v1
+- name: COMMENT v1
+- name: MDS v1
+- name: ADMIN v1
+- name: IAM v1
+- name: CONFIG v1
+- name: REGISTER v1
+- name: TRACKING v1
+- name: USAGE v1
+- name: SEARCH v1
+- name: NODE v1
+- name: SHARING v1
 paths:
   /_about:
     get:
@@ -14500,10 +14500,7 @@ paths:
           content:
             'application/json':
               schema:
-                type: object
-                additionalProperties:
-                  type: object
-                  properties: {}
+                $ref: '#/components/schemas/SearchResultNode'
         "400":
           description: Preconditions are not present.
           content:
@@ -17020,13 +17017,6 @@ components:
           type: string
         newPassword:
           type: string
-    Parameters:
-      type: object
-      properties:
-        general:
-          $ref: '#/components/schemas/General'
-      xml:
-        name: usage
     ColumnV2:
       type: object
       properties:
@@ -17037,17 +17027,24 @@ components:
         showDefault:
           type: boolean
           default: false
-    Audience:
+    Parameters:
       type: object
       properties:
-        name:
-          type: string
+        general:
+          $ref: '#/components/schemas/General'
+      xml:
+        name: usage
     OrganisationsImportResult:
       type: object
       properties:
         rows:
           type: integer
           format: int32
+    Audience:
+      type: object
+      properties:
+        name:
+          type: string
     StatisticsGlobal:
       type: object
       properties:
@@ -17268,13 +17265,6 @@ components:
           - OWNER
           - EVERYONE
           - GUEST
-    DynamicConfig:
-      type: object
-      properties:
-        nodeId:
-          type: string
-        value:
-          type: string
     StreamEntry:
       type: object
       properties:
@@ -17302,6 +17292,13 @@ components:
         modified:
           type: integer
           format: int64
+    DynamicConfig:
+      type: object
+      properties:
+        nodeId:
+          type: string
+        value:
+          type: string
     StatisticsSubGroup:
       type: object
       properties:
@@ -17352,6 +17349,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Value'
+        sumOtherDocCount:
+          type: integer
+          format: int64
     NodeShare:
       type: object
       properties:
@@ -17557,14 +17557,14 @@ components:
           type: boolean
           default: false
     Statistics:
-      required:
-      - entries
       type: object
       properties:
-        entries:
+        groups:
           type: array
           items:
-            $ref: '#/components/schemas/StatisticEntry'
+            type: string
+        nodeGroup:
+          type: string
     ErrorResponse:
       required:
       - error
@@ -17671,10 +17671,10 @@ components:
           default: false
         defaultvalue:
           type: string
-        isExtended:
+        isSearchable:
           type: boolean
           default: false
-        isSearchable:
+        isExtended:
           type: boolean
           default: false
     CollectionsResult:
@@ -17775,13 +17775,6 @@ components:
         minor:
           type: integer
           format: int32
-    GroupEntry:
-      required:
-      - group
-      type: object
-      properties:
-        group:
-          $ref: '#/components/schemas/Group'
     ValueParameters:
       required:
       - pattern
@@ -17796,6 +17789,13 @@ components:
         pattern:
           type: string
           description: prefix of the value (or "-all-" for all values)
+    GroupEntry:
+      required:
+      - group
+      type: object
+      properties:
+        group:
+          $ref: '#/components/schemas/Group'
     RegisterInformation:
       type: object
       properties:
@@ -17950,19 +17950,6 @@ components:
           $ref: '#/components/schemas/User'
         action:
           type: string
-    CreateUsage:
-      type: object
-      properties:
-        appId:
-          type: string
-        courseId:
-          type: string
-        resourceId:
-          type: string
-        nodeId:
-          type: string
-        nodeVersion:
-          type: string
     JobInfo:
       type: object
       properties:
@@ -17987,6 +17974,19 @@ components:
             $ref: '#/components/schemas/LogEntry'
         jobDetail:
           $ref: '#/components/schemas/JobDetail'
+    CreateUsage:
+      type: object
+      properties:
+        appId:
+          type: string
+        courseId:
+          type: string
+        resourceId:
+          type: string
+        nodeId:
+          type: string
+        nodeVersion:
+          type: string
     MediacenterProfileExtension:
       type: object
       properties:
@@ -18033,20 +18033,6 @@ components:
       properties:
         version:
           $ref: '#/components/schemas/NodeVersion'
-    Usages:
-      type: object
-      properties:
-        usages:
-          type: array
-          items:
-            $ref: '#/components/schemas/Usage'
-    Collections:
-      type: object
-      properties:
-        colors:
-          type: array
-          items:
-            type: string
     WebsiteInformation:
       type: object
       properties:
@@ -18062,6 +18048,20 @@ components:
           type: array
           items:
             type: string
+    Collections:
+      type: object
+      properties:
+        colors:
+          type: array
+          items:
+            type: string
+    Usages:
+      type: object
+      properties:
+        usages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Usage'
     CollectionCounts:
       type: object
       properties:
@@ -18088,6 +18088,17 @@ components:
         rows:
           type: integer
           format: int32
+    ValueV2:
+      type: object
+      properties:
+        id:
+          type: string
+        caption:
+          type: string
+        description:
+          type: string
+        parent:
+          type: string
     UserEntries:
       required:
       - pagination
@@ -18100,17 +18111,6 @@ components:
             $ref: '#/components/schemas/UserSimple'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    ValueV2:
-      type: object
-      properties:
-        id:
-          type: string
-        caption:
-          type: string
-        description:
-          type: string
-        parent:
-          type: string
     About:
       required:
       - services
@@ -18874,35 +18874,6 @@ components:
             $ref: '#/components/schemas/SortColumnV2'
         default:
           $ref: '#/components/schemas/SortV2Default'
-    UserProfileEdit:
-      type: object
-      properties:
-        primaryAffiliation:
-          type: string
-        skills:
-          type: array
-          items:
-            type: string
-        types:
-          type: array
-          readOnly: true
-          items:
-            type: string
-        sizeQuota:
-          type: integer
-          format: int64
-        vcard:
-          type: string
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-        avatar:
-          type: string
-        about:
-          type: string
     Login:
       required:
       - currentScope
@@ -18943,6 +18914,35 @@ components:
         isGuest:
           type: boolean
           default: false
+    UserProfileEdit:
+      type: object
+      properties:
+        primaryAffiliation:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        types:
+          type: array
+          readOnly: true
+          items:
+            type: string
+        sizeQuota:
+          type: integer
+          format: int64
+        vcard:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        avatar:
+          type: string
+        about:
+          type: string
     Geo:
       type: object
       properties:
@@ -19650,18 +19650,6 @@ components:
             attribute: true
         value:
           type: string
-    UserQuota:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          default: false
-        sizeCurrent:
-          type: integer
-          format: int64
-        sizeQuota:
-          type: integer
-          format: int64
     RestoreResult:
       required:
       - archiveNodeId
@@ -19710,6 +19698,18 @@ components:
           type: string
         receiverGroup:
           type: string
+    UserQuota:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+        sizeCurrent:
+          type: integer
+          format: int64
+        sizeQuota:
+          type: integer
+          format: int64
     Guest:
       type: object
       properties:
@@ -19940,6 +19940,13 @@ components:
         executedAt:
           type: integer
           format: int64
+    Counts:
+      type: object
+      properties:
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Element'
     User:
       required:
       - authorityName
@@ -19980,13 +19987,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NodeRef'
-    Counts:
-      type: object
-      properties:
-        elements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Element'
     UserProfile:
       type: object
       properties:
@@ -20228,17 +20228,41 @@ components:
           type: integer
           format: int32
     Service:
-      required:
-      - instances
-      - name
       type: object
       properties:
         name:
           type: string
-        instances:
+        url:
+          type: string
+        icon:
+          type: string
+        logo:
+          type: string
+        inLanguage:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        audience:
           type: array
           items:
-            $ref: '#/components/schemas/ServiceInstance'
+            $ref: '#/components/schemas/Audience'
+        provider:
+          $ref: '#/components/schemas/Provider'
+        startDate:
+          type: string
+        interfaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interface'
+        about:
+          type: array
+          items:
+            type: string
+        isAccessibleForFree:
+          type: boolean
+          default: false
     NodePermissionEntry:
       required:
       - permissions

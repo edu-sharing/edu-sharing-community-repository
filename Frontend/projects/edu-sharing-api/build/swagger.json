@@ -7,32 +7,32 @@
     },
     "basePath": "/edu-sharing/rest",
     "tags": [
-        { "name": "COMMENT v1" },
-        { "name": "REGISTER v1" },
-        { "name": "COLLECTION v1" },
-        { "name": "SHARING v1" },
         { "name": "CONNECTOR v1" },
-        { "name": "IAM v1" },
-        { "name": "NETWORK v1" },
+        { "name": "RENDERING v1" },
         { "name": "BULK v1" },
-        { "name": "ORGANIZATION v1" },
-        { "name": "SEARCH v1" },
-        { "name": "ARCHIVE v1" },
-        { "name": "TRACKING v1" },
-        { "name": "ABOUT" },
-        { "name": "USAGE v1" },
-        { "name": "TOOL v1" },
-        { "name": "MDS v1" },
-        { "name": "RATING v1" },
-        { "name": "ADMIN v1" },
-        { "name": "MEDIACENTER v1" },
-        { "name": "AUTHENTICATION v1" },
-        { "name": "CONFIG v1" },
-        { "name": "CLIENTUTILS v1" },
         { "name": "STREAM v1" },
-        { "name": "NODE v1" },
+        { "name": "COLLECTION v1" },
+        { "name": "MEDIACENTER v1" },
+        { "name": "ABOUT" },
+        { "name": "AUTHENTICATION v1" },
+        { "name": "TOOL v1" },
+        { "name": "ARCHIVE v1" },
+        { "name": "CLIENTUTILS v1" },
         { "name": "STATISTIC v1" },
-        { "name": "RENDERING v1" }
+        { "name": "NETWORK v1" },
+        { "name": "RATING v1" },
+        { "name": "ORGANIZATION v1" },
+        { "name": "COMMENT v1" },
+        { "name": "MDS v1" },
+        { "name": "ADMIN v1" },
+        { "name": "IAM v1" },
+        { "name": "CONFIG v1" },
+        { "name": "REGISTER v1" },
+        { "name": "TRACKING v1" },
+        { "name": "USAGE v1" },
+        { "name": "SEARCH v1" },
+        { "name": "NODE v1" },
+        { "name": "SHARING v1" }
     ],
     "paths": {
         "/_about": {
@@ -11853,7 +11853,7 @@
                 "responses": {
                     "200": {
                         "description": "OK.",
-                        "schema": { "type": "object", "additionalProperties": { "type": "object" } }
+                        "schema": { "$ref": "#/definitions/SearchResultNode" }
                     },
                     "400": {
                         "description": "Preconditions are not present.",
@@ -13873,11 +13873,6 @@
                 "newPassword": { "type": "string" }
             }
         },
-        "Parameters": {
-            "type": "object",
-            "properties": { "general": { "$ref": "#/definitions/General" } },
-            "xml": { "name": "usage" }
-        },
         "ColumnV2": {
             "type": "object",
             "properties": {
@@ -13886,11 +13881,16 @@
                 "showDefault": { "type": "boolean", "default": false }
             }
         },
-        "Audience": { "type": "object", "properties": { "name": { "type": "string" } } },
+        "Parameters": {
+            "type": "object",
+            "properties": { "general": { "$ref": "#/definitions/General" } },
+            "xml": { "name": "usage" }
+        },
         "OrganisationsImportResult": {
             "type": "object",
             "properties": { "rows": { "type": "integer", "format": "int32" } }
         },
+        "Audience": { "type": "object", "properties": { "name": { "type": "string" } } },
         "StatisticsGlobal": {
             "type": "object",
             "properties": {
@@ -14038,10 +14038,6 @@
                 }
             }
         },
-        "DynamicConfig": {
-            "type": "object",
-            "properties": { "nodeId": { "type": "string" }, "value": { "type": "string" } }
-        },
         "StreamEntry": {
             "type": "object",
             "properties": {
@@ -14054,6 +14050,10 @@
                 "created": { "type": "integer", "format": "int64" },
                 "modified": { "type": "integer", "format": "int64" }
             }
+        },
+        "DynamicConfig": {
+            "type": "object",
+            "properties": { "nodeId": { "type": "string" }, "value": { "type": "string" } }
         },
         "StatisticsSubGroup": {
             "type": "object",
@@ -14085,7 +14085,8 @@
             "required": ["property", "values"],
             "properties": {
                 "property": { "type": "string" },
-                "values": { "type": "array", "items": { "$ref": "#/definitions/Value" } }
+                "values": { "type": "array", "items": { "$ref": "#/definitions/Value" } },
+                "sumOtherDocCount": { "type": "integer", "format": "int64" }
             }
         },
         "NodeShare": {
@@ -14217,9 +14218,9 @@
         },
         "Statistics": {
             "type": "object",
-            "required": ["entries"],
             "properties": {
-                "entries": { "type": "array", "items": { "$ref": "#/definitions/StatisticEntry" } }
+                "groups": { "type": "array", "items": { "type": "string" } },
+                "nodeGroup": { "type": "string" }
             }
         },
         "ErrorResponse": {
@@ -14281,8 +14282,8 @@
                 },
                 "allowempty": { "type": "boolean", "default": false },
                 "defaultvalue": { "type": "string" },
-                "isExtended": { "type": "boolean", "default": false },
-                "isSearchable": { "type": "boolean", "default": false }
+                "isSearchable": { "type": "boolean", "default": false },
+                "isExtended": { "type": "boolean", "default": false }
             }
         },
         "CollectionsResult": {
@@ -14350,11 +14351,6 @@
                 "minor": { "type": "integer", "format": "int32" }
             }
         },
-        "GroupEntry": {
-            "type": "object",
-            "required": ["group"],
-            "properties": { "group": { "$ref": "#/definitions/Group" } }
-        },
         "ValueParameters": {
             "type": "object",
             "required": ["pattern", "property", "query"],
@@ -14366,6 +14362,11 @@
                     "description": "prefix of the value (or \"-all-\" for all values)"
                 }
             }
+        },
+        "GroupEntry": {
+            "type": "object",
+            "required": ["group"],
+            "properties": { "group": { "$ref": "#/definitions/Group" } }
         },
         "RegisterInformation": {
             "type": "object",
@@ -14455,16 +14456,6 @@
                 "action": { "type": "string" }
             }
         },
-        "CreateUsage": {
-            "type": "object",
-            "properties": {
-                "appId": { "type": "string" },
-                "courseId": { "type": "string" },
-                "resourceId": { "type": "string" },
-                "nodeId": { "type": "string" },
-                "nodeVersion": { "type": "string" }
-            }
-        },
         "JobInfo": {
             "type": "object",
             "properties": {
@@ -14477,6 +14468,16 @@
                 "worstLevel": { "$ref": "#/definitions/Level" },
                 "log": { "type": "array", "items": { "$ref": "#/definitions/LogEntry" } },
                 "jobDetail": { "$ref": "#/definitions/JobDetail" }
+            }
+        },
+        "CreateUsage": {
+            "type": "object",
+            "properties": {
+                "appId": { "type": "string" },
+                "courseId": { "type": "string" },
+                "resourceId": { "type": "string" },
+                "nodeId": { "type": "string" },
+                "nodeVersion": { "type": "string" }
             }
         },
         "MediacenterProfileExtension": {
@@ -14507,16 +14508,6 @@
             "required": ["version"],
             "properties": { "version": { "$ref": "#/definitions/NodeVersion" } }
         },
-        "Usages": {
-            "type": "object",
-            "properties": {
-                "usages": { "type": "array", "items": { "$ref": "#/definitions/Usage" } }
-            }
-        },
-        "Collections": {
-            "type": "object",
-            "properties": { "colors": { "type": "array", "items": { "type": "string" } } }
-        },
         "WebsiteInformation": {
             "type": "object",
             "properties": {
@@ -14525,6 +14516,16 @@
                 "description": { "type": "string" },
                 "license": { "type": "string" },
                 "keywords": { "type": "array", "items": { "type": "string" } }
+            }
+        },
+        "Collections": {
+            "type": "object",
+            "properties": { "colors": { "type": "array", "items": { "type": "string" } } }
+        },
+        "Usages": {
+            "type": "object",
+            "properties": {
+                "usages": { "type": "array", "items": { "$ref": "#/definitions/Usage" } }
             }
         },
         "CollectionCounts": {
@@ -14546,14 +14547,6 @@
             "type": "object",
             "properties": { "rows": { "type": "integer", "format": "int32" } }
         },
-        "UserEntries": {
-            "type": "object",
-            "required": ["pagination", "users"],
-            "properties": {
-                "users": { "type": "array", "items": { "$ref": "#/definitions/UserSimple" } },
-                "pagination": { "$ref": "#/definitions/Pagination" }
-            }
-        },
         "ValueV2": {
             "type": "object",
             "properties": {
@@ -14561,6 +14554,14 @@
                 "caption": { "type": "string" },
                 "description": { "type": "string" },
                 "parent": { "type": "string" }
+            }
+        },
+        "UserEntries": {
+            "type": "object",
+            "required": ["pagination", "users"],
+            "properties": {
+                "users": { "type": "array", "items": { "$ref": "#/definitions/UserSimple" } },
+                "pagination": { "$ref": "#/definitions/Pagination" }
             }
         },
         "About": {
@@ -15012,21 +15013,6 @@
                 "default": { "$ref": "#/definitions/SortV2Default" }
             }
         },
-        "UserProfileEdit": {
-            "type": "object",
-            "properties": {
-                "primaryAffiliation": { "type": "string" },
-                "skills": { "type": "array", "items": { "type": "string" } },
-                "types": { "type": "array", "readOnly": true, "items": { "type": "string" } },
-                "sizeQuota": { "type": "integer", "format": "int64" },
-                "vcard": { "type": "string" },
-                "firstName": { "type": "string" },
-                "lastName": { "type": "string" },
-                "email": { "type": "string" },
-                "avatar": { "type": "string" },
-                "about": { "type": "string" }
-            }
-        },
         "Login": {
             "type": "object",
             "required": ["currentScope", "isAdmin", "isGuest", "isValidLogin", "sessionTimeout"],
@@ -15045,6 +15031,21 @@
                 "statusCode": { "type": "string", "readOnly": true },
                 "authorityName": { "type": "string" },
                 "isGuest": { "type": "boolean", "default": false }
+            }
+        },
+        "UserProfileEdit": {
+            "type": "object",
+            "properties": {
+                "primaryAffiliation": { "type": "string" },
+                "skills": { "type": "array", "items": { "type": "string" } },
+                "types": { "type": "array", "readOnly": true, "items": { "type": "string" } },
+                "sizeQuota": { "type": "integer", "format": "int64" },
+                "vcard": { "type": "string" },
+                "firstName": { "type": "string" },
+                "lastName": { "type": "string" },
+                "email": { "type": "string" },
+                "avatar": { "type": "string" },
+                "about": { "type": "string" }
             }
         },
         "Geo": {
@@ -15510,14 +15511,6 @@
                 "value": { "type": "string" }
             }
         },
-        "UserQuota": {
-            "type": "object",
-            "properties": {
-                "enabled": { "type": "boolean", "default": false },
-                "sizeCurrent": { "type": "integer", "format": "int64" },
-                "sizeQuota": { "type": "integer", "format": "int64" }
-            }
-        },
         "RestoreResult": {
             "type": "object",
             "required": ["archiveNodeId", "name", "nodeId", "parent", "path", "restoreStatus"],
@@ -15544,6 +15537,14 @@
                 "stream": { "$ref": "#/definitions/DeleteOption" },
                 "receiver": { "type": "string" },
                 "receiverGroup": { "type": "string" }
+            }
+        },
+        "UserQuota": {
+            "type": "object",
+            "properties": {
+                "enabled": { "type": "boolean", "default": false },
+                "sizeCurrent": { "type": "integer", "format": "int64" },
+                "sizeQuota": { "type": "integer", "format": "int64" }
             }
         },
         "Guest": {
@@ -15698,6 +15699,12 @@
                 "executedAt": { "type": "integer", "format": "int64" }
             }
         },
+        "Counts": {
+            "type": "object",
+            "properties": {
+                "elements": { "type": "array", "items": { "$ref": "#/definitions/Element" } }
+            }
+        },
         "User": {
             "type": "object",
             "required": ["authorityName", "homeFolder"],
@@ -15721,12 +15728,6 @@
                 "profile": { "$ref": "#/definitions/UserProfile" },
                 "homeFolder": { "$ref": "#/definitions/NodeRef" },
                 "sharedFolders": { "type": "array", "items": { "$ref": "#/definitions/NodeRef" } }
-            }
-        },
-        "Counts": {
-            "type": "object",
-            "properties": {
-                "elements": { "type": "array", "items": { "$ref": "#/definitions/Element" } }
             }
         },
         "UserProfile": {
@@ -15882,13 +15883,20 @@
         },
         "Service": {
             "type": "object",
-            "required": ["instances", "name"],
             "properties": {
                 "name": { "type": "string" },
-                "instances": {
-                    "type": "array",
-                    "items": { "$ref": "#/definitions/ServiceInstance" }
-                }
+                "url": { "type": "string" },
+                "icon": { "type": "string" },
+                "logo": { "type": "string" },
+                "inLanguage": { "type": "string" },
+                "type": { "type": "string" },
+                "description": { "type": "string" },
+                "audience": { "type": "array", "items": { "$ref": "#/definitions/Audience" } },
+                "provider": { "$ref": "#/definitions/Provider" },
+                "startDate": { "type": "string" },
+                "interfaces": { "type": "array", "items": { "$ref": "#/definitions/Interface" } },
+                "about": { "type": "array", "items": { "type": "string" } },
+                "isAccessibleForFree": { "type": "boolean", "default": false }
             }
         },
         "NodePermissionEntry": {
