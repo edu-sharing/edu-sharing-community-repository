@@ -68,7 +68,7 @@ import {MdsDefinition, FacetValues, Values} from '../../common/ui/mds-editor/typ
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
 import {ReplaySubject} from 'rxjs';
-import {first, switchMap, takeUntil} from 'rxjs/operators';
+import {delay, distinctUntilChanged, first, map, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
@@ -328,6 +328,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.scrollTo(this.searchService.offset);
         this.innerWidth = this.winRef.getNativeWindow().innerWidth;
         //this.autocompletesArray = this.autocompletes.toArray();
+        this.registerSearchOnMdsUpdate();
     }
 
     ngOnDestroy() {
@@ -1265,7 +1266,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         const searchAction = new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
             this.applyParameters(await this.getActiveMds().getValues());
         });
-        this.mdsActions.push(searchAction);
+        if (this.mdsDesktopRef?.editorType === 'legacy') {
+            this.mdsActions.push(searchAction);
+        }
         this.mdsButtons = DialogButton.fromOptionItem([searchAction]);
     }
 
@@ -1628,5 +1631,30 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.searchService.sidenavOpened ||
                 (this.selection && this.selection.length > 0),
         );
+    }
+
+    private registerSearchOnMdsUpdate(): void {
+        this.mdsDesktopRef.mdsEditorInstance.values
+            .pipe(
+                takeUntil(this.destroyed$),
+                map((valuesDict) =>
+                    Object.entries(valuesDict).reduce((acc, [property, values]) => {
+                        if (values?.length > 0) {
+                            acc[property] = values;
+                        }
+                        return acc;
+                    }, {} as { [property: string]: string[] }),
+                ),
+                map((valuesDict) => JSON.stringify(valuesDict)),
+                distinctUntilChanged(),
+                map((json) => JSON.parse(json)),
+            )
+            .subscribe((values) => this.applyParameters(values));
+        this.mdsDesktopRef.mdsEditorInstance.mdsInitDone
+            .pipe(
+                takeUntil(this.destroyed$),
+                // Wait for `MdsEditorWrapper` to reflect `editorType`.
+                delay(0),
+            ).subscribe(() => this.updateMdsActions());
     }
 }
