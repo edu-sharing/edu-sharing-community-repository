@@ -12,7 +12,7 @@ import {
 import { FormControl } from '@angular/forms';
 import { FacetsDict, LabeledValue } from 'edu-sharing-api';
 import { Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, tap } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../mds-editor/types';
 import { SearchFieldService } from './search-field.service';
@@ -23,9 +23,15 @@ import { SearchFieldService } from './search-field.service';
     styleUrls: ['./search-field.component.scss'],
 })
 export class SearchFieldComponent implements OnInit, OnDestroy {
-    @Input() set searchString(s: string) {
+    @Input()
+    set searchString(s: string) {
+        this.searchString_ = s;
         this.inputControl.setValue(s);
     }
+    get searchString() {
+        return this.searchString_;
+    }
+    private searchString_: string;
     @Output() searchStringChange = new EventEmitter<string>();
     @Input() placeholder: string;
     /**
@@ -68,17 +74,26 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.searchField.setEnableFiltersAndSuggestions(this.enableFiltersAndSuggestions);
-        this.searchField.updateSuggestions(this.inputControl.value);
         this.inputControl.valueChanges.subscribe((inputString) => {
-            this.searchField.updateSuggestions(inputString);
-            this.searchStringChange.emit(inputString);
+            if (inputString !== this.searchString) {
+                // The value was updated through user interaction and not by the component input
+                // `searchString`.
+                this.searchField.updateSuggestions(inputString);
+                this.searchStringChange.emit(inputString);
+            }
         });
         this.suggestions$
             .pipe(
                 takeUntil(this.destroyed$),
                 map((suggestions) => this.getHasSuggestions(suggestions)),
             )
-            .subscribe((hasSuggestions) => (this.hasSuggestions = hasSuggestions));
+            .subscribe((hasSuggestions) => {
+                this.hasSuggestions = hasSuggestions;
+                // We only fetch new suggestions when the user types into the search field. In case
+                // the user dismissed the suggestions overlay earlier (`showOverlay = false`), this
+                // is the time to show it again.
+                this.showOverlay = true;
+            });
     }
 
     ngOnDestroy(): void {

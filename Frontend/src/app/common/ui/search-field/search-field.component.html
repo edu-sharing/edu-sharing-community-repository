@@ -14,15 +14,17 @@
             <!-- We considered injecting the chip list from the mds editor like the suggestions
             panel, but `mat-chip-list` needs direct access to `mat-chip`s as child components for
             keyboard interaction to work. -->
-            <mat-chip
-              *ngFor="let filterValue of filters.value"
-              class="filter-chip-{{ filters.key | propertySlug }}"
-              [removable]="true"
-              (removed)="onRemoveFilter(filters.key, filterValue)"
-            >
-              {{ filterValue.label }}
-              <mat-icon matChipRemove>cancel</mat-icon>
-            </mat-chip>
+            <ng-container *ngIf="(categories$ | async).includes(filters.key)">
+              <mat-chip
+                *ngFor="let filterValue of filters.value"
+                class="filter-chip-{{ filters.key | propertySlug }}"
+                [removable]="true"
+                (removed)="onRemoveFilter(filters.key, filterValue)"
+              >
+                {{ filterValue.label }}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+            </ng-container>
           </ng-container>
         </div>
         <div class="search-field-input-wrapper">
@@ -73,11 +75,16 @@
   (overlayOutsideClick)="onOutsideClick($event)"
   (detach)="onDetach()"
 >
+  <!-- FIXME: The focus trap doesn't seem to work, when there are suggestions for only one facet
+  category. -->
   <div class="suggestion-card mat-elevation-z2" cdkTrapFocus>
     <ng-container *ngTemplateOutlet="facets.suggestionsPanel"></ng-container>
   </div>
 </ng-template>
 
+<!-- We need to have `SearchFieldFacets` permanently injected, so we can get the `categories`
+parameter that tells us which facets to request for suggestions. When there are any suggestions, we
+show the suggestion panel via template outlet. -->
 <app-search-field-facets
   #facets
   [repository]="(mdsInfo$ | async)?.repository"

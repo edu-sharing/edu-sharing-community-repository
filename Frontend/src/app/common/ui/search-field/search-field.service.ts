@@ -9,8 +9,8 @@ import {
     SearchConfig,
     SearchService,
 } from 'edu-sharing-api';
-import { BehaviorSubject, EMPTY, Observable, of, ReplaySubject, timer } from 'rxjs';
-import { debounce, filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, EMPTY, Observable, of, ReplaySubject, timer } from 'rxjs';
+import { debounce, filter, map, switchMap, tap } from 'rxjs/operators';
 
 const NUMBER_OF_FACET_SUGGESTIONS = 5;
 
@@ -28,9 +28,10 @@ export class SearchFieldService {
     readonly filterValuesChange = new EventEmitter<RawValuesDict>();
 
     private readonly searchConfigSubject = new BehaviorSubject<Partial<SearchConfig>>({});
-    private readonly suggestionsInputStringSubject = new ReplaySubject<string>(1);
-    private readonly filtersSubject = new BehaviorSubject<LabeledValuesDict>({});
     private readonly enableFiltersAndSuggestionsSubject = new BehaviorSubject(false);
+    private readonly filtersSubject = new BehaviorSubject<LabeledValuesDict>({});
+    private readonly suggestionsInputStringSubject = new ReplaySubject<string>(1);
+    private readonly suggestionsSubject = new BehaviorSubject<FacetsDict>(null);
 
     readonly mdsInfo$ = this.searchConfigSubject.pipe(
         filter((config): config is SearchConfig => !!config.repository && !!config.metadataSet),
@@ -44,33 +45,8 @@ export class SearchFieldService {
         this.filters$ = this.enableFiltersAndSuggestionsSubject.pipe(
             switchMap((enabled) => (enabled ? this.filtersSubject : of(null))),
         );
-        this.suggestions$ = this.enableFiltersAndSuggestionsSubject.pipe(
-            switchMap((enabled) =>
-                enabled
-                    ? this.categoriesSubject.pipe(
-                          switchMap((facets) =>
-                              this.suggestionsInputStringSubject.pipe(
-                                  map((inputString) =>
-                                      inputString?.length >= 3 ? inputString : null,
-                                  ),
-                                  debounce((inputString) => (inputString ? timer(200) : EMPTY)),
-                                  map((inputString) => ({ facets, inputString })),
-                              ),
-                          ),
-                          switchMap(({ facets, inputString }) =>
-                              inputString
-                                  ? this.search.getAsYouTypeFacetSuggestions(
-                                        inputString,
-                                        facets,
-                                        NUMBER_OF_FACET_SUGGESTIONS,
-                                    )
-                                  : of(null),
-                          ),
-                      )
-                    : of(null),
-            ),
-            shareReplay(1),
-        );
+        this.suggestions$ = this.suggestionsSubject.asObservable();
+        this.registerSuggestionsSubject();
     }
 
     /**
@@ -134,6 +110,9 @@ export class SearchFieldService {
         } else {
             console.warn('Called setFilterValues when mds was not configured.');
         }
+        // Propagate to search service, so the filters will be taken into account for facet
+        // suggestions.
+        this.search.setParams({ filters: values });
     }
 
     /**
@@ -156,6 +135,32 @@ export class SearchFieldService {
         if (this.searchConfigSubject.value.metadataSet !== metadataSet) {
             this.searchConfigSubject.next({ ...this.searchConfigSubject.value, metadataSet });
         }
+    }
+
+    private registerSuggestionsSubject(): void {
+        combineLatest([
+            this.enableFiltersAndSuggestionsSubject,
+            this.categoriesSubject,
+            this.filtersSubject,
+        ]).subscribe(() => this.suggestionsSubject.next(null));
+        this.suggestionsInputStringSubject
+            .pipe(
+                map((inputString) =>
+                    this.enableFiltersAndSuggestionsSubject.value ? inputString : null,
+                ),
+                map((inputString) => (inputString?.length >= 3 ? inputString : null)),
+                debounce((inputString) => (inputString ? timer(200) : EMPTY)),
+                switchMap((inputString) =>
+                    inputString
+                        ? this.search.getAsYouTypeFacetSuggestions(
+                              inputString,
+                              this.categoriesSubject.value,
+                              NUMBER_OF_FACET_SUGGESTIONS,
+                          )
+                        : of(null),
+                ),
+            )
+            .subscribe((suggestions) => this.suggestionsSubject.next(suggestions));
     }
 
     private getCurrentMdsIdentifier(): MdsIdentifier | null {

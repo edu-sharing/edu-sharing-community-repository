@@ -84,6 +84,14 @@ export class SearchService {
     }
 
     /**
+     * Set search params for future calls to `getAsYouTypeFacetSuggestions` without triggering a
+     * search request.
+     */
+    setParams(params: SearchParams): void {
+        this.params = params;
+    }
+
+    /**
      * Get another page of search results with parameters last provided to `search`.
      */
     getPage(pageIndex: number): Observable<SearchResults> {
@@ -110,17 +118,14 @@ export class SearchService {
                 metadataset: config.metadataSet,
                 query: config.query,
                 body: {
-                    criterias: this.getSearchCriteria(this.params),
+                    criterias: this.getSearchCriteria({ filters: this.params.filters }),
                     facettes: facets,
                     facetLimit: size,
                     facetMinCount: 1,
                     facetSuggest: inputString,
                 },
             })
-            .pipe(
-                tap((response) => console.log('response', response)),
-                switchMap((response) => this.mapFacets(response as FacetSearchResponse)),
-            );
+            .pipe(switchMap((response) => this.mapFacets(response.facettes)));
     }
 
     private requestSearch({
@@ -140,44 +145,27 @@ export class SearchService {
     }
 
     private getSearchCriteria(params: SearchParams): apiModels.SearchParameters['criterias'] {
-        // TODO: implementation
-        return [];
+        return [
+            ...(params.searchString
+                ? [{ property: 'ngsearchword', values: [params.searchString] }]
+                : []),
+            ...Object.entries(params.filters ?? {})
+                .filter(([_, values]) => values?.length > 0)
+                .map(([property, values]) => ({ property, values })),
+        ];
     }
 
-    private mapFacets(results: FacetSearchResponse): Observable<FacetsDict> {
-        const entries = Object.entries(results);
-        if (entries.length === 0) {
+    private mapFacets(results: apiModels.SearchResultNode['facettes']): Observable<FacetsDict> {
+        if (results.length === 0) {
             return rxjs.of({});
         }
         return rxjs.forkJoin(
-            entries.reduce((acc, [property, values]) => {
-                const facet = {
-                    property,
-                    values: this.mapFacetMap(values),
-                };
+            results.reduce((acc, facet) => {
                 acc[facet.property] = this.mapFacet(facet);
                 return acc;
             }, {} as { [property: string]: Observable<FacetAggregation> }),
         );
     }
-
-    private mapFacetMap(facetMap: { [value: string]: number }): apiModels.Facette['values'] {
-        return Object.entries(facetMap)
-            .map(([value, count]) => ({ value, count }))
-            .sort((lhs, rhs) => rhs.count - lhs.count);
-    }
-
-    // private mapFacets(results: apiModels.SearchResultNode['facettes']): Observable<FacetsDict> {
-    //     if (results.length === 0) {
-    //         return rxjs.of({});
-    //     }
-    //     return rxjs.forkJoin(
-    //         results.reduce((acc, facet) => {
-    //             acc[facet.property] = this.mapFacet(facet);
-    //             return acc;
-    //         }, {} as { [property: string]: Observable<FacetAggregation> }),
-    //     );
-    // }
 
     private mapFacet(facet: apiModels.Facette): Observable<FacetAggregation> {
         if (facet.values.length === 0) {

@@ -68,7 +68,7 @@ import {MdsDefinition, FacetValues, Values} from '../../common/ui/mds-editor/typ
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
 import {ReplaySubject} from 'rxjs';
-import {switchMap, takeUntil} from 'rxjs/operators';
+import {first, switchMap, takeUntil} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
@@ -1145,6 +1145,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         let queryRequest = this.mdsDesktopRef.mdsEditorInstance
             .getNeededFacets()
             .pipe(
+                first(),
                 switchMap((facettes) =>
                     this.search.searchWithBody(
                         { criterias, facettes, permissions },
