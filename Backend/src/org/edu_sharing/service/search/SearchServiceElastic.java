@@ -153,7 +153,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return audienceQueryBuilder;
     }
 
-    public Map<String, Map<String, Integer>> searchFacets(MetadataSetV2 mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
+    public SearchResultNodeRef searchFacets(MetadataSetV2 mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
         Map<String, Map<String, Integer>> facetsResult = new HashMap<>();
         BoolQueryBuilder globalConditions = getGlobalConditions(searchToken);
 
@@ -199,7 +199,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 logger.error("non supported aggreagtion " + a.getName());
             }
         }
-        return facetsResult;
+
+        SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
+        searchResultNodeRef.setData(new ArrayList<>());
+        searchResultNodeRef.setCountedProps(facetsResult);
+        searchResultNodeRef.setStartIDX(searchToken.getFrom());
+        searchResultNodeRef.setNodeCount(0);
+
+        return searchResultNodeRef;
     }
 
     @Override

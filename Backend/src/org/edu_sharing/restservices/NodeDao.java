@@ -216,18 +216,19 @@ public class NodeDao {
 		}
 	}
 
-	public static Map<String, Map<String, Integer>> searchFacettes(RepositoryDao repoDao, MdsDaoV2 mdsDao, String query,
+	public static NodeSearch searchFacettes(RepositoryDao repoDao, MdsDaoV2 mdsDao, String query,
 																   List<MdsQueryCriteria> criterias,
 																   SearchToken token) throws DAOException {
 		SearchService ss=SearchServiceFactory.getSearchService(repoDao.getId());
-		if(!(ss instanceof SearchServiceElastic)){
-			logger.error("not implemented for non elastic searchengine");
-			return new HashMap<>();
-		}
-		SearchServiceElastic searchService = (SearchServiceElastic)ss;
 		try {
+			if(!(ss instanceof SearchServiceElastic)){
+				throw new Exception("not implemented for non elastic searchengine:"+ss.getClass().getName());
+			}
+			SearchServiceElastic searchService = (SearchServiceElastic)ss;
 			Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
-			return searchService.searchFacets(mdsDao.getMds(), query, criteriasMap, token);
+			SearchResultNodeRef searchResultNodeRef = searchService.searchFacets(mdsDao.getMds(), query, criteriasMap, token);
+			NodeSearch nodeSearch = transform(repoDao,searchResultNodeRef);
+			return nodeSearch;
 		}catch (Throwable e){
 			throw DAOException.mapping(e);
 		}

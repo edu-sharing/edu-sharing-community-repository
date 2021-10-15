@@ -134,7 +134,7 @@ public class SearchApi {
 
 	@ApiOperation(value = "Search in facets", notes = "Perform queries based on metadata sets V2.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultNode.class),
 			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
 			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
 			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
@@ -163,7 +163,12 @@ public class SearchApi {
 					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 
-			return Response.status(Response.Status.OK).entity(NodeDao.searchFacettes(repoDao,mdsDao,query,parameters.getCriterias(),token)).build();
+			NodeSearch search = NodeDao.searchFacettes(repoDao, mdsDao, query, parameters.getCriterias(), token);
+			SearchResultNode response = new SearchResultNode();
+			response.setNodes(new ArrayList<>());
+			response.setIgnored(search.getIgnored());
+			response.setFacettes(search.getFacettes());
+			return Response.status(Response.Status.OK).entity(search).build();
 
 		}  catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
