@@ -10,7 +10,6 @@
   aria-hidden="true"
 ></button>
 <mat-table [dataSource]="entriesService.dataSource"
-           xmlns="http://www.w3.org/1999/html"
            matSort
            cdkDropList
            [cdkDropListSortPredicate]="dragEnter"
@@ -156,6 +155,7 @@ available. -->
   <div class="icon-bg">
     <img
       [src]="node.iconURL"
+      [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
       [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
     >
   </div>

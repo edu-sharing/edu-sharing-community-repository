@@ -84,6 +84,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     getSortColumns() {
         return this.entriesService.sort?.columns?.filter((c) =>
             this.entriesService.columns.concat(
+                new ListItemSort('NODE', 'score'),
                 new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),
                 new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
                 new ListItemSort('NODE', RestConstants.CM_NAME),
