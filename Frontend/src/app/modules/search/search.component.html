@@ -230,7 +230,10 @@
           </div>
         </mat-tab>
       </mat-tab-group>
-      <div class="apply" #sidenavApply *ngIf="searchService.sidenavOpened && !isMdsLoading()">
+      <div
+        class="apply"
+        *ngIf="searchService.sidenavOpened && !isMdsLoading() && mdsActions?.length > 0"
+      >
         <actionbar
           [options]="mdsActions"
           [numberOfAlwaysVisibleOptions]="2"

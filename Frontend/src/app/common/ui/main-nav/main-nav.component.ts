@@ -298,7 +298,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     @HostListener('window:scroll', ['$event'])
     @HostListener('window:touchmove', ['$event'])
-    handleScroll(event: any) {
+    async handleScroll(event: any) {
         if (
             this.storage.get(
                 TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,
@@ -340,37 +340,36 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             }
             // Give the browser layout engine some time to remove the values, otherwise the elements
             // will have not their initial positions
-            setTimeout(() => {
-                for (let i = 0; i < elements.length; i++) {
-                    const element: any = elements[i];
-                    element.style.transition = null;
-                    if (
-                        !element.getAttribute(
+            await new Promise(resolve => resolve(void 0));
+            for (let i = 0; i < elements.length; i++) {
+                const element: any = elements[i];
+                element.style.transition = null;
+                if (
+                    !element.getAttribute(
+                        MainNavComponent.ID_ATTRIBUTE_NAME,
+                    )
+                ) {
+                    element.setAttribute(
+                        MainNavComponent.ID_ATTRIBUTE_NAME,
+                        Math.random(),
+                    );
+                }
+                if (
+                    this.scrollInitialPositions[
+                        element.getAttribute(
                             MainNavComponent.ID_ATTRIBUTE_NAME,
                         )
-                    ) {
-                        element.setAttribute(
-                            MainNavComponent.ID_ATTRIBUTE_NAME,
-                            Math.random(),
-                        );
-                    }
-                    if (
-                        this.scrollInitialPositions[
-                            element.getAttribute(
-                                MainNavComponent.ID_ATTRIBUTE_NAME,
-                            )
-                        ]
-                    )
-                        continue;
-                    // getComputedStyle does report wrong values in search sidenav
-                    this.scrollInitialPositions[
-                        element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                    ] = window
-                        .getComputedStyle(element)
-                        .getPropertyValue('top');
-                }
-                this.posScrollElements(event, elements);
-            });
+                    ]
+                )
+                    continue;
+                // getComputedStyle does report wrong values in search sidenav
+                this.scrollInitialPositions[
+                    element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
+                ] = window
+                    .getComputedStyle(element)
+                    .getPropertyValue('top');
+            }
+            this.posScrollElements(event, elements);
         } else {
             this.handleScrollHide();
             this.posScrollElements(event, elements);
@@ -481,8 +480,9 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         ]);
     }
 
-    refreshBanner() {
-        setTimeout(() => this.handleScroll(null));
+    async refreshBanner(): Promise<void> {
+        await new Promise(resolve => resolve(void 0));
+        await this.handleScroll(null);
     }
 
     scrollToTop() {

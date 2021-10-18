@@ -93,7 +93,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
     @ViewChild('sidenav') sidenavRef: ElementRef<HTMLElement>;
-    @ViewChild('sidenavApply') sidenavApplyRef: ElementRef;
     @ViewChild('collections') collectionsRef: ElementRef;
 
     toolPermissions: string[];
@@ -345,10 +344,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         // required since banners, footer etc. can cause wrong heights and overflows
         this.searchService.offset =
             window.pageYOffset || document.documentElement.scrollTop;
-        if(this.sidenavRef?.nativeElement && this.sidenavApplyRef?.nativeElement) {
-            this.sidenavRef.nativeElement.style.height =
-                (parseFloat(this.sidenavApplyRef.nativeElement.getBoundingClientRect().top) -
-                    parseFloat(this.sidenavRef.nativeElement.style.top)) + 'px';
+        if (this.sidenavRef?.nativeElement.style.top) {
+            const sideNavHeight =
+                window.innerHeight - parseFloat(this.sidenavRef.nativeElement.style.top);
+            this.sidenavRef.nativeElement.style.height = sideNavHeight + 'px';
         }
     }
 
@@ -1008,7 +1007,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     true);
         }
         if (this.mainNavRef && !this.bannerInitalized) {
-            this.mainNavRef.refreshBanner();
+            await this.mainNavRef.refreshBanner();
+            this.handleScroll();
             this.bannerInitalized = true;
         }
         this.searchService.reinit = true;
