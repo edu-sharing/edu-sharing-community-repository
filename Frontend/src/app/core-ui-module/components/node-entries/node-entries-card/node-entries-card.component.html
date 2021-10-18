@@ -138,11 +138,12 @@
       class="card-meta-row"
     >
       <div *ngIf="!first">{{
-        (displayPart | appListItemLabel)}}</div>
+        (displayPart | appListItemLabel)
+        }}</div>
       <app-list-base
         [item]="displayPart"
         [node]="node"
-        [showFieldTooltip]="true"
+        [showFieldTooltip]="false"
       >
       </app-list-base>
     </div>

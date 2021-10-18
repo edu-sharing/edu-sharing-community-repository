@@ -8,3 +8,13 @@ $collectionIconPadding: 40px;
 $collectionIconSize: 40px;
 
 @import 'node-entries-card.main';
+
+.grid-card {
+    .card-meta {
+        .card-meta {
+            > app-list-base {
+                @include limitLineCount(2, 1.25);
+            }
+        }
+    }
+}
