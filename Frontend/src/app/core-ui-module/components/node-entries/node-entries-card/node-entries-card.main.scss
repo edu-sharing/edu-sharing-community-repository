@@ -209,15 +209,24 @@
 }
 :host ::ng-deep {
     .grid-card app-node-url {
-        a.cdk-keyboard-focused .card-meta{
-            // @TDOO: better focus visibility is required
-            background-color: $primaryLight;
+        a.cdk-keyboard-focused {
+            position: relative;
+            overflow: visible;
+            @include setGlobalKeyboardFocus();
+            .card-meta {
+                background-color: $primaryLight;
+                @include setGlobalKeyboardFocus('border');
+            }
         }
     }
     .grid-card-collection app-node-url {
-        a.cdk-keyboard-focused .card-meta{
-            // @TDOO: better focus visibility is required
-            background-color: #fff;
+        a.cdk-keyboard-focused {
+            position: relative;
+            overflow: visible;
+            @include setGlobalKeyboardFocus('border');
+            .card-meta {
+                background-color: #fff;
+            }
         }
     }
     .card-meta {
