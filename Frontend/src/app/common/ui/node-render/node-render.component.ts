@@ -608,18 +608,24 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data => {
              this.sequenceParent = data.node;
                this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.sequenceParent.ref.repo).subscribe((data:NodeList)=> {
-                   if(data.nodes.length > 0)
-                    this.sequence = data;
-                    setTimeout(()=>this.setScrollparameters(),100);
+                   if(data.nodes.length > 0) {
+                       this.sequence = data;
+                   } else {
+                       this.sequence = null;
+                   }
+                   setTimeout(()=>this.setScrollparameters(),100);
                    onFinish();
                });
             });
         } else {
             this.sequenceParent = this._node;
             this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.sequenceParent.ref.repo).subscribe((data:NodeList)=> {
-                if(data.nodes.length > 0)
-                  this.sequence = data;
-                  setTimeout(()=>this.setScrollparameters(),100);
+                if(data.nodes.length > 0) {
+                    this.sequence = data;
+                } else {
+                    this.sequence = null;
+                }
+                setTimeout(()=>this.setScrollparameters(),100);
                 onFinish();
             }, error => {
                     console.error('failed sequence fetching');
