@@ -98,14 +98,6 @@ export class MdsEditorCommonService {
         return requestedMdsIds[0];
     }
 
-    /**
-     * Fetches the metadata-set definition from the server.
-     */
-    @memoize
-    async fetchMdsDefinition(mdsId: string, repository?: string): Promise<MdsDefinition> {
-        return this.mdsService.getSet(mdsId, repository).toPromise();
-    }
-
     getGroupId(nodes: Node[]): MdsType {
         const node = nodes[0];
         let nodeGroup: MdsType = node.isDirectory ? MdsType.Map : MdsType.Io;

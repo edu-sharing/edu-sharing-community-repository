@@ -1,6 +1,6 @@
 import { Directive, EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { FacetsDict } from 'edu-sharing-api';
+import { FacetsDict, MdsService, MdsViewRelation } from 'edu-sharing-api';
 import {
     BehaviorSubject,
     combineLatest,
@@ -42,7 +42,6 @@ import {
     RequiredMode,
     FacetValues,
     Values,
-    ViewRelation,
 } from './types';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
@@ -151,7 +150,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             public readonly definition: MdsWidget,
             public readonly viewId: string,
             public readonly repositoryId: string,
-            public readonly relation: ViewRelation = null,
+            public readonly relation: MdsViewRelation = null,
             public readonly variables: string[] = null,
         ) {
             this.replaceVariables();
@@ -601,6 +600,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
         private restLocator: RestLocatorService,
+        private mdsService: MdsService,
         private restMdsService: RestMdsService,
         private restConnector: RestConnectorService,
         private searchService: SearchService,
@@ -1078,7 +1078,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             this.groupId !== groupId ||
             !this.mdsDefinition$.value
         ) {
-            mdsDefinition = await this.mdsEditorCommonService.fetchMdsDefinition(mdsId, repository);
+            mdsDefinition = await this.mdsService
+                .getMetadataSet({ metadataSet: mdsId, repository })
+                .toPromise();
         }
         const group = this.getGroup(mdsDefinition, groupId);
         const views = this.getViews(mdsDefinition, group);

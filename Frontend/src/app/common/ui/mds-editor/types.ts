@@ -1,7 +1,15 @@
 import { Type } from '@angular/core';
-import { Sort } from '../../../core-module/core.module';
+import { MdsWidgetValue } from 'edu-sharing-api';
 import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
+export {
+    MdsDefinition,
+    MdsGroup,
+    MdsView,
+    MdsWidget,
+    MdsWidgetCondition,
+    MdsWidgetValue,
+} from 'edu-sharing-api';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -28,8 +36,6 @@ export class UserPresentableError extends Error {
  *   - All values returned.
  */
 export type EditorMode = 'nodes' | 'search' | 'form';
-
-export type ViewRelation = 'suggestions';
 
 export interface Constraints {
     requiresNode?: boolean;
@@ -111,33 +117,7 @@ export enum NativeWidgetType {
 
 export type MdsEditorWidgetComponent = Type<MdsEditorWidgetBase>;
 
-export interface MdsDefinition {
-    create: null;
-    name: string;
-    lists: MdsList[];
-    groups: MdsGroup[];
-    views: MdsView[];
-    widgets: MdsWidget[];
-    sorts: Sort[];
-}
-
-export interface MdsView {
-    id: string;
-    caption: string;
-    isExtended: boolean;
-    html: string;
-    icon: string;
-    rel: ViewRelation;
-    hideIfEmpty: boolean;
-}
-
 export type EditorType = 'angular' | 'legacy';
-
-export interface MdsGroup {
-    id: string;
-    views: string[];
-    rendering: EditorType;
-}
 
 export interface MdsList {
     columns: MdsListColumn[];
@@ -150,52 +130,7 @@ export interface MdsListColumn {
     showDefault: boolean;
 }
 
-// Incomplete, fill in as needed.
-export interface MdsWidget {
-    link: null;
-    subwidgets: null;
-    condition: MdsWidgetCondition;
-    maxlength: number;
-    id: string;
-    caption: string;
-    bottomCaption: string;
-    icon: null;
-    type: MdsWidgetType;
-    template: null;
-    hasValues: boolean;
-    values: MdsWidgetValue[];
-    placeholder: string;
-    unit: string;
-    min: number;
-    max: number;
-    defaultMin: number;
-    defaultMax: number;
-    step: number;
-    allowempty: boolean;
-    defaultvalue: string;
-    isRequired: RequiredMode;
-    isSearchable: boolean;
-    isExtended: boolean|string;
-    hideIfEmpty: boolean;
-    interactionType: 'Input' | 'None';
-}
-
-// Incomplete, fill in as needed.
-export interface MdsWidgetValue {
-    id: string;
-    caption: string;
-    description?: string;
-    parent?: string;
-}
 export type MdsWidgetFacetValue = MdsWidgetValue & { count: number };
-
-export interface MdsWidgetCondition {
-    dynamic: boolean;
-    type: 'PROPERTY' | 'TOOLPERMISSION';
-    value: string;
-    negate: boolean;
-    pattern?: string;
-}
 
 export type FacetValues = { [property: string]: MdsWidgetFacetValue[] };
 

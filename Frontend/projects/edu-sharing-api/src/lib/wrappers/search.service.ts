@@ -47,10 +47,6 @@ export type FacetsDict = {
     [property: string]: FacetAggregation;
 };
 
-interface FacetSearchResponse {
-    [property: string]: { [value: string]: number };
-}
-
 @Injectable({
     providedIn: 'root',
 })

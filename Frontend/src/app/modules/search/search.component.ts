@@ -36,7 +36,6 @@ import {
     RestConstants,
     RestHelper,
     RestIamService,
-    RestMdsService,
     RestNetworkService,
     RestNodeService,
     RestSearchService,
@@ -73,6 +72,7 @@ import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
+import { MdsService, MetadataSetInfo } from 'edu-sharing-api';
 
 @Component({
     selector: 'app-search',
@@ -175,7 +175,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private http: HttpClient,
         private connector: RestConnectorService,
         private RestNodeService: RestNodeService,
-        private mdsService: RestMdsService,
+        private mds: MdsService,
         private bridge: BridgeService,
         private iam: RestIamService,
         private search: RestSearchService,
@@ -1552,8 +1552,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
                 this.updateSelection([]);
                 let repo = this.currentRepository;
-                this.mdsService.getSets(repo).subscribe(
-                    (data: MdsMetadatasets) => {
+                this.mds.getAvailableMetadataSets(repo).subscribe(
+                    (metadataSets: MetadataSetInfo[]) => {
                         if (repo != this.currentRepository) {
                             return;
                         }
@@ -1561,7 +1561,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             this.currentRepositoryObject
                                 ? this.currentRepositoryObject
                                 : this.currentRepository,
-                            data.metadatasets,
+                            metadataSets,
                             this.config,
                         );
                         if (this.mdsSets) {

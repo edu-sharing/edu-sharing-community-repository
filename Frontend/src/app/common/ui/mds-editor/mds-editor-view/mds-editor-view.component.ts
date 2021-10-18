@@ -347,11 +347,13 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         if (this.overrideWidget) {
             return this.overrideWidget;
         } else if (this.view.rel === 'suggestions') {
-            return MdsEditorViewComponent.suggestionWidgetComponents[widget.definition.type];
+            return MdsEditorViewComponent.suggestionWidgetComponents[
+                widget.definition.type as MdsWidgetType
+            ];
         } else if (widget.definition.interactionType === 'None') {
             return MdsWidgetComponent;
         } else {
-            return MdsEditorViewComponent.widgetComponents[widget.definition.type];
+            return MdsEditorViewComponent.widgetComponents[widget.definition.type as MdsWidgetType];
         }
     }
 
