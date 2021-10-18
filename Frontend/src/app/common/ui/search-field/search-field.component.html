@@ -14,7 +14,7 @@
             <!-- We considered injecting the chip list from the mds editor like the suggestions
             panel, but `mat-chip-list` needs direct access to `mat-chip`s as child components for
             keyboard interaction to work. -->
-            <ng-container *ngIf="(categories$ | async).includes(filters.key)">
+            <ng-container *ngIf="(categories$ | async)?.includes(filters.key)">
               <mat-chip
                 *ngFor="let filterValue of filters.value"
                 class="filter-chip-{{ filters.key | propertySlug }}"
