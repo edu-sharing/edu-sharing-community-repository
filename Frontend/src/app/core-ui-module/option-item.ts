@@ -65,6 +65,12 @@ export class OptionItem {
   public isEnabled = true;
 
   /**
+   * Whether the option should be manually marked as primary action when always visible on an
+   * `actionbar`.
+   */
+  public isPrimary: boolean;
+
+  /**
    * A function called with the node as param which should return true or false if the option should be shown for this node
    * Is handled by optionsHelper and may not be used otherwise
    * Please use @customShowCallback instead

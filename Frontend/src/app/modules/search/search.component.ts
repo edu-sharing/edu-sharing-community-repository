@@ -1266,6 +1266,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         const searchAction = new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
             this.applyParameters(await this.getActiveMds().getValues());
         });
+        searchAction.isPrimary = true;
         if (this.mdsDesktopRef?.editorType === 'legacy') {
             this.mdsActions.push(searchAction);
         }
