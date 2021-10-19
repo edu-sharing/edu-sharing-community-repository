@@ -66,7 +66,7 @@ import {WindowRefService} from './window-ref.service';
 import {MdsDefinition, FacetValues, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
-import {ReplaySubject} from 'rxjs';
+import {BehaviorSubject, ReplaySubject, combineLatest} from 'rxjs';
 import {delay, distinctUntilChanged, first, map, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
@@ -93,7 +93,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
     @ViewChild('sidenav') sidenavRef: ElementRef<HTMLElement>;
-    @ViewChild('collections') collectionsRef: ElementRef;
 
     toolPermissions: string[];
     searchFail: boolean = false;
@@ -103,7 +102,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     tutorialElement: ElementRef;
     mdsFacets: FacetValues = {};
     mdsExtended = false;
-    collectionsMore = false;
+    private collectionsMoreSubject = new BehaviorSubject(false);
+    set collectionsMore(value: boolean) {
+        this.collectionsMoreSubject.next(value);
+    }
+    get collectionsMore(): boolean {
+        return this.collectionsMoreSubject.value;
+    }
     nodeReport: Node;
     nodeVariant: Node;
     currentRepository: string = RestConstants.HOME_REPOSITORY;
@@ -168,6 +173,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         useDefaultOptions: true
     };
     private destroyed$ = new ReplaySubject<void>(1);
+    collectionsContainerWidthSubject = new BehaviorSubject(0);
+    private collectionsPerRowSubject = new BehaviorSubject(0);
+    visibleCollectionsSubject = new BehaviorSubject<Node[]>(null);
+    hasMoreCollectionsSubject = new BehaviorSubject(false);
 
     constructor(
         private router: Router,
@@ -321,6 +330,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchField.filterValuesChange
             .pipe(takeUntil(this.destroyed$))
             .subscribe((filterValues) => this.applyParameters(filterValues));
+        this.registerHasMoreCollections();
+        this.registerVisibleCollections();
+        this.registerCollectionsPerRow();
     }
 
     ngAfterViewInit() {
@@ -827,22 +839,56 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.sidenavRef.nativeElement.addEventListener('blur', removeTabindex);
     }
 
-    getHasMoreCollections(): boolean {
-        return this.collectionsPerRow() < this.searchService.searchResultCollections.length;
+    private registerHasMoreCollections(): void {
+        combineLatest([
+            this.searchService.searchResultCollectionsSubject,
+            this.collectionsPerRowSubject,
+        ])
+            .pipe(
+                map(
+                    ([searchResultCollections, collectionsPerRow]) =>
+                        collectionsPerRow < searchResultCollections.length,
+                ),
+            )
+            .subscribe((hasMoreCollections) =>
+                this.hasMoreCollectionsSubject.next(hasMoreCollections),
+            );
     }
 
-    getSearchResultCollections(): Node[] {
-        if (this.collectionsMore) {
-            return this.searchService.searchResultCollections;
-        } else {
-            return this.searchService.searchResultCollections.slice(0, this.collectionsPerRow());
-        }
+    private registerVisibleCollections(): void {
+        combineLatest([
+            this.searchService.searchResultCollectionsSubject,
+            this.collectionsPerRowSubject,
+            this.collectionsMoreSubject,
+        ])
+            .pipe(
+                map(([searchResultCollections, collectionsPerRow, collectionsMore]) => {
+                    if (collectionsMore) {
+                        return searchResultCollections;
+                    } else {
+                        return searchResultCollections.slice(0, collectionsPerRow);
+                    }
+                }),
+            )
+            .subscribe((visibleCollections) =>
+                this.visibleCollectionsSubject.next(visibleCollections),
+            );
     }
 
-    private collectionsPerRow(): number {
+    private registerCollectionsPerRow(): void {
+        this.collectionsContainerWidthSubject
+            .pipe(
+                map((width) => this.collectionsPerRow(width)),
+            )
+            .subscribe((collectionsPerRow) =>
+                this.collectionsPerRowSubject.next(collectionsPerRow),
+            );
+    }
+
+    private collectionsPerRow(collectionsContainerWidth: number = 0): number {
         return Math.floor(
             (
-                this.collectionsRef?.nativeElement.clientWidth
+                collectionsContainerWidth
                 - 20 // container padding
             ) / 212 // 200px cards width + 2 * 6px cards padding
         );

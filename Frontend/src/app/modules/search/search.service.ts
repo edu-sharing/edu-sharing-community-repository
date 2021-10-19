@@ -14,7 +14,13 @@ export class SearchService {
     searchTerm: string = '';
     searchResult: Node[] = [];
     searchResultRepositories: Node[][] = [];
-    searchResultCollections: Node[] = [];
+    searchResultCollectionsSubject = new BehaviorSubject<Node[]>([]);
+    set searchResultCollections(collections: Node[]) {
+        this.searchResultCollectionsSubject.next(collections);
+    }
+    get searchResultCollections(): Node[] {
+        return this.searchResultCollectionsSubject.value;
+    }
     columns: ListItem[] = [];
     collectionsColumns: ListItem[] = [];
     ignored: Array<string> = [];

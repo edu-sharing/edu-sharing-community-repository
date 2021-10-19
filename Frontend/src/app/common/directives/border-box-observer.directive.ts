@@ -31,7 +31,8 @@ export class BorderBoxObserverDirective implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.registerEventEmitter();
         this.registerObserver();
-        this.setInitialValue();
+        // Can cause changed-after-checked errors if done synchronously.
+        Promise.resolve(() => this.setInitialValue());
     }
 
     ngOnDestroy(): void {
