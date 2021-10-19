@@ -398,4 +398,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             parent: this._node,
         });
     }
+
+    saveColumns(columns: ListItem[]) {
+        this.storage.set('workspaceColumns',columns);
+    }
 }

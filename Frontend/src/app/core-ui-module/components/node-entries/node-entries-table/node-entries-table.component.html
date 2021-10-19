@@ -54,6 +54,17 @@
   </ng-container>
   <ng-container matColumnDef="actions">
     <mat-header-cell *matHeaderCellDef>
+      <button
+        *ngIf="entriesService.configureColumns"
+        mat-icon-button
+        (click)="columnChooserVisible = !columnChooserVisible"
+        cdkOverlayOrigin
+        #columnChooserTrigger="cdkOverlayOrigin"
+        [matTooltip]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
+        [attr.aria-label]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
+      >
+        <i icon="settings"></i>
+      </button>
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
       <button mat-icon-button
@@ -154,6 +165,7 @@ available. -->
   [columns]="entriesService.columns"
   [(columnChooserVisible)]="columnChooserVisible"
   [origin]="columnChooserTrigger"
+  (columnsChange)="entriesService.columnsChange.emit($event)"
 ></app-column-chooser>
 <ng-template #loading>
   <spinner></spinner>

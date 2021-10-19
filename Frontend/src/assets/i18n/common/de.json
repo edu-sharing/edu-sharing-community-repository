@@ -241,7 +241,8 @@
     },
     "LIST_TABLE": {
         "DUMMY_ICON_LABEL": "Dateityp",
-        "TOGGLE_ALL": "Alle / Nichts auswählen"
+        "TOGGLE_ALL": "Alle / Nichts auswählen",
+        "CONFIGURE_COLUMNS": "Spalten konfigurieren"
     },
     "NODE": {
         "cm:name": "Dateiname",

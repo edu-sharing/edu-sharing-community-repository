@@ -39,6 +39,8 @@
 <app-node-entries-wrapper
   [dataSource]="_dataSource"
   [columns]="columns"
+  [configureColumns]="true"
+  (columnsChange)="saveColumns($event)"
   [displayType]="displayType"
   (displayTypeChange)="displayTypeChange.emit($event)"
   [elementInteractionType]="InteractionType.Emitter"

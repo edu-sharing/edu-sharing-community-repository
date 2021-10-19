@@ -225,7 +225,8 @@
     },
     "LIST_TABLE": {
         "DUMMY_ICON_LABEL": "File type",
-        "TOGGLE_ALL": "Select all/none"
+        "TOGGLE_ALL": "Select all/none",
+        "CONFIGURE_COLUMNS": "Configure columns"
     },
     "NODE": {
         "cm:name": "filename",

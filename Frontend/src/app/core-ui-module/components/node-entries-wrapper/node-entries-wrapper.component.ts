@@ -119,6 +119,8 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     @ContentChild('empty') emptyRef: TemplateRef<any>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
+    @Input() configureColumns: boolean;
+    @Output() columnsChange = new EventEmitter<ListItem[]>();
     @Input() globalOptions: OptionItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
@@ -166,6 +168,8 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         this.entriesService.list = this;
         this.entriesService.dataSource = this.dataSource;
         this.entriesService.columns = this.columns;
+        this.entriesService.configureColumns = this.configureColumns;
+        this.entriesService.columnsChange = this.columnsChange;
         this.entriesService.displayType = this.displayType;
         this.entriesService.elementInteractionType = this.elementInteractionType;
         this.entriesService.gridConfig = this.gridConfig;

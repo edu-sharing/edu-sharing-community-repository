@@ -24,6 +24,8 @@ export class NodeEntriesService<T extends Node> {
     list: ListEventInterface<T>;
     dataSource: NodeDataSource<T>;
     columns: ListItem[];
+    configureColumns: boolean;
+    columnsChange: EventEmitter<ListItem[]>;
     displayType: NodeEntriesDisplayType;
     selection = new SelectionModel<T>(true, []);
     elementInteractionType: InteractionType;
