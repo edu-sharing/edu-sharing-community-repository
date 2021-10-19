@@ -68,11 +68,18 @@ export class MdsEditorWidgetLicenseComponent
         if (this.mdsEditorValues.editorMode === 'nodes') {
             return values;
         }
-        if (this.checked.length) {
-            values[this.widget.definition.id] = this.checked;
-        } else {
-            delete values[this.widget.definition.id];
-        }
+        values[this.widget.definition.id] = this.checked;
+        // The property used to be deleted, when no license was selected as commented out below.
+        //
+        // When aggregating all widgets' values, this leads to the widget object (`this.widget`) to
+        // set its old initial value since it is not overridden here anymore.
+        //
+        // If we need the `delete` for some reason, we need to find a way to prevent this by getting
+        // rid of the additional state in the widget object or synchronizing with it.
+
+        // if (!this.checked.length) {
+        //     delete values[this.widget.definition.id];
+        // }
         return values;
     }
 
