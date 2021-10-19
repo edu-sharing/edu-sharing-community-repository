@@ -5,6 +5,8 @@
     #trigger="cdkOverlayOrigin"
     cdkMonitorSubtreeFocus
     [class.input-has-focus]="inputHasFocus()"
+    appBorderBoxObserver
+    #triggerBorderBox="borderBoxObserver"
   >
     <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
       <mat-label></mat-label>
@@ -71,7 +73,7 @@
   [cdkConnectedOverlayOrigin]="trigger"
   [cdkConnectedOverlayOpen]="showOverlay && hasSuggestions"
   [cdkConnectedOverlayPositions]="overlayPositions"
-  [cdkConnectedOverlayWidth]="trigger.elementRef.nativeElement.getBoundingClientRect().width"
+  [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   (overlayOutsideClick)="onOutsideClick($event)"
   (detach)="onDetach()"
 >
