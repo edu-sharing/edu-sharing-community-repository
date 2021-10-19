@@ -4,14 +4,14 @@ import { FacetsDict, MdsService, MdsViewRelation } from 'edu-sharing-api';
 import {
     BehaviorSubject,
     combineLatest,
+    EMPTY,
+    from,
     Observable,
     of,
     ReplaySubject,
     Subject,
-    from,
-    EMPTY,
 } from 'rxjs';
-import { map, shareReplay, switchMap, first, takeUntil, filter, tap, skip } from 'rxjs/operators';
+import { filter, first, map, shareReplay, skip, switchMap, takeUntil, tap } from 'rxjs/operators';
 import {
     MdsValueList,
     Node,
@@ -30,6 +30,7 @@ import {
     EditorBulkMode,
     EditorMode,
     EditorType,
+    FacetValues,
     InputStatus,
     MdsDefinition,
     MdsGroup,
@@ -40,7 +41,6 @@ import {
     MdsWidgetValue,
     NativeWidgetType,
     RequiredMode,
-    FacetValues,
     Values,
 } from './types';
 import { parseAttributes } from './util/parse-attributes';
@@ -595,7 +595,15 @@ export class MdsEditorInstanceService implements OnDestroy {
     readonly _new_valuesChange = new EventEmitter<Values>();
     private readonly _new_inputValuesSubject = new BehaviorSubject<Values>(null);
     private readonly _new_valuesSubject = new BehaviorSubject<Values>(null);
-    private readonly _new_initializingSubject = new BehaviorSubject(false);
+    /**
+     * - `new`: the mds has not yet been initialized
+     * - `initializing`: the mds is currently initializing or re-initializing
+     * - `failed`: initialization has failed
+     * - `complete`: initialization is complete
+     */
+    private readonly _new_initializingStateSubject = new BehaviorSubject<
+        'new' | 'initializing' | 'failed' | 'complete'
+    >('new');
 
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
@@ -1024,22 +1032,24 @@ export class MdsEditorInstanceService implements OnDestroy {
             values,
         });
         return new Promise((resolve) => {
-            this._new_initializingSubject
+            this._new_initializingStateSubject
                 .pipe(
-                    // _new_initializingSubject will be set to `true` as reaction to the trigger.
+                    // _new_initializingSubject will be set to `initializing` as reaction to the
+                    // trigger.
                     skip(1),
-                    // If it becomes `false` next, the initialization went through. If it is set to
-                    // `true` again, `initMds` was called again, before the run completed.
+                    // If it becomes `complete` next, the initialization went through. If it is set
+                    // to `initializing` again, `initMds` was called again, before the run
+                    // completed.
                     first(),
                 )
-                .subscribe((initializing) => resolve(!initializing));
+                .subscribe((state) => resolve(state === 'complete'));
         });
     }
 
     private registerInitMds(): void {
         this.initMdsTrigger
             .pipe(
-                tap(() => this._new_initializingSubject.next(true)),
+                tap(() => this._new_initializingStateSubject.next('initializing')),
                 switchMap((args) =>
                     this.doInitMds(
                         args.groupId,
@@ -1050,17 +1060,23 @@ export class MdsEditorInstanceService implements OnDestroy {
                     ),
                 ),
             )
-            .subscribe(({ mdsId, repository, groupId, mdsDefinition, views, widgets }) => {
-                if (this.mdsDefinition$.value !== mdsDefinition) {
-                    this.mdsDefinition$.next(mdsDefinition);
-                }
-                this.mdsId = mdsId;
-                this.repository = repository;
-                this.groupId = groupId;
-                this.views = views;
-                this.widgets.next(widgets);
-                this.mdsInitDone.next();
-                this._new_initializingSubject.next(false);
+            .subscribe({
+                next: ({ mdsId, repository, groupId, mdsDefinition, views, widgets }) => {
+                    if (this.mdsDefinition$.value !== mdsDefinition) {
+                        this.mdsDefinition$.next(mdsDefinition);
+                    }
+                    this.mdsId = mdsId;
+                    this.repository = repository;
+                    this.groupId = groupId;
+                    this.views = views;
+                    this.widgets.next(widgets);
+                    this.mdsInitDone.next();
+                    this._new_initializingStateSubject.next('complete');
+                },
+                error: (error) => {
+                    console.warn('Failed to initialize MDS:', error);
+                    this._new_initializingStateSubject.next('failed');
+                },
             });
     }
 
@@ -1083,6 +1099,9 @@ export class MdsEditorInstanceService implements OnDestroy {
                 .toPromise();
         }
         const group = this.getGroup(mdsDefinition, groupId);
+        if (!group) {
+            throw new Error(`no such group "${groupId}"`);
+        }
         const views = this.getViews(mdsDefinition, group);
         const widgets = await this.generateWidgets(mdsDefinition, views, nodes, values);
         return { mdsId, repository, groupId, mdsDefinition, views, widgets };
@@ -1335,7 +1354,7 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     /**
      * Returns a list of properties for which the MDS editor requires facet values.
-     * 
+     *
      * The observable continues to emit updates as long as the mds editor is alive.
      */
     getNeededFacets(): Observable<string[]> {
@@ -1379,7 +1398,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
 
     private register_new_valuesChange(): void {
-        this._new_initializingSubject
+        this._new_initializingStateSubject
             .pipe(
                 // Don't emit values while initializing. Wait for all widgets to propagate any
                 // default values and value changes due to constraints and then emit a single time.
