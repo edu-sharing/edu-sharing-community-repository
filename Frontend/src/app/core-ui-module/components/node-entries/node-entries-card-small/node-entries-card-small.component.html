@@ -5,6 +5,7 @@
   (contextmenu)="openContextmenu($event)"
 >
   <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+                mode="wrapper"
                 [node]="node"
   >
     <ng-container *ngTemplateOutlet="image"></ng-container>
@@ -43,16 +44,36 @@
       *ngFor="let displayPart of entriesService.columns; let first = first;"
       class="card-meta-row"
     >
-      <!--<label *ngIf="!first">{{
-        ((displayPart.type === 'NODE_PROPOSAL' ? 'NODE_PROPOSAL' : 'NODE') + '.' + displayPart.name) | translate:{fallback: ''}
-        }}</label>-->
-      <app-list-base
-        [item]="displayPart"
-        [node]="node"
-        [showFieldTooltip]="true"
-      >
-      </app-list-base>
-
+      <ng-container *ngIf="first">
+        <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+                      [node]="node"
+                      #link
+        >
+          <app-list-base
+            [item]="displayPart"
+            [node]="node"
+            [showFieldTooltip]="false"
+          >
+          </app-list-base>
+        </app-node-url>
+        <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+        >
+          <app-list-base
+            [item]="displayPart"
+            [node]="node"
+            [showFieldTooltip]="false"
+          >
+          </app-list-base>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="!first">
+        <app-list-base
+          [item]="displayPart"
+          [node]="node"
+          [showFieldTooltip]="false"
+        >
+        </app-list-base>
+      </ng-container>
     </div>
   </div>
 </ng-template>

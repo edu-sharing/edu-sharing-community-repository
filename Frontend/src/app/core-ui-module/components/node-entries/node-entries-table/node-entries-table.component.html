@@ -23,6 +23,7 @@
         [ngModel]="entriesService.selection.selected.length > 0"
         [indeterminate]="entriesService.selection.selected.length > 0 && entriesService.selection.selected.length !== entriesService.dataSource.getData().length"
         (ngModelChange)="toggleAll($event)"
+        aria-label="{{ 'LIST_TABLE.TOGGLE_ALL' | translate }}"
       ></mat-checkbox>
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
@@ -65,7 +66,7 @@
     </mat-cell>
   </ng-container>
   <!-- Data Columns -->
-  <ng-container *ngFor="let column of entriesService.columns" [matColumnDef]="column.name">
+  <ng-container *ngFor="let column of entriesService.columns;let first=first" [matColumnDef]="column.name">
     <ng-container *ngIf="entriesService.sort?.allowed && isSortable(column)">
       <mat-header-cell *matHeaderCellDef mat-sort-header>{{ column | appListItemLabel }}</mat-header-cell>
     </ng-container>
@@ -73,17 +74,22 @@
       <mat-header-cell *matHeaderCellDef>{{ column | appListItemLabel }}</mat-header-cell>
     </ng-container>
     <mat-cell *matCellDef="let node" #cell>
-      <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
-                    [node]="node"
+      <ng-container *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
       >
-        <app-list-text
+        <app-node-url
+          cdkMonitorSubtreeFocus
           [node]="node"
-          [item]="column"
-          appCheckTextOverflow
-          #text="appCheckTextOverflow"
-          [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-        ></app-list-text>
-      </app-node-url>
+          [mode]="first ? 'link' : 'wrapper'"
+        >
+          <app-list-text
+            [node]="node"
+            [item]="column"
+            appCheckTextOverflow
+            #text="appCheckTextOverflow"
+            [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
+          ></app-list-text>
+        </app-node-url>
+      </ng-container>
       <app-list-text
         *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
         [node]="node"
@@ -116,6 +122,7 @@
       *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
       (contextmenu)="onRowContextMenu({ event: $event, node: node })"
     >
+      Test
     </mat-row>
   </ng-container>
   <ng-container *ngIf="!entriesService.dragDrop?.dragAllowed">

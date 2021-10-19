@@ -164,28 +164,32 @@
             flex-direction: row;
             align-items: center;
             min-height: 2.5em;
-            > div {
-                cursor: inherit;
-                color: $textLight;
-                font-size: 85%;
-            }
-            > app-list-base {
-                color: #000;
-                flex-grow: 1;
-                margin: 5px 0;
-                display: flex;
-                justify-content: flex-end;
-                text-align: end;
-                word-break: break-word;
-                // height: 1em;
+            &:not(:first-child) {
+                > label {
+                    cursor: inherit;
+                    color: $textLight;
+                    font-size: 85%;
+                }
+                > app-list-base {
+                    color: #000;
+                    flex-grow: 1;
+                    margin: 5px 0;
+                    display: flex;
+                    justify-content: flex-end;
+                    text-align: end;
+                    word-break: break-word;
+                    // height: 1em;
 
+                }
             }
             &:first-child {
-                > app-list-base {
+                > app-list-base, > app-node-url {
+                    width: 100%;
+                    color: $textMain;
                     font-size: 120%;
                     height: 1.25 * 2em;
                     text-align: left;
-                    @include limitLineCount(2, 1.25);
+                    word-break: break-word;
                 }
             }
         }
@@ -207,24 +211,21 @@
     }
 }
 :host ::ng-deep {
-    .grid-card app-node-url {
-        a.cdk-keyboard-focused {
-            position: relative;
-            overflow: visible;
-            @include setGlobalKeyboardFocus();
-            .card-meta {
-                background-color: $primaryLight;
-                @include setGlobalKeyboardFocus('border');
+    .grid-card {
+        .card-meta-row {
+            &:first-child {
+                app-list-base, app-node-url a app-list-base {
+                    @include limitLineCount(2, 1.25);
+                }
             }
-        }
-    }
-    .grid-card-collection app-node-url {
-        a.cdk-keyboard-focused {
-            position: relative;
-            overflow: visible;
-            @include setGlobalKeyboardFocus('border');
-            .card-meta {
-                background-color: #fff;
+            app-node-url {
+                a {
+                    color: $textMain;
+                    &.cdk-keyboard-focused {
+                        display: inline-flex;
+                        @include setGlobalKeyboardFocus('outline');
+                    }
+                }
             }
         }
     }
