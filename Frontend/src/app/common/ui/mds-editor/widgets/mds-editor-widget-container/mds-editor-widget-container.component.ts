@@ -10,6 +10,7 @@ import {
     Injectable,
     Input,
     OnChanges,
+    OnDestroy,
     OnInit,
     SimpleChanges,
     ViewChild,
@@ -18,15 +19,16 @@ import { AbstractControl } from '@angular/forms';
 import { MatRipple } from '@angular/material/core';
 import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { BulkBehavior } from '../../../mds/mds.component';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { BulkMode, EditorBulkMode, InputStatus, RequiredMode } from '../../types';
+import { BulkMode, EditorBulkMode, InputStatus } from '../../types';
 import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { MdsWidget } from 'edu-sharing-api';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
 // its `FormFieldControl`.
@@ -94,8 +96,9 @@ export class RegisterFormFieldDirective {
         ]),
     ],
 })
-export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, AfterContentInit {
-    readonly RequiredMode = RequiredMode;
+export class MdsEditorWidgetContainerComponent
+    implements OnInit, OnChanges, AfterContentInit, OnDestroy
+{
     readonly ValueType = ValueType;
     @ViewChild(MatRipple) ripple: MatRipple;
 
@@ -132,8 +135,10 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
     readonly labelId: string;
     readonly descriptionId: string;
     bulkMode: BehaviorSubject<BulkMode>;
-    missingRequired: RequiredMode | null;
+    missingRequired: MdsWidget['isRequired'] | null;
     isHidden: boolean;
+
+    private readonly destroyed$ = new Subject<void>();
 
     constructor(
         private elementRef: ElementRef,
@@ -181,11 +186,21 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
             this.initFormControl(this.control);
         }
         this.wrapInFormField = this.wrapInFormField ?? !!this.control;
+        if (this.widget) {
+            this.widget.focusTrigger
+                .pipe(takeUntil(this.destroyed$))
+                .subscribe(() => this.injectedView?.focus());
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
     private registerIsHidden(): void {
         const shouldShowFactors = [this.widget.meetsDynamicCondition];
-        if (this.widget.definition.isExtended === 'true' || this.widget.definition.isExtended === true) {
+        if (this.widget.definition.isExtended) {
             shouldShowFactors.push(this.mdsEditorInstance.shouldShowExtendedWidgets$);
         }
         combineLatest(shouldShowFactors)
@@ -224,7 +239,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
             .subscribe((status: InputStatus) => {
                 this.handleStatus(status);
             });
-        this.widget.onShowMissingRequired((shouldScrollIntoView) => {
+        this.widget.registerShowMissingRequired((shouldScrollIntoView) => {
             formControl.markAllAsTouched();
             if (formControl.errors?.required && shouldScrollIntoView) {
                 this.scrollIntoViewAndFocus();
@@ -265,7 +280,7 @@ export class MdsEditorWidgetContainerComponent implements OnInit, OnChanges, Aft
     private handleStatus(status: InputStatus): void {
         if (this.control.errors?.required) {
             if (
-                this.widget.definition.isRequired === RequiredMode.MandatoryForPublish &&
+                this.widget.definition.isRequired === 'mandatoryForPublish' &&
                 Object.keys(this.control.errors).length === 1
             ) {
                 status = 'VALID'; // downgrade to warning

@@ -65,7 +65,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
-    @Output() onDone = new EventEmitter<Node[]|Values>();
+    @Output() onDone = new EventEmitter<Node[] | Values>();
     @Output() onMdsLoaded = new EventEmitter();
     @Output() openContributor = new EventEmitter();
     @Output() openLicense = new EventEmitter();
@@ -171,7 +171,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                         });
                         return;
                     case 'angular':
-                        if(onlyLegacy) {
+                        if (onlyLegacy) {
                             return;
                         }
                         this.mdsEditorInstance.mdsDefinition$
@@ -187,7 +187,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         try {
             if (!this.mdsEditorInstance.getCanSave()) {
                 // no changes, behave like close
-                if(this.mdsEditorInstance.getIsValid()){
+                if (this.mdsEditorInstance.getIsValid()) {
                     this.onDone.emit(this.nodes);
                     return;
                 } else {

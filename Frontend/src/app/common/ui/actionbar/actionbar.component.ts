@@ -45,7 +45,13 @@ export class ActionbarComponent {
      * Style, currently default or 'flat' if all always visible icons should get a flat look
      */
     @Input() style: 'default' | 'flat' = 'default';
-    @Input() highlight: 'first' | 'last' = 'first';
+    /**
+     * Highlight one or more of the always-visible buttons as primary action.
+     * 
+     * - `first`, `last`: The first / last of `optionsAlways` by order.
+     * - `manual`: Highlight all options that set `isPrimary = true`.
+     */
+    @Input() highlight: 'first' | 'last' | 'manual' = 'first';
     /**
      * Should disabled ("greyed out") options be shown or hidden?
      */
@@ -149,12 +155,14 @@ export class ActionbarComponent {
         return this.optionsMenu.filter((o) => o.isEnabled).length > 0;
     }
 
-    shouldHighlight(optionIndex: number): boolean {
+    shouldHighlight(optionIndex: number, option: OptionItem): boolean {
         switch (this.highlight) {
             case 'first':
                 return optionIndex === 0;
             case 'last':
                 return optionIndex === this.optionsAlways.length - 1;
+            case 'manual':
+                return option.isPrimary;
         }
     }
 }

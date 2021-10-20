@@ -5,6 +5,7 @@ import { TranslateService, TranslateModule, TranslatePipe, TranslateLoader } fro
 import { DECLARATIONS } from '../../../declarations';
 import { PROVIDERS } from '../../../providers';
 import { IMPORTS } from '../../../imports';
+import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
@@ -20,7 +21,7 @@ const fake_translate: any = {
 
 export class FakeLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<any> {
-    return Observable.of(fake_translate)
+    return rxjs.of(fake_translate)
   }
 }
 

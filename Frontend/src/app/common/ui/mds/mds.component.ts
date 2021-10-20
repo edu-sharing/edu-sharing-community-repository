@@ -44,6 +44,7 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
 import {DateHelper} from '../../../core-ui-module/DateHelper';
+import { MdsService } from 'edu-sharing-api';
 declare var noUiSlider: any;
 
 @Component({
@@ -210,7 +211,9 @@ export class MdsComponent {
             let mdsDefinition: MdsDefinition;
             try {
                 mdsId = this.mdsEditorCommon.getMdsId(nodesConverted)
-                mdsDefinition = await this.mdsEditorCommon.fetchMdsDefinition(mdsId);
+                mdsDefinition = await this.newMdsService
+                    .getMetadataSet({ metadataSet: mdsId })
+                    .toPromise();
             } catch (error) {
                 if (error instanceof UserPresentableError) {
                     this.toast.error(null, error.message);
@@ -281,6 +284,7 @@ export class MdsComponent {
 
     constructor(
         private mdsService: RestMdsService,
+        private newMdsService: MdsService,
         private translate: TranslateService,
         private route: ActivatedRoute,
         private uiService: UIService,

@@ -76,6 +76,13 @@ import { extensionImports } from './extension/extension-imports';
 import {ResizableModule} from 'angular-resizable-element';
 import { MainMenuButtonsComponent } from './common/ui/main-menu-buttons/main-menu-buttons.component';
 import { MdsEditorWidgetFacetListComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
+import { SearchFieldComponent } from './common/ui/search-field/search-field.component';
+import { MdsEditorComponent } from './common/ui/mds-editor/mds-editor.component';
+import { SearchFieldFacetsComponent } from './common/ui/mds-editor/search-field-facets/search-field-facets.component';
+import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
+import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pipe';
+import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
+import { BorderBoxObserverDirective } from './common/directives/border-box-observer.directive';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -143,6 +150,13 @@ import { MdsEditorWidgetFacetListComponent } from './common/ui/mds-editor/widget
         extensionDeclarations,
         MainMenuButtonsComponent,
         MdsEditorWidgetFacetListComponent,
+        SearchFieldComponent,
+        MdsEditorComponent,
+        SearchFieldFacetsComponent,
+        LabelPipe,
+        PropertySlugPipe,
+        MdsEditorWidgetSearchSuggestionsComponent,
+        BorderBoxObserverDirective,
     ],
     imports: [
         IMPORTS,

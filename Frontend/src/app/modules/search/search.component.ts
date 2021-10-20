@@ -36,7 +36,6 @@ import {
     RestConstants,
     RestHelper,
     RestIamService,
-    RestMdsService,
     RestNetworkService,
     RestNodeService,
     RestSearchService,
@@ -66,8 +65,8 @@ import {WindowRefService} from './window-ref.service';
 import {MdsDefinition, FacetValues, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
-import {ReplaySubject} from 'rxjs';
-import {switchMap, takeUntil} from 'rxjs/operators';
+import {BehaviorSubject, ReplaySubject, combineLatest} from 'rxjs';
+import {delay, distinctUntilChanged, first, map, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
@@ -78,6 +77,8 @@ import {
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
+import { MdsService, MetadataSetInfo } from 'edu-sharing-api';
 
 @Component({
     selector: 'app-search',
@@ -100,7 +101,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
     @ViewChild('sidenav') sidenavRef: ElementRef<HTMLElement>;
-    @ViewChild('sidenavApply') sidenavApplyRef: ElementRef;
     @ViewChild('collections') collectionsRef: ElementRef;
     @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
@@ -111,7 +111,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     tutorialElement: ElementRef;
     mdsFacets: FacetValues = {};
     mdsExtended = false;
-    collectionsMore = false;
+    private collectionsMoreSubject = new BehaviorSubject(false);
+    set collectionsMore(value: boolean) {
+        this.collectionsMoreSubject.next(value);
+    }
+    get collectionsMore(): boolean {
+        return this.collectionsMoreSubject.value;
+    }
     nodeReport: Node;
     nodeVariant: Node;
     currentRepository: string = RestConstants.HOME_REPOSITORY;
@@ -138,6 +144,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     set mdsId(mdsId: string) {
         this._mdsId = mdsId;
+        this.searchField.setMetadataSet(mdsId);
     }
     extendedRepositorySelected = false;
     savedSearch: Node[] = [];
@@ -174,13 +181,17 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         useDefaultOptions: true
     };
     private destroyed$ = new ReplaySubject<void>(1);
+    collectionsContainerWidthSubject = new BehaviorSubject(0);
+    private collectionsPerRowSubject = new BehaviorSubject(0);
+    visibleCollectionsSubject = new BehaviorSubject<Node[]>(null);
+    hasMoreCollectionsSubject = new BehaviorSubject(false);
 
     constructor(
         private router: Router,
         private http: HttpClient,
         private connector: RestConnectorService,
         private RestNodeService: RestNodeService,
-        private mdsService: RestMdsService,
+        private mds: MdsService,
         private bridge: BridgeService,
         private iam: RestIamService,
         private search: RestSearchService,
@@ -199,11 +210,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private storage: SessionStorageService,
         private network: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
+        private searchField: SearchFieldService,
     ) {}
 
     ngOnInit() {
         setTimeout(() => {
-            this.tutorialElement = this.mainNavRef.search;
+            this.tutorialElement = this.mainNavRef.searchField.input;
             this.handleScroll();
         });
         this.searchService.clear();
@@ -327,12 +339,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.sidenavOpened$
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.extendedSearchTabGroup?.realignInkBar());
+        this.searchField.filterValuesChange
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((filterValues) => this.applyParameters(filterValues));
     }
 
     ngAfterViewInit() {
         this.scrollTo(this.searchService.offset);
         this.innerWidth = this.winRef.getNativeWindow().innerWidth;
         //this.autocompletesArray = this.autocompletes.toArray();
+        this.registerSearchOnMdsUpdate();
     }
 
     ngOnDestroy() {
@@ -349,10 +365,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         // required since banners, footer etc. can cause wrong heights and overflows
         this.searchService.offset =
             window.pageYOffset || document.documentElement.scrollTop;
-        if(this.sidenavRef?.nativeElement && this.sidenavApplyRef?.nativeElement) {
-            this.sidenavRef.nativeElement.style.height =
-                (parseFloat(this.sidenavApplyRef.nativeElement.getBoundingClientRect().top) -
-                    parseFloat(this.sidenavRef.nativeElement.style.top)) + 'px';
+        if (this.sidenavRef?.nativeElement.style.top) {
+            const sideNavHeight =
+                window.innerHeight - parseFloat(this.sidenavRef.nativeElement.style.top);
+            this.sidenavRef.nativeElement.style.height = sideNavHeight + 'px';
         }
     }
 
@@ -554,6 +570,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.currentRepository == RestConstants.ALL
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
+        this.searchField.setFilterValues(this.currentValues);
         this.searchRepository(repos, criterias, init);
 
         if (init) {
@@ -817,21 +834,26 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     getSearchResultCollections(): Node[] {
         if (this.collectionsMore) {
             return this.searchService.searchResultCollections;
-        } else {
-            return this.searchService.searchResultCollections.slice(0, this.collectionsPerRow());
-        }
+                    } else {
+                        return searchResultCollections.slice(0, collectionsPerRow);
+                    }
+                }),
+            )
+            .subscribe((visibleCollections) =>
+                this.visibleCollectionsSubject.next(visibleCollections),
+            );
+    }
+
+    private registerCollectionsPerRow(): void {
+        this.collectionsContainerWidthSubject
+            .pipe(
+                map((width) => this.collectionsPerRow(width)),
+            )
+            .subscribe((collectionsPerRow) =>
+                this.collectionsPerRowSubject.next(collectionsPerRow),
+            );
     }
      */
-
-    private collectionsPerRow(): number {
-        return Math.floor(
-            (
-                this.collectionsRef?.nativeElement.clientWidth
-                - 20 // container padding
-            ) / 212 // 200px cards width + 2 * 6px cards padding
-        );
-    }
-
 
     private updateSortMds() {
         // when mds is not ready, we can't update just now
@@ -985,7 +1007,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     true);
         }
         if (this.mainNavRef && !this.bannerInitalized) {
-            this.mainNavRef.refreshBanner();
+            await this.mainNavRef.refreshBanner();
+            this.handleScroll();
             this.bannerInitalized = true;
         }
         this.searchService.reinit = true;
@@ -1120,6 +1143,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         let queryRequest = this.mdsDesktopRef.mdsEditorInstance
             .getNeededFacets()
             .pipe(
+                first(),
                 switchMap((facettes) =>
                     this.search.searchWithBody(
                         { criterias, facettes, permissions },
@@ -1247,7 +1271,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         const searchAction = new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
             this.applyParameters(await this.getActiveMds().getValues());
         });
-        this.mdsActions.push(searchAction);
+        searchAction.isPrimary = true;
+        if (this.mdsDesktopRef?.editorType === 'legacy') {
+            this.mdsActions.push(searchAction);
+        }
         this.mdsButtons = DialogButton.fromOptionItem([searchAction]);
     }
 
@@ -1532,8 +1559,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
                 this.updateSelection([]);
                 let repo = this.currentRepository;
-                this.mdsService.getSets(repo).subscribe(
-                    (data: MdsMetadatasets) => {
+                this.mds.getAvailableMetadataSets(repo).subscribe(
+                    (metadataSets: MetadataSetInfo[]) => {
                         if (repo != this.currentRepository) {
                             return;
                         }
@@ -1541,7 +1568,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             this.currentRepositoryObject
                                 ? this.currentRepositoryObject
                                 : this.currentRepository,
-                            data.metadatasets,
+                            metadataSets,
                             this.config,
                         );
                         if (this.mdsSets) {
@@ -1592,6 +1619,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
             this.currentRepository = this.currentRepositoryObject.id;
         }
+        this.searchField.setRepository(this.currentRepository);
     }
 
     private getEnabledRepositories() {
@@ -1614,5 +1642,30 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     getSelection() {
         return this.nodeEntriesResults?.getSelection()?.selected;
+    }
+
+    private registerSearchOnMdsUpdate(): void {
+        this.mdsDesktopRef.mdsEditorInstance.values
+            .pipe(
+                takeUntil(this.destroyed$),
+                map((valuesDict) =>
+                    Object.entries(valuesDict).reduce((acc, [property, values]) => {
+                        if (values?.length > 0) {
+                            acc[property] = values;
+                        }
+                        return acc;
+                    }, {} as { [property: string]: string[] }),
+                ),
+                map((valuesDict) => JSON.stringify(valuesDict)),
+                distinctUntilChanged(),
+                map((json) => JSON.parse(json)),
+            )
+            .subscribe((values) => this.applyParameters(values));
+        this.mdsDesktopRef.mdsEditorInstance.mdsInitDone
+            .pipe(
+                takeUntil(this.destroyed$),
+                // Wait for `MdsEditorWrapper` to reflect `editorType`.
+                delay(0),
+            ).subscribe(() => this.updateMdsActions());
     }
 }

@@ -69,7 +69,6 @@
     <app-create-menu
       #createMenu
       [allowed]="isCreateAllowed()"
-      [searchQuery]="searchQuery"
       [allowBinary]="create.allowBinary"
       [parent]="create.parent"
       [folder]="create.folder"
@@ -152,28 +151,15 @@
         </div>
         <div class="topBarSearch" [class.noScope]="!showScope">
           <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
-          <form
-                autocomplete="off"
-                *ngIf="searchEnabled"
-                role="search"
-                #searchForm>
-            <div class="searchInputGroup">
-              <input
-                #search
-                cdkMonitorElementFocus
-                name="search"
-                type="search"
-                [(ngModel)]="searchQuery"
-                (change)="searchQueryChange.emit(searchQuery)"
-                placeholder="{{ searchPlaceholder | translate }}"
-                [attr.aria-label]="searchPlaceholder | translate"
-              />
-              <i class="searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()" icon="clear"></i>
-              <button mat-icon-button (click)="doSearch()" attr.aria-label="{{'WORKSPACE.SEARCH_ACTION' | translate}}">
-                <i icon="search" [aria]="false"></i>
-              </button>
-            </div>
-          </form>
+          <app-search-field
+            *ngIf="searchEnabled"
+            [(searchString)]="searchQuery"
+            (searchStringChange)="searchQueryChange.emit($event)"
+            [placeholder]="searchPlaceholder"
+            [enableFiltersAndSuggestions]="currentScope === 'search'"
+            (search)="doSearch($event)"
+            (clear)="clearSearch()"
+          ></app-search-field>
         </div>
         <div class="topbar-search-right">
           <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">

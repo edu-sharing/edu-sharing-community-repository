@@ -107,6 +107,9 @@ user-profile {
 .topBarSearch {
     flex: auto;
     margin: 0 20px;
+    app-search-field {
+        max-width: 550px;
+    }
 }
 .addDesktop{
     margin-left: 50px;
@@ -196,66 +199,8 @@ user-profile {
                 20%
         ); //rgba(255,255,255,0.165);/* => #595959;*/
     }
-    .topBarSearch .searchInputGroup {
-        display: flex;
-        height: 40px;
-        input,
-        input:focus {
-            padding-right: 40px; // space for clear icon
-            border-radius: 2px;
-            width: 100%;
-            background: $workspaceTopBarInputBackground;
-            color: $workspaceTopBarInputText;
-            border: none !important;
-            -webkit-appearance: none;
-            &:focus {
-                border-radius: 0;
-                &:not(.cdk-keyboard-focused) {
-                    @include setGlobalFocus();
-                }
-                &.cdk-keyboard-focused {
-                    transition: none;
-                    @include setGlobalKeyboardFocus();
-                }
-            }
-        }
-        >button {
-            position: absolute;
-            top: 0;
-            right: 0;
-            height: 40px;
-            border-radius: 0 2px 2px 0;
-            color: $workspaceTopBarInputText;
-            background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
-        }
-        .searchClearIcon {
-            color: $workspaceTopBarInputText;
-            opacity: 0.8;
-            top: 9px;
-            right: 0;
-            @include clickable();
-        }
-    }
-}
-.searchInputGroup {
-    position: relative;
-    width: 100%;
-    max-width: 550px;
 }
 
-.topBar .topBarSearch form {
-    position: relative;
-}
-
-.searchIcon,
-.searchClearIcon {
-    font-size: 22px !important;
-    position: absolute;
-    top: 10px;
-}
-.searchIcon {
-    left: 8px;
-}
 .topBar .user {
     position: relative;
     display: flex;
