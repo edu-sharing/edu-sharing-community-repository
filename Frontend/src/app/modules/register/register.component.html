@@ -1,6 +1,6 @@
 <global-progress *ngIf="isLoading"></global-progress>
 <card *ngIf="!isLoading"
-      role="main" [appSkipTarget]="SkipTarget.MainContent"
+      role="main" appSkipTarget="main-content"
       avatar="assets/images/app-icon.svg"
       [buttons]="updateButtons()"
       title="{{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}"

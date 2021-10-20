@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-export enum SkipTarget {
-    MainContent = 'MAIN_CONTENT',
+// Define as object, so we can derive the type `SkipTarget` and the values `skipTargets` from the
+// same source.
+const skipTargets_ = {
+    'main-content': {},
 }
+
+export type SkipTarget = keyof typeof skipTargets_;
+const skipTargets: SkipTarget[] = Object.keys(skipTargets_) as SkipTarget[];
 
 /**
  * Manages targets for skip navigation.
@@ -55,7 +60,7 @@ export class SkipNavService {
 
     private updateAvailableTargets(): void {
         const availableTargets: SkipTarget[] = [];
-        for (const target of Object.values(SkipTarget)) {
+        for (const target of skipTargets) {
             if (this.elements[target]) {
                 availableTargets.push(target);
             }

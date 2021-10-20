@@ -44,7 +44,6 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 
 type LuceneData = {
@@ -70,7 +69,6 @@ type LuceneData = {
 })
 export class AdminComponent {
   readonly SCOPES = Scope;
-  readonly SkipTarget = SkipTarget;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,

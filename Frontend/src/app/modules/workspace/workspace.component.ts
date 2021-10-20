@@ -52,6 +52,7 @@ import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import {CardService} from '../../core-ui-module/card.service';
 import {Observable} from 'rxjs';
 import {delay} from 'rxjs/operators';
+import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {
@@ -73,7 +74,6 @@ import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapp
     ]
 })
 export class WorkspaceMainComponent implements EventListener, OnDestroy {
-    readonly SkipTarget = SkipTarget;
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
