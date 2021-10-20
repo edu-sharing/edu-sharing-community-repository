@@ -1,5 +1,6 @@
 @import '../../../styles/variables';
 
+$optionBarHeight: 50px;
 
 .grid-card {
     transition: all $transitionNormal;
@@ -8,6 +9,7 @@
     background-color: #fff;
     @include materialShadowBottom();
     display: grid;
+    height: 100%;
     grid-template-columns: auto;
     .dropdown-dummy {
         position: fixed;
@@ -156,7 +158,6 @@
     }
     .card-meta {
         padding: $entriesCardPaddingVertical $entriesCardPaddingHorizontal 0 $entriesCardPaddingHorizontal;
-        background-color: rgba(255,255,255, 0.8);
         display: grid;
         flex-direction: row;
         .card-meta-row {
@@ -197,9 +198,7 @@
     }
     &:hover {
         @include materialShadowMediumLarge(false, 0.2);
-        .card-meta, .card-options {
-            background-color: $primaryVeryLight;
-        }
+        background-color: $primaryVeryLight;
         // transform: scale(1.0075);
     }
     &.grid-card-collection:hover .card-meta {
