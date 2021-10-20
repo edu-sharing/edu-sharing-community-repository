@@ -12,7 +12,6 @@ import { RegisterDoneComponent } from './register-done/register-done.component';
 import { RegisterFormComponent } from './register-form/register-form.component';
 import { RegisterRequestComponent } from './register-request/register-request.component';
 import { RegisterResetPasswordComponent } from './register-reset-password/register-reset-password.component';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
     selector: 'app-register',
@@ -21,7 +20,6 @@ import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegisterComponent {
-    readonly SkipTarget = SkipTarget;
     @ViewChild('registerForm') registerForm: RegisterFormComponent;
     @ViewChild('registerDone') registerDone: RegisterDoneComponent;
     @ViewChild('request') request: RegisterRequestComponent;

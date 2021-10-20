@@ -45,7 +45,6 @@ import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 import {MdsMetadatasets} from '../../../core-module/core.module';
 import {ConfigurationHelper} from '../../../core-module/core.module';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import { SkipTarget } from '../../../common/ui/skip-nav/skip-nav.service';
 import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {Values} from '../../../common/ui/mds-editor/types';
 
@@ -58,7 +57,6 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
   styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
-  readonly SkipTarget = SkipTarget;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('mds') mds : MdsEditorWrapperComponent;
   @ViewChild('share') shareRef : WorkspaceShareComponent;

@@ -69,7 +69,6 @@ import {FormControl} from '@angular/forms';
 import {BehaviorSubject, ReplaySubject, combineLatest} from 'rxjs';
 import {delay, distinctUntilChanged, first, map, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
-import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
 import { MdsService, MetadataSetInfo } from 'edu-sharing-api';
@@ -83,7 +82,6 @@ import { MdsService, MetadataSetInfo } from 'edu-sharing-api';
 })
 export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
-    readonly SkipTarget = SkipTarget;
 
     @ViewChild('mdsMobile') mdsMobileRef: MdsEditorWrapperComponent;
     @ViewChild('mdsDesktop') mdsDesktopRef: MdsEditorWrapperComponent;

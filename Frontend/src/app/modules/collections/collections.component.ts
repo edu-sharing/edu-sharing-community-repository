@@ -58,7 +58,6 @@ import { GlobalContainerComponent } from '../../common/ui/global-container/globa
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 import {MainNavService} from '../../common/services/main-nav.service';
 import {
     ManagementEvent,
@@ -96,7 +95,6 @@ export class CollectionsMainComponent {
         sortAscending: [false, true, false],
     };
     readonly SCOPES = Scope;
-    readonly SkipTarget = SkipTarget;
 
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;

@@ -22,7 +22,6 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {Helper} from '../../core-module/rest/helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
   selector: 'app-profiles',
@@ -33,7 +32,6 @@ import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
   ]
 })
 export class ProfilesComponent {
-  readonly SkipTarget = SkipTarget;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private connector: RestConnectorService,
