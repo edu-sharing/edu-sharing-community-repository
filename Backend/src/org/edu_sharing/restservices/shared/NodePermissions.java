@@ -4,16 +4,16 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class NodePermissions {
 
 	private ACL localPermissions = null;
 	private List<ACE> inheritedPermissions = null;
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("localPermissions")
 	public ACL getLocalPermissions() {
 		return localPermissions;
@@ -22,7 +22,7 @@ public class NodePermissions {
 		this.localPermissions = localPermissions;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("inheritedPermissions")
 	public List<ACE> getInheritedPermissions() {
 		return inheritedPermissions;

@@ -10,8 +10,8 @@ import org.edu_sharing.metadataset.v2.MetadataWidget;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-@ApiModel(description = "")
+import io.swagger.v3.oas.annotations.media.Schema;
+@Schema(description = "")
 public class ColumnV2 {
 		private String id;
 		private String format;

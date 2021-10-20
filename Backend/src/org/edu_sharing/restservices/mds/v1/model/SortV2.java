@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.mds.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.metadataset.v2.MetadataColumn;
 import org.edu_sharing.metadataset.v2.MetadataList;
 import org.edu_sharing.metadataset.v2.MetadataSort;
@@ -10,7 +10,7 @@ import org.edu_sharing.metadataset.v2.MetadataSortColumn;
 import java.util.ArrayList;
 import java.util.List;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class SortV2 {
 	public class SortV2Default{
 		private String sortBy;

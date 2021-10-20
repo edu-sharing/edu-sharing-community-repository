@@ -6,10 +6,10 @@ import org.edu_sharing.restservices.shared.User;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Collection {
 
 	boolean level0;
@@ -40,7 +40,7 @@ public class Collection {
 
 
 
-	@ApiModelProperty(required = true, value = "false")
+	@Schema(required = true, description = "false")
 	@JsonProperty("level0")
 	public boolean isLevel0() {
 		return level0;
@@ -49,7 +49,7 @@ public class Collection {
 	public void setLevel0(boolean level0) {
 		this.level0 = level0;
 	}
-	@ApiModelProperty(required = true, value = "false")
+	@Schema(required = true, description = "false")
 	@JsonProperty("fromUser")
 	public boolean isFromUser() {
 		return fromUser;
@@ -58,7 +58,7 @@ public class Collection {
 	public void setFromUser(boolean fromUser) {
 		this.fromUser = fromUser;
 	}
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("title")
 	public String getTitle() {
 		return title;
@@ -68,7 +68,7 @@ public class Collection {
 		this.title = title;
 	}
 
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("description")
 	public String getDescription() {
 		return description;
@@ -78,7 +78,7 @@ public class Collection {
 		this.description = description;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("type")
 	public String getType() {
 		return type;
@@ -88,7 +88,7 @@ public class Collection {
 		this.type = type;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("viewtype")
 	public String getViewtype() {
 		return viewtype;
@@ -98,7 +98,7 @@ public class Collection {
 		this.viewtype = viewtype;
 	}
 
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("x")
 	public int getX() {
 		return x;
@@ -108,7 +108,7 @@ public class Collection {
 		this.x = x;
 	}
 
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("y")
 	public int getY() {
 		return y;
@@ -118,7 +118,7 @@ public class Collection {
 		this.y = y;
 	}
 
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("z")
 	public int getZ() {
 		return z;
@@ -128,7 +128,7 @@ public class Collection {
 		this.z = z;
 	}
 
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("color")
 	public String getColor() {
 		return color;
@@ -138,7 +138,7 @@ public class Collection {
 		this.color = color;
 	}
 
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("childCollectionsCount")
 	public int getChildCollectionsCount() {
 		return childCollectionsCount;
@@ -148,7 +148,7 @@ public class Collection {
 		this.childCollectionsCount = childCollectionsCount;
 	}
 	
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("childReferencesCount")
 	public int getChildReferencesCount() {
 		return childReferencesCount;
@@ -158,7 +158,7 @@ public class Collection {
 		this.childReferencesCount = childReferencesCount;
 	}
 	
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("pinned")
 	public boolean isPinned() {
 		return pinned;
@@ -168,7 +168,7 @@ public class Collection {
 		this.pinned = pinned;
 	}
 	
-	@ApiModelProperty(required = false)
+	@Schema(required = false)
 	@JsonProperty("orderMode")
 	public String getOrderMode() {
 		return orderMode;

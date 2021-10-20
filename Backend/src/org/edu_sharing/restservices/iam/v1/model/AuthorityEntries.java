@@ -7,10 +7,10 @@ import org.edu_sharing.restservices.shared.Pagination;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class AuthorityEntries {
 
 	private List<Authority> list = null;
@@ -18,7 +18,7 @@ public class AuthorityEntries {
 
 	/**
 	 **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("pagination")
 	public Pagination getPagination() {
 		return pagination;
@@ -30,7 +30,7 @@ public class AuthorityEntries {
 
 	/**
 	   **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("authorities")
 	public List<Authority> getList() {
 		return list;

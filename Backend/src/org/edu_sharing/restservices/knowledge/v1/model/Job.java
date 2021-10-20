@@ -1,13 +1,13 @@
 package org.edu_sharing.restservices.knowledge.v1.model;
 
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Job  {
   
   private String id = null;
@@ -16,7 +16,7 @@ public class Job  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -28,7 +28,7 @@ public class Job  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("status")
   public String getStatus() {
     return status;

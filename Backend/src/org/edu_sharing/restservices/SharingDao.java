@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices;
 
-import io.swagger.util.Json;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;

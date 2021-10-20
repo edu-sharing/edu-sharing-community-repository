@@ -28,28 +28,29 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.monitoring.Monitoring;
 import org.edu_sharing.service.version.VersionService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Path("/_about")
-@Api(tags = {"ABOUT"})
+@Tag(name="ABOUT")
 public class AboutApi  {
 
 	private static Logger logger = Logger.getLogger(AboutApi.class);
 
     @GET
     
-    @ApiOperation(
-    	value = "Discover the API.", 
-    	notes = "Get all services provided by this API.")
+    @Operation(summary = "Discover the API.", description = "Get all services provided by this API.")
     
     @ApiResponses(
     	value = { 
-			@ApiResponse(code = 200, message = "OK.", response = About.class), 
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = About.class))), 
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     	})
 
     public Response about() {
@@ -117,7 +118,7 @@ public class AboutApi  {
     }
     
     @OPTIONS        
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
     public Response options() {
     	
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
@@ -125,14 +126,14 @@ public class AboutApi  {
     
     @GET
 	@Path("/status/{mode}")
-	@ApiOperation(value = "status of repo services", notes = "returns http status 200 when ok")
+	@Operation(summary = "status of repo services", description = "returns http status 200 when ok")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response status(@PathParam("mode") Monitoring.Modes mode, 
 			@QueryParam("timeoutSeconds") @DefaultValue("10") int timeout,
 			@Context HttpServletRequest req) {
@@ -168,7 +169,7 @@ public class AboutApi  {
     
     @OPTIONS
 	@Path("/status/repo/{mode}")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 	public Response options2() {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}

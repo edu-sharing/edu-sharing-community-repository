@@ -5,13 +5,13 @@ import org.edu_sharing.service.admin.model.GlobalGroup;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 import org.edu_sharing.service.organization.GroupSignupMethod;
 
 import java.util.List;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Group extends Authority {
 
 	private GroupSignupMethod signupMethod;
@@ -49,7 +49,7 @@ public class Group extends Authority {
     	
 	}
 
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("groupName")
 	public String getGroupName() {
 		return groupName;
@@ -60,7 +60,7 @@ public class Group extends Authority {
 	}
 	/**
 	 **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("profile")
 	public GroupProfile getProfile() {
 		return profile;

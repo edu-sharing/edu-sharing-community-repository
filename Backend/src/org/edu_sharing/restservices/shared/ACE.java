@@ -12,10 +12,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class ACE  {
 	
 	private Authority authority = null;
@@ -42,7 +42,7 @@ public class ACE  {
 		permissions.add(ace.getPermission());		
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("authority")
 	public Authority getAuthority() {
 		return authority;
@@ -50,7 +50,7 @@ public class ACE  {
 	public void setAuthority(Authority authority) {
 		this.authority = authority;
 	}
-	@ApiModelProperty(required = false, value = "")
+	@Schema(required = false, description = "")
 	@JsonProperty("user")
 	public UserProfile getUserProfile() {
 		return userProfile;
@@ -58,7 +58,7 @@ public class ACE  {
 	public void setUserProfile(UserProfile user){
 		this.userProfile=user;
 	}
-	@ApiModelProperty(required = false, value = "")
+	@Schema(required = false, description = "")
 	@JsonProperty("group")
 	public GroupProfile getGroupProfile() {
 		return groupProfile;
@@ -68,7 +68,7 @@ public class ACE  {
 	}
 
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("permissions")
 	public List<String> getPermissions() {
 		return permissions;

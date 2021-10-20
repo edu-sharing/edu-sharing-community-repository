@@ -2,7 +2,7 @@ package org.edu_sharing.restservices.statistic.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class FilterEntry {
 
@@ -14,7 +14,7 @@ public class FilterEntry {
 		this.property = property;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("property")
 	public String getProperty() {
 		return property;
@@ -24,7 +24,7 @@ public class FilterEntry {
 		this.values = values;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("values")
 	public String[] getValues() {
 		return values;

@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.search.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class SearchParameters {
 
 	private List<String> permissions;
@@ -17,7 +17,7 @@ public class SearchParameters {
 	private List<String> facettes;
 	private boolean resolveCollections = false;
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("criterias")
 	public List<MdsQueryCriteria> getCriterias() {
 		return criterias;
@@ -27,7 +27,7 @@ public class SearchParameters {
 		this.criterias = criterias;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("facettes")
 	public List<String> getFacettes() {
 		return facettes;

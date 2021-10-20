@@ -32,14 +32,18 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SortDefinition;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Path("/organization/v1")
-@Api(tags = {"ORGANIZATION v1"})
+@Tag(name="ORGANIZATION v1")
 @ApiService(value="ORGANIZATION", major=1, minor=0)
 public class OrganizationApi  {
 
@@ -48,28 +52,26 @@ public class OrganizationApi  {
     @GET
     @Path("/organizations/{repository}")
         
-    @ApiOperation(
-    	value = "Get organizations of repository.", 
-    	notes = "Get organizations of repository the current user is member. May returns an empty list.")
+    @Operation(summary = "Get organizations of repository.", description = "Get organizations of repository the current user is member. May returns an empty list.")
     
     @ApiResponses(
         	value = { 
-    	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = OrganizationEntries.class),
-    	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = OrganizationEntries.class))),
+    	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     	    })
     
     public Response getOrganizations(
-        	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-        	@ApiParam(value = "pattern",required=false) @QueryParam("pattern") String pattern,
-    		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
-    	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-    	    @ApiParam(value = "search only in memberships, false can only be done by admin",defaultValue="true") @QueryParam("onlyMemberships") boolean onlyMemberships,
+        	@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+        	@Parameter(description = "pattern",required=false) @QueryParam("pattern") String pattern,
+    		@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
+    	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+    	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+    	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+    	    @Parameter(description = "search only in memberships, false can only be done by admin",schema = @Schema(defaultValue="true")) @QueryParam("onlyMemberships") boolean onlyMemberships,
     		@Context HttpServletRequest req) {
     	
     	try {
@@ -103,23 +105,21 @@ public class OrganizationApi  {
 	@GET
 	@Path("/organizations/{repository}/{organization}")
 
-	@ApiOperation(
-			value = "Get organization by id.",
-			notes = "Get organization by id.")
+	@Operation(summary = "Get organization by id.", description = "Get organization by id.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Organization.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Organization.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getOrganization(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of organization",required=true) @PathParam("organization") String organization,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of organization",required=true) @PathParam("organization") String organization,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -135,7 +135,7 @@ public class OrganizationApi  {
 
     @OPTIONS    
     @Path("/organizations/{repository}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options01() {
     		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
@@ -144,25 +144,23 @@ public class OrganizationApi  {
     @PUT
     @Path("/organizations/{repository}/{organization}")
         
-    @ApiOperation(
-    	value = "create organization in repository.", 
-    	notes = "create organization in repository.")
+    @Operation(summary = "create organization in repository.", description = "create organization in repository.")
     
     @ApiResponses(
     	value = { 
-    		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Organization.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Organization.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     	})
 
     public Response createOrganizations(
-        	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "organization name",required=true) @PathParam("organization") String organization,
-    		@ApiParam(value = "eduscope (may be null)",defaultValue="",required=false) @QueryParam("eduscope") String scope,
+        	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "organization name",required=true) @PathParam("organization") String organization,
+    		@Parameter(description = "eduscope (may be null)",schema = @Schema(defaultValue=""),required=false) @QueryParam("eduscope") String scope,
     		@Context HttpServletRequest req) {
     	
     	try {
@@ -189,23 +187,21 @@ public class OrganizationApi  {
     @DELETE
     @Path("/organizations/{repository}/{organization}")
         
-    @ApiOperation(
-    	value = "Delete organization of repository.", 
-    	notes = "Delete organization of repository.")
+    @Operation(summary = "Delete organization of repository.", description = "Delete organization of repository.")
     
     @ApiResponses(
     	value = { 
-    		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     	})
 
     public Response deleteOrganizations(
-        	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "groupname",required=true) @PathParam("organization") String organization,
+        	@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "groupname",required=true) @PathParam("organization") String organization,
     		@Context HttpServletRequest req) {
     	
     	try {
@@ -225,23 +221,21 @@ public class OrganizationApi  {
     @DELETE
     @Path("/organizations/{repository}/{organization}/member/{member}")
         
-    @ApiOperation(
-    	value = "Remove member from organization.", 
-    	notes = "Remove member from organization.")
+    @Operation(summary = "Remove member from organization.", description = "Remove member from organization.")
     
     @ApiResponses(
     	value = { 
-    		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     	})
     public Response removeFromOrganization(
-    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "groupname",required=true) @PathParam("organization") String organization,
-    		@ApiParam(value = "authorityName of member",required=true ) @PathParam("member") String member,
+    		@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "groupname",required=true) @PathParam("organization") String organization,
+    		@Parameter(description = "authorityName of member",required=true ) @PathParam("member") String member,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -257,7 +251,7 @@ public class OrganizationApi  {
     }
     @OPTIONS    
     @Path("/organizations/{repository}/{organization}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options02() {
     		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT, DELETE").build();

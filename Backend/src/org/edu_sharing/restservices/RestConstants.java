@@ -4,7 +4,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 
-import io.swagger.annotations.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class RestConstants {
 	public static final String MESSAGE_REPOSITORY_ID="ID of repository (or \"-home-\" for home repository)";

@@ -1,20 +1,20 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class MdsList {
 
 	private String id = null;
 	private String label = null;
 	private List<MdsListProperty> properties = null;
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("id")
 	public String getId() {
 		return id;
@@ -23,7 +23,7 @@ public class MdsList {
 		this.id = id;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("label")
 	public String getLabel() {
 		return label;
@@ -32,7 +32,7 @@ public class MdsList {
 		this.label = label;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("properties")	
 	public List<MdsListProperty> getProperties() {
 		return properties;
@@ -42,7 +42,7 @@ public class MdsList {
 	}
 	
 
-	@ApiModel(description = "")
+	@Schema(description = "")
 	public static class MdsListProperty {
 
 		private String name = null;
@@ -62,7 +62,7 @@ public class MdsList {
 		private String styleNameLabel = null;
 		private String type = null;
 		
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("name")
 		public String getName() {
 			return name;
@@ -72,7 +72,7 @@ public class MdsList {
 			this.name = name;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("label")
 		public String getLabel() {
 			return label;
@@ -82,7 +82,7 @@ public class MdsList {
 			this.label = label;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("labelHint")
 		public String getLabelHint() {
 			return labelHint;
@@ -92,7 +92,7 @@ public class MdsList {
 			this.labelHint = labelHint;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("formHeight")
 		public String getFormHeight() {
 			return formHeight;
@@ -102,7 +102,7 @@ public class MdsList {
 			this.formHeight = formHeight;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("formLength")
 		public String getFormLength() {
 			return formLength;
@@ -112,7 +112,7 @@ public class MdsList {
 			this.formLength = formLength;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("widget")
 		public String getWidget() {
 			return widget;
@@ -122,7 +122,7 @@ public class MdsList {
 			this.widget = widget;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("widgetTitle")
 		public String getWidgetTitle() {
 			return widgetTitle;
@@ -132,7 +132,7 @@ public class MdsList {
 			this.widgetTitle = widgetTitle;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("copyFrom")
 		public List<String> getCopyFrom() {
 			return copyFrom;
@@ -142,7 +142,7 @@ public class MdsList {
 			this.copyFrom = copyFrom;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("parameters")
 		public List<MdsListPropertyParameter> getParameters() {
 			return parameters;
@@ -152,7 +152,7 @@ public class MdsList {
 			this.parameters = parameters;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("values")
 		public List<MdsListPropertyValue> getValues() {
 			return values;
@@ -161,7 +161,7 @@ public class MdsList {
 			this.values = values;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("defaultValues")
 		public List<String> getDefaultValues() {
 			return defaultValues;
@@ -171,7 +171,7 @@ public class MdsList {
 			this.defaultValues = defaultValues;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("multiple")
 		public Boolean getMultiple() {
 			return multiple;
@@ -181,7 +181,7 @@ public class MdsList {
 			this.multiple = multiple;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("placeHolder")
 		public String getPlaceHolder() {
 			return placeHolder;
@@ -191,7 +191,7 @@ public class MdsList {
 			this.placeHolder = placeHolder;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("styleName")		
 		public String getStyleName() {
 			return styleName;
@@ -201,7 +201,7 @@ public class MdsList {
 			this.styleName = styleName;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("styleNameLabel")
 		public String getStyleNameLabel() {
 			return styleNameLabel;
@@ -211,7 +211,7 @@ public class MdsList {
 			this.styleNameLabel = styleNameLabel;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("type")
 		public String getType() {
 			return type;
@@ -223,13 +223,13 @@ public class MdsList {
 
 	}
 	
-	@ApiModel(description = "")
+	@Schema(description = "")
 	public static class MdsListPropertyParameter {
 
 		private String name = null;
 		private String value = null;
 		
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("name")
 		public String getName() {
 			return name;
@@ -238,7 +238,7 @@ public class MdsList {
 			this.name = name;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("value")
 		public String getValue() {
 			return value;
@@ -248,13 +248,13 @@ public class MdsList {
 		}
 	}
 
-	@ApiModel(description = "")
+	@Schema(description = "")
 	public static class MdsListPropertyValue {
 
 		private String key = null;
 		private String value = null;
 		
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("key")
 		public String getKey() {
 			return key;
@@ -263,7 +263,7 @@ public class MdsList {
 			this.key = key;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("value")
 		public String getValue() {
 			return value;

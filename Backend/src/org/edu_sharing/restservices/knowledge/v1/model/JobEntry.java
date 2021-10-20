@@ -1,12 +1,12 @@
 package org.edu_sharing.restservices.knowledge.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class JobEntry  {
   
   private Job data = null;
@@ -14,7 +14,7 @@ public class JobEntry  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("data")
   public Job getData() {
     return data;

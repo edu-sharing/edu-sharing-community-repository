@@ -26,16 +26,20 @@ import org.edu_sharing.restservices.stream.v1.model.StreamEntry;
 import org.edu_sharing.restservices.stream.v1.model.StreamEntryInput;
 import org.edu_sharing.restservices.stream.v1.model.StreamList;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 
 @Path("/stream/v1")
-@Api(tags = {"STREAM v1"})
+@Tag(name="STREAM v1")
 @ApiService(value="STREAM", major=1, minor=0)
 public class StreamApi {
 
@@ -44,29 +48,27 @@ public class StreamApi {
 	 @POST
      @Path("/search/{repository}")
 	        
-     @ApiOperation(
-    	value = "Get the stream content for the current user with the given status."
-    	)
+     @Operation(summary = "Get the stream content for the current user with the given status.")
     
      @ApiResponses(
     		value = { 
-    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StreamList.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = StreamList.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	    public Response search(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = "Stream object status to search for",required=false ) @QueryParam("status") String status,
-	    	@ApiParam(value = "generic text to search for (in title or description)",required=false ) @QueryParam("query") String query,
-		    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
-		    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
-		    @ApiParam(value = "map with property + value to search", defaultValue="0") Map<String,String> properties,
-		    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES+", currently supported: created, priority, default: priority desc, created desc") @QueryParam("sortProperties") List<String> sortProperties,
-		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = "Stream object status to search for",required=false ) @QueryParam("status") String status,
+	    	@Parameter(description = "generic text to search for (in title or description)",required=false ) @QueryParam("query") String query,
+		    @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
+		    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+		    @Parameter(description = "map with property + value to search", schema = @Schema(defaultValue="0")) Map<String,String> properties,
+		    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES+", currently supported: created, priority, default: priority desc, created desc") @QueryParam("sortProperties") List<String> sortProperties,
+		    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
@@ -81,23 +83,21 @@ public class StreamApi {
 	 @GET
      @Path("/properties/{repository}/{property}")
 	        
-     @ApiOperation(
-    	value = "Get top values for a property"
-    	)
+     @Operation(summary = "Get top values for a property")
     
      @ApiResponses(
     		value = { 
-    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	    public Response getPropertyValues(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = "The property to aggregate",required=true) @PathParam("property") String property,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = "The property to aggregate",required=true) @PathParam("property") String property,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
@@ -111,23 +111,21 @@ public class StreamApi {
 	 @GET
      @Path("/access/{repository}/{node}")
 	        
-     @ApiOperation(
-    		 value = "test"
-    	)
+     @Operation(summary = "test")
     
      @ApiResponses(
     		value = { 
-    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	    public Response canAccess(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = "The property to aggregate",required=true) @PathParam("node") String node,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = "The property to aggregate",required=true) @PathParam("node") String node,
 			@Context HttpServletRequest req) {
 	    	try {
 	    		boolean response = StreamDao.canAccessNode(node);
@@ -140,24 +138,21 @@ public class StreamApi {
 	 @PUT
      @Path("/add/{repository}")
 	        
-     @ApiOperation(
-    	value = "add a new stream object.",
-    	notes = "will return the object and add the id to the object if creation succeeded"
-    	)
+     @Operation(summary = "add a new stream object.", description = "will return the object and add the id to the object if creation succeeded")
     
      @ApiResponses(
     		value = { 
-    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StreamEntryInput.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = StreamEntryInput.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	    public Response addEntry(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = "Stream object to add",required=true ) StreamEntryInput entry,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = "Stream object to add",required=true ) StreamEntryInput entry,
 			@Context HttpServletRequest req) {
 	    	try {
 	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -170,25 +165,23 @@ public class StreamApi {
 	 @PUT
      @Path("/status/{repository}/{entry}")
 	        
-     @ApiOperation(
-    	value = "update status for a stream object and authority"
-    	)
+     @Operation(summary = "update status for a stream object and authority")
     
      @ApiResponses(
     		value = { 
-    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	    public Response updateEntry(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = "entry id to update",required=true ) @PathParam("entry") String entryId,
-	    	@ApiParam(value = "authority to set/change status",required=true ) @QueryParam("authority") String authority,
-	    	@ApiParam(value = "New status for this authority",required=true ) @QueryParam("status") String status,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = "entry id to update",required=true ) @PathParam("entry") String entryId,
+	    	@Parameter(description = "authority to set/change status",required=true ) @QueryParam("authority") String authority,
+	    	@Parameter(description = "New status for this authority",required=true ) @QueryParam("status") String status,
 			@Context HttpServletRequest req) {
 	    	try {
 	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -201,23 +194,20 @@ public class StreamApi {
 	 @DELETE
      @Path("/delete/{repository}/{entry}")
 	        
-     @ApiOperation(
-    	value = "delete a stream object",
-    	notes = "the current user must be author of the given stream object"
-    	)
+     @Operation(summary = "delete a stream object", description = "the current user must be author of the given stream object")
     
      @ApiResponses(
     		value = { 
-    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	    public Response deleteEntry(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = "entry id to delete",required=true ) @PathParam("entry") String entryId,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = "entry id to delete",required=true ) @PathParam("entry") String entryId,
 			@Context HttpServletRequest req) {
 	    	try {
 	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);

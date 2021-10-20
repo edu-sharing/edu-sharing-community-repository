@@ -15,14 +15,18 @@ import org.edu_sharing.restservices.clientutils.v1.model.WebsiteInformation;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Path("/clientUtils/v1")
-@Api(tags = {"CLIENTUTILS v1"})
+@Tag(name="CLIENTUTILS v1")
 @ApiService(value="CLIENTUTILS", major=1, minor=0)
 public class ClientUtilsApi  {
 
@@ -31,22 +35,21 @@ public class ClientUtilsApi  {
 	
     @GET
     @Path("/getWebsiteInformation")        
-    @ApiOperation(
-    	value = "Read generic information about a webpage")
+    @Operation(summary = "Read generic information about a webpage")
     
     @ApiResponses(
     		value = { 
-    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = WebsiteInformation.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = WebsiteInformation.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getWebsiteInformation(
     	
-    	@ApiParam(value = "full url with http or https" ) @QueryParam("url") String url,
+    	@Parameter(description = "full url with http or https" ) @QueryParam("url") String url,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -61,7 +64,7 @@ public class ClientUtilsApi  {
     }
 	@OPTIONS    
     @Path("/getWebsiteInformation")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options01() {
 		

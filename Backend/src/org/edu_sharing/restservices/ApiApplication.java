@@ -1,14 +1,23 @@
 package org.edu_sharing.restservices;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.listing.ApiListingResource;
-import io.swagger.jaxrs.listing.SwaggerSerializers;
+import io.swagger.v3.jaxrs2.SwaggerSerializers;
+import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 
 import javax.ws.rs.ApplicationPath;
 
+
+import io.swagger.v3.oas.integration.OpenApiConfigurationException;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationPath(value = "/rest")
 public class ApiApplication extends ResourceConfig {
@@ -56,21 +65,49 @@ public class ApiApplication extends ResourceConfig {
 		this.packages(getClass().getPackage().getName());
 
 		// swagger service
-
-		this.register(ApiListingResource.class, SwaggerSerializers.class);
+		/**
+		 * @TODO: ApiListingResource
+		 */
+		//this.register(ApiListingResource.class, SwaggerSerializers.class);
+		this.register(SwaggerSerializers.class);
 		this.packages("io.swagger.jaxrs.listing");
 
-		final BeanConfig beanConfig = new BeanConfig();
+		//final BeanConfig beanConfig = new BeanConfig();
 
-		beanConfig.setTitle("edu-sharing Repository REST API");
-		beanConfig.setDescription("The public restful API of the edu-sharing repository.");
-		beanConfig.setVersion(MAJOR + "." + MINOR);
-		beanConfig.setBasePath(
-				"/" + ApplicationInfoList.getHomeRepository().getWebappname()
-				+ getClass().getAnnotation(ApplicationPath.class).value());
-		beanConfig.setResourcePackage(getClass().getPackage().getName());
+		OpenAPI oas = new OpenAPI();
+		Info info = new Info();
+		info.setTitle("edu-sharing Repository REST API");
+		info.setDescription("The public restful API of the edu-sharing repository.");
+		info.setVersion(MAJOR + "." + MINOR);
+		oas.info(info);
+		oas.servers(Collections.singletonList(new Server().url("/" + ApplicationInfoList.getHomeRepository().getWebappname()
+				+ getClass().getAnnotation(ApplicationPath.class).value())));
 
-		beanConfig.setScan(true);
+		SwaggerConfiguration oasConfig = new SwaggerConfiguration()
+				.openAPI(oas)
+				.prettyPrint(true)
+				.resourcePackages(Stream.of(getClass().getPackage().getName()).collect(Collectors.toSet()));
+
+		/**
+		 * @TODO
+		 */
+		//beanConfig.setScan(true);
+
+
+
+		try {
+			new JaxrsOpenApiContextBuilder()
+					/**
+					 * @TODO
+					 */
+					//.servletConfig(servletConfig)
+					.application(this)
+					.openApiConfiguration(oasConfig)
+					.buildContext(true);
+		} catch (OpenApiConfigurationException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
 
 	}
 

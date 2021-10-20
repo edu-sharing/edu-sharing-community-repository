@@ -23,14 +23,18 @@ import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Path("/usage/v1")
-@Api(tags = { "USAGE v1" })
+@Tag(name= "USAGE v1" )
 @ApiService(value = "USAGE", major = 1, minor = 0)
 public class UsageApi {
 
@@ -39,16 +43,16 @@ public class UsageApi {
 	@GET
 	@Path("/usages/{appId}")
 
-	@ApiOperation(value = "Get all usages of an application.", notes = "Get all usages of an application.")
+	@Operation(summary = "Get all usages of an application.", description = "Get all usages of an application.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK.", response = Usages.class),
-			@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Usages.class))),
+			@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
-	public Response getUsages(@ApiParam(value = "ID of application (or \"-home-\" for home repository)", required = true) @PathParam("appId") String appId) {
+	public Response getUsages(@Parameter(description = "ID of application (or \"-home-\" for home repository)", required = true) @PathParam("appId") String appId) {
 		try {
 			
 			
@@ -67,7 +71,7 @@ public class UsageApi {
 
 	@OPTIONS
 	@Path("/usages/{appId}")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 	public Response options1() {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS,  GET").build();
 	}
@@ -75,18 +79,18 @@ public class UsageApi {
 	@GET
 	@Path("/usages/course/{appId}/{courseId}")
 
-	@ApiOperation(value = "Get all usages of an course.", notes = "Get all usages of an course.")
+	@Operation(summary = "Get all usages of an course.", description = "Get all usages of an course.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK.", response = Usages.class),
-			@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Usages.class))),
+			@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response getUsagesByCourse(
-			@ApiParam(value = "ID of application (or \"-home-\" for home repository)", required = true) @PathParam("appId") String appId,
-			@ApiParam(value = "ID of course", required = true) @PathParam("courseId") String courseId,
+			@Parameter(description = "ID of application (or \"-home-\" for home repository)", required = true) @PathParam("appId") String appId,
+			@Parameter(description = "ID of course", required = true) @PathParam("courseId") String courseId,
 			@Context HttpServletRequest req) {
 		try {
 			
@@ -105,7 +109,7 @@ public class UsageApi {
 
 	@OPTIONS
 	@Path("/usages/course/{appId}/{courseId}")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 	public Response options2() {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS,  GET").build();
 	}
@@ -114,17 +118,17 @@ public class UsageApi {
 	@GET
 	@Path("/usages/node/{nodeId}")
 
-	@ApiOperation(value = "Get all usages of an node.", notes = "Get all usages of an node.")
+	@Operation(summary = "Get all usages of an node.", description = "Get all usages of an node.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK.", response = Usages.class),
-			@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Usages.class))),
+			@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response getUsagesByNode(
-			@ApiParam(value = "ID of node", required = true) @PathParam("nodeId") String nodeId,
+			@Parameter(description = "ID of node", required = true) @PathParam("nodeId") String nodeId,
 			@Context HttpServletRequest req) {
 		try {
 			return Response.status(Response.Status.OK).entity(new Usages(new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNode(nodeId)))
@@ -136,7 +140,7 @@ public class UsageApi {
 
 	@OPTIONS
 	@Path("/usages/node/{nodeId}")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 	public Response options3() {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS,  GET").build();
 	}
@@ -144,17 +148,17 @@ public class UsageApi {
 	@GET
 	@Path("/usages/node/{nodeId}/collections")
 
-	@ApiOperation(value = "Get all collections where this node is used.")
+	@Operation(summary = "Get all collections where this node is used.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK.", response = Collection[].class),
-			@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Collection[].class))),
+			@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response getUsagesByNodeCollections(
-			@ApiParam(value = "ID of node", required = true) @PathParam("nodeId") String nodeId,
+			@Parameter(description = "ID of node", required = true) @PathParam("nodeId") String nodeId,
 			@Context HttpServletRequest req) {
 		try {
 			Set<Usages.CollectionUsage> collections = new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNodeCollection(nodeId);
@@ -167,18 +171,18 @@ public class UsageApi {
 	@DELETE
 	@Path("/usages/node/{nodeId}/{usageId}")
 
-	@ApiOperation(value = "Delete an usage of a node.")
+	@Operation(summary = "Delete an usage of a node.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK.", response = Usages.class),
-			@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Usages.class))),
+			@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response deleteUsage(
-			@ApiParam(value = "ID of node", required = true) @PathParam("nodeId") String nodeId,
-			@ApiParam(value = "ID of usage", required = true) @PathParam("usageId") String usageId,
+			@Parameter(description = "ID of node", required = true) @PathParam("nodeId") String nodeId,
+			@Parameter(description = "ID of usage", required = true) @PathParam("usageId") String usageId,
 			@Context HttpServletRequest req) {
 		try {
 			new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).deleteUsage(nodeId,usageId);
@@ -190,10 +194,10 @@ public class UsageApi {
 	
 	@GET
 	@Path("/usages/repository/{repositoryId}/{nodeid}")
-	public Response getUsages(@ApiParam(value = "ID of repository", required = true, defaultValue=RepositoryDao.HOME)  @PathParam("repositoryId") String repositoryId,
-			@ApiParam(value = "ID of node. Use -all- for getting usages of all nodes", required = true, defaultValue="-all-") @PathParam("nodeId") String nodeId,
-			@ApiParam(value = "from date", required = false) @QueryParam("from") Long from,
-			@ApiParam(value = "to date", required = false) @QueryParam("to") Long to,
+	public Response getUsages(@Parameter(description = "ID of repository", required = true, schema = @Schema(defaultValue=RepositoryDao.HOME))  @PathParam("repositoryId") String repositoryId,
+			@Parameter(description = "ID of node. Use -all- for getting usages of all nodes", required = true, schema = @Schema(defaultValue="-all-")) @PathParam("nodeId") String nodeId,
+			@Parameter(description = "from date", required = false) @QueryParam("from") Long from,
+			@Parameter(description = "to date", required = false) @QueryParam("to") Long to,
 			@Context HttpServletRequest req) {
 		
 		try {
@@ -220,21 +224,19 @@ public class UsageApi {
 	@POST
 	@Path("/usages/repository/{repositoryId}")
 
-	@ApiOperation(
-			value = "Set a usage for a node. app signature headers and authenticated user required.",
-			notes = "headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts")
+	@Operation(summary = "Set a usage for a node. app signature headers and authenticated user required.", description = "headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Usages.Usage.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode = "200", description=RestConstants.HTTP_200,content = @Content(schema = @Schema(implementation = Usages.Usage.class)) ),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
-	public Response setUsage(@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-							 @ApiParam(value = " usage date",required = true) CreateUsage usage){
+	public Response setUsage(@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+							 @Parameter(description = " usage date",required = true) CreateUsage usage){
 		try {
 			RepositoryDao homeRepo = RepositoryDao.getRepository(RepositoryDao.HOME);
 			if(RepositoryDao.HOME.equals(repository)) {

@@ -1,11 +1,11 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Person {
 
 	private String firstName = null;
@@ -13,7 +13,7 @@ public class Person {
 	private String mailbox = null;
 	private UserProfile profile = null;
 
-	@ApiModelProperty(required = false, value = "")
+	@Schema(required = false, description = "")
 	@JsonProperty("firstName")
 	public String getFirstName() {
 		return firstName;
@@ -23,7 +23,7 @@ public class Person {
 		this.firstName = firstName;
 	}
 
-	@ApiModelProperty(required = false, value = "")
+	@Schema(required = false, description = "")
 	@JsonProperty("lastName")
 	public String getLastName() {
 		return lastName;
@@ -33,7 +33,7 @@ public class Person {
 		this.lastName = lastName;
 	}
 
-	@ApiModelProperty(required = false, value = "")
+	@Schema(required = false, description = "")
 	@JsonProperty("mailbox")
 	public String getMailbox() {
 		return mailbox;

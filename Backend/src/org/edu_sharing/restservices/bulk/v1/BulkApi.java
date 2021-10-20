@@ -1,6 +1,11 @@
 package org.edu_sharing.restservices.bulk.v1;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.*;
@@ -21,7 +26,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 @Path("/bulk/v1")
-@Api(tags = { "BULK v1" })
+@Tag(name= "BULK v1" )
 @ApiService(value = "BULK", major = 1, minor = 0)
 public class BulkApi {
 	private static Logger logger = Logger.getLogger(BulkApi.class);
@@ -29,22 +34,22 @@ public class BulkApi {
 	@PUT
 	@Path("/sync/{group}")
 
-	@ApiOperation(value = "Create or update a given node", notes = "Depending on the given \"match\" properties either a new node will be created or the existing one will be updated")
+	@Operation(summary = "Create or update a given node", description = "Depending on the given \"match\" properties either a new node will be created or the existing one will be updated")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response sync(@Context HttpServletRequest req,
-		   @ApiParam(value = "The group to which this node belongs to. Used for internal structuring. Please use simple names only", required = true) @PathParam("group") String group,
-		   @ApiParam(value = "The properties that must match to identify if this node exists. Multiple properties will be and combined and compared", required = true) @QueryParam("match") List<String> match,
-		   @ApiParam(value = "The properties on which the imported nodes should be grouped (for each value, a folder with the corresponding data is created)", required = false) @QueryParam("groupBy") List<String> groupBy,
-		   @ApiParam(value = "type of node. If the node already exists, this will not change the type afterwards",required=true ) @QueryParam("type") String type,
-		   @ApiParam(value = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
-		   @ApiParam(value = "properties, they'll not get filtered via mds, so be careful what you add here" , required=true) HashMap<String, String[]> properties,
-		   @ApiParam(value = "reset all versions (like a complete reimport), all data inside edu-sharing will be lost" , required=false) @QueryParam("resetVersion") Boolean resetVersion
+		   @Parameter(description = "The group to which this node belongs to. Used for internal structuring. Please use simple names only", required = true) @PathParam("group") String group,
+		   @Parameter(description = "The properties that must match to identify if this node exists. Multiple properties will be and combined and compared", required = true) @QueryParam("match") List<String> match,
+		   @Parameter(description = "The properties on which the imported nodes should be grouped (for each value, a folder with the corresponding data is created)", required = false) @QueryParam("groupBy") List<String> groupBy,
+		   @Parameter(description = "type of node. If the node already exists, this will not change the type afterwards",required=true ) @QueryParam("type") String type,
+		   @Parameter(description = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
+		   @Parameter(description = "properties, they'll not get filtered via mds, so be careful what you add here" , required=true) HashMap<String, String[]> properties,
+		   @Parameter(description = "reset all versions (like a complete reimport), all data inside edu-sharing will be lost" , required=false) @QueryParam("resetVersion") Boolean resetVersion
 
 	) {
 		try {
@@ -63,16 +68,16 @@ public class BulkApi {
 	@POST
 	@Path("/find")
 
-	@ApiOperation(value = "gets a given node", notes = "Get a given node based on the posted, multiple criterias. Make sure that they'll provide an unique result")
+	@Operation(summary = "gets a given node", description = "Get a given node based on the posted, multiple criterias. Make sure that they'll provide an unique result")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response find(@Context HttpServletRequest req,
-						 @ApiParam(value = "properties that must match (with \"AND\" concatenated)" , required=true ) HashMap<String, String[]> properties
+						 @Parameter(description = "properties that must match (with \"AND\" concatenated)" , required=true ) HashMap<String, String[]> properties
 	) {
 		try {
 			NodeRef node = BulkServiceFactory.getInstance().find(properties);

@@ -29,11 +29,15 @@ import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
@@ -43,7 +47,7 @@ import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
 
 @Path("/rendering/v1")
-@Api(tags = {"RENDERING v1"})
+@Tag(name="RENDERING v1")
 @ApiService(value="RENDERING", major=1, minor=0)
 public class RenderingApi {
 
@@ -53,25 +57,23 @@ public class RenderingApi {
     @Path("/details/{repository}/{node}")
     
 	
-	 @ApiOperation(
-		    	value = "Get metadata of node.", 
-		    	notes = "Get metadata of node.")
+	 @Operation(summary = "Get metadata of node.", description = "Get metadata of node.")
 		    
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = RenderingDetailsEntry.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = RenderingDetailsEntry.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	
 	public Response getDetailsSnippet(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = "ID of node",required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "version of node",required=false) @QueryParam("version") String nodeVersion,
-	    	@ApiParam(value = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = "ID of node",required=true ) @PathParam("node") String node,
+	    	@Parameter(description = "version of node",required=false) @QueryParam("version") String nodeVersion,
+	    	@Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
 			@Context HttpServletRequest req){
 
 		try{
@@ -104,27 +106,25 @@ public class RenderingApi {
     @Path("/details/{repository}/{node}")
     
 	
-	 @ApiOperation(
-		    	value = "Get metadata of node.", 
-		    	notes = "Get metadata of node.")
+	 @Operation(summary = "Get metadata of node.", description = "Get metadata of node.")
 		    
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = RenderingDetailsEntry.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = RenderingDetailsEntry.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	
 	public Response getDetailsSnippetWithParameters(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = "ID of node",required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "version of node",required=false) @QueryParam("version") String nodeVersion,
-			@ApiParam(value = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = "ID of node",required=true ) @PathParam("node") String node,
+	    	@Parameter(description = "version of node",required=false) @QueryParam("version") String nodeVersion,
+			@Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
 			// options include: showDownloadButton, showDownloadAdvice, metadataGroup
-			@ApiParam(value = "additional parameters to send to the rendering service",required=false) Map<String,String> parameters,
+			@Parameter(description = "additional parameters to send to the rendering service",required=false) Map<String,String> parameters,
 			@Context HttpServletRequest req){
 
 		try {

@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.node.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.Pagination;
 
@@ -18,7 +18,7 @@ public class AbstractEntries<T>  {
 
     /**
      **/
-    @ApiModelProperty(required = true, value = "")
+    @Schema(required = true, description = "")
     @JsonProperty("nodes")
     public List<T> getNodes() {
         return nodes;
@@ -29,7 +29,7 @@ public class AbstractEntries<T>  {
 
     /**
      **/
-    @ApiModelProperty(required = true, value = "")
+    @Schema(required = true, description = "")
     @JsonProperty("pagination")
     public Pagination getPagination() {
         return pagination;
