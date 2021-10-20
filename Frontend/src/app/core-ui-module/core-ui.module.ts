@@ -81,11 +81,32 @@ import { FormatDurationPipe } from './pipes/format-duration.pipe';
 import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
 import {RenderHelperService} from './render-helper.service';
 import {MdsDurationPipe} from './pipes/mds-duration.pipe';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import {NodeEntriesComponent} from './components/node-entries/node-entries.component';
+import {NodeEntriesWrapperComponent} from './components/node-entries-wrapper/node-entries-wrapper.component';
+import {NodeEntriesCardGridComponent} from './components/node-entries/node-entries-card-grid/node-entries-card-grid.component';
+import {NodeEntriesCardComponent} from './components/node-entries/node-entries-card/node-entries-card.component';
+import {NodeImagePipe} from './pipes/node-image.pipe';
+import {NodeTitlePipe} from './pipes/node-title.pipe';
+import {OptionButtonComponent} from './components/option-button/option-button.component';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {NodeEntriesDragDirective} from './directives/node-entries-drag';
+import {NodeEntriesCardSmallComponent} from './components/node-entries/node-entries-card-small/node-entries-card-small.component';
+import {NodeEntriesTableComponent} from './components/node-entries/node-entries-table/node-entries-table.component';
+import {MatTableModule} from '@angular/material/table';
+import {ColumnChooserComponent} from './components/node-entries/node-entries-table/column-chooser/column-chooser.component';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {CheckTextOverflowDirective} from './directives/check-text-overflow.directive';
+import {MatSortModule} from '@angular/material/sort';
+import {OverlayModule} from '@angular/cdk/overlay';
+import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
+import {DragCursorDirective} from './directives/drag-cursor.directive';
 
 @NgModule({
     declarations: [
         CollectionChooserComponent,
         ListTableComponent,
+        NodeEntriesComponent,
         ListBaseComponent,
         ListCollectionInfoComponent,
         ListNodeLicenseComponent,
@@ -93,6 +114,7 @@ import {MdsDurationPipe} from './pipes/mds-duration.pipe';
         ListNodeWorkflowComponent,
         ListTextComponent,
         ListCountsComponent,
+        NodeEntriesDragDirective,
         DropdownComponent,
         SortDropdownComponent,
         IconDirective,
@@ -107,6 +129,7 @@ import {MdsDurationPipe} from './pipes/mds-duration.pipe';
         GlobalProgressComponent,
         VideoControlsComponent,
         InfoMessageComponent,
+        OptionButtonComponent,
         InputPasswordComponent,
         InfiniteScrollDirective,
         AuthorityNamePipe,
@@ -124,7 +147,9 @@ import {MdsDurationPipe} from './pipes/mds-duration.pipe';
         UrlPipe,
         AuthorityAffiliationPipe,
         OptionTooltipPipe,
+        NodeImagePipe,
         NodeSourcePipe,
+        NodeTitlePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         ImageConfigDirective,
@@ -137,12 +162,23 @@ import {MdsDurationPipe} from './pipes/mds-duration.pipe';
         ElementRefDirective,
         TitleDirective,
         FormatDurationPipe,
+        NodeEntriesWrapperComponent,
+        NodeEntriesComponent,
+        NodeEntriesCardGridComponent,
+        NodeEntriesCardComponent,
+        NodeEntriesCardSmallComponent,
+        NodeEntriesTableComponent,
+        ColumnChooserComponent,
+        CheckTextOverflowDirective,
+        ListItemLabelPipe,
+        DragCursorDirective
     ],
     imports: [
         A11yModule,
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
+        DragDropModule,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
@@ -169,6 +205,11 @@ import {MdsDurationPipe} from './pipes/mds-duration.pipe';
                 useClass: FallbackTranslationHandler,
             },
         }),
+        MatSlideToggleModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        OverlayModule,
     ],
     providers: [
         Toast,
@@ -179,6 +220,7 @@ import {MdsDurationPipe} from './pipes/mds-duration.pipe';
     exports: [
         TranslateModule,
         ListTableComponent,
+        NodeEntriesComponent,
         SpinnerComponent,
         CustomNodeListWrapperComponent,
         BreadcrumbsComponent,
@@ -217,9 +259,13 @@ import {MdsDurationPipe} from './pipes/mds-duration.pipe';
         ListCollectionInfoComponent,
         ListBaseComponent,
         ListTextComponent,
+        NodeTitlePipe,
         TitleDirective,
         SafeHtmlPipe,
         ElementRefDirective,
+        NodeEntriesWrapperComponent,
+        CheckTextOverflowDirective,
+        DragCursorDirective
     ],
 })
 export class CoreUiModule {}

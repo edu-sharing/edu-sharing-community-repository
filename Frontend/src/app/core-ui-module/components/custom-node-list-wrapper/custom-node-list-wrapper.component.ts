@@ -146,7 +146,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         this.componentRef.instance.changeDetectorRef?.detectChanges();
     }
     getListTable(): ListTableComponent {
-        return this.componentRef.instance;
+        return this.componentRef?.instance;
     }
 
     /**

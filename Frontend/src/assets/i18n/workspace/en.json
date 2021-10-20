@@ -428,7 +428,7 @@
             "ADDED_TO_COLLECTION_MEDIA_CENTER": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to members of the mediacenter",
             "PROPOSED_FOR_COLLECTION": "{{count}} element(s) proposed for collection \"{{collection}}\". The elements need to be approved before they are visible.",
             "ADD_TO_COLLECTION_DISABLED": "At least 1 selected material can not be collected",
-            "DELETE_FINISHED": "Element(s) move to recycle",
+            "DELETE_FINISHED": "Element(s) moved to recycle",
             "CUT_COPY": "{{count}} Element(s) copied to clipboard",
             "PASTE": "{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
             "PASTE_DRAG": "{{count}} Element(s) have been {{mode}} to {{to}}",

@@ -67,7 +67,7 @@ import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
 import {MdsEditorWidgetFileUploadComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 import {CommonModule} from '@angular/common';
 import { MultiLineLabelComponent } from './common/ui/multi-line-label/multi-line-label.component';
-import { CheckTextOverflowDirective } from './common/directives/check-text-overflow.directive';
+import { CheckTextOverflowDirective } from './core-ui-module/directives/check-text-overflow.directive';
 import { RegisterCustomPropertyDirective } from './common/directives/register-custom-property.directive';
 import { OnAttributeChangeDirective } from './common/directives/on-attribute-change.directive';
 import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
@@ -145,7 +145,6 @@ import { BorderBoxObserverDirective } from './common/directives/border-box-obser
         SkipTargetDirective,
         SkipNavComponent,
         MultiLineLabelComponent,
-        CheckTextOverflowDirective,
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
         extensionDeclarations,

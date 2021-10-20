@@ -1,0 +1,185 @@
+<div class="grid-top">
+  <div role="heading" aria-level="1" class="title">
+    <ng-container *ngTemplateOutlet="titleRef"></ng-container>
+  </div>
+  <div *ngIf="entriesService.sort?.allowed" class="order-panel">
+    <mat-slide-toggle *ngIf="entriesService.sort.active === 'ccm:collection_ordered_position'"
+                      [(ngModel)]="entriesService.sort.customSortingInProgress"
+                      (ngModelChange)="entriesService.sortChange.emit(entriesService.sort)"
+    >
+      {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
+    </mat-slide-toggle>
+    <button *ngIf="sortDropdown.menu"
+            [matMenuTriggerFor]="sortDropdown.menu"
+            mat-button
+            color="primary"
+    >
+      {{ ('NODE.' + entriesService.sort.active) | translate}}
+      <i *ngIf="entriesService.sort.active !== 'ccm:collection_ordered_position'"
+         [icon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"></i>
+    </button>
+    <sort-dropdown
+      #sortDropdown
+      [columns]="getSortColumns()"
+      [sortBy]="entriesService.sort.active"
+      [sortAscending]="entriesService.sort.direction === 'asc'"
+      (onSort)="changeSort($event)"
+    ></sort-dropdown>
+  </div>
+</div>
+<dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
+<ul *ngIf="entriesService.sort?.customSortingInProgress"
+    class="card-grid card-grid-reorder"
+>
+  <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+    <div
+      class="card-grid-order-wrapper"
+      *ngFor="let node of getVisibleNodes(nodes); let i = index"
+      role="none"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="i"
+      (cdkDropListDropped)="reorder($event)"
+    >
+      <app-node-entries-card
+        *ngIf="displayType === NodeEntriesDisplayType.Grid"
+        [node]="node"
+        [dropdown]="dropdown"
+        role="listitem"
+        cdkDrag
+      ></app-node-entries-card>
+      <app-node-entries-card-small
+        *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+        [node]="node"
+        role="listitem"
+        cdkDrag
+      ></app-node-entries-card-small>
+    </div>
+  </ng-container>
+</ul>
+<ng-container *ngIf="!entriesService.sort?.customSortingInProgress">
+  <ul *ngIf="!entriesService.dragDrop?.dragAllowed"
+      class="card-grid"
+      #grid
+      infiniteScroll
+      (scrolled)="loadData()"
+  >
+    <ng-container *ngTemplateOutlet="list"></ng-container>
+  </ul>
+  <ul *ngIf="entriesService.dragDrop?.dragAllowed"
+      class="card-grid"
+      #grid
+      infiniteScroll
+      (dragleave)="dragExit($event)"
+      (scrolled)="loadData()"
+  >
+    <ng-container
+      *ngTemplateOutlet="globalOptions"
+    ></ng-container>
+    <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+      <div
+        class="card-grid-drag-wrapper"
+        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        role="none"
+        cdkDropList
+        cdkDropListOrientation="vertical"
+        [class.card-grid-drop-allowed]="getDragState()?.element === node && getDragState()?.dropAllowed"
+        [class.card-grid-drop-blocked]="getDragState()?.element === node && !getDragState()?.dropAllowed"
+        [cdkDropListData]="node"
+        [cdkDropListSortingDisabled]="true"
+        (cdkDropListEntered)="dragEnter($event)"
+        (cdkDropListExited)="dragExit($event)"
+        (cdkDropListDropped)="drop($event)"
+      >
+        <app-node-entries-card
+          *ngIf="displayType === NodeEntriesDisplayType.Grid"
+          [node]="node"
+          [dropdown]="dropdown"
+          role="listitem"
+          cdkDrag
+          [cdkDragData]="node"
+          appDragCursor
+        ></app-node-entries-card>
+        <app-node-entries-card-small
+          *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+          [node]="node"
+          role="listitem"
+          cdkDrag
+          [cdkDragData]="node"
+          appDragCursor
+        ></app-node-entries-card-small>
+        <div *ngIf="getDragState()?.element === node && !getDragState().dropAllowed"
+             class="card-grid-drop-blocked-container">
+          <i icon="cancel"></i>
+        </div>
+        <div *ngIf="getDragState()?.element === node && getDragState().dropAllowed"
+             class="card-grid-drop-allowed-container">
+          <i [icon]="getDragState().mode === 'copy' ? 'add_circle_outline' : 'archive'"></i>
+        </div>
+      </div>
+    </ng-container>
+  </ul>
+</ng-container>
+<ng-container *ngIf="entriesService.dataSource.isLoading">
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+</ng-container>
+
+<ng-template #loading>
+  <spinner></spinner>
+</ng-template>
+<ng-template #list>
+  <ng-container
+    *ngTemplateOutlet="globalOptions"
+  ></ng-container>
+  <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+    <ng-container *ngIf="displayType === NodeEntriesDisplayType.SmallGrid">
+      <app-node-entries-card-small
+        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        [node]="node"
+        role="listitem"
+      ></app-node-entries-card-small>
+    </ng-container>
+    <ng-container *ngIf="displayType === NodeEntriesDisplayType.Grid">
+      <app-node-entries-card
+        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        [node]="node"
+        [dropdown]="dropdown"
+        role="listitem"
+      ></app-node-entries-card>
+    </ng-container>
+  </ng-container>
+  <!--
+  <div style="display: flex; flex-wrap: wrap" cdkDropListGroup>
+    <mat-card cdkDropList cdkDropListOrientation="horizontal" (cdkDropListEntered)="debug($event)"
+              (cdkDropListExited)="debug($event)"
+      *ngFor="let node of (entriesService.dataSource?.connect() | async)"
+    ><div cdkDrag>
+      {{node.name}}
+    </div>
+    </mat-card>
+  </div>
+  -->
+
+</ng-template>
+<ng-template #globalOptions>
+  <li *ngIf="entriesService.globalOptions?.length"
+      class="global-options"
+      [class.global-options-small]="displayType === NodeEntriesDisplayType.SmallGrid"
+  >
+    <button
+      mat-button
+      *ngFor="let option of entriesService.globalOptions"
+      (click)="option.callback()"
+      class="global-option-btn">
+      <ng-container
+        *ngTemplateOutlet="globalOption; context: {option}"
+      ></ng-container>
+    </button>
+  </li>
+</ng-template>
+<ng-template #globalOption let-option="option">
+  <div class="global-option">
+    <i [icon]="option.icon"></i>
+    <label>{{option.name | translate}}</label>
+  </div>
+</ng-template>

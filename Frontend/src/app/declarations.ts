@@ -12,7 +12,6 @@
   import {ToolListComponent} from './common/ui/tool-list/tool-list.component';
   import {UserProfileComponent} from './common/ui/user-profile/user-profile.component';
   import {ToucheventDirective} from './common/ui/touchevents/touchevents';
-  import {NodeTitlePipe} from './common/ui/node-title.pipe';
   import {BannerComponent} from './common/ui/banner/banner.component';
   import {SmallCollectionComponent} from './common/ui/small-collection/small-collection.component';
   import {InfobarComponent} from './common/ui/infobar/infobar.component';
@@ -57,7 +56,6 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       AuthorityRowComponent,
-      NodeTitlePipe,
       ColorTransformPipe,
       SanitizeHTMLPipe,
       NodeAuthorNamePipe,

@@ -70,6 +70,7 @@ import {CardComponent} from '../../../core-ui-module/components/card/card.compon
 import {CardService} from '../../../core-ui-module/card.service';
 import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
+import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 
 declare var jQuery:any;
 declare var window: any;
@@ -146,7 +147,12 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+              const dataSource: NodeDataSource<Node> = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE)
+                if(dataSource) {
+                    this.list = dataSource.getData();
+                } else {
+                    this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+                }
               this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {

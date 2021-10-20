@@ -1,20 +1,17 @@
-import {Component, ElementRef, HostListener, ViewChild, OnInit, OnDestroy} from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { Translation } from '../../core-ui-module/translation';
+import {Component, HostListener, OnDestroy, ViewChild} from '@angular/core';
+import {TranslateService} from '@ngx-translate/core';
+import {Translation} from '../../core-ui-module/translation';
 import {
     ClipboardObject,
     ConfigurationService,
     Connector,
-    ConnectorList, DialogButton,
+    DialogButton,
     EventListener,
     Filetype,
     FrameEventsService,
     IamUser,
-    LoginResult,
     Node,
     NodeList,
-    NodeRef,
-    NodeVersions,
     NodeWrapper,
     RestCollectionService,
     RestConnectorService,
@@ -27,36 +24,43 @@ import {
     RestToolService,
     SessionStorageService,
     TemporaryStorageService,
-    UIService,
-    Version
+    UIService
 } from '../../core-module/core.module';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import {CustomOptions, DefaultGroups, ElementType, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
-import { Toast } from '../../core-ui-module/toast';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
+import {ActivatedRoute, Params, Router} from '@angular/router';
+import {
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    OptionItem
+} from '../../core-ui-module/option-item';
+import {Toast} from '../../core-ui-module/toast';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
-import { KeyEvents } from '../../core-module/ui/key-events';
-import { UIHelper } from '../../core-ui-module/ui-helper';
-import { trigger } from '@angular/animations';
-import { UIConstants } from '../../core-module/ui/ui-constants';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
-import { Helper } from '../../core-module/rest/helper';
-import { DateHelper } from '../../core-ui-module/DateHelper';
-import { CordovaService } from '../../common/services/cordova.service';
-import { HttpClient } from '@angular/common/http';
-import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
-import { MatMenuTrigger } from '@angular/material/menu';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
+import {KeyEvents} from '../../core-module/ui/key-events';
+import {UIHelper} from '../../core-ui-module/ui-helper';
+import {trigger} from '@angular/animations';
+import {UIConstants} from '../../core-module/ui/ui-constants';
+import {ActionbarHelperService} from '../../common/services/actionbar-helper';
+import {Helper} from '../../core-module/rest/helper';
+import {CordovaService} from '../../common/services/cordova.service';
+import {HttpClient} from '@angular/common/http';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
-import { CardService } from '../../core-ui-module/card.service';
-import { Observable } from 'rxjs';
-import { delay } from "rxjs/operators";
+import {CardService} from '../../core-ui-module/card.service';
+import {Observable} from 'rxjs';
+import {delay} from 'rxjs/operators';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
+import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
+import {
+    DropSource, DropTarget,
+    NodeEntriesDisplayType, NodeRoot
+} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 
-export type WorkspaceRoot = 'MY_FILES' | 'SHARED_FILES' | 'MY_SHARED_FILES' | 'TO_ME_SHARED_FILES' | 'WORKFLOW_RECEIVE' | 'RECYCLE' | 'ALL_FILES';
 @Component({
     selector: 'workspace-main',
     templateUrl: 'workspace.component.html',
@@ -82,9 +86,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private sharedFolders: Node[] = [];
     path: Node[] = [];
     private parameterNode: Node;
-    root: WorkspaceRoot = 'MY_FILES';
-
-    selection: Node[] = [];
+    root: NodeRoot = 'MY_FILES';
 
     showSelectRoot = false;
 
@@ -119,7 +121,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     toMeSharedToggle: boolean;
 
-    currentNodes: Node[];
+    dataSource = new NodeDataSource<Node>();
     private appleCmd = false;
     private reurl: string;
     private mdsParentNode: Node;
@@ -128,7 +130,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
-    viewType: 0|1|null = null;
+    displayType: NodeEntriesDisplayType  = null;
     private reurlDirectories: boolean;
     reorderDialog: boolean;
     @HostListener('window:beforeunload', ['$event'])
@@ -215,25 +217,25 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private editConnector(node: Node = null, type: Filetype = null, win: any = null, connectorType: Connector = null) {
         UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, this.getNodeList(node)[0], type, win, connectorType);
     }
-    handleDrop(event: any) {
-        for (const s of event.source) {
-            if (event.target?.ref?.id === s.ref.id || event.target?.ref?.id === s.parent.id) {
+    handleDrop(event: {target: DropTarget, source: DropSource<Node>}) {
+        for (const s of event.source.element) {
+            if ((event.target as Node).ref?.id === s.ref.id || (event.target as Node).ref?.id === s.parent.id) {
                 this.toast.error(null, 'WORKSPACE.SOURCE_TARGET_IDENTICAL');
                 return;
             }
         }
-        if (event.target !== 'HOME' && !event.target.isDirectory) {
+        if (event.target !== 'MY_FILES' && !(event.target as Node).isDirectory) {
             this.toast.error(null, 'WORKSPACE.TARGET_NO_DIRECTORY');
             return;
         }
-        if (event.event.altKey) {
+        if (event.source.mode === 'link') {
             this.toast.error(null, 'WORKSPACE.FEATURE_NOT_IMPLEMENTED');
         }
-        else if (event.type === 'copy') {
-            this.copyNode(event.target, event.source);
+        else if (event.source.mode === 'copy') {
+            this.copyNode(event.target, event.source.element);
         }
         else {
-            this.moveNode(event.target, event.source);
+            this.moveNode(event.target, event.source.element);
         }
         /*
         this.dialogTitle="WORKSPACE.DRAG_DROP_TITLE";
@@ -250,7 +252,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         return event.target === 'HOME' ? this.root === 'MY_FILES' :
             event.target?.ref?.id !== this.currentFolder.ref.id;
     };
-    private moveNode(target: DragNodeTarget, source: Node[], position = 0) {
+    private moveNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
             this.finishMoveCopy(target, source, false);
@@ -266,7 +268,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.moveNode(target, source, position + 1);
             });
     }
-    private copyNode(target: DragNodeTarget, source: Node[], position = 0) {
+    private copyNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
             this.finishMoveCopy(target, source, true);
@@ -282,7 +284,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.copyNode(target, source, position + 1);
             });
     }
-    private finishMoveCopy(target: DragNodeTarget, source: Node[], copy: boolean) {
+    private finishMoveCopy(target: DropTarget, source: Node[], copy: boolean) {
         this.toast.closeModalDialog();
         const info: any = {
             to: (target as Node).name || this.translate.instant('WORKSPACE.MY_FILES'),
@@ -354,15 +356,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     }
                 } else {
                     needsUpdate = true;
-                    if(this.explorer) {
-                        this.explorer.showLoading = true;
-                    }
                 }
                 this.oldParams = params;
-                if (params.viewType != null) {
-                    this.setViewType(params.viewType, false);
+                if (params.displayType != null) {
+                    this.setDisplayType(parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10), false);
                 } else {
-                    this.setViewType(this.config.instant('workspaceViewType', ListTableComponent.VIEW_TYPE_LIST), false);
+                    this.setDisplayType(this.config.instant('workspaceViewType', NodeEntriesDisplayType.Table) as NodeEntriesDisplayType, false);
                 }
                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
                     this.root = params.root;
@@ -428,7 +427,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
         this.createAllowed = false;
         this.path = [];
-        this.selection = [];
+        this.setSelection([]);
     }
     private deleteDone() {
         this.closeMetadata();
@@ -450,7 +449,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.nodeDisplayed = event;
             this.nodeDisplayedVersion = event.version;
             */
-            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.currentNodes);
+            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.dataSource);
             this.currentNode = list[0];
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
                 {
@@ -468,7 +467,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
         let nodes = [node];
         if (node == null) {
-            nodes = this.selection;
+            nodes = this.explorer.nodeEntries.getSelection().selected;
         }
         return nodes;
     }
@@ -478,22 +477,20 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.node.getNodeMetadata(folder.id).subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
         }
     }
-    setRoot(root: WorkspaceRoot) {
+    setRoot(root: NodeRoot) {
         this.root = root;
         this.searchQuery = null;
         this.routeTo(root, null, null);
         this.actionbarRef.invalidate();
     }
-    private updateList(nodes: Node[]) {
-        this.currentNodes = nodes;
-    }
 
     setSelection(nodes: Node[]) {
-        this.selection = nodes;
+        this.explorer.nodeEntries.getSelection().clear();
+        this.explorer.nodeEntries.getSelection().select(...nodes);
         this.setFixMobileNav();
     }
     private setFixMobileNav() {
-        this.mainNavRef.setFixMobileElements(this.selection && this.selection.length > 0);
+        this.mainNavRef.setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
     }
     private updateLicense() {
         this.closeMetadata();
@@ -509,7 +506,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
     private openDirectoryFromRoute(params: any = null) {
         let id = params?.id;
-        this.selection = [];
         this.closeMetadata();
         this.createAllowed = false;
         if (!id) {
@@ -623,7 +619,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         const folder = this.currentFolder;
         this.currentFolder = null;
         this.searchQuery = null;
-        this.selection = [];
         const path = this.path;
         if (refreshPath) {
             this.path = [];
@@ -635,18 +630,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         });
     }
 
-    private refreshRoute() {
-        this.routeTo(
-            this.root,
-            !this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,
-            this.searchQuery ? this.searchQuery.query : null
-        );
-    }
     private routeTo(root: string, node: string = null, search: string = null) {
         const params: any = { root, id: node, query: search, mainnav: this.mainnav };
         // tslint:disable-next-line:triple-equals
-        if(this.viewType !== null) {
-            params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
+        if(this.displayType !== null) {
+            params.displayType = this.displayType;
         }
         if (this.reurl) {
             params.reurl = this.reurl;
@@ -717,17 +705,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         return this.getRootFolderId();
     }
 
-    private toggleView() {
-        this.setViewType(this.viewType === 1 ? 0 : 1);
-        if (this.viewType === 0) {
-            this.viewToggle.icon = 'view_module';
-        }
-        else {
-            this.viewToggle.icon = 'list';
-        }
-
-    }
-
     public listLTI() {
         this.showLtiTools = true;
     }
@@ -775,7 +752,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
 
     private updateNodes(nodes: Node[]) {
-        for(let node of this.currentNodes){
+        for(let node of this.dataSource.getData()){
             const hit = nodes.filter((n) => n.ref.id === node.ref.id);
             if (hit && hit.length === 1) {
                 Helper.copyObjectProperties(node, hit[0]);
@@ -805,14 +782,17 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.customOptions.addOptions = [toggle];
     }
 
-    /**
-     * function to add value to viewType
-     * @param viewType as params accept number, in this case we want just 0|1
-     */
-    private setViewType(viewType: 0|1, refreshRoute = true) {
-        this.viewType = viewType;
+    setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {
+        this.displayType = displayType;
         if(refreshRoute) {
-            this.refreshRoute();
+            this.router.navigate(['./'], {
+                relativeTo: this.route,
+                replaceUrl: true,
+                queryParamsHandling: 'merge',
+                queryParams: {
+                    [UIConstants.QUERY_PARAM_LIST_VIEW_TYPE]: displayType
+                }
+            });
         }
     }
 }

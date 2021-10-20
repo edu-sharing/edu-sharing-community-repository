@@ -241,7 +241,8 @@
     },
     "LIST_TABLE": {
         "DUMMY_ICON_LABEL": "Dateityp",
-        "TOGGLE_ALL": "Alle / Nichts auswählen"
+        "TOGGLE_ALL": "Alle / Nichts auswählen",
+        "CONFIGURE_COLUMNS": "Spalten konfigurieren"
     },
     "NODE": {
         "cm:name": "Dateiname",
@@ -253,6 +254,7 @@
         "size": "Größe",
         "mediatype": "Dateityp",
         "ccm:commonlicense_key": "Lizenz",
+        "ccm:collection_ordered_position": "Benutzerdefiniert",
         "ccm:educationallearningresourcetype": "Medienart",
         "ccm:replicationsourceid": "Original-ID",
         "ccm:educationalcontext": "Bildungsbereich",
@@ -483,6 +485,7 @@
     },
     "AUTHORITY_TYPE_GROUP": "Gruppe",
     "AUTHORITY_TYPE_ORG": "Organisation",
+    "CHILDOBJECT_COUNT": "{{count}} Elemente (Serienobjekt)",
     "GROUP": {
         "displayName": "Gruppenname",
         "authorityName": "Systemname",
