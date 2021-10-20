@@ -9,9 +9,9 @@ export class MdsDurationPipe implements PipeTransform {
         const hours: number = Math.floor(totalSeconds / 3600);
         const minutes: number = Math.round((totalSeconds - hours * 3600) / 60);
         if(hours > 0){
-            return hours + 'h ' + minutes+'m';
+            return hours + 'h ' + minutes + 'm';
         }
-        return minutes+'m';
+        return minutes + 'm';
 
     }
 }
