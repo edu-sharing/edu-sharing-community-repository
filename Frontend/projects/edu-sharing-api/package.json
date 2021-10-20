@@ -13,6 +13,7 @@
     "@angular/core": "^12.2.0"
   },
   "dependencies": {
+    "prettier": "^2.4.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
