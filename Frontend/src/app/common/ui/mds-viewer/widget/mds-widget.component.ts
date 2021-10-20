@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {MdsEditorWidgetBase, ValueType} from '../../mds-editor/widgets/mds-editor-widget-base';
 import {Widget} from '../../mds-editor/mds-editor-instance.service';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
+import {FormatSizePipe} from '../../../../core-ui-module/pipes/file-size.pipe';
 
 @Component({
     selector: 'mds-widget',
@@ -16,13 +17,14 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
     getBasicType() {
         switch(this.widget.definition.type) {
             case 'text':
-            case 'number':
             case 'email':
             case 'month':
             case 'color':
             case 'textarea':
             case 'singleoption':
                 return 'text';
+            case 'number':
+                return 'number';
             case 'multivalueFixedBadges':
             case 'multivalueSuggestBadges':
             case 'multivalueBadges':
@@ -70,5 +72,14 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
 
     isEmpty() {
         return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
+    }
+
+    formatNumber() {
+        return this.value.map((v) => {
+            if(this.widget.definition.format === 'bytes') {
+                return new FormatSizePipe().transform(v);
+            }
+            return v;
+        });
     }
 }
