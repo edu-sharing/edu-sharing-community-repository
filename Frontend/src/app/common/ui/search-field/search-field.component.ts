@@ -67,6 +67,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         },
     ];
     readonly mdsInfo$ = this.searchField.mdsInfo$;
+    inputHasFocus = false;
 
     private readonly destroyed$ = new Subject<void>();
 
@@ -118,10 +119,6 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         this.searchField.setFilterValues(values, { emitValuesChange: true });
     }
 
-    inputHasFocus(): boolean {
-        return document.activeElement === this.input?.nativeElement;
-    }
-
     onRemoveFilter(property: string, filter: LabeledValue): void {
         this.searchField.removeFilter(property, filter);
     }
@@ -156,7 +153,13 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         }
     }
 
+    onInputFocus(): void {
+        Promise.resolve().then(() => (this.inputHasFocus = true));
+        this.showOverlay = true;
+    }
+
     onInputBlur(event: FocusEvent): void {
+        this.inputHasFocus = false;
         if (!this.overlay.overlayRef?.overlayElement.contains(event.relatedTarget as HTMLElement)) {
             this.showOverlay = false;
         }

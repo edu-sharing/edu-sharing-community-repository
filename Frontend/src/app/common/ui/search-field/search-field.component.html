@@ -4,7 +4,7 @@
     cdkOverlayOrigin
     #trigger="cdkOverlayOrigin"
     cdkMonitorSubtreeFocus
-    [class.input-has-focus]="inputHasFocus()"
+    [class.input-has-focus]="inputHasFocus"
     appBorderBoxObserver
     #triggerBorderBox="borderBoxObserver"
   >
@@ -41,7 +41,7 @@
             autocomplete="off"
             placeholder="{{ placeholder | translate }}"
             [attr.aria-label]="placeholder | translate"
-            (focus)="showOverlay = true"
+            (focus)="onInputFocus()"
             (blur)="onInputBlur($event)"
             (keydown.tab)="focusOverlayIfOpen($event)"
             (keydown.enter)="onSubmit()"
