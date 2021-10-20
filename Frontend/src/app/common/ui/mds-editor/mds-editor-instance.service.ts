@@ -1402,7 +1402,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             .pipe(
                 // Don't emit values while initializing. Wait for all widgets to propagate any
                 // default values and value changes due to constraints and then emit a single time.
-                switchMap((initializing) => (initializing ? EMPTY : this._new_valuesSubject)),
+                switchMap((state) => (state === 'complete' ? this._new_valuesSubject : EMPTY)),
                 // Skip the initial `null` value.
                 filter((values) => values !== null),
                 // Don't emit values set from outside.
