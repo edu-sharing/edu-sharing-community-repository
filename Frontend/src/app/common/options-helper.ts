@@ -536,7 +536,7 @@ export class OptionsHelperService {
         inviteNode.customShowCallback = ((objects) =>
             objects[0].collection ?
                 objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL :
-                true
+                objects[0].type !== RestConstants.SYS_TYPE_CONTAINER
         );
 
         const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', (object) =>
