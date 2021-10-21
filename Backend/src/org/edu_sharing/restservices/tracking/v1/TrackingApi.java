@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.tracking.v1;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,9 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tracking.TrackingEvent;
-import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.comment.v1.model.Comments;
+import org.edu_sharing.restservices.ApiService;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
@@ -25,6 +25,8 @@ import java.util.Arrays;
 @Path("/tracking/v1")
 @Tag(name= "TRACKING v1" )
 @ApiService(value = "TRACKING", major = 1, minor = 0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class TrackingApi {
 	private static Logger logger = Logger.getLogger(TrackingApi.class);
 	@PUT

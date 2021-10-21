@@ -1,12 +1,12 @@
 package org.edu_sharing.restservices.mediacenter.v1;
 
-import io.swagger.v3.oas.annotations.*;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
 @Path("/mediacenter/v1")
 @Tag(name="MEDIACENTER v1")
 @ApiService(value="MEDIACENTER", major=1, minor=0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class MediacenterApi {
 
 	private static Logger logger = Logger.getLogger(MediacenterApi.class);

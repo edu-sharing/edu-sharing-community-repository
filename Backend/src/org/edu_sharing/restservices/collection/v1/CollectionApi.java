@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices.collection.v1;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,7 +17,6 @@ import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.collection.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.AbstractEntries;
-import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
@@ -40,6 +41,8 @@ import java.util.List;
 @Path("/collection/v1")
 @Tag(name= "COLLECTION v1" )
 @ApiService(value = "COLLECTION", major = 1, minor = 0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class CollectionApi {
 
 	private static Logger logger = Logger.getLogger(CollectionApi.class);

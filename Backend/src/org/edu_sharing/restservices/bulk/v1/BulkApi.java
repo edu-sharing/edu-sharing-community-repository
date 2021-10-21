@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.bulk.v1;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,16 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
 
 @Path("/bulk/v1")
 @Tag(name= "BULK v1" )
 @ApiService(value = "BULK", major = 1, minor = 0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class BulkApi {
 	private static Logger logger = Logger.getLogger(BulkApi.class);
 
