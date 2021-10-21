@@ -17,11 +17,11 @@ import { SkipNavService, SkipTarget } from './skip-nav.service';
 export class SkipNavComponent implements OnInit {
     availableTargets: Observable<SkipTarget[]>;
 
-    constructor(private skipNav: SkipNavService) {
+    constructor(private skipNav: SkipNavService) {}
+
+    ngOnInit(): void {
         this.availableTargets = this.skipNav.getAvailableTargets();
     }
-
-    ngOnInit(): void {}
 
     skipTo(target: SkipTarget): void {
         this.skipNav.skipTo(target);
