@@ -6,11 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface PropertiesInterceptor {
-    enum PropertiesCallSource {
-        Search,
-        Render,
-        Workspace
-    }
+
     class PropertiesContext {
         private NodeRef nodeRef;
         /**
@@ -25,7 +21,7 @@ public interface PropertiesInterceptor {
          * the context source of the node
          * this can be useful because you might don't want to do "expensive" taks e.g. in the search context
          */
-        private PropertiesCallSource source;
+        private CallSourceHelper.CallSource source;
 
         public NodeRef getNodeRef() {
             return nodeRef;
@@ -51,11 +47,11 @@ public interface PropertiesInterceptor {
             this.aspects = aspects;
         }
 
-        public PropertiesCallSource getSource() {
+        public CallSourceHelper.CallSource getSource() {
             return source;
         }
 
-        public void setSource(PropertiesCallSource source) {
+        public void setSource(CallSourceHelper.CallSource source) {
             this.source = source;
         }
     }

@@ -243,6 +243,7 @@ public class RepoFactory {
 		} catch (Exception ignored) {}
 		eduSharingProps = null;
 		PropertiesInterceptorFactory.refresh();
+		ProviderHelper.clearCache();
 	}
 
 	public static List<MetadataSetInfo> getMetadataSetsV2ForRepository(String repositoryId) throws Exception {

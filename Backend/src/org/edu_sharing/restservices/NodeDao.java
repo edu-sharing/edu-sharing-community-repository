@@ -65,6 +65,7 @@ import org.edu_sharing.service.rating.RatingDetails;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
@@ -214,6 +215,24 @@ public class NodeDao {
 			throw DAOException.mapping(e);
 		}
 	}
+
+	public static NodeSearch searchFacettes(RepositoryDao repoDao, MdsDaoV2 mdsDao, String query,
+																   List<MdsQueryCriteria> criterias,
+																   SearchToken token) throws DAOException {
+		SearchService ss=SearchServiceFactory.getSearchService(repoDao.getId());
+		try {
+			if(!(ss instanceof SearchServiceElastic)){
+				throw new Exception("not implemented for non elastic searchengine:"+ss.getClass().getName());
+			}
+			SearchServiceElastic searchService = (SearchServiceElastic)ss;
+			Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
+			SearchResultNodeRef searchResultNodeRef = searchService.searchFacets(mdsDao.getMds(), query, criteriasMap, token);
+			NodeSearch nodeSearch = transform(repoDao,searchResultNodeRef);
+			return nodeSearch;
+		}catch (Throwable e){
+			throw DAOException.mapping(e);
+		}
+	}
 	
 	private static List<String> slackCriteriasMap(Map<String, String[]> criteriasMap, MetadataQuery metadataQuery) {
 		List<String> removed=new ArrayList<>();
@@ -292,40 +311,19 @@ public class NodeDao {
 		result.setCount(search.getNodeCount());
 		result.setSkip(search.getStartIDX());
 	
-		Map<String, Map<String, Integer>> countedProps = search
-				.getCountedProps();
-		if (countedProps != null) {
-			List<Facette> resultFacettes = new ArrayList<Facette>();
-			for (Entry<String, Map<String, Integer>> entry : countedProps
-					.entrySet()) {
 
-				Facette facette = new Facette();
-				facette.setProperty(entry.getKey());
-
-				List<Value> values = new ArrayList<Value>();
-				for (Entry<String, Integer> entryValue : entry.getValue()
-						.entrySet()) {
-
-					Value value = new Value();
-					value.setValue(entryValue.getKey());
-					value.setCount(entryValue.getValue());
-
-					values.add(value);
+		if (search.getFacets() != null) {
+			for(Facette facet : search.getFacets()){
+				if(facet.getValues() != null){
+					Collections.sort(facet.getValues(),new Comparator<Value>(){
+						@Override
+						public int compare(Value o1, Value o2) {
+							return o2.getCount().compareTo(o1.getCount());
+						}
+					});
 				}
-
-				Collections.sort(values,new Comparator<Value>(){
-
-					@Override
-					public int compare(Value o1, Value o2) {
-						return o2.getCount().compareTo(o1.getCount());
-					}
-
-				});
-				facette.setValues(values);
-
-				resultFacettes.add(facette);
 			}
-			result.setFacettes(resultFacettes);
+			result.setFacettes(search.getFacets());
 		}
 
 		return result;

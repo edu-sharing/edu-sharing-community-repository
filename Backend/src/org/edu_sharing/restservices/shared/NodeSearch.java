@@ -42,6 +42,7 @@ public class NodeSearch {
 
 		private String property = null;
 		private List<Value> values = null;
+		private Long sumOtherDocCount = null;
 
 		@ApiModelProperty(required = true, value = "")
 		@JsonProperty(value = "property")
@@ -62,6 +63,12 @@ public class NodeSearch {
 		public void setValues(List<Value> values) {
 			this.values = values;
 		}
+
+		public void setSumOtherDocCount(Long sumOtherDocCount) { this.sumOtherDocCount = sumOtherDocCount; }
+
+		@ApiModelProperty(required = false, value = "")
+		@JsonProperty(value = "sumOtherDocCount")
+		public Long getSumOtherDocCount() { return sumOtherDocCount; }
 	}
 	
 	private List<String> ignored = null;

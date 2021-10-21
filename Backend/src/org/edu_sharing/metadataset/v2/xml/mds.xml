@@ -572,6 +572,14 @@
 				]]></html>
 		</template>
 		<template>
+			<id>search_input</id>
+			<rel>suggestions</rel>
+			<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
+              <cclom:general_keyword>
+				]]></html>
+		</template>
+		<template>
 			<id>node_general_render</id>
 			<caption>dialog_upload_tab_basic</caption>
 			<html><![CDATA[
@@ -840,6 +848,13 @@
 			<views>
 				<view>search</view>
 				<view>search_suggestions</view>
+			</views>
+		</group>
+		<group>
+			<id>search_input</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_input</view>
 			</views>
 		</group>
 		<group>

@@ -343,11 +343,23 @@
 		]]></html>
 		</template>
 		<template>
+			<id>search_input</id>
+			<rel>suggestions</rel>
+			<html><![CDATA[
+			  <<ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalcontext>
+		  	  <ccm:educationalintendedenduserrole>
+		      <ccm:educationallearningresourcetype>
+				]]></html>
+		</template>
+		<template>
 			<id>search_suggestions</id>
 			<rel>suggestions</rel>
 			<html><![CDATA[
 		  <ccm:educationalcontext>
 		  <cclom:general_keyword>
+		  <ccm:taxonid>
 		]]></html>
 		</template>
 		<template>
@@ -434,6 +446,7 @@
 			<property name="ccm:taxonid">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
+				<statement>{"term":{"properties.ccm:taxonid.keyword":"${value}"}}</statement>
 			</property>
 			<property name="ccm:educationalintendedenduserrole">
 				<multiple>true</multiple>
@@ -446,6 +459,12 @@
 			<property name="ccm:educationalcontext">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
+				<statement>{"term":{"properties.ccm:educationalcontext.keyword":"${value}"}}</statement>
+			</property>
+			<property name="cclom:general_keyword">
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<statement>{"term":{"properties.cclom:general_keyword.keyword":"${value}"}}</statement>
 			</property>
 			<property name="ccm:educationallearningresourcetype">
 				<multiple>true</multiple>

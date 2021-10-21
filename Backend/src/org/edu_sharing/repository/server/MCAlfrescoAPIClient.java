@@ -154,6 +154,7 @@ import org.edu_sharing.repository.server.tools.cache.Cache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
+import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
@@ -329,7 +330,17 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		SearchResultNodeRef srnr = searchSolrNodeRef(query, startIdx, nrOfresults, facettes, facettesMinCount, facettesLimit);
 		SearchResult result = new SearchResult();
-		result.setCountedProps(srnr.getCountedProps());
+		Map<String, Map<String, Integer>> countedProps = new HashMap<>();
+		if(srnr.getFacets() != null){
+			for(NodeSearch.Facette f : srnr.getFacets()){
+				Map<String, Integer> values = new HashMap<>();
+				for(NodeSearch.Facette.Value value : f.getValues()){
+					values.put(value.getValue(),value.getCount());
+				}
+				countedProps.put(f.getProperty(),values);
+			}
+		}
+		result.setCountedProps(countedProps);
 		result.setNodeCount(srnr.getNodeCount());
 		result.setStartIDX(startIdx);
 
@@ -390,12 +401,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		// do the facette
 		if (facettes != null && facettes.size() > 0) {
-			Map<String, Map<String, Integer>> newCountPropsMap = new HashMap<String, Map<String, Integer>>();
+			List<NodeSearch.Facette> facetsResult = new ArrayList<>();
+
 			for (String facetteProp : facettes) {
-				Map<String, Integer> resultPairs = newCountPropsMap.get(facetteProp);
-				if (resultPairs == null) {
-					resultPairs = new HashMap<String, Integer>();
-				}
+				NodeSearch.Facette facet = new NodeSearch.Facette();
+				facet.setProperty(facetteProp);
+				facet.setValues(new ArrayList<>());
+				facetsResult.add(facet);
+
 				String fieldFacette = "@" + facetteProp;
 
 				List<Pair<String, Integer>> facettPairs = resultSet.getFieldFacet(fieldFacette);
@@ -417,15 +430,15 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					 * --> pair.getSecond() > 0
 					 */
 					if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
-						resultPairs.put(first, pair.getSecond());
+						NodeSearch.Facette.Value value = new NodeSearch.Facette.Value();
+						value.setValue(first);
+						value.setCount(pair.getSecond());
+						facet.getValues().add(value);
 					}
 				}
 
-				if (resultPairs.size() > 0)
-					newCountPropsMap.put(facetteProp, resultPairs);
 			}
-			searchResult.setCountedProps(newCountPropsMap);
-
+			searchResult.setFacets(facetsResult);
 		}
 
 		searchResult.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), this.repId));

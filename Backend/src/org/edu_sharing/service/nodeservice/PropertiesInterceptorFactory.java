@@ -36,21 +36,7 @@ public class PropertiesInterceptorFactory {
         propertiesContext.setProperties(properties);
         propertiesContext.setAspects(aspects);
         propertiesContext.setNodeRef(nodeRef);
-
-        String requestURI = "";
-        if(Context.getCurrentInstance() != null) {
-            requestURI = Context.getCurrentInstance().getRequest().getRequestURI();
-        }
-        if(requestURI.contains("rest/search")){
-            propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Search);
-        }else if(requestURI.contains("components/render")
-                || requestURI.contains("rest/rendering")
-                || requestURI.contains("eduservlet/render")
-                || requestURI.contains("/content")){
-            propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Render);
-        }else{
-            propertiesContext.setSource(PropertiesInterceptor.PropertiesCallSource.Workspace);
-        }
+        propertiesContext.setSource(CallSourceHelper.getCallSource());
         return propertiesContext;
     }
 }
