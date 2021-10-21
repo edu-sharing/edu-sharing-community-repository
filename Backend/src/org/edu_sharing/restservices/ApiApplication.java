@@ -70,7 +70,10 @@ public class ApiApplication extends ResourceConfig {
 		 */
 		//this.register(ApiListingResource.class, SwaggerSerializers.class);
 		this.register(SwaggerSerializers.class);
-		this.packages("io.swagger.jaxrs.listing");
+		//this.packages("io.swagger.jaxrs.listing");
+		this.packages("io.swagger.v3.jaxrs2.integration.resources");
+
+
 
 		//final BeanConfig beanConfig = new BeanConfig();
 
@@ -80,8 +83,9 @@ public class ApiApplication extends ResourceConfig {
 		info.setDescription("The public restful API of the edu-sharing repository.");
 		info.setVersion(MAJOR + "." + MINOR);
 		oas.info(info);
-		oas.servers(Collections.singletonList(new Server().url("/" + ApplicationInfoList.getHomeRepository().getWebappname()
-				+ getClass().getAnnotation(ApplicationPath.class).value())));
+		String url = "/" + ApplicationInfoList.getHomeRepository().getWebappname();
+				//+ getClass().getAnnotation(ApplicationPath.class).value();
+		oas.servers(Collections.singletonList(new Server().url(url)));
 
 		SwaggerConfiguration oasConfig = new SwaggerConfiguration()
 				.openAPI(oas)
