@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Node } from '../../core-module/core.module';
-import { ListItem } from '../../core-module/core.module';
+import { SearchConfig, SearchService as SearchApiService } from 'edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
+import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
+import { ListItem, Node } from '../../core-module/core.module';
 
 /**
  * Session state for search.component.
@@ -25,7 +26,6 @@ export class SearchService {
     collectionsColumns: ListItem[] = [];
     ignored: Array<string> = [];
     reurl: string;
-    facettes: Array<any> = [];
     autocompleteData: any = [];
     skipcount: number[] = [];
     numberofresults: number = 0;
@@ -49,7 +49,16 @@ export class SearchService {
     sort: any = {};
     extendedSearchUsed = false;
 
-    constructor() {}
+    private readonly searchConfigSubject = new BehaviorSubject<Partial<SearchConfig>>({});
+
+    constructor(private searchApi: SearchApiService, private searchField: SearchFieldService) {
+        this.searchConfigSubject.pipe().subscribe((config) => {
+            const { repository, metadataSet } = config;
+            if (repository && metadataSet) {
+                this.searchField.setMdsInfo({ repository, metadataSet });
+            }
+        });
+    }
 
     clear() {
         this.searchTerm = '';
@@ -65,6 +74,17 @@ export class SearchService {
         this.searchResultCollections = [];
         this.searchResultRepositories = [];
         this.complete = false;
-        this.facettes = [];
+    }
+
+    setRepository(repository: string): void {
+        if (this.searchConfigSubject.value.repository !== repository) {
+            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, repository });
+        }
+    }
+
+    setMetadataSet(metadataSet: string): void {
+        if (this.searchConfigSubject.value.metadataSet !== metadataSet) {
+            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, metadataSet });
+        }
     }
 }

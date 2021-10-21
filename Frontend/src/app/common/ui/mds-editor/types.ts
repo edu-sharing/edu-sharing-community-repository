@@ -130,10 +130,6 @@ export interface MdsListColumn {
     showDefault: boolean;
 }
 
-export type MdsWidgetFacetValue = MdsWidgetValue & { count: number };
-
-export type FacetValues = { [property: string]: MdsWidgetFacetValue[] };
-
 export enum RequiredMode {
     Mandatory = 'mandatory',
     MandatoryForPublish = 'mandatoryForPublish',

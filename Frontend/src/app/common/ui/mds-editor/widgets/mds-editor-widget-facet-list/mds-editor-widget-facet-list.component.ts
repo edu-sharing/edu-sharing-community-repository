@@ -1,23 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormArray, FormControl } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
+import { FacetAggregation, FacetValue, SearchService } from 'edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { MdsWidgetFacetValue } from '../../types';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
     selector: 'app-mds-editor-widget-facet-list',
     templateUrl: './mds-editor-widget-facet-list.component.html',
     styleUrls: ['./mds-editor-widget-facet-list.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MdsEditorWidgetFacetListComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.MultiValue;
     /** Available facet values being updated from `mdsEditorInstance.suggestions$`. */
-    readonly facetValuesSubject = new BehaviorSubject<MdsWidgetFacetValue[]>(null);
+    readonly facetAggregationSubject = new BehaviorSubject<FacetAggregation>(null);
     /** Form array representing checkbox states. */
     formArray: FormArray;
+    /** Whether we are currently loading more facets. */
+    isLoading = false;
     /** IDs of selected values. Updated through user interaction. */
     private values: string[];
+
+    constructor(
+        mdsEditorInstance: MdsEditorInstanceService,
+        translate: TranslateService,
+        private search: SearchService,
+    ) {
+        super(mdsEditorInstance, translate);
+    }
 
     ngOnInit(): void {
         this.values = this.widget.getInitialValues().jointValues;
@@ -25,34 +38,45 @@ export class MdsEditorWidgetFacetListComponent extends MdsEditorWidgetBase imple
         this.registerFormControls();
     }
 
+    getFacet(index: number): FacetValue {
+        return this.facetAggregationSubject.value.values[index];
+    }
+
+    onLoadMore(): void {
+        this.isLoading = true;
+        this.search
+            .loadMoreFacets(this.widget.definition.id, 10)
+            .finally(() => (this.isLoading = false));
+    }
+
     private registerFacetValuesSubject(): void {
         this.mdsEditorInstance.facets$
             .pipe(map((facets) => facets[this.widget.definition.id]))
-            .subscribe((values) => this.facetValuesSubject.next(values));
+            .subscribe((facetAggregation) => this.facetAggregationSubject.next(facetAggregation));
     }
 
     private registerFormControls(): void {
         // (Re-)create `formArray` on changed facet values.
-        this.facetValuesSubject.subscribe((facetValues) => {
+        this.facetAggregationSubject.subscribe((facetValues) => {
             if (facetValues) {
-                this.formArray = this.generateFormArray(facetValues);
+                this.formArray = this.generateFormArray(facetValues.values);
             } else {
                 this.formArray = null;
             }
         });
     }
 
-    private generateFormArray(facetValues: MdsWidgetFacetValue[]): FormArray {
+    private generateFormArray(facetValues: FacetValue[]): FormArray {
         const formArray = new FormArray(
-            facetValues.map((value) => new FormControl(this.values.includes(value.id))),
+            facetValues.map((value) => new FormControl(this.values.includes(value.value))),
         );
         // Propagate user interaction to instance service.
         formArray.valueChanges
             .pipe(filter((value) => value !== null))
             .subscribe((checkboxStates: boolean[]) => {
-                this.values = this.facetValuesSubject.value
+                this.values = this.facetAggregationSubject.value.values
                     .filter((_, index) => checkboxStates[index] === true)
-                    .map((value) => value.id);
+                    .map(({ value }) => value);
                 this.setValue(this.values);
             });
         return formArray;
