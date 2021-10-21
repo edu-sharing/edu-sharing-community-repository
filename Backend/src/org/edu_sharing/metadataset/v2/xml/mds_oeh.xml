@@ -346,7 +346,7 @@
 			<id>search_input</id>
 			<rel>suggestions</rel>
 			<html><![CDATA[
-			  <<ccm:objecttype>
+			  <ccm:objecttype>
 			  <ccm:taxonid>
 			  <ccm:educationalcontext>
 		  	  <ccm:educationalintendedenduserrole>
