@@ -1,12 +1,14 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "edusharing_rendering_service.name" . }}
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  podManagementPolicy: Parallel
   selector:
     matchLabels: {{ include "edusharing_rendering_service.labels.instance" . | nindent 6 }}
+  serviceName: {{ include "edusharing_rendering_service.name" . }}-headless
   template:
     metadata:
       labels: {{ include "edusharing_rendering_service.labels" . | nindent 8 }}
