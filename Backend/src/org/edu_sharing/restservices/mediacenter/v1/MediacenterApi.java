@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.mediacenter.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -202,7 +203,7 @@ public class MediacenterApi {
 		    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
 		    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 		    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-		    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", schema = @Schema(defaultValue="-all-") ) @QueryParam("propertyFilter") List<String> propertyFilter,
+		    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Parameter(description = "authorityName of the mediacenter that licenses nodes",required=true) @PathParam("mediacenter") String mediacenter,
 			@Parameter(description = "searchword of licensed nodes",required=true) @QueryParam("searchword") String searchword,
 			@Parameter(description = "search parameters", required = true) SearchParameters parameters,

@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -1202,7 +1203,7 @@ public class AdminApi {
 			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0") ) @QueryParam("skipCount") Integer skipCount,
 			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", schema = @Schema(defaultValue="-all-") ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Parameter(description = "store, workspace or archive") @QueryParam("store") LuceneStore store,
 			@Parameter(description = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
 			@Context HttpServletRequest req) {

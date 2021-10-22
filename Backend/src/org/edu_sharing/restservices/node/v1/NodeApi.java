@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.node.v1;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -291,7 +292,7 @@ public class NodeApi  {
     public Response getMetadata(
     	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
     	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", schema = @Schema(defaultValue="-all-") ) @QueryParam("propertyFilter") List<String> propertyFilter,
+    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -769,7 +770,7 @@ public class NodeApi  {
 	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 	    @Parameter(description = "Filter for a specific association. May be empty", required = false, schema = @Schema(defaultValue="")) @QueryParam("assocName") String assocName,
-	    @Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, schema = @Schema(defaultValue="-all-") ) @QueryParam("propertyFilter") List<String> propertyFilter,
+	    @Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -865,7 +866,7 @@ public class NodeApi  {
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Parameter(description = "Either where the given node should be the \"SOURCE\" or the \"TARGET\"",required = true) @QueryParam("direction") AssocInfo.Direction direction,
 			@Parameter(description = "Association name (e.g. ccm:forkio).") @QueryParam("assocName") String assocName,
-			@Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, schema = @Schema(defaultValue="-all-") ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1647,7 +1648,7 @@ public class NodeApi  {
     	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Parameter(description = "major version",required=true ) @PathParam("major") int major,
     	@Parameter(description = "minor version",required=true ) @PathParam("minor") int minor,
-    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", schema = @Schema(defaultValue="-all-") ) @QueryParam("propertyFilter") List<String> propertyFilter,
+    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1751,7 +1752,7 @@ public class NodeApi  {
 	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
 	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-	    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", schema = @Schema(defaultValue="-all-") ) @QueryParam("propertyFilter") List<String> propertyFilter,
+	    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 		    
     	try {
