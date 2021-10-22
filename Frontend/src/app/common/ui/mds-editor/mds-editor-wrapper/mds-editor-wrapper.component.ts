@@ -1,14 +1,6 @@
-import {
-    Component,
-    EventEmitter,
-    Input,
-    OnChanges,
-    OnInit,
-    Output,
-    SimpleChanges,
-    ViewChild,
-} from '@angular/core';
-import { first } from 'rxjs/operators';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { SearchService } from 'edu-sharing-api';
+import { first, map, switchMap } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
@@ -17,7 +9,7 @@ import {
     EditorMode,
     EditorType,
     MdsWidget,
-    FacetValues,
+    MdsWidgetValue,
     UserPresentableError,
     Values,
 } from '../types';
@@ -36,7 +28,7 @@ import {
     styleUrls: ['./mds-editor-wrapper.component.scss'],
     providers: [MdsEditorInstanceService],
 })
-export class MdsEditorWrapperComponent implements OnInit, OnChanges {
+export class MdsEditorWrapperComponent implements OnInit {
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.
 
     // Properties compatible to legacy MdsComponent.
@@ -61,7 +53,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() editorMode: EditorMode;
     @Input() setId: string;
-    @Input() facets: FacetValues;
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
@@ -75,7 +66,14 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     isLoading = true;
     editorType: EditorType;
 
-    constructor(public mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
+    legacySuggestions: { [property: string]: MdsWidgetValue[] };
+    legacySuggestionsRegistered = false;
+
+    constructor(
+        public mdsEditorInstance: MdsEditorInstanceService,
+        private toast: Toast,
+        private search: SearchService,
+    ) {}
 
     ngOnInit(): void {
         // For compatibility reasons, we wait for `loadMds()` to be called before initializing when
@@ -85,12 +83,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         // to `loadMds()`.
         if (this.nodes || this.currentValues) {
             this.init();
-        }
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if ('facets' in changes) {
-            this.mdsEditorInstance.facets$.next(changes.facets.currentValue);
         }
     }
 
@@ -239,11 +231,38 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                 );
                 this.editorType = 'legacy';
             }
+            if (this.editorType === 'legacy' && !this.legacySuggestionsRegistered) {
+                this.registerLegacySuggestions();
+                this.legacySuggestionsRegistered = true;
+            }
         } catch (error) {
             this.handleError(error);
         } finally {
             this.isLoading = false;
         }
+    }
+
+    private registerLegacySuggestions(): void {
+        this.mdsEditorInstance.facets$
+            .pipe(
+                map((facets) => {
+                    if (facets) {
+                        return Object.entries(facets).reduce(
+                            (acc, [property, facetAggregation]) => {
+                                acc[property] = facetAggregation.values.map(({ value, label }) => ({
+                                    id: value,
+                                    caption: label,
+                                }));
+                                return acc;
+                            },
+                            {} as { [property: string]: MdsWidgetValue[] },
+                        );
+                    } else {
+                        return null;
+                    }
+                }),
+            )
+            .subscribe((facets) => (this.legacySuggestions = facets));
     }
 
     private handleError(error: any): void {

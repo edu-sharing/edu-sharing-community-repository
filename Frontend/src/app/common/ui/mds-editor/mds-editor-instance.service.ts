@@ -1,6 +1,11 @@
 import { Directive, EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { FacetsDict, MdsService, MdsViewRelation } from 'edu-sharing-api';
+import {
+    FacetsDict,
+    MdsService,
+    MdsViewRelation,
+    SearchService as SearchApiService,
+} from 'edu-sharing-api';
 import {
     BehaviorSubject,
     combineLatest,
@@ -30,7 +35,6 @@ import {
     EditorBulkMode,
     EditorMode,
     EditorType,
-    FacetValues,
     InputStatus,
     MdsDefinition,
     MdsGroup,
@@ -45,6 +49,7 @@ import {
 } from './types';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import * as rxjs from 'rxjs';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -540,7 +545,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      */
     mdsInflated = new ReplaySubject<boolean>(1);
     mdsInflatedValue: boolean;
-    facets$ = new BehaviorSubject<FacetValues>(null);
+    facets$ = new BehaviorSubject<FacetsDict>(null);
     suggestionsSubject = new BehaviorSubject<FacetsDict>(null);
     /** Views that have at least one widget, that is not hidden due to dynamic conditions. */
     activeViews = new ReplaySubject<MdsView[]>(1);
@@ -575,6 +580,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     private canSave$ = new BehaviorSubject(false);
     private lastScrolledIntoViewIndex: number = null;
     private isDestroyed = false;
+    private destroyed$ = new Subject<void>();
 
     private readonly initMdsTrigger = new Subject<{
         groupId: string;
@@ -612,6 +618,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private restMdsService: RestMdsService,
         private restConnector: RestConnectorService,
         private searchService: SearchService,
+        private searchApi: SearchApiService,
     ) {
         this.registerInitMds();
         this.register_new_valuesChange();
@@ -738,10 +745,28 @@ export class MdsEditorInstanceService implements OnDestroy {
             ),
             shareReplay(1),
         );
+        this.mdsInitDone
+            .pipe(
+                takeUntil(this.destroyed$),
+                switchMap(() => {
+                    // The group 'search_input' uses its own widgets which do not rely on regular
+                    // facets, although setting `relation: 'suggestions'`.
+                    if (this.groupId === 'search_input') {
+                        return EMPTY;
+                    } else {
+                        return rxjs.of(void 0);
+                    }
+                }),
+                map(() => this.getNeededFacetsInstant()),
+                switchMap((neededFacets) => this.searchApi.getFacets(neededFacets)),
+            )
+            .subscribe((facets) => this.facets$.next(facets));
     }
 
     ngOnDestroy() {
         this.isDestroyed = true;
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
     /**
@@ -1356,11 +1381,17 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Returns a list of properties for which the MDS editor requires facet values.
      *
      * The observable continues to emit updates as long as the mds editor is alive.
+     *
+     * Needed facets are now registered with the search api automatically. Usually, you *do not*
+     * need to use this.
      */
     getNeededFacets(): Observable<string[]> {
         return this.mdsInitDone.pipe(map(() => this.getNeededFacetsInstant()));
     }
 
+    // TODO: The facet subscriptions could be registered by the widgets themselves, but since the
+    // widget components might not be initialized in time, we would need a layer of widget-specific
+    // services that handle these things.
     private getNeededFacetsInstant(): string[] {
         const facets = this.widgets.value
             .filter((widget) => this.needsFacets(widget))

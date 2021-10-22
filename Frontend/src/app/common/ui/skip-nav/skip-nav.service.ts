@@ -4,8 +4,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 // Define as object, so we can derive the type `SkipTarget` and the values `skipTargets` from the
 // same source.
 const skipTargets_ = {
-    'main-content': {},
-}
+    'MAIN_CONTENT': {},
+};
 
 export type SkipTarget = keyof typeof skipTargets_;
 const skipTargets: SkipTarget[] = Object.keys(skipTargets_) as SkipTarget[];
@@ -26,9 +26,7 @@ export class SkipNavService {
 
     register(target: SkipTarget, element: HTMLElement): void {
         if (this.elements[target]) {
-            throw new Error(
-                `Tried to register skip target ${target}, but was already registered.`,
-            );
+            throw new Error(`Tried to register skip target ${target}, but was already registered.`);
         }
         if (!element.hasAttribute('tabindex')) {
             element.addEventListener('blur', (event) =>
@@ -65,6 +63,6 @@ export class SkipNavService {
                 availableTargets.push(target);
             }
         }
-        this.availableTargetsSubject.next(availableTargets);
+        Promise.resolve().then(() => this.availableTargetsSubject.next(availableTargets));
     }
 }

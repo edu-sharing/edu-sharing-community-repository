@@ -38,3 +38,10 @@ mat-checkbox {
         font-weight: bold;
     }
 }
+
+.load-more-button {
+    .spinner {
+        margin-left: 10px;
+        transform: scale(0.8);
+    }
+}

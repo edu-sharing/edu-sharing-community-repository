@@ -62,10 +62,10 @@ import {Translation} from '../../core-ui-module/translation';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SearchService} from './search.service';
 import {WindowRefService} from './window-ref.service';
-import {MdsDefinition, FacetValues, Values} from '../../common/ui/mds-editor/types';
+import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
-import {BehaviorSubject, ReplaySubject, combineLatest} from 'rxjs';
+import {BehaviorSubject, ReplaySubject, combineLatest, Observable} from 'rxjs';
 import {delay, distinctUntilChanged, first, map, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
@@ -77,7 +77,7 @@ import {
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
-import { MdsService, MetadataSetInfo } from 'edu-sharing-api';
+import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'edu-sharing-api';
 
 @Component({
     selector: 'app-search',
@@ -107,7 +107,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     breakpoint: number = 800;
     initalized: boolean;
     tutorialElement: ElementRef;
-    mdsFacets: FacetValues = {};
     mdsExtended = false;
     private collectionsMoreSubject = new BehaviorSubject(false);
     set collectionsMore(value: boolean) {
@@ -142,7 +141,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     set mdsId(mdsId: string) {
         this._mdsId = mdsId;
-        this.searchField.setMetadataSet(mdsId);
+        this.searchService.setMetadataSet(mdsId);
     }
     extendedRepositorySelected = false;
     savedSearch: Node[] = [];
@@ -209,6 +208,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private network: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
         private searchField: SearchFieldService,
+        private searchApi: SearchApiService,
     ) {}
 
     ngOnInit() {
@@ -692,57 +692,25 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.searchService.complete = true;
             return;
         }
-        if (init) {
-            this.searchService.facettes = data.facettes;
-            this.mdsFacets = this.getMdsFacets(data.facettes);
-            if (this.searchService.facettes && this.searchService.facettes[0]) {
-                if (
-                    this.searchService.autocompleteData.keyword &&
-                    this.searchService.facettes[0].values
-                ) {
-                    for (
-                        let i = 0;
-                        i < this.searchService.autocompleteData.keyword.length;
-                        i++
-                    ) {
-                        let index = Helper.indexOfObjectArray(
-                            this.searchService.facettes[0].values,
-                            'value',
-                            this.searchService.autocompleteData.keyword[i]
-                                .title,
-                        );
-                        if (index > -1)
-                            this.searchService.facettes[0].values.splice(
-                                index,
-                                1,
-                            );
-                    }
-                }
-                this.searchService.facettes[0].values = this.searchService.facettes[0].values.slice(
-                    0,
-                    20,
-                );
-            }
-        }
     }
 
-    private getMdsFacets(facets: Facette[]): FacetValues {
-        // TODO: consider doing this in an MDS service.
-        const result: FacetValues = {};
-        for (const facet of facets ?? []) {
-            result[facet.property] = [];
-            const widget = MdsHelper.getWidget(facet.property, null, this.currentMdsSet?.widgets);
-            for (let value of facet.values) {
-                const cap = widget?.values?.find((v: any) => v.id === value.value);
-                result[facet.property].push({
-                    id: value.value,
-                    caption: cap ? cap.caption : value.value,
-                    count: value.count,
-                });
-            }
-        }
-        return result;
-    }
+    // private getMdsFacets(facets: Facette[]): FacetValues {
+    //     // TODO: consider doing this in an MDS service.
+    //     const result: FacetValues = {};
+    //     for (const facet of facets ?? []) {
+    //         result[facet.property] = [];
+    //         const widget = MdsHelper.getWidget(facet.property, null, this.currentMdsSet?.widgets);
+    //         for (let value of facet.values) {
+    //             const cap = widget?.values?.find((v: any) => v.id === value.value);
+    //             result[facet.property].push({
+    //                 id: value.value,
+    //                 caption: cap ? cap.caption : value.value,
+    //                 count: value.count,
+    //             });
+    //         }
+    //     }
+    //     return result;
+    // }
 
     updateMds() {
         this.currentValues = null;
@@ -1138,18 +1106,24 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if(this.applyMode){
             permissions = [RestConstants.ACCESS_CC_PUBLISH];
         }
-        let queryRequest = this.mdsDesktopRef.mdsEditorInstance
-            .getNeededFacets()
+        let queryRequest: Observable<SearchResults | NodeList> = this.mdsDesktopRef.mdsEditorInstance
+            // Wait for the mds editor to register its needed facets with the search api.
+            .mdsInitDone
             .pipe(
                 first(),
-                switchMap((facettes) =>
-                    this.search.searchWithBody(
-                        { criterias, facettes, permissions },
-                        request,
-                        RestConstants.CONTENT_TYPE_FILES,
-                        repo ? repo.id : RestConstants.HOME_REPOSITORY,
-                        mdsId,
-                    ),
+                switchMap(() =>
+                    this.searchApi.search({
+                        body: { criterias, facettes: [], permissions, facetLimit: 5, facetMinCount: 1 },
+                        skipCount: request.offset,
+                        maxItems: request.count ?? this.search.getRestConnector().numberPerRequest,
+                        sortProperties: request.sortBy,
+                        sortAscending: request.sortAscending,
+                        propertyFilter: request.propertyFilter[0],
+                        contentType: 'FILES',
+                        repository: repo ? repo.id : RestConstants.HOME_REPOSITORY,
+                        metadataset: mdsId,
+                        query: RestConstants.DEFAULT_QUERY_NAME,
+                    })
                 ),
             );
             const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed &&
@@ -1617,7 +1591,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
             this.currentRepository = this.currentRepositoryObject.id;
         }
-        this.searchField.setRepository(this.currentRepository);
+        this.searchService.setRepository(this.currentRepository);
     }
 
     private getEnabledRepositories() {

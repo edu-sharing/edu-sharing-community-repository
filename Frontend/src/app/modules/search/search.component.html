@@ -109,7 +109,6 @@
             [setId]="mdsId"
             [embedded]="true"
             [currentValues]="currentValues"
-            [facets]="mdsFacets"
             [mode]="'search'"
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
@@ -154,7 +153,6 @@
             [setId]="mdsId"
             [embedded]="true"
             [currentValues]="currentValues"
-            [facets]="mdsFacets"
             [mode]="'search'"
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
@@ -244,7 +242,7 @@
     <div class="content-with-footer">
         <div
             role="main"
-            appSkipTarget="main-content"
+            appSkipTarget="MAIN_CONTENT"
             class="content_wrapper"
             [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
             [class.contentSidenav]="searchService.sidenavOpened"
