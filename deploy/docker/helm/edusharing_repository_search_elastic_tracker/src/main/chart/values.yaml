@@ -24,6 +24,11 @@ nameOverride: edusharing-repository-search-elastic-tracker
 
 ########################################################################################################################
 
+service:
+
+  port:
+    mgmt: 8081
+
 config:
 
   jvm:
