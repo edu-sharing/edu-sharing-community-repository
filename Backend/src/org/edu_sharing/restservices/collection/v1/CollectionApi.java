@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.collection.v1;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,7 +49,7 @@ public class CollectionApi {
 	private static Logger logger = Logger.getLogger(CollectionApi.class);
 
 	@GET
-	@Path("/collections/{repository}/{collection}")
+	@Path("/collections/{repository}/{collectionId}")
 
 	@Operation(summary = "Get a collection.", description = "Get a collection.")
 
@@ -63,7 +64,7 @@ public class CollectionApi {
 
 	public Response getCollection(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collectionId") String collectionId,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -140,7 +141,7 @@ public class CollectionApi {
 	})
 	public Response setPinnedCollections(
 			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "List of collections that should be pinned", required = true, schema = @Schema(defaultValue="-home-")) String[] collections
+			@Parameter(description = "List of collections that should be pinned", required = true, array = @ArraySchema( schema = @Schema(defaultValue="-home-"))) String[] collections
 	) {
 		try {
 
@@ -220,7 +221,8 @@ public class CollectionApi {
 	})
 	public Response updateCollection(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "collection", required = true) Node node,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collection,
+			@Parameter(description = "collection node", required = true) Node node,
 			@Context HttpServletRequest req) {
 
 		try {
