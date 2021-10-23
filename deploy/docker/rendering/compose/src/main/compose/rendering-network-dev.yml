@@ -6,4 +6,4 @@ services:
 
   rendering-database:
     ports:
-      - "127.0.0.1:${RENDERING_DATABASE_PORT_SQL:-9000}:3306"
+      - "127.0.0.1:${RENDERING_DATABASE_PORT_SQL:-9000}:5432"

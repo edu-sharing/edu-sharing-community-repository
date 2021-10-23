@@ -6,7 +6,7 @@ Prerequisites
 
 - Apache2 Webserver
 - PHP Framework 7.1+
-- MySQL Community Server / MariaDB Server
+- MySQL Community Server / MariaDB Server / PostgreSQL Server
 - Apache Maven 3.6.3+
 
 Download

@@ -11,11 +11,11 @@ kubeVersion: ">= 1.16.0"
 
 dependencies:
 
-  - name: edusharing_mariadb
+  - name: edusharing_postgresql
     version: ${helm.chart.version}
-    repository: "file://../../../edusharing_mariadb/target/chart"
-    alias: edusharing_rendering_mariadb
-    condition: edusharing_rendering_mariadb.enabled
+    repository: "file://../../../edusharing_postgresql/target/chart"
+    alias: edusharing_rendering_postgresql
+    condition: edusharing_rendering_postgresql.enabled
 
   - name: edusharing_rediscluster
     version: ${helm.chart.version}

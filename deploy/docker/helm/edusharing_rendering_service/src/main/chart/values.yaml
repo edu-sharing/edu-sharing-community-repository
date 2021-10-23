@@ -98,9 +98,9 @@ config:
     schedule: "*/10 * * * *"
 
   database:
-    driver: mysql
-    host: edusharing-rendering-mariadb
-    port: 3306
+    driver: pgsql
+    host: edusharing-rendering-postgresql
+    port: 5432
     database: rendering
     username: rendering
     password: rendering

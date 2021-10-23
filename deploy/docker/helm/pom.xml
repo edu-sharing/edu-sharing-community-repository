@@ -30,7 +30,7 @@
     <!--suppress UnresolvedMavenProperty -->
     <helm.password>${env.HELM_PASSWORD}</helm.password>
 
-    <helm.version>3.4.1</helm.version>
+    <helm.version>3.7.1</helm.version>
     
   </properties>
 
@@ -158,7 +158,6 @@
 
 <modules>  <module>edusharing</module>
     <module>edusharing_elasticsearch</module>
-    <module>edusharing_mariadb</module>
     <module>edusharing_postgresql</module>
     <module>edusharing_rediscluster</module>
     <module>edusharing_rendering</module>

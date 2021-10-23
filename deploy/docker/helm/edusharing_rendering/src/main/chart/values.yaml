@@ -12,21 +12,21 @@ nameOverride: edusharing-rendering
 # DEPENDENCY
 ########################################################################################################################
 
-edusharing_rendering_mariadb:
+edusharing_rendering_postgresql:
 
   enabled: true
 
-  nameOverride: &mariadbNameOverride edusharing-rendering-mariadb
+  nameOverride: &postgresqlNameOverride edusharing-rendering-postgresql
 
   service:
     port:
-      api: &mariadbServicePortApi 3306
+      api: &postgresqlServicePortApi 5432
 
   config:
 
-    database: &mariadbConfigDatabase rendering
-    username: &mariadbConfigUsername rendering
-    password: &mariadbConfigPassword rendering
+    database: &postgresqlConfigDatabase rendering
+    username: &postgresqlConfigUsername rendering
+    password: &postgresqlConfigPassword rendering
 
 ########################################################################################################################
 
@@ -53,10 +53,10 @@ edusharing_rendering_service:
       port: *redisclusterServicePortApi
 
     database:
-      host: *mariadbNameOverride
-      port: *mariadbServicePortApi
-      database: *mariadbConfigDatabase
-      username: *mariadbConfigUsername
-      password: *mariadbConfigPassword
+      host: *postgresqlNameOverride
+      port: *postgresqlServicePortApi
+      database: *postgresqlConfigDatabase
+      username: *postgresqlConfigUsername
+      password: *postgresqlConfigPassword
 
 ########################################################################################################################

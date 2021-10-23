@@ -21,11 +21,11 @@ rendering_cache_prot="${RENDERING_CACHE_PROT:-tcp://}"
 rendering_cache_opts="${RENDERING_CACHE_OPTS:-}"
 rendering_cache_type="${RENDERING_CACHE_TYPE:-redis}"
 
-rendering_database_driv="${RENDERING_DATABASE_DRIV:-"mysql"}"
+rendering_database_driv="${RENDERING_DATABASE_DRIV:-"pgsql"}"
 rendering_database_host="${RENDERING_DATABASE_HOST:-rendering-database}"
 rendering_database_name="${RENDERING_DATABASE_NAME:-rendering}"
 rendering_database_pass="${RENDERING_DATABASE_PASS:-rendering}"
-rendering_database_port="${RENDERING_DATABASE_PORT:-3306}"
+rendering_database_port="${RENDERING_DATABASE_PORT:-5432}"
 rendering_database_user="${RENDERING_DATABASE_USER:-rendering}"
 
 repository_service_host="${REPOSITORY_SERVICE_HOST:-repository-service}"

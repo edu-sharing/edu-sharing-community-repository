@@ -41,8 +41,6 @@
 <modules>  <module>apache_exporter</module>
     <module>elasticsearch</module>
     <module>elasticsearch_exporter</module>
-    <module>mariadb</module>
-    <module>mariadb_exporter</module>
     <module>minideb</module>
     <module>postgresql</module>
     <module>postgresql_exporter</module>

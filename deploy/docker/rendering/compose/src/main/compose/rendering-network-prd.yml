@@ -6,4 +6,4 @@ services:
 
   rendering-database:
     expose:
-      - "3306"
+      - "5432"
