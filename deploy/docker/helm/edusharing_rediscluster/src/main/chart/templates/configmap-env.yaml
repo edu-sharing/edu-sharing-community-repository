@@ -7,4 +7,7 @@ data:
   ALLOW_EMPTY_PASSWORD: "yes"
   REDIS_ALLOW_REMOTE_CONNECTIONS: "{{ if .Values.global.cluster.istio.enabled }}no{{ else }}yes{{ end }}"
   REDIS_CLUSTER_DYNAMIC_IPS: "no"
+  REDIS_CLUSTER_INIT: {{ .Release.IsInstall | quote }}
+  REDIS_CLUSTER_REPLICAS: {{ .Values.config.cluster.replicas | quote }}
+  REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP: {{ .Values.config.cluster.wait | quote }}
   REDIS_NODES: '{{ range $i := until (include "edusharing_rediscluster.replicas" . | int) }}{{ include "edusharing_rediscluster.name" $ }}-{{ $i }}.{{ include "edusharing_rediscluster.name" $ }}-headless {{ end }}'
