@@ -58,22 +58,6 @@ build() {
 		exit
 	}
 
-	echo "Checking version ..."
-
-	pushd "${BUILD_PATH}" >/dev/null || exit
-	EXPECTED_VERSION=$($MVN_EXEC -q -ff -nsu -N help:evaluate -Dexpression=community.rendering.version -DforceStdout)
-	popd >/dev/null || exit
-
-	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	PROJECT_VERSION=$($MVN_EXEC -q -ff -nsu -N help:evaluate -Dexpression=project.version -DforceStdout)
-	echo "- rendering          [ ${PROJECT_VERSION} ]"
-	popd >/dev/null || exit
-
-	[[ "${EXPECTED_VERSION}" != "${PROJECT_VERSION}" ]] && {
-		echo "Error: expected version [ ${EXPECTED_VERSION} ] is different."
-		exit
-	}
-
 	echo "Building ..."
 
 	echo "- rendering"
