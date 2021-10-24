@@ -4,9 +4,6 @@ metadata:
   name: {{ include "edusharing_rendering_service.name" . }}-init
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
     app.kubernetes.io/component: init
-  annotations:
-    helm.sh/hook: post-install
-    helm.sh/hook-delete-policy: hook-succeeded
 spec:
   completions: 1
   parallelism: 1
