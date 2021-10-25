@@ -138,7 +138,7 @@
   <repositories>
 
     <repository>
-      <id>public.releases</id>
+      <id>edu-sharing.public.releases</id>
       <url>https://artifacts.edu-sharing.com/repository/public-releases/</url>
       <snapshots>
         <enabled>false</enabled>
@@ -146,7 +146,7 @@
     </repository>
 
     <repository>
-      <id>public.snapshots</id>
+      <id>edu-sharing.public.snapshots</id>
       <url>https://artifacts.edu-sharing.com/repository/public-snapshots/</url>
       <releases>
         <enabled>false</enabled>
@@ -157,7 +157,7 @@
     </repository>
 
     <repository>
-      <id>plugin.remote.releases</id>
+      <id>edu-sharing.plugin.remote.releases</id>
       <url>https://artifacts.edu-sharing.com/repository/plugin-remote-releases/</url>
       <snapshots>
         <enabled>false</enabled>
@@ -165,7 +165,7 @@
     </repository>
 
     <repository>
-      <id>plugin.remote.snapshots</id>
+      <id>edu-sharing.plugin.remote.snapshots</id>
       <url>https://artifacts.edu-sharing.com/repository/plugin-remote-snapshots/</url>
       <releases>
         <enabled>false</enabled>
@@ -180,12 +180,12 @@
   <distributionManagement>
 
     <repository>
-      <id>deploy.releases</id>
+      <id>maven.deploy.releases</id>
       <url>${maven.deploy.releases}</url>
     </repository>
 
     <snapshotRepository>
-      <id>deploy.snapshots</id>
+      <id>maven.deploy.snapshots</id>
       <url>${maven.deploy.snapshots}</url>
     </snapshotRepository>
 
