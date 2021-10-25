@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MetadataWidget extends MetadataTranslatable{
 
@@ -321,5 +322,14 @@ public class MetadataWidget extends MetadataTranslatable{
 		}
 		return map;
 	}
-
+	public Map<MetadataKey.MetadataKeyRelated, MetadataKey> getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation relation) {
+		Map<MetadataKey.MetadataKeyRelated, MetadataKey> map=new HashMap<>();
+		for(MetadataKey value : values){
+			List<MetadataKey.MetadataKeyRelated> related = value.getRelated().stream().filter((r) -> r.getRelation().equals(relation)).collect(Collectors.toList());
+			related.forEach((r) -> {
+				map.put(r, value);
+			});
+		}
+		return map;
+	}
 }

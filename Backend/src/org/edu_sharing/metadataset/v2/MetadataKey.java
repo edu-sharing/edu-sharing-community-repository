@@ -1,14 +1,32 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MetadataKey extends MetadataTranslatable {
-	
+	public static class MetadataKeyRelated extends MetadataKey {
+		public enum Relation {
+			exactMatch,
+			narrowMatch,
+			relatedMatch
+		};
+		private Relation relation;
+
+		public MetadataKeyRelated(Relation relation) {
+			this.relation = relation;
+		}
+
+		public Relation getRelation() {
+			return relation;
+		}
+	}
 	private String key,caption,description,parent,locale;
 	/**
 	 * List of other keys this child is a precedor of
 	 */
 	private List<String> preceds;
+
+	private final List<MetadataKeyRelated> related = new ArrayList<>();
 
 	public String getParent() {
 		return parent;
@@ -19,6 +37,14 @@ public class MetadataKey extends MetadataTranslatable {
 			this.parent=null;
 		else
 			this.parent = parent;
+	}
+
+	public void addRelated(MetadataKeyRelated related) {
+		this.related.add(related);
+	}
+
+	public List<MetadataKeyRelated> getRelated() {
+		return related;
 	}
 
 	public String getKey() {
