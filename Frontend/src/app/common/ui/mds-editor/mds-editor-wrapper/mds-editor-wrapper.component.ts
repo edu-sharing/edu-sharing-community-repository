@@ -79,6 +79,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     legacySuggestionsRegistered = false;
 
     private destroyed$ = new Subject<void>();
+    private values: Values;
 
     constructor(
         public mdsEditorInstance: MdsEditorInstanceService,
@@ -95,6 +96,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         if (this.nodes || this.currentValues) {
             this.init();
         }
+        this.mdsEditorInstance.values.subscribe((values) => this.values = values);
     }
 
     ngOnDestroy(): void {
@@ -170,24 +172,43 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         // In case of `SearchComponent`, `currentValues` is not ready when `loadMds` is called. So
         // we wait tick before initializing.
         setTimeout(() => {
-            this.init().then(() => {
-                switch (this.editorType) {
-                    case 'legacy':
-                        // Wait for mdsRef
-                        setTimeout(() => {
-                            return this.mdsRef.loadMds();
-                        });
-                        return;
-                    case 'angular':
-                        if (onlyLegacy) {
-                            return;
-                        }
-                        this.mdsEditorInstance.mdsDefinition$
-                            .pipe(first((definition) => definition !== null))
-                            .subscribe((definition) => this.onMdsLoaded.emit(definition));
-                }
-            });
+            // Re-inits the MDS if needed, otherwise pretends to do so.
+            if (
+                this.editorType === 'angular' &&
+                this.groupId === this.mdsEditorInstance.groupId &&
+                this.setId === this.mdsEditorInstance.mdsId &&
+                this.repository === this.mdsEditorInstance.repository &&
+                this.valuesDictIsEquivalent(
+                    this.currentValues,
+                    this.values,
+                )
+            ) {
+                // Don't need to re-init
+                this.loadMdsAfterInit(onlyLegacy);
+            } else {
+                this.init().then(() => {
+                    this.loadMdsAfterInit(onlyLegacy);
+                });
+            }
         });
+    }
+
+    private loadMdsAfterInit(onlyLegacy: boolean): void {
+        switch (this.editorType) {
+            case 'legacy':
+                // Wait for mdsRef
+                setTimeout(() => {
+                    return this.mdsRef.loadMds();
+                });
+                return;
+            case 'angular':
+                if (onlyLegacy) {
+                    return;
+                }
+                this.mdsEditorInstance.mdsDefinition$
+                    .pipe(first((definition) => definition !== null))
+                    .subscribe((definition) => this.onMdsLoaded.emit(definition));
+        }
     }
 
     async onSave(): Promise<void> {
@@ -292,5 +313,24 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             this.toast.error(error);
         }
         this.onCancel.emit();
+    }
+
+    private valuesDictIsEquivalent(lhs: Values, rhs: Values): boolean {
+        if (!lhs || Object.keys(lhs).length === 0 || !rhs || Object.keys(rhs).length === 0) {
+            return (
+                (!lhs || Object.keys(lhs).length === 0) === (!rhs || Object.keys(rhs).length === 0)
+            );
+        }
+        const keys = Array.from(new Set([...Object.keys(lhs), ...Object.keys(rhs)]));
+        return keys.every((key) => this.valuesArrayIsEquivalent(lhs[key], rhs[key]));
+    }
+
+    private valuesArrayIsEquivalent(lhs: string[], rhs: string[]): boolean {
+        if (!lhs || lhs.length === 0 || !rhs || rhs.length === 0) {
+            return (!lhs || lhs.length === 0) === (!rhs || rhs.length === 0);
+        }
+        return (
+            lhs.every((value) => rhs.includes(value)) && rhs.every((value) => lhs.includes(value))
+        );
     }
 }

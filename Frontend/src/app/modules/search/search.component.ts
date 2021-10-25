@@ -78,6 +78,7 @@ import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapp
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
 import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'edu-sharing-api';
+import * as rxjs from 'rxjs';
 
 @Component({
     selector: 'app-search',
@@ -337,9 +338,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.sidenavOpened$
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.extendedSearchTabGroup?.realignInkBar());
-        this.searchField.filterValuesChange
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((filterValues) => this.applyParameters(filterValues));
     }
 
     ngAfterViewInit() {
@@ -1620,7 +1618,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private registerSearchOnMdsUpdate(): void {
-        this.mdsDesktopRef.mdsEditorInstance.values
+        rxjs.merge(this.searchField.filterValuesChange, this.mdsDesktopRef.mdsEditorInstance.values)
             .pipe(
                 takeUntil(this.destroyed$),
                 map((valuesDict) =>
