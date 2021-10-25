@@ -19,6 +19,9 @@ global:
         selector:
           app: istio-ingressgateway
 
+    pdb:
+      enabled: false
+
     storage:
       share:
         spec: {}
@@ -39,10 +42,10 @@ nameOverride: edusharing-repository-service
 
 ########################################################################################################################
 
-replicaCount: 3
+replicaCount: 1
 
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 3
   maxReplicas: 5
   targetCPU: 80
@@ -113,7 +116,6 @@ config:
       transportMode: "NIO"
 
   cluster:
-    enabled: false
     backupCount: 1
     readBackupData: true
 

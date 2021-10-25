@@ -9,6 +9,9 @@ global:
     istio:
       enabled: false
 
+    pdb:
+      enabled: false
+
     storage:
       data:
         spec: {}

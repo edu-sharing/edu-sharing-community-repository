@@ -4,7 +4,7 @@ metadata:
   name: {{ include "edusharing_repository_service.name" . }}
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
 spec:
-  replicas: {{ if .Values.config.cluster.enabled }}{{ .Values.replicaCount }}{{ else }}1{{ end }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels: {{ include "edusharing_repository_service.labels.instance" . | nindent 6 }}
   serviceName: {{ include "edusharing_repository_service.name" . }}-headless

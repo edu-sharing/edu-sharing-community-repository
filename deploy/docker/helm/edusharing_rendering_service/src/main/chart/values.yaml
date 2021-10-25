@@ -17,6 +17,9 @@ global:
         selector:
           app: istio-ingressgateway
 
+    pdb:
+      enabled: false
+
     storage:
       share:
         spec: {}
@@ -37,10 +40,10 @@ nameOverride: edusharing-rendering-service
 
 ########################################################################################################################
 
-replicaCount: 3
+replicaCount: 1
 
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 3
   maxReplicas: 5
   targetCPU: 80

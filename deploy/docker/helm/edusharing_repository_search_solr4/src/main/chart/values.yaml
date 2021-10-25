@@ -9,6 +9,9 @@ global:
     istio:
       enabled: false
 
+    pdb:
+      enabled: false
+
     storage:
       data:
         spec: {}
@@ -30,6 +33,12 @@ nameOverride: edusharing-repository-search-solr4
 ########################################################################################################################
 
 replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPU: 80
 
 ########################################################################################################################
 

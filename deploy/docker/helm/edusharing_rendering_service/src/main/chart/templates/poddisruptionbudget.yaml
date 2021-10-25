@@ -1,9 +1,11 @@
+{{- if .Values.global.cluster.pdb.enabled }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "edusharing_rendering_service.name" . }}
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
 spec:
-  minAvailable: 1
+  maxUnavailable: {{ if .Values.autoscaling.enabled }}1{{ else }}0{{ end }}
   selector:
     matchLabels: {{ include "edusharing_rendering_service.labels.instance" . | nindent 6 }}
+{{- end }}

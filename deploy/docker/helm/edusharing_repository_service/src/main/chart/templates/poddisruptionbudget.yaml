@@ -1,13 +1,11 @@
+{{- if .Values.global.cluster.pdb.enabled }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "edusharing_repository_service.name" . }}
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
 spec:
-{{- if .Values.config.cluster.enabled }}
-  maxUnavailable: {{ .Values.config.cluster.backupCount }}
-{{- else }}
-  minAvailable: 1
-{{- end }}
+  maxUnavailable: {{ if .Values.autoscaling.enabled }}1{{ else }}0{{ end }}
   selector:
     matchLabels: {{ include "edusharing_repository_service.labels.instance" . | nindent 6 }}
+{{- end }}

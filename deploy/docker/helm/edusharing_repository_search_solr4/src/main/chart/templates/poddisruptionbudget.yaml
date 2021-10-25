@@ -1,0 +1,11 @@
+{{- if .Values.global.cluster.pdb.enabled }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "edusharing_repository_search_solr4.name" . }}
+  labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: {{ if .Values.autoscaling.enabled }}1{{ else }}0{{ end }}
+  selector:
+    matchLabels: {{ include "edusharing_repository_search_solr4.labels.instance" . | nindent 6 }}
+{{- end }}
