@@ -1,7 +1,7 @@
 import { PlatformLocation } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router, UrlSerializer } from '@angular/router';
+import {ActivatedRoute, Params, Router, UrlSerializer} from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {ConfigurationService, DialogButton, RestConnectorService, RestHelper, SessionStorageService, UIService} from '../../core-module/core.module';
 import { UIConstants } from '../../core-module/ui/ui-constants';
@@ -12,7 +12,6 @@ import { RegisterDoneComponent } from './register-done/register-done.component';
 import { RegisterFormComponent } from './register-form/register-form.component';
 import { RegisterRequestComponent } from './register-request/register-request.component';
 import { RegisterResetPasswordComponent } from './register-reset-password/register-reset-password.component';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
     selector: 'app-register',
@@ -21,7 +20,6 @@ import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegisterComponent {
-    readonly SkipTarget = SkipTarget;
     @ViewChild('registerForm') registerForm: RegisterFormComponent;
     @ViewChild('registerDone') registerDone: RegisterDoneComponent;
     @ViewChild('request') request: RegisterRequestComponent;
@@ -29,6 +27,7 @@ export class RegisterComponent {
     public isLoading = true;
     state: 'register' | 'request' | 'reset-password' | 'done' | 'done-reset' = 'register';
     buttons: DialogButton[];
+    private params: Params;
 
     public cancel() {
         RestHelper.goToLogin(this.router, this.configService, null, null);
@@ -60,6 +59,7 @@ export class RegisterComponent {
     ) {
         this.updateButtons();
         this.route.params.subscribe((params) => {
+            this.params = params;
             if (params.status) {
                 if (params.status === 'done'
                     || params.status === 'done-reset'
@@ -77,7 +77,12 @@ export class RegisterComponent {
         Translation.initialize(this.translate, this.configService, this.storage, this.route).subscribe(() => {
             this.isLoading = false;
             this.changes.detectChanges();
-            if (!this.configService.instant('register.local', true)) {
+            if(['request', 'reset-password', 'done-reset'].indexOf(this.params.status) !== -1) {
+                if(this.configService.instant('register.local', true as boolean) === false &&
+                    this.configService.instant('register.recoverPassword', false) === false) {
+                    RestHelper.goToLogin(this.router, this.configService, null, null);
+                }
+            } else if (!this.configService.instant('register.local', true)) {
                 RestHelper.goToLogin(this.router, this.configService, null, null);
             }
             setTimeout(() => this.setParams());
@@ -168,5 +173,9 @@ export class RegisterComponent {
             btn.disabled = !this.registerDone || !this.registerDone.keyInput.trim();
         }
         return btn;
+    }
+
+    canRegister() {
+        return this.configService.instant('register.local', true);
     }
 }

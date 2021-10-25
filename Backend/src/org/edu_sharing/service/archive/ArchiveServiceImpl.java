@@ -83,6 +83,8 @@ public class ArchiveServiceImpl implements ArchiveService  {
 	public void purge(List<String> archivedNodeIds) {
 		for(String archivedNodeId : archivedNodeIds){
 			this.client.removeNode(MCAlfrescoAPIClient.archiveStoreRef.getProtocol(), MCAlfrescoAPIClient.archiveStoreRef.getIdentifier(), archivedNodeId);
+			// clear cache so that primary parent etc. gets newly resolved
+			new RepositoryCache().remove(archivedNodeId);
 		}
 	}
 	
@@ -216,7 +218,9 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		NodeRef restoredNode = nodeService.restoreNode(archivedNodeRef, 
 				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, destinationParentId),
 				QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), 
-				QName.createQName(assocName));	
+				QName.createQName(assocName));
+		// clear cache so that primary parent etc. gets newly resolved
+		new RepositoryCache().remove(restoredNode.getId());
 		
 		restoreResult.setNodeId(restoredNode.getId());
 		restoreResult.setParent(destinationParentId);

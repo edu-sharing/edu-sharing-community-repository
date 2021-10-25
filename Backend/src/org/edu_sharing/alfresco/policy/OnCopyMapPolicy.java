@@ -7,6 +7,7 @@ import org.alfresco.repo.copy.CopyBehaviourCallback;
 import org.alfresco.repo.copy.CopyDetails;
 import org.alfresco.repo.copy.CopyServicePolicies.OnCopyCompletePolicy;
 import org.alfresco.repo.copy.DefaultCopyBehaviourCallback;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -25,6 +26,8 @@ public class OnCopyMapPolicy implements OnCopyCompletePolicy{
 	Logger logger = Logger.getLogger(OnCopyMapPolicy.class);
 	
 	QName versionProp = QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+
+	BehaviourFilter policyBehaviourFilter;
 	
 	public void init(){
 		this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "onCopyComplete"),
@@ -33,15 +36,20 @@ public class OnCopyMapPolicy implements OnCopyCompletePolicy{
 	
 	@Override
 	public void onCopyComplete(QName classRef, NodeRef sourceNodeRef, NodeRef targetNodeRef, boolean copyToNewNode, Map<NodeRef, NodeRef> copyMap) {
-		nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
-		
-		//remove old permissionhistory, current entry will be added by edu-sharing NodeDao
-		if(nodeService.hasAspect(targetNodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
-			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
-			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED));
-			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION));
-			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED));
-			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+		try {
+			policyBehaviourFilter.disableBehaviour(targetNodeRef);
+			nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
+
+			//remove old permissionhistory, current entry will be added by edu-sharing NodeDao
+			if(nodeService.hasAspect(targetNodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
+				nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
+				nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED));
+				nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION));
+				nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED));
+				nodeService.removeProperty(targetNodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+			}
+		}finally {
+			policyBehaviourFilter.enableBehaviour(targetNodeRef);
 		}
 	}
 	
@@ -51,5 +59,9 @@ public class OnCopyMapPolicy implements OnCopyCompletePolicy{
 	
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
+	}
+
+	public void setPolicyBehaviourFilter(BehaviourFilter policyBehaviourFilter) {
+		this.policyBehaviourFilter = policyBehaviourFilter;
 	}
 }

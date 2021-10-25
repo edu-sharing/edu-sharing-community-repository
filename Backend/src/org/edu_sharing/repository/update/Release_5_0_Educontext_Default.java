@@ -13,6 +13,7 @@ import org.edu_sharing.service.nodeservice.RecurseMode;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class Release_5_0_Educontext_Default extends UpdateAbstract {
@@ -43,7 +44,17 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 
 	@Override
 	public void run() throws Throwable {
-		doTask(false);
+
+	}
+
+	@Override
+	public boolean runAndReport() {
+		return doTask(false);
+	}
+
+	@Override
+	public void execute() {
+		executeWithProtocolEntryNoGlobalTx();
 	}
 
 	@Override
@@ -51,38 +62,55 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		doTask(true);
 	}
 
-	private void doTask(boolean test) {
+	private boolean doTask(boolean test) {
 		NodeRunner runner=new NodeRunner();
 		runner.setRunAsSystem(true);
 		runner.setTypes(CCConstants.EDUCONTEXT_TYPES);
-		runner.setThreaded(true);
+		runner.setThreaded(false);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		runner.setKeepModifiedDate(true);
 		runner.setRecurseMode(RecurseMode.All);
 		int[] processed=new int[]{0};
+		AtomicBoolean result = new AtomicBoolean(true);
 		runner.setFilter((ref)->{
-			Serializable prop = nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));
-			// we want to return true for all nodes which don't have the property set yet
-			if(prop==null)
-				return true;
-			if(prop instanceof String) {
-				 return ((String)prop).isEmpty();
+			try {
+				if (!nodeService.exists(ref)) {
+					return false;
+				}
+				Serializable prop = nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME));
+				// we want to return true for all nodes which don't have the property set yet
+				if (prop == null)
+					return true;
+				if (prop instanceof String) {
+					return ((String) prop).isEmpty();
+				} else if (prop instanceof List) {
+					return ((List) prop).isEmpty();
+				} else
+					return true;
+			}catch(Throwable e){
+				logger.error("error filtering node:" + ref +" " + e.getMessage());
+				result.set(false);
+				return false;
 			}
-			else if(prop instanceof List){
-				return ((List)prop).isEmpty();
-			}
-			else
-				return true;
 		});
 		runner.setTask((ref)->{
-			logDebug("add educontext to "+ref.getId());
-			if(!test){
-				nodeService.setProperty(ref,QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME),CCConstants.EDUCONTEXT_DEFAULT);
+			try {
+				if (!nodeService.exists(ref)) {
+					return;
+				}
+				logInfo("add educontext to " + ref.getId());
+				if (!test) {
+					nodeService.setProperty(ref, QName.createQName(CCConstants.CCM_PROP_EDUCONTEXT_NAME), CCConstants.EDUCONTEXT_DEFAULT);
+				}
+				processed[0]++;
+			}catch(Throwable e){
+				result.set(false);
+				logger.error("error processing node:" + ref +" " + e.getMessage());
 			}
-			processed[0]++;
 		});
         runner.run();
-		logInfo("Added educontext default value to a total of "+processed[0]+" nodes");
+		logInfo("Added educontext default value to a total of "+processed[0]+" nodes. success:"+result.get());
+		return result.get();
 	}
 
 

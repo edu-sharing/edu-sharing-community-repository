@@ -33,6 +33,7 @@ import org.edu_sharing.repository.server.tools.HttpException;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -87,6 +88,9 @@ public class RenderingProxy extends HttpServlet {
 		}catch(Exception e){
 			throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,e.getMessage(),RenderingException.I18N.encryption,e);
 		}
+		if(usernameDecrypted==null || usernameDecrypted.isEmpty()){
+			throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,"Encrypted username was empty. Check your keys",RenderingException.I18N.encryption,new Throwable());
+		}
 
 		// remove any old states from current session before continuing
 		req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
@@ -99,6 +103,7 @@ public class RenderingProxy extends HttpServlet {
 
 			ApplicationInfo repoInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
 			if("window".equals(display)) {
+				storeTrackingDetails(req, usage);
 				openWindow(req, resp, nodeId, parentId, repoInfo);
 			}
 			else{
@@ -112,6 +117,11 @@ public class RenderingProxy extends HttpServlet {
 			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage(),RenderingException.I18N.unknown,e);
 		}
 
+	}
+
+	private void storeTrackingDetails(HttpServletRequest req, Usage usage) {
+		NodeTrackingDetails details = getTrackingDetails(req, usage);
+		req.getSession().setAttribute(CCConstants.SESSION_RENDERING_DETAILS, details);
 	}
 
 	/**
@@ -181,8 +191,12 @@ public class RenderingProxy extends HttpServlet {
 		Encryption encryptionTool = new Encryption("RSA");
 
 		try {
-			return encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()),
+			String username = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()),
 					encryptionTool.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey()));
+			if(username == null || username.isEmpty()) {
+				throw new Exception("Username was empty after trying to decrypt, check key chain");
+			}
+			return SSOAuthorityMapper.mapAdminAuthority(username, req.getParameter("app_id"));
 		}catch(Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new SecurityException("Parameter \"u\" (username) could not be decrypted: "+e.getMessage(),e);
@@ -342,11 +356,13 @@ public class RenderingProxy extends HttpServlet {
 			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes(StandardCharsets.UTF_8));
 			// track inline / lms
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
-				NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
-				details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
+				NodeTrackingDetails details = getTrackingDetails(req, usage);
+				AuthenticationUtil.runAs(() ->
 				TrackingServiceFactory.getTrackingService().trackActivityOnNode(
-						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), details,
-						TrackingService.EventType.VIEW_MATERIAL_EMBEDDED);
+						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+						details,
+						TrackingService.EventType.VIEW_MATERIAL_EMBEDDED)
+				,usernameDecrypted);
 			}
 		} catch (HttpException e) {
 			throw new RenderingException(e);
@@ -354,6 +370,12 @@ public class RenderingProxy extends HttpServlet {
 			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(),
 					RenderingException.I18N.unknown, t);
 		}
+	}
+
+	private NodeTrackingDetails getTrackingDetails(HttpServletRequest req, Usage usage) {
+		NodeTrackingDetails details = new NodeTrackingDetails(req.getParameter("obj_id"), getVersion(req));
+		details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
+		return details;
 	}
 
 	private void runAsSystem(ThrowingProcedure<RenderingException> f) throws RenderingException {

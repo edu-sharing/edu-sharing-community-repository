@@ -3,19 +3,25 @@ package org.edu_sharing.metadataset.v2.tools;
 import com.sun.star.lang.IllegalArgumentException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.*;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.WrapperQueryBuilder;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.restservices.mds.v1.model.WidgetV2;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
+
     public static QueryBuilder getElasticSearchQuery(MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
+        return getElasticSearchQuery(queries,query,parameters,true);
+    }
+
+    public static QueryBuilder getElasticSearchQuery(MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters, Boolean asFilter) throws IllegalArgumentException {
 
         /**
          * @TODO basequery
@@ -23,11 +29,13 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
          * cause collection request needs solr basequery
          */
         String baseQuery = query.getBasequery().get(null);
-        WrapperQueryBuilder baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
-
-
         BoolQueryBuilder result = QueryBuilders.boolQuery();
-        result.must(baseQueryBuilder);
+
+        if(asFilter == null || (asFilter.booleanValue() == query.getBasequeryAsFilter())){
+            WrapperQueryBuilder baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
+            result.must(baseQueryBuilder);
+        }
+
         for (String name : parameters.keySet()) {
             MetadataQueryParameter parameter = query.findParameterByName(name);
             if (parameter == null)
@@ -39,6 +47,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
              */
             if ((values == null || values.length == 0)) {
                 //if(parameter.getIgnorable()==0)
+                continue;
+            }
+
+            if(asFilter != null && parameter.isAsFilter() != asFilter.booleanValue()){
                 continue;
             }
 
@@ -133,5 +145,74 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         }
         return boolQuery.toString();
+    }
+
+    public static Set<MetadataQueryParameter> getExcludeOwnFacets(MetadataQuery query, Map<String,String[]> parameters, List<String> facets){
+        Set<MetadataQueryParameter> excludeOwn = new HashSet<>();
+        for (String name : facets) {
+            MetadataQueryParameter parameter = query.findParameterByName(name);
+            if(parameter == null) continue;
+            if((parameter.getMultiplejoin() != null && parameter.getMultiplejoin().equals("OR"))) excludeOwn.add(parameter);
+        }
+        return excludeOwn;
+    }
+
+    /**
+     * returns FilterAggregations to be used in a separate call
+     * @param mds
+     * @param query
+     * @param parameters
+     * @param facets
+     * @param excludeOwn
+     * @param globalConditions
+     * @param searchToken
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static List<AggregationBuilder> getAggregations(MetadataSetV2 mds, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, QueryBuilder globalConditions, SearchToken searchToken) throws IllegalArgumentException {
+        MetadataQueries queries = mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL);
+        List<AggregationBuilder> result = new ArrayList<>();
+        String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+        for (String facet : facets) {
+
+            Map<String, String[]> tmp = new HashMap<>(parameters);
+            if (excludeOwn.stream().anyMatch(mdqp -> mdqp.getName().equals(facet))) {
+                tmp.remove(facet);
+            }
+
+            QueryBuilder qbFilter = getElasticSearchQuery(queries, query, tmp, true);
+            QueryBuilder qbNoFilter = getElasticSearchQuery(queries, query, tmp, false);
+            BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+            bqb = bqb.must(qbFilter).must(qbNoFilter).must(globalConditions);
+            if(searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()){
+
+                boolean isi18nProp = false;
+                MetadataWidget mdw = mds.findWidget(facet);
+                if(mdw != null && new WidgetV2(mdw).isHasValues()){
+                    isi18nProp = true;
+                }
+
+                MultiMatchQueryBuilder mmqb = null;
+
+                if(isi18nProp){
+                    mmqb = QueryBuilders
+                            .multiMatchQuery(searchToken.getQueryString(),"i18n."+currentLocale+"."+facet,"collections.i18n."+currentLocale+"."+facet);
+                }else{
+                    mmqb = QueryBuilders
+                            .multiMatchQuery(searchToken.getQueryString(),"properties."+facet);
+                }
+                mmqb.type(MultiMatchQueryBuilder.Type.BOOL_PREFIX).operator(Operator.AND);
+                bqb.must(mmqb);
+            }
+
+            result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet)
+                    .size(searchToken.getFacettesLimit())
+                    .minDocCount(searchToken.getFacettesMinCount())
+                    .field("properties." + facet+".keyword")));
+
+
+        }
+
+        return result;
     }
 }

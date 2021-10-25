@@ -139,6 +139,9 @@ public class NodeServiceHelper {
 	public static String getType(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}
+	public static List<ChildAssociationRef> getChildrenChildAssociationRefType(NodeRef nodeRef, String type){
+    	return NodeServiceFactory.getLocalService().getChildrenChildAssociationRefType(nodeRef.getId(), type);
+	}
 	public static String[] getAspects(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getAspects(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
 	}
@@ -460,6 +463,7 @@ public class NodeServiceHelper {
 	 * @return
 	 */
 	public static Map<String, Object> addVirtualProperties(String type, List<String> aspects, Map<String, Object> properties) {
+		properties.put(CCConstants.VIRT_PROP_TYPE, CCConstants.getValidLocalName(type));
 		properties.put(CCConstants.VIRT_PROP_MEDIATYPE, I18nAngular.getTranslationAngular("common", "MEDIATYPE." + MimeTypesV2.getNodeType(type,
 				properties,
 				aspects))

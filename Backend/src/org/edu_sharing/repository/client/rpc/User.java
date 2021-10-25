@@ -1,6 +1,10 @@
 package org.edu_sharing.repository.client.rpc;
 
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 public class User extends Authority {
 
 	String nodeId;
@@ -9,6 +13,8 @@ public class User extends Authority {
 	String surname;
 	String repositoryId;
 	String username;
+	Map<String, Serializable> profileSettings;
+	HashMap<String, Serializable> properties;
 
 	public User() {
 		super("USER");
@@ -73,5 +79,20 @@ public class User extends Authority {
 	public String getAuthorityDisplayName() {
 		return getGivenName() + " " + getSurname();
 	}
-	
+
+	public Map<String, Serializable> getProfileSettings() {
+		return profileSettings;
+	}
+
+	public void setProfileSettings(Map<String, Serializable> profileSettings) {
+		this.profileSettings = profileSettings;
+	}
+
+    public void setProperties(HashMap<String, Serializable> userProperties) {
+		this.properties = userProperties;
+    }
+
+	public HashMap<String, Serializable> getProperties() {
+		return properties;
+	}
 }

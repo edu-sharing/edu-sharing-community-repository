@@ -1,3 +1,4 @@
+import {first} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AsyncSubject, Observable } from 'rxjs';
@@ -302,8 +303,8 @@ export class MainMenuEntriesService {
         );
         switch (target.type) {
             case 'path':
-                const currentParams = await this.route.queryParams
-                    .first()
+                const currentParams = await this.route.queryParams.pipe(
+                    first())
                     .toPromise();
                 const params: Params = {};
                 for (const key of ['reurl', 'applyDirectories']) {

@@ -39,14 +39,14 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.springframework.context.ApplicationContext;
 
 
 
 public class EduAuthenticationComponent{
-	
-	
+
 	Logger logger = Logger.getLogger(EduAuthenticationComponent.class);
 	
     private List<AuthMethodInterface> ccAuthMethod;
@@ -56,10 +56,8 @@ public class EduAuthenticationComponent{
     PersonService personService;
     
     NodeService nodeService;
-    
-    public void init(){
-		
-		
+
+	public void init(){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		this.authenticationComponent = (AuthenticationComponent)applicationContext.getBean("authenticationComponent");
 		ServiceRegistry sr = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -78,7 +76,7 @@ public class EduAuthenticationComponent{
      * @param authClassName
      * @param params
      */
-    public void authenticate(String authClassName, HashMap<String,String> params) throws AuthenticationException{
+    public String authenticate(String authClassName, HashMap<String,String> params) throws AuthenticationException{
     	
 		String username = null;
 		//only allow classes that are in ccAuthMethod List
@@ -116,8 +114,15 @@ public class EduAuthenticationComponent{
 			
 			//inform Alfresco that the following user authenticated successfully
 			authenticationComponent.setCurrentUser(repoUsername);
+
+			//set last login
+			Object alfAuthService = AlfAppContextGate.getApplicationContext().getBean("authenticationService");
+			if(alfAuthService instanceof SubsystemChainingAuthenticationService) {
+				SubsystemChainingAuthenticationService scAuthService = (SubsystemChainingAuthenticationService)alfAuthService;
+				scAuthService.setEsLastLoginToNow(username);
+			}
 		}
-		
+		return username;
     }
     
  

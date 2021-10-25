@@ -1,25 +1,25 @@
+@use '~@angular/material' as mat;
 @import "variables";
-@import '~@angular/material/theming';
 
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
 // Be sure that you only ever include this mixin once!
-@include mat-core();
+@include mat.core();
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$custom-typography: mat-typography-config(
+$custom-typography: mat.define-typography-config(
     $font-family: $primaryFontFamily,
-    $body-1: mat-typography-level(100%, normal, 400),
-    $body-2: mat-typography-level(100%, normal, 600),
-    $button: mat-typography-level(100%, normal, 400),
-    $headline: mat-typography-level(150%, normal, 400),
-    $title: mat-typography-level(130%, normal, 400),
-    $input: mat-typography-level(inherit, 1.25, 400)
+    $body-1: mat.define-typography-level(100%, normal, 400),
+    $body-2: mat.define-typography-level(100%, normal, 600),
+    $button: mat.define-typography-level(100%, normal, 400),
+    $headline: mat.define-typography-level(150%, normal, 400),
+    $title: mat.define-typography-level(130%, normal, 400),
+    $input: mat.define-typography-level(inherit, 1.25, 400)
 );
 // Override typography for all Angular Material, including mat-base-typography and all components.
-@include angular-material-typography($custom-typography);
+@include mat.all-component-typographies($custom-typography);
 $mat-custom: (
     50: lighten($primary,50%),
     100: lighten($primary,40%),
@@ -53,25 +53,53 @@ $mat-custom: (
     )
 );
 
-$candy-app-primary: mat-palette($mat-custom);
-$candy-app-accent:  mat-palette($mat-custom);
+$candy-app-primary: mat.define-palette($mat-custom);
+$candy-app-accent:  mat.define-palette($mat-custom);
 
 // The warn palette is optional (defaults to red).
-$candy-app-warn:    mat-palette($mat-red);
+$candy-app-warn:    mat.define-palette(mat.$red-palette);
 
 // Create the theme object (a Sass map containing all of the palettes).
-$candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
+$candy-app-theme: mat.define-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
+
+// Uncomment the styles below to override the themes foreground colors.
+// WCAG minimums are
+//  - rgba(black, 0.54) for text on white
+//  - rgba(black, 0.42) for non-text on white
+//
+// $dark-dividers: rgba(black, 0.12);
+// $dark-disabled-text: rgba(black, 0.38);
+// $dark-secondary-text: rgba(black, 0.54);
+// $mat-light-theme-foreground: (
+//   base:              black,
+//   divider:           $dark-dividers,
+//   dividers:          $dark-dividers,
+//   disabled:          $dark-disabled-text,
+//   disabled-button:   rgba(black, 0.26),
+//   disabled-text:     $dark-disabled-text,
+//   elevation:         black,
+//   hint-text:         $dark-disabled-text,
+//   secondary-text:    $dark-secondary-text,
+//   icon:              rgba(black, 0.54),
+//   icons:             rgba(black, 0.54),
+//   text:              rgba(black, 0.87),
+//   slider-min:        rgba(black, 0.87),
+//   slider-off:        rgba(black, 0.26),
+//   slider-off-active: rgba(black, 0.38),
+// );
+// $my-app-theme-custom: map-merge($candy-app-theme, (foreground: $mat-light-theme-foreground));
+// @include angular-material-theme($my-app-theme-custom);
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include angular-material-theme($candy-app-theme);
+@include mat.all-component-themes($candy-app-theme);
 
 /** custom project specifics */
 [matripplecolor=primary] {
     > .mat-ripple-element {
         background-color: $primary;
-        opacity: $mat-ripple-color-opacity;
+        opacity: 0.1;
     }
 }
 /*
@@ -117,7 +145,9 @@ mat-button-toggle-group{
             margin-right: 5px;
         }
     }
-
+}
+.mat-tab-group .mat-ink-bar {
+    height: 4px;
 }
 .mat-tab-group.mat-dark{
     .mat-tab-header{
@@ -251,6 +281,9 @@ mat-slide-toggle.mat-primary-bright{
 input.mat-input-element, mat-label, .mat-select-value{
     line-height: normal;
 }
+input.mat-input-element::placeholder {
+    color: $placeholderColor;
+}
 // will better align the border label for the outlined input
 .mat-form-field-appearance-outline {
     $mat-form-field-floating-label-offset: 0.3em;
@@ -290,6 +323,20 @@ input.mat-input-element, mat-label, .mat-select-value{
     color: $textMain;
     > .label-secondary{
         line-height: normal !important;
+    }
+}
+.mat-checkbox-disabled {
+    $disabled-color: #919191; // 3:1 on #fafafa (fill-color of checkmark)
+    &.mat-checkbox-checked,
+    &.mat-checkbox-indeterminate {
+      .mat-checkbox-background {
+        background-color: $disabled-color;
+      }
+    }
+    &:not(.mat-checkbox-checked) {
+      .mat-checkbox-frame {
+        border-color: $disabled-color;
+      }
     }
 }
 .mat-flat-button,.mat-raised-button{
@@ -407,6 +454,31 @@ mat-label.mat-label-standalone{
     font-size: $fontSizeSmall;
     color: $textLight;
 }
+/* fix for mat select icons */
+.mat-select-icon {
+    .mat-option-text {
+        display: flex;
+        align-items: center;
+        >i {
+            margin-right: 5px;
+        }
+    }
+}
+mat-select.mat-select-icon {
+    mat-select-trigger {
+        max-height: 22px;
+        display: flex;
+        align-items: center;
+        > i {
+            color: $textLight;
+            margin-right: 5px;
+        }
+    }
+    .mat-select-arrow-wrapper {
+        transform: none;
+    }
+}
+
 .mat-select-panel, .mat-autocomplete-panel {
     .mat-option{
         color: $primary;

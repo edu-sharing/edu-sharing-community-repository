@@ -1,3 +1,5 @@
+import {forkJoin as observableForkJoin, Observable, Observer, of} from 'rxjs';
+import {first, catchError} from 'rxjs/operators';
 import {OPEN_URL_MODE, UIConstants} from '../core-module/ui/ui-constants';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
 import {TranslateService} from '@ngx-translate/core';
@@ -38,7 +40,6 @@ import {ListItem} from '../core-module/ui/list-item';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {OptionItem} from './option-item';
 import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
-import {Observable, Observer, of} from 'rxjs';
 import {RouterHelper} from './router.helper';
 import {PlatformLocation} from '@angular/common';
 import {MessageType} from '../core-module/ui/message-type';
@@ -46,7 +47,6 @@ import {Helper} from '../core-module/rest/helper';
 import {NodeHelperService} from './node-helper.service';
 import { RestIamService } from '../core-module/rest/services/rest-iam.service';
 import { DialogButton } from '../core-module/ui/dialog-button';
-import {catchError} from "rxjs/operators";
 import {ObservedValueOf} from "rxjs/internal/types";
 
 export class UIHelper {
@@ -216,6 +216,12 @@ export class UIHelper {
             },
         });
     }
+    public static goToNode(
+        router: Router,
+        node: Node,
+    ) {
+        router.navigate([UIConstants.ROUTER_PREFIX, 'node', node.ref.id]);
+    }
     public static goToCollection(
         router: Router,
         node: Node,
@@ -374,7 +380,7 @@ export class UIHelper {
         callback: (nodes: CollectionReference[]) => void = null,
         allowDuplicate = false,
     ) {
-        Observable.forkJoin(nodes.map(node =>
+        observableForkJoin(nodes.map(node =>
             collectionService.addNodeToCollection(
                 collection.ref.id,
                 node.ref.id,
@@ -569,7 +575,7 @@ export class UIHelper {
         smoothness = 1,
         axis = 'y',
     ) {
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
             let currentPos =
                 axis == 'x' ? element.scrollLeft : element.scrollTop;
             if (element.getAttribute('data-is-scrolling') == 'true') {
@@ -769,6 +775,7 @@ export class UIHelper {
         targetElement: Element,
         bindings: { [key: string]: any } = null,
         { delay = 0, replace = true } = {},
+        injector?: Injector, 
     ): ComponentRef<T> {
         if (targetElement == null) {
             return null;
@@ -777,7 +784,7 @@ export class UIHelper {
             componentName,
         );
         const component: ComponentRef<T> = viewContainerRef.createComponent(
-            factory
+            factory, undefined, injector,
         );
         if (bindings) {
             const instance: { [key: string]: any } = component.instance;
@@ -815,8 +822,8 @@ export class UIHelper {
         const COPY_PARAMS = ['mainnav', 'reurl', 'applyDirectories'];
         return new Observable<any>((observer: Observer<any>) => {
             route.queryParams
-                .pipe()
-                .first()
+                .pipe().pipe(
+                first())
                 .subscribe(queryParams => {
                     let result: any = {};
                     COPY_PARAMS.forEach(params => {

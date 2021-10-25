@@ -1,3 +1,4 @@
+import {filter, skipWhile} from 'rxjs/operators';
 import {
     ChangeDetectorRef,
     Component,
@@ -67,6 +68,9 @@ import {RestTrackingService} from '../../../core-module/rest/services/rest-track
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {CardComponent} from '../../../core-ui-module/components/card/card.component';
 import {CardService} from '../../../core-ui-module/card.service';
+import {RouterComponent} from '../../../router/router.component';
+import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
+import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 
 declare var jQuery:any;
 declare var window: any;
@@ -95,6 +99,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       private translate : TranslateService,
       private tracking : RestTrackingService,
       private nodeHelper: NodeHelperService,
+      private renderHelper: RenderHelperService,
       private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
@@ -125,15 +130,16 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       (window as any).nodeRenderComponentRef = {component: this, zone: _ngZone};
       (window as any).ngRender = {setDownloadUrl:(url:string)=> {this.setDownloadUrl(url)}};
       this.frame.addListener(this);
+      this.renderHelper.setViewContainerRef(viewContainerRef);
 
         Translation.initialize(translate,config,storage,route).subscribe(()=> {
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.networkService.prepareCache();
         this.route.queryParams.subscribe((params:Params)=> {
-          this.closeOnBack=params.closeOnBack=='true';
+          this.closeOnBack=params.closeOnBack === 'true';
           this.editor=params.editor;
-          this.fromLogin=params.fromLogin=='true';
+          this.fromLogin=params.fromLogin === 'true' || params.redirectFromSSO === 'true';
           this.repository=params.repository ? params.repository : RestConstants.HOME_REPOSITORY;
           this.queryParams=params;
           const childobject = params.childobject_id ? params.childobject_id : null;
@@ -141,7 +147,12 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+              const dataSource: NodeDataSource<Node> = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE)
+                if(dataSource) {
+                    this.list = dataSource.getData();
+                } else {
+                    this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+                }
               this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
@@ -262,7 +273,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
           window.close();
         }
         else {
-          if(this.fromLogin) {
+          if(this.fromLogin && !RouterComponent.isRedirectedFromLogin()) {
             UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, false);
           }
           else {
@@ -395,7 +406,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     this.isBuildingPage=true;
       // we only fetching versions for the primary parent (child objects don't have versions)
       this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : '-1',parameters,this.repository)
-        .subscribe((data:any)=> {
+        .subscribe((data)=> {
             if (!data.detailsSnippet) {
                 console.error(data);
                 this.toast.error(null,'RENDERSERVICE_API_ERROR');
@@ -480,44 +491,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
     addCollections() {
-        let domContainer:Element;
-        let domCollections:Element;
-        try {
-            domContainer = document.getElementsByClassName('node_collections_render')[0].parentElement;
-            domCollections = document.getElementsByTagName('collections')[0];
-        } catch(e) {
-            return;
-        }
-        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
-        this.usageApi.getNodeUsagesCollection(this.isCollectionRef() ? this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL] : this._node.ref.id,this._node.ref.repo).subscribe((usages)=> {
-            // @TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
-            if(usages.length==0) {
-                domContainer.parentElement.removeChild(domContainer);
-                return;
-            }
-            const data= {
-                nodes:usages.map((u)=>u.collection),
-                columns:ListItem.getCollectionDefaults(),
-                isClickable:true,
-                clickRow:(event: {node: Node})=> {
-                    UIHelper.goToCollection(this.router,event.node);
-                },
-                doubleClickRow:(event: Node)=> {
-                    UIHelper.goToCollection(this.router,event);
-                },
-                viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
-            };
-            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName('collections')[0],data, { delay: 250 });
-        },(error)=> {
-            domContainer.parentElement.removeChild(domContainer);
-        });
+        this.renderHelper.injectModuleInCollections(this._node);
     }
-  private addComments() {
-      const data= {
-          node:this._node
-      };
-      UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,CommentsListComponent,document.getElementsByTagName('comments')[0],data);
-  }
+    addComments() {
+        this.renderHelper.injectModuleComments(this._node)
+    }
   private postprocessHtml() {
     if(!this.config.instant('rendering.showPreview',true)) {
       jQuery('.edusharing_rendering_content_wrapper').hide();
@@ -751,9 +729,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                     option.callback();
                     // wait until a dialog has opened, then, as soon as the particular dialog closed
                     // trigger that the action has been done
-                    this.cardServcie.hasOpenModals
-                        .skipWhile((h) => !h)
-                        .filter((h) => !h)
+                    this.cardServcie.hasOpenModals.pipe(
+                        skipWhile((h) => !h),
+                        filter((h) => !h),)
                         .subscribe(() => this.onQueryActionDone());
                 } else {
                     console.warn('action ' + this.queryParams.action + ' is currently not enabled');

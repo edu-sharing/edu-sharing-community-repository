@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
@@ -66,9 +67,10 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 	
 	public String getCurrentLocale(){
 		try {
-			HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-			String currentLocale = (String) session.getAttribute(CCConstants.AUTH_LOCALE);
-			if (currentLocale == null || currentLocale.trim().equals("")) currentLocale = getPrimaryLocale();
+			HttpServletRequest request = Context.getCurrentInstance().getRequest();
+			String currentLocale = request.getHeader("locale");
+			if (currentLocale == null || currentLocale.trim().isEmpty()) currentLocale = (String) request.getSession().getAttribute(CCConstants.AUTH_LOCALE);
+			if (currentLocale == null || currentLocale.trim().isEmpty()) currentLocale = getPrimaryLocale();
 			return currentLocale;
 		}catch(Throwable t){
 			String primary=getPrimaryLocale();

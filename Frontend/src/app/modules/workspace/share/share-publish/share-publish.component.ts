@@ -1,4 +1,13 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnInit,
+    Output,
+    SimpleChanges,
+    ViewChild
+} from '@angular/core';
 import {UIHelper} from "../../../../core-ui-module/ui-helper";
 import {Node, Permission} from '../../../../core-module/rest/data-object';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
@@ -28,8 +37,12 @@ export class SharePublishComponent implements OnChanges {
     @Input() node: Node;
     @Input() permissions: Permission[];
     @Input() inherited: boolean;
+    @Input() isAuthorEmpty: boolean;
+    @Input() isLicenseEmpty: boolean;
     @Output() onDisableInherit = new EventEmitter<void>();
     @Output() onInitCompleted = new EventEmitter<void>();
+    @ViewChild('shareModeCopyRef') shareModeCopyRef: any;
+    @ViewChild('shareModeDirectRef') shareModeDirectRef: any;
     doiPermission: boolean;
     initialState: {
         copy: boolean,
@@ -138,7 +151,7 @@ export class SharePublishComponent implements OnChanges {
 
 
 
-    updateShareMode(force = false) {
+    updateShareMode(type: 'copy' | 'direct', force = false) {
         if((this.shareModeCopy  || this.shareModeDirect) && !force) {
             if (this.config.instant('publishingNotice', false)) {
                 let cancel = () => {
@@ -150,7 +163,7 @@ export class SharePublishComponent implements OnChanges {
                     'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
                     'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
                     DialogButton.getYesNo(cancel, () => {
-                        this.updateShareMode(true);
+                        this.updateShareMode(type, true);
                         this.toast.closeModalDialog();
                     }),
                     true,
@@ -159,7 +172,7 @@ export class SharePublishComponent implements OnChanges {
                 return;
             }
         }
-        if(this.shareModeCopy && this.doiPermission) {
+        if(this.shareModeCopy && this.doiPermission && type === 'copy') {
             this.doiActive = true;
         }
         this.updatePublishedVersions();
@@ -250,6 +263,12 @@ export class SharePublishComponent implements OnChanges {
         return new Set(this.allPublishedVersions.filter(
             (v) => !v.virtual && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]
         ).map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0])).size === 1;
+    }
+    isLicenseMissing() {
+        return !this.getLicense() && this.isLicenseEmpty && !this.node.isDirectory;
+    }
+    isAuthorMissing() {
+        return this.isAuthorEmpty && !this.node.isDirectory;
     }
 }
 export enum ShareMode {

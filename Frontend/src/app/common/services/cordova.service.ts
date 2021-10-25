@@ -400,7 +400,8 @@ export class CordovaService {
   isAndroid() : boolean {
     try {
       const device:any = (window as any).device;
-      return device.platform=='Android';
+      return device.platform.toLowerCase() === 'android' ||
+          device.platform.toLowerCase() === 'amazon-fireos';
     } catch (e) {
       return true;
     }

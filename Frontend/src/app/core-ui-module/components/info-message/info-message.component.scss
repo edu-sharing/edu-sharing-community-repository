@@ -16,6 +16,10 @@
     background-color: lighten($warningMedium,45%);
     border: 1px solid darken($warningMedium, 10%);
   }
+  &.error{
+      background-color: lighten($warning,50%);
+      border: 1px solid darken($warning, 20%);
+  }
   &.info{
     background-color: lighten($primary,50%);
     border: 1px solid $primary;

@@ -1,3 +1,4 @@
+import {filter} from 'rxjs/operators';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -33,8 +34,8 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             initialValue = initialValue.map((v) => DateHelper.formatDateByPattern(v, 'y-M-d'));
         }
         this.formControl = new FormControl(initialValue[0] ?? null, this.getValidators());
-        this.formControl.valueChanges
-            .filter((value) => value !== null)
+        this.formControl.valueChanges.pipe(
+            filter((value) => value !== null))
             .subscribe((value) => {
                 this.setValue([value]);
             });

@@ -45,6 +45,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -59,6 +60,7 @@ import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -299,6 +301,18 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 			else{
 				toSafe.put(id,values.size()==0 ? null : values.get(0));
+			}
+
+			if(widget.getSuggestDisplayProperty() != null){
+				String[] keys = props.get(id);
+				if(keys != null) {
+					Set<String> displayStrings = new HashSet<>();
+					for (String key : keys) {
+						List<? extends Suggestion> suggestions = MetadataSearchHelper.getSuggestions(getApplication().getAppId(), mds, "ngsearch", widget.getId(), key, null);
+						displayStrings.add(suggestions.get(0).getDisplayString());
+					}
+					toSafe.put(CCConstants.getValidGlobalName(widget.getSuggestDisplayProperty()),displayStrings.size()==0 ? null : new ArrayList<>(displayStrings));
+				}
 			}
 		}
 
@@ -839,6 +853,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				}
 
 				if (compare == 0) {
+					if(prop1 instanceof MLText && prop2 instanceof MLText) {
+						prop1 = ((MLText) prop1).getDefaultValue();
+						prop2 = ((MLText) prop2).getDefaultValue();
+					}
 					if (prop1 instanceof String && prop2 instanceof String) {
 						// normalize umlauts
 						prop1 = StringUtils.stripAccents((String)prop1);

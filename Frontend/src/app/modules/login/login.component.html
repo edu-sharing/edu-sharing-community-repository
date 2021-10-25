@@ -9,7 +9,7 @@
 <global-progress *ngIf="isLoading"></global-progress>
 <div *ngIf="!isLoading">
   <card
-    role="main" [appSkipTarget]="SkipTarget.MainContent"
+    role="main" appSkipTarget="main-content"
     title="{{ caption | translate }}"
     avatar="assets/images/app-icon.svg"
     subtitle="{{ 'LOGIN.SUBTITLE' | translate }}"
@@ -83,16 +83,19 @@
                 (keydown.enter)="login()"
                 [(value)]="password"
               ></input-password>
-              <div class="forgot-password" *ngIf="config.register.local || config.register.recoverUrl">
+              <div class="forgot-password" *ngIf="
+                  (config.register.local && config.register.recoverPassword !== false || config.register.recoverPassword === true) ||
+                  config.register.recoverUrl
+              ">
                 <a
-                  *ngIf="config.register.local"
+                  *ngIf="(config.register.local || config.register.recoverPassword === true)"
                   cdkMonitorElementFocus
                   [routerLink]="['/' + ROUTER_PREFIX + 'register', 'request']"
                 >
                   {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
                 </a>
                 <a
-                  *ngIf="!config.register.local"
+                  *ngIf="!(config.register.local || config.register.recoverPassword === true)"
                   [href]="config.register.recoverUrl"
                   cdkMonitorElementFocus
                 >

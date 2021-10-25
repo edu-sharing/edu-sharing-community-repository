@@ -52,6 +52,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
+import org.edu_sharing.service.authentication.AuthenticationExceptionMessages;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -197,17 +198,6 @@ public class ShibbolethServlet extends HttpServlet {
 				req.getSession().setAttribute(SSOAuthorityMapper.SSO_REFERER,referer);
 			}
 
-
-			Object alfAuthService = AlfAppContextGate.getApplicationContext().getBean("authenticationService");
-			if(alfAuthService instanceof SubsystemChainingAuthenticationService) {
-				SubsystemChainingAuthenticationService scAuthService = (SubsystemChainingAuthenticationService)alfAuthService;
-				String userName = ssoMap.get(ssoMapper.getSSOUsernameProp());
-				if(ssoMapper.isHashUserName()){
-					userName=ssoMapper.digest(userName);
-				}
-				scAuthService.setEsLastLoginToNow(userName);
-			}
-
 			//federated repositoryies arixs(edunex)
 			for (Map.Entry<String, ApplicationInfo> entry : ApplicationInfoList.getApplicationInfos().entrySet()) {
 				ApplicationInfo appInfo = entry.getValue();
@@ -248,9 +238,16 @@ public class ShibbolethServlet extends HttpServlet {
 			redirect(resp,req);
 
 		} catch(org.alfresco.repo.security.authentication.AuthenticationException e) {
-			logger.error("INVALID ACCESS!",e);
-			resp.getOutputStream().println("INVALID ACCESS! "+e.getMessage());
-			return;
+			if(e.getMessage() != null
+					&& e.getMessage().contains(AuthenticationExceptionMessages.USER_BLOCKED)){
+				logger.error(e.getMessage());
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, AuthenticationExceptionMessages.USER_BLOCKED);
+				return;
+			}else{
+				logger.error("INVALID ACCESS!",e);
+				resp.getOutputStream().println("INVALID ACCESS! "+e.getMessage());
+				return;
+			}
 		}
 	}
 
@@ -271,15 +268,9 @@ public class ShibbolethServlet extends HttpServlet {
 		logger.info("redirectSuccessUrl:"+redirectUrl);
 
 		//so that redirecting to invited trunk works
-		if(req.getParameter(CCConstants.WORKSPACE_PARAM_TRUNK) != null && req.getParameter(CCConstants.WORKSPACE_PARAM_TRUNK).equals(CCConstants.WORKSPACE_PARAM_TRUNK_VALUE_INVITED)){
 
-			//remove trunk param here cause it's only needed cause of anchor is added here (server side does not get anchors)
-			redirectUrl = redirectUrl.replace("&"+CCConstants.WORKSPACE_PARAM_TRUNK+"="+CCConstants.WORKSPACE_PARAM_TRUNK_VALUE_INVITED,"");
-
-			if(!redirectUrl.contains(CCConstants.WORKSPACE_INVITED_ANCHOR)){
-				redirectUrl += CCConstants.WORKSPACE_INVITED_ANCHOR;
-			}
-		}
+		//remove trunk param here cause it's only needed cause of anchor is added here (server side does not get anchors)
+		redirectUrl = UrlTool.setParamEncode(redirectUrl, "redirectFromSSO", "true");
 
 		resp.sendRedirect(redirectUrl);
 	}

@@ -14,7 +14,6 @@ import {SessionStorageService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
   selector: 'permissions-main',
@@ -25,7 +24,6 @@ import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
   ]
 })
 export class PermissionsMainComponent {
-  readonly SkipTarget = SkipTarget;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public tab : number;
   public searchQuery: string;

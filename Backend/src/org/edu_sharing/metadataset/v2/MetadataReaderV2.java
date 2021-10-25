@@ -229,6 +229,10 @@ public class MetadataReaderV2 {
 				if (nodeMap.getNamedItem("applyBasequery") != null)
 					query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
 
+				if(nodeMap.getNamedItem("basequeryAsFilter") != null && nodeMap.getNamedItem("basequeryAsFilter").getTextContent() != null){
+					query.setBasequeryAsFilter(new Boolean(nodeMap.getNamedItem("basequeryAsFilter").getTextContent()));
+				}
+
 				List<MetadataQueryParameter> parameters = new ArrayList<>();
 
 				NodeList list2 = node.getChildNodes();
@@ -251,6 +255,9 @@ public class MetadataReaderV2 {
 					if (attributes == null || attributes.getNamedItem("name") == null)
 						continue;
 					parameter.setName(attributes.getNamedItem("name").getTextContent());
+					if(attributes.getNamedItem("asFilter") != null && attributes.getNamedItem("asFilter").getTextContent() != null){
+						parameter.setAsFilter(new Boolean(attributes.getNamedItem("asFilter").getTextContent()));
+					}
 					Map<String, String> statements = new HashMap<String, String>();
 					for (int k = 0; k < list3.getLength(); k++) {
 						Node data = list3.item(k);
@@ -439,6 +446,8 @@ public class MetadataReaderV2 {
 					widget.setSuggestionSource(value);
 				if(name.equals("suggestionQuery"))
 					widget.setSuggestionQuery(value);
+				if(name.equals("suggestDisplayProperty"))
+					widget.setSuggestDisplayProperty(value);
 				if(name.equals("required")) {
 					if(value.equalsIgnoreCase("true")){
 						widget.setRequired(MetadataWidget.Required.mandatory);
@@ -464,6 +473,9 @@ public class MetadataReaderV2 {
 				}
 				if(name.equals("valuespaceClient")){
 					widget.setValuespaceClient(value.equalsIgnoreCase("true"));				
+				}
+				if(name.equals("interactionType")){
+					widget.setInteractionType(MetadataWidget.InteractionType.valueOf(value));
 				}
 				if(name.equals("searchable")){
 					widget.setSearchable(value.equalsIgnoreCase("true"));

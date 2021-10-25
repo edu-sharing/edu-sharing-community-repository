@@ -1,9 +1,7 @@
 package org.edu_sharing.restservices;
 
-import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -13,21 +11,16 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.restservices.usage.v1.model.CreateUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
-import org.edu_sharing.restservices.usage.v1.model.Usages.NodeUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage2Service;
 
-import io.swagger.annotations.ApiParam;
-import org.edu_sharing.service.usage.UsageException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEvent;
@@ -135,24 +128,41 @@ public class UsageDao {
 
 	public void deleteUsage(String nodeId, String usageId) throws DAOException {
 		try {
-			boolean permission = (ContextManagementFilter.accessToolType.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
+			org.edu_sharing.service.usage.Usage usage = AuthenticationUtil.runAsSystem(() -> {
+				for (org.edu_sharing.service.usage.Usage u : new Usage2Service().getUsageByParentNodeId(null, null,
+						nodeId)) {
+					if (u.getNodeId().equals(usageId)) {
+						return u;
+					}
+				}
+				return null;
+			});
+			boolean permission = (ContextManagementFilter.accessTool.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
 					CCConstants.PERMISSION_CHANGEPERMISSIONS);
-
+			if(ContextManagementFilter.accessTool != null
+					&& ContextManagementFilter.accessTool.get() != null){
+				if(ContextManagementFilter.accessTool.get().getAppId().equals(usage.getLmsId())) {
+					permission = true;
+					logger.info("Delete usage allowed for app id " + usage.getLmsId());
+				} else {
+					throw new SecurityException("The current authenticated app id is not allowed to delete this usage");
+				}
+			}
 			if (!permission) {
 				throw new SecurityException("Can not modify usages on node " + nodeId);
 			}
-			for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsageByParentNodeId(null, null,
-					nodeId)) {
-				if (usage.getNodeId().equals(usageId)) {
-					if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,
-							usage.getResourceId()))
-						return;
-					else
-						throw new Exception("Error deleting usage " + usage.getNodeId());
-				}
+			if(usage == null) {
+				throw new IllegalArgumentException(usageId + " is not an usage of " + nodeId);
 			}
-			throw new IllegalArgumentException(usageId + " is not an usage of " + nodeId);
+			AuthenticationUtil.runAsSystem(() -> {
+				if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,
+						usage.getResourceId())) {
+					return null;
+				} else {
+					throw new RuntimeException("Error deleting usage " + usage.getNodeId());
+				}
+			});
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
@@ -192,10 +202,21 @@ public class UsageDao {
 					Usages.CollectionUsage collectionUsage = convertUsage(usage, Usages.CollectionUsage.class);
 					collectionUsage
 							.setCollection(CollectionDao.getCollection(repoDao, usage.getCourseId()).asNode());
+					collectionUsage.setCollectionUsageType(Usages.CollectionUsageType.ACTIVE);
 					collections.add(collectionUsage);
 				} catch (Throwable t) {
 				}
 			}
+			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId).forEach((ref) -> {
+				Usages.CollectionUsage usage = new Usages.CollectionUsage();
+				try {
+					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
+					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL);
+					collections.add(usage);
+				} catch (DAOException e) {
+					logger.warn("Could not fetch collection: " + e.getMessage(), e);
+				}
+			});
 			return collections;
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
@@ -227,25 +248,31 @@ public class UsageDao {
 		
 	}
 
-	public Usages.Usage setUsage(String repository,Usages.Usage usage) throws Exception {
+	public Usages.Usage setUsage(String repository, CreateUsage usage) throws Exception {
 
-		if(ContextManagementFilter.accessToolType == null
-				|| ContextManagementFilter.accessToolType.get() == null
-				|| ContextManagementFilter.accessToolType.get().trim().equals("") ){
-			throw new DAOValidationException(new Exception("app signature required to use this endpoint."));
+		if(ContextManagementFilter.accessTool == null
+				|| ContextManagementFilter.accessTool.get() == null){
+			throw new DAOSecurityException(new Exception("app signature required to use this endpoint."));
 		}
-		if(AuthenticationUtil.getFullyAuthenticatedUser() == null){
-			throw new DAOValidationException(new Exception("authenticated user required to use this endpoint."));
+		if(AuthenticationUtil.getFullyAuthenticatedUser() == null || AuthorityServiceFactory.getLocalService().isGuest()){
+			throw new DAOSecurityException(new Exception("authenticated user required to use this endpoint."));
 		}
 
 		Usage2Service us = new Usage2Service();
-		org.edu_sharing.service.usage.Usage usageResult = us.setUsage(repository,usage.getAppUser(), usage.getAppId(),
-				usage.getCourseId(), usage.getParentNodeId(),usage.getAppUserMail(),usage.getFromUsed(),
-				usage.getToUsed(),
-				usage.getDistinctPersons() != null ? usage.getDistinctPersons() : -1 ,
-				usage.getUsageVersion(),
-				usage.getResourceId(),
-				usage.getUsageXmlParamsRaw());
+		org.edu_sharing.service.usage.Usage usageResult = us.setUsage(
+				repository,
+				AuthenticationUtil.getFullyAuthenticatedUser(),
+				usage.appId,
+				usage.courseId,
+				usage.nodeId,
+				(String)AuthorityServiceFactory.getLocalService().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser()).get(CCConstants.PROP_USER_EMAIL),
+				null,
+				null,
+				-1 ,
+				usage.nodeVersion,
+				usage.resourceId,
+				null
+		);
 		return convertUsage(usageResult, Usages.Usage.class);
 	}
 }

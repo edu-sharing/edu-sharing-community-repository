@@ -91,15 +91,15 @@ a{
   .badgeIconLeft{
     left:0;
   }
-  .mat-chip-group{
-    display: flex;
-    flex-direction: column;
-    >.secondary{
-      font-size: 80%;
-      color: $textLight;
-      margin-top: -3px;
-      min-height: 3px;
-    }
+}
+.mat-chip-group{
+  display: flex;
+  flex-direction: column;
+  >.secondary{
+    font-size: 80%;
+    color: $textLight;
+    margin-top: -3px;
+    min-height: 3px;
   }
 }
 .workflowStatus{
@@ -179,7 +179,14 @@ a{
   padding:10px;
   border:1px solid rgba(0,0,0,.25);
 }
-
+mat-label .required-marker {
+    color: darken($colorStatusNegative, 20%);
+}
+::placeholder {
+  color: $placeholderColor;
+  // By default, Firefox reduces opacity of placeholders.
+  opacity: 1;
+}
 @media screen and (max-width: $mobileWidth) {
   .hidemobile {
     display: none;

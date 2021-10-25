@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -79,6 +80,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	OrganisationService organisationService = (OrganisationService)applicationContext.getBean("eduOrganisationService");
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	AuthorityService authorityService = serviceRegistry.getAuthorityService();
+	BehaviourFilter policyBehaviourFilter = (BehaviourFilter)applicationContext.getBean("policyBehaviourFilter");
 	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
 	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
 	private PermissionService permissionService;
@@ -898,7 +900,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public StringBuffer getFindUsersSearchString(String query,List<String> searchFields, boolean globalContext) {
+	public StringBuffer getFindUsersSearchString(String query,Map<String, Double> searchFields, boolean globalContext) {
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
@@ -927,11 +929,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 							}
 						}
 						StringBuffer fieldQuery=new StringBuffer();
-						for(String field : searchFields) {
+						for(Map.Entry<String, Double> field : searchFields.entrySet()) {
 							if(fieldQuery.length()>0) {
 								fieldQuery.append(" OR ");
 							}
-							fieldQuery.append("@cm\\:").append(field).append(":").append("\"").append(token).append("\"");
+							fieldQuery.append("@cm\\:").append(field.getKey()).append(":").append("\"").append(token).append("\"^").append(field.getValue());
 						}
 						subQuery.append(subQuery.length() > 0 ? " AND " : "").append("(").append(fieldQuery).append(")");
 					}
@@ -1088,8 +1090,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						boolean furtherToken = (subQuery.length() > 0);
 						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
 						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
-						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:").append("\"")
-								.append(token).append("\"");
+
+						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:")
+								.append("\"").append(token).append("\"").
+								// boost groups so that they'll appear before users
+								append("^10");
 						subQuery.append(")");
 	
 					}
@@ -1173,7 +1178,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults) {
+	public Result<List<User>> findUsers(String query,Map<String, Double> searchFields, boolean globalContext, int from, int nrOfResults) {
 
 		StringBuffer searchQuery = null;
 		searchQuery = getFindUsersSearchString(query, searchFields, globalContext);
@@ -1238,12 +1243,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			int nrOfResults) {
 
 		// fields to search in - not using username
-		List<String> searchFields = new ArrayList<>();
-		searchFields.add("email");
-		searchFields.add("firstName");
-		searchFields.add("lastName");
 
-		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,searchFields, globalContext);
+		StringBuffer findUsersQuery = getFindUsersSearchString(searchWord,AuthorityServiceHelper.getDefaultAuthoritySearchFields(), globalContext);
 		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext, false);
 
 		/**
@@ -1391,55 +1392,61 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public void createNotifyObject(final String nodeId, final String user, final String action) {
 
 		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+		serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
+			try {
+				policyBehaviourFilter.disableBehaviour(nodeRef);
+				if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
+					nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY), null);
+				}
 
-		if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY))) {
-			nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PERMISSION_HISTORY), null);
-		}
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
 
-		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), action);
-
-		ArrayList<String> phUsers = (ArrayList<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
-		if(phUsers == null) phUsers = new ArrayList<String>();
-		if(!phUsers.contains(user)) phUsers.add(user);
-		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
-		Date created = new Date();
-		nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
-
-
-		//ObjectMapper jsonMapper = new ObjectMapper();
-		Gson gson = new Gson();
-		Notify n = new Notify();
-		try {
-			ACL acl = repoClient.getPermissions(nodeId);
-			// set of all authority names that are not inherited, but explicitly set
-			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
-
-			acl.setAces(acl.getAces());
+				ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+				if (phUsers == null) phUsers = new ArrayList<String>();
+				if (!phUsers.contains(user)) phUsers.add(user);
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS), phUsers);
+				Date created = new Date();
+				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED), created);
 
 
-			n.setAcl(acl);
-			n.setCreated(created);
-			n.setNotifyAction(action);
-			n.setNotifyUser(user);
-			User u = new User();
-			u.setAuthorityName(user);
-			u.setUsername(user);
-			n.setUser(u);
+				//ObjectMapper jsonMapper = new ObjectMapper();
+				Gson gson = new Gson();
+				Notify n = new Notify();
+				try {
+					ACL acl = repoClient.getPermissions(nodeId);
+					// set of all authority names that are not inherited, but explicitly set
+					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED), PermissionServiceHelper.getExplicitAuthoritiesFromACL(acl));
+
+					acl.setAces(acl.getAces());
 
 
-			String jsonStringACL = gson.toJson(n);
-			List<String> history = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
-			history = (history == null)? new ArrayList<String>() : history;
-			while(history.size()>MAX_NOTIFY_HISTORY_LENGTH){
-					history.remove(0);
+					n.setAcl(acl);
+					n.setCreated(created);
+					n.setNotifyAction(action);
+					n.setNotifyUser(user);
+					User u = new User();
+					u.setAuthorityName(user);
+					u.setUsername(user);
+					n.setUser(u);
+
+
+					String jsonStringACL = gson.toJson(n);
+					List<String> history = (List<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY));
+					history = (history == null) ? new ArrayList<String>() : history;
+					while (history.size() > MAX_NOTIFY_HISTORY_LENGTH) {
+						history.remove(0);
+					}
+					history.add(jsonStringACL);
+					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}finally {
+				policyBehaviourFilter.enableBehaviour(nodeRef);
 			}
-			history.add(jsonStringACL);
-			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
+			return null;
+		});
 	}
 
 	@Override

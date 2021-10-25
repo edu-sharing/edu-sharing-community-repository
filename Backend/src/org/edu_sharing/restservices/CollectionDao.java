@@ -140,12 +140,6 @@ public class CollectionDao {
 				parentNode = NodeDao.getNode(repoDao, parentId);
 				parentNode.fetchCounts = false;
 			}
-			// if this collection is ordered by user, use the position of the elements as primary order criteria
-			if (parentNode != null && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(parentNode.asNode().getCollection().getOrderMode())) {
-				sortDefinition.addSortDefinitionEntry(
-						new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION), true), 0);
-			}
-
 			List<org.alfresco.service.cmr.repository.NodeRef> children =
 					repoDao.getCollectionClient().getChildren(
 							ROOT.equals(parentId) ? null : parentId,
@@ -427,6 +421,7 @@ public class CollectionDao {
 		result.setTitle(collection.getTitle());
 		result.setType(collection.getType());
 		result.setOrderMode(collection.getOrderMode());
+		result.setOrderAscending(collection.getOrderAscending());
 		result.setViewtype(collection.getViewtype());
 		result.setX(collection.getX());
 		result.setY(collection.getY());

@@ -87,7 +87,8 @@
         "INVITE_RECENT_AUTHORITIES": "Recently invited",
         "FILE_LOCATION": "Storage location",
         "CHANGE__LOCATION": "Change",
-        "CHOOSE_LOCATION": "Choose location",
+        "CHOOSE_LOCATION_TITLE": "Location",
+        "CHOOSE_LOCATION_DESCRIPTION": "Choose a directory for storage",
         "TREE_MORE_ITEMS": "+ {{count}} more folders",
         "SHARE": {
             "TITLE": "Manage Sharing",
@@ -168,7 +169,9 @@
                 "DOI_DISTINCT": "Create new handle",
                 "DOI_DISTINCT_INFO": "A new, unique handle is created. Future versions of the object will have independent identifiers. Note that after selecting this option, no updated versions of the item can subsequently be published under the same handle",
                 "DOI_UPDATE": "Update an existing handle",
-                "DOI_UPDATE_INFO": "The new version of the element will be made available under the existing, old handle address in the future. The previously published version is no longer directly accessible via the handle address"
+                "DOI_UPDATE_INFO": "The new version of the element will be made available under the existing, old handle address in the future. The previously published version is no longer directly accessible via the handle address",
+                "LICENSE_REQUIRED": "In order to publish the material you need to define a license first",
+                "AUTHOR_REQUIRED": "In order to publish the material you need to define the author first"
             },
             "STATE": {
                 "PRIVATE": "Private",
@@ -377,7 +380,6 @@
             "CURRENT": "currently picked license",
             "VERSION": "version",
             "LOCALE": "locale",
-            "RELEASE_WITHOUT_LICENSE": "In order to release an object you need to select a license",
             "CUSTOM_RIGHTS": "GNU GPL or other licenses...",
             "RELEASE": "Release object under this license",
             "RELEASE_MULTI": "Release {{count}} objects under this license",
@@ -412,6 +414,10 @@
                 "PDM_INFO": "This object is free of known restrictions covered by copyright law."
             }
         },
+        "FILE_CHOOSER": {
+            "NO_WRITE_PERMISSIONS": "You don't have write permissions for the selected directory. Please select a different one.",
+            "HOME_FOLDER_NO_PERMISSIONS": "You can't store elements in this directory. Please choose a sub-directory."
+        },
         "TOAST": {
             "FOLDER_ADDED": "Folder added",
             "NODE_EXISTS_IN_COLLECTION": "The collection already contains the element {{name}}",
@@ -422,7 +428,7 @@
             "ADDED_TO_COLLECTION_MEDIA_CENTER": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to members of the mediacenter",
             "PROPOSED_FOR_COLLECTION": "{{count}} element(s) proposed for collection \"{{collection}}\". The elements need to be approved before they are visible.",
             "ADD_TO_COLLECTION_DISABLED": "At least 1 selected material can not be collected",
-            "DELETE_FINISHED": "Element(s) move to recycle",
+            "DELETE_FINISHED": "Element(s) moved to recycle",
             "CUT_COPY": "{{count}} Element(s) copied to clipboard",
             "PASTE": "{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
             "PASTE_DRAG": "{{count}} Element(s) have been {{mode}} to {{to}}",

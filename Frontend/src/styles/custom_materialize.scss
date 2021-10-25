@@ -227,7 +227,7 @@ option {
 .collection{
   .disabled{
     color:$textLight!important;
-    cursor:default;
+    cursor:not-allowed;
   }
   a.collection-item {
     color: $primary;

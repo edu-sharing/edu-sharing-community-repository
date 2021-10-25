@@ -111,7 +111,8 @@ public class NodeFrontpage {
         searchSourceBuilder.sort(sb);
 
 
-        searchSourceBuilder.size(config.totalCount);
+        // fetch more because we might need buffer for invalid permissions
+        searchSourceBuilder.size(config.totalCount*2);
         searchSourceBuilder.from(0);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         searchRequest.indices("workspace");
@@ -119,12 +120,13 @@ public class NodeFrontpage {
         List<NodeRef> result=new ArrayList<>();
         for(SearchHit hit : searchResult.getHits().getHits()){
             logger.info("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));
-            if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),hit.getId(),CCConstants.PERMISSION_READ)){
-                Map nodeRef = (Map) hit.getSourceAsMap().get("nodeRef");
-                String nodeId = (String) nodeRef.get("id");
+            Map nodeRef = (Map) hit.getSourceAsMap().get("nodeRef");
+            String nodeId = (String) nodeRef.get("id");
+            if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ)){
                 result.add(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
             }
         }
+        result = result.subList(0, result.size() > config.totalCount ? config.totalCount : result.size());
         if(config.displayCount<config.totalCount) {
             Set<NodeRef> randoms = new HashSet<>();
             // grab a random count of elements (equals displayCount) of the whole array

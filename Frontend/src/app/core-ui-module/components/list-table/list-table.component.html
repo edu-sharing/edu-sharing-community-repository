@@ -1,5 +1,5 @@
 
-<div #drag class="dragBadge" [style.top]="(id*-9999999)+'px'" aria-hidden="true"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
+<div #drag class="dragBadge" [style.top]="(id*-9999 - 100)+'px'" aria-hidden="true"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
 <button
   #menuTrigger="matMenuTrigger"
   mat-button
@@ -112,7 +112,7 @@
            [class.selected]="getSelectedPos(node)!=-1"
            [class.node-virtual]="node.virtual"
            [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-           [class.hover]="dragHover==node"
+           [class.hover]="dragHover==node && !orderElementsActive"
       >
         <div class="row node-row"
              [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
@@ -144,10 +144,14 @@
             [nodes]="_nodes"
             [scope]="scope"
             [class.node-padding]="_options && _options.length>0"
-            [unclickable]="!createLink"
+            [disabled]="!createLink"
+            [alwaysRipple]="true"
             [aria-describedby]="getDescribedBy(node)"
             #childList
           >
+            <ng-container *ngIf="orderElementsActive">
+              <ng-container *ngTemplateOutlet="itemOrderHint; context: { $implicit: node }"></ng-container>
+            </ng-container>
             <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
             <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
               <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
@@ -155,7 +159,6 @@
             <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
               <img
                 src="{{getIconUrl(node)}}"
-                tabindex="0"
                 [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
                 [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
               />
@@ -176,15 +179,8 @@
                  class="collectionEditorial"
                  aria-hidden="true"><i class="material-icons">star</i></div>
             <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon="edu-pin"></i></div>
-            <!-- FIXME: Interactive elements should be outside of links (app-node-url). -->
             <div class="checkbox column" *ngIf="hasCheckbox">
-              <mat-checkbox
-                [ngModel]="getSelectedPos(node)!=-1"
-                (change)="onCheckboxClick(node)"
-                (click)="$event.stopPropagation()"
-                aria-label="{{ 'SELECT' | translate:{element: getPrimaryTitle(node)} }}">
-                &nbsp;
-              </mat-checkbox>
+              <!-- dummy placeholder for the checkbox, will be placed outside for code validation -->
             </div>
             <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
             <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
@@ -271,6 +267,15 @@
               </div>
             </div>
           </app-node-url>
+          <mat-checkbox
+            *ngIf="hasCheckbox"
+            class="mat-checkbox"
+            [ngModel]="getSelectedPos(node)!=-1"
+            (change)="onCheckboxClick(node)"
+            (click)="$event.stopPropagation()"
+            aria-label="{{ 'SELECT' | translate:{element: getPrimaryTitle(node)} }}">
+            &nbsp;
+          </mat-checkbox>
           <ng-container *ngIf="viewType !== 0">
             <div *ngFor="let option of getOptionsAlways()"
                  class="more moreAlways column">
@@ -284,23 +289,25 @@
               </button>
             </div>
           </ng-container>
-          <div class="more column" *ngIf="_options && _options.length>1" >
-            <button mat-icon-button
-                    color="primary"
-                    (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
-            >
-              <i icon="more_vert" [aria]="true"></i>
-            </button>
-          </div>
-          <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
-            <button mat-icon-button
-                    color="primary"
-                    [class.disabled]="!optionIsValid(_options[0],node)"
-                    matTooltip="{{_options[0].name | translate}}"
-                    (click)="callOption(_options[0],node);$event.stopPropagation();"
-            >
-              <i icon="{{_options[0].icon}}"></i>
-            </button></div>
+          <ng-container *ngIf="!orderElementsActive">
+            <div class="more column" *ngIf="_options && _options.length>1" >
+              <button mat-icon-button
+                      color="primary"
+                      (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
+              >
+                <i icon="more_vert" [aria]="true"></i>
+              </button>
+            </div>
+            <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
+              <button mat-icon-button
+                      color="primary"
+                      [class.disabled]="!optionIsValid(_options[0],node)"
+                      matTooltip="{{_options[0].name | translate}}"
+                      (click)="callOption(_options[0],node);$event.stopPropagation();"
+              >
+                <i icon="{{_options[0].icon}}"></i>
+              </button></div>
+          </ng-container>
         </div>
       </div>
       <div class="loadMore">
@@ -311,3 +318,8 @@
       </div>
       <spinner *ngIf="isLoading"></spinner>
     </div>
+<ng-template #itemOrderHint>
+  <div class="item-order-overlay">
+    <i icon="drag_handle"></i>
+  </div>
+</ng-template>

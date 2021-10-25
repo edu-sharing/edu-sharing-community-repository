@@ -50,6 +50,7 @@ import {
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { WorkspaceManagementDialogsComponent } from '../management-dialogs/management-dialogs.component';
+import { delay } from "rxjs/operators";
 
 @Component({
     selector: 'app-create-menu',
@@ -79,10 +80,6 @@ export class CreateMenuComponent {
      * Currently allowed to drop files?
      */
     @Input() allowed = true;
-    /**
-     * Current search query
-     */
-    @Input() searchQuery: string;
     /**
      * Allow upload of binary files
      */
@@ -155,6 +152,13 @@ export class CreateMenuComponent {
                         .getNodeMetadata(id)
                         .subscribe(node => {
                             this.fallbackFolder = node.node;
+                        }, error => {
+                            console.warn('error resolving defaultInboxFolder', error);
+                            this.nodeService
+                                .getNodeMetadata(RestConstants.INBOX)
+                                .subscribe(node => {
+                                    this.fallbackFolder = node.node;
+                                });
                         });
                 }, (error)=> {
                     console.warn('error resolving defaultInboxFolder', error);
@@ -166,7 +170,7 @@ export class CreateMenuComponent {
                 });
             }
         });
-        this.cardHasOpenModals$ = cardService.hasOpenModals.delay(0);
+        this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
     }
 
     @HostListener('document:paste', ['$event'])

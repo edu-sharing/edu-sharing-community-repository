@@ -1,6 +1,6 @@
 
 import {TranslateService} from "@ngx-translate/core";
-import {isNumeric} from "rxjs/util/isNumeric";
+import { isNumeric } from "../common/ui/isNumeric";
 import {Translation} from "./translation";
 
 export class FormatOptions {

@@ -31,7 +31,9 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.SearchServiceImpl;
 import org.edu_sharing.service.search.Suggestion;
+import org.edu_sharing.service.search.model.SharedToMeType;
 import org.springframework.context.ApplicationContext;
 
 import com.sun.star.lang.IllegalArgumentException;
@@ -93,7 +95,30 @@ public class MetadataSearchHelper {
 						throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field "+parameter.getName());
 					}
 					else{
-						queryString+=replaceCommonQueryVariables(getStatmentForValue(parameter, values[0]));
+						if("workspace".equals(query.getId()) && parameter.getName().equals("parent")
+								&& values[0].startsWith("-to_me_shared_files")){
+
+							try {
+								if("-to_me_shared_files_personal-".equals(values[0]) ){
+									queryString += SearchServiceImpl.getFilesSharedToMeLucene(SharedToMeType.Private);
+								}else if("-to_me_shared_files-".equals(values[0])){
+									queryString += SearchServiceImpl.getFilesSharedToMeLucene(SharedToMeType.All);
+								}else{
+									logger.error("unknown SharedToMeType:"+values[0]);
+								}
+							} catch (Exception e) {
+								logger.error(e.getMessage(),e);
+							}
+						}else if("workspace".equals(query.getId()) && parameter.getName().equals("parent")
+								&& values[0].startsWith("-my_shared_files")){
+							try {
+								queryString += SearchServiceImpl.getFilesSharedByMeLucene();
+							} catch (Exception e) {
+								logger.error(e.getMessage(),e);
+							}
+						}else {
+							queryString += replaceCommonQueryVariables(getStatmentForValue(parameter, values[0]));
+						}
 					}
 					queryString+=")";
 				}
@@ -135,6 +160,7 @@ public class MetadataSearchHelper {
 		try {
 			value = MetadataQueryPreprocessor.run(parameter, value);
 		}catch(Exception e){
+			logger.error(e.getMessage(),e);
 			throw new RuntimeException(e);
 		}
 
@@ -237,6 +263,7 @@ public class MetadataSearchHelper {
 				result.add(sqlKw);
 			}	
 		}catch(Throwable e){
+			logger.debug(e.getMessage(),e);
 		}finally {
 			dbAlf.cleanUp(con, statement);
 		}

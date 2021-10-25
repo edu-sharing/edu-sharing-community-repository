@@ -141,20 +141,22 @@ public class AuthenticationFilter implements javax.servlet.Filter {
   		
 	    
 	    //find out if the user is already authenticated
+		boolean isValidated = false;
 	    try{
 			
 			String ticket = authTool.getTicketFromSession( httpReq.getSession());
 			log.debug("ticket from session:"+ticket);
-			
-			if(authTool.validateTicket(ticket)){
-						
-				//default stuff
-				chain.doFilter(req,res);
-				return;
-			}
+			isValidated = authTool.validateTicket(ticket);
 			
 		}catch(Throwable e){
 			e.printStackTrace();
+		}
+
+		if(isValidated){
+
+			//default stuff
+			chain.doFilter(req,res);
+			return;
 		}
 		
 		//for async GWT calls
@@ -197,13 +199,6 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		
 		if(loginSuccessRedirectUrl.contains(CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER)){
 			loginSuccessRedirectUrl = UrlTool.removeParam(loginSuccessRedirectUrl, CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER);
-		}
-				
-		if(req.getParameter(CCConstants.WORKSPACE_PARAM_TRUNK) != null && req.getParameter(CCConstants.WORKSPACE_PARAM_TRUNK).equals(CCConstants.WORKSPACE_PARAM_TRUNK_VALUE_INVITED)){
-			
-			//remove trunk param here cause it's only needed cause of anchor is added here (server side does not get anchors)
-			loginSuccessRedirectUrl = loginSuccessRedirectUrl.replace("&"+CCConstants.WORKSPACE_PARAM_TRUNK+"="+CCConstants.WORKSPACE_PARAM_TRUNK_VALUE_INVITED,"");
-			loginSuccessRedirectUrl += CCConstants.WORKSPACE_INVITED_ANCHOR;
 		}
 		
 		log.info(LOGIN_SUCCESS_REDIRECT_URL+":"+loginSuccessRedirectUrl);

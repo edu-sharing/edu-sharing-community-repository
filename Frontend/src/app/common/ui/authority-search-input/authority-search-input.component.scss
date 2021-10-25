@@ -1,26 +1,36 @@
-@import "../../../../app/core-ui-module/styles/variables";
+@import '../../../../app/core-ui-module/styles/variables';
 
-form{
-  width: 100%;
-}
-.authority-search-input{
-  width:100%;
-  .material-icons {
-    color: $textLight;
-  }
-  mat-hint{
-    margin-top: 15px;
-  }
-}
+$optionHeight: 66px;
 
-user-avatar{
-  height: 40px;
-}
-.mat-option{
-  height: auto;
-}
-.authority-search-input-option{
-  app-authority-row{
+form {
     width: 100%;
-  }
+}
+.authority-search-input {
+    width: 100%;
+    .material-icons {
+        color: $textLight;
+    }
+    mat-hint {
+        margin-top: 15px;
+    }
+}
+
+user-avatar {
+    height: 40px;
+}
+
+.mat-option {
+    height: $optionHeight;
+}
+
+.mat-optgroup ::ng-deep .mat-optgroup-label {
+    display: flex;
+    align-items: flex-end;
+    height: $optionHeight;
+}
+
+.authority-search-input-option {
+    app-authority-row {
+        width: 100%;
+    }
 }

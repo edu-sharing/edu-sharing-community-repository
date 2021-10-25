@@ -34,6 +34,17 @@ public class ErrorResponse {
 	public ErrorResponse() {	
 		
 	}
+
+	@Override
+	public String toString() {
+		return "ErrorResponse{" +
+				"error='" + error + '\'' +
+				", message='" + message + '\'' +
+				", stacktrace='" + stacktrace + '\'' +
+				", logLevel='" + logLevel + '\'' +
+				'}';
+	}
+
 	private static Logger logger = Logger.getLogger(ErrorResponse.class);
 	public static Response createResponse(Throwable t) {
 		return createResponse(t,ErrorResponseLogging.strict);
@@ -138,17 +149,7 @@ public class ErrorResponse {
 	public void setLogLevel(String logLevel) {
 		this.logLevel = logLevel;
 	}
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("class Error {\n");
 
-		sb.append("  error: ").append(error).append("\n");
-		sb.append("  message: ").append(message).append("\n");
-		sb.append("}\n");
-		return sb.toString();
-	}
-	
 	@ApiModelProperty(required = true, value = "")
 	@JsonProperty("stacktraceArray")
 	public String[] getStacktraceArray() {

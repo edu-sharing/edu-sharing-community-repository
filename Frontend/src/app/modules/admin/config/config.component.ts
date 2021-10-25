@@ -3,7 +3,7 @@ import {Component} from "@angular/core";
 import {DialogButton, RestLocatorService} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {ModalMessageType} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 
 // Charts.js
 declare var Chart:any;
@@ -65,11 +65,11 @@ export class AdminConfigComponent {
   }
   save() {
     this.toast.showProgressDialog();
-    Observable.forkJoin(
+    forkJoin([
         this.adminService.updateConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE,this.extensionConfig),
         this.adminService.updateConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, this.configClient),
         this.adminService.updateConfigFile(AdminConfigComponent.SERVER_CONFIG_FILE, this.serverConfig),
-    ).subscribe(() => {
+    ]).subscribe(() => {
       this.adminService.refreshAppInfo().subscribe(() => {
         this.toast.closeModalDialog();
         this.locator.getConfig().subscribe(() => {

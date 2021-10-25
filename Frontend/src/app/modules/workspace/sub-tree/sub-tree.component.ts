@@ -16,6 +16,9 @@ import {MatMenuTrigger} from '@angular/material/menu';
 import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
+import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
 
 @Component({
     selector: 'workspace-sub-tree',
@@ -62,7 +65,7 @@ export class WorkspaceSubTreeComponent {
     @Output() onClick = new EventEmitter();
     @Output() onToggleTree = new EventEmitter();
     @Output() onLoading = new EventEmitter();
-    @Output() onDrop = new EventEmitter();
+    @Output() onDrop = new EventEmitter<{target: Node, source: DropSource<Node>}>();
     @Output() hasChilds = new EventEmitter();
     @Output() onUpdateOptions = new EventEmitter();
 
@@ -119,10 +122,6 @@ export class WorkspaceSubTreeComponent {
                 this.dragHover = null;
             }
         }
-    }
-
-    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
-        this.onDrop.emit({ target, source: nodes, event, type: dropAction });
     }
 
     contextMenu(event: any, node: Node) {
@@ -239,5 +238,27 @@ export class WorkspaceSubTreeComponent {
                 this.onLoading.emit(false);
                 this.loading = false;
             });
+    }
+    getDragState() {
+        return DragCursorDirective.dragState;
+    }
+    dragExit(event: CdkDragExit<any>) {
+        DragCursorDirective.dragState.element = null;
+    }
+
+    dragEnter(event: CdkDragEnter<any>) {
+        DragCursorDirective.dragState.element = event.container.data;
+        DragCursorDirective.dragState.dropAllowed = true;
+    }
+    drop(event: CdkDragDrop<Node, any>) {
+        this.onDrop.emit({
+            target: event.container.data,
+            source: {
+                element: [event.item.data || event.previousContainer.data],
+                sourceList: null,
+                mode: DragCursorDirective.dragState.mode
+            }
+        });
+        DragCursorDirective.dragState.element = null;
     }
 }

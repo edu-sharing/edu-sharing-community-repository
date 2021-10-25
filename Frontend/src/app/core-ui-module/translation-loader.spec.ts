@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { fakeAsync, tick } from '@angular/core/testing';
+import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { RestLocatorService } from '../core-module/core.module';
 import { TranslationLoader, TRANSLATION_LIST } from './translation-loader';
@@ -8,16 +9,16 @@ import { TranslationSource } from './translation-source';
 
 class HttpClientStub {
     get(url: string): Observable<any> {
-        return Observable.of(null);
+        return rxjs.of(null);
     }
 }
 
 class RestLocatorStub {
     getConfigLanguage(lang: string): Observable<any> {
-        return Observable.of(null);
+        return rxjs.of(null);
     }
     getLanguageDefaults(lang: string): Observable<any> {
-        return Observable.of(null);
+        return rxjs.of(null);
     }
 }
 
@@ -117,9 +118,9 @@ describe('TranslationLoader', () => {
             it('should include translations via http', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({ foo: 'bar' });
+                        return rxjs.of({ foo: 'bar' });
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar' });
@@ -128,11 +129,11 @@ describe('TranslationLoader', () => {
             it('should merge translations via http', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({ foo: 'bar' });
+                        return rxjs.of({ foo: 'bar' });
                     } else if (url === 'assets/i18n/admin/de.json') {
-                        return Observable.of({ bar: 'baz' });
+                        return rxjs.of({ bar: 'baz' });
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar', bar: 'baz' });
@@ -141,11 +142,11 @@ describe('TranslationLoader', () => {
             it('should override nested translations via http', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({ prefix: { foo: 'bar' } });
+                        return rxjs.of({ prefix: { foo: 'bar' } });
                     } else if (url === 'assets/i18n/admin/de.json') {
-                        return Observable.of({ prefix: { bar: 'baz' } });
+                        return rxjs.of({ prefix: { bar: 'baz' } });
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ prefix: { bar: 'baz' } });
@@ -153,7 +154,7 @@ describe('TranslationLoader', () => {
 
             it('should include translations via getConfigLanguage', async () => {
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ foo: 'bar' });
+                    return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar' });
@@ -162,12 +163,12 @@ describe('TranslationLoader', () => {
             it('should override translations via getConfigLanguage', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({ foo: 'bar' });
+                        return rxjs.of({ foo: 'bar' });
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ foo: 'baz' });
+                    return rxjs.of({ foo: 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'baz' });
@@ -176,12 +177,12 @@ describe('TranslationLoader', () => {
             it('should merge translations via getConfigLanguage', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({ foo: 'bar' });
+                        return rxjs.of({ foo: 'bar' });
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ bar: 'baz' });
+                    return rxjs.of({ bar: 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar', bar: 'baz' });
@@ -190,12 +191,12 @@ describe('TranslationLoader', () => {
             it('should override nested translations via getConfigLanguage', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({ prefix: { foo: 'bar' } });
+                        return rxjs.of({ prefix: { foo: 'bar' } });
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ prefix: { bar: 'baz' } });
+                    return rxjs.of({ prefix: { bar: 'baz' } });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ prefix: { bar: 'baz' } });
@@ -204,12 +205,12 @@ describe('TranslationLoader', () => {
             it('should deep-merge translations via getConfigLanguage', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({ prefix: { foo: 'bar' } });
+                        return rxjs.of({ prefix: { foo: 'bar' } });
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ 'prefix.bar': 'baz' });
+                    return rxjs.of({ 'prefix.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ prefix: { foo: 'bar', bar: 'baz' } });
@@ -218,14 +219,14 @@ describe('TranslationLoader', () => {
             it('should deep-merge translations via getConfigLanguage (3 levels)', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({
+                        return rxjs.of({
                             l1: { l2: { l3: { foo: 'bar' } } },
                         });
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ 'l1.l2.l3.bar': 'baz' });
+                    return rxjs.of({ 'l1.l2.l3.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({
@@ -236,12 +237,12 @@ describe('TranslationLoader', () => {
             it('should create missing levels via getConfigLanguage', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
-                        return Observable.of({});
+                        return rxjs.of({});
                     }
-                    return Observable.of(null);
+                    return rxjs.of(null);
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ 'l1.l2.l3.bar': 'baz' });
+                    return rxjs.of({ 'l1.l2.l3.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({
@@ -308,7 +309,7 @@ describe('TranslationLoader', () => {
 
             it('should include translations via getLanguageDefaults', async () => {
                 locator.getLanguageDefaults = lang => {
-                    return Observable.of({ foo: 'bar' });
+                    return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar' });
@@ -316,7 +317,7 @@ describe('TranslationLoader', () => {
 
             it('should include translations via getConfigLanguage', async () => {
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ foo: 'bar' });
+                    return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar' });
@@ -324,10 +325,10 @@ describe('TranslationLoader', () => {
 
             it('should merge translations via getConfigLanguage', async () => {
                 locator.getLanguageDefaults = lang => {
-                    return Observable.of({ foo: 'bar' });
+                    return rxjs.of({ foo: 'bar' });
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ bar: 'baz' });
+                    return rxjs.of({ bar: 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar', bar: 'baz' });
@@ -335,10 +336,10 @@ describe('TranslationLoader', () => {
 
             it('should override nested translations via getConfigLanguage', async () => {
                 locator.getLanguageDefaults = lang => {
-                    return Observable.of({ prefix: { foo: 'bar' } });
+                    return rxjs.of({ prefix: { foo: 'bar' } });
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ prefix: { bar: 'baz' } });
+                    return rxjs.of({ prefix: { bar: 'baz' } });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ prefix: { bar: 'baz' } });
@@ -346,10 +347,10 @@ describe('TranslationLoader', () => {
 
             it('should deep-merge translations via getConfigLanguage', async () => {
                 locator.getLanguageDefaults = lang => {
-                    return Observable.of({ prefix: { foo: 'bar' } });
+                    return rxjs.of({ prefix: { foo: 'bar' } });
                 };
                 locator.getConfigLanguage = lang => {
-                    return Observable.of({ 'prefix.bar': 'baz' });
+                    return rxjs.of({ 'prefix.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ prefix: { foo: 'bar', bar: 'baz' } });

@@ -1,10 +1,13 @@
 package org.edu_sharing.repository.server.tools;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -39,7 +42,7 @@ public class LRMITool {
         JSONObject lrmi=new JSONObject();
         // TODO: This probably has to work for remote repos in future
         HashMap<String, Object> props = NodeServiceHelper.getPropertiesVersion(node.getNodeRef(), node.getVersion());
-        Properties lrmiProps = getMappingFile();
+        Config lrmiProps = getMappingFile();
         lrmi.put("@context","http://schema.org/");
         lrmi.put("@type",new String[]{"CreativeWork","MediaObject"});
         for(Map.Entry<String,String> vcard : VCARD_MAPPING.entrySet()){
@@ -55,16 +58,16 @@ public class LRMITool {
                 (String)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE),
                 (String)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)
         ));
-        for(String prop : lrmiProps.stringPropertyNames()){
+        for(Map.Entry<String, ConfigValue> prop : lrmiProps.entrySet()){
             // split by "," (or) first, than combine all the "+" concats (and)
             // finally, convert them to global names
-            List<List<String>> propsListAnd = Arrays.stream(lrmiProps.getProperty(prop).split(OR_SEPERATOR)).map((f) ->
+            List<List<String>> propsListAnd = Arrays.stream(prop.getValue().unwrapped().toString().split(OR_SEPERATOR)).map((f) ->
                     Arrays.stream(f.split("\\"+AND_SEPERATOR)).
                             map(CCConstants::getValidGlobalName).
                             collect(Collectors.toList())).
                     collect(Collectors.toList()
             );
-            lrmi.put(prop,getPropertyCombined(props,propsListAnd));
+            lrmi.put(prop.getKey(),getPropertyCombined(props,propsListAnd));
         }
         /*
         lrmi.put("name",getProperty(props,CCConstants.LOM_PROP_GENERAL_TITLE,CCConstants.CM_NAME));
@@ -76,9 +79,8 @@ public class LRMITool {
         return lrmi;
     }
 
-    private static Properties getMappingFile() throws Exception {
-        String propFile = "org/edu_sharing/repository/server/tools/lrmi.properties";
-        return PropertiesHelper.getProperties(propFile, PropertiesHelper.TEXT);
+    private static Config getMappingFile() throws Exception {
+        return LightbendConfigLoader.get().getConfig("exporter.lrmi.properties");
     }
 
     private static String getDate(Object property) {
@@ -161,7 +163,7 @@ public class LRMITool {
 
     public static Map<String, String[]> fromLRMIJsonToProperties(JSONObject jsonObject) throws Exception {
         Map<String,String[]> props=new HashMap<>();
-        Properties lrmiProps = getMappingFile();
+        Config lrmiProps = getMappingFile();
         for(Map.Entry<String,String> vcard : VCARD_MAPPING.entrySet()){
             try {
                 props.put(vcard.getValue(), new String[]{asVCard(jsonObject.getJSONObject(vcard.getKey()))});
@@ -169,14 +171,14 @@ public class LRMITool {
                 logger.info("Can not map vcard lrmi value for "+vcard.getKey()+": "+e.getMessage());
             }
         }
-        for(String name : lrmiProps.stringPropertyNames()){
+        for(Map.Entry<String, ConfigValue> prop : lrmiProps.entrySet()){
             try{
-                if(!jsonObject.has(name)){
-                    logger.debug("Can not map lrmi field "+name+" because the json is missing it.");
+                if(!jsonObject.has(prop.getKey())){
+                    logger.debug("Can not map lrmi field "+prop.getKey()+" because the json is missing it.");
                     continue;
                 }
-                Object data=jsonObject.get(name);
-                String property=lrmiProps.getProperty(name);
+                Object data=jsonObject.get(prop.getKey());
+                String property=prop.getValue().unwrapped().toString();
                 // if there are multiple targets, use the first for reverse mapping
                 property=property.split(OR_SEPERATOR)[0].split("\\"+AND_SEPERATOR)[0];
                 if(IGNORED_PROPERTIES.contains(property)){
@@ -193,7 +195,7 @@ public class LRMITool {
                     props.put(property,new String[]{(String)data});
                 }
                 else{
-                    logger.warn("Can not map lrmi attribute "+name+" to "+property+" because the object type is unsupported: "+data.getClass().getSimpleName());
+                    logger.warn("Can not map lrmi attribute "+prop.getKey()+" to "+property+" because the object type is unsupported: "+data.getClass().getSimpleName());
                 }
             }catch(Throwable t){
                 logger.info("Error mapping lrmi: "+t.getMessage(),t);

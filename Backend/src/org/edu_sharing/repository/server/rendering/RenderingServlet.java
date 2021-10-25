@@ -43,6 +43,7 @@ public class RenderingServlet extends HttpServlet {
             } catch (Throwable t) {
                 response = RenderingErrorServlet.errorToHTML(req,
                         new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage(), RenderingException.I18N.unknown, t));
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             resp.setContentType("text/html");
             resp.getWriter().write(response);

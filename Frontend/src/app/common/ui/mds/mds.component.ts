@@ -1,3 +1,4 @@
+import {forkJoin as observableForkJoin,  Observable, throwError } from 'rxjs';
 import {
     Component,
     ElementRef,
@@ -40,10 +41,10 @@ import {
 } from '../../../core-module/core.module';
 import { CardJumpmark } from '../../../core-ui-module/components/card/card.component';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { Observable } from 'rxjs';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
 import {DateHelper} from '../../../core-ui-module/DateHelper';
+import { MdsService } from 'edu-sharing-api';
 declare var noUiSlider: any;
 
 @Component({
@@ -56,14 +57,15 @@ declare var noUiSlider: any;
     ],
 })
 export class MdsComponent {
-    /**
-     * priority, useful if the dialog seems not to be in the foreground
-     * Values greater 0 will raise the z-index
-     * Default is 1 for mds
-     */
-    @Input() priority = 1;
-    @Input() addWidget = false;
-    @Input() embedded = false;
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   * Default is 1 for mds
+   */
+  @Input() priority = 1;
+  @Input() addWidget=false;
+  @Input() embedded=false;
+  @Input() displayJumpmarks=true;
 
     /**
      * bulk behaviour: this controls how the bulk feature shall behave
@@ -209,7 +211,9 @@ export class MdsComponent {
             let mdsDefinition: MdsDefinition;
             try {
                 mdsId = this.mdsEditorCommon.getMdsId(nodesConverted)
-                mdsDefinition = await this.mdsEditorCommon.fetchMdsDefinition(mdsId);
+                mdsDefinition = await this.newMdsService
+                    .getMetadataSet({ metadataSet: mdsId })
+                    .toPromise();
             } catch (error) {
                 if (error instanceof UserPresentableError) {
                     this.toast.error(null, error.message);
@@ -280,6 +284,7 @@ export class MdsComponent {
 
     constructor(
         private mdsService: RestMdsService,
+        private newMdsService: MdsService,
         private translate: TranslateService,
         private route: ActivatedRoute,
         private uiService: UIService,
@@ -783,7 +788,6 @@ export class MdsComponent {
                 version = RestConstants.COMMENT_METADATA_UPDATE;
             }
         }
-
         this.globalProgress = true;
         // can only happen for single element
         if (files.length) {
@@ -809,25 +813,24 @@ export class MdsComponent {
             );
         } else {
             // can be bulk mode
-            Observable.forkJoin(
-                this.currentNodes.map((n) =>
-                    this.node.editNodeMetadataNewVersion(
-                        n.ref.id,
-                        version,
-                        this.getValues(n.properties),
-                    ),
-                ),
-            ).subscribe(
-                (nodes) => {
-                    this.currentNodes = nodes.map((n) => n.node);
-                    this.onUpdatePreview(callback);
-                },
-                (error) => {
-                    this.toast.error(error);
-                    this.globalProgress = false;
-                },
-            );
-        }
+                  observableForkJoin(this.currentNodes.map((n) => {
+                    const props = this.getValues(n.properties);
+                    if(props) {
+                      return this.node.editNodeMetadataNewVersion(n.ref.id, version, this.getValues(n.properties))
+                    } else {
+                      return throwError(null);
+                    }
+                  }))
+                      .subscribe((nodes) => {
+                        this.currentNodes = nodes.map((n) => n.node);
+                        this.onUpdatePreview(callback);
+                      },(error) => {
+                        if(error) {
+                          this.toast.error(error);
+                        }
+                        this.globalProgress = false;
+                      });
+                }
     }
     public setValuesByProperty(data: any, properties: any) {
         setTimeout(() => {
@@ -1041,7 +1044,7 @@ export class MdsComponent {
             `
                   <input type="checkbox" id="` +
             id +
-            `" 
+            `"
                     onchange="` +
             this.getWindowComponent() +
             `.toggleBulk('` +
@@ -1192,7 +1195,16 @@ export class MdsComponent {
             </div>`
         );
     }
+  escapeUnsafeData(unsafe: string) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+  }
     private getMultivalueBadge(value: string, caption: string = value) {
+        caption = this.escapeUnsafeData(caption)
         return (
             '<div class="badge" data-value="' +
             value +
@@ -1605,7 +1617,7 @@ export class MdsComponent {
             (widget.placeholder ? widget.placeholder : '') +
             `" class="suggestInput ` +
             css +
-            `" 
+            `"
             onkeyup="` +
             this.getWindowComponent() +
             `.openSuggestions('` +
@@ -1644,7 +1656,7 @@ export class MdsComponent {
         }
         if (openCallback) {
             html +=
-                `<a class="btn-flat suggestOpen" 
+                `<a class="btn-flat suggestOpen"
               onclick="` +
                 openCallback +
                 `"
@@ -2381,7 +2393,7 @@ export class MdsComponent {
                       <a tabindex="0"
                       onclick="document.getElementById('` +
                 this.getDomId('preview-select') +
-                `').click()" 
+                `').click()"
                       onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="` +
                 this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') +
                 `">file_upload</i></a>
@@ -2394,7 +2406,7 @@ export class MdsComponent {
                 `
                           onclick="` +
                 this.getWindowComponent() +
-                `.deletePreview()" 
+                `.deletePreview()"
                           onkeydown="if(event.keyCode==13) this.click();"
                           class="btn-circle"><i class="material-icons" aria-label="` +
                 this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW') +

@@ -32,13 +32,22 @@
   <span *ngSwitchCase="'name'">
     {{ $any(getNode()).name }}
   </span>
-  <span *ngSwitchCase="'title'">
+  <span
+    *ngSwitchCase="'title'"
+    [matTooltip]="showFieldTooltip ? $any(getNode()).title || $any(getNode()).name : null"
+  >
     {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
-  <span *ngSwitchCase="'cm:title'">
+  <span
+    *ngSwitchCase="'cm:title'"
+    [matTooltip]="showFieldTooltip ? $any(getNode()).title || $any(getNode()).name : null"
+  >
     {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
-  <span *ngSwitchCase="'cclom:title'">
+  <span
+    *ngSwitchCase="'cclom:title'"
+    [matTooltip]="showFieldTooltip ? $any(getNode()).title || $any(getNode()).name : null"
+  >
     {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
   <span
@@ -58,6 +67,13 @@
   >
     <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     {{ $any(getNode()) | NodeImageSize }}
+  </span>
+  <span
+    *ngSwitchCase="'ccm:wf_status'"
+    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+  >
+    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    {{ 'WORKFLOW.' + getWorkflowStatus().id | translate }}
   </span>
   <span
     *ngSwitchCase="'cm:creator'"
@@ -80,10 +96,10 @@
     <span class="cdk-visually-hidden">{{ 'NODE.ccm:commonlicense_key' | translate }}:</span>
     <ng-container *ngIf="$any(getNode()).properties['ccm:commonlicense_key'] as license">
       {{
-        license[0] === 'CUSTOM'
-          ? $any(getNode()).properties['cclom:rights_description']
-          : ('LICENSE.NAMES.' + $any(getNode()).properties['ccm:commonlicense_key']
-            | translate: { fallback: $any(getNode()).properties['ccm:commonlicense_key'] })
+      license[0] === 'CUSTOM'
+        ? $any(getNode()).properties['cclom:rights_description']
+        : ('LICENSE.NAMES.' + $any(getNode()).properties['ccm:commonlicense_key']
+          | translate: { fallback: $any(getNode()).properties['ccm:commonlicense_key'] })
       }}
     </ng-container>
   </span>
@@ -92,7 +108,7 @@
     [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
   >
     <span class="cdk-visually-hidden"
-      >{{ 'NODE.ccm:educationaltypicalagerange' | translate }}:</span
+    >{{ 'NODE.ccm:educationaltypicalagerange' | translate }}:</span
     >
     <ng-container
       *ngIf="
@@ -117,25 +133,25 @@
       *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
     >
       {{
-        $any(getNode()).properties
-          ? $any(getNode()).properties[item.name + '_DISPLAYNAME']
-            ? $any(getNode()).properties[item.name + '_DISPLAYNAME'].join(', ')
-            : $any(getNode()).properties[item.name]?.join(', ')
-          : ''
+      $any(getNode()).properties
+        ? $any(getNode()).properties[item.name + '_DISPLAYNAME']
+          ? $any(getNode()).properties[item.name + '_DISPLAYNAME'].join(', ')
+          : $any(getNode()).properties[item.name]?.join(', ')
+        : ''
       }}
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
       {{
-        $any(getNode()).properties[item.name]
-          ? ($any(getNode()).properties[item.name][0] | formatDate)
-          : ''
+      $any(getNode()).properties[item.name]
+        ? ($any(getNode()).properties[item.name][0] | formatDate)
+        : ''
       }}
     </ng-container>
     <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
       {{
-        $any(getNode()).properties[item.name]
-          ? ($any(getNode()).properties[item.name][0] | vcardName)
-          : ''
+      $any(getNode()).properties[item.name]
+        ? ($any(getNode()).properties[item.name][0] | vcardName)
+        : ''
       }}
     </ng-container>
   </span>

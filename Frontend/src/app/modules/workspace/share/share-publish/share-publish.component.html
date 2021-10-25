@@ -30,7 +30,21 @@
         </button>
       </div>
     </info-message>
-    <info-message mode="warning" *ngIf="!getLicense()">
+    <info-message mode="error" *ngIf="isLicenseMissing()">
+      {{'WORKSPACE.SHARE.PUBLISH.LICENSE_REQUIRED' | translate}}
+      <div>
+        <button mat-button color="primary"
+                (click)="openLicense()"
+                appToolpermissionCheck
+                toolpermission="TOOLPERMISSION_LICENSE">
+          <i icon="arrow_forward"></i> {{'WORKSPACE.SHARE.PUBLISH.SET_LICENSE' | translate}}
+        </button>
+      </div>
+    </info-message>
+    <info-message mode="error" *ngIf="isAuthorMissing()">
+      {{'WORKSPACE.SHARE.PUBLISH.AUTHOR_REQUIRED' | translate}}
+    </info-message>
+    <info-message mode="warning" *ngIf="!getLicense() && !isLicenseMissing()">
       {{'WORKSPACE.SHARE.PUBLISH.NO_LICENSE' | translate}}
       <div>
         <button mat-button color="primary"
@@ -54,8 +68,10 @@
     {{'WORKSPACE.SHARE.PUBLISH.COPY_ACTIVE' | translate}}
   </info-message>
   <div *ngIf="!inherited && mdsCompletion?.completed === mdsCompletion?.total" class="share-type">
-    <mat-checkbox [(ngModel)]="shareModeDirect"
-                  (ngModelChange)="updateShareMode()"
+    <mat-checkbox #shareModeDirectRef
+                  [(ngModel)]="shareModeDirect"
+                  (ngModelChange)="updateShareMode('direct')"
+                  [disabled]="isLicenseMissing() || isAuthorMissing()"
                   value="direct">
       <app-multi-line-label>
         <ng-container slot="label">
@@ -66,9 +82,10 @@
         </span>
       </app-multi-line-label>
     </mat-checkbox>
-    <mat-checkbox [(ngModel)]="shareModeCopy"
-                  (ngModelChange)="$event ? doiActive = true : null; updateShareMode()"
-                  [disabled]="!copyAllowed() || isCopy">
+    <mat-checkbox #shareModeCopyRef
+                  [(ngModel)]="shareModeCopy"
+                  (ngModelChange)="$event ? doiActive = true : null; updateShareMode('copy')"
+                  [disabled]="!copyAllowed() || isCopy || isLicenseMissing() || isAuthorMissing()">
       <app-multi-line-label>
         <ng-container slot="label">
           {{'WORKSPACE.SHARE.PUBLISH.MODE_COPY' | translate}}
@@ -85,8 +102,8 @@
                            [disabled]="!copyAllowed()"
                            (ngModelChange)="setRepublish()">
             <mat-radio-button
-                    [disabled]="!isCopy"
-                    [value]="false">
+              [disabled]="!isCopy"
+              [value]="false">
               <app-multi-line-label>
                 <ng-container slot="label">
                   {{'WORKSPACE.SHARE.PUBLISH.NO_REPUBLISH' | translate}}
@@ -94,8 +111,8 @@
               </app-multi-line-label>
             </mat-radio-button>
             <mat-radio-button
-                    [disabled]="currentVersionPublished()"
-                    [value]="true">
+              [disabled]="currentVersionPublished()"
+              [value]="true">
               <app-multi-line-label>
                 <ng-container slot="label">
                   {{'WORKSPACE.SHARE.PUBLISH.REPUBLISH' | translate}}

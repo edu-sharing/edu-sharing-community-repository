@@ -1,2 +1,7 @@
 @import "../../../core-ui-module/styles/variables.scss";
 
+:host ::ng-deep {
+    app-mds-editor-widget-container {
+        margin-bottom: 0;
+    }
+}

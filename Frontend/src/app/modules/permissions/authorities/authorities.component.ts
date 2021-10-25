@@ -32,7 +32,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {ModalDialogOptions} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
@@ -297,7 +297,7 @@ export class PermissionsAuthoritiesComponent {
       );
       createGroup.elementType = [ElementType.Unknown];
       createGroup.group = DefaultGroups.Primary;
-      createGroup.constrains = [Constrain.Admin, Constrain.NoSelection];
+      createGroup.constrains = [Constrain.NoSelection];
       options.push(createGroup);
     }
     if (this._mode === 'USER') {
@@ -397,7 +397,7 @@ export class PermissionsAuthoritiesComponent {
     }
     if (this._mode === 'GROUP' || this.orgs && this.orgs.canCreate) {
       const editGroup = new OptionItem('PERMISSIONS.MENU_EDIT_GROUP', 'edit', (data: any) => this.editAuthority(data));
-      editGroup.constrains = [Constrain.Admin, Constrain.NoBulk];
+      editGroup.constrains = [Constrain.NoBulk];
       editGroup.elementType = [ElementType.Group];
       editGroup.group = DefaultGroups.Edit;
       editGroup.priority = 10;
@@ -424,7 +424,7 @@ export class PermissionsAuthoritiesComponent {
       const removeGroup = new OptionItem('PERMISSIONS.MENU_DELETE', 'delete', (data: any) =>
           this.deleteAuthority(data, (list: any) => this.startDelete(list))
       );
-      removeGroup.constrains = [Constrain.Admin];
+      removeGroup.constrains = [Constrain.User];
       removeGroup.elementType = [ElementType.Group];
       removeGroup.group = DefaultGroups.Delete;
       options.push(removeGroup);
@@ -459,7 +459,7 @@ export class PermissionsAuthoritiesComponent {
     const signupAdd = new OptionItem('PERMISSIONS.ORG_SIGNUP_ADD', 'person_add', (node: UserSimple) => {
       this.toast.showProgressDialog();
       const users = NodeHelperService.getActionbarNodes(this.groupSignupSelected, node);
-      Observable.forkJoin(users.map((u) =>
+      forkJoin(users.map((u) =>
           this.iam.confirmSignup(this.groupSignup.authorityName, u.authorityName)
       )).subscribe(() => {
         this.groupSignupList = null;
@@ -475,7 +475,7 @@ export class PermissionsAuthoritiesComponent {
     const signupRemove = new OptionItem('PERMISSIONS.ORG_SIGNUP_REJECT', 'close', (node: UserSimple) => {
         this.toast.showProgressDialog();
         const users = NodeHelperService.getActionbarNodes(this.groupSignupSelected, node);
-        Observable.forkJoin(users.map((u) =>
+        forkJoin(users.map((u) =>
             this.iam.rejectSignup(this.groupSignup.authorityName, u.authorityName)
         )).subscribe(() => {
           this.groupSignupList = null;
@@ -1110,6 +1110,9 @@ export class PermissionsAuthoritiesComponent {
 
   saveGroupSignup() {
     this.toast.showProgressDialog();
+    if(this.groupSignupDetails.signupMethod === 'disabled') {
+        this.groupSignupDetails.signupMethod = null;
+    }
     this.iam.editGroupSignup(this.groupSignup.authorityName, this.groupSignupDetails).subscribe(() => {
       this.groupSignupDetails = null;
       this.refresh();

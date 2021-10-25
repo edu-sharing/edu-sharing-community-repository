@@ -32,7 +32,7 @@ import {SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
 import {RestOrganizationService} from '../../core-module/core.module';
 import {RestSearchService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
-import {Observable, Observer} from 'rxjs/index';
+import {Observable, Observer} from 'rxjs';
 import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {CustomHelper} from '../../common/custom-helper';
@@ -44,7 +44,6 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 
 type LuceneData = {
@@ -70,7 +69,6 @@ type LuceneData = {
 })
 export class AdminComponent {
   readonly SCOPES = Scope;
-  readonly SkipTarget = SkipTarget;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,

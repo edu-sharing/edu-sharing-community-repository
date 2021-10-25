@@ -37,7 +37,7 @@ public class Preview  {
   public Preview(NodeService nodeService,String storeProtocol,String storeIdentifier,String nodeId, String version, HashMap<String, Object> nodeProps) {
     GetPreviewResult preview = nodeService.getPreview(storeProtocol, storeIdentifier, nodeId ,nodeProps, version);
     try {
-      PreviewServlet.PreviewDetail detail = PreviewServlet.getPreview(nodeService, storeProtocol, storeIdentifier, nodeId);
+      PreviewServlet.PreviewDetail detail = PreviewServlet.getPreview(nodeService, storeProtocol, storeIdentifier, nodeId,nodeProps);
       if(detail != null) {
         setIsGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(detail.getType()));
         setType(detail.getType());

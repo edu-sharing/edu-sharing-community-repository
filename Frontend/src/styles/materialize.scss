@@ -2602,16 +2602,6 @@ a {
   box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.3);
 }
 
-.hoverable {
-  transition: box-shadow .25s;
-  box-shadow: 0;
-}
-
-.hoverable:hover {
-  transition: box-shadow .25s;
-  box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
 .divider {
   height: 1px;
   overflow: hidden;
@@ -6765,36 +6755,6 @@ input[type=range]:focus::-ms-fill-upper {
 /***************
     Nav List
 ***************/
-.table-of-contents.fixed {
-  position: fixed;
-}
-
-.table-of-contents li {
-  padding: 2px 0;
-}
-
-.table-of-contents a {
-  display: inline-block;
-  font-weight: 300;
-  color: #757575;
-  padding-left: 20px;
-  height: 1.5rem;
-  line-height: 1.5rem;
-  letter-spacing: .4;
-  display: inline-block;
-}
-
-.table-of-contents a:hover {
-  color: #a8a8a8;
-  padding-left: 19px;
-  border-left: 1px solid #ea4a4f;
-}
-
-.table-of-contents a.active {
-  font-weight: 500;
-  padding-left: 18px;
-  border-left: 2px solid #ea4a4f;
-}
 
 .side-nav {
   position: fixed;
@@ -8018,163 +7978,6 @@ input[type=range]:focus::-ms-fill-upper {
   }
 }
 
-/**
- * The days on the calendar
- */
-.picker__day--today {
-  position: relative;
-  color: #595959;
-  letter-spacing: -.3;
-  padding: .75rem 0;
-  font-weight: 400;
-  border: 1px solid transparent;
-}
-
-.picker__day--disabled:before {
-  border-top-color: #aaaaaa;
-}
-
-.picker__day--infocus:hover {
-  cursor: pointer;
-  color: #000;
-  font-weight: 500;
-}
-
-.picker__day--outfocus {
-  display: none;
-  padding: .75rem 0;
-  color: #fff;
-}
-
-.picker__day--outfocus:hover {
-  cursor: pointer;
-  color: #dddddd;
-  font-weight: 500;
-}
-
-.picker__day--highlighted:hover,
-.picker--focused .picker__day--highlighted {
-  cursor: pointer;
-}
-
-.picker__day--selected,
-.picker__day--selected:hover,
-.picker--focused .picker__day--selected {
-  border-radius: 50%;
-  -webkit-transform: scale(0.75);
-  transform: scale(0.75);
-  background: #0089ec;
-  color: #ffffff;
-}
-
-.picker__day--disabled,
-.picker__day--disabled:hover,
-.picker--focused .picker__day--disabled {
-  background: #f5f5f5;
-  border-color: #f5f5f5;
-  color: #dddddd;
-  cursor: default;
-}
-
-.picker__day--highlighted.picker__day--disabled,
-.picker__day--highlighted.picker__day--disabled:hover {
-  background: #bbbbbb;
-}
-
-/**
- * The footer containing the "today", "clear", and "close" buttons.
- */
-.picker__footer {
-  text-align: center;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.picker__button--today,
-.picker__button--clear,
-.picker__button--close {
-  border: 1px solid #ffffff;
-  background: #ffffff;
-  font-size: .8em;
-  padding: .66em 0;
-  font-weight: bold;
-  width: 33%;
-  display: inline-block;
-  vertical-align: bottom;
-}
-
-.picker__button--today:hover,
-.picker__button--clear:hover,
-.picker__button--close:hover {
-  cursor: pointer;
-  color: #000000;
-  background: #b1dcfb;
-  border-bottom-color: #b1dcfb;
-}
-
-.picker__button--today:focus,
-.picker__button--clear:focus,
-.picker__button--close:focus {
-  background: #b1dcfb;
-  border-color: rgba(0, 0, 0, 0.05);
-  outline: none;
-}
-
-.picker__button--today:before,
-.picker__button--clear:before,
-.picker__button--close:before {
-  position: relative;
-  display: inline-block;
-  height: 0;
-}
-
-.picker__button--today:before,
-.picker__button--clear:before {
-  content: " ";
-  margin-right: .45em;
-}
-
-.picker__button--today:before {
-  top: -0.05em;
-  width: 0;
-  border-top: 0.66em solid #0059bc;
-  border-left: .66em solid transparent;
-}
-
-.picker__button--clear:before {
-  top: -0.25em;
-  width: .66em;
-  border-top: 3px solid #ee2200;
-}
-
-.picker__button--close:before {
-  content: "\D7";
-  top: -0.1em;
-  vertical-align: top;
-  font-size: 1.1em;
-  margin-right: .35em;
-  color: #777777;
-}
-
-.picker__button--today[disabled],
-.picker__button--today[disabled]:hover {
-  background: #f5f5f5;
-  border-color: #f5f5f5;
-  color: #dddddd;
-  cursor: default;
-}
-
-.picker__button--today[disabled]:before {
-  border-top-color: #aaaaaa;
-}
-
 /* ==========================================================================
    CUSTOM MATERIALIZE STYLES
    ========================================================================== */
@@ -8196,15 +7999,6 @@ input[type=range]:focus::-ms-fill-upper {
   cursor: pointer;
   color: #000000;
   background: #a1ded8;
-}
-
-.picker__weekday-display {
-  background-color: #1f897f;
-  padding: 10px;
-  font-weight: 200;
-  letter-spacing: .5;
-  font-size: 1rem;
-  margin-bottom: 15px;
 }
 
 .picker__month-display {
@@ -8237,14 +8031,6 @@ input[type=range]:focus::-ms-fill-upper {
 .picker__table {
   margin-top: 0;
   margin-bottom: .5em;
-}
-
-.picker__day--infocus {
-  color: #595959;
-  letter-spacing: -.3;
-  padding: .75rem 0;
-  font-weight: 400;
-  border: 1px solid transparent;
 }
 
 .picker__day.picker__day--today {

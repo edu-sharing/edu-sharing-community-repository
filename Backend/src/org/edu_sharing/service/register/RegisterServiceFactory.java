@@ -1,12 +1,8 @@
 package org.edu_sharing.service.register;
 
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
-import org.edu_sharing.service.permission.PermissionService;
-import org.edu_sharing.service.permission.PermissionServiceImpl;
+import com.typesafe.config.Config;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
-import java.io.InputStream;
 import java.util.Properties;
 
 public class RegisterServiceFactory {
@@ -17,8 +13,8 @@ public class RegisterServiceFactory {
 	}
 	public static RegisterService getLocalService() {
 		try{
-			Properties config = getConfig();
-			Class clazz = Class.forName(RegisterServiceFactory.class.getPackage().getName()+"."+config.getProperty("class"));
+			Config config = getConfig();
+			Class clazz = Class.forName(RegisterServiceFactory.class.getPackage().getName()+"."+config.getString("class"));
 			Object obj = clazz.newInstance();
 			RegisterService registerService = (RegisterService) obj;
 			return registerService;
@@ -27,8 +23,8 @@ public class RegisterServiceFactory {
 		}
 
 	}
-	public static Properties getConfig() throws Exception {
-		return PropertiesHelper.getProperties("/org/edu_sharing/service/register/register.properties", PropertiesHelper.TEXT);
+	public static Config getConfig() throws Exception {
+		return LightbendConfigLoader.get().getConfig("repository.register");
 	}
 
 }

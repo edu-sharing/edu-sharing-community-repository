@@ -1,0 +1,7 @@
+<ng-template #suggestionsPanel>
+  <app-mds-editor-view
+    *ngFor="let view of views"
+    [view]="view"
+    [overrideWidget]="overrideWidget"
+  ></app-mds-editor-view>
+</ng-template>

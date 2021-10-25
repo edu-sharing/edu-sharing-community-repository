@@ -204,9 +204,7 @@ public class SearchToken implements Serializable {
 		this.queryString=queryString;
 	}
 	public String getQueryString() throws IllegalArgumentException {
-		if(queryString!=null)
-			return queryString;
-		return getLuceneString();
+		return queryString;
 	}
 	
 	/**

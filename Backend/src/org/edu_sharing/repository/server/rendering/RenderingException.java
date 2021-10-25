@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.rendering;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.ErrorFilter;
 import org.edu_sharing.repository.server.tools.HttpException;
 import org.json.JSONObject;
 
@@ -13,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
-public class RenderingException extends ServletException {
+public class RenderingException extends ErrorFilter.ErrorFilterException {
 
     public enum I18N{
         invalid_parameters,
@@ -24,18 +25,17 @@ public class RenderingException extends ServletException {
         internal,
         unknown,
     }
-    private int statusCode;
     private String technicalDetail;
     private I18N i18nName;
     private Throwable nested;
 
     public RenderingException(int statusCode,String technicalDetail, I18N i18nName) {
-        this.statusCode=statusCode;
+        super(statusCode);
         this.technicalDetail=technicalDetail;
         this.i18nName=i18nName;
     }
     public RenderingException(HttpException exception){
-        this.statusCode=exception.getStatusCode();
+        super(exception.getStatusCode());
         this.nested=exception;
         try{
             JSONObject json = new JSONObject(exception.getMessage());
@@ -51,10 +51,6 @@ public class RenderingException extends ServletException {
         this(statusCode,technicalDetail,i18nName);
         this.nested=nested;
 
-    }
-
-    public int getStatusCode() {
-        return statusCode;
     }
 
     public String getTechnicalDetail() {

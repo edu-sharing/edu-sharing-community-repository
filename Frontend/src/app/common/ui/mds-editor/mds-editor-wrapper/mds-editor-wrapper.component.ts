@@ -17,7 +17,7 @@ import {
     EditorMode,
     EditorType,
     MdsWidget,
-    Suggestions,
+    FacetValues,
     UserPresentableError,
     Values,
 } from '../types';
@@ -61,11 +61,11 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() editorMode: EditorMode;
     @Input() setId: string;
-    @Input() suggestions: Suggestions;
+    @Input() facets: FacetValues;
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
-    @Output() onDone = new EventEmitter<Node[]|Values>();
+    @Output() onDone = new EventEmitter<Node[] | Values>();
     @Output() onMdsLoaded = new EventEmitter();
     @Output() openContributor = new EventEmitter();
     @Output() openLicense = new EventEmitter();
@@ -89,8 +89,8 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if ('suggestions' in changes) {
-            this.mdsEditorInstance.suggestions$.next(changes.suggestions.currentValue);
+        if ('facets' in changes) {
+            this.mdsEditorInstance.facets$.next(changes.facets.currentValue);
         }
     }
 
@@ -158,7 +158,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
      *
      * Use `reInit()` and make sure inputs are prepared before calling.
      */
-    loadMds(): void {
+    loadMds(onlyLegacy = false): void {
         // In case of `SearchComponent`, `currentValues` is not ready when `loadMds` is called. So
         // we wait tick before initializing.
         setTimeout(() => {
@@ -171,6 +171,9 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                         });
                         return;
                     case 'angular':
+                        if (onlyLegacy) {
+                            return;
+                        }
                         this.mdsEditorInstance.mdsDefinition$
                             .pipe(first((definition) => definition !== null))
                             .subscribe((definition) => this.onMdsLoaded.emit(definition));
@@ -184,7 +187,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         try {
             if (!this.mdsEditorInstance.getCanSave()) {
                 // no changes, behave like close
-                if(this.mdsEditorInstance.getIsValid()){
+                if (this.mdsEditorInstance.getIsValid()) {
                     this.onDone.emit(this.nodes);
                     return;
                 } else {
@@ -203,11 +206,13 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     }
 
     async reInit(): Promise<void> {
-        this.mdsEditorInstance.mdsInflated.next(false);
         return this.init();
     }
 
     private async init(): Promise<void> {
+        if (this.mdsEditorInstance.mdsInflatedValue) {
+            this.mdsEditorInstance.mdsInflated.next(false);
+        }
         this.isLoading = true;
         try {
             if (this.nodes) {

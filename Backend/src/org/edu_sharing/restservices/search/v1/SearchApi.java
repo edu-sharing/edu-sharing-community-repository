@@ -20,6 +20,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
+import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
@@ -82,6 +83,11 @@ public class SearchApi {
 
 			SearchToken token = new SearchToken();
 			token.setFacettes(parameters.getFacettes());
+			token.setFacettesLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+					? parameters.getFacetLimit() : 10);
+			token.setFacettesMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0 )
+					? parameters.getFacetMinCount(): 5);
+			token.setQueryString(parameters.getFacetSuggest());
 			token.setPermissions(parameters.getPermissions());
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 			token.setFrom(skipCount != null ? skipCount : 0);
@@ -118,6 +124,55 @@ public class SearchApi {
 	    	}  catch (Throwable t) {
 	    		return ErrorResponse.createResponse(t);
 	    	}
+
+	}
+
+
+	@POST
+	@Path("/queriesV2/{repository}/{metadataset}/{query}/facets")
+	@Consumes({ "application/json" })
+
+	@ApiOperation(value = "Search in facets", notes = "Perform queries based on metadata sets V2.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultNode.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response searchFacets(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, defaultValue = "-default-") @PathParam("metadataset") String mdsId,
+			@ApiParam(value = "ID of query", required = true) @PathParam("query") String query,
+			@ApiParam(value = "facet parameters", required = true) SearchParametersFacets parameters,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, mdsId);
+
+			SearchToken token = new SearchToken();
+			token.setFacettes(parameters.getFacettes());
+			token.setFrom(0);
+			token.setMaxResult(0);
+			token.setFacettesLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+					? parameters.getFacetLimit() : 10);
+			token.setFacettesMinCount((parameters.getFacetMinCount()  != null && parameters.getFacetMinCount() >= 0 )
+					? parameters.getFacetMinCount() : 5);
+			token.setQueryString(parameters.getFacetSuggest());
+
+			NodeSearch search = NodeDao.searchFacettes(repoDao, mdsDao, query, parameters.getCriterias(), token);
+			SearchResultNode response = new SearchResultNode();
+			response.setNodes(new ArrayList<>());
+			response.setIgnored(search.getIgnored());
+			response.setFacettes(search.getFacettes());
+			return Response.status(Response.Status.OK).entity(search).build();
+
+		}  catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 
 	}
 

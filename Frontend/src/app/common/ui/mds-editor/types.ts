@@ -1,7 +1,15 @@
 import { Type } from '@angular/core';
-import { Sort } from '../../../core-module/core.module';
+import { MdsWidgetValue } from 'edu-sharing-api';
 import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
+export {
+    MdsDefinition,
+    MdsGroup,
+    MdsView,
+    MdsWidget,
+    MdsWidgetCondition,
+    MdsWidgetValue,
+} from 'edu-sharing-api';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -15,14 +23,19 @@ export class UserPresentableError extends Error {
 }
 
 /**
- * - `nodes`: Supports bulk, only returns changed values
- * - `search`: No bulk, all values returned, Trees sub-children are auto-selected if root is
- *   selected, required errors and -warnings are disabled
- * - `form`: No bulk, all values returned
+ * - `nodes`:
+ *   - Supports bulk.
+ *   - Returns only changed values.
+ * - `search`:
+ *   - No bulk.
+ *   - All values returned.
+ *   - Trees sub-children are auto-selected if root is selected.
+ *   - Required errors and -warnings are disabled.
+ * - `form`:
+ *   - No bulk.
+ *   - All values returned.
  */
 export type EditorMode = 'nodes' | 'search' | 'form';
-
-export type ViewRelation = 'suggestions';
 
 export interface Constraints {
     requiresNode?: boolean;
@@ -87,6 +100,7 @@ export enum MdsWidgetType {
     SingleValueTree = 'singlevalueTree',
     MultiValueTree = 'multivalueTree',
     DefaultValue = 'defaultvalue',
+    FacetList = 'facetList',
 }
 
 // Entries must be lowercase only.
@@ -103,33 +117,7 @@ export enum NativeWidgetType {
 
 export type MdsEditorWidgetComponent = Type<MdsEditorWidgetBase>;
 
-export interface MdsDefinition {
-    create: null;
-    name: string;
-    lists: MdsList[];
-    groups: MdsGroup[];
-    views: MdsView[];
-    widgets: MdsWidget[];
-    sorts: Sort[];
-}
-
-export interface MdsView {
-    id: string;
-    caption: string;
-    isExtended: boolean;
-    html: string;
-    icon: string;
-    rel: ViewRelation;
-    hideIfEmpty: boolean;
-}
-
 export type EditorType = 'angular' | 'legacy';
-
-export interface MdsGroup {
-    id: string;
-    views: string[];
-    rendering: EditorType;
-}
 
 export interface MdsList {
     columns: MdsListColumn[];
@@ -142,56 +130,14 @@ export interface MdsListColumn {
     showDefault: boolean;
 }
 
-// Incomplete, fill in as needed.
-export interface MdsWidget {
-    link: null;
-    subwidgets: null;
-    condition: MdsWidgetCondition;
-    maxlength: number;
-    id: string;
-    caption: string;
-    bottomCaption: string;
-    icon: null;
-    type: MdsWidgetType;
-    template: null;
-    hasValues: boolean;
-    values: MdsWidgetValue[];
-    placeholder: null;
-    unit: string;
-    min: number;
-    max: number;
-    defaultMin: number;
-    defaultMax: number;
-    step: number;
-    allowempty: boolean;
-    defaultvalue: string;
-    isRequired: RequiredMode;
-    isSearchable: boolean;
-    isExtended: boolean;
-}
+export type MdsWidgetFacetValue = MdsWidgetValue & { count: number };
 
-// Incomplete, fill in as needed.
-export interface MdsWidgetValue {
-    id: string;
-    caption: string;
-    description?: string;
-    parent?: string;
-}
-export type MdsWidgetFacetValue = MdsWidgetValue & { count?: string };
-
-export interface MdsWidgetCondition {
-    dynamic: boolean;
-    type: 'PROPERTY' | 'TOOLPERMISSION';
-    value: string;
-    negate: boolean;
-    pattern?: string;
-}
-
-export type Suggestions = { [property: string]: MdsWidgetValue[] };
+export type FacetValues = { [property: string]: MdsWidgetFacetValue[] };
 
 export enum RequiredMode {
     Mandatory = 'mandatory',
     MandatoryForPublish = 'mandatoryForPublish',
+    Recommended = 'recommended',
     Optional = 'optional',
     Ignore = 'ignore',
 }

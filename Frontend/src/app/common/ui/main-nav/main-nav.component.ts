@@ -22,7 +22,7 @@ import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     About,
     ConfigurationHelper,
-    ConfigurationService,
+    ConfigurationService, Connector,
     DialogButton,
     FrameEventsService,
     IamUser,
@@ -55,6 +55,7 @@ import { GlobalContainerComponent } from '../global-container/global-container.c
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
 import {MainNavService} from '../../services/main-nav.service';
+import { SearchFieldComponent } from '../search-field/search-field.component';
 
 /**
  * The main nav (top bar + menus)
@@ -108,7 +109,7 @@ import {MainNavService} from '../../services/main-nav.service';
 export class MainNavComponent implements AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
-    @ViewChild('search') search: ElementRef;
+    @ViewChild(SearchFieldComponent) searchField: SearchFieldComponent;
     @ViewChild('topbar') topbar: ElementRef;
     @ViewChild('userRef') userRef: ElementRef;
     @ViewChild('tabNav') tabNav: ElementRef;
@@ -158,12 +159,16 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         folder: false,
     };
     @Input() searchQuery: string;
-    @Input() set currentScope(currentScope: string) {
+    @Input()
+    set currentScope(currentScope: string) {
         this._currentScope = currentScope;
         this.event.broadcastEvent(
             FrameEventsService.EVENT_VIEW_OPENED,
             currentScope,
         );
+    }
+    get currentScope() {
+        return this._currentScope;
     }
 
     /**
@@ -259,6 +264,14 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
+                        if(params.connector) {
+                            this.createMenu?.showCreateConnector(
+                                this.createMenu?.connectorList?.filter(
+                                    (c) => c.id === params.connector
+                                )[0]
+                            );
+                        }
+
                         this.showNodeStore = params.nodeStore === 'true';
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
@@ -285,7 +298,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     @HostListener('window:scroll', ['$event'])
     @HostListener('window:touchmove', ['$event'])
-    handleScroll(event: any) {
+    async handleScroll(event: any) {
         if (
             this.storage.get(
                 TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,
@@ -327,37 +340,36 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             }
             // Give the browser layout engine some time to remove the values, otherwise the elements
             // will have not their initial positions
-            setTimeout(() => {
-                for (let i = 0; i < elements.length; i++) {
-                    const element: any = elements[i];
-                    element.style.transition = null;
-                    if (
-                        !element.getAttribute(
+            await new Promise(resolve => resolve(void 0));
+            for (let i = 0; i < elements.length; i++) {
+                const element: any = elements[i];
+                element.style.transition = null;
+                if (
+                    !element.getAttribute(
+                        MainNavComponent.ID_ATTRIBUTE_NAME,
+                    )
+                ) {
+                    element.setAttribute(
+                        MainNavComponent.ID_ATTRIBUTE_NAME,
+                        Math.random(),
+                    );
+                }
+                if (
+                    this.scrollInitialPositions[
+                        element.getAttribute(
                             MainNavComponent.ID_ATTRIBUTE_NAME,
                         )
-                    ) {
-                        element.setAttribute(
-                            MainNavComponent.ID_ATTRIBUTE_NAME,
-                            Math.random(),
-                        );
-                    }
-                    if (
-                        this.scrollInitialPositions[
-                            element.getAttribute(
-                                MainNavComponent.ID_ATTRIBUTE_NAME,
-                            )
-                        ]
-                    )
-                        continue;
-                    // getComputedStyle does report wrong values in search sidenav
-                    this.scrollInitialPositions[
-                        element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                    ] = window
-                        .getComputedStyle(element)
-                        .getPropertyValue('top');
-                }
-                this.posScrollElements(event, elements);
-            });
+                    ]
+                )
+                    continue;
+                // getComputedStyle does report wrong values in search sidenav
+                this.scrollInitialPositions[
+                    element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
+                ] = window
+                    .getComputedStyle(element)
+                    .getPropertyValue('top');
+            }
+            this.posScrollElements(event, elements);
         } else {
             this.handleScrollHide();
             this.posScrollElements(event, elements);
@@ -468,8 +480,9 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         ]);
     }
 
-    refreshBanner() {
-        setTimeout(() => this.handleScroll(null));
+    async refreshBanner(): Promise<void> {
+        await new Promise(resolve => resolve(void 0));
+        await this.handleScroll(null);
     }
 
     scrollToTop() {
@@ -578,8 +591,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     }
 
     clearSearch() {
-        this.searchQuery = '';
-        this.searchQueryChange.emit('');
         this.onSearch.emit({ query: '', cleared: true });
     }
 
@@ -598,7 +609,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     }
 
     doSearch(
-        value = this.search.nativeElement.value,
+        value = this.searchQuery,
         broadcast = true,
     ) {
         if (broadcast) {
@@ -721,7 +732,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     private updateUserOptions() {
         this.userMenuOptions = [];
-        if (!this.connector.getCurrentLogin()?.isGuest) {
+        if (!this.connector.getCurrentLogin()?.isGuest && !this.connector.getCurrentLogin()?.currentScope) {
             this.userMenuOptions.push(
                 new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
                     this.openProfile(),

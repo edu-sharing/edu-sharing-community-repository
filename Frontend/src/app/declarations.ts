@@ -12,7 +12,6 @@
   import {ToolListComponent} from './common/ui/tool-list/tool-list.component';
   import {UserProfileComponent} from './common/ui/user-profile/user-profile.component';
   import {ToucheventDirective} from './common/ui/touchevents/touchevents';
-  import {NodeTitlePipe} from './common/ui/node-title.pipe';
   import {BannerComponent} from './common/ui/banner/banner.component';
   import {SmallCollectionComponent} from './common/ui/small-collection/small-collection.component';
   import {InfobarComponent} from './common/ui/infobar/infobar.component';
@@ -45,6 +44,7 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
   import {SanitizeHTMLPipe} from './common/ui/sanitizeHTML.pipe';
   import {ColorTransformPipe} from "./common/ui/color-transform.pipe";
   import {AccessibilityComponent} from './common/ui/accessibility/accessibility.component';
+  import {MatConfirmGroupComponent} from './common/ui/mat-confirm-group/mat-confirm-group.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -56,7 +56,6 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       AuthorityRowComponent,
-      NodeTitlePipe,
       ColorTransformPipe,
       SanitizeHTMLPipe,
       NodeAuthorNamePipe,
@@ -89,6 +88,7 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
       FooterComponent,
       InputFillProgressComponent,
       CookieInfoComponent,
+      MatConfirmGroupComponent,
       AccessibilityComponent,
       TutorialComponent,
       EmbedComponent,

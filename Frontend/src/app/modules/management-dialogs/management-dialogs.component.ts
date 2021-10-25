@@ -1,3 +1,4 @@
+import {forkJoin as observableForkJoin, observable, Observable} from 'rxjs';
 import {
     Component,
     Input,
@@ -36,7 +37,6 @@ import {Router} from '@angular/router';
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
 import {RestUsageService} from "../../core-module/core.module";
-import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
@@ -301,7 +301,7 @@ export class WorkspaceManagementDialogsComponent  {
  closeShare() {
       // reload node metadata
      this.toast.showProgressDialog();
-     Observable.forkJoin(this.nodeShare.map((n) => this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
+     observableForkJoin(this.nodeShare.map((n) => this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
          .subscribe((nodes: NodeWrapper[]) => {
              this.onRefresh.emit(nodes.map(n => n.node));
              this.nodeShare = null
@@ -452,7 +452,7 @@ export class WorkspaceManagementDialogsComponent  {
   }
   deleteNodes(nodes: Node[]) {
       this.toast.showProgressDialog();
-      Observable.forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
+      observableForkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
           .subscribe(() => {
               this.toast.closeModalDialog();
               this.closeEditor(true);
@@ -697,7 +697,7 @@ export class WorkspaceManagementDialogsComponent  {
 
     private unblockImportedNodes(nodes: Node[]) {
         this.toast.showProgressDialog();
-        Observable.forkJoin(nodes.map((n) => {
+        observableForkJoin(nodes.map((n) => {
             const properties: any = {};
             properties[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [null];
             return new Observable((observer) => {
@@ -730,7 +730,7 @@ export class WorkspaceManagementDialogsComponent  {
 
     declineProposals(nodes: ProposalNode[]) {
         this.errorProcessing.handleRestRequest(
-            Observable.forkJoin(nodes.map((n) =>
+            observableForkJoin(nodes.map((n) =>
                 this.nodeService.editNodeProperty(n.proposal.ref.id,
                     RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
                     [('DECLINED' as CollectionProposalStatus)])
@@ -742,13 +742,13 @@ export class WorkspaceManagementDialogsComponent  {
 
     addProposalsToCollection(nodes: ProposalNode[]) {
         this.errorProcessing.handleRestRequest(
-        Observable.forkJoin(nodes.map((n) =>
+        observableForkJoin(nodes.map((n) =>
             this.nodeService.editNodeProperty(n.proposal.ref.id,
                 RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
                 [('ACCEPTED' as CollectionProposalStatus)])
 
         ))).then(() => {
-            this.errorProcessing.handleRestRequest(Observable.forkJoin(nodes.map((n) =>
+            this.errorProcessing.handleRestRequest(observableForkJoin(nodes.map((n) =>
                 this.collectionService.addNodeToCollection(n.proposalCollection.ref.id,
                     n.ref.id,
                     n.ref.repo)
@@ -763,7 +763,7 @@ export class WorkspaceManagementDialogsComponent  {
                         references: results.map((r) => r.node)
                     }
                 });
-            })
+            });
         });
     }
 }

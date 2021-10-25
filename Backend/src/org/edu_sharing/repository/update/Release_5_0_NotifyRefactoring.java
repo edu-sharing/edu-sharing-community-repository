@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -49,7 +50,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 
 	@Override
 	public void execute() {
-		this.executeWithProtocolEntry();
+		this.executeWithProtocolEntryNoGlobalTx();
 	}
 
 	@Override
@@ -66,10 +67,16 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 
 	@Override
 	public void run() throws Throwable {
-		doTask();
 
 	}
-	public void doTask(){
+
+	@Override
+	public boolean runAndReport() {
+		return doTask();
+	}
+
+
+	public boolean doTask(){
 		NodeRunner runner=new NodeRunner();
 		runner.setRunAsSystem(true);
 		runner.setTypes(Arrays.asList(CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP));
@@ -77,9 +84,15 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		runner.setKeepModifiedDate(true);
 		runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
 		int[] processed=new int[]{0};
+		AtomicBoolean result = new AtomicBoolean(true);
 		runner.setTask((ref)->{
-			migrate(ref);
-			processed[0]++;
+			try{
+				migrate(ref);
+				processed[0]++;
+			}catch (Throwable e){
+				result.set(false);
+				logger.error("problem with noderef:"+ref+". "+e.getMessage(),e);
+			}
 		});
 		runner.run();
 		logInfo("Converted a total of "+processed[0]+" nodes");
@@ -90,6 +103,7 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
             nodeService.deleteNode(ref);
             logInfo("removed the notify folder");
         }catch(Throwable t) {
+			result.set(false);
             logger.error(t.getMessage(),t);
         }
 		try{
@@ -100,13 +114,14 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 			nodeService.deleteNode(ref);
             logInfo("removed the notify safe folder");
 		} catch (Throwable t) {
+			result.set(false);
 			logger.error(t.getMessage(),t);
 		}
 		finally {
             NodeServiceInterceptor.setEduSharingScope(null);;
         }
 
-
+		return result.get();
 	}
 
 	private void migrate(NodeRef nodeRef) {

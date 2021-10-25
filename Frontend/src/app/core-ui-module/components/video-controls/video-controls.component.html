@@ -11,13 +11,13 @@
     </mat-expansion-panel-header>
     <ng-template matExpansionPanelContent>
       <div class="selectionSlider">
-        <ng5-slider
+        <ngx-slider
           [(value)]="values.startTime"
           [(highValue)]="values.endTime"
           [options]="sliderOptions"
           (valueChange)="onValueChange($event, 'start')"
           (highValueChange)="onValueChange($event, 'end')"
-        ></ng5-slider>
+        ></ngx-slider>
       </div>
       <div>
         <form class="addChapter">

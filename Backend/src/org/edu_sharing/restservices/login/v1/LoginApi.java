@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.authentication.AppSignatureFilter;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -238,7 +237,7 @@ public class LoginApi  {
 			ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 			SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper) eduApplicationContext.getBean("ssoAuthorityMapper");
 
-			ApplicationInfo verifiedApp = AppSignatureFilter.getAppInfo();
+			ApplicationInfo verifiedApp = ContextManagementFilter.accessTool.get();
 			if(verifiedApp == null){
 				String msg = "no app was verified. check if AppSignatureFilter is configured";
 				logger.error(msg);

@@ -11,13 +11,13 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "aot": true,
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "showCircularDependencies": true,
+            "baseHref": "/edu-sharing/",
+            "deployUrl": "/edu-sharing/",
             "assets": [
               { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
               { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "/assets/monaco/" }
@@ -32,22 +32,27 @@
               "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/moment/min/moment-with-locales.min.js",
               "src/assets/js/chart.js"
-            ]
+            ],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
+                  "maximumWarning": "15kb",
+                  "maximumError": "100kb"
                 }
               ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -58,12 +63,14 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "angular-edusharing:build"
+            "browserTarget": "angular-edusharing:build",
+            "proxyConfig": "src/proxy.conf.js"
           },
           "configurations": {
             "production": {
@@ -127,6 +134,37 @@
           "options": {
             "tsConfig": [],
             "exclude": []
+          }
+        }
+      }
+    },
+    "edu-sharing-api": {
+      "projectType": "library",
+      "root": "projects/edu-sharing-api",
+      "sourceRoot": "projects/edu-sharing-api/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/edu-sharing-api/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/edu-sharing-api/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/edu-sharing-api/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/edu-sharing-api/src/test.ts",
+            "tsConfig": "projects/edu-sharing-api/tsconfig.spec.json",
+            "karmaConfig": "projects/edu-sharing-api/karma.conf.js"
           }
         }
       }

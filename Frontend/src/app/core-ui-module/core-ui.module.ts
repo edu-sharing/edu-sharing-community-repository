@@ -19,7 +19,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { Ng5SliderModule } from 'ng5-slider';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { RestLocatorService } from '../core-module/rest/services/rest-locator.service';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CardComponent } from './components/card/card.component';
@@ -79,11 +79,34 @@ import {ErrorProcessingService} from './error.processing';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
 import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
+import {RenderHelperService} from './render-helper.service';
+import {MdsDurationPipe} from './pipes/mds-duration.pipe';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import {NodeEntriesComponent} from './components/node-entries/node-entries.component';
+import {NodeEntriesWrapperComponent} from './components/node-entries-wrapper/node-entries-wrapper.component';
+import {NodeEntriesCardGridComponent} from './components/node-entries/node-entries-card-grid/node-entries-card-grid.component';
+import {NodeEntriesCardComponent} from './components/node-entries/node-entries-card/node-entries-card.component';
+import {NodeImagePipe} from './pipes/node-image.pipe';
+import {NodeTitlePipe} from './pipes/node-title.pipe';
+import {OptionButtonComponent} from './components/option-button/option-button.component';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {NodeEntriesDragDirective} from './directives/node-entries-drag';
+import {NodeEntriesCardSmallComponent} from './components/node-entries/node-entries-card-small/node-entries-card-small.component';
+import {NodeEntriesTableComponent} from './components/node-entries/node-entries-table/node-entries-table.component';
+import {MatTableModule} from '@angular/material/table';
+import {ColumnChooserComponent} from './components/node-entries/node-entries-table/column-chooser/column-chooser.component';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {CheckTextOverflowDirective} from './directives/check-text-overflow.directive';
+import {MatSortModule} from '@angular/material/sort';
+import {OverlayModule} from '@angular/cdk/overlay';
+import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
+import {DragCursorDirective} from './directives/drag-cursor.directive';
 
 @NgModule({
     declarations: [
         CollectionChooserComponent,
         ListTableComponent,
+        NodeEntriesComponent,
         ListBaseComponent,
         ListCollectionInfoComponent,
         ListNodeLicenseComponent,
@@ -91,6 +114,7 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         ListNodeWorkflowComponent,
         ListTextComponent,
         ListCountsComponent,
+        NodeEntriesDragDirective,
         DropdownComponent,
         SortDropdownComponent,
         IconDirective,
@@ -105,6 +129,7 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         GlobalProgressComponent,
         VideoControlsComponent,
         InfoMessageComponent,
+        OptionButtonComponent,
         InputPasswordComponent,
         InfiniteScrollDirective,
         AuthorityNamePipe,
@@ -122,7 +147,9 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         UrlPipe,
         AuthorityAffiliationPipe,
         OptionTooltipPipe,
+        NodeImagePipe,
         NodeSourcePipe,
+        NodeTitlePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         ImageConfigDirective,
@@ -130,16 +157,28 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
+        MdsDurationPipe,
         BitwisePipe,
         ElementRefDirective,
         TitleDirective,
         FormatDurationPipe,
+        NodeEntriesWrapperComponent,
+        NodeEntriesComponent,
+        NodeEntriesCardGridComponent,
+        NodeEntriesCardComponent,
+        NodeEntriesCardSmallComponent,
+        NodeEntriesTableComponent,
+        ColumnChooserComponent,
+        CheckTextOverflowDirective,
+        ListItemLabelPipe,
+        DragCursorDirective
     ],
     imports: [
         A11yModule,
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
+        DragDropModule,
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
@@ -153,7 +192,7 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         MatSnackBarModule,
         MatTabsModule,
         MatTooltipModule,
-        Ng5SliderModule,
+        NgxSliderModule,
         RouterModule,
         TranslateModule.forRoot({
             loader: {
@@ -166,15 +205,22 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
                 useClass: FallbackTranslationHandler,
             },
         }),
+        MatSlideToggleModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        OverlayModule,
     ],
     providers: [
         Toast,
         ErrorProcessingService,
         NodeHelperService,
+        RenderHelperService,
         OptionsHelperService],
     exports: [
         TranslateModule,
         ListTableComponent,
+        NodeEntriesComponent,
         SpinnerComponent,
         CustomNodeListWrapperComponent,
         BreadcrumbsComponent,
@@ -188,6 +234,7 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         CardComponent,
         UserAvatarComponent,
         UserTileComponent,
+        MdsDurationPipe,
         LinkComponent,
         CollectionChooserComponent,
         DropdownComponent,
@@ -212,9 +259,13 @@ import {OptionTooltipPipe} from './pipes/option-tooltip.pipe';
         ListCollectionInfoComponent,
         ListBaseComponent,
         ListTextComponent,
+        NodeTitlePipe,
         TitleDirective,
         SafeHtmlPipe,
         ElementRefDirective,
+        NodeEntriesWrapperComponent,
+        CheckTextOverflowDirective,
+        DragCursorDirective
     ],
 })
 export class CoreUiModule {}
