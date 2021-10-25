@@ -23,10 +23,10 @@ spec:
             name: {{ include "edusharing_rendering_service.name" . }}-env
         - secretRef:
             name: {{ include "edusharing_rendering_service.name" . }}-env
-        {{- with .Values.resources }}
+        {{- with .Values.job.init.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.securityContext }}
+        {{- with .Values.job.init.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
       {{- with .Values.global.image.pullSecrets }}

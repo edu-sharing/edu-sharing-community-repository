@@ -16,7 +16,7 @@ spec:
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
         prometheus.io/path: "/actuator/prometheus"
         prometheus.io/port: "8081"
-        prometheus.io/scrape: {{ .Values.metrics.enabled | quote }}
+        prometheus.io/scrape: {{ .Values.config.metrics | quote }}
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       containers:
@@ -31,12 +31,6 @@ spec:
         ports:
         - name: mgmt
           containerPort: 8081
-        - name: jmx
-          containerPort: 7199
-        {{- if .Values.config.jvm.debug }}
-        - name: jpda
-          containerPort: 5005
-        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           httpGet:

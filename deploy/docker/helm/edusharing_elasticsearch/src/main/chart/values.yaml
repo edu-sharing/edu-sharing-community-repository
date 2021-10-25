@@ -78,6 +78,7 @@ podSecurityContext:
 
 securityContext:
 
+  allowPrivilegeEscalation: false
   capabilities:
     drop:
     - ALL
@@ -114,18 +115,47 @@ resources:
 
 ########################################################################################################################
 
-metrics:
+init:
 
-  enabled: true
+  permission:
 
-  resources:
-    limits:
-      cpu: 100m
-      memory: 100Mi
-    requests:
-      cpu: 100m
-      memory: 100Mi
+    enabled: false
 
-  securityContext: {}
+    resources: {}
+
+    securityContext:
+      runAsUser: 0
+
+  sysctl:
+
+    enabled: false
+
+    resources: {}
+
+    securityContext:
+      privileged: true
+      runAsUser: 0
+
+########################################################################################################################
+
+sidecar:
+
+  metrics:
+
+    enabled: true
+
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
 
 ########################################################################################################################

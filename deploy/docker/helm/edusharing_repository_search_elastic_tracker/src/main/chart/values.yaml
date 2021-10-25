@@ -37,6 +37,8 @@ config:
       minPercentage: "95.0"
       maxPercentage: "95.0"
 
+  metrics: true
+
   options: ""
 
   repository:
@@ -65,6 +67,7 @@ podSecurityContext:
 
 securityContext:
 
+  allowPrivilegeEscalation: false
   capabilities:
     drop:
     - ALL
@@ -98,11 +101,5 @@ resources:
   requests:
     cpu: 500m
     memory: 2Gi
-
-########################################################################################################################
-
-metrics:
-
-  enabled: true
 
 ########################################################################################################################

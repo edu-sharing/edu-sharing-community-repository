@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/component: cachecleaner
 spec:
   concurrencyPolicy: Forbid
-  schedule: {{ .Values.config.cachecleaner.schedule | quote }}
+  schedule: {{ .Values.job.cachecleaner.schedule | quote }}
   successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:
@@ -32,10 +32,10 @@ spec:
             - name: share
               mountPath: /var/cache/esrender
               subPath: data/
-            {{- with .Values.resources }}
+            {{- with .Values.job.cachecleaner.resources }}
             resources: {{ toYaml . | nindent 14 }}
             {{- end }}
-            {{- with .Values.securityContext }}
+            {{- with .Values.job.cachecleaner.securityContext }}
             securityContext: {{ toYaml . | nindent 14 }}
             {{- end }}
           {{- with .Values.global.image.pullSecrets }}

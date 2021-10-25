@@ -48,6 +48,8 @@ config:
       minPercentage: "75.0"
       maxPercentage: "75.0"
 
+  metrics: true
+
   repository:
     host: edusharing-repository-service
     port: 8080
@@ -79,6 +81,7 @@ podSecurityContext:
 
 securityContext:
 
+  allowPrivilegeEscalation: false
   capabilities:
     drop:
     - ALL
@@ -115,8 +118,15 @@ resources:
 
 ########################################################################################################################
 
-metrics:
+init:
 
-  enabled: true
+  permission:
+
+    enabled: false
+
+    resources: {}
+
+    securityContext:
+      runAsUser: 0
 
 ########################################################################################################################

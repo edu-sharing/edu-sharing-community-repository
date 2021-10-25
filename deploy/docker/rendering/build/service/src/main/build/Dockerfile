@@ -60,7 +60,6 @@ WORKDIR $RS_ROOT
 COPY artifacts/edu_sharing-community-rendering-${org.edu_sharing:edu_sharing-community-rendering:tar.gz:bin.version}-bin.tar.gz /tmp/edu_sharing-community-rendering.tar.gz
 
 RUN set -eux \
-	&& mkdir -p $RS_ROOT $RS_CACHE \
 	&& tar -xzvf /tmp/edu_sharing-community-rendering.tar.gz --exclude './vendor/lib/converter' \
 	&& rm -rf /tmp/edu_sharing-community-rendering.tar.gz
 
@@ -75,10 +74,6 @@ RUN set -eux \
 COPY assets/rendering/de.metaventis.esrender.log4php.properties conf/
 COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties install/_tmpl/conf/
 
-RUN set -eux \
-    && mkdir -p $RS_CACHE \
-	&& chown -R www-data:www-data $RS_ROOT $RS_CACHE
-
 ########################################################################################################################
 
 COPY assets/entrypoint.sh /usr/local/bin/
@@ -87,6 +82,14 @@ COPY assets/init.sh /usr/local/bin/
 RUN set -eux \
     && chmod +x /usr/local/bin/entrypoint.sh \
     && chmod +x /usr/local/bin/init.sh
+
+########################################################################################################################
+
+RUN set -eux \
+    && mkdir -p $RS_CACHE \
+	&& chown -R www-data:www-data /etc/apache2 $RS_ROOT $RS_CACHE $PHP_INI_DIR
+
+USER www-data
 
 ########################################################################################################################
 

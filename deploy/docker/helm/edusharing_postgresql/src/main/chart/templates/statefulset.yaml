@@ -18,10 +18,11 @@ spec:
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
         prometheus.io/path: "/metrics"
         prometheus.io/port: "9114"
-        prometheus.io/scrape: {{ .Values.metrics.enabled | quote }}
+        prometheus.io/scrape: {{ .Values.sidecar.metrics.enabled | quote }}
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       initContainers:
+      {{- if .Values.init.permission.enabled }}
       - name: {{ include "edusharing_postgresql.name" . }}-init-permission
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -34,8 +35,13 @@ spec:
         - name: data
           mountPath: /bitnami/postgresql
           subPath: data/
-        securityContext:
-          runAsUser: 0
+        {{- with .Values.init.permission.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.init.permission.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - name: {{ include "edusharing_postgresql.name" . }}
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-postgresql:{{ .Values.global.image.tag }}
@@ -84,7 +90,7 @@ spec:
         {{- with .Values.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
-      {{- if .Values.metrics.enabled }}
+      {{- if .Values.sidecar.metrics.enabled }}
       - name: {{ include "edusharing_postgresql.name" . }}-metrics
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}-postgresql_exporter:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -95,13 +101,10 @@ spec:
         env:
         - name: DATA_SOURCE_NAME
           value: postgresql://{{ .Values.config.username }}:{{ .Values.config.password }}@127.0.0.1:5432/{{ .Values.config.database }}?sslmode=disable
-        ports:
-        - name: metric
-          containerPort: 9114
-        {{- with .Values.metrics.resources }}
+        {{- with .Values.sidecar.metrics.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.metrics.securityContext }}
+        {{- with .Values.sidecar.metrics.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
       {{- end }}

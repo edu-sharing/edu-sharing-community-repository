@@ -154,6 +154,8 @@ config:
       minPercentage: "75.0"
       maxPercentage: "75.0"
 
+  metrics: true
+
   saml:
     enabled: false
 #    config: ""
@@ -207,12 +209,10 @@ podSecurityContext:
 
   runAsUser: 1000
   fsGroup: 1000
-#  sysctls:
-#  - name: net.core.somaxconn
-#    value: "10000"
 
 securityContext:
 
+  allowPrivilegeEscalation: false
   capabilities:
     drop:
     - ALL
@@ -249,42 +249,52 @@ resources:
 
 ########################################################################################################################
 
-metrics:
+init:
 
-  enabled: true
+  permission:
+
+    enabled: false
+
+    resources: {}
+
+    securityContext:
+      runAsUser: 0
 
 ########################################################################################################################
 
-transform:
+sidecar:
 
-  securityContext:
+  transform:
 
-    capabilities:
-      drop:
-        - ALL
+    livenessProbe:
 
-  livenessProbe:
+      failureThreshold: 3
+      initialDelaySeconds: 1200
+      periodSeconds: 10
+      timeoutSeconds: 5
 
-    failureThreshold: 3
-    initialDelaySeconds: 1200
-    periodSeconds: 10
-    timeoutSeconds: 5
+    readinessProbe:
 
-  readinessProbe:
+      failureThreshold: 1
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
 
-    failureThreshold: 1
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    successThreshold: 1
-    timeoutSeconds: 5
+    resources:
 
-  resources:
+      limits:
+        cpu: 100m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
 
-    limits:
-      cpu: 100m
-      memory: 1Gi
-    requests:
-      cpu: 100m
-      memory: 1Gi
+    securityContext:
+
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
 
 ########################################################################################################################
