@@ -1,6 +1,15 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    ViewChild,
+} from '@angular/core';
 import { SearchService } from 'edu-sharing-api';
-import { first, map, switchMap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { first, map, switchMap, takeUntil } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
@@ -28,7 +37,7 @@ import {
     styleUrls: ['./mds-editor-wrapper.component.scss'],
     providers: [MdsEditorInstanceService],
 })
-export class MdsEditorWrapperComponent implements OnInit {
+export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.
 
     // Properties compatible to legacy MdsComponent.
@@ -69,6 +78,8 @@ export class MdsEditorWrapperComponent implements OnInit {
     legacySuggestions: { [property: string]: MdsWidgetValue[] };
     legacySuggestionsRegistered = false;
 
+    private destroyed$ = new Subject<void>();
+
     constructor(
         public mdsEditorInstance: MdsEditorInstanceService,
         private toast: Toast,
@@ -84,6 +95,11 @@ export class MdsEditorWrapperComponent implements OnInit {
         if (this.nodes || this.currentValues) {
             this.init();
         }
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
     /** @deprecated compatibility to legacy `mds` component */
@@ -243,8 +259,11 @@ export class MdsEditorWrapperComponent implements OnInit {
     }
 
     private registerLegacySuggestions(): void {
-        this.mdsEditorInstance.facets$
+        this.mdsEditorInstance
+            .getNeededFacets()
             .pipe(
+                takeUntil(this.destroyed$),
+                switchMap((neededFacets) => this.search.getFacets(neededFacets)),
                 map((facets) => {
                     if (facets) {
                         return Object.entries(facets).reduce(

@@ -1106,26 +1106,33 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if(this.applyMode){
             permissions = [RestConstants.ACCESS_CC_PUBLISH];
         }
-        let queryRequest: Observable<SearchResults | NodeList> = this.mdsDesktopRef.mdsEditorInstance
-            // Wait for the mds editor to register its needed facets with the search api.
-            .mdsInitDone
-            .pipe(
-                first(),
-                switchMap(() =>
-                    this.searchApi.search({
-                        body: { criterias, facettes: [], permissions, facetLimit: 5, facetMinCount: 1 },
-                        skipCount: request.offset,
-                        maxItems: request.count ?? this.search.getRestConnector().numberPerRequest,
-                        sortProperties: request.sortBy,
-                        sortAscending: request.sortAscending,
-                        propertyFilter: request.propertyFilter[0],
-                        contentType: 'FILES',
-                        repository: repo ? repo.id : RestConstants.HOME_REPOSITORY,
-                        metadataset: mdsId,
-                        query: RestConstants.DEFAULT_QUERY_NAME,
-                    })
-                ),
-            );
+        let queryRequest: Observable<SearchResults | NodeList> =
+            this.mdsDesktopRef.mdsEditorInstance
+                .getNeededFacets()
+                .pipe(
+                    first(),
+                    switchMap((neededFacets) =>
+                        this.searchApi.search({
+                            body: {
+                                criterias,
+                                facettes: neededFacets,
+                                permissions,
+                                facetLimit: 5,
+                                facetMinCount: 1,
+                            },
+                            skipCount: request.offset,
+                            maxItems:
+                                request.count ?? this.search.getRestConnector().numberPerRequest,
+                            sortProperties: request.sortBy,
+                            sortAscending: request.sortAscending,
+                            propertyFilter: request.propertyFilter[0],
+                            contentType: 'FILES',
+                            repository: repo ? repo.id : RestConstants.HOME_REPOSITORY,
+                            metadataset: mdsId,
+                            query: RestConstants.DEFAULT_QUERY_NAME,
+                        }),
+                    ),
+                );
             const useFrontpage = !this.searchService.searchTerm && !this.searchService.extendedSearchUsed &&
                 this.isHomeRepository() && this.config.instant('frontpage.enabled', true);
             if(useFrontpage && tryFrontpage) {

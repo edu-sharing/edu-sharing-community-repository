@@ -6,6 +6,7 @@ import {
     MdsViewRelation,
     SearchService as SearchApiService,
 } from 'edu-sharing-api';
+import * as rxjs from 'rxjs';
 import {
     BehaviorSubject,
     combineLatest,
@@ -49,7 +50,6 @@ import {
 } from './types';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import * as rxjs from 'rxjs';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -545,7 +545,6 @@ export class MdsEditorInstanceService implements OnDestroy {
      */
     mdsInflated = new ReplaySubject<boolean>(1);
     mdsInflatedValue: boolean;
-    facets$ = new BehaviorSubject<FacetsDict>(null);
     suggestionsSubject = new BehaviorSubject<FacetsDict>(null);
     /** Views that have at least one widget, that is not hidden due to dynamic conditions. */
     activeViews = new ReplaySubject<MdsView[]>(1);
@@ -745,22 +744,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             ),
             shareReplay(1),
         );
-        this.mdsInitDone
-            .pipe(
-                takeUntil(this.destroyed$),
-                switchMap(() => {
-                    // The group 'search_input' uses its own widgets which do not rely on regular
-                    // facets, although setting `relation: 'suggestions'`.
-                    if (this.groupId === 'search_input') {
-                        return EMPTY;
-                    } else {
-                        return rxjs.of(void 0);
-                    }
-                }),
-                map(() => this.getNeededFacetsInstant()),
-                switchMap((neededFacets) => this.searchApi.getFacets(neededFacets)),
-            )
-            .subscribe((facets) => this.facets$.next(facets));
     }
 
     ngOnDestroy() {
@@ -1381,9 +1364,6 @@ export class MdsEditorInstanceService implements OnDestroy {
      * Returns a list of properties for which the MDS editor requires facet values.
      *
      * The observable continues to emit updates as long as the mds editor is alive.
-     *
-     * Needed facets are now registered with the search api automatically. Usually, you *do not*
-     * need to use this.
      */
     getNeededFacets(): Observable<string[]> {
         return this.mdsInitDone.pipe(map(() => this.getNeededFacetsInstant()));
