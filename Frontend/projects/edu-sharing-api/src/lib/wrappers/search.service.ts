@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { Subject } from 'rxjs';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { LabeledValue, MdsIdentifier } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
-import { MdsLabelService } from './mds-label.service';
+import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
 
 /** Configuration for `SearchService`. */
 export class SearchConfig {
@@ -100,13 +99,21 @@ export class SearchService {
      * triggered.
      *
      * Facets are mapped to include translated labels taken from the respective MDS widget.
+     *
+     * @param includeActiveFilters - whether to always include active filters in the facet
+     * list---even if the facet does not have any results (`count` is 0).
      */
-    getFacets(properties: string[]): Observable<FacetsDict> {
+    getFacets(properties: string[], { includeActiveFilters = false } = {}): Observable<FacetsDict> {
         this.subscribeFacets(properties);
         return new Observable((subscriber) => {
             const destroyed$ = new Subject<void>();
             this.facetsSubject
-                .pipe(takeUntil(destroyed$))
+                .pipe(
+                    takeUntil(destroyed$),
+                    includeActiveFilters
+                        ? switchMap((facets) => this.includeActiveFilters(facets))
+                        : rxjs.identity,
+                )
                 .subscribe((value) => subscriber.next(value));
             return () => {
                 this.unsubscribeFacets(properties);
@@ -114,6 +121,19 @@ export class SearchService {
                 destroyed$.complete();
             };
         });
+    }
+
+    /**
+     * Like `getFacets`, but gets facets for a single property.
+     *
+     * Might still return `null` when the requested facet was not part of the last search request
+     * (see `getFacets`).
+     */
+    getFacet(
+        property: string,
+        options?: Parameters<SearchService['getFacets']>[1],
+    ): Observable<FacetAggregation | null> {
+        return this.getFacets([property], options).pipe(map((facets) => facets[property] ?? null));
     }
 
     // /**
@@ -202,6 +222,17 @@ export class SearchService {
             .pipe(switchMap((response) => this.mapFacets(response.facettes)));
     }
 
+    /**
+     * Returns the filters provided as search params.
+     *
+     * Filters are mapped to include translated labels taken from the respective MDS widget.
+     */
+    getFilters(): Observable<LabeledValuesDict> {
+        const filterCriteria = this.getFilterCriteria();
+        const filterRawValues = this.criteriaToRawValues(filterCriteria);
+        return this.mdsLabel.labelValuesDict(this.getMdsIdentifier(), filterRawValues);
+    }
+
     private registerFacetsSubject(): void {
         this.resultsSubject
             .pipe(
@@ -264,9 +295,34 @@ export class SearchService {
      * This includes everything but the free-text search string.
      */
     private getFilterCriteria(
-        criteria: apiModels.SearchParameters['criterias'],
+        criteria: apiModels.SearchParameters['criterias'] = this.searchParamsSubject.value?.body
+            .criterias ?? [],
     ): apiModels.SearchParameters['criterias'] {
         return criteria.filter((criterion) => criterion.property !== 'ngsearchword');
+    }
+
+    private includeActiveFilters(facets: FacetsDict): Observable<FacetsDict> {
+        return this.getFilters().pipe(
+            // first(),
+            map((activeFilters) => {
+                for (const [property, filters] of Object.entries(activeFilters)) {
+                    for (const filter of filters) {
+                        if (
+                            facets[property]?.values.every((facet) => facet.value !== filter.value)
+                        ) {
+                            facets = {
+                                ...facets,
+                                [property]: {
+                                    ...facets[property],
+                                    values: [...facets[property].values, { ...filter, count: 0 }],
+                                },
+                            };
+                        }
+                    }
+                }
+                return facets;
+            }),
+        );
     }
 
     private mapFacets(results: apiModels.SearchResultNode['facettes']): Observable<FacetsDict> {
@@ -302,5 +358,12 @@ export class SearchService {
         return this.mdsLabel
             .getLabel(this.getMdsIdentifier(), property, value)
             .pipe(map((label) => ({ count, value, label })));
+    }
+
+    private criteriaToRawValues(criteria: apiModels.SearchParameters['criterias']): RawValuesDict {
+        return criteria.reduce((acc, criterion) => {
+            acc[criterion.property] = criterion.values;
+            return acc;
+        }, {} as RawValuesDict);
     }
 }

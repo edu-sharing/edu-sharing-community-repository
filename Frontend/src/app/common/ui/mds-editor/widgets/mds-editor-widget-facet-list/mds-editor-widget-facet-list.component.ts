@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { FacetAggregation, FacetValue, SearchService } from 'edu-sharing-api';
-import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
@@ -13,7 +13,10 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
     styleUrls: ['./mds-editor-widget-facet-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MdsEditorWidgetFacetListComponent extends MdsEditorWidgetBase implements OnInit {
+export class MdsEditorWidgetFacetListComponent
+    extends MdsEditorWidgetBase
+    implements OnInit, OnDestroy
+{
     readonly valueType: ValueType = ValueType.MultiValue;
     /** Available facet values being updated from `mdsEditorInstance.suggestions$`. */
     readonly facetAggregationSubject = new BehaviorSubject<FacetAggregation>(null);
@@ -23,6 +26,7 @@ export class MdsEditorWidgetFacetListComponent extends MdsEditorWidgetBase imple
     isLoading = false;
     /** IDs of selected values. Updated through user interaction. */
     private values: string[];
+    private readonly destroyed$ = new Subject<void>();
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
@@ -38,6 +42,11 @@ export class MdsEditorWidgetFacetListComponent extends MdsEditorWidgetBase imple
         this.registerFormControls();
     }
 
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
+
     getFacet(index: number): FacetValue {
         return this.facetAggregationSubject.value.values[index];
     }
@@ -50,8 +59,9 @@ export class MdsEditorWidgetFacetListComponent extends MdsEditorWidgetBase imple
     }
 
     private registerFacetValuesSubject(): void {
-        this.mdsEditorInstance.facets$
-            .pipe(map((facets) => facets[this.widget.definition.id]))
+        this.search
+            .getFacet(this.widget.definition.id, { includeActiveFilters: true })
+            .pipe(takeUntil(this.destroyed$))
             .subscribe((facetAggregation) => this.facetAggregationSubject.next(facetAggregation));
     }
 
