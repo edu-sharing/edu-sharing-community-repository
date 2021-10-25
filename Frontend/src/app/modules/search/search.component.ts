@@ -663,7 +663,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setDisplayType(type: NodeEntriesDisplayType) {
-        console.log(type);
         this.nodeEntriesResults.displayType = type;
         this.router.navigate(['./'], {
             relativeTo: this.activatedRoute,
@@ -830,7 +829,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private updateSortState() {
-        console.log('sort state');
         let sort = this.updateSortMds();
         if (sort) {
             const columns = sort.columns.map((c) =>
@@ -842,7 +840,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.searchService.sort.columns = columns;
                 return;
             }
-            console.log(sort);
             this.searchService.sort = {
                 active: sort.default.sortBy,
                 direction: sort.default.sortAscending ? 'asc' : 'desc',
@@ -1147,7 +1144,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.searchService.dataSourceSearchResult[position].appendData(data.nodes);
                         this.searchService.dataSourceSearchResult[position].setPagination(data.pagination);
                     }
-                    console.log('init options')
                     await this.nodeEntriesResults.initOptionsGenerator({
                         actionbar: this.actionbarComponent,
                         customOptions: this.customOptions,

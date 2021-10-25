@@ -26,7 +26,6 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
     }
 
     async appendData(appendData: T[], location: 'before' | 'after' = 'after') {
-        console.log('append', appendData);
         let data = this.getData();
         if(location === 'after') {
             data = data.concat(appendData);
