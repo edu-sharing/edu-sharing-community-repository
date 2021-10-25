@@ -81,6 +81,13 @@
     "NO_CC_PUBLISH": "no publishing permissions for object",
     "SELECT": "select {{ element }}",
     "EDIT": "edit {{ thing }}",
+    "EXPAND": "expand {{ element }}",
+    "COLLAPSE": "collapse {{ element }}",
+    "CHECKBOX_CHECKED": "checkbox checked",
+    "CHECKBOX_NOT_CHECKED": "checkbox not checked",
+    "RADIO_BUTTON_SELECTED": "radio button selected",
+    "RADIO_BUTTON_NOT_SELECTED": "radio button not selected",
+    "DISABLED": "disabled",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "Add to recently used collections",
         "SEARCH_COLLECTIONS": "Find collection...",
@@ -218,7 +225,8 @@
     },
     "LIST_TABLE": {
         "DUMMY_ICON_LABEL": "File type",
-        "TOGGLE_ALL": "Select all/none"
+        "TOGGLE_ALL": "Select all/none",
+        "CONFIGURE_COLUMNS": "Configure columns"
     },
     "NODE": {
         "cm:name": "filename",
@@ -228,6 +236,7 @@
         "size": "size",
         "mediatype": "file type",
         "ccm:commonlicense_key": "license",
+        "ccm:collection_ordered_position": "custom",
         "ccm:educationallearningresourcetype": "Type",
         "ccm:replicationsourceid": "Original-ID",
         "ccm:educationalcontext": "Educational Context",
@@ -406,6 +415,7 @@
     },
     "AUTHORITY_TYPE_GROUP": "Group",
     "AUTHORITY_TYPE_ORG": "Organisation",
+    "CHILDOBJECT_COUNT": "{{count}} elements (series)",
     "GROUP": {
         "displayName": "group name",
         "authorityName": "system name",

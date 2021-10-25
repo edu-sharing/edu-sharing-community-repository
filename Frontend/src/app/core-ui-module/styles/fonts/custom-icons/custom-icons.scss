@@ -3,11 +3,11 @@
   @if $customIcons == true {
     @font-face {
       font-family: 'Custom-Icons';
-      src: url('fonts/custom-icons/custom-icons.eot');
+      src: url('custom-icons.eot');
       src: local('Custom-Icons'),
-      url('fonts/custom-icons/custom-icons.eot?1pib6e#iefix') format('embedded-opentype'),
-      url('fonts/custom-icons/custom-icons.ttf?1pib6e') format('truetype'),
-      url('fonts/custom-icons/custom-icons.woff?1pib6e') format('woff');
+      url('custom-icons.eot?1pib6e#iefix') format('embedded-opentype'),
+      url('custom-icons.ttf?1pib6e') format('truetype'),
+      url('custom-icons.woff?1pib6e') format('woff');
       font-weight: normal;
       font-style: normal;
     }

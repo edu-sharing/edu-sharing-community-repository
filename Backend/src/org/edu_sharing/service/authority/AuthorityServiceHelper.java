@@ -6,6 +6,8 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class AuthorityServiceHelper {
@@ -31,6 +33,17 @@ public class AuthorityServiceHelper {
         } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
         }
         return false;
+    }
+
+    public static Map<String, Double> getDefaultAuthoritySearchFields() {
+        Map<String, Double> fields = new HashMap<>();
+        if(isAdmin()) {
+            fields.put("userName", 1.);
+        }
+        fields.put("email", 2.);
+        fields.put("firstName", 5.);
+        fields.put("lastName", 5.);
+        return fields;
     }
 
 }

@@ -9,7 +9,7 @@
 <global-progress *ngIf="isLoading"></global-progress>
 <div *ngIf="!isLoading">
   <card
-    role="main" [appSkipTarget]="SkipTarget.MainContent"
+    role="main" appSkipTarget="main-content"
     title="{{ caption | translate }}"
     avatar="assets/images/app-icon.svg"
     subtitle="{{ 'LOGIN.SUBTITLE' | translate }}"

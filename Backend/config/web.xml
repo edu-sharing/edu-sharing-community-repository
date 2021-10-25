@@ -82,9 +82,13 @@
 		    </init-param>
       -->
    </filter>
-  
-   
-	<filter>
+
+    <filter>
+        <filter-name>Edu Error Filter</filter-name>
+        <filter-class>org.edu_sharing.repository.server.ErrorFilter</filter-class>
+    </filter>
+
+    <filter>
 		<filter-name>Edu Context Management Filter</filter-name>
 		<filter-class>org.edu_sharing.repository.server.authentication.ContextManagementFilter</filter-class>
 	</filter>
@@ -106,12 +110,7 @@
       <filter-name>Edu-Sharing Authentication Rest Filter</filter-name>
       <filter-class>org.edu_sharing.restservices.ApiAuthenticationFilter</filter-class>
     </filter>
-   
-    <filter>
-        <filter-name>App Signature Filter</filter-name>
-        <filter-class>org.edu_sharing.repository.server.authentication.AppSignatureFilter</filter-class>
-    </filter>
-    
+
     <filter>
     	<filter-name>Shibboleth SoapAction Header Fix</filter-name>
     	<filter-class>org.edu_sharing.repository.server.authentication.ShibbolethSLOHeaderFix</filter-class>
@@ -170,11 +169,6 @@
     </filter-mapping>
 
     <filter-mapping>
-        <filter-name>App Signature Filter</filter-name>
-        <url-pattern>/rest/authentication/v1/appauth/*</url-pattern>
-    </filter-mapping>
-
-    <filter-mapping>
       <filter-name>REST Origin Filter</filter-name>
       <url-pattern>/rest/*</url-pattern>
    </filter-mapping>
@@ -183,7 +177,10 @@
       <filter-name>REST Origin Filter</filter-name>
       <url-pattern>/oauth2/*</url-pattern>
    </filter-mapping>
-
+    <filter-mapping>
+        <filter-name>Edu Error Filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <filter-mapping>
       <filter-name>Edu Context Management Filter</filter-name>
       <url-pattern>/webdav/*</url-pattern>
@@ -851,12 +848,17 @@
         <location>/error.html</location>
     </error-page>
     <error-page>
+        <error-code>405</error-code>
+        <location>/error.html</location>
+    </error-page>
+    <error-page>
         <error-code>500</error-code>
         <location>/error.html</location>
     </error-page>
-
+    <!--
     <error-page>
         <exception-type>org.edu_sharing.repository.server.rendering.RenderingException</exception-type>
         <location>/rendering-error</location>
     </error-page>
+    -->
 </web-app>

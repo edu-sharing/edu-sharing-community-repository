@@ -1,6 +1,5 @@
 import {Component, Input, EventEmitter, ViewEncapsulation, Output} from '@angular/core';
-import 'rxjs/add/operator/map'
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { BrowserModule } from '@angular/platform-browser';
 import {Translation} from "../../core-ui-module/translation";
 import {Toast} from "../../core-ui-module/toast";

@@ -1,3 +1,4 @@
+import {filter, skipWhile} from 'rxjs/operators';
 import {
     ChangeDetectorRef,
     Component,
@@ -69,6 +70,7 @@ import {CardComponent} from '../../../core-ui-module/components/card/card.compon
 import {CardService} from '../../../core-ui-module/card.service';
 import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
+import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 
 declare var jQuery:any;
 declare var window: any;
@@ -145,7 +147,12 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+              const dataSource: NodeDataSource<Node> = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE)
+                if(dataSource) {
+                    this.list = dataSource.getData();
+                } else {
+                    this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+                }
               this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
@@ -722,9 +729,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                     option.callback();
                     // wait until a dialog has opened, then, as soon as the particular dialog closed
                     // trigger that the action has been done
-                    this.cardServcie.hasOpenModals
-                        .skipWhile((h) => !h)
-                        .filter((h) => !h)
+                    this.cardServcie.hasOpenModals.pipe(
+                        skipWhile((h) => !h),
+                        filter((h) => !h),)
                         .subscribe(() => this.onQueryActionDone());
                 } else {
                     console.warn('action ' + this.queryParams.action + ' is currently not enabled');

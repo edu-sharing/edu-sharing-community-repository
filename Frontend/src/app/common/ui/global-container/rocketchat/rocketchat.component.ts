@@ -6,6 +6,7 @@ import {EventListener,FrameEventsService} from "../../../../core-module/rest/ser
 import {UIAnimation} from "../../../../core-module/ui/ui-animation";
 import {ConfigurationService, RestConnectorService} from '../../../../core-module/core.module';
 import {GlobalContainerComponent} from "../global-container.component";
+import { first } from "rxjs/operators";
 
 @Component({
   selector: 'rocketchat',
@@ -79,7 +80,7 @@ export class RocketchatComponent implements EventListener {
         this.opened = await this.configuration.get('remote.rocketchat.shouldOpen', false).toPromise();
         this.fullscreen = false;
         if (GlobalContainerComponent.getPreloading()) {
-            GlobalContainerComponent.subscribePreloading().first().subscribe(() => this.initalize());
+            GlobalContainerComponent.subscribePreloading().pipe(first()).subscribe(() => this.initalize());
             return;
         }
         const login = await this.connector.isLoggedIn(forceRenew).toPromise();

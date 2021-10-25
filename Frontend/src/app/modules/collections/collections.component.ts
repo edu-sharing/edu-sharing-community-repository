@@ -1,4 +1,14 @@
-import {Component, ContentChild, ElementRef, TemplateRef, ViewChild} from '@angular/core';
+import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
+import {
+    AfterViewInit,
+    Component,
+    ContentChild,
+    ElementRef,
+    EventEmitter, OnDestroy,
+    TemplateRef,
+    ViewChild
+} from '@angular/core';
+import 'rxjs/add/operator/first';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
 import * as EduData from '../../core-module/core.module';
@@ -34,7 +44,7 @@ import {
     SortDefault,
     RequestObject,
     RestMediacenterService, Mediacenter,
-    AbstractList, ProposalNode,
+    AbstractList, ProposalNode, ListItemSort,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
 import {CustomOptions, DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
@@ -54,17 +64,27 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
-import { Observable } from 'rxjs';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 import {MainNavService} from '../../common/services/main-nav.service';
 import {
     ManagementEvent,
     ManagementEventType
 } from '../management-dialogs/management-dialogs.component';
 import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/custom-node-list-wrapper/custom-node-list-wrapper.component';
+import {
+    SortEvent,
+} from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
+import {DataSource} from '@angular/cdk/collections';
+import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import {
+    DropSource, DropTarget,
+    ListEventInterface, ListSortConfig, NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent
+} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+import {Sort} from '@angular/material/sort';
+import {first} from 'rxjs/operators';
 
 // component class
 @Component({
@@ -73,9 +93,9 @@ import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/cu
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
     providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
-        subscribeEvents: false
-    }}]})
-export class CollectionsMainComponent {
+            subscribeEvents: false
+        }}]})
+export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -95,15 +115,18 @@ export class CollectionsMainComponent {
         sortAscending: [false, true, false],
     };
     readonly SCOPES = Scope;
-    readonly SkipTarget = SkipTarget;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
-    @ViewChild('listReferences') listReferences: CustomNodeListWrapperComponent;
+    @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
+
+    dataSourceCollections = new NodeDataSource<Node>();
+    dataSourceReferences = new NodeDataSource<CollectionReference>();
 
     viewTypeNodes: 0 | 1 | 2 = ListTableComponent.VIEW_TYPE_GRID;
 
@@ -116,15 +139,18 @@ export class CollectionsMainComponent {
     isReady = false;
     collectionContent: {
         node: Node;
-        collections: Node[];
-        references: EduData.CollectionReference[];
-        collectionsPagination?: EduData.Pagination;
-        referencesPagination?: EduData.Pagination;
-        referencesLoading?: boolean;
-        collectionsLoading?: boolean;
     };
+    collectionSortEmitter = new EventEmitter<SortEvent>();
+    collectionCustomSortEmitter = new EventEmitter<boolean>();
+    referenceSortEmitter = new EventEmitter<SortEvent>();
+    referenceCustomSortEmitter = new EventEmitter<boolean>();
     mainnav = true;
     isGuest = true;
+    sortCollectionColumns: ListItemSort[] = [
+        new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
+        new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
+        new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'ascending'),
+    ];
     addToOther: EduData.Node[];
     addPinning: string;
     infoTitle: string;
@@ -158,7 +184,6 @@ export class CollectionsMainComponent {
             this.mainNavRef.createMenu.showUploadSelect = true
         },
     );
-    optionsMaterials: OptionItem[];
     collectionProposals: AbstractList<ProposalNode>;
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
@@ -167,7 +192,26 @@ export class CollectionsMainComponent {
     ];
     tutorialElement: ElementRef;
     permissions: Permission[];
-    private sortCollections: SortDefault;
+    sortReferences: ListSortConfig = {
+        active: null,
+        direction: 'asc',
+        columns: [
+            // new ListItemSort('NODE', RestConstants.LOM_PROP_TITLE),
+            new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
+            new ListItemSort('NODE', RestConstants.CM_PROP_C_CREATED),
+            new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'ascending'),
+        ]
+    };
+    sortCollections: ListSortConfig = {
+        active: null,
+        direction: 'asc',
+        columns: [
+            new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
+            new ListItemSort('NODE', RestConstants.CM_PROP_C_CREATED),
+            new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
+            new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'ascending'),
+        ]
+    };
     // FIXME: `collectionShare` is expected to be of type `Node[]` by `workspace-management` but is
     // of type `Node` here.
     private adminMediacenters: Mediacenter[];
@@ -205,39 +249,48 @@ export class CollectionsMainComponent {
         }
         return pos;
     }
-    set orderActive(orderActive: boolean) {
-        this._orderActive = orderActive;
-        this.collectionContent.node.collection.orderMode = orderActive
-            ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-            : null;
-
-        if (this._orderActive) {
+    toggleCollectionsOrder() {
+        if (this.sortCollections.customSortingInProgress) {
+            this.infoTitle = 'COLLECTIONS.ORDER_COLLECTIONS';
+            this.infoMessage = 'COLLECTIONS.ORDER_COLLECTIONS_INFO';
+            this.infoButtons = DialogButton.getSingleButton('SAVE', () => {
+                this.changeCollectionsOrder();
+            });
+            this.infoClose = () => {
+                this.sortCollections.customSortingInProgress = false;
+                this.toggleCollectionsOrder();
+            };
+        } else {
+            this.infoTitle = null;
+            this.refreshContent();
+        }
+    }
+    toggleReferencesOrder() {
+        if (this.sortReferences.customSortingInProgress) {
             this.infoTitle = 'COLLECTIONS.ORDER_ELEMENTS';
             this.infoMessage = 'COLLECTIONS.ORDER_ELEMENTS_INFO';
             this.infoButtons = DialogButton.getSingleButton('SAVE', () => {
-                this.changeOrder();
+                this.changeReferencesOrder();
+                this.sortReferences.customSortingInProgress = false;
+                this.listReferences.getSelection().clear();
             });
             this.infoClose = () => {
-                this.orderActive = false;
+                this.sortReferences.customSortingInProgress = false;
+                this.toggleReferencesOrder();
             };
-            this.loadMoreReferences(true);
         } else {
             this.infoTitle = null;
-            // this.collectionContent.references=Helper.deepCopy(this.collectionContentOriginal.references);
-            this.refreshAll();
+            this.refreshContent();
         }
-    }
-    get orderActive() {
-        return this._orderActive;
     }
 
     private collectionContentOriginal: any;
     private filteredOutCollections: Array<EduData.Collection> = new Array<
         EduData.Collection
-    >();
+        >();
     private filteredOutReferences: Array<
         EduData.CollectionReference
-    > = new Array<EduData.CollectionReference>();
+        > = new Array<EduData.CollectionReference>();
     private collectionIdParamSubscription: any;
     private contentDetailObject: any = null;
     // real parentCollectionId is only available, if user was browsing
@@ -252,7 +305,6 @@ export class CollectionsMainComponent {
     hasEditorial = false;
     hasMediacenter = false;
     private showCollection = false;
-    private _orderActive: boolean;
     reurl: any;
     private _collectionShare: Node;
     private feedbacks: CollectionFeedback[];
@@ -286,6 +338,11 @@ export class CollectionsMainComponent {
         private config: ConfigurationService,
         private translationService: TranslateService,
     ) {
+        this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
+        // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
+        // this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
+        // this.referenceSortEmitter.subscribe((sort: SortEvent) => this.setReferenceSort(sort));
+        // this.referenceCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleReferencesOrder() : this.changeReferencesOrder());
         this.collectionsColumns.push(new ListItem('COLLECTION', 'title'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
@@ -334,8 +391,8 @@ export class CollectionsMainComponent {
                                         mds,
                                         'collectionReferences',
                                     );
-                                    const info = MdsHelper.getSortInfo(mds, 'collections');
-                                    this.sortCollections = info.default;
+                                    //const info = MdsHelper.getSortInfo(mds, 'collections');
+                                    //this.sortCollections = info.default;
                                     this.initialize();
                                 });
                             },(e) => {
@@ -350,14 +407,21 @@ export class CollectionsMainComponent {
             );
         });
         this.mainNavService.getDialogs().onEvent.subscribe((event: ManagementEvent) => {
-            console.log(event, this.collectionContent.node);
             if(event.event === ManagementEventType.AddCollectionNodes){
                 if(event.data.collection.ref.id === this.collectionContent.node.ref.id) {
                     console.log('add virtual', event.data.references)
-                    this.listReferences.getListTable().addVirtualNodes(event.data.references);
+                    this.listReferences.addVirtualNodes(event.data.references);
                 }
             }
-        })
+        });
+    }
+
+
+    ngOnDestroy() {
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.dataSourceReferences);
+    }
+
+    ngAfterViewInit() {
     }
 
     isMobile() {
@@ -366,24 +430,6 @@ export class CollectionsMainComponent {
 
     isMobileWidth() {
         return window.innerWidth < UIConstants.MOBILE_WIDTH;
-    }
-
-    setCustomOrder(event: MatSlideToggleChange) {
-        const checked = event.checked;
-        this.collectionContent.node.collection.orderMode = checked
-            ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM
-            : null;
-        if (checked) {
-            this.orderActive = true;
-        } else {
-            this.toast.showProgressDialog();
-            this.collectionService
-                .setOrder(this.collectionContent.node.ref.id)
-                .subscribe(() => {
-                    this.toast.closeModalDialog();
-                    this.orderActive = false;
-                });
-        }
     }
 
     navigate(id = '', addToOther = '', feedback = false) {
@@ -499,18 +545,21 @@ export class CollectionsMainComponent {
     getScopeInfo() {
         return this.nodeHelper.getCollectionScopeInfo(this.collectionContent.node);
     }
-    dropOnCollection(event: any) {
-        console.log(event);
-        const target = event.target;
-        const source = event.source[0];
+    dropOnRef = (target: Node, source: DropSource<Node>) => {
+        return;
+    }
+    dropOnCollection = (target: Node, source: DropSource<Node>) => {
+        if(source.element[0] === target) {
+            return;
+        }
         this.toast.showProgressDialog();
-        if (source.mediatype === 'collection') {
-            if (event.type === 'copy') {
+        if (source.element[0].mediatype === 'collection') {
+            if (source.mode === 'copy') {
                 this.toast.error(null, 'INVALID_OPERATION');
                 this.toast.closeModalDialog();
                 return;
             }
-            this.nodeService.moveNode(target?.ref?.id || RestConstants.COLLECTIONHOME, source.ref.id).subscribe(
+            this.nodeService.moveNode(target?.ref?.id || RestConstants.COLLECTIONHOME, source.element[0].ref.id).subscribe(
                 () => {
                     this.toast.closeModalDialog();
                     this.refreshContent();
@@ -526,23 +575,23 @@ export class CollectionsMainComponent {
                 this.collectionService,
                 this.router,
                 this.bridge,
-                event.target,
-                event.source,
+                target,
+                source.element,
                 false,
                 nodes => {
-                    if (event.type === 'copy') {
+                    if (source.mode === 'copy') {
                         this.toast.closeModalDialog();
                         this.refreshContent();
                         return;
                     }
-                    if (event.source.length === nodes.length) {
-                        const observables = event.source.map((n: any) =>
+                    if (source.element.length === nodes.length) {
+                        const observables = source.element.map((n: any) =>
                             this.collectionService.removeFromCollection(
                                 n.ref.id,
                                 this.collectionContent.node.ref.id,
                             ),
                         );
-                        Observable.forkJoin(observables).subscribe(
+                        observableForkJoin(observables).subscribe(
                             () => {
                                 this.toast.closeModalDialog();
                                 this.refreshContent();
@@ -576,47 +625,47 @@ export class CollectionsMainComponent {
         );
     }
 
-    canDropOnCollection = (event: DropData) => {
+    canDropOnCollection = (target: DropTarget, source: DropSource<Node>) => {
         // drop to "home"
-        if(event.target === 'HOME') {
-            return event.dropAction === 'move' &&
-                event.nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1 &&
-                this.nodeHelper.getNodesRight(event.nodes, RestConstants.ACCESS_WRITE);
+        if(target === 'MY_FILES') {
+            return source.mode === 'move' &&
+                source.element[0].aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1 &&
+                this.nodeHelper.getNodesRight(source.element, RestConstants.ACCESS_WRITE);
         }
-        if (event.nodes[0].ref.id === event.target.ref.id) {
+        if (source.element[0].ref.id === (target as Node).ref.id) {
             return false;
         }
-        if (event.target.ref.id === this.collectionContent.node.ref.id) {
+        if ((target as Node).ref.id === this.collectionContent.node.ref.id) {
             return false;
         }
-        if(event.nodes[0].collection && event.dropAction === 'copy') {
+        if(source.element[0].collection && source.mode === 'copy') {
             return false;
         }
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
-        if (event.nodes[0].collection?.hasOwnProperty('childCollectionsCount')) {
+        if (source.element[0].collection?.hasOwnProperty('childCollectionsCount')) {
             if (
-                (event.nodes[0].collection.type ===
+                (source.element[0].collection.type ===
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.collection.type !==
-                        RestConstants.COLLECTIONTYPE_EDITORIAL) ||
-                (event.nodes[0].collection.type !==
+                    (target as Node).collection.type !==
+                    RestConstants.COLLECTIONTYPE_EDITORIAL) ||
+                (source.element[0].collection.type !==
                     RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    event.target.collection.type ===
-                        RestConstants.COLLECTIONTYPE_EDITORIAL)
+                    (target as Node).collection.type ===
+                    RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }
         }
         if (
-            event.dropAction === 'copy' &&
+            source.mode === 'copy' &&
             !this.nodeHelper.getNodesRight(
-                event.nodes,
+                source.element,
                 RestConstants.ACCESS_CC_PUBLISH,
                 NodesRightMode.Original,
             )
-            || event.dropAction === 'move' &&
+            || source.mode === 'move' &&
             !this.nodeHelper.getNodesRight(
-                event.nodes,
+                source.element,
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Original,
             )
@@ -626,7 +675,7 @@ export class CollectionsMainComponent {
 
         if (
             !this.nodeHelper.getNodesRight(
-                [event.target],
+                [target],
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Local,
             )
@@ -637,7 +686,7 @@ export class CollectionsMainComponent {
         return true;
     };
 
-    canDropOnRef(event: DropData) {
+    canDropOnRef(target: Node, source: DropSource<Node>) {
         // do not allow to drop here
         return false;
     }
@@ -705,8 +754,8 @@ export class CollectionsMainComponent {
             CollectionsMainComponent.DEFAULT_REQUEST,
         );
         if(this.sortCollections) {
-            request.sortBy = [this.sortCollections.sortBy];
-            request.sortAscending = [this.sortCollections.sortAscending];
+            request.sortBy = [this.sortCollections.active];
+            request.sortAscending = [this.sortCollections.direction === 'asc'];
         } else {
             console.warn('Sort for collections is not defined in the mds!');
         }
@@ -725,24 +774,22 @@ export class CollectionsMainComponent {
             .subscribe(
                 collection => {
                     // transfere sub collections and content
-                    this.collectionContent.collections = collection.collections;
-                    this.collectionContent.collectionsPagination =
-                        collection.pagination;
+                    this.dataSourceCollections.setData(collection.collections, collection.pagination);
                     if (this.isRootLevelCollection()) {
                         this.finishCollectionLoading(callback);
                         return;
                     }
                     if(this.isAllowedToEditCollection()) {
                         this.collectionService.
-                            getCollectionProposals(this.collectionContent.node.ref.id).subscribe((proposals) => {
+                        getCollectionProposals(this.collectionContent.node.ref.id).subscribe((proposals) => {
                             proposals.nodes = proposals.nodes.map((p) => {
-                                    p.proposalCollection = this.collectionContent.node;
-                                    return p;
+                                p.proposalCollection = this.collectionContent.node;
+                                return p;
                             });
                             this.collectionProposals = proposals;
                         })
                     }
-                    const requestRefs = Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
+                    const requestRefs = this.getReferencesRequest();
                     requestRefs.count = null;
                     this.collectionService
                         .getCollectionReferences(
@@ -752,9 +799,7 @@ export class CollectionsMainComponent {
                             this.collectionContent.node.ref.repo,
                         )
                         .subscribe(refs => {
-                            this.collectionContent.references = refs.references;
-                            this.collectionContent.referencesPagination =
-                                refs.pagination;
+                            this.dataSourceReferences.setData(refs.references, refs.pagination);
                             this.finishCollectionLoading(callback);
                         });
                 },
@@ -764,24 +809,18 @@ export class CollectionsMainComponent {
             );
     }
 
-    loadMoreReferences(loadAll = false) {
+    async loadMoreReferences(loadAll = false) {
         if (
-            this.collectionContent.references.length ==
-            this.collectionContent.referencesPagination.total
+            !(await this.dataSourceReferences.hasMore()) || this.dataSourceReferences.isLoading
         ) {
             return;
         }
-        if (this.collectionContent.referencesLoading) {
-            return;
-        }
-        const request: any = Helper.deepCopy(
-            CollectionsMainComponent.DEFAULT_REQUEST,
-        );
-        request.offset = this.collectionContent.references.length;
+        const request = this.getReferencesRequest();
+        request.offset = (await this.dataSourceReferences.getData()).length;
         if (loadAll) {
             request.count = RestConstants.COUNT_UNLIMITED;
         }
-        this.collectionContent.referencesLoading = true;
+        this.dataSourceReferences.isLoading = true;
         this.collectionService
             .getCollectionReferences(
                 this.collectionContent.node.ref.id,
@@ -790,28 +829,23 @@ export class CollectionsMainComponent {
                 this.collectionContent.node.ref.repo,
             )
             .subscribe(refs => {
-                this.collectionContent.references = this.collectionContent.references.concat(
-                    refs.references,
-                );
-                this.collectionContent.referencesLoading = false;
+                this.dataSourceReferences.appendData(refs.references);
+                this.dataSourceReferences.isLoading = false;
             });
     }
 
-    loadMoreCollections() {
+    async loadMoreCollections() {
         if (
-            this.collectionContent.collections.length ==
-            this.collectionContent.collectionsPagination.total
+            !await this.dataSourceCollections.hasMore() ||
+            this.dataSourceCollections.isLoading
         ) {
-            return;
-        }
-        if (this.collectionContent.collectionsLoading) {
             return;
         }
         const request: any = Helper.deepCopy(
             CollectionsMainComponent.DEFAULT_REQUEST,
         );
-        request.offset = this.collectionContent.collections.length;
-        this.collectionContent.collectionsLoading = true;
+        request.offset = (await this.dataSourceCollections.getData()).length;
+        this.dataSourceCollections.isLoading = true;
         this.collectionService
             .getCollectionSubcollections(
                 this.collectionContent.node.ref.id,
@@ -821,10 +855,8 @@ export class CollectionsMainComponent {
                 this.collectionContent.node.ref.repo,
             )
             .subscribe(refs => {
-                this.collectionContent.collections = this.collectionContent.collections.concat(
-                    refs.collections,
-                );
-                this.collectionContent.collectionsLoading = false;
+                this.dataSourceCollections.appendData(refs.collections);
+                this.dataSourceCollections.isLoading = false;
             });
     }
 
@@ -925,6 +957,8 @@ export class CollectionsMainComponent {
         if (id == null) {
             id = RestConstants.ROOT;
         }
+        this.createSubCollectionOptionItem.name = 'OPTIONS.' +
+            (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
         if (id == '-root-') {
             // display root collections with tabs
             this.setCollectionId(RestConstants.ROOT);
@@ -934,18 +968,38 @@ export class CollectionsMainComponent {
             this.isLoading = true;
 
             this.collectionService.getCollection(id).subscribe(
-                collection => {
+                ({collection}) => {
                     // set the collection and load content data by refresh
                     this.setCollectionId(null);
-                    this.collectionContent.node = collection.collection;
+                    const orderCollections = collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
+                    this.sortCollections.active = orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
+                    this.sortCollections.direction = orderCollections?.[1] === 'true' ? 'asc' : 'desc';
+
+                    const refMode = collection.collection.orderMode;
+                    const refAscending = collection.collection.orderAscending;
+                    // cast old order mode to new parameter
+                    this.sortReferences.active = (
+                        ((refMode === RestConstants.COLLECTION_ORDER_MODE_CUSTOM ?
+                            RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION : refMode) || RestConstants.CM_MODIFIED_DATE) as any
+                    );
+                    this.sortReferences.direction = refAscending ? 'asc' : 'desc';
+                    this.collectionContent.node = collection;
 
                     this.renderBreadcrumbs();
 
                     this.refreshContent(callback);
+                    if(this.feedbackAllowed() && this.params.feedback === 'true') {
+                        this.mainNavRef.management.collectionWriteFeedback = collection;
+                        this.mainNavRef.management.collectionWriteFeedbackChange.pipe(first()).subscribe(() => {
+                            if(this.params.feedbackClose === 'true') {
+                                window.close();
+                            }
+                        })
+                    }
                     if(this.collectionContent.node.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1) {
                         this.nodeService.getNodePermissions(id).subscribe((permissions) => {
                             this.permissions = permissions.permissions.localPermissions.permissions.
-                                                            concat(permissions.permissions.inheritedPermissions);
+                            concat(permissions.permissions.inheritedPermissions);
                         });
                     }
                 },
@@ -963,8 +1017,6 @@ export class CollectionsMainComponent {
                 },
             );
         }
-        this.createSubCollectionOptionItem.name = 'OPTIONS.' +
-            (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
     }
 
     closeDialog() {
@@ -1041,10 +1093,7 @@ export class CollectionsMainComponent {
                     if (params.mainnav) {
                         this.mainnav = params.mainnav !== 'false';
                     }
-                    // @TODO handle the feedback param, maybe in management-dialogs
-                    // this.feedback = params.feedback === 'true';
 
-                    this._orderActive = false;
                     this.infoTitle = null;
                     // get id from route and validate input data
                     let id = params.id || '-root-';
@@ -1075,21 +1124,20 @@ export class CollectionsMainComponent {
                                 },
                             );
                     } else {*/
-                        this.showCollection = id != '-root-';
-                        this.displayCollectionById(id, () => {
-                            if (params.content) {
-                                for (const content of this.collectionContent
-                                    .references) {
-                                    if (content.ref.id == params.content) {
-                                        this.contentDetailObject = content;
-                                        break;
-                                    }
+                    this.showCollection = id !== '-root-';
+                    this.displayCollectionById(id, async () => {
+                        if (params.content) {
+                            for (const content of (await this.dataSourceReferences.getData())) {
+                                if (content.ref.id === params.content) {
+                                    this.contentDetailObject = content;
+                                    break;
                                 }
                             }
-                            this.frame.broadcastEvent(
-                                FrameEventsService.EVENT_INVALIDATE_HEIGHT,
-                            );
-                        });
+                        }
+                        this.frame.broadcastEvent(
+                            FrameEventsService.EVENT_INVALIDATE_HEIGHT,
+                        );
+                    });
                     // }
                 });
             },
@@ -1166,20 +1214,44 @@ export class CollectionsMainComponent {
         }
     }
 
-    private changeOrder() {
-        this.toast.showProgressDialog();        this.collectionService
+    private async changeReferencesOrder() {
+        this.toast.showProgressDialog();
+        this.collectionService
             .setOrder(
                 this.collectionContent.node.ref.id,
-                RestHelper.getNodeIds(this.collectionContent.references),
+                RestHelper.getNodeIds(await this.dataSourceReferences.getData()),
             )
             .subscribe(
                 () => {
                     this.collectionContentOriginal = Helper.deepCopy(
                         this.collectionContent,
                     );
-                    this._orderActive = false;
                     this.infoTitle = null;
-                    this.toast.toast('COLLECTIONS.ORDER_SAVED');
+                    this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
+                    this.toast.closeModalDialog();
+                },
+                (error: any) => {
+                    this.toast.closeModalDialog();
+                    this.toast.error(error);
+                },
+            );
+    }
+
+    private async changeCollectionsOrder() {
+        this.toast.showProgressDialog();
+        this.collectionService
+            .setOrder(
+                this.collectionContent.node.ref.id,
+                RestHelper.getNodeIds(await this.dataSourceCollections.getData()),
+            )
+            .subscribe(
+                () => {
+                    this.collectionContentOriginal = Helper.deepCopy(
+                        this.collectionContent,
+                    );
+                    this.infoTitle = null;
+                    this.sortCollections.customSortingInProgress = false;
+                    this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
                     this.toast.closeModalDialog();
                 },
                 (error: any) => {
@@ -1208,14 +1280,15 @@ export class CollectionsMainComponent {
         this.optionsService.initComponents(
             this.mainNavRef,
             this.actionbarCollection,
+            this.listReferences,
         );
         this.optionsService.refreshComponents();
     }
 
     private setCollectionId(id: string) {
+        this.dataSourceCollections.reset();
+        this.dataSourceReferences.reset();
         this.collectionContent = {
-            collections: [],
-            references: [],
             node: new Node(),
         };
         this.collectionContent.node.ref = new NodeRef();
@@ -1256,7 +1329,14 @@ export class CollectionsMainComponent {
         if (callback) {
             callback();
         }
-        setTimeout(() => this.setOptionsCollection());
+        setTimeout(() => {
+            this.setOptionsCollection();
+            this.listReferences?.initOptionsGenerator({
+                scope: Scope.CollectionsReferences,
+                actionbar: this.actionbarReferences,
+                parent: this.collectionContent.node
+            });
+        });
     }
 
     private addToStore(nodes: Node[]) {
@@ -1265,6 +1345,61 @@ export class CollectionsMainComponent {
             this.toast.closeModalDialog();
             this.mainNavRef.refreshNodeStore();
         });
+    }
+    async setCollectionSort(sort: ListSortConfig) {
+        this.sortCollections = sort;
+        try {
+            await this.nodeService.editNodeProperty(
+                this.collectionContent.node.ref.id,
+                RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
+                [this.sortCollections.active, (this.sortCollections.direction === 'asc') + '']
+            ).toPromise();
+        } catch (e) {
+            this.toast.error(e);
+        }
+        this.refreshContent();
+        if (sort.active !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
+            this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
+                type: this.translationService.instant('NODE.' + sort.active),
+            });
+        }
+        this.sortCollections.customSortingInProgress = this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        if (this.sortCollections.customSortingInProgress) {
+            this.toggleCollectionsOrder();
+        }
+    }
+    async setReferenceSort(sort: ListSortConfig) {
+        const diff = Helper.getKeysWithDifferentValues(this.sortReferences, sort);
+        this.sortReferences = sort;
+        // auto activate the custom sorting when the users switches to "custom order"
+        if(diff.includes('active')) {
+            this.sortReferences.customSortingInProgress = this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        }
+        this.toggleReferencesOrder();
+        if (this.sortReferences.customSortingInProgress) {
+            await this.loadMoreReferences(true);
+        }
+        if(diff.includes('customSortingInProgress') && sort.customSortingInProgress) {
+            return;
+        }
+
+        try {
+            await this.nodeService.editNodeProperty(
+                this.collectionContent.node.ref.id,
+                RestConstants.CCM_PROP_COLLECTION_ORDER_MODE,
+                [sort.active, (sort.direction === 'asc') + '']
+            ).toPromise();
+        } catch (e) {
+            this.toast.error(e);
+        }
+        this.refreshContent();
+    }
+
+    private getReferencesRequest(): RequestObject {
+        return {
+            sortBy: [this.sortReferences.active],
+            sortAscending: [this.sortReferences.direction === 'asc']
+        };
     }
 
     createAllowed() {
@@ -1287,4 +1422,9 @@ export class CollectionsMainComponent {
             return !this.isGuest && this.isAllowedToEditCollection();
         }
     }
+}
+export interface SortInfo {
+    name: 'cm:name' | 'cm:modified' | 'ccm:collection_ordered_position';
+    ascending: boolean;
+    userModifyActive?: boolean;
 }

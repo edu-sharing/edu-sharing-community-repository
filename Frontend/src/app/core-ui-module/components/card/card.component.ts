@@ -22,8 +22,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { CardService } from '../../card.service';
 import { UIHelper } from '../../ui-helper';
 import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
-import {Observable} from 'rxjs/Rx';
-import {BehaviorSubject} from 'rxjs';
+import {Observable, BehaviorSubject} from 'rxjs';
 
 /**
  * A common edu-sharing modal card
@@ -272,7 +271,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         this.jumpmarkActive = jumpmark;
         this.shouldUpdateJumpmarkOnScroll = false;
         this.onScrollToJumpmark.emit(jumpmark);
-        await UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 2);
+        await UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 0.5);
         // Leave a little time for the last scroll event to propagate before enabling updates again.
         window.setTimeout(() => (this.shouldUpdateJumpmarkOnScroll = true), 20);
     }

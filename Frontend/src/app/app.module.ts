@@ -25,7 +25,6 @@ import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
 import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
-import { MAT_LABEL_GLOBAL_OPTIONS } from "@angular/material/core";
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
 import { MAT_TOOLTIP_DEFAULT_OPTIONS } from "@angular/material/tooltip";
 import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component';
@@ -49,7 +48,7 @@ import { MdsEditorWidgetVersionComponent } from './common/ui/mds-editor/widgets/
 import { MdsEditorWidgetLinkComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-link/mds-editor-widget-link.component';
 import {MdsEditorWidgetSelectComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-select/mds-editor-widget-select.component';
 import {MdsEditorWidgetSliderComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-slider/mds-editor-widget-slider.component';
-import {Ng5SliderModule} from 'ng5-slider';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { MdsEditorWidgetTreeComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetTreeCoreComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import {MdsEditorWidgetAuthorComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
@@ -68,14 +67,22 @@ import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
 import {MdsEditorWidgetFileUploadComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 import {CommonModule} from '@angular/common';
 import { MultiLineLabelComponent } from './common/ui/multi-line-label/multi-line-label.component';
-import { CheckTextOverflowDirective } from './common/directives/check-text-overflow.directive';
+import { CheckTextOverflowDirective } from './core-ui-module/directives/check-text-overflow.directive';
 import { RegisterCustomPropertyDirective } from './common/directives/register-custom-property.directive';
 import { OnAttributeChangeDirective } from './common/directives/on-attribute-change.directive';
 import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
-import { MatAutocompleteTriggerAccessorDirective } from './common/directives/mat-autocomplete-trigger-accessor.directive';
 import {ResizableModule} from 'angular-resizable-element';
+import { MainMenuButtonsComponent } from './common/ui/main-menu-buttons/main-menu-buttons.component';
+import { MdsEditorWidgetFacetListComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
+import { SearchFieldComponent } from './common/ui/search-field/search-field.component';
+import { MdsEditorComponent } from './common/ui/mds-editor/mds-editor.component';
+import { SearchFieldFacetsComponent } from './common/ui/mds-editor/search-field-facets/search-field-facets.component';
+import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
+import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pipe';
+import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
+import { BorderBoxObserverDirective } from './common/directives/border-box-observer.directive';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -138,16 +145,23 @@ import {ResizableModule} from 'angular-resizable-element';
         SkipTargetDirective,
         SkipNavComponent,
         MultiLineLabelComponent,
-        CheckTextOverflowDirective,
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
         extensionDeclarations,
-        MatAutocompleteTriggerAccessorDirective,
+        MainMenuButtonsComponent,
+        MdsEditorWidgetFacetListComponent,
+        SearchFieldComponent,
+        MdsEditorComponent,
+        SearchFieldFacetsComponent,
+        LabelPipe,
+        PropertySlugPipe,
+        MdsEditorWidgetSearchSuggestionsComponent,
+        BorderBoxObserverDirective,
     ],
     imports: [
         IMPORTS,
         CommonModule,
-        Ng5SliderModule,
+        NgxSliderModule,
         DragDropModule,
         extensionImports,
         ResizableModule,

@@ -1,8 +1,5 @@
 @import '../../../../app/core-ui-module/styles/variables';
 
-// Mat-Autocomplete runs into problems with keyboard navigation when the height of options is
-// changed. This value has to be consistent with the value provided to the related <input> with the
-// `optionHeight` attribute.
 $optionHeight: 66px;
 
 form {

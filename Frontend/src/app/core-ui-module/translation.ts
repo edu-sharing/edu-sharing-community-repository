@@ -1,12 +1,7 @@
+import {of as observableOf,  BehaviorSubject, Observer, Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService, MissingTranslationHandler, MissingTranslationHandlerParams } from '@ngx-translate/core';
-import { BehaviorSubject, Observer, ReplaySubject } from 'rxjs';
-import 'rxjs/add/observable/concat';
-import 'rxjs/add/observable/forkJoin';
-import 'rxjs/add/operator/first';
-import { Observable } from 'rxjs/Observable';
 import { first, map, switchMap, tap } from 'rxjs/operators';
-import 'rxjs/Rx';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -45,14 +40,14 @@ export class Translation {
                 .getBridge()
                 .isRunningCordova()
         ) {
-            return supportedLanguages$.switchMap(
+            return supportedLanguages$.pipe(switchMap(
                 (supportedLanguages: string[]) =>
                     Translation.initializeCordova(
                         translate,
                         config.getLocator().getBridge(),
                         supportedLanguages,
                     ),
-            );
+            ));
         }
         return supportedLanguages$.pipe(
             tap((supportedLanguages: string[]) =>
@@ -61,7 +56,7 @@ export class Translation {
             // Select queryParams.locale if set meaningfully
             switchMap((supportedLanguages: string[]) =>
                 //
-                route.queryParams.first().map(params => {
+                route.queryParams.pipe(first(), map(params => {
                     let selectedLanguage: string = null;
                     if (supportedLanguages.indexOf(params.locale) !== -1) {
                         selectedLanguage = params.locale;
@@ -76,18 +71,18 @@ export class Translation {
                         supportedLanguages,
                         selectedLanguage,
                     };
-                }),
+                })),
             ),
             // Select storage.get('language') if set meaningfully
             switchMap(({ supportedLanguages, selectedLanguage }) => {
                 if (selectedLanguage) {
-                    return Observable.of({
+                    return observableOf({
                         supportedLanguages,
                         selectedLanguage,
                         useStored: false,
                     });
                 } else {
-                    return storage.get('language').map(storageLanguage => {
+                    return storage.get('language').pipe(map(storageLanguage => {
                         let useStored = false;
                         if (
                             supportedLanguages.indexOf(storageLanguage) !== -1
@@ -100,7 +95,7 @@ export class Translation {
                             selectedLanguage,
                             useStored,
                         };
-                    });
+                    }));
                 }
             }),
             map(({ supportedLanguages, selectedLanguage, useStored }) => {
@@ -141,16 +136,16 @@ export class Translation {
                 }
             }),
             switchMap(({ supportedLanguages, selectedLanguage, useStored }) =>
-                translate.getTranslation(selectedLanguage).map(translation => {
+                translate.getTranslation(selectedLanguage).pipe(map(translation => {
                     return selectedLanguage;
-                }),
+                })),
             ),
             switchMap(selectedLanguage => {
                 // console.log('language used: ' + selectedLanguage);
                 Translation.setLanguage(selectedLanguage);
                 return translate
                     .use(selectedLanguage)
-                    .map(() => selectedLanguage);
+                    .pipe(map(() => selectedLanguage));
             }),
             tap(selectedLanguage => {
                 Translation.languageLoaded.next(true);

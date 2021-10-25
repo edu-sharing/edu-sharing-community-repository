@@ -3,6 +3,7 @@ package org.edu_sharing.service.permission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -75,9 +76,9 @@ public interface PermissionService {
 
     StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck);
 
-    public Result<List<User>> findUsers(String query, List<String> searchFields, boolean globalContext, int from, int nrOfResults);
+    public Result<List<User>> findUsers(String query, Map<String, Double> searchFields, boolean globalContext, int from, int nrOfResults);
 
-    StringBuffer getFindUsersSearchString(String query, List<String> searchFields, boolean globalContext);
+	StringBuffer getFindUsersSearchString(String query, Map<String, Double> searchFields, boolean globalContext);
 
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults);
 

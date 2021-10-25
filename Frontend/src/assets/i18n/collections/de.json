@@ -6,9 +6,11 @@
         "ERROR_DELETE": "Fehler beim Löschen der Sammlung",
         "ENTER_NAME": "Bitte einen Namen für die Sammlung eingeben.",
         "NO_EDITORIAL_GROUPS": "Noch keine Redaktionsgruppen festgelegt.",
-        "ORDER_ELEMENTS": "Reihenfolge der Materialien manuell festlegen?",
-        "ORDER_ELEMENTS_INFO": "Betrachter der Sammlung sehen die enthaltenen Materialien in einer bestimmten Reihenfolge.",
-        "ORDER_SAVED": "Reihenfolge erfolgreich festgelegt",
+        "ORDER_ELEMENTS": "Reihenfolge der Materialien manuell festlegen",
+        "ORDER_ELEMENTS_INFO": "Betrachter der Sammlung sehen die enthaltenen Materialien in der festgelegten Reihenfolge.",
+        "ORDER_COLLECTIONS": "Reihenfolge der Sammlungen manuell festlegen",
+        "ORDER_COLLECTIONS_INFO": "Betrachter der Sammlung sehen die enthaltenen Untersammlungen in der festgelegten Reihenfolge.",
+        "SORT_SLIDER": "Umsortieren",
         "CUSTOM_ORDER": "Festgelegte Reihenfolge",
         "PERMISSIONS": "Eingeladen:",
         "DETAILS": "Sammlungsdetails",
@@ -78,7 +80,9 @@
         "TOAST": {
             "DUPLICATE_NAME": "Eine Sammlung mit diesen Namen existiert bereits",
             "CREATED": "Sammlung wurde erstellt",
-            "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden"
+            "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden",
+            "SORT_SAVED_TYPE": "Die gewählte Sortierung nach \"{{type}}\" gilt zukünftig für alle Betrachter der Sammlung",
+            "SORT_SAVED_CUSTOM": "Die festgelegte Reihenfolge gilt zukünftig für alle Betrachter der Sammlung"
         },
         "NEW": {
             "AUTHOR_FREETEXT": "Bezeichnung des Autors"

@@ -18,7 +18,6 @@ import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
 import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 
 @Component({
@@ -30,7 +29,6 @@ import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
     ]
 })
 export class LoginComponent implements OnInit {
-    readonly SkipTarget = SkipTarget;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
@@ -254,7 +252,7 @@ export class LoginComponent implements OnInit {
         this.currentProvider = null;
         for (const p of Helper.deepCopy(this.providers)) {
             p.providers = p.providers.filter((p: any) =>
-                p.name.toLowerCase().includes(filter.toLowerCase()) || p.data?.toLowerCase().includes(filter.toLocaleString())
+                p.name.toLowerCase().includes(filter.toLowerCase()) || p.data?.toLowerCase().includes(filter.toLowerCase())
             );
             if (p.providers.length) {
                 filtered.push(p);

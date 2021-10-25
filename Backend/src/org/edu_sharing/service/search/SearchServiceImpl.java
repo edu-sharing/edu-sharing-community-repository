@@ -38,7 +38,9 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
+import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -92,18 +94,13 @@ public class SearchServiceImpl implements SearchService {
 		token.setMaxResult(maxItems);
 		token.setSortDefinition(sortDefinition);
 		token.setContentType(contentType);
-		String mdsQuery = MetadataSearchHelper.getLuceneString(
-				"sharedByMe",
-				null
-		);
-		token.setLuceneString(mdsQuery + " AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"");
+		token.setLuceneString(SearchServiceImpl.getFilesSharedByMeLucene());
 		return search(token);
 	}
 
 
 	@Override
 	public SearchResultNodeRef getFilesSharedToMe(SharedToMeType type, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
-		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 
 		SearchToken token=new SearchToken();
 		token.setFrom(skipCount);
@@ -111,31 +108,7 @@ public class SearchServiceImpl implements SearchService {
 		token.setSortDefinition(sortDefinition);
 		token.setContentType(contentType);
 
-		Set<String> memberships = new HashSet<>();
-		memberships.add(username);
-		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
-		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
-		String mdsQuery = MetadataSearchHelper.getLuceneString(
-				"sharedToMe",
-				null
-		);
-		StringBuilder query= new StringBuilder(mdsQuery + " AND ("
-				+ "NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
-				+ " AND (");
-		int i=0;
-		if(type.equals(SharedToMeType.All)) {
-			for (String m : memberships) {
-				if (i++ > 0)
-					query.append(" OR ");
-				query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
-			}
-		} else if (type.equals(SharedToMeType.Private)){
-			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(username)).append("\"");
-		}
-		query.append(")");
-		query.append(")");
-		token.setLuceneString(query.toString());
-
+		token.setLuceneString(SearchServiceImpl.getFilesSharedToMeLucene(type));
 		return search(token);
 
 		// Done via solr ccm:ph_invited now
@@ -173,6 +146,44 @@ public class SearchServiceImpl implements SearchService {
 			}
 		));
 		*/
+	}
+
+	public static String getFilesSharedToMeLucene(SharedToMeType type) throws Exception{
+		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+		String username = AuthenticationUtil.getFullyAuthenticatedUser();
+		Set<String> memberships = new HashSet<>();
+		memberships.add(username);
+		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
+		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedToMe",
+				null
+		);
+		StringBuilder query= new StringBuilder(mdsQuery + " AND ("
+				+ "NOT @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\""
+				+ " AND (");
+		int i=0;
+		if(type.equals(SharedToMeType.All)) {
+			for (String m : memberships) {
+				if (i++ > 0)
+					query.append(" OR ");
+				query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(m)).append("\"");
+			}
+		} else if (type.equals(SharedToMeType.Private)){
+			query.append("@ccm\\:ph_invited:\"").append(QueryParser.escape(username)).append("\"");
+		}
+		query.append(")");
+		query.append(")");
+		return query.toString();
+	}
+
+	public static String getFilesSharedByMeLucene() throws Exception{
+		String username = AuthenticationUtil.getFullyAuthenticatedUser();
+		String mdsQuery = MetadataSearchHelper.getLuceneString(
+				"sharedByMe",
+				null
+		);
+		return mdsQuery + " AND @ccm\\:ph_users:\"" + QueryParser.escape(username) + "\"";
 	}
 
 	@Override
@@ -754,12 +765,12 @@ public class SearchServiceImpl implements SearchService {
 
 			// process facette
 			if (facettes != null && facettes.size() > 0) {
-				Map<String, Map<String, Integer>> newCountPropsMap = new HashMap<String, Map<String, Integer>>();
+				List<NodeSearch.Facette> facetsResult = new ArrayList<>();
 				for (String facetteProp : facettes) {
-					Map<String, Integer> resultPairs = newCountPropsMap.get(facetteProp);
-					if (resultPairs == null) {
-						resultPairs = new HashMap<String, Integer>();
-					}
+					NodeSearch.Facette facet = new NodeSearch.Facette();
+					facetsResult.add(facet);
+					List<NodeSearch.Facette.Value> values = new ArrayList<>();
+					facet.setValues(values);
 					String fieldFacette = "@" + facetteProp;
 
 					List<Pair<String, Integer>> facettPairs = resultSet.getFieldFacet(fieldFacette);
@@ -780,20 +791,21 @@ public class SearchServiceImpl implements SearchService {
 						 * --> pair.getSecond() > 0
 						 */
 						if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
-							resultPairs.put(first, pair.getSecond());
+							NodeSearch.Facette.Value value = new NodeSearch.Facette.Value();
+							value.setValue(first);
+							value.setCount(pair.getSecond());
+							facet.getValues().add(value);
 						}
 					}
-
-					if (resultPairs.size() > 0)
-						newCountPropsMap.put(facetteProp, resultPairs);
 				}
-				sr.setCountedProps(newCountPropsMap);
+				sr.setFacets(facetsResult);
 
 			}
 			SearchLogger.logSearch(searchToken,sr);
 			return sr;
 
 		} catch (Throwable e) {
+			if(e.getCause() != null) e.getCause().printStackTrace();
 			logger.error(e.getMessage(), e);
 			throw new RuntimeException(e.getMessage());
 		}
@@ -861,19 +873,12 @@ public class SearchServiceImpl implements SearchService {
 		if(globalContext && !searchingSignupGroups) {
 			checkGlobalSearchPermission();
 		}
-		List<String> searchFields = new ArrayList<>();
 
 		// fields to search in - also using username as admin (6.0 or later)
-		if(AuthorityServiceHelper.isAdmin()) {
-			searchFields.add("userName");
-		}
-		searchFields.add("email");
-		searchFields.add("firstName");
-		searchFields.add("lastName");
-		
+
 		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
-		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,searchFields, globalContext);
+		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(searchWord,AuthorityServiceHelper.getDefaultAuthoritySearchFields(), globalContext);
 		// we're skipping TP checks when the search requested signup groups -> it's possible to see them even without GLOBAL_AUTHORITY_SEARCH permissions
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext, searchingSignupGroups);
 		
@@ -927,7 +932,7 @@ public class SearchServiceImpl implements SearchService {
 			}
 		}
 
-		System.out.println("finalQuery:" + finalQuery);
+		logger.debug("finalQuery:" + finalQuery);
 
 		List<Authority> data = new ArrayList<Authority>();
 
@@ -939,8 +944,7 @@ public class SearchServiceImpl implements SearchService {
 		searchParameters.setSkipCount(from);
 		searchParameters.setMaxItems(nrOfResults);
 		if(sort==null || !sort.hasContent()) {
-		searchParameters.addSort("@" + CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME, true);
-		searchParameters.addSort("@" + CCConstants.PROP_USER_FIRSTNAME, true);
+			searchParameters.addSort("score", false);
 		}
 		else {
 			sort.applyToSearchParameters(searchParameters);
@@ -964,6 +968,7 @@ public class SearchServiceImpl implements SearchService {
 		return new SearchResult<String>(result, from, (int) resultSet.getNumberFound());
 
 	}
+
 	private static String getLuceneSuggestionQuery(MetadataQueryParameter parameter,String value){
 		//return "("+queries.getBasequery()+") AND ("+parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*")+")";
 		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");

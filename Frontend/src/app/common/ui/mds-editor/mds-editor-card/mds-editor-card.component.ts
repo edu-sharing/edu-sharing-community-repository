@@ -1,5 +1,5 @@
+import {takeUntil,  delay, map } from 'rxjs/operators';
 import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
-import { delay, map } from 'rxjs/operators';
 import { DialogButton, Node } from '../../../../core-module/core.module';
 import { CardJumpmark } from '../../../../core-ui-module/components/card/card.component';
 import { Toast } from '../../../../core-ui-module/toast';
@@ -38,8 +38,8 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.nodes = this.mdsEditorInstance.nodes$.value;
-        this.getJumpMarks()
-            .takeUntil(this.destroyed)
+        this.getJumpMarks().pipe(
+            takeUntil(this.destroyed))
             .subscribe((jumpMarks) => (this.jumpMarks = jumpMarks));
         this.mdsEditorInstance
             .observeCompletionStatus()

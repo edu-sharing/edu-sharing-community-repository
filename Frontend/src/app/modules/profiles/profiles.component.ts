@@ -1,4 +1,6 @@
 
+import {forkJoin as observableForkJoin, Observable} from 'rxjs';
+
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from '../../core-ui-module/translation';
 import {
@@ -25,8 +27,6 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {Helper} from '../../core-module/rest/helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
-import {Observable} from 'rxjs';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
 
 @Component({
   selector: 'app-profiles',
@@ -37,7 +37,6 @@ import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
   ]
 })
 export class ProfilesComponent {
-  readonly SkipTarget = SkipTarget;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private connector: RestConnectorService,
@@ -92,7 +91,7 @@ export class ProfilesComponent {
   public loadUser(authority:string) {
     this.toast.showProgressDialog();
     this.connector.isLoggedIn().subscribe((login)=> {
-      Observable.forkJoin(
+      observableForkJoin(
           this.iamService.getUser(authority),
           this.iamService.getUserStats(authority),
       ).subscribe(([profile, stats]) => {

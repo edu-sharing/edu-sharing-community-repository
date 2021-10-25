@@ -777,9 +777,9 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 	public SearchResult findUsers(KeyValue[] searchProps, String eduGroupNodeId, int from, int nrOfResults) throws RemoteException {
 
 		// mapping to new findUsers method signature
-		List<String> searchFields = new ArrayList<>();
+		Map<String, Double> searchFields = new HashMap<>();
 		for(KeyValue kv:searchProps){
-			searchFields.add(kv.getKey());
+			searchFields.put(kv.getKey(), 1.);
 		}
 		
 		try {

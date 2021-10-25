@@ -40,30 +40,51 @@ public class EduGroupCache {
 
 	public static ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 	
-			// Shared Cache over EHCache
+	// Shared Cache over EHCache
 	final static SimpleCache<NodeRef,Map<QName,Serializable>> cache = (SimpleCache<NodeRef,Map<QName,Serializable>>)  AlfAppContextGate.getApplicationContext().getBean("eduSharingEduGroupCache");
 
+	final static SimpleCache<NodeRef,Map<QName,Serializable>> cacheWithFolderAsKey = (SimpleCache<NodeRef,Map<QName,Serializable>>)  AlfAppContextGate.getApplicationContext().getBean("eduSharingEduGroupFolderCache");
 	
 	public static void put(NodeRef nodeRef, Map<QName,Serializable> props){
 		
 		synchronized(EduGroupCache.cache){
 			EduGroupCache.cache.put(nodeRef, props);
+			EduGroupCache.putEduGroupFolder((NodeRef)props.get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)),props);
 		}
 		
+	}
+
+	private static void putEduGroupFolder(NodeRef nodeRef, Map<QName,Serializable> props){
+		if(nodeRef == null){
+			String message = "got a null value for edugroupfolder of edu group:";
+			if(props != null) message += props.get(ContentModel.PROP_AUTHORITY_NAME);
+			logger.error(message);
+			return;
+		}
+		EduGroupCache.cacheWithFolderAsKey.put(nodeRef,props);
 	}
 
 	public static Map<QName,Serializable> get(NodeRef nodeRef) {
 		return EduGroupCache.cache.get(nodeRef);
 	}
 
+	public static Map<QName,Serializable> getByEduGroupfolder(NodeRef nodeRef){
+		return EduGroupCache.cacheWithFolderAsKey.get(nodeRef);
+	}
+
 	public static void remove(NodeRef nodeRef) {
 		synchronized(EduGroupCache.cache){
+			EduGroupCache.cacheWithFolderAsKey.remove((NodeRef)EduGroupCache.cache.get(nodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)));
 			EduGroupCache.cache.remove(nodeRef);
 		}		
 	}
 	
 	public static Collection<NodeRef> getKeys(){
 		return EduGroupCache.cache.getKeys();
+	}
+
+	public static Collection<NodeRef> getKeysEduGroupFolder(){
+		return EduGroupCache.cacheWithFolderAsKey.getKeys();
 	}
 	
 	public static String[] getNames(){
@@ -73,53 +94,27 @@ public class EduGroupCache {
 		}
 		return names.toArray(new String[names.size()]);
 	}
-	
-	public static List<NodeRef> getAllEduGoupFolder(){
-		List<NodeRef> result = new ArrayList<NodeRef>();
-		for(NodeRef groupNodeRef : EduGroupCache.cache.getKeys()){
-			result.add((NodeRef)EduGroupCache.cache.get(groupNodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)));
-		}
-		return result;
-	}
-	
-	/**
-	 * 
-	 * @return Map keys: EduGroup HomeFolder NodeRef, Values EduGroup Properties 
-	 */
-	public static Map<NodeRef,Map<QName,Serializable>> getAllEduGroupFolderAndEduGroupProps(){
-		Map<NodeRef,Map<QName,Serializable>> result = new HashMap<NodeRef,Map<QName,Serializable>>();
-		for(NodeRef groupNodeRef : EduGroupCache.cache.getKeys()){
 
-			NodeRef homeDirNodeRef = (NodeRef)EduGroupCache.cache.get(groupNodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
-			if(homeDirNodeRef != null) {
-				result.put(homeDirNodeRef,
-						EduGroupCache.cache.get(groupNodeRef));
-			}else{
-				logger.error("homeDirNodeRef is null for " + EduGroupCache.cache.get(groupNodeRef).get(ContentModel.PROP_AUTHORITY_NAME));
-			}
-		}
-		return result;
+	public static boolean isAnOrganisationFolder(NodeRef nodeRef){
+		if(EduGroupCache.cacheWithFolderAsKey.contains(nodeRef)) return true;
+		else return false;
 	}
-	
-	protected static void setCache(Map<NodeRef,Map<QName,Serializable>> cache) {
-		synchronized(EduGroupCache.cache){
-			EduGroupCache.cache.clear();
-			for(Map.Entry<NodeRef,Map<QName,Serializable>> entry : cache.entrySet()){
-				EduGroupCache.cache.put(entry.getKey(), entry.getValue());
-			}
-		}
-	}
-	
+
 	public static void refresh(){
 		synchronized(EduGroupCache.cache){
 			logger.info("size before refresh:"+EduGroupCache.cache.getKeys().size());
-			EduGroupCache.cache.clear();
+			clear();
 			for(NodeRef eduGroupNodeRef : getEduGroupNodeRefs()){
-				
-				EduGroupCache.cache.put(eduGroupNodeRef, serviceRegistry.getNodeService().getProperties(eduGroupNodeRef));
+				Map<QName, Serializable> properties = serviceRegistry.getNodeService().getProperties(eduGroupNodeRef);
+				EduGroupCache.put(eduGroupNodeRef,properties);
 			}
 			logger.info("size after refresh:"+EduGroupCache.cache.getKeys().size());
 		}		
+	}
+
+	private static void clear(){
+		EduGroupCache.cache.clear();
+		EduGroupCache.cacheWithFolderAsKey.clear();
 	}
 	
 	public static void refreshByKeepExisting(){
@@ -128,42 +123,12 @@ public class EduGroupCache {
 			//EduGroupCache.cache.clear();
 			for(NodeRef eduGroupNodeRef : getEduGroupNodeRefs()){
 				if(!EduGroupCache.cache.contains(eduGroupNodeRef)) {
-					EduGroupCache.cache.put(eduGroupNodeRef, serviceRegistry.getNodeService().getProperties(eduGroupNodeRef));
+					Map<QName, Serializable> properties = serviceRegistry.getNodeService().getProperties(eduGroupNodeRef);
+					EduGroupCache.put(eduGroupNodeRef, properties);
 				}
 			}
 			logger.info("size after refresh:"+EduGroupCache.cache.getKeys().size());
 		}		
-	}
-	
-	private static List<NodeRef> getEduGroupNodeRefs2(){
-		List<NodeRef> result = new ArrayList<NodeRef>();
-		NodeRef rootNode = serviceRegistry.getNodeService().getRootNode(new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"));
-		List<ChildAssociationRef> rootChildAssocs = serviceRegistry.getNodeService().getChildAssocs(rootNode);
-		for(ChildAssociationRef childAssocRef : rootChildAssocs){
-			
-			if(childAssocRef.getQName().equals(QName.createQName("{"+NamespaceService.SYSTEM_MODEL_1_0_URI+"}system"))){
-				
-				List<ChildAssociationRef> systemChildren =  serviceRegistry.getNodeService().getChildAssocs(childAssocRef.getChildRef());
-				
-				for(ChildAssociationRef sysChild : systemChildren){
-					if(sysChild.getQName().equals(QName.createQName("{"+NamespaceService.SYSTEM_MODEL_1_0_URI+"}authorities"))){
-						List<ChildAssociationRef> authorities = serviceRegistry.getNodeService().getChildAssocs(sysChild.getChildRef());
-						
-						for(ChildAssociationRef authorityChild :authorities ){
-							if(serviceRegistry.getNodeService().hasAspect(authorityChild.getChildRef(), QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))){
-								result.add(authorityChild.getChildRef());
-							}
-						}
-						
-						
-					}
-				}
-				
-				
-			}
-		}
-		return result;
-		
 	}
 	
 	private static List<NodeRef> getEduGroupNodeRefs(){

@@ -1,70 +1,85 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  NgZone,
-  HostListener,
-  ViewChild,
-  ElementRef,
-  Sanitizer
-} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {MdsEditorWidgetBase, ValueType} from '../../mds-editor/widgets/mds-editor-widget-base';
+import {Widget} from '../../mds-editor/mds-editor-instance.service';
+import {RestConstants} from '../../../../core-module/rest/rest-constants';
+import {FormatSizePipe} from '../../../../core-ui-module/pipes/file-size.pipe';
 
 @Component({
-  selector: 'mds-widget',
-  templateUrl: 'mds-widget.component.html',
-  styleUrls: ['mds-widget.component.scss'],
+    selector: 'mds-widget',
+    templateUrl: 'mds-widget.component.html',
+    styleUrls: ['mds-widget.component.scss'],
 })
-export class MdsWidgetComponent{
-  _data:string[];
-  value:any;
-  @Input() widget:any;
-  @Input() set data(data:string[]){
-    this._data=data; 
-    this.value=this.getValue();
-  }
+export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
+    readonly valueType = ValueType.String;
+    value:string[];
+    @Input() widget: Widget;
 
-  getBasicType() {
-    switch(this.widget.type) {
-      case 'text':
-      case 'number':
-      case 'email':
-      case 'month':
-      case 'color':
-      case 'textarea':
-      case 'singleoption':
-        return 'text';
-      case 'multivalueFixedBadges':
-      case 'multivalueSuggestBadges':
-      case 'multivalueBadges':
-      case 'multivalueTree':
-        return 'array';
-      case 'slider':
-        return 'slider';
+    getBasicType() {
+        switch(this.widget.definition.type) {
+            case 'text':
+            case 'email':
+            case 'month':
+            case 'color':
+            case 'textarea':
+            case 'singleoption':
+                return 'text';
+            case 'number':
+                return 'number';
+            case 'multivalueFixedBadges':
+            case 'multivalueSuggestBadges':
+            case 'multivalueBadges':
+            case 'multivalueTree':
+                return 'array';
+            case 'slider':
+                return 'slider';
+            case 'duration':
+                return 'duration';
+            case 'range':
+                return 'range';
+        }
+        return 'unknown';
     }
-    return 'unknown';
-  }
-
-  getValue() {
-    if(!this._data || !this._data[0]) {
-      return null;
-    }
-    if(this.widget.values) {
-      console.log(this._data, this.widget.values);
-        const mapping=this.widget.values.filter((v:any) => this._data.filter((d) => d === v.id).length > 0).map((v:any) => v.caption);
-        if(mapping){
-          return mapping;
+    ngOnInit(): void {
+        if(this.widget.definition.type === 'range') {
+            const id = this.widget.definition.id;
+            const values = this.mdsEditorInstance.values$.value;
+            this.value = [values[id + '_from']?.[0], values[id + '_to']?.[0]];
+        } else if (this.widget.getInitialValues()?.jointValues) {
+            this.value = this.getValue(this.widget.getInitialValues().jointValues);
         }
     }
-    return this._data;
-  }
+    getValue(data: string[]) {
+        let value = data;
+        if(!value || !value[0]) {
+            return null;
+        }
+        if(this.widget.definition.values) {
+            const mapping=this.widget.definition.values.filter((v:any) => data.filter((d) => d === v.id).length > 0).map((v) => v.caption);
+            if(mapping){
+                return mapping;
+            }
+        }
+        return data;
+    }
 
     click() {
-        if(this.widget.link === '_BLANK') {
-          window.open(this.value);
+        if(this.widget.definition.link === '_BLANK') {
+            window.open(this.value[0]);
         } else {
-          console.warn('Unsupported link type ' + this.widget.link);
+            console.warn('Unsupported link type ' + this.widget.definition.link);
         }
+    }
+
+    isEmpty() {
+        return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
+    }
+
+    formatNumber() {
+        return this.value.map((v) => {
+            if(this.widget.definition.format === 'bytes') {
+                return new FormatSizePipe().transform(v);
+            }
+            return v;
+        });
     }
 }

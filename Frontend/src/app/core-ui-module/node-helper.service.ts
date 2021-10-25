@@ -44,8 +44,8 @@ export interface ConfigEntry {
     name: string;
     icon: string;
     scope?: string;
-    isDisabled: boolean;
-    isSeparate: boolean;
+    isDisabled?: boolean;
+    isSeparate?: boolean;
     isCustom: boolean;
     position?: number;
     url?: string;

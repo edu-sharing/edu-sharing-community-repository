@@ -1,3 +1,4 @@
+@use 'sass:math';
 @import '../../styles/variables';
 $borderRadius: 2px;
 $previewHeight: 160px;
@@ -639,33 +640,33 @@ $badgeWidth: 250px;
 
 @keyframes OrderAnimationCards {
     0% {
-        transform: rotate(-0.75deg);
+        transform: rotate(-0.5deg);
     }
     50% {
-        transform: rotate(0.75deg);
+        transform: rotate(0.5deg);
     }
     100% {
-        transform: rotate(-0.75deg);
+        transform: rotate(-0.5deg);
     }
 }
 
 @keyframes OrderAnimationList {
     0% {
-        transform: translate(0, -.1em);
+        transform: translate(0, -.05em);
     }
     50% {
-        transform: translate(0, .1em);
+        transform: translate(0, .05em);
     }
     100% {
-        transform: translate(0, -.1em);
+        transform: translate(0, -.05em);
     }
 }
 
 .order-animation {
-    $orderAnimationTime: $transitionNormal;
+    $orderAnimationTime: 0.5s;
     animation-iteration-count: infinite;
     animation-duration: $orderAnimationTime;
-    .cardList & {
+    .cardList &, .cardSmallList & {
         animation-name: OrderAnimationCards;
     }
     .tableList & {
@@ -675,13 +676,13 @@ $badgeWidth: 250px;
         animation-delay: 0s;
     }
     &:nth-of-type(2n + 1) {
-        animation-delay: -$orderAnimationTime/2;
+        animation-delay: math.div(-$orderAnimationTime, 2);
     }
     &:nth-of-type(3n) {
-        animation-delay: -$orderAnimationTime/4;
+        animation-delay: math.div(-$orderAnimationTime, 4);
     }
     &:nth-of-type(5n) {
-        animation-delay: -$orderAnimationTime/8;
+        animation-delay: math.div(-$orderAnimationTime, 8);
     }
 }
 .rowFrame {
@@ -1223,6 +1224,42 @@ a.rowInner {
 .cardList .row > div.node_ccm_replicationsource,
 .cardList .row > div.node_ccm_lifecyclecontributer_publisherFN {
     display: inline-block;
+}
+
+.item-order-overlay {
+    position: absolute;
+    z-index: 15;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    > i {
+        font-size: 20px;
+    }
+}
+.cardList .item-order-overlay{
+    background-color: rgba(255,255,255,.95);
+    backdrop-filter: blur(5px);
+    width: auto;
+    height: 60px;
+    margin: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 5px;
+    top: math.div($previewHeight - 60px, 2);
+}
+.cardSmallList .item-order-overlay{
+    background-color: rgba(255,255,255,.95);
+    backdrop-filter: blur(5px);
+    height: 40px;
+    bottom: 0;
+    width: 100%;
+}
+.tableList .item-order-overlay{
+    background-color: transparent;
+    right: 10px;
+    width: 20px!important;
 }
 
 @media all {

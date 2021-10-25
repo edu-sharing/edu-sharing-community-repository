@@ -74,14 +74,12 @@ public class OnCreateNodePolicyOrgAdministrators implements OnCreateNodePolicy, 
 	
 	private String getAdminGroup(ChildAssociationRef childRef) {
 		NodeRef companyHome = repositoryHelper.getCompanyHome();
-		
-		Map<NodeRef,Map<QName,Serializable>>  eduGroupFoldersAndProps = EduGroupCache.getAllEduGroupFolderAndEduGroupProps();
-		
+
 		NodeRef currentNode = childRef.getParentRef();
 		NodeRef organisationNode = null;
 		while(!companyHome.equals(currentNode) && organisationNode == null){
 			
-			if(eduGroupFoldersAndProps.keySet().contains(currentNode)){
+			if(EduGroupCache.isAnOrganisationFolder(currentNode)){
 				organisationNode = currentNode;
 				break;
 			}
@@ -91,7 +89,7 @@ public class OnCreateNodePolicyOrgAdministrators implements OnCreateNodePolicy, 
 		
 		if(organisationNode != null){
 			
-			Map<QName, Serializable> eduGroupProps = eduGroupFoldersAndProps.get(organisationNode);
+			Map<QName, Serializable> eduGroupProps = EduGroupCache.getByEduGroupfolder(organisationNode);
 			NodeRef eduGroupNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, (String)eduGroupProps.get(ContentModel.PROP_NODE_UUID));
 			List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
 			for(ChildAssociationRef childGroup : childGroups){

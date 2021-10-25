@@ -1,7 +1,10 @@
 @import "../../core-ui-module/styles/variables";
 
+$repoTabBarHeight: 48px;
+$toolbarHeight: 65px;
+
 $sidenavWidth:300px;
-$sidenavTopBaseOffset:110px;
+$sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
 .switchToCollections{
     font-weight:bold;
     flex-grow: 1;
@@ -73,6 +76,7 @@ $sidenavTopBaseOffset:110px;
     // padding-bottom: 10px;
     margin-left: 15px;
     margin-right: 5px;
+    width: 100%;
     h2 {
         font-size: 120%;
         margin: 1rem 0;
@@ -353,20 +357,27 @@ small-collection{
 }
 .sidenav{
     position: fixed;
+    display: flex;
+    flex-direction: column;
     z-index: 10;
     box-shadow: none;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
-    overflow-x: hidden;
-    overflow-y: auto;
     width: $sidenavWidth;
-    top:$mainnavHeight+$sidenavTopBaseOffset;
-    height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset} - 75px);
+    top: $mainnavHeight + $sidenavTopBaseOffset;
+    height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset});
     transition: $transitionNormal all ease;
     @include iosScrolling();
     &.no-mainnav{
-        top:$sidenavTopBaseOffset;
-        height: calc(100% - #{$sidenavTopBaseOffset} - 70px);
+        top: $sidenavTopBaseOffset;
+        height: calc(100% - #{$sidenavTopBaseOffset});
+    }
+    .mat-tab-group {
+        min-height: 0;
+        flex-grow: 1;
+        & ::ng-deep .mat-tab-body-wrapper {
+            flex-grow: 1;
+        }
     }
 }
 .sidenavHidden{
@@ -374,12 +385,12 @@ small-collection{
     display: none;
 }
 .sidenavNoRepositories{
-    top:$mainnavHeight+65px;
+    top: $mainnavHeight + $toolbarHeight;
     // This brakes when the site has a custom header, that adds to the page height.
-    height: calc(100% - #{$mainnavHeight} - 65px - 70px);
+    height: calc(100% - #{$mainnavHeight} - #{$toolbarHeight});
     &.no-mainnav{
-        top:65px;
-        height: calc(100% - 65px - 70px);
+        top: $toolbarHeight;
+        height: calc(100% - #{$toolbarHeight});
     }
 }
 #sub {
@@ -470,8 +481,9 @@ small-collection{
     clear: both;
 }
 
-listtable {
-    margin-top: 20px;
+app-node-entries-wrapper {
+    display: block;
+    padding: 0 20px;
 }
 
 .chip.facette {
@@ -552,19 +564,10 @@ listtable {
         margin-top: 15px;
     }
     .apply{
-        position: fixed;
         background-color: $backgroundColor;
-        width:$sidenavWidth;
         display: flex;
         justify-content: flex-end;
-        left:0;
-        bottom:0;
-        padding:20px 8px;
-        z-index: 25;
-        actionbar,a{
-            position: relative;
-            top: 5px;
-        }
+        padding: 20px 8px;
     }
 }
 .sidenav {

@@ -18,7 +18,7 @@
   [priority]="priority"
   [repository]="repository"
   [setId]="setId"
-  [suggestions]="suggestions"
+  [suggestions]="facets"
   (extendedChange)="extendedChange.emit($event)"
   (onCancel)="onCancel.emit($event)"
   (onDone)="onDone.emit($event)"
@@ -38,5 +38,5 @@
 </app-mds-editor-card>
 
 <app-mds-editor-embedded *ngIf="editorType === 'angular' && embedded"></app-mds-editor-embedded>
-
+<spinner *ngIf="isLoading && embedded"></spinner>
 <global-progress *ngIf="isLoading && !embedded"></global-progress>

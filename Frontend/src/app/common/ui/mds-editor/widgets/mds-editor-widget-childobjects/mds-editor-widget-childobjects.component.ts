@@ -1,3 +1,5 @@
+import {forkJoin as observableForkJoin, BehaviorSubject, Observable, Subscriber} from 'rxjs';
+import {filter} from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {RestConstants} from '../../../../../core-module/rest/rest-constants';
@@ -6,7 +8,6 @@ import {UIService} from '../../../../../core-module/rest/services/ui.service';
 import {Node, NodeWrapper} from '../../../../../core-module/rest/data-object';
 import {RestIamService} from '../../../../../core-module/rest/services/rest-iam.service';
 import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
-import {BehaviorSubject, Observable, Subscriber} from 'rxjs';
 import {Helper} from '../../../../../core-module/rest/helper';
 import {Values} from '../../types';
 import {MainNavService} from '../../../../services/main-nav.service';
@@ -57,7 +58,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes$.filter((n) => n != null).subscribe(async (nodes) => {
+        this.mdsEditorValues.nodes$.pipe(filter((n) => n != null)).subscribe(async (nodes) => {
             if (nodes?.length) {
                 this.children = (await this.nodeApi.getNodeChildobjects(nodes[0].ref.id).toPromise()).nodes.map((n) => {
                     return {
@@ -167,8 +168,8 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         }
         this.onChange();
     }
-    onSaveNode(nodes: Node[]) {
-        return Observable.forkJoin(
+    async onSaveNode(nodes: Node[]) {
+        await observableForkJoin(
             this.children.map((child) =>
                 new Observable<Node>((observer) => {
                 if (child.file) {
@@ -191,7 +192,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                                 )
                                 .subscribe(
                                     () => {
-                                        this.deleteChildren(observer);
+                                        observer.complete();
                                     },
                                     (error) => {
                                         if (
@@ -202,11 +203,12 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                                         ) {
                                             this.nodeApi
                                                 .deleteNode(data.node.ref.id, false)
-                                                .subscribe(() => {});
+                                                .subscribe(() => {
+                                                    observer.complete();
+                                                });
                                             this.toast.error(null, 'MDS.ADD_CHILD_OBJECT_QUOTA_REACHED', {
                                                 name: child.name,
                                             });
-                                            this.deleteChildren(observer);
                                         }
                                     },
                                 );
@@ -225,31 +227,26 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                             RestConstants.CCM_ASSOC_CHILDIO,
                         )
                         .subscribe(() => {
-                            this.deleteChildren(observer);
                         });
                 } else {
                     this.nodeApi
                         .editNodeMetadata(child.node.ref.id, this.getProperties(child))
                         .subscribe(() => {
-                            this.deleteChildren(observer);
+                            observer.complete();
                         });
                 }
             }))).toPromise();
+            await this.deleteChildren();
+            return nodes;
     }
     drop(event: CdkDragDrop<string[]>) {
         moveItemInArray(this.children, event.previousIndex, event.currentIndex);
         this.onChange();
     }
 
-    private deleteChildren(observer: Subscriber<Node>) {
+    private async deleteChildren() {
         if(this.childrenDelete.length) {
-            Observable.forkJoin(this.childrenDelete.map((node) => this.nodeApi.deleteNode(node.ref.id, false))).subscribe(() => {
-                observer.next();
-                observer.complete();
-            });
-        } else {
-            observer.next();
-            observer.complete();
+            await observableForkJoin(this.childrenDelete.map((node) => this.nodeApi.deleteNode(node.ref.id, false))).toPromise();
         }
     }
 }

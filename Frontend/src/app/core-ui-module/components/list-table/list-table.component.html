@@ -112,7 +112,7 @@
            [class.selected]="getSelectedPos(node)!=-1"
            [class.node-virtual]="node.virtual"
            [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-           [class.hover]="dragHover==node"
+           [class.hover]="dragHover==node && !orderElementsActive"
       >
         <div class="row node-row"
              [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
@@ -149,6 +149,9 @@
             [aria-describedby]="getDescribedBy(node)"
             #childList
           >
+            <ng-container *ngIf="orderElementsActive">
+              <ng-container *ngTemplateOutlet="itemOrderHint; context: { $implicit: node }"></ng-container>
+            </ng-container>
             <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
             <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
               <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
@@ -286,23 +289,25 @@
               </button>
             </div>
           </ng-container>
-          <div class="more column" *ngIf="_options && _options.length>1" >
-            <button mat-icon-button
-                    color="primary"
-                    (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
-            >
-              <i icon="more_vert" [aria]="true"></i>
-            </button>
-          </div>
-          <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
-            <button mat-icon-button
-                    color="primary"
-                    [class.disabled]="!optionIsValid(_options[0],node)"
-                    matTooltip="{{_options[0].name | translate}}"
-                    (click)="callOption(_options[0],node);$event.stopPropagation();"
-            >
-              <i icon="{{_options[0].icon}}"></i>
-            </button></div>
+          <ng-container *ngIf="!orderElementsActive">
+            <div class="more column" *ngIf="_options && _options.length>1" >
+              <button mat-icon-button
+                      color="primary"
+                      (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
+              >
+                <i icon="more_vert" [aria]="true"></i>
+              </button>
+            </div>
+            <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
+              <button mat-icon-button
+                      color="primary"
+                      [class.disabled]="!optionIsValid(_options[0],node)"
+                      matTooltip="{{_options[0].name | translate}}"
+                      (click)="callOption(_options[0],node);$event.stopPropagation();"
+              >
+                <i icon="{{_options[0].icon}}"></i>
+              </button></div>
+          </ng-container>
         </div>
       </div>
       <div class="loadMore">
@@ -313,3 +318,8 @@
       </div>
       <spinner *ngIf="isLoading"></spinner>
     </div>
+<ng-template #itemOrderHint>
+  <div class="item-order-overlay">
+    <i icon="drag_handle"></i>
+  </div>
+</ng-template>

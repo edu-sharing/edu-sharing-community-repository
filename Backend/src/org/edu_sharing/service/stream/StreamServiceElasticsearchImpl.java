@@ -107,7 +107,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 			CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
 			indexRequest.mapping(jsonBuilder().
 					startObject().
-					startObject(TYPE_NAME).
 					startObject("properties").
 					startObject("created").field("type", "date").endObject().
 					startObject("modified").field("type", "date").endObject().
@@ -121,7 +120,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 					endObject().
 					endObject().
 					endObject().
-					endObject().
 					endObject()
 			);
 			client.indices().create(indexRequest, RequestOptions.DEFAULT);
@@ -132,7 +130,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		}
 	}
 	private static String INDEX_NAME="entry_index22";
-	private static String TYPE_NAME="entry";
 	private static TimeValue SCROLL_TIME=TimeValue.timeValueMinutes(1);
 	private static RestHighLevelClient client;
 
@@ -140,8 +137,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	public String addEntry(ContentEntry entry) throws Exception {
 		IndexRequest indexRequest = new IndexRequest();
 		indexRequest.index(INDEX_NAME);
-		indexRequest.type(TYPE_NAME);
-		
+
 		indexRequest.source(ContentEntryConverter.toContentBuilder(entry));
 		IndexResponse result = client.index(indexRequest,RequestOptions.DEFAULT);
 		return result.getId();
@@ -150,7 +146,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	public void updateEntry(ContentEntry entry) throws Exception {
 		UpdateRequest updateRequest = new UpdateRequest();
 		updateRequest.index(INDEX_NAME);
-		updateRequest.type(TYPE_NAME);
 
 		updateRequest.doc(ContentEntryConverter.toContentBuilder(entry));
 		client.update(updateRequest,RequestOptions.DEFAULT);
@@ -221,7 +216,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		return ContentEntryConverter.fromSourceMap(getEntryRequest(entryId).getSource(),entryId);
 	}
 	private GetResponse getEntryRequest(String entryId) throws IOException {
-		GetRequest request=new GetRequest(INDEX_NAME, TYPE_NAME, entryId);
+		GetRequest request=new GetRequest(INDEX_NAME, entryId);
 		return client.get(request,RequestOptions.DEFAULT);
 	}
 	@Override
@@ -243,7 +238,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	public void delete(String id) throws Exception {
 		DeleteRequest request = new DeleteRequest();
 		request.index(INDEX_NAME);
-		request.type(TYPE_NAME);
 		request.id(id);
 		client.delete(request,RequestOptions.DEFAULT);
 	}
@@ -262,7 +256,6 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	public void updateStatus(String id,String authority,ContentEntry.Audience.STATUS status) throws Exception {
 		UpdateRequest updateRequest = new UpdateRequest();
 		updateRequest.index(INDEX_NAME);
-		updateRequest.type(TYPE_NAME);
 		updateRequest.id(id);
 		String script="boolean updated=false; if(ctx._source.audience == null) {ctx._source.audience=new ArrayList();}  for (item in ctx._source.audience) {if (item!=null && item.authority == params.audience.authority) {item.status = params.audience.status;updated=true;}} if(!updated){ctx._source.audience.add(params.audience);}";
 		//script="boolean updated=false; if(ctx._source.audience == null) {ctx._source.audience=new ArrayList();}  if(!updated){ctx._source.audience.add(params.audience.authority+'='+params.audience.status);}";

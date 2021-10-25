@@ -19,6 +19,9 @@ public class MetadataQueryParameter implements Serializable {
 	private List<String> facets;
 	private String preprocessor;
 	private boolean mandatory = true;
+	//only DSL
+	private boolean asFilter = true;
+
 	MetadataQueryParameter(String syntax){
 		this.syntax = syntax;
 	}
@@ -141,4 +144,8 @@ public class MetadataQueryParameter implements Serializable {
     public boolean isMandatory() {
         return mandatory;
     }
+
+	public void setAsFilter(boolean asFilter) { this.asFilter = asFilter; }
+
+	public boolean isAsFilter() { return asFilter; }
 }

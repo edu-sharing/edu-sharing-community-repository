@@ -81,6 +81,13 @@
     "NO_CC_PUBLISH": "Kein Recht zum Veröffentlichen",
     "SELECT": "{{ element }} auswählen",
     "EDIT": "{{ thing }} bearbeiten",
+    "EXPAND": "{{ element }} ausklappen",
+    "COLLAPSE": "{{ element }} einklappen",
+    "CHECKBOX_CHECKED": "Kontrollkästchen ausgewählt",
+    "CHECKBOX_NOT_CHECKED": "Kontrollkästchen nicht ausgewählt",
+    "RADIO_BUTTON_SELECTED": "Optionsfeld ausgewählt",
+    "RADIO_BUTTON_NOT_SELECTED": "Optionsfeld nicht ausgewählt",
+    "DISABLED": "deaktiviert",
     "COLLECTION_CHOOSER": {
         "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
         "SEARCH_COLLECTIONS": "Sammlung suchen...",
@@ -234,7 +241,8 @@
     },
     "LIST_TABLE": {
         "DUMMY_ICON_LABEL": "Dateityp",
-        "TOGGLE_ALL": "Alle / Nichts auswählen"
+        "TOGGLE_ALL": "Alle / Nichts auswählen",
+        "CONFIGURE_COLUMNS": "Spalten konfigurieren"
     },
     "NODE": {
         "cm:name": "Dateiname",
@@ -246,6 +254,7 @@
         "size": "Größe",
         "mediatype": "Dateityp",
         "ccm:commonlicense_key": "Lizenz",
+        "ccm:collection_ordered_position": "Benutzerdefiniert",
         "ccm:educationallearningresourcetype": "Medienart",
         "ccm:replicationsourceid": "Original-ID",
         "ccm:educationalcontext": "Bildungsbereich",
@@ -476,6 +485,7 @@
     },
     "AUTHORITY_TYPE_GROUP": "Gruppe",
     "AUTHORITY_TYPE_ORG": "Organisation",
+    "CHILDOBJECT_COUNT": "{{count}} Elemente (Serienobjekt)",
     "GROUP": {
         "displayName": "Gruppenname",
         "authorityName": "Systemname",
@@ -599,7 +609,7 @@
         "PASTE": "Einfügen",
         "METADATA": "Details",
         "COLLECTION": "In Sammlung",
-        "COLLECTION_OTHER": "In Weitere Sammlung",
+        "COLLECTION_OTHER": "In weitere Sammlung",
         "STREAM": "Auf Stream",
         "LICENSE": "Lizenz",
         "CONTRIBUTOR": "Beteiligte",

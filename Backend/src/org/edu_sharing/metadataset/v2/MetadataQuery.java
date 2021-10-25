@@ -7,6 +7,7 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 	protected String id;
 	protected String join;
 	protected Boolean applyBasequery;
+	protected boolean basequeryAsFilter = true;
 	private List<MetadataQueryParameter> parameters;
 
 	public MetadataQuery(){}
@@ -80,5 +81,13 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 			return true;
 
 		return applyBasequery;
+	}
+
+	public void setBasequeryAsFilter(boolean basequeryAsFilter) {
+		this.basequeryAsFilter = basequeryAsFilter;
+	}
+
+	public boolean getBasequeryAsFilter() {
+		return basequeryAsFilter;
 	}
 }

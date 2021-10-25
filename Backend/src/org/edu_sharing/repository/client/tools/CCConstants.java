@@ -922,6 +922,8 @@ public class CCConstants {
 	/**
 	 * dynamic generated properties
 	 */
+	public final static String VIRT_PROP_TYPE = "{virtualproperty}type";
+
 	public final static String VIRT_PROP_MEDIATYPE = "{virtualproperty}mediatype";
 
 	public final static String VIRT_PROP_USAGECOUNT = "{virtualproperty}usagecount";
@@ -929,6 +931,8 @@ public class CCConstants {
 	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
 
 	public final static String VIRT_PROP_CHILDOBJECTCOUNT = "{virtualproperty}childobjectcount";
+
+	public final static String VIRT_PROP_MEDIACENTERS = "{virtualproperty}mediacenters";
 
 	/**
 	 * says if this set of properties is from an remote repository that was linked in the local repo by an remoteobject

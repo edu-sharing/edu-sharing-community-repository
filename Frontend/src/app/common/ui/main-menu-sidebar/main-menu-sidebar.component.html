@@ -36,21 +36,7 @@
         ><ng-container *ngTemplateOutlet="userAvatar"></ng-container></a>
       </div>
     </div>
-    <button
-      *ngFor="let entry of entries$ | async"
-      mat-button
-      color="primary"
-      class="entry mat-button-no-uppercase"
-      [class.selected]="currentScope === entry.scope"
-      (click)="entry.open()"
-      [class.collection-item-separate]="entry.isSeparate"
-      [class.clickable]="!entry.isDisabled"
-      [class.disabled]="entry.isDisabled"
-      title="{{ 'GOTO' | translate }} {{ entry.name | translate }}"
-    >
-      <i *ngIf="entry.icon" class="material-icons align-icon">{{ entry.icon }}</i>
-      <span>{{ entry.name | translate }}</span>
-    </button>
+    <app-main-menu-buttons [currentScope]="currentScope"></app-main-menu-buttons>
   </div>
   <div class="license-info">
     <button mat-button class="mat-button-no-uppercase" (click)="onShowLicenses()">

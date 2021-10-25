@@ -14,7 +14,7 @@
     (click)="$event.stopPropagation(); $event.preventDefault()"
   >
     <mat-chip
-      *ngFor="let value of chipsControl.value"
+      *ngFor="let value of chipsControl?.value"
       [selectable]="false"
       [removable]="true"
       [matTooltip]="value.hint"
@@ -29,7 +29,7 @@
     <div class="input-wrapper">
       <input
         autocomplete="off"
-        [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
+        [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
         [matChipInputFor]="chipList"
         (click)="openOverlay()"
         cdkMonitorElementFocus
@@ -59,14 +59,18 @@
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"
 >
-  <div class="suggestion-card">
+  <div *ngIf="overlayIsVisible"
+       class="suggestion-card"
+       role="dialog"
+       [attr.aria-labelledby]="container.labelId"
+  >
     <app-mds-editor-widget-tree-core
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
       #treeRef
       [widget]="widget"
       [tree]="tree"
-      [values]="chipsControl.value"
+      [values]="chipsControl?.value"
       [indeterminateValues]="indeterminateValues$ | async"
       [parentImpliesChildren]="editorMode === 'search'"
       (close)="closeOverlay()"

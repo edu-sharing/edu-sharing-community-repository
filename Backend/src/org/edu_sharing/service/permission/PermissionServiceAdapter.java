@@ -3,6 +3,7 @@ package org.edu_sharing.service.permission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -71,17 +72,17 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public StringBuffer getFindUsersSearchString(String query, List<String> searchFields, boolean globalContext) {
-		return null;
-	}
-
-	@Override
 	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext, boolean skipTpCheck) {
 		return null;
 	}
 
 	@Override
-	public Result<List<User>> findUsers(String query,List<String> searchFields, boolean globalContext, int from, int nrOfResults) {
+	public Result<List<User>> findUsers(String query, Map<String, Double> searchFields, boolean globalContext, int from, int nrOfResults) {
+		return null;
+	}
+
+	@Override
+	public StringBuffer getFindUsersSearchString(String query, Map<String, Double> searchFields, boolean globalContext) {
 		return null;
 	}
 

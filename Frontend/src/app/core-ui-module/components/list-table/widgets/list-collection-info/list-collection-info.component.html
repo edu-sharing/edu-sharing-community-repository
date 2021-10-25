@@ -14,9 +14,13 @@
     {{ $any(node).collection?.childReferencesCount }}
   </ng-container>
   <ng-container *ngSwitchCase="'scope'">
-    <i class="collectionScope" [icon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"></i>
-    <span>{{
+    <i
+      class="collectionScope"
+      [icon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
+      matTooltip="{{ 'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate }}"
+    ></i>
+    <!--<span>{{
       'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
-    }}</span>
+    }}</span> -->
   </ng-container>
 </ng-container>

@@ -26,7 +26,7 @@ import {AuthoritySearchInputComponent} from '../../../authority-search-input/aut
 import {Authority, AuthorityProfile, Group} from '../../../../../core-module/rest/data-object';
 import {AuthorityNamePipe} from '../../../../../core-ui-module/pipes/authority-name.pipe';
 import {AuthorityAffiliationPipe} from '../../../../../core-ui-module/pipes/authority-affiliation.pipe';
-import {async} from '@angular/core/testing';
+import { waitForAsync } from '@angular/core/testing';
 import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';
 import {RestConstants} from '../../../../../core-module/rest/rest-constants';
 

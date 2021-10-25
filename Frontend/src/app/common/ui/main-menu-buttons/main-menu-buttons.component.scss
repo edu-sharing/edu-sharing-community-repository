@@ -1,0 +1,26 @@
+@import "../../../core-ui-module/styles/variables";
+
+.entry {
+    padding: 20px 30px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    color: $textMain;
+    transition: all $transitionNormal;
+    &:hover {
+        background-color: $workspaceTreeSelectedBackground;
+    }
+    &.disabled {
+        cursor: default;
+        color: $textVeryLight;
+    }
+    &.selected {
+        color: $primary;
+        font-weight: bold;
+        background: $workspaceTreeSelectedBackgroundEffect !important;
+    }
+    i {
+        padding-right: 10px;
+    }
+}

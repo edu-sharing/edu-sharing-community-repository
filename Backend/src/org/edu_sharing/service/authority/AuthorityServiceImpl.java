@@ -30,12 +30,14 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.PropertyRequiredException;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
+import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.springframework.context.ApplicationContext;
@@ -448,36 +450,17 @@ public EduGroup getEduGroup(String authority){
 	 */
 	@Override
 	public Map<String, Serializable> getUserInfo(String userName) throws Exception {
+		User user = getUser(userName);
+		if(user == null) return null;
+		return user.getProperties();
+	}
 
-		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
+	@Override
+	public User getUser(String userName) {
+		return new MCAlfrescoAPIClient().getUser(userName);
+	}
 
-                new RetryingTransactionCallback<Map<String, Serializable>>()
-                {
-                    public Map<String, Serializable> execute() throws Throwable
-                    {
-                		NodeRef personRef = serviceRegistry.getPersonService().getPerson(userName, false);
-                		if (personRef == null) {
-                			return null;
-                		}
-
-                		Map<QName, Serializable> tmpProps = nodeService.getProperties(personRef);
-                		HashMap<String, Serializable> result = new HashMap<String, Serializable>();
-                		for (Map.Entry<QName, Serializable> entry : tmpProps.entrySet()) {
-
-                			Serializable value = entry.getValue();
-
-                			result.put(
-                					entry.getKey().toString(),
-                					value);
-                		}
-                		return result;
-                    }
-                }, true);
-
-
-
-		}
-		@Override
+	@Override
 		public void createOrUpdateUser(Map<String, Serializable> userInfo) throws Exception {
 
 			String currentUser = AuthenticationUtil.getRunAsUser();
@@ -643,28 +626,40 @@ public EduGroup getEduGroup(String authority){
 
 	@Override
 	public Map<String, Serializable> getProfileSettingsProperties(String userName, String profileSettingsProperty) {
-		List<String> properties = new ArrayList<>();// ProfileSettings property to return
 		String user = userName;
-		Map<String, Serializable> profileSettings = new HashMap<String, Serializable>();
+		//check if userName exist, if not get login USER
+		if (user == null)
+			user = AuthenticationUtil.getFullyAuthenticatedUser();
 
+		User userObj = this.getUser(user);
+		Map<String, Serializable> profileSettings = userObj.getProfileSettings();
+		if(profileSettings == null){
+			profileSettings = new HashMap<>();
+			NodeRef personRef = serviceRegistry.getPersonService().getPerson(user, false);
+			for (String property : CCConstants.getAllPropertiesOfProfileSettings()) {
+				profileSettings.put(property, serviceRegistry.getNodeService().getProperty(personRef, QName.createQName(property)));
+			}
+			userObj.setProfileSettings(profileSettings);
+			UserCache.put(user,userObj);
+		}
+
+		Map<String, Serializable> result = new HashMap<String, Serializable>();
+
+		List<String> properties = new ArrayList<>();// ProfileSettings property to return
 		// If profileSettingsProperty==null than  Get all Properties for ProfileSettings
 		if (profileSettingsProperty == null)
 			properties = CCConstants.getAllPropertiesOfProfileSettings();
 		else
 			properties.add(profileSettingsProperty);
 
-
-		//check if userName exist, if not get login USER
-		if (user == null)
-			user = AuthenticationUtil.getFullyAuthenticatedUser();
-
-		NodeRef personRef = serviceRegistry.getPersonService().getPerson(user, false);
-
-		for (String property : properties) {
-			profileSettings.put(property, serviceRegistry.getNodeService().getProperty(personRef, QName.createQName(property)));
+		for(String property : properties){
+			Serializable profileSetting = userObj.getProfileSettings().get(property);
+			if(profileSetting != null){
+				result.put(property,profileSetting);
+			}
 		}
 
-		return profileSettings;
+		return result;
 	}
 
 

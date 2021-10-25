@@ -1,4 +1,7 @@
-<app-mds-editor-widget-container [label]="'WORKSPACE.EDITOR.VERSION' | translate">
+<app-mds-editor-widget-container
+  *ngIf="show"
+  [label]="'WORKSPACE.EDITOR.VERSION' | translate"
+>
   <div class="version-container">
     <div>
       <input

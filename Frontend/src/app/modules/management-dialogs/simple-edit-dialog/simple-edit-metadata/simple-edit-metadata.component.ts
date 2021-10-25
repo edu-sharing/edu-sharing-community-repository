@@ -1,6 +1,6 @@
 import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { BehaviorSubject, from, Observable, of } from 'rxjs';
+import { BehaviorSubject, forkJoin, from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { MdsEditorWrapperComponent } from '../../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { BulkBehavior } from '../../../../common/ui/mds/mds.component';
@@ -53,7 +53,7 @@ export class SimpleEditMetadataComponent {
             // emit null so that next and complete get's called
             return of(null);
         }
-        return Observable.forkJoin(
+        return forkJoin(
             this.nodes.map((n) =>
                 from(this.mds.getValues(n)).pipe(
                     switchMap((props) => {
