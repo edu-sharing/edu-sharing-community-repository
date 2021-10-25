@@ -104,8 +104,8 @@ export class SearchService {
      * list---even if the facet does not have any results (`count` is 0).
      */
     getFacets(properties: string[], { includeActiveFilters = false } = {}): Observable<FacetsDict> {
-        this.subscribeFacets(properties);
         return new Observable((subscriber) => {
+            this.subscribeFacets(properties);
             const destroyed$ = new Subject<void>();
             this.facetsSubject
                 .pipe(
