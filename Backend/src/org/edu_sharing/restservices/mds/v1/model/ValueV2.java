@@ -26,7 +26,7 @@ public class ValueV2{
 		this.parent = parent;
 	}
 
-	@JsonProperty
+	@JsonProperty(required = true)
 	public String getId() {
 		return id;
 	}

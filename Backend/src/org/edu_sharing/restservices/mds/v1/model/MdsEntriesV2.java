@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class MdsEntriesV2 {
-	@JsonProperty
+	@JsonProperty(required = true)
 	private List<MetadataSetInfo> metadatasets;
 
 	public List<MetadataSetInfo> getMetadatasets() {
