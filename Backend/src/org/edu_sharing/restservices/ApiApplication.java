@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@ApplicationPath(value = "/rest")
+//@ApplicationPath(value = "/rest")
 public class ApiApplication extends ResourceConfig {
 
 	public static final int MAJOR = 1;
@@ -83,7 +83,7 @@ public class ApiApplication extends ResourceConfig {
 		info.setDescription("The public restful API of the edu-sharing repository.");
 		info.setVersion(MAJOR + "." + MINOR);
 		oas.info(info);
-		String url = "/" + ApplicationInfoList.getHomeRepository().getWebappname();
+		String url = "/" + ApplicationInfoList.getHomeRepository().getWebappname() + "/rest";
 				//+ getClass().getAnnotation(ApplicationPath.class).value();
 		oas.servers(Collections.singletonList(new Server().url(url)));
 
