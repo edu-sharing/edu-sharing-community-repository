@@ -16,6 +16,7 @@ public class SortV2 {
 		private String sortBy;
 		private boolean sortAscending;
 
+		@JsonProperty(required = true)
 		public String getSortBy() {
 			return sortBy;
 		}
@@ -24,6 +25,7 @@ public class SortV2 {
 			this.sortBy = sortBy;
 		}
 
+		@JsonProperty(required = true)
 		public boolean isSortAscending() {
 			return sortAscending;
 		}
@@ -52,7 +54,7 @@ public class SortV2 {
 		}
 	}
 
-	@JsonProperty
+	@JsonProperty(required = true)
 	public String getId() {
 		return id;
 	}

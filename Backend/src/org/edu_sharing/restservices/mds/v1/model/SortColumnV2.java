@@ -16,7 +16,7 @@ public class SortColumnV2 {
 		}
 		
 		
-		@JsonProperty
+		@JsonProperty(required = true)
 		public String getId() {
 			return id;
 		}

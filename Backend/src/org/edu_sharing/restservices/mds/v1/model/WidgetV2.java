@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.mds.v1.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.edu_sharing.metadataset.v2.MetadataCondition;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 
@@ -13,26 +14,28 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class WidgetV2 {
 
 	public static class WidgetCondition {
-		private String value,type;
+		MetadataCondition.CONDITION_TYPE type;
+		private String value;
 		private boolean negate;
 		private boolean dynamic;
 		private String pattern;
 
-		@JsonProperty
+		@JsonProperty(required = true)
 		public String getValue() {
 			return value;
 		}
 		public void setValue(String value) {
 			this.value = value;
 		}
-		@JsonProperty
-		public String getType() {
+
+		@JsonProperty(required = true)
+		public MetadataCondition.CONDITION_TYPE getType() {
 			return type;
 		}
-		public void setType(String type) {
+		public void setType(MetadataCondition.CONDITION_TYPE type) {
 			this.type = type;
 		}
-		@JsonProperty
+		@JsonProperty(required = true)
 		public boolean isNegate() {
 			return negate;
 		}
@@ -40,7 +43,7 @@ public class WidgetV2 {
 			this.negate = negate;
 		}
 
-		@JsonProperty
+		@JsonProperty(required = true)
 		public void setDynamic(boolean dynamic) {
 			this.dynamic = dynamic;
 		}
@@ -119,7 +122,7 @@ public class WidgetV2 {
 			if(widget.getCondition()!=null) {
 				this.condition=new WidgetCondition();
 				this.condition.setValue(widget.getCondition().getValue());
-				this.condition.setType(widget.getCondition().getType().name());
+				this.condition.setType(widget.getCondition().getType());
 				this.condition.setNegate(widget.getCondition().isNegate());
 				this.condition.setDynamic(widget.getCondition().isDynamic());
 				this.condition.setPattern(widget.getCondition().getPattern());
