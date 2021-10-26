@@ -3,6 +3,9 @@ import {MdsEditorWidgetBase, ValueType} from '../../mds-editor/widgets/mds-edito
 import {Widget} from '../../mds-editor/mds-editor-instance.service';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
 import {FormatSizePipe} from '../../../../core-ui-module/pipes/file-size.pipe';
+import {DatePipe} from '@angular/common';
+import {NodeDatePipe} from '../../../../core-ui-module/pipes/date.pipe';
+import {DateHelper} from '../../../../core-ui-module/DateHelper';
 
 @Component({
     selector: 'mds-widget',
@@ -25,6 +28,8 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
                 return 'text';
             case 'number':
                 return 'number';
+            case 'date':
+                return 'date';
             case 'multivalueFixedBadges':
             case 'multivalueSuggestBadges':
             case 'multivalueBadges':
@@ -73,7 +78,17 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
     isEmpty() {
         return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
     }
-
+    formatDate() {
+        return this.value.map((v) => {
+            if(this.widget.definition.format) {
+                return new DatePipe(null).transform(v, this.widget.definition.format);
+            } else {
+                return DateHelper.formatDate(this.translate,v,{
+                    showAlwaysTime: true
+                });
+            }
+        });
+    }
     formatNumber() {
         return this.value.map((v) => {
             if(this.widget.definition.format === 'bytes') {

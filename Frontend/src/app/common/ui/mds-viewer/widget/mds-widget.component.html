@@ -12,6 +12,7 @@
     <div *ngIf="!isEmpty()" class="widget-data widget-type-{{getBasicType()}} {{widget.definition.link ? 'widget-link' : ''}}" (click)="click()">
       <div *ngIf="getBasicType()=='text'">{{value}}</div>
       <div *ngIf="getBasicType()=='number'">{{formatNumber()}}</div>
+      <div *ngIf="getBasicType()=='date'">{{formatDate()}}</div>
       <div *ngIf="getBasicType()=='array'">
         <div class="array-entry" *ngFor="let v of value">{{v}}</div>
       </div>
