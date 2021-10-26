@@ -12,7 +12,7 @@ $collectionIconSize: 40px;
 .grid-card {
     grid-template-rows: $topBarHeight auto $optionBarHeight;
     .card-meta {
-        .card-meta {
+        .card-meta-row {
             > app-list-base {
                 @include limitLineCount(2, 1.25);
             }
