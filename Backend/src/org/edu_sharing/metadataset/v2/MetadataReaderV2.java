@@ -612,7 +612,7 @@ public class MetadataReaderV2 {
 					template.setCaption(getTranslation(template,value));
 				}
 				if(name.equals("rel"))
-					template.setRel(value);
+					template.setRel(MetadataTemplate.REL_TYPE.valueOf(value));
 				if(name.equals("icon"))
 					template.setIcon(value);
 				if(name.equals("html"))
