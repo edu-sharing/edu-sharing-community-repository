@@ -21,7 +21,7 @@
       https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Edu-sharing_Logo.svg/200px-Edu-sharing_Logo.svg.png
     </helm.chart.icon>
     <!--suppress UnresolvedMavenProperty -->
-    <helm.chart.version>${git.closest.tag.name}</helm.chart.version>
+    <helm.chart.version>${git.closest.tag.fixed}</helm.chart.version>
 
     <helm.registry>https://artifacts.edu-sharing.com/repository/community-helm/</helm.registry>
     <helm.type>NEXUS</helm.type>
@@ -148,7 +148,7 @@
       <properties>
 
         <!--suppress UnresolvedMavenProperty -->
-        <helm.chart.version>${git.closest.tag.name}+${build.timestamp}</helm.chart.version>
+        <helm.chart.version>${git.closest.tag.fixed}+${build.timestamp}</helm.chart.version>
 
       </properties>
 
