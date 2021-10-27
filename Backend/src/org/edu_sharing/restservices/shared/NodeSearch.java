@@ -1,7 +1,6 @@
 package org.edu_sharing.restservices.shared;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
@@ -66,7 +65,7 @@ public class NodeSearch {
 
 		public void setSumOtherDocCount(Long sumOtherDocCount) { this.sumOtherDocCount = sumOtherDocCount; }
 
-		@ApiModelProperty(required = false, value = "")
+		@Schema(required = false, defaultValue = "")
 		@JsonProperty(value = "sumOtherDocCount")
 		public Long getSumOtherDocCount() { return sumOtherDocCount; }
 	}

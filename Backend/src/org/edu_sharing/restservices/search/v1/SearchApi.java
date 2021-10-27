@@ -131,20 +131,21 @@ public class SearchApi {
 	@Path("/queriesV2/{repository}/{metadataset}/{query}/facets")
 	@Consumes({ "application/json" })
 
-	@ApiOperation(value = "Search in facets", notes = "Perform queries based on metadata sets V2.")
+	@Operation(summary = "Search in facets.", description = "Perform queries based on metadata sets V2.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultNode.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
+		@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 
 	public Response searchFacets(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, defaultValue = "-default-") @PathParam("metadataset") String mdsId,
-			@ApiParam(value = "ID of query", required = true) @PathParam("query") String query,
-			@ApiParam(value = "facet parameters", required = true) SearchParametersFacets parameters,
+
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-")) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "ID of query", required = true) @PathParam("query") String query,
+			@Parameter(description = "facet parameters", required = true) SearchParametersFacets parameters,
 			@Context HttpServletRequest req) {
 
 		try {
