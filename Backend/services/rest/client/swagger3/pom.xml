@@ -54,7 +54,7 @@
       <plugin>
         <groupId>io.swagger.codegen.v3</groupId>
         <artifactId>swagger-codegen-maven-plugin</artifactId>
-        <version>3.0.28</version>
+        <version>3.0.29</version>
         <executions>
           <execution>
             <goals>
@@ -64,6 +64,8 @@
             <configuration>
               <inputSpec>${project.build.directory}/api/swagger.yaml</inputSpec>
               <language>java</language>
+              <apiPackage>io.swagger.client.api</apiPackage>
+              <modelPackage>io.swagger.client.model</modelPackage>
             </configuration>
           </execution>
         </executions>

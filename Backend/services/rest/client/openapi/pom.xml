@@ -54,7 +54,7 @@
       <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
-        <version>5.2.1</version>
+        <version>5.3.0</version>
         <executions>
           <execution>
             <goals>
@@ -64,6 +64,8 @@
             <configuration>
               <inputSpec>${project.build.directory}/api/swagger.yaml</inputSpec>
               <generatorName>java</generatorName>
+              <apiPackage>io.swagger.client.api</apiPackage>
+              <modelPackage>io.swagger.client.model</modelPackage>
               <skipValidateSpec>true</skipValidateSpec>
             </configuration>
           </execution>
