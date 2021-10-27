@@ -1,16 +1,13 @@
 package org.edu_sharing.metadataset.v2.tools;
 
 import com.sun.star.lang.IllegalArgumentException;
-import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.restservices.mds.v1.model.WidgetV2;
+import org.edu_sharing.restservices.mds.v1.model.MdsWidget;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.elasticsearch.index.query.*;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -188,7 +185,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
                 boolean isi18nProp = false;
                 MetadataWidget mdw = mds.findWidget(facet);
-                if(mdw != null && new WidgetV2(mdw).isHasValues()){
+                if(mdw != null && new MdsWidget(mdw).isHasValues()){
                     isi18nProp = true;
                 }
 

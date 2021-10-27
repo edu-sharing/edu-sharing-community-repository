@@ -11,9 +11,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "")
-public class WidgetV2 {
+public class MdsWidget {
 
-	public static class WidgetCondition {
+	public static class MdsWidgetCondition {
 		MetadataCondition.CONDITION_TYPE type;
 		private String value;
 		private boolean negate;
@@ -60,10 +60,10 @@ public class WidgetV2 {
 			return pattern;
 		}
 	}
-	public static class Subwidget{
+	public static class MdsSubwidget {
 		private String id;
 
-		public Subwidget(org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget key) {
+		public MdsSubwidget(org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget key) {
 			this.id = key.getId();
 		}
 
@@ -78,8 +78,8 @@ public class WidgetV2 {
 	}
 	private String id,caption,bottomCaption,icon,type,link,template;
 	private boolean hasValues;
-	private List<ValueV2> values;
-	private List<Subwidget> subwidgets;
+	private List<MdsValue> values;
+	private List<MdsSubwidget> mdsSubwidgets;
 	private String placeholder;
 	private String unit;
 	private String format;
@@ -94,12 +94,12 @@ public class WidgetV2 {
 	private boolean allowempty;
 	private String defaultvalue;
 	private boolean isSearchable;
-	private WidgetCondition condition;
+	private MdsWidgetCondition condition;
 	private int maxlength;
 	private MetadataWidget.InteractionType interactionType;
 
-	public WidgetV2(){}
-	public WidgetV2(MetadataWidget widget) {
+	public MdsWidget(){}
+	public MdsWidget(MetadataWidget widget) {
 		this.id=widget.getId();
 		this.caption=widget.getCaption();
 		this.bottomCaption=widget.getBottomCaption();
@@ -124,7 +124,7 @@ public class WidgetV2 {
 		this.allowempty=widget.isAllowempty();
 		this.isSearchable=widget.isSearchable();
 		if(widget.getCondition()!=null) {
-			this.condition=new WidgetCondition();
+			this.condition=new MdsWidgetCondition();
 			this.condition.setValue(widget.getCondition().getValue());
 			this.condition.setType(widget.getCondition().getType());
 			this.condition.setNegate(widget.getCondition().isNegate());
@@ -134,25 +134,25 @@ public class WidgetV2 {
 		if(widget.getValues()!=null){
 			this.hasValues = true;
 			if(widget.isValuespaceClient()) {
-				values = new ArrayList<ValueV2>();
+				values = new ArrayList<MdsValue>();
 				for (MetadataKey key : widget.getValues()) {
-					values.add(new ValueV2(key));
+					values.add(new MdsValue(key));
 				}
 			}
 		}
 		if(widget.getSubwidgets()!=null){
-			subwidgets=new ArrayList<Subwidget>();
+			mdsSubwidgets =new ArrayList<MdsSubwidget>();
 			for(MetadataWidget.Subwidget key : widget.getSubwidgets()){
-				subwidgets.add(new Subwidget(key));
+				mdsSubwidgets.add(new MdsSubwidget(key));
 			}
 		}
 
 	}
 	@JsonProperty
-	public WidgetCondition getCondition() {
+	public MdsWidgetCondition getCondition() {
 		return condition;
 	}
-	public void setCondition(WidgetCondition condition) {
+	public void setCondition(MdsWidgetCondition condition) {
 		this.condition = condition;
 	}
 	@JsonProperty("isSearchable")
@@ -261,10 +261,10 @@ public class WidgetV2 {
 		this.isRequired = isRequired;
 	}
 	@JsonProperty("values")
-	public List<ValueV2> getValues() {
+	public List<MdsValue> getValues() {
 		return values;
 	}
-	public void setValues(List<ValueV2> values) {
+	public void setValues(List<MdsValue> values) {
 		this.values = values;
 	}
 
@@ -321,11 +321,11 @@ public class WidgetV2 {
 		this.unit = unit;
 	}
 	@JsonProperty
-	public List<Subwidget> getSubwidgets() {
-		return subwidgets;
+	public List<MdsSubwidget> getSubwidgets() {
+		return mdsSubwidgets;
 	}
-	public void setSubwidgets(List<Subwidget> subwidgets) {
-		this.subwidgets = subwidgets;
+	public void setSubwidgets(List<MdsSubwidget> mdsSubwidgets) {
+		this.mdsSubwidgets = mdsSubwidgets;
 	}
 	@JsonProperty
 	public int getMaxlength() {

@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "")
-public class ValueV2{
+public class MdsValue {
 	private String id,caption,description,parent;
-	public ValueV2(){};
-	public ValueV2(MetadataKey key) {
+	public MdsValue(){};
+	public MdsValue(MetadataKey key) {
 		id=key.getKey();
 		caption=key.getCaption();
 		description=key.getDescription();

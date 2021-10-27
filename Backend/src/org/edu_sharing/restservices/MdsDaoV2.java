@@ -9,7 +9,7 @@ import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.restservices.mds.v1.model.*;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.restservices.shared.MdsV2;
+import org.edu_sharing.restservices.shared.Mds;
 import org.edu_sharing.service.search.Suggestion;
 
 public class MdsDaoV2 {
@@ -68,12 +68,12 @@ public class MdsDaoV2 {
 		this.mds = mds;		
 	}
 
-	public MdsV2 asMds() {
+	public Mds asMds() {
 		
-    	MdsV2 data = new MdsV2();
+    	Mds data = new Mds();
     	
     	data.setName(mds.getName());
-    	data.setCreate(mds.getCreate()!=null ? new MdsV2.Create(mds.getCreate()) : null);
+    	data.setCreate(mds.getCreate()!=null ? new Mds.Create(mds.getCreate()) : null);
     	data.setWidgets(getWidgets());
     	data.setViews(getViews());
     	data.setGroups(getGroups());
@@ -83,42 +83,42 @@ public class MdsDaoV2 {
     	return data; 
 	}
 
-	private List<WidgetV2> getWidgets() {
-		List<WidgetV2> result = new ArrayList<WidgetV2>();
+	private List<MdsWidget> getWidgets() {
+		List<MdsWidget> result = new ArrayList<MdsWidget>();
 		for (MetadataWidget type : this.mds.getWidgets()) {
-			result.add(new WidgetV2(type));
+			result.add(new MdsWidget(type));
 		}
 		return result;		
 	}
 	
-	private List<ViewV2> getViews() {
-		List<ViewV2> result = new ArrayList<ViewV2>();
+	private List<MdsView> getViews() {
+		List<MdsView> result = new ArrayList<MdsView>();
 		for (MetadataTemplate type : this.mds.getTemplates()) {
-			result.add(new ViewV2(type));
+			result.add(new MdsView(type));
 		}
 		return result;		
 	}
 	
-	private List<GroupV2> getGroups() {
-		List<GroupV2> result = new ArrayList<GroupV2>();
+	private List<MdsGroup> getGroups() {
+		List<MdsGroup> result = new ArrayList<MdsGroup>();
 		for (MetadataGroup type : this.mds.getGroups()) {
-			result.add(new GroupV2(type));
+			result.add(new MdsGroup(type));
 		}
 		return result;		
 	}
 	
-	private List<ListV2> getLists() {
-		List<ListV2> result = new ArrayList<>();
+	private List<MdsList> getLists() {
+		List<MdsList> result = new ArrayList<>();
 		for (MetadataList type : this.mds.getLists()) {
-			result.add(new ListV2(type));
+			result.add(new MdsList(type));
 		}
 		return result;		
 	}
 
-	private List<SortV2> getSorts() {
-		List<SortV2> result = new ArrayList<>();
+	private List<MdsSort> getSorts() {
+		List<MdsSort> result = new ArrayList<>();
 		for (MetadataSort type : this.mds.getSorts()) {
-			result.add(new SortV2(type));
+			result.add(new MdsSort(type));
 		}
 		return result;
 	}
