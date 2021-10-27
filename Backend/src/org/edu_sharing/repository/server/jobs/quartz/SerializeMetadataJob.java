@@ -28,23 +28,14 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import com.google.gson.Gson;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import com.google.gson.GsonBuilder;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -52,6 +43,8 @@ import org.springframework.context.ApplicationContext;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import java.util.function.Function;
 
 @JobDescription(description = "Serialize all metadata of nodes and persistent them as a file")
 public class SerializeMetadataJob extends AbstractJobMapAnnotationParams{
@@ -94,18 +87,54 @@ public class SerializeMetadataJob extends AbstractJobMapAnnotationParams{
 					model.properties = map;
 					//oos.writeObject(model);
 					nodes.add(model);
-					logger.info("Wrote node " + nodeRef);
+					//logger.info("Wrote node " + nodeRef);
 				} catch (Throwable e) {
 					logger.warn(e.getMessage(), e);
 				}
 			});
 			runner.run();
-			oos.write(new Gson().toJson(nodes));
+
+			LogDistinctProperties(nodes);
+
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			oos.write(gson.toJson(nodes));
 			logger.info("Wrote data to " +file);
+			logger.info("Test");
 		} catch(Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
+
+	private void LogDistinctProperties(List<AlfrescoNodeModel> nodes){
+		String allMetaDataKeys = nodes.stream()
+				.flatMap(x -> x.properties.entrySet().stream())
+				.collect(Collectors.groupingBy(Map.Entry<String, Serializable>::getKey,
+						Collectors.mapping(Map.Entry<String, Serializable>::getValue,
+								Collectors.reducing(null, Function.identity(), (first, last) -> {
+									if (first == null) {
+										return last;
+									}
+									if (first instanceof String && ((String) first).isEmpty()) {
+										return last;
+									}
+									if (first instanceof List) {
+										List list = (List) first;
+										if (list.size() == 0 || (list.get(0) instanceof String && ((String) list.get(0)).isEmpty())) {
+											return last;
+										}
+									}
+									return first;
+								}))))
+				.entrySet()
+				.stream()
+				.collect(Collectors.toMap(Map.Entry<String, Serializable>::getKey, p -> "put(\""+p.getKey() + "\", " + Optional.of(p).map(Map.Entry::getValue).map(Object::toString).map(x->x.replace("\n", "| ")).orElse("") + "); // " + Optional.of(p).map(Map.Entry::getValue).map(Object::getClass).map(Class::getName).orElse(""), (p, q) -> p))
+				.values()
+				.stream()
+				.sorted()
+				.collect(Collectors.joining("\n"));
+		logger.info(allMetaDataKeys);
+	}
+
 	public static class AlfrescoNodeModel implements Serializable {
 		public String type;
 		public Set<String> aspects;
