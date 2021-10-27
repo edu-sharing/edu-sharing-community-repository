@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "")
 public class ViewV2 {
 	private String id,caption,icon,html;
-	private String rel;
+	private MetadataTemplate.REL_TYPE rel;
 	private boolean hideIfEmpty;
 	private boolean isExtended;
 
@@ -56,10 +56,10 @@ public class ViewV2 {
 		this.icon = icon;
 	}
 	@JsonProperty("rel")
-	public String getRel() {
+	public MetadataTemplate.REL_TYPE getRel() {
 		return rel;
 	}
-	public void setRel(String rel) {
+	public void setRel(MetadataTemplate.REL_TYPE rel) {
 		this.rel = rel;
 	}
 	@JsonProperty("hideIfEmpty")
