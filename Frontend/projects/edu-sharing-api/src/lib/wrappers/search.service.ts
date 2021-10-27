@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { LabeledValue, MdsIdentifier } from '../../public-api';
+import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { LabeledValue, MdsIdentifier, SearchResults } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
 import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
@@ -21,8 +21,6 @@ export class SearchConfig {
     facets: string[] = [];
 }
 
-export type SearchResults = Pick<apiModels.SearchResultNode, 'nodes' | 'pagination'>;
-
 /** A singe entry of a given facet, including its localized display name. */
 export interface FacetValue extends LabeledValue {
     count: number;
@@ -39,15 +37,16 @@ export type FacetsDict = {
     [property: string]: FacetAggregation;
 };
 
-type SearchParams = Parameters<SearchV1Service['searchV2']>[0];
+/** Parameters to be provided to `search`. */
+export type SearchRequestParams = Parameters<SearchV1Service['searchV2']>[0];
 
 @Injectable({
     providedIn: 'root',
 })
 export class SearchService {
-    private readonly resultsSubject = new BehaviorSubject<apiModels.SearchResultNode | null>(null);
+    private readonly resultsSubject = new BehaviorSubject<SearchResults | null>(null);
     private readonly facetsSubject = new BehaviorSubject<FacetsDict>({});
-    private readonly searchParamsSubject = new BehaviorSubject<SearchParams | null>(null);
+    private readonly searchParamsSubject = new BehaviorSubject<SearchRequestParams | null>(null);
     private readonly subscribedFacetsSubject = new BehaviorSubject<string[][]>([]);
 
     constructor(private searchV1: SearchV1Service, private mdsLabel: MdsLabelService) {
@@ -55,12 +54,12 @@ export class SearchService {
     }
 
     /**
-     * Send a search request with new parameters.
+     * Sends a search request with new parameters.
      *
      * Facets will be updated and search parameters will be kept for future calls to `getPage` and
      * `getAsYouTypeFacetSuggestions`.
      */
-    search(params: SearchParams): Observable<SearchResults> {
+    search(params: SearchRequestParams): Observable<SearchResults> {
         this.searchParamsSubject.next(params);
         return this.requestSearch({
             ...params,
@@ -69,11 +68,18 @@ export class SearchService {
                 // Additionally fetch facets that have been subscribed to via `getFacets`.
                 facettes: this.getSubscribedFacets(params.body.facettes),
             },
-        });
+        }).pipe(tap((results) => this.resultsSubject.next(results)));
     }
 
     /**
-     * Get another page of search results with parameters last provided to `search`.
+     * Sends a plain search request without updating any global state.
+     */
+    requestSearch(params: SearchRequestParams): Observable<SearchResults> {
+        return this.searchV1.searchV2(params);
+    }
+
+    /**
+     * Gets another page of search results with parameters last provided to `search`.
      */
     getPage(pageIndex: number): Observable<SearchResults> {
         const searchParams = this.getSearchParams();
@@ -135,27 +141,6 @@ export class SearchService {
     ): Observable<FacetAggregation | null> {
         return this.getFacets([property], options).pipe(map((facets) => facets[property] ?? null));
     }
-
-    // /**
-    //  * Like `getFacets`, but does not map translated labels.
-    //  */
-    // getRawFacets(properties: string[]): Observable<apiModels.Facette[]> {
-    //     this.subscribeFacets(properties);
-    //     return new Observable((subscriber) => {
-    //         const destroyed$ = new Subject<void>();
-    //         this.resultsSubject
-    //             .pipe(
-    //                 takeUntil(destroyed$),
-    //                 filter((results): results is apiModels.SearchResultNode => results !== null),
-    //             )
-    //             .subscribe((results) => subscriber.next(results.facettes));
-    //         return () => {
-    //             this.unsubscribeFacets(properties);
-    //             destroyed$.next();
-    //             destroyed$.complete();
-    //         };
-    //     });
-    // }
 
     /**
      * Loads more facets of the given property.
@@ -229,10 +214,16 @@ export class SearchService {
      */
     getFilters(): Observable<LabeledValuesDict> {
         const filterCriteria = this.getFilterCriteria();
+        if (filterCriteria.length === 0) {
+            // If we don't have any filters yet, search params might not be available and
+            // `getMdsIdentifier` would fail.
+            return rxjs.of({});
+        }
         const filterRawValues = this.criteriaToRawValues(filterCriteria);
         return this.mdsLabel.labelValuesDict(this.getMdsIdentifier(), filterRawValues);
     }
 
+    /** Registers the internal `facetsSubject` to be updated with search responses. */
     private registerFacetsSubject(): void {
         this.resultsSubject
             .pipe(
@@ -247,10 +238,16 @@ export class SearchService {
             .subscribe((facets) => this.facetsSubject.next(facets));
     }
 
+    /** Adds given properties to the list of facets to be fetched with search requests. */
     private subscribeFacets(properties: string[]) {
         this.subscribedFacetsSubject.next([...this.subscribedFacetsSubject.value, properties]);
     }
 
+    /**
+     * Removes the given array from the subscribed-facets list.
+     *
+     * The given array has to be the exact object that has been passed to `subscribeFacets`.
+     */
     private unsubscribeFacets(properties: string[]) {
         const subscribedFacets = [...this.subscribedFacetsSubject.value];
         const index = subscribedFacets.indexOf(properties);
@@ -261,13 +258,20 @@ export class SearchService {
         this.subscribedFacetsSubject.next(subscribedFacets);
     }
 
+    /**
+     * Gets a list of all facets that should be fetched with search request right now.
+     *
+     * @param additionalFacets - facets that should be fetched in addition to the ones on the
+     * subscribed-facets list.
+     */
     private getSubscribedFacets(additionalFacets: string[] = []): string[] {
         return additionalFacets
             .concat(...this.subscribedFacetsSubject.value) // Flatten array
             .filter((value, index, array) => array.indexOf(value) === index); // Remove duplicates
     }
 
-    private getSearchParams(): SearchParams {
+    /** Gets parameters of the last call to `search`. */
+    private getSearchParams(): SearchRequestParams {
         if (this.searchParamsSubject.value) {
             return this.searchParamsSubject.value;
         } else {
@@ -275,18 +279,13 @@ export class SearchService {
         }
     }
 
+    /** Gets the mds identifier taken from the last call to `search`. */
     private getMdsIdentifier(): MdsIdentifier {
         const searchParams = this.getSearchParams();
         return {
             repository: searchParams.repository,
             metadataSet: searchParams.metadataset,
         };
-    }
-
-    private requestSearch(params: SearchParams): Observable<apiModels.SearchResultNode> {
-        return this.searchV1
-            .searchV2(params)
-            .pipe(tap((results) => this.resultsSubject.next(results)));
     }
 
     /**
@@ -301,9 +300,16 @@ export class SearchService {
         return criteria.filter((criterion) => criterion.property !== 'ngsearchword');
     }
 
+    /**
+     * Adds filters as facets to the given facets dictionary.
+     *
+     * Filters are taken from the last call to `search` and updated with new requests.
+     *
+     * If a filter is not already included as facet in the facets dictionary, it is appended with a
+     * `count` of 0 to the respective list.
+     */
     private includeActiveFilters(facets: FacetsDict): Observable<FacetsDict> {
         return this.getFilters().pipe(
-            // first(),
             map((activeFilters) => {
                 for (const [property, filters] of Object.entries(activeFilters)) {
                     for (const filter of filters) {
@@ -325,7 +331,10 @@ export class SearchService {
         );
     }
 
-    private mapFacets(results: apiModels.SearchResultNode['facettes']): Observable<FacetsDict> {
+    /**
+     * Maps the `facets` part of a search response to a facets dictionary with labeled facet values.
+     */
+    private mapFacets(results: SearchResults['facettes']): Observable<FacetsDict> {
         if (results.length === 0) {
             return rxjs.of({});
         }
@@ -337,6 +346,10 @@ export class SearchService {
         );
     }
 
+    /**
+     * Maps a facets list of a single property from a search response to a facet aggregation with
+     * labeled facet values.
+     */
     private mapFacet(facet: apiModels.Facette): Observable<FacetAggregation> {
         if (facet.values.length === 0) {
             return rxjs.of({ values: [], hasMore: false });
@@ -351,6 +364,9 @@ export class SearchService {
             );
     }
 
+    /**
+     * Maps a single facet value from a search response to a labeled facet value.
+     */
     private mapFacetValue(
         property: string,
         { count, value }: apiModels.Value,
@@ -360,6 +376,10 @@ export class SearchService {
             .pipe(map((label) => ({ count, value, label })));
     }
 
+    /**
+     * Maps the `criteria` array of a search request to a simple dictionary of values indexed by
+     * properties.
+     */
     private criteriaToRawValues(criteria: apiModels.SearchParameters['criterias']): RawValuesDict {
         return criteria.reduce((acc, criterion) => {
             acc[criterion.property] = criterion.values;

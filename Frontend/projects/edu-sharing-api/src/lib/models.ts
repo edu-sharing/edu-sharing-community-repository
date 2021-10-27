@@ -5,6 +5,7 @@ export {
     Node,
     ValueV2 as MdsWidgetValue,
     WidgetCondition as MdsWidgetCondition,
+    SearchResultNode as SearchResults,
 } from './api/models';
 export { MdsV2 as MdsDefinition } from './model-overrides/mds-v-2';
 export { MetadataSetInfo } from './model-overrides/metadata-set-info';

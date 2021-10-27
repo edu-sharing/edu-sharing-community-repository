@@ -10,7 +10,8 @@
   },
   "peerDependencies": {
     "@angular/common": "^12.2.0",
-    "@angular/core": "^12.2.0"
+    "@angular/core": "^12.2.0",
+    "rxjs": "^6.6.3"
   },
   "dependencies": {
     "tslib": "^2.3.0"
