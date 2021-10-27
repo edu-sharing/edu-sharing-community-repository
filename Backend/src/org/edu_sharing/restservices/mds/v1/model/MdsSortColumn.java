@@ -6,11 +6,11 @@ import org.edu_sharing.metadataset.v2.MetadataColumn;
 import org.edu_sharing.metadataset.v2.MetadataSortColumn;
 
 @Schema(description = "")
-public class SortColumnV2 {
+public class MdsSortColumn {
 		private String id;
 		private String mode;
 
-		public SortColumnV2(MetadataSortColumn column) {
+		public MdsSortColumn(MetadataSortColumn column) {
 			this.id=column.getId();		
 			this.mode=column.getMode();
 		}

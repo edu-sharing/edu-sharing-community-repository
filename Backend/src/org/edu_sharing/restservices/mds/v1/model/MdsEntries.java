@@ -7,7 +7,7 @@ import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-public class MdsEntriesV2 {
+public class MdsEntries {
 	@JsonProperty(required = true)
 	private List<MetadataSetInfo> metadatasets;
 

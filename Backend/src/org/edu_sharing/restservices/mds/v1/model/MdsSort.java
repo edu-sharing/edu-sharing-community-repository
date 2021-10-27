@@ -2,8 +2,6 @@ package org.edu_sharing.restservices.mds.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.edu_sharing.metadataset.v2.MetadataColumn;
-import org.edu_sharing.metadataset.v2.MetadataList;
 import org.edu_sharing.metadataset.v2.MetadataSort;
 import org.edu_sharing.metadataset.v2.MetadataSortColumn;
 
@@ -11,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Schema(description = "")
-public class SortV2 {
-	public class SortV2Default{
+public class MdsSort {
+	public class MdsSortDefault {
 		private String sortBy;
 		private boolean sortAscending;
 
@@ -35,21 +33,21 @@ public class SortV2 {
 		}
 	}
 	private String id;
-	private SortV2Default defaultValue;
-	private List<SortColumnV2> columns;
+	private MdsSortDefault defaultValue;
+	private List<MdsSortColumn> columns;
 
-	public SortV2(){}
-	public SortV2(MetadataSort sort) {
+	public MdsSort(){}
+	public MdsSort(MetadataSort sort) {
 		this.id=sort.getId();
 		if(sort.getDefaultValue()!=null){
-			this.defaultValue=new SortV2Default();
+			this.defaultValue=new MdsSortDefault();
 			this.defaultValue.setSortBy(sort.getDefaultValue().getSortBy());
 			this.defaultValue.setSortAscending(sort.getDefaultValue().isSortAscending());
 		}
 		if(sort.getColumns()!=null){
 			columns=new ArrayList<>();
 			for(MetadataSortColumn column : sort.getColumns()){
-				columns.add(new SortColumnV2(column));
+				columns.add(new MdsSortColumn(column));
 			}
 		}
 	}
@@ -63,19 +61,19 @@ public class SortV2 {
 		this.id = id;
 	}
 	@JsonProperty
-	public List<SortColumnV2> getColumns() {
+	public List<MdsSortColumn> getColumns() {
 		return columns;
 	}
-	public void setColumns(List<SortColumnV2> columns) {
+	public void setColumns(List<MdsSortColumn> columns) {
 		this.columns = columns;
 	}
 
 	@JsonProperty("default")
-	public SortV2Default getDefaultValue() {
+	public MdsSortDefault getDefaultValue() {
 		return defaultValue;
 	}
 
-	public void setDefaultValue(SortV2Default defaultValue) {
+	public void setDefaultValue(MdsSortDefault defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 }
