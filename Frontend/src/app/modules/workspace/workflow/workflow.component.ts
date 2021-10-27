@@ -145,6 +145,9 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             if (!hasPermission) {
                 return;
             }
+        } else if(this.status.hasReceiver) {
+            this.toast.error(null, 'WORKSPACE.WORKFLOW.NO_RECEIVER');
+            return;
         }
         this.saveWorkflowFinal(receivers);
     }

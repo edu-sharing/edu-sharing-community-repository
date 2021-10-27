@@ -321,6 +321,7 @@
             "NEW_STATUS": "neuer Status",
             "HISTORY": "Protokoll der bisherigen Workflow-Aktivitäten",
             "NO_COMMENT": "Bitte geben Sie einen Kommentar für diesen Vorgang an",
+            "NO_RECEIVER": "Bitte geben Sie einen Zuständigen für diesen Vorgang an",
             "NO_HISTORY": "Es wurden noch keine Workflow-Einträge vorgenommen",
             "USER_NO_PERMISSION": "Zuständige(n) als Koordinator einladen",
             "USER_NO_PERMISSION_INFO": "Die von Ihnen gewählte zuständige Person/Gruppe {{user}} hat aktuell keine Berechtigung das Objekt / die Objekte zu bearbeiten. Möchten Sie sie als Koordinator zulassen?\n\nKoordinatoren dürfen das Material bearbeiten und weiteren Personen Zugriff gewähren.",
