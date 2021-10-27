@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.edu_sharing.restservices.knowledge.v1.model.JobEntry;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ import javax.ws.rs.core.Response;
 @Path("/knowledge/v1")
 @Consumes({ "application/json" })
 @Produces({"application/json"})
+@Tag(name="KNOWLEDGE v1")
 public class KnowledgeApi  {
 
     @POST
