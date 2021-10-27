@@ -4,11 +4,11 @@ import org.edu_sharing.repository.client.rpc.Group;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class GroupProfile  {
   
   private String displayName = null;
@@ -28,7 +28,7 @@ public class GroupProfile  {
   }
 /**
    **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   @JsonProperty("displayName")
   public String getDisplayName() {
     return displayName;

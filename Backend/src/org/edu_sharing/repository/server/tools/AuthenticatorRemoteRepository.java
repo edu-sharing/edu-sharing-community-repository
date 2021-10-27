@@ -123,7 +123,7 @@ public class AuthenticatorRemoteRepository {
 
 	private AuthenticationToken remoteAuth(String appId, String username) throws Exception{
 		ApplicationInfo appInfoRemoteApp = ApplicationInfoList.getRepositoryInfoById(appId);
-		if((Float)appInfoRemoteApp.getCache().get(ApplicationInfo.CacheKey.RemoteAlfrescoVersion) <= 5.1){
+		if(appInfoRemoteApp.getCache().size() > 0 && (Float)appInfoRemoteApp.getCache().get(ApplicationInfo.CacheKey.RemoteAlfrescoVersion) <= 5.1){
 			logger.info("Detected repository " + appId + " has version <= 5.1, using legacy SOAP authentication");
 			return remoteAuthSoap(appId, username);
 		}

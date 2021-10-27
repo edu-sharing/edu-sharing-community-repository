@@ -4,12 +4,12 @@ import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.restservices.shared.ACL;
 import org.edu_sharing.restservices.shared.User;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class NotifyEntry  {
   
 	  private long date;
@@ -23,7 +23,7 @@ public class NotifyEntry  {
 		  user=new User(notify.getUser());
 		  permissions=new ACL(notify.getAcl());
 	  }
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	  @JsonProperty("date")
   public long getDate() {
 		return date;
@@ -31,7 +31,7 @@ public class NotifyEntry  {
 	public void setDate(long date) {
 		this.date = date;
 	}
-	  @ApiModelProperty(required = true, value = "")
+	  @Schema(required = true, description = "")
 	  @JsonProperty("permissions")
 	public ACL getPermissions() {
 		return permissions;
@@ -39,7 +39,7 @@ public class NotifyEntry  {
 	public void setPermissions(ACL permissions) {
 		this.permissions = permissions;
 	}
-	  @ApiModelProperty(required = true, value = "")
+	  @Schema(required = true, description = "")
 	  @JsonProperty("user")
 	public User getUser() {
 		return user;
@@ -47,7 +47,7 @@ public class NotifyEntry  {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	  @ApiModelProperty(required = true, value = "")
+	  @Schema(required = true, description = "")
 	  @JsonProperty("action")
 	public String getAction() {
 		return action;

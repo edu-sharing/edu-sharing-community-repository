@@ -1,6 +1,6 @@
 package org.edu_sharing.restservices.node.v1.model;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class SearchResult {
 
 	/**
 	   **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("nodes")
 	public List<Node> getNodes() {
 		return nodes;
@@ -31,7 +31,7 @@ public class SearchResult {
 
 	/**
 	   **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("pagination")
 	public Pagination getPagination() {
 		return pagination;
@@ -43,7 +43,7 @@ public class SearchResult {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("facettes")
 	public List<Facette> getFacettes() {
 		return facettes;

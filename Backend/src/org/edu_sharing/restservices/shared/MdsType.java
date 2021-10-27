@@ -1,19 +1,19 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class MdsType {
 
 	private String type = null;
 	private List<MdsProperty> properties = null;
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("type")
 	public String getType() {
 		return type;
@@ -23,7 +23,7 @@ public class MdsType {
 		this.type = type;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("properties")
 	public List<MdsProperty> getProperties() {
 		return properties;
@@ -33,7 +33,7 @@ public class MdsType {
 		this.properties = properties;
 	}
 
-	@ApiModel(description = "")
+	@Schema(description = "")
 	public static class MdsProperty {
 
 		private String name = null;
@@ -46,7 +46,7 @@ public class MdsType {
 		private String copyFrom = null;
 
 		
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("name")
 		public String getName() {
 			return name;
@@ -55,7 +55,7 @@ public class MdsType {
 			this.name = name;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("type")
 		public String getType() {
 			return type;
@@ -64,7 +64,7 @@ public class MdsType {
 			this.type = type;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("defaultValue")
 		public String getDefaultValue() {
 			return defaultValue;
@@ -73,7 +73,7 @@ public class MdsType {
 			this.defaultValue = defaultValue;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("processtype")
 		public String getProcesstype() {
 			return processtype;
@@ -82,7 +82,7 @@ public class MdsType {
 			this.processtype = processtype;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("keyContenturl")
 		public String getKeyContenturl() {
 			return keyContenturl;
@@ -91,7 +91,7 @@ public class MdsType {
 			this.keyContenturl = keyContenturl;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("concatewithtype")
 		public Boolean getConcatewithtype() {
 			return concatewithtype;
@@ -100,7 +100,7 @@ public class MdsType {
 			this.concatewithtype = concatewithtype;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("multiple")
 		public Boolean getMultiple() {
 			return multiple;
@@ -109,7 +109,7 @@ public class MdsType {
 			this.multiple = multiple;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("copyFrom")
 		public String getCopyFrom() {
 			return copyFrom;

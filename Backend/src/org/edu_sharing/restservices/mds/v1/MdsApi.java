@@ -1,40 +1,36 @@
 package org.edu_sharing.restservices.mds.v1;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOValidationException;
 import org.edu_sharing.restservices.MdsDaoV2;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.mds.v1.model.MdsEntries;
 import org.edu_sharing.restservices.mds.v1.model.MdsEntriesV2;
-import org.edu_sharing.restservices.mds.v1.model.MdsEntry;
 import org.edu_sharing.restservices.mds.v1.model.SuggestionParam;
 import org.edu_sharing.restservices.mds.v1.model.Suggestions;
-import org.edu_sharing.restservices.mds.v1.model.ValueParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.MdsV2;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.List;
 
 @Path("/mds/v1")
-@Api(tags = {"MDS v1"})
+@Tag(name="MDS v1")
 @ApiService(value="MDS", major=1, minor=0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class MdsApi {
 
 	private static Logger logger = Logger.getLogger(MdsApi.class);
@@ -42,22 +38,20 @@ public class MdsApi {
 	@GET
 	@Path("/metadatasetsV2/{repository}")
 
-	@ApiOperation(
-			value = "Get metadata sets V2 of repository.",
-			notes = "Get metadata sets V2 of repository.")
+	@Operation(summary = "Get metadata sets V2 of repository.", description = "Get metadata sets V2 of repository.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = "OK.", response = MdsEntriesV2.class),
-					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = MdsEntriesV2.class))),
+					@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getMetadataSetsV2(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -80,23 +74,21 @@ public class MdsApi {
 	@GET
 	@Path("/metadatasetsV2/{repository}/{metadataset}")
 
-	@ApiOperation(
-			value = "Get metadata set new.",
-			notes = "Get metadata set new.")
+	@Operation(summary = "Get metadata set new.", description = "Get metadata set new.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = MdsV2.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = MdsV2.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getMetadataSetV2(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-" )) @PathParam("metadataset") String mdsId,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -117,7 +109,7 @@ public class MdsApi {
 
 	@OPTIONS
 	@Path("/metadatasets/{repository}/{metadataset}")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options2() {
 
@@ -132,23 +124,21 @@ public class MdsApi {
 	@POST
 	@Path("/metadatasetsV2/{repository}/{metadataset}/values")
 
-	@ApiOperation(
-			value = "Get values.",
-			notes = "Get values.")
+	@Operation(summary = "Get values.", description = "Get values.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = "OK.", response = Suggestions.class),
-					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Suggestions.class))),
+					@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 	public Response getValuesV2(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
-			@ApiParam(value = "suggestionParam") SuggestionParam suggestionParam,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-" )) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "suggestionParam") SuggestionParam suggestionParam,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -179,25 +169,23 @@ public class MdsApi {
 	@POST
 	@Path("/metadatasetsV2/{repository}/{metadataset}/values_for_keys")
 
-	@ApiOperation(
-			value = "Get values for keys.",
-			notes = "Get values for keys.")
+	@Operation(summary = "Get values for keys.", description = "Get values for keys.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = "OK.", response = Suggestions.class),
-					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Suggestions.class))),
+					@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 	public Response getValues4KeysV2(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
-			@ApiParam(value = "query") @QueryParam("query") String query,
-			@ApiParam(value = "property") @QueryParam("property") String property,
-			@ApiParam(value = "keys") ArrayList<String> keys,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-" )) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "query") @QueryParam("query") String query,
+			@Parameter(description = "property") @QueryParam("property") String property,
+			@Parameter(description = "keys") ArrayList<String> keys,
 			@Context HttpServletRequest req) {
 
 		try {

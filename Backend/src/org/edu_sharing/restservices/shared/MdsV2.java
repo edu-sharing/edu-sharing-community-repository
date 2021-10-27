@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import org.edu_sharing.restservices.mds.v1.model.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class MdsV2 {
 		
 	public static class Create {
@@ -37,21 +37,22 @@ public class MdsV2 {
 	private List<SortV2> sorts;
 
 
-	@JsonProperty
+	@JsonProperty(required = true)
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
 	}
-	@JsonProperty
+
+	@JsonProperty(required = false)
 	public Create getCreate() {
 		return create;
 	}
 	public void setCreate(Create create) {
 		this.create = create;
 	}
-	@JsonProperty
+	@JsonProperty(required = true)
 	public List<WidgetV2> getWidgets() {
 		return widgets;
 	}
@@ -61,7 +62,7 @@ public class MdsV2 {
 	public void setWidgets(List<WidgetV2> widgets) {
 		this.widgets = widgets;
 	}
-	@JsonProperty
+	@JsonProperty(required = true)
 	public List<ViewV2> getViews() {
 		return views;
 	}
@@ -69,7 +70,7 @@ public class MdsV2 {
 	public void setViews(List<ViewV2> views) {
 		this.views = views;
 	}
-	@JsonProperty
+	@JsonProperty(required = true)
 	public List<GroupV2> getGroups() {
 		return groups;
 	}
@@ -77,14 +78,14 @@ public class MdsV2 {
 	public void setGroups(List<GroupV2> groups) {
 		this.groups = groups;
 	}
-	@JsonProperty
+	@JsonProperty(required = true)
 	public List<ListV2> getLists() {
 		return lists;
 	}
 	public void setLists(List<ListV2> lists) {
 		this.lists = lists;
 	}
-	@JsonProperty
+	@JsonProperty(required = true)
 	public List<SortV2> getSorts() {
 		return sorts;
 	}

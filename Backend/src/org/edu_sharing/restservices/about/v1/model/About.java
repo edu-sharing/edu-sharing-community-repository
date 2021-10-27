@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.about.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class About  {
   
   private ServiceVersion version = null;
@@ -20,7 +20,7 @@ public class About  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("version")
   public ServiceVersion getVersion() {
     return version;
@@ -32,7 +32,7 @@ public class About  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("services")
   public List<Service> getServices() {
     return services;

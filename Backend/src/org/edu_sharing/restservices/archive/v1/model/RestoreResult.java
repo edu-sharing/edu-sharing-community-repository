@@ -2,7 +2,7 @@ package org.edu_sharing.restservices.archive.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class RestoreResult {
 	String archiveNodeId;
@@ -15,7 +15,7 @@ public class RestoreResult {
 	String restoreStatus;
 
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("archiveNodeId")
 	public String getArchiveNodeId() {
 		return archiveNodeId;
@@ -25,7 +25,7 @@ public class RestoreResult {
 		this.archiveNodeId = archiveNodeId;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("nodeId")
 	public String getNodeId() {
 		return nodeId;
@@ -35,7 +35,7 @@ public class RestoreResult {
 		this.nodeId = restoredNodeId;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("parent")
 	public String getParent() {
 		return parent;
@@ -45,7 +45,7 @@ public class RestoreResult {
 		this.parent = parent;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("restoreStatus")
 	public String getRestoreStatus() {
 		return restoreStatus;
@@ -55,7 +55,7 @@ public class RestoreResult {
 		this.restoreStatus = restoreStatus;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("path")
 	public String getPath() {
 		return path;
@@ -65,7 +65,7 @@ public class RestoreResult {
 		this.path = resultPath;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("name")
 	public String getName() {
 		return name;

@@ -1,13 +1,12 @@
 package org.edu_sharing.restservices.config.v1;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -19,24 +18,31 @@ import org.edu_sharing.restservices.config.v1.model.Variables;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.DynamicConfig;
-
 import org.json.JSONObject;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Path("/config/v1")
-@Api(tags = { "CONFIG v1" })
+@Tag(name= "CONFIG v1" )
 @ApiService(value = "CONFIG", major = 1, minor = 0)
-public class ConfigApi {	
+@Consumes({ "application/json" })
+@Produces({"application/json"})
+public class ConfigApi {
 	private static Logger logger = Logger.getLogger(ConfigApi.class);
 	@GET
 	@Path("/values")
-	@ApiOperation(value = "get repository config values", notes = "Current is the actual (context-based) active config. Global is the default global config if no context is active (may be identical to the current)")
+	@Operation(summary = "get repository config values", description = "Current is the actual (context-based) active config. Global is the default global config if no context is active (may be identical to the current)")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Config.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Config.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	public Response getConfig() {
     	try {
@@ -58,14 +64,14 @@ public class ConfigApi {
     }
 	@GET
 	@Path("/language/defaults")
-	@ApiOperation(value = "get all inital language strings for angular")
+	@Operation(summary = "get all inital language strings for angular")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public Response getLanguageDefaults() {
 		try {
@@ -77,14 +83,14 @@ public class ConfigApi {
 	}
 	@GET
 	@Path("/language")
-	@ApiOperation(value = "get override strings for the current language", notes = "Language strings")
+	@Operation(summary = "get override strings for the current language", description = "Language strings")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Language.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Language.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	public Response getLanguage() {
     	try {
@@ -107,14 +113,14 @@ public class ConfigApi {
     }
 	@GET
 	@Path("/variables")
-	@ApiOperation(value = "get global config variables", notes = "global config variables")
+	@Operation(summary = "get global config variables", description = "global config variables")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Variables.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Variables.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	public Response getVariables() {
     	try {
@@ -136,16 +142,16 @@ public class ConfigApi {
     }
 	@GET
 	@Path("/dynamic/{key}")
-	@ApiOperation(value = "Get a config entry (appropriate rights for the entry are required)")
+	@Operation(summary = "Get a config entry (appropriate rights for the entry are required)")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = DynamicConfig.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DynamicConfig.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	public Response getDynamicValue(@ApiParam(value = "Key of the config value that should be fetched",required=true ) @PathParam("key") String key) {
+	public Response getDynamicValue(@Parameter(description = "Key of the config value that should be fetched",required=true ) @PathParam("key") String key) {
 		try {
 			DynamicConfig config = ConfigServiceFactory.getConfigService().getDynamicValue(key);
 			return Response.status(Response.Status.OK).entity(config).build();
@@ -156,18 +162,18 @@ public class ConfigApi {
 	}
 	@POST
 	@Path("/dynamic/{key}")
-	@ApiOperation(value = "Set a config entry (admin rights required)", notes="the body must be a json encapsulated string")
+	@Operation(summary = "Set a config entry (admin rights required)", description="the body must be a json encapsulated string")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = DynamicConfig.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DynamicConfig.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	public Response setDynamicValue(@ApiParam(value = "Key of the config value that should be fetched",required=true ) @PathParam("key") String key,
-									@ApiParam(value = "Is everyone allowed to read the value",required=true ) @QueryParam("public") Boolean readPublic,
-									@ApiParam(value = "Must be a json-encapsulated string",required=true )String value) {
+	public Response setDynamicValue(@Parameter(description = "Key of the config value that should be fetched",required=true ) @PathParam("key") String key,
+									@Parameter(description = "Is everyone allowed to read the value",required=true ) @QueryParam("public") Boolean readPublic,
+									@Parameter(description = "Must be a json-encapsulated string",required=true )String value) {
 		try {
 			DynamicConfig config = ConfigServiceFactory.getConfigService().setDynamicValue(key,readPublic==null ? false : readPublic.booleanValue(), new JSONObject(value));
 			return Response.status(Response.Status.OK).entity(config).build();

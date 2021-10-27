@@ -1,24 +1,14 @@
 package org.edu_sharing.restservices.iam.v1;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
@@ -26,13 +16,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
-import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
-import org.edu_sharing.restservices.iam.v1.model.GroupEntry;
-import org.edu_sharing.restservices.iam.v1.model.Preferences;
-import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
-import org.edu_sharing.restservices.iam.v1.model.UserEntries;
-import org.edu_sharing.restservices.iam.v1.model.UserEntry;
 import org.edu_sharing.restservices.iam.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.organization.v1.model.GroupSignupDetails;
@@ -45,15 +28,22 @@ import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Path("/iam/v1")
-@Api(tags = {"IAM v1"})
+@Tag(name="IAM v1")
 @ApiService(value="IAM", major=1, minor=0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class IamApi  {
 
 	private static Logger logger = Logger.getLogger(IamApi.class);
@@ -62,29 +52,27 @@ public class IamApi  {
 
     @Path("/people/{repository}")    
     
-    @ApiOperation(
-    	value = "Search users.", 
-    	notes = "Search users. (admin rights are required.)")
+    @Operation(summary = "Search users.", description = "Search users. (admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserEntries.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UserEntries.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response searchUser(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
-			@ApiParam(value = "global search context, defaults to true, otherwise just searches for users within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
-			@ApiParam(value = "the user status (e.g. active), if not set, all users are returned",required=false) @QueryParam("status") PersonLifecycleService.PersonStatus status,
-			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
-			@ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "pattern",required=true) @QueryParam("pattern") String pattern,
+			@Parameter(description = "global search context, defaults to true, otherwise just searches for users within the organizations", required = false, schema = @Schema(defaultValue="true")) @QueryParam("global") Boolean global,
+			@Parameter(description = "the user status (e.g. active), if not set, all users are returned",required=false) @QueryParam("status") PersonLifecycleService.PersonStatus status,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Context HttpServletRequest req) {
 
     	try {
@@ -123,7 +111,7 @@ public class IamApi  {
     
     @OPTIONS        
     @Path("/people/{repository}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options01() {
     	
@@ -132,21 +120,19 @@ public class IamApi  {
     
     @GET
     @Path("/people/{repository}/{person}")
-    @ApiOperation(
-    	value = "Get the user.", 
-    	notes = "Get the user. (Not all information are feteched for foreign profiles if current user is not an admin)")
+    @Operation(summary = "Get the user.", description = "Get the user. (Not all information are feteched for foreign profiles if current user is not an admin)")
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserEntry.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UserEntry.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
     public Response getUser(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -178,21 +164,19 @@ public class IamApi  {
 
 	@GET
 	@Path("/people/{repository}/{person}/stats")
-	@ApiOperation(
-			value = "Get the user stats.",
-			notes = "Get the user stats (e.g. publicly created material count)")
+	@Operation(summary = "Get the user stats.", description = "Get the user stats (e.g. publicly created material count)")
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserStats.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UserStats.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 	public Response getUserStats(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
 			@Context HttpServletRequest req) {
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -204,27 +188,25 @@ public class IamApi  {
 	}
     @GET       
     @Path("/people/{repository}/{person}/nodeList/{list}")    
-    @ApiOperation(
-    	value = "Get a specific node list for a user", 
-    	notes = "For guest users, the list will be temporary stored in the current session")
+    @Operation(summary = "Get a specific node list for a user", description = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
-    			 @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntries.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    			 @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     		    })
 
     public Response getNodeList(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    		@ApiParam(value = "list name",required=true) @PathParam("list") String list,
-    	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
-    		@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    		@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
+			@Parameter(description = "list name",required=true) @PathParam("list") String list,
+			@Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue="-all-")))  @QueryParam("propertyFilter") List<String> propertyFilter,
+    		@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+    		@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
     		@Context HttpServletRequest req) {
 		try{
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -244,25 +226,23 @@ public class IamApi  {
     }
     @PUT       
     @Path("/people/{repository}/{person}/nodeList/{list}/{node}")    
-    @ApiOperation(
-    	value = "Add a node to node a list of a user", 
-    	notes = "For guest users, the list will be temporary stored in the current session")
+    @Operation(summary = "Add a node to node a list of a user", description = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
-    			 @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    			 @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     		    })
 
     public Response addNodeList(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    		@ApiParam(value = "list name. If this list does not exist, it will be created",required=true) @PathParam("list") String list,    		
-    		@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true) @PathParam("node") String node,    		
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
+    		@Parameter(description = "list name. If this list does not exist, it will be created",required=true) @PathParam("list") String list,    		
+    		@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true) @PathParam("node") String node,    		
     		@Context HttpServletRequest req) {
 		try{
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -275,25 +255,23 @@ public class IamApi  {
     }
     @DELETE       
     @Path("/people/{repository}/{person}/nodeList/{list}/{node}")    
-    @ApiOperation(
-    	value = "Deelete a node of a node list of a user", 
-    	notes = "For guest users, the list will be temporary stored in the current session")
+    @Operation(summary = "Deelete a node of a node list of a user", description = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
-    			 @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    			 @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     		    })
 
     public Response removeNodeList(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    		@ApiParam(value = "list name",required=true) @PathParam("list") String list,    		
-    		@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true) @PathParam("node") String node,    		
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
+    		@Parameter(description = "list name",required=true) @PathParam("list") String list,    		
+    		@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true) @PathParam("node") String node,    		
     		@Context HttpServletRequest req) {
 		try{
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -306,23 +284,21 @@ public class IamApi  {
     }
     @GET       
     @Path("/people/{repository}/{person}/preferences")    
-    @ApiOperation(
-    	value = "Get preferences stored for user", 
-    	notes = "Will fail for guest")
+    @Operation(summary = "Get preferences stored for user", description = "Will fail for guest")
     
     @ApiResponses(
     	value = { 
-    			 @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Preferences.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    			 @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Preferences.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     		    })
 
     public Response getPreferences(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
     		@Context HttpServletRequest req) {
 		try{
 			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
@@ -340,24 +316,22 @@ public class IamApi  {
     }
     @PUT       
     @Path("/people/{repository}/{person}/preferences")    
-    @ApiOperation(
-    	value = "Set preferences for user", 
-    	notes = "Will fail for guest")
+    @Operation(summary = "Set preferences for user", description = "Will fail for guest")
     
     @ApiResponses(
     	value = { 
-    			 @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    			 @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+    		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     		    })
 
     public Response setPreferences(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    		@ApiParam(value = "preferences (json string)",required=true, defaultValue="-me-" ) String content,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
+    		@Parameter(description = "preferences (json string)", required = true, schema = @Schema(defaultValue="-me-" )) String content,
     		@Context HttpServletRequest req) {
 		try{
 			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
@@ -374,23 +348,21 @@ public class IamApi  {
 
 	@GET
 	@Path("/people/{repository}/{person}/profileSettings")
-	@ApiOperation(
-			value = "Get profileSettings configuration",
-			notes = "Will fail for guest")
+	@Operation(summary = "Get profileSettings configuration", description = "Will fail for guest")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ProfileSettings.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ProfileSettings.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getProfileSettings(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "username (or \"-me-\" for current user)", required = true, defaultValue = "-me-") @PathParam("person") String person,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-")) @PathParam("person") String person,
 			@Context HttpServletRequest req) {
 		try {
 			org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
@@ -408,24 +380,22 @@ public class IamApi  {
 
 	@PUT
 	@Path("/people/{repository}/{person}/profileSettings")
-	@ApiOperation(
-			value = "Set profileSettings Configuration",
-			notes = "Will fail for guest")
+	@Operation(summary = "Set profileSettings Configuration", description = "Will fail for guest")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response setProfileSettings(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "username (or \"-me-\" for current user)", required = true, defaultValue = "-me-") @PathParam("person") String person,
-			@ApiParam(value = "ProfileSetting Object", required = true) ProfileSettings profileSettings,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-")) @PathParam("person") String person,
+			@Parameter(description = "ProfileSetting Object", required = true) ProfileSettings profileSettings,
 			@Context HttpServletRequest req) {
 		try {
 			org.edu_sharing.service.authority.AuthorityService service = AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
@@ -446,25 +416,23 @@ public class IamApi  {
 
     @Path("/people/{repository}/{person}")    
     
-    @ApiOperation(
-    	value = "Create a new user.", 
-    	notes = "Create a new user. (admin rights are required.)")
+    @Operation(summary = "Create a new user.", description = "Create a new user. (admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = User.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = User.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response createUser(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username",required=true) @PathParam("person") String person,
-    	    @ApiParam(value = "profile" ,required=true ) UserProfileEdit profile,
-    	    @ApiParam(value = "Password, leave empty if you don't want to set any" ,required=false )@QueryParam("password") String password,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username",required=true) @PathParam("person") String person,
+    	    @Parameter(description = "profile" ,required=true ) UserProfileEdit profile,
+    	    @Parameter(description = "Password, leave empty if you don't want to set any" ,required=false )@QueryParam("password") String password,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -498,25 +466,23 @@ public class IamApi  {
 
     @PUT
     @Path("/people/{repository}/{person}/status/{status}")
-    @ApiOperation(
-    	value = "update the user status.",
-    	notes = "update the user status. (admin rights are required.)")
+    @Operation(summary = "update the user status.", description = "update the user status. (admin rights are required.)")
 
     @ApiResponses(
     	value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 		})
 
     public Response updateUserStatus(
-    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username",required=true) @PathParam("person") String person,
-    		@ApiParam(value = "the new status to set",required=true) @PathParam("status") PersonLifecycleService.PersonStatus status,
-    		@ApiParam(value = "notify the user via mail",required=true,defaultValue = "true") @QueryParam("notify") Boolean notifyMail,
+    		@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username",required=true) @PathParam("person") String person,
+    		@Parameter(description = "the new status to set",required=true) @PathParam("status") PersonLifecycleService.PersonStatus status,
+    		@Parameter(description = "notify the user via mail", required = true, schema = @Schema(defaultValue="true")) @QueryParam("notify") Boolean notifyMail,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -554,24 +520,22 @@ public class IamApi  {
 
 	@Path("/people/{repository}/{person}")
 
-	@ApiOperation(
-			value = "Delete the user.",
-			notes = "Delete the user. (admin rights are required.)")
+	@Operation(summary = "Delete the user.", description = "Delete the user. (admin rights are required.)")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = "OK.", response = Void.class),
-					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Void.class))),
+					@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response deleteUser(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "username",required=true) @PathParam("person") String person,
-			@ApiParam(value = "force the deletion (if false then only persons which are previously marked for deletion are getting deleted)",required=false, defaultValue = "false") @QueryParam("force") Boolean force,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "username",required=true) @PathParam("person") String person,
+			@Parameter(description = "force the deletion (if false then only persons which are previously marked for deletion are getting deleted)", required = false, schema = @Schema(defaultValue="false")) @QueryParam("force") Boolean force,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -590,7 +554,7 @@ public class IamApi  {
 
     @OPTIONS        
     @Path("/people/{repository}/{person}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options02() {
     	
@@ -601,24 +565,22 @@ public class IamApi  {
 
     @Path("/people/{repository}/{person}/profile")    
     
-    @ApiOperation(
-    	value = "Set profile of the user.", 
-    	notes = "Set profile of the user. (To set foreign profiles, admin rights are required.)")
+    @Operation(summary = "Set profile of the user.", description = "Set profile of the user. (To set foreign profiles, admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 
     public Response changeUserProfile(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    	    @ApiParam(value = "properties" ,required=true ) UserProfileEdit profile,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
+    	    @Parameter(description = "properties" ,required=true ) UserProfileEdit profile,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -636,23 +598,21 @@ public class IamApi  {
     }
     @PUT
     @Path("/people/{repository}/{person}/avatar")
-    @ApiOperation(
-    	value = "Set avatar of the user.",
-    	notes = "Set avatar of the user. (To set foreign avatars, admin rights are required.)")
+    @Operation(summary = "Set avatar of the user.", description = "Set avatar of the user. (To set foreign avatars, admin rights are required.)")
     @ApiResponses(
     	value = {
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 
     public Response changeUserAvatar(
-    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    	    @ApiParam(value = "avatar image" ,required=true ) @FormDataParam("avatar") InputStream avatar,
+    		@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
+    	    @Parameter(description = "avatar image" ,required=true ) @FormDataParam("avatar") InputStream avatar,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -671,22 +631,20 @@ public class IamApi  {
     }
     @DELETE
     @Path("/people/{repository}/{person}/avatar")
-    @ApiOperation(
-    	value = "Remove avatar of the user.",
-    	notes = "Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)")
+    @Operation(summary = "Remove avatar of the user.", description = "Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)")
     @ApiResponses(
     	value = {
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 
     public Response removeUserAvatar(
-    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+    		@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -702,7 +660,7 @@ public class IamApi  {
 
     @OPTIONS        
     @Path("/people/{repository}/{person}/profile")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options03() {
     	
@@ -713,24 +671,22 @@ public class IamApi  {
 
     @Path("/people/{repository}/{person}/credential")    
     
-    @ApiOperation(
-    	value = "Change/Set password of the user.", 
-    	notes = "Change/Set password of the user. (To change foreign passwords or set passwords, admin rights are required.)")
+    @Operation(summary = "Change/Set password of the user.", description = "Change/Set password of the user. (To change foreign passwords or set passwords, admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response changeUserPassword(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
-    	    @ApiParam(value = "credential" ,required=true ) UserCredential credential,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
+    	    @Parameter(description = "credential" ,required=true ) UserCredential credential,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -766,7 +722,7 @@ public class IamApi  {
 
     @OPTIONS        
     @Path("/people/{repository}/{person}/credential")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options04() {	
     	
@@ -777,30 +733,28 @@ public class IamApi  {
 
     @Path("/groups/{repository}")    
     
-    @ApiOperation(
-    	value = "Search groups.", 
-    	notes = "Search groups. (admin rights are required.)")
+    @Operation(summary = "Search groups.", description = "Search groups. (admin rights are required.)")
 
     @ApiResponses(
         	value = { 
-    	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = GroupEntries.class),
-    	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-    	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-    	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-    	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-    	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = GroupEntries.class))),
+    	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+    	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+    	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     	    })
 
         public Response searchGroups(
-        		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-        		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
-        		@ApiParam(value = "find a specific groupType",required=false) @QueryParam("groupType") String groupType,
-				@ApiParam(value = "find a specific signupMethod for groups (or asterisk for all including one)",required=false) @QueryParam("signupMethod") String signupMethod,
-				@ApiParam(value = "global search context, defaults to true, otherwise just searches for groups within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
-        		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
-        	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
-        	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-        	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+        		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+        		@Parameter(description = "pattern",required=true) @QueryParam("pattern") String pattern,
+        		@Parameter(description = "find a specific groupType",required=false) @QueryParam("groupType") String groupType,
+				@Parameter(description = "find a specific signupMethod for groups (or asterisk for all including one)",required=false) @QueryParam("signupMethod") String signupMethod,
+				@Parameter(description = "global search context, defaults to true, otherwise just searches for groups within the organizations", required = false, schema = @Schema(defaultValue="true")) @QueryParam("global") Boolean global,
+        		@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
+        	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+        	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+        	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
         		@Context HttpServletRequest req) {
 
         	try {
@@ -841,7 +795,7 @@ public class IamApi  {
         
     @OPTIONS        
     @Path("/groups/{repository}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options05() {
     	
@@ -852,23 +806,21 @@ public class IamApi  {
 
     @Path("/groups/{repository}/{group}")    
     
-    @ApiOperation(
-    	value = "Get the group.", 
-    	notes = "Get the group. (To get foreign profiles, admin rights are required.)")
+    @Operation(summary = "Get the group.", description = "Get the group. (To get foreign profiles, admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = GroupEntry.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = GroupEntry.class))),        
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getGroup(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "groupname",required=true) @PathParam("group") String group,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "groupname",required=true) @PathParam("group") String group,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -890,25 +842,23 @@ public class IamApi  {
 
     @Path("/groups/{repository}/{group}")    
     
-    @ApiOperation(
-    	value = "Create a new group.", 
-    	notes = "Create a new group. (admin rights are required.)")
+    @Operation(summary = "Create a new group.", description = "Create a new group. (admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Group.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Group.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response createGroup(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "groupname",required=true) @PathParam("group") String group,
-    		@ApiParam(value = "parent (will be added to this parent, also for name hashing), may be null",required=false) @QueryParam("parent") String parent,
-    		@ApiParam(value = "properties" ,required=true ) GroupProfile profile,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "groupname",required=true) @PathParam("group") String group,
+    		@Parameter(description = "parent (will be added to this parent, also for name hashing), may be null",required=false) @QueryParam("parent") String parent,
+    		@Parameter(description = "properties" ,required=true ) GroupProfile profile,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -944,23 +894,21 @@ public class IamApi  {
 
     @Path("/groups/{repository}/{group}")    
     
-    @ApiOperation(
-    	value = "Delete the group.", 
-    	notes = "Delete the group. (admin rights are required.)")
+    @Operation(summary = "Delete the group.", description = "Delete the group. (admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response deleteGroup(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "groupname",required=true) @PathParam("group") String group,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "groupname",required=true) @PathParam("group") String group,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -980,7 +928,7 @@ public class IamApi  {
 
     @OPTIONS        
     @Path("/groups/{repository}/{group}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options06() {
     	
@@ -991,24 +939,22 @@ public class IamApi  {
 
     @Path("/groups/{repository}/{group}/profile")    
     
-    @ApiOperation(
-    	value = "Set profile of the group.", 
-    	notes = "Set profile of the group. (admin rights are required.)")
+    @Operation(summary = "Set profile of the group.", description = "Set profile of the group. (admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response changeGroupProfile(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "groupname",required=true ) @PathParam("group") String group,
-    	    @ApiParam(value = "properties" ,required=true ) GroupProfile profile,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "groupname",required=true ) @PathParam("group") String group,
+    	    @Parameter(description = "properties" ,required=true ) GroupProfile profile,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -1026,7 +972,7 @@ public class IamApi  {
 
     @OPTIONS        
     @Path("/groups/{repository}/{group}/profile")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options07() {
     	
@@ -1036,25 +982,25 @@ public class IamApi  {
 	@POST
 	@Path("/groups/{repository}/{group}/signup/config")
 
-	@ApiOperation(
-			value = "set group signup options",
-			notes =" requires admin rights"
+	@Operation(
+			description = "set group signup options",
+			summary =" requires admin rights"
 	)
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response signupGroupDetails(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
-			@ApiParam(value = "Details to edit",required=true) GroupSignupDetails details,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of group",required=true) @PathParam("group") String group,
+			@Parameter(description = "Details to edit",required=true) GroupSignupDetails details,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1072,24 +1018,22 @@ public class IamApi  {
 	@POST
 	@Path("/groups/{repository}/{group}/signup")
 
-	@ApiOperation(
-			value = "let the current user signup to the given group"
-	)
+	@Operation(summary = "let the current user signup to the given group")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = GroupSignupResult.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = GroupSignupResult.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response signupGroup(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
-			@ApiParam(value = "Password for signup (only required if signupMethod == password)",required=false) @QueryParam("password") String password,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of group",required=true) @PathParam("group") String group,
+			@Parameter(description = "Password for signup (only required if signupMethod == password)",required=false) @QueryParam("password") String password,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1106,24 +1050,21 @@ public class IamApi  {
 	@GET
 	@Path("/groups/{repository}/{group}/signup/list")
 
-	@ApiOperation(
-			value = "list pending users that want to join this group",
-			notes = "Requires admin rights or org administrator on this group"
-	)
+	@Operation(summary = "list pending users that want to join this group", description = "Requires admin rights or org administrator on this group")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = User[].class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = User[].class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response signupGroupList(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of group",required=true) @PathParam("group") String group,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1147,25 +1088,22 @@ public class IamApi  {
 	@PUT
 	@Path("/groups/{repository}/{group}/signup/list/{user}")
 
-	@ApiOperation(
-			value = "put the pending user into the group",
-			notes = "Requires admin rights or org administrator on this group"
-	)
+	@Operation(summary = "put the pending user into the group", description = "Requires admin rights or org administrator on this group")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = void.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = void.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response confirmSignup(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
-			@ApiParam(value = "ID of user",required=true) @PathParam("user") String user,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of group",required=true) @PathParam("group") String group,
+			@Parameter(description = "ID of user",required=true) @PathParam("user") String user,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1183,25 +1121,22 @@ public class IamApi  {
 	@DELETE
 	@Path("/groups/{repository}/{group}/signup/list/{user}")
 
-	@ApiOperation(
-			value = "reject the pending user",
-			notes = "Requires admin rights or org administrator on this group"
-	)
+	@Operation(summary = "reject the pending user", description = "Requires admin rights or org administrator on this group")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = void.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = void.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response rejectSignup(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of group",required=true) @PathParam("group") String group,
-			@ApiParam(value = "ID of user",required=true) @PathParam("user") String user,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "ID of group",required=true) @PathParam("group") String group,
+			@Parameter(description = "ID of user",required=true) @PathParam("user") String user,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1220,28 +1155,26 @@ public class IamApi  {
 
     @Path("/people/{repository}/{person}/memberships")
 
-    @ApiOperation(
-    	value = "Get all groups the given user is member of."
-    	)
+    @Operation(summary = "Get all groups the given user is member of.")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = GroupEntries.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = GroupEntries.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getUserGroups(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "authority name",required=true ) @PathParam("person") String person,
-       		@ApiParam(value = "pattern",required=false) @QueryParam("pattern") String pattern,
-    		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
-    	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "authority name",required=true ) @PathParam("person") String person,
+       		@Parameter(description = "pattern",required=false) @QueryParam("pattern") String pattern,
+    		@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
+    	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+    	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+    	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 
     		@Context HttpServletRequest req) {
 
@@ -1267,29 +1200,27 @@ public class IamApi  {
 
     @Path("/groups/{repository}/{group}/members")    
     
-    @ApiOperation(
-    	value = "Get all members of the group.", 
-    	notes = "Get all members of the group. (admin rights are required.)")
+    @Operation(summary = "Get all members of the group.", description = "Get all members of the group. (admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = AuthorityEntries.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = AuthorityEntries.class))),        
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getMembership(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "authority name (begins with GROUP_)",required=true ) @PathParam("group") String group,
-       		@ApiParam(value = "pattern",required=false) @QueryParam("pattern") String pattern,
-       		@ApiParam(value = "authorityType either GROUP or USER, empty to show all",required=false) @QueryParam("authorityType") String authorityType,
-    		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
-    	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "authority name (begins with GROUP_)",required=true ) @PathParam("group") String group,
+       		@Parameter(description = "pattern",required=false) @QueryParam("pattern") String pattern,
+       		@Parameter(description = "authorityType either GROUP or USER, empty to show all",required=false) @QueryParam("authorityType") String authorityType,
+    		@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
+    	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+    	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+    	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
  
     		@Context HttpServletRequest req) {
 
@@ -1327,24 +1258,22 @@ public class IamApi  {
 
 	@Path("/groups/{repository}/{group}/type/{type}")
 
-	@ApiOperation(
-			value = "Get a subgroup by the specified type",
-			notes = "Get a subgroup by the specified type")
+	@Operation(summary = "Get a subgroup by the specified type", description = "Get a subgroup by the specified type")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = "OK.", response = AuthorityEntries.class),
-					@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = AuthorityEntries.class))),
+					@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getSubgroupByType(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "authority name of the parent/primary group (begins with GROUP_)",required=true ) @PathParam("group") String group,
-			@ApiParam(value = "authorityType either GROUP or USER, empty to show all",required=true) @PathParam("type") String type,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "authority name of the parent/primary group (begins with GROUP_)",required=true ) @PathParam("group") String group,
+			@Parameter(description = "authorityType either GROUP or USER, empty to show all",required=true) @PathParam("type") String type,
 
 			@Context HttpServletRequest req) {
 
@@ -1366,25 +1295,23 @@ public class IamApi  {
 
     @Path("/groups/{repository}/{group}/members/{member}")    
     
-    @ApiOperation(
-    	value = "Add member to the group.", 
-    	notes = "Add member to the group. (admin rights are required.)")
+    @Operation(summary = "Add member to the group.", description = "Add member to the group. (admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response addMembership(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "groupname",required=true ) @PathParam("group") String group,
-    		@ApiParam(value = "authorityName of member",required=true ) @PathParam("member") String member,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "groupname",required=true ) @PathParam("group") String group,
+    		@Parameter(description = "authorityName of member",required=true ) @PathParam("member") String member,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -1405,24 +1332,22 @@ public class IamApi  {
 
     @Path("/groups/{repository}/{group}/members/{member}")    
     
-    @ApiOperation(
-    	value = "Delete member from the group.", 
-    	notes = "Delete member from the group. (admin rights are required.)")
+    @Operation(summary = "Delete member from the group.", description = "Delete member from the group. (admin rights are required.)")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response deleteMembership(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "groupname",required=true ) @PathParam("group") String group,
-    		@ApiParam(value = "authorityName of member",required=true ) @PathParam("member") String member,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "groupname",required=true ) @PathParam("group") String group,
+    		@Parameter(description = "authorityName of member",required=true ) @PathParam("member") String member,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -1440,7 +1365,7 @@ public class IamApi  {
 
     @OPTIONS        
     @Path("/groups/{repository}/{group}/members/{member}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options09() {
     	
@@ -1452,28 +1377,26 @@ public class IamApi  {
 
     @Path("/authorities/{repository}")    
     
-    @ApiOperation(
-    	value = "Search authorities.", 
-    	notes = "Search authorities.")
+    @Operation(summary = "Search authorities.", description = "Search authorities.")
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = AuthorityEntries.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AuthorityEntries.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response searchAuthorities(
-    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
-    		@ApiParam(value = "global search context, defaults to true, otherwise just searches for users within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
-			@ApiParam(value = "find a specific groupType (does nothing for persons)",required=false) @QueryParam("groupType") String groupType,
-			@ApiParam(value = "find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)",required=false) @QueryParam("signupMethod") String signupMethod,
-			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
-    	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
+    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    		@Parameter(description = "pattern",required=true) @QueryParam("pattern") String pattern,
+    		@Parameter(description = "global search context, defaults to true, otherwise just searches for users within the organizations", required = false, schema = @Schema(defaultValue="true")) @QueryParam("global") Boolean global,
+			@Parameter(description = "find a specific groupType (does nothing for persons)",required=false) @QueryParam("groupType") String groupType,
+			@Parameter(description = "find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)",required=false) @QueryParam("signupMethod") String signupMethod,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
+    	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -1516,22 +1439,20 @@ public class IamApi  {
 
 	@Path("/authorities/{repository}/recent")
 
-	@ApiOperation(
-			value = "Get recently invited authorities.",
-			notes = "Get the authorities the current user has recently invited.")
+	@Operation(summary = "Get recently invited authorities.", description = "Get the authorities the current user has recently invited.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = AuthorityEntries.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AuthorityEntries.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getRecentlyInvited(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Context HttpServletRequest req) {
 
 		try {

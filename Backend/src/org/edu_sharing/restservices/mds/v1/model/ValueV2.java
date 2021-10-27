@@ -4,9 +4,9 @@ import org.edu_sharing.metadataset.v2.MetadataKey;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class ValueV2{
 	private String id,caption,description,parent;
 	public ValueV2(){};
@@ -26,7 +26,7 @@ public class ValueV2{
 		this.parent = parent;
 	}
 
-	@JsonProperty
+	@JsonProperty(required = true)
 	public String getId() {
 		return id;
 	}

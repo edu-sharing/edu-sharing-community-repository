@@ -1,58 +1,55 @@
 package org.edu_sharing.restservices.statistic.v1;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.about.v1.model.About;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.statistic.v1.model.Filter;
 import org.edu_sharing.restservices.statistic.v1.model.Statistics;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
-import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.statistic.StatisticsGlobal;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 @Path("/statistic/v1")
-@Api(tags = { "STATISTIC v1" })
+@Tag(name= "STATISTIC v1" )
 @ApiService(value = "STATISTIC", major = 1, minor = 0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class StatisticApi {
 
 	@POST
 	@Path("/facettes/{context}")
-	@ApiOperation(value = "Get statistics of repository.", notes = "Statistics.")
+	@Operation(summary = "Get statistics of repository.", description = "Statistics.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Statistics.class), @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Statistics.class))), @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response get(
-			@ApiParam(value = "context, the node where to start", required = true, defaultValue = "-root-") @PathParam("context") String context,
-			@ApiParam(value = "filter", required = true) Filter filter, @ApiParam(value = "properties")
+			@Parameter(description = "context, the node where to start", required = true, schema = @Schema(defaultValue="-root-")) @PathParam("context") String context,
+			@Parameter(description = "filter", required = true) Filter filter,
+			@Parameter(description = "properties")
             @QueryParam("properties") List<String> properties,
             @Context HttpServletRequest req) {
 
@@ -66,20 +63,18 @@ public class StatisticApi {
 	
 	 	@GET
 		@Path("/public")
-	    @ApiOperation(
-	    	value = "Get stats.", 
-	    	notes = "Get global statistics for this repository.")
+	    @Operation(summary = "Get stats.", description = "Get global statistics for this repository.")
 	    
 	    @ApiResponses(
 	    	value = { 
-				@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StatisticsGlobal.class),
-		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+				@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = StatisticsGlobal.class))),
+		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    	})
 
 	    public Response getGlobalStatistics(
-                @ApiParam(value = "primary property to build facettes and count+group values", required = false) @QueryParam("group") String group,
-                @ApiParam(value = "additional properties to build facettes and count+sub-group values", required = false) @QueryParam("subGroup") List<String> subGroup) {
+                @Parameter(description = "primary property to build facettes and count+group values", required = false) @QueryParam("group") String group,
+                @Parameter(description = "additional properties to build facettes and count+sub-group values", required = false) @QueryParam("subGroup") List<String> subGroup) {
 
 	    	try {
 		    	StatisticsGlobal statistics=StatisticDao.getGlobal(group,subGroup);
@@ -94,25 +89,23 @@ public class StatisticApi {
 	@POST
 	@Path("/statistics/nodes")
 
-	@ApiOperation(value = "get statistics for node actions",
-			      notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES+" for global stats or to be admin of the requested mediacenter"
-	)
+	@Operation(summary = "get statistics for node actions", description = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES+" for global stats or to be admin of the requested mediacenter")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = TrackingNode[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = TrackingNode[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getStatisticsNode(@Context HttpServletRequest req,
-									  @ApiParam(value = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
-									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
-									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
-									  @ApiParam(value = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
-									  @ApiParam(value = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
-									  @ApiParam(value = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
-									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
+									  @Parameter(description = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
+									  @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
+									  @Parameter(description = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
+									  @Parameter(description = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
+									  @Parameter(description = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
+									  @Parameter(description = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
+									  @Parameter(description = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
 	) {
 		try {
 			validatePermissions(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES, mediacenter);
@@ -127,19 +120,17 @@ public class StatisticApi {
 
 	@GET
 	@Path("/statistics/nodes/altered")
-	@ApiOperation(value = "get the range of nodes which had tracked actions since a given timestamp",
-			notes = "requires admin"
-	)
+	@Operation(summary = "get the range of nodes which had tracked actions since a given timestamp", description = "requires admin")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getNodesAlteredInRange(@Context HttpServletRequest req,
-									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
+									  @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
 	) {
 		try {
 			if(!AuthorityServiceHelper.isAdmin()){
@@ -154,20 +145,18 @@ public class StatisticApi {
 
 	@GET
 	@Path("/statistics/nodes/node/{id}")
-	@ApiOperation(value = "get the range of nodes which had tracked actions since a given timestamp",
-			notes = "requires admin"
-	)
+	@Operation(summary = "get the range of nodes which had tracked actions since a given timestamp", description = "requires admin")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeData[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeData[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getNodeData(@Context HttpServletRequest req,
-										   @ApiParam(value = "node id to fetch data for", required = true) @PathParam("id") String id,
-										   @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
+										   @Parameter(description = "node id to fetch data for", required = true) @PathParam("id") String id,
+										   @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
 	) {
 		try {
 			if(!AuthorityServiceHelper.isAdmin()){
@@ -193,24 +182,22 @@ public class StatisticApi {
 	@POST
 	@Path("/statistics/users")
 
-	@ApiOperation(value = "get statistics for user actions (login, logout)",
-				  notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER+" for global stats or to be admin of the requested mediacenter"
-	)
+	@Operation(summary = "get statistics for user actions (login, logout)", description = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER+" for global stats or to be admin of the requested mediacenter")
 			@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Tracking[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Tracking[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getStatisticsUser(@Context HttpServletRequest req,
-									  @ApiParam(value = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
-									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
-									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
-									  @ApiParam(value = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
-									  @ApiParam(value = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
-									  @ApiParam(value = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
-									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
+									  @Parameter(description = "Grouping type (by date)", required = true) @QueryParam("grouping")TrackingService.GroupingType grouping,
+									  @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
+									  @Parameter(description = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
+									  @Parameter(description = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
+									  @Parameter(description = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
+									  @Parameter(description = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
+									  @Parameter(description = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
 	) {
 		try {
 			validatePermissions(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER, mediacenter);

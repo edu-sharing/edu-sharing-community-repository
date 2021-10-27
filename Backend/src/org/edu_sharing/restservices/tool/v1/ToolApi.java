@@ -1,42 +1,31 @@
 package org.edu_sharing.restservices.tool.v1;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.NameSpaceTool;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOException;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.ToolDao;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.List;
 
 @Path("/tool/v1")
-@Api(tags = { "TOOL v1" })
+@Tag(name= "TOOL v1" )
 @ApiService(value = "TOOL", major = 1, minor = 0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class ToolApi {
 
 	private static Logger logger = Logger.getLogger(ToolApi.class);
@@ -44,21 +33,21 @@ public class ToolApi {
 	@POST
 	@Path("/tools/{repository}/tooldefinitions")
 
-	@ApiOperation(value = "Create a new tool definition object.", notes = "Create a new tool definition object.")
+	@Operation(summary = "Create a new tool definition object.", description = "Create a new tool definition object.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response createToolDefintition(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "rename if the same node name exists", required = false, defaultValue = "false") @QueryParam("renameIfExists") Boolean renameIfExists,
-			@ApiParam(value = "comment, leave empty = no inital version", required = false) @QueryParam("versionComment") String versionComment,
-			@ApiParam(value = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}", required = true) HashMap<String, String[]> properties,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("renameIfExists") Boolean renameIfExists,
+			@Parameter(description = "comment, leave empty = no inital version", required = false) @QueryParam("versionComment") String versionComment,
+			@Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}", required = true) HashMap<String, String[]> properties,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -77,23 +66,23 @@ public class ToolApi {
 	@POST
 	@Path("/tools/{repository}/{toolDefinition}/toolinstances")
 
-	@ApiOperation(value = "Create a new tool Instance object.", notes = "Create a new tool Instance object.")
+	@Operation(summary = "Create a new tool Instance object.", description = "Create a new tool Instance object.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response createToolInstance(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_PARENT_NODE
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_PARENT_NODE
 					+ " must have tool_definition aspect", required = true) @PathParam("toolDefinition") String toolDefinition,
-			@ApiParam(value = "rename if the same node name exists", required = false, defaultValue = "false") @QueryParam("renameIfExists") Boolean renameIfExists,
-			@ApiParam(value = "comment, leave empty = no inital version", required = false) @QueryParam("versionComment") String versionComment,
-			@ApiParam(value = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}", required = true) HashMap<String, String[]> properties,
+			@Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("renameIfExists") Boolean renameIfExists,
+			@Parameter(description = "comment, leave empty = no inital version", required = false) @QueryParam("versionComment") String versionComment,
+			@Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}", required = true) HashMap<String, String[]> properties,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -109,23 +98,23 @@ public class ToolApi {
 	@Path("/tools/{repository}/{toolinstance}/toolobject")
 
 
-	@ApiOperation(value = "Create a new tool object for a given tool instance.", notes = "Create a new tool object for a given tool instance.")
+	@Operation(summary = "Create a new tool object for a given tool instance.", description = "Create a new tool object for a given tool instance.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response createToolObject(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_PARENT_NODE
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_PARENT_NODE
 					+ " (a tool instance object)", required = true) @PathParam("toolinstance") String toolinstance,
-			@ApiParam(value = "rename if the same node name exists", required = false, defaultValue = "false") @QueryParam("renameIfExists") Boolean renameIfExists,
-			@ApiParam(value = "comment, leave empty = no inital version", required = false) @QueryParam("versionComment") String versionComment,
-			@ApiParam(value = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}", required = true) HashMap<String, String[]> properties,
+			@Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("renameIfExists") Boolean renameIfExists,
+			@Parameter(description = "comment, leave empty = no inital version", required = false) @QueryParam("versionComment") String versionComment,
+			@Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}", required = true) HashMap<String, String[]> properties,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -150,18 +139,18 @@ public class ToolApi {
 	@GET
 	@Path("/tools/{repository}/{toolDefinition}/toolinstances")
 
-	@ApiOperation(value = "Get Instances of a ToolDefinition.", notes = "Get Instances of a ToolDefinition.")
+	@Operation(summary = "Get Instances of a ToolDefinition.", description = "Get Instances of a ToolDefinition.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response getInstances(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("toolDefinition") String toolDefinition,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("toolDefinition") String toolDefinition,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -181,18 +170,18 @@ public class ToolApi {
 	@GET
 	@Path("/tools/{repository}/{nodeid}/toolinstance")
 
-	@ApiOperation(value = "Get Instances of a ToolDefinition.", notes = "Get Instances of a ToolDefinition.")
+	@Operation(summary = "Get Instances of a ToolDefinition.", description = "Get Instances of a ToolDefinition.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response getInstance(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("nodeid") String nodeid,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("nodeid") String nodeid,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -212,17 +201,17 @@ public class ToolApi {
 	@GET
 	@Path("/tools/{repository}/tooldefinitions")
 
-	@ApiOperation(value = "Get all ToolDefinitions.", notes = "Get all ToolDefinitions.")
+	@Operation(summary = "Get all ToolDefinitions.", description = "Get all ToolDefinitions.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response getAllToolDefinitions(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
 			@Context HttpServletRequest req) {
 
 		try {

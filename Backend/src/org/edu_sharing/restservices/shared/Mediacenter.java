@@ -1,12 +1,12 @@
 package org.edu_sharing.restservices.shared;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Mediacenter extends ManagableGroup {
 	public Mediacenter(Group group) {
 		this.setAuthorityName(group.getAuthorityName());

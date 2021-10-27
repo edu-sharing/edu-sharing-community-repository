@@ -1,14 +1,14 @@
 package org.edu_sharing.restservices.iam.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import org.edu_sharing.restservices.shared.User;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class UserEntry  {
   
   private User person = null;
@@ -17,7 +17,7 @@ public class UserEntry  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("person")
   public User getPerson() {
     return person;
