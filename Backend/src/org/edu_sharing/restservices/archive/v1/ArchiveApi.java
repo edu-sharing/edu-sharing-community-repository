@@ -146,7 +146,7 @@ public class ArchiveApi {
 	    	SearchResult<Node> response = new SearchResult<>();
 	    	response.setNodes(data);
 	    	response.setPagination(pagination);	    	
-	    	response.setFacettes(search.getFacettes());
+	    	response.setFacets(search.getFacets());
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	    	

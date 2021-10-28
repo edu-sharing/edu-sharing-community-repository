@@ -116,11 +116,11 @@ public class StatisticServiceImpl implements StatisticService {
 		return lucene;
 	}
 	@Override
-	public List<Map<String, Integer>> countFacettesForQuery(String mdsId, String queryId, String type, String customLucene,
-			Collection<String> facettes) throws Throwable {
+	public List<Map<String, Integer>> countFacetsForQuery(String mdsId, String queryId, String type, String customLucene,
+                                                          Collection<String> facets) throws Throwable {
 		String lucene=getLucene(mdsId,queryId,type,customLucene);
 		SearchParameters searchParameters = new ESSearchParameters();
-		for(String field : facettes) {
+		for(String field : facets) {
 			FieldFacet facette = new FieldFacet(field);
 			facette.setMinCount(1);
 			facette.setMethod(FieldFacetMethod.ENUM);
@@ -134,7 +134,7 @@ public class StatisticServiceImpl implements StatisticService {
 		searchParameters.setMaxItems(0);
 		ResultSet result = searchService.query(searchParameters);
 		List<Map<String, Integer>> list=new ArrayList<Map<String, Integer>>();
-		for(String field : facettes) {
+		for(String field : facets) {
 			List<Pair<String, Integer>> data = result.getFieldFacet(field);
 			Map<String, Integer> map = new HashMap<>();
 			for(Pair<String, Integer> d : data) {

@@ -1764,7 +1764,7 @@ public class NodeApi  {
     public Response getNodes(
     	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 	    @Parameter(description = "lucene query",required=true) @QueryParam("query") String query,
-	    @Parameter(description = "facettes") @QueryParam("facettes") List<String> facettes,
+	    @Parameter(description = "facets") @QueryParam("facets") List<String> facets,
 	    @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
 	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
 	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
@@ -1782,7 +1782,7 @@ public class NodeApi  {
 			searchToken.setLuceneString(query);
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
-			searchToken.setFacettes(facettes);
+			searchToken.setFacets(facets);
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
     		NodeSearch search = NodeDao.search(repoDao,searchToken);
     		List<Node> data = new ArrayList<Node>();
@@ -1798,7 +1798,7 @@ public class NodeApi  {
 	    	SearchResult response = new SearchResult();
 	    	response.setNodes(data);
 	    	response.setPagination(pagination);	    	
-	    	response.setFacettes(search.getFacettes());
+	    	response.setFacets(search.getFacets());
 	    	return Response.status(Response.Status.OK).entity(response).build();
     		
     	} catch (Throwable t) {

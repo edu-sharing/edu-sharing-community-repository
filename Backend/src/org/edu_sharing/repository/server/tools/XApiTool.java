@@ -108,11 +108,11 @@ public class XApiTool {
 
     /**
      *
-     * @param authority if null, do not filter by authority and fetch all facettes
+     * @param authority if null, do not filter by authority and fetch all facets
      * @param fieldName
      * @return
      */
-    public static List<String> getFacettesFromStore(String authority, String fieldName,int limit) throws Exception {
+    public static List<String> getFacetsFromStore(String authority, String fieldName, int limit) throws Exception {
         /**
          * [
          *   {
@@ -165,7 +165,7 @@ public class XApiTool {
             }
             return mapped;
         }catch(Exception e){
-            logger.info("Could not fetch facettes from xapi store: "+e.getMessage());
+            logger.info("Could not fetch facets from xapi store: "+e.getMessage());
             return null;
         }
     }

@@ -675,7 +675,7 @@ public class SearchServiceImpl implements SearchService {
 		HashMap<ContentType, SearchToken> lastTokens = getLastSearchTokens();
 		lastTokens.put(searchToken.getContentType(),searchToken);
 		Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
-		List<String> facettes = searchToken.getFacettes();
+		List<String> facettes = searchToken.getFacets();
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
@@ -728,7 +728,7 @@ public class SearchServiceImpl implements SearchService {
 				}
 			}
 
-			List<String> facettes = searchToken.getFacettes();
+			List<String> facettes = searchToken.getFacets();
 
 			if (facettes != null && facettes.size() > 0) {
 				for (String facetteProp : facettes) {
@@ -737,8 +737,6 @@ public class SearchServiceImpl implements SearchService {
 						fieldFacette = "@" + facetteProp;
 					}
 					FieldFacet fieldFacet = new FieldFacet(fieldFacette);
-					fieldFacet.setLimit(searchToken.getFacettesLimit());
-					fieldFacet.setMinCount(searchToken.getFacettesMinCount());
 					searchParameters.addFieldFacet(fieldFacet);
 				}
 			}

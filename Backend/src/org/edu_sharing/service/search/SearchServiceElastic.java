@@ -17,7 +17,6 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -181,8 +180,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 queryBuilder = queryBuilder.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
             }
 
-            if(searchToken.getFacettes() != null) {
-                for (String facette : searchToken.getFacettes()) {
+            if(searchToken.getFacets() != null) {
+                for (String facette : searchToken.getFacets()) {
                     searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
                 }
             }

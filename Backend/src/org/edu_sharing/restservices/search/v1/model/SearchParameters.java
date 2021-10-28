@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.search.v1.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
+;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class SearchParameters {
 
 	private List<String> permissions;
 	private List<MdsQueryCriteria> criterias;
-	private List<String> facettes;
+	private List<String> facets;
 	private boolean resolveCollections = false;
 
 	@Schema(required = true, description = "")
@@ -29,12 +29,12 @@ public class SearchParameters {
 
 	@Schema(required = true, description = "")
 	@JsonProperty("facettes")
-	public List<String> getFacettes() {
-		return facettes;
+	public List<String> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<String> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<String> facets) {
+		this.facets = facets;
 	}
 
 	@JsonProperty

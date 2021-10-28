@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class NodeSearch {
 
 	@Schema(description = "")
-	public static class Facette {
+	public static class Facet {
 
 		@Schema(description = "")
 		public static class Value {
@@ -66,7 +66,7 @@ public class NodeSearch {
 	
 	private List<String> ignored = null;
 	private List<NodeRef> result = null;
-	private List<Facette> facettes = null;
+	private List<Facet> facets = null;
 	private Integer count = null;
 	private Integer skip = null;
 	private List<Node> nodes = null;
@@ -95,13 +95,13 @@ public class NodeSearch {
 	/**
 	   **/
 	@Schema(required = true, description = "")
-	@JsonProperty(value = "facettes")
-	public List<Facette> getFacettes() {
-		return facettes;
+	@JsonProperty(value = "facets")
+	public List<Facet> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<Facette> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<Facet> facets) {
+		this.facets = facets;
 	}
 
 	/**

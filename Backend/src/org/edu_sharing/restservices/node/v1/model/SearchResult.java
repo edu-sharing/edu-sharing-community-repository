@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.NodeSearch.Facette;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -15,7 +15,7 @@ public class SearchResult {
 
 	private List<Node> nodes = new ArrayList<Node>();
 	private Pagination pagination = null;
-	private List<Facette> facettes = null;
+	private List<Facet> facets = null;
 
 	/**
 	   **/
@@ -44,13 +44,13 @@ public class SearchResult {
 	/**
    **/
 	@Schema(required = true, description = "")
-	@JsonProperty("facettes")
-	public List<Facette> getFacettes() {
-		return facettes;
+	@JsonProperty("facets")
+	public List<Facet> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<Facette> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<Facet> facets) {
+		this.facets = facets;
 	}
 
 }

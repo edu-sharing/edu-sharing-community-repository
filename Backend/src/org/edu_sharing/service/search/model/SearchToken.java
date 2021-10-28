@@ -24,7 +24,7 @@ public class SearchToken implements Serializable {
 	
 	String luceneString;
 	
-	List<String> facettes=null;
+	List<String> facets =null;
 
 	String storeProtocol = "workspace";
 	
@@ -54,22 +54,22 @@ public class SearchToken implements Serializable {
 		this.contentType=contentType;
 		updateSearchCriterias(true);
 	}
-	public int getFacettesMinCount() {
-		return facettesMinCount;
+	public int getFacetsMinCount() {
+		return facetsMinCount;
 	}
 
-	public void setFacettesMinCount(int facettesMinCount) {
-		this.facettesMinCount = facettesMinCount;
+	public void setFacetsMinCount(int facetsMinCount) {
+		this.facetsMinCount = facetsMinCount;
 	}
 
 
 	
-	public void setFacettesLimit(int facettesLimit) {
-		this.facettesLimit = facettesLimit;
+	public void setFacetLimit(int facetLimit) {
+		this.facetLimit = facetLimit;
 	}
 
-	private int facettesLimit=50;
-	private int facettesMinCount=4;
+	private int facetLimit =50;
+	private int facetsMinCount =4;
 
 	private SearchCriterias searchCriterias;
 
@@ -153,10 +153,10 @@ public class SearchToken implements Serializable {
 	public void setMaxResult(int maxResult) {
 		this.maxResult = maxResult;
 	}
-	public List<String> getFacettes() {
-		if(this.query != null && facettes != null) {
+	public List<String> getFacets() {
+		if(this.query != null && facets != null) {
 			List<String> combined = new ArrayList<>();
-			this.facettes.forEach((facette) -> {
+			this.facets.forEach((facette) -> {
 				List<String> sublist = this.query.findParameterByName(facette).getFacets();
 				if(sublist != null) {
 					combined.addAll(sublist);
@@ -164,7 +164,7 @@ public class SearchToken implements Serializable {
 			});
 			return combined;
 		}
-		return facettes;
+		return facets;
 	}
 
 	/**
@@ -173,7 +173,7 @@ public class SearchToken implements Serializable {
 	 */
 	public Map<String, Map<String, Integer>> aggregateFacettes(Map<String, Map<String, Integer>> propsMap) {
 		Map<String, Map<String, Integer>> combined = new HashMap<>();
-		if(this.query != null && facettes != null) {
+		if(this.query != null && facets != null) {
 			List<MetadataQueryParameter> facetParams = this.query.getParameters().stream().filter((p) -> p.getFacets() != null).collect(Collectors.toList());
 			for(Map.Entry<String, Map<String, Integer>> entry : propsMap.entrySet()) {
 				Optional<MetadataQueryParameter> param = facetParams.stream().filter((p) -> p.getFacets().contains(entry.getKey())).findFirst();
@@ -194,12 +194,12 @@ public class SearchToken implements Serializable {
 		return propsMap;
 	}
 
-	public void setFacettes(List<String> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<String> facets) {
+		this.facets = facets;
 	}
 
-	public int getFacettesLimit() {
-		return facettesLimit;
+	public int getFacetLimit() {
+		return facetLimit;
 	}
 
 	public void setSearchCriterias(SearchCriterias searchCriterias) {

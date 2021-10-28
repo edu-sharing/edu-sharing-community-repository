@@ -47,9 +47,9 @@ import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet.Value;
 import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeSearch.Facette;
-import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
@@ -291,11 +291,11 @@ public class NodeDao {
 		Map<String, Map<String, Integer>> countedProps = search
 				.getCountedProps();
 		if (countedProps != null) {
-			List<Facette> resultFacettes = new ArrayList<Facette>();
+			List<Facet> resultFacettes = new ArrayList<Facet>();
 			for (Entry<String, Map<String, Integer>> entry : countedProps
 					.entrySet()) {
 
-				Facette facette = new Facette();
+				Facet facette = new Facet();
 				facette.setProperty(entry.getKey());
 
 				List<Value> values = new ArrayList<Value>();
@@ -321,7 +321,7 @@ public class NodeDao {
 
 				resultFacettes.add(facette);
 			}
-			result.setFacettes(resultFacettes);
+			result.setFacets(resultFacettes);
 		}
 
 		return result;
@@ -420,7 +420,7 @@ public class NodeDao {
 			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
 
 			SearchToken token = new SearchToken();
-			token.setFacettes(facettes);
+			token.setFacets(facettes);
 			token.setSortDefinition(sort);
 			token.setFrom(skipCount);
 			token.setMaxResult(maxItems);
@@ -454,7 +454,7 @@ public class NodeDao {
 			SearchResult<Node> response = new SearchResult<>();
 			response.setNodes(data);
 			response.setPagination(pagination);
-			response.setFacettes(search.getFacettes());
+			response.setFacets(search.getFacets());
 
 			return response;
 		}catch(Throwable t){

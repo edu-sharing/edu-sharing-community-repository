@@ -38,7 +38,7 @@ import java.util.Map;
 public class StatisticApi {
 
 	@POST
-	@Path("/facettes/{context}")
+	@Path("/facets/{context}")
 	@Operation(summary = "Get statistics of repository.", description = "Statistics.")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Statistics.class))), @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -73,8 +73,8 @@ public class StatisticApi {
 	    	})
 
 	    public Response getGlobalStatistics(
-                @Parameter(description = "primary property to build facettes and count+group values", required = false) @QueryParam("group") String group,
-                @Parameter(description = "additional properties to build facettes and count+sub-group values", required = false) @QueryParam("subGroup") List<String> subGroup) {
+                @Parameter(description = "primary property to build facets and count+group values", required = false) @QueryParam("group") String group,
+                @Parameter(description = "additional properties to build facets and count+sub-group values", required = false) @QueryParam("subGroup") List<String> subGroup) {
 
 	    	try {
 		    	StatisticsGlobal statistics=StatisticDao.getGlobal(group,subGroup);

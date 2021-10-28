@@ -302,8 +302,8 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public SearchResult searchSolr(String query, int startIdx, int nrOfresults, List<String> facettes,
-			int facettesMinCount, int facettesLimit) throws Throwable {
+	public SearchResult searchSolr(String query, int startIdx, int nrOfresults, List<String> facets,
+			int facetsMinCount, int facetsLimit) throws Throwable {
 		return null;
 	}
 

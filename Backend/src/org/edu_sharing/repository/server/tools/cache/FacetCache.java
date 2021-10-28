@@ -31,17 +31,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FacetteCache {
+public class FacetCache {
 	/**
 	 * Map<LuceneQuery,Map<ToCountProp,Map<wert,count>>>
 	 */
-	private static Map<String,Map<String,Map<String,Integer>>> facetteCache = new ConcurrentHashMap<String,Map<String,Map<String,Integer>>>();
+	private static Map<String,Map<String,Map<String,Integer>>> facetCache = new ConcurrentHashMap<String,Map<String,Map<String,Integer>>>();
 	
 	public void add(String cacheId, String property, String value, Integer count){
-		Map<String, Map<String, Integer>> propsToCountMap = facetteCache.get(cacheId);
+		Map<String, Map<String, Integer>> propsToCountMap = facetCache.get(cacheId);
 		if(propsToCountMap == null){
 			propsToCountMap = new ConcurrentHashMap<String, Map<String, Integer>>();
-			facetteCache.put(cacheId, propsToCountMap);
+			facetCache.put(cacheId, propsToCountMap);
 		}
 		
 		Map<String, Integer> valuesCountmap = propsToCountMap.get(property);
@@ -53,7 +53,7 @@ public class FacetteCache {
 	}
 	
 	public Map<String, Integer> get(String cacheId, String property){
-		Map<String, Map<String, Integer>> propsToCountMap = facetteCache.get(cacheId);
+		Map<String, Map<String, Integer>> propsToCountMap = facetCache.get(cacheId);
 		if(propsToCountMap != null){
 			 Map<String, Integer> synchMap = propsToCountMap.get(property);
 			 if(synchMap != null && synchMap.size() > 0){
@@ -68,8 +68,8 @@ public class FacetteCache {
 		return null;
 	}
 
-	public static Map<String, Map<String, Map<String, Integer>>> getFacetteCache() {
-		return facetteCache;
+	public static Map<String, Map<String, Map<String, Integer>>> getFacetCache() {
+		return facetCache;
 	}
 	
 }
