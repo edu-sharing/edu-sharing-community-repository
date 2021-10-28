@@ -578,7 +578,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.isSearchingCollections = true;
                 this.search
                     .searchWithBody(
-                      {criterias: this.getCriterias(this.currentValues, searchString, false), facettes: []},
+                      {criterias: this.getCriterias(this.currentValues, searchString, false), facets: []},
                         {sortBy: [
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
@@ -1110,7 +1110,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.searchApi.search({
                             body: {
                                 criterias,
-                                facettes: neededFacets,
+                                facets: neededFacets,
                                 permissions,
                                 facetLimit: 5,
                                 facetMinCount: 1,

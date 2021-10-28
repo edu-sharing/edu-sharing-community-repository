@@ -23,7 +23,6 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.model.CollectionRef;
@@ -51,8 +50,8 @@ import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeSearch.Facette;
-import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet.Value;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
@@ -216,9 +215,9 @@ public class NodeDao {
 		}
 	}
 
-	public static NodeSearch searchFacettes(RepositoryDao repoDao, MdsDaoV2 mdsDao, String query,
-																   List<MdsQueryCriteria> criterias,
-																   SearchToken token) throws DAOException {
+	public static NodeSearch searchFacets(RepositoryDao repoDao, MdsDaoV2 mdsDao, String query,
+										  List<MdsQueryCriteria> criterias,
+										  SearchToken token) throws DAOException {
 		SearchService ss=SearchServiceFactory.getSearchService(repoDao.getId());
 		try {
 			if(!(ss instanceof SearchServiceElastic)){
@@ -255,14 +254,14 @@ public class NodeDao {
 	}
 
 	public static NodeSearch search(RepositoryDao repoDao, String query,
-			int startIdx, int nrOfresults, List<String> facettes,
-			int facettesMinCount, int facettesLimit) throws DAOException {
+			int startIdx, int nrOfresults, List<String> facets,
+			int facetsMinCount, int facetsLimit) throws DAOException {
 
 		try {
 			
 			SearchResultNodeRef search = ((MCAlfrescoAPIClient)repoDao.getBaseClient()).searchSolrNodeRef(query,
-					startIdx, nrOfresults, facettes, facettesMinCount,
-					facettesLimit);
+					startIdx, nrOfresults, facets, facetsMinCount,
+					facetsLimit);
 	
 			return transform(repoDao, search);
 			
@@ -313,7 +312,7 @@ public class NodeDao {
 	
 
 		if (search.getFacets() != null) {
-			for(Facette facet : search.getFacets()){
+			for(Facet facet : search.getFacets()){
 				if(facet.getValues() != null){
 					Collections.sort(facet.getValues(),new Comparator<Value>(){
 						@Override
@@ -323,7 +322,7 @@ public class NodeDao {
 					});
 				}
 			}
-			result.setFacettes(search.getFacets());
+			result.setFacets(search.getFacets());
 		}
 
 		return result;
@@ -434,7 +433,7 @@ public class NodeDao {
 		return node;
 	}
 
-	public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facettes) throws DAOException {
+	public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facets) throws DAOException {
 		try {
 			if(!CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SAVED_SEARCH).equals(getType())){
 				throw new IllegalArgumentException("The given node must be of type "+CCConstants.CCM_TYPE_SAVED_SEARCH);
@@ -445,7 +444,7 @@ public class NodeDao {
 			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
 
 			SearchToken token = new SearchToken();
-			token.setFacettes(facettes);
+			token.setFacets(facets);
 			token.setSortDefinition(sort);
 			token.setFrom(skipCount);
 			token.setMaxResult(maxItems);
@@ -479,7 +478,7 @@ public class NodeDao {
 			SearchResult<Node> response = new SearchResult<>();
 			response.setNodes(data);
 			response.setPagination(pagination);
-			response.setFacettes(search.getFacettes());
+			response.setFacets(search.getFacets());
 
 			return response;
 		}catch(Throwable t){

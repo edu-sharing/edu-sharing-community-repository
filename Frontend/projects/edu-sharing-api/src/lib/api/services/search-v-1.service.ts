@@ -395,7 +395,7 @@ export class SearchV1Service extends BaseService {
         propertyFilter?: Array<string>;
 
         /**
-         * facettes
+         * facets
          */
         body?: Array<string>;
     }): Observable<StrictHttpResponse<Node>> {
@@ -479,7 +479,7 @@ export class SearchV1Service extends BaseService {
         propertyFilter?: Array<string>;
 
         /**
-         * facettes
+         * facets
          */
         body?: Array<string>;
     }): Observable<Node> {

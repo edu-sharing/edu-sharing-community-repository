@@ -64,8 +64,8 @@ public class SearchServiceWSImpl extends SearchServiceAdapter {
 	@Override
 	public SearchResultNodeRef search(SearchToken _searchToken) {
 		org.edu_sharing.repository.client.rpc.SearchToken searchToken = new org.edu_sharing.repository.client.rpc.SearchToken();
-		searchToken.setCountProps(new ArrayList<String>(_searchToken.getFacettes()));
-		searchToken.setCountPropsMinCount(_searchToken.getFacettesMinCount());
+		searchToken.setCountProps(new ArrayList<String>(_searchToken.getFacets()));
+		searchToken.setCountPropsMinCount(_searchToken.getFacetsMinCount());
 		searchToken.setNrOfResults(_searchToken.getMaxResult());
 		searchToken.setRepositoryId(appId);
 		return null;

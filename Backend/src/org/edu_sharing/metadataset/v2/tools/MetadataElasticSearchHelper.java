@@ -203,8 +203,8 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
 
             result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet)
-                    .size(searchToken.getFacettesLimit())
-                    .minDocCount(searchToken.getFacettesMinCount())
+                    .size(searchToken.getFacetLimit())
+                    .minDocCount(searchToken.getFacetsMinCount())
                     .field("properties." + facet+".keyword")));
 
 

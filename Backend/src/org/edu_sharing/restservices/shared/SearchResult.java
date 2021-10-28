@@ -3,7 +3,7 @@ package org.edu_sharing.restservices.shared;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.edu_sharing.restservices.shared.NodeSearch.Facette;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,7 +13,7 @@ public class SearchResult<T> {
 
 	private List<T> nodes = new ArrayList<T>();
 	private Pagination pagination = null;
-	private List<Facette> facettes = null;
+	private List<Facet> facets = null;
 	private List<String> ignored;
 
 	/**
@@ -43,13 +43,13 @@ public class SearchResult<T> {
 	/**
    **/
 	@Schema(required = true, description = "")
-	@JsonProperty("facettes")
-	public List<Facette> getFacettes() {
-		return facettes;
+	@JsonProperty("facets")
+	public List<Facet> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<Facette> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<Facet> facets) {
+		this.facets = facets;
 	}
 	
 	@JsonProperty("ignored")

@@ -14,7 +14,7 @@ export interface SearchParameters {
      */
     facetMinCount: number;
     facetSuggest?: string;
-    facettes: Array<string>;
+    facets: Array<string>;
     permissions?: Array<string>;
     resolveCollections?: boolean;
 }

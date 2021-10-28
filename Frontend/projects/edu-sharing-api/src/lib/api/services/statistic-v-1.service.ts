@@ -27,7 +27,7 @@ export class StatisticV1Service extends BaseService {
     /**
      * Path part for operation get
      */
-    static readonly GetPath = '/statistic/v1/facettes/{context}';
+    static readonly GetPath = '/statistic/v1/facets/{context}';
 
     /**
      * Get statistics of repository.
@@ -125,12 +125,12 @@ export class StatisticV1Service extends BaseService {
      */
     getGlobalStatistics$Response(params?: {
         /**
-         * primary property to build facettes and count+group values
+         * primary property to build facets and count+group values
          */
         group?: string;
 
         /**
-         * additional properties to build facettes and count+sub-group values
+         * additional properties to build facets and count+sub-group values
          */
         subGroup?: Array<string>;
     }): Observable<StrictHttpResponse<StatisticsGlobal>> {
@@ -171,12 +171,12 @@ export class StatisticV1Service extends BaseService {
      */
     getGlobalStatistics(params?: {
         /**
-         * primary property to build facettes and count+group values
+         * primary property to build facets and count+group values
          */
         group?: string;
 
         /**
-         * additional properties to build facettes and count+sub-group values
+         * additional properties to build facets and count+sub-group values
          */
         subGroup?: Array<string>;
     }): Observable<StatisticsGlobal> {
