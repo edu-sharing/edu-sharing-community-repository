@@ -4,7 +4,7 @@ import { Facette } from './facette';
 import { Pagination } from './pagination';
 export interface SearchResultElastic {
     elasticResponse?: string;
-    facettes: Array<Facette>;
+    facets: Array<Facette>;
     ignored?: Array<string>;
     nodes: Array<{}>;
     pagination: Pagination;

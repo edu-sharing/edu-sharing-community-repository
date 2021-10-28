@@ -4,7 +4,7 @@ import { Facette } from './facette';
 import { Node } from './node';
 import { Pagination } from './pagination';
 export interface SearchResultNode {
-    facettes: Array<Facette>;
+    facets: Array<Facette>;
     ignored?: Array<string>;
     nodes: Array<Node>;
     pagination: Pagination;

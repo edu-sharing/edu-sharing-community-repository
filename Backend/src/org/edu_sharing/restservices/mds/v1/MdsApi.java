@@ -13,11 +13,11 @@ import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.MdsDaoV2;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.mds.v1.model.MdsEntriesV2;
+import org.edu_sharing.restservices.mds.v1.model.MdsEntries;
 import org.edu_sharing.restservices.mds.v1.model.SuggestionParam;
 import org.edu_sharing.restservices.mds.v1.model.Suggestions;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.MdsV2;
+import org.edu_sharing.restservices.shared.Mds;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +42,7 @@ public class MdsApi {
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = MdsEntriesV2.class))),
+					@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = MdsEntries.class))),
 					@ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -61,7 +61,7 @@ public class MdsApi {
 			}
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			MdsEntriesV2 result=new MdsEntriesV2();
+			MdsEntries result=new MdsEntries();
 			result.setMetadatasets(MdsDaoV2.getAllMdsDesc(repoDao));
 
 			return Response.status(Response.Status.OK).entity(result).build();
@@ -78,7 +78,7 @@ public class MdsApi {
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = MdsV2.class))),
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Mds.class))),
 					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

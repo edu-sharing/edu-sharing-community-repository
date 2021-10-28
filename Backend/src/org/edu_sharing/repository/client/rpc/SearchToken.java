@@ -46,8 +46,8 @@ public class SearchToken implements Serializable {
 	private ArrayList<String> countProps = null;
 	
 	/**
-	 * global facette mincount
-	 * @todo make it configurable for every single facette
+	 * global facet mincount
+	 * @todo make it configurable for every single facet
 	 */
 	protected int countPropsMinCount = 5;
 	

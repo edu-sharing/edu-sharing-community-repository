@@ -332,9 +332,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		SearchResult result = new SearchResult();
 		Map<String, Map<String, Integer>> countedProps = new HashMap<>();
 		if(srnr.getFacets() != null){
-			for(NodeSearch.Facette f : srnr.getFacets()){
+			for(NodeSearch.Facet f : srnr.getFacets()){
 				Map<String, Integer> values = new HashMap<>();
-				for(NodeSearch.Facette.Value value : f.getValues()){
+				for(NodeSearch.Facet.Value value : f.getValues()){
 					values.put(value.getValue(),value.getCount());
 				}
 				countedProps.put(f.getProperty(),values);
@@ -401,10 +401,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		// do the facette
 		if (facettes != null && facettes.size() > 0) {
-			List<NodeSearch.Facette> facetsResult = new ArrayList<>();
+			List<NodeSearch.Facet> facetsResult = new ArrayList<>();
 
 			for (String facetteProp : facettes) {
-				NodeSearch.Facette facet = new NodeSearch.Facette();
+				NodeSearch.Facet facet = new NodeSearch.Facet();
 				facet.setProperty(facetteProp);
 				facet.setValues(new ArrayList<>());
 				facetsResult.add(facet);
@@ -430,7 +430,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					 * --> pair.getSecond() > 0
 					 */
 					if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
-						NodeSearch.Facette.Value value = new NodeSearch.Facette.Value();
+						NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
 						value.setValue(first);
 						value.setCount(pair.getSecond());
 						facet.getValues().add(value);

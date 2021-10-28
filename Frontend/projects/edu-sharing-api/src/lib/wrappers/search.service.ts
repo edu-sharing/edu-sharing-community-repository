@@ -67,7 +67,7 @@ export class SearchService {
             body: {
                 ...params.body,
                 // Additionally fetch facets that have been subscribed to via `getFacets`.
-                facettes: this.getSubscribedFacets(params.body.facettes),
+                facets: this.getSubscribedFacets(params.body.facets),
             },
         });
     }
@@ -83,7 +83,7 @@ export class SearchService {
             body: {
                 ...searchParams.body,
                 // Do not fetch facets again. These don't change for equal search criteria.
-                facettes: [],
+                facets: [],
             },
         });
     }
@@ -173,12 +173,12 @@ export class SearchService {
                 maxItems: 0,
                 body: {
                     ...searchParams.body,
-                    facettes: [property],
+                    facets: [property],
                     facetLimit: currentFacetSize + size,
                 },
             })
             .pipe(
-                map((results) => results.facettes.find((facet) => facet.property === property)),
+                map((results) => results.facets.find((facet) => facet.property === property)),
                 switchMap((facet) =>
                     facet
                         ? this.mapFacet(facet)
@@ -213,13 +213,13 @@ export class SearchService {
                 query: searchParams.query,
                 body: {
                     criterias: this.getFilterCriteria(searchParams.body.criterias),
-                    facettes: facets,
+                    facets: facets,
                     facetLimit: size,
                     facetMinCount: 1,
                     facetSuggest: inputString,
                 },
             })
-            .pipe(switchMap((response) => this.mapFacets(response.facettes)));
+            .pipe(switchMap((response) => this.mapFacets(response.facets)));
     }
 
     /**
@@ -237,8 +237,8 @@ export class SearchService {
         this.resultsSubject
             .pipe(
                 switchMap((results) => {
-                    if (results?.facettes) {
-                        return this.mapFacets(results.facettes);
+                    if (results?.facets) {
+                        return this.mapFacets(results.facets);
                     } else {
                         return rxjs.of({});
                     }
@@ -325,7 +325,7 @@ export class SearchService {
         );
     }
 
-    private mapFacets(results: apiModels.SearchResultNode['facettes']): Observable<FacetsDict> {
+    private mapFacets(results: apiModels.SearchResultNode['facets']): Observable<FacetsDict> {
         if (results.length === 0) {
             return rxjs.of({});
         }

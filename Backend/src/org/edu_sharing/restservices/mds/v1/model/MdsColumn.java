@@ -12,12 +12,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "")
-public class ColumnV2 {
+public class MdsColumn {
 		private String id;
 		private String format;
 		private boolean showDefault;
 	
-		public ColumnV2(MetadataColumn column) {
+		public MdsColumn(MetadataColumn column) {
 			this.id=column.getId();		
 			this.showDefault=column.isShowDefault();
 			this.format=column.getFormat();

@@ -11,13 +11,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "")
-public class GroupV2 {
+public class MdsGroup {
 	private String id;
 	private List<String> views;
 	private MetadataGroup.Rendering rendering;
 
-	public GroupV2(){}
-	public GroupV2(MetadataGroup group) {
+	public MdsGroup(){}
+	public MdsGroup(MetadataGroup group) {
 		this.id=group.getId();
 		this.rendering=group.getRendering();
 		this.views=group.getViews();

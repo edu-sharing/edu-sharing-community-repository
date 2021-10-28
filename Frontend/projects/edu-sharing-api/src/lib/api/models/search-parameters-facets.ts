@@ -14,5 +14,5 @@ export interface SearchParametersFacets {
      */
     facetMinCount: number;
     facetSuggest?: string;
-    facettes: Array<string>;
+    facets: Array<string>;
 }

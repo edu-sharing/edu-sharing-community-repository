@@ -231,7 +231,7 @@ public class MediacenterApi {
 			searchToken.setAuthorityScope(Arrays.asList(new String[] {authorityScope}));
 			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, MdsDaoV2.DEFAULT);
 
-			searchToken.setFacettes(new ArrayList<>());
+			searchToken.setFacets(new ArrayList<>());
 			NodeSearch search = NodeDao.searchV2(repoDao,mdsDao,"mediacenter_filter", parameters.getCriterias() ,searchToken,Filter.createShowAllFilter());
 
 			List<Node> data = null;
@@ -279,7 +279,7 @@ public class MediacenterApi {
 	    	SearchResult response = new SearchResult();
 	    	response.setNodes(data);
 	    	response.setPagination(pagination);	    	
-	    	response.setFacettes(search.getFacettes());
+	    	response.setFacets(search.getFacets());
 	    	return Response.status(Response.Status.OK).entity(response).build();
 			//MediacenterDao dao = MediacenterDao.get(repoDao, mediacenter);
 	    	//List<Node> result = dao.getLicensedNodes();

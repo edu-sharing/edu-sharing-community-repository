@@ -61,9 +61,9 @@ export class NodeV1Service extends BaseService {
         query: string;
 
         /**
-         * facettes
+         * facets
          */
-        facettes?: Array<string>;
+        facets?: Array<string>;
 
         /**
          * maximum items per page
@@ -94,7 +94,7 @@ export class NodeV1Service extends BaseService {
         if (params) {
             rb.path('repository', params.repository, { style: 'simple', explode: false });
             rb.query('query', params.query, { style: 'form', explode: true });
-            rb.query('facettes', params.facettes, { style: 'form', explode: true });
+            rb.query('facets', params.facets, { style: 'form', explode: true });
             rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
             rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
             rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
@@ -139,9 +139,9 @@ export class NodeV1Service extends BaseService {
         query: string;
 
         /**
-         * facettes
+         * facets
          */
-        facettes?: Array<string>;
+        facets?: Array<string>;
 
         /**
          * maximum items per page

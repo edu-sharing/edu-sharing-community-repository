@@ -81,10 +81,10 @@ public class SearchApi {
 			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, mdsId);
 
 			SearchToken token = new SearchToken();
-			token.setFacettes(parameters.getFacettes());
-			token.setFacettesLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+			token.setFacets(parameters.getFacets());
+			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
 					? parameters.getFacetLimit() : 10);
-			token.setFacettesMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0 )
+			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0 )
 					? parameters.getFacetMinCount(): 5);
 			token.setQueryString(parameters.getFacetSuggest());
 			token.setPermissions(parameters.getPermissions());
@@ -116,7 +116,7 @@ public class SearchApi {
 		    	response.setNodes(data);
 		    	response.setIgnored(search.getIgnored());
 		    	response.setPagination(pagination);	    	
-		    	response.setFacettes(search.getFacettes());
+		    	response.setFacets(search.getFacets());
 		    	
 		    	return Response.status(Response.Status.OK).entity(response).build();
 		
@@ -154,20 +154,20 @@ public class SearchApi {
 			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, mdsId);
 
 			SearchToken token = new SearchToken();
-			token.setFacettes(parameters.getFacettes());
+			token.setFacets(parameters.getFacets());
 			token.setFrom(0);
 			token.setMaxResult(0);
-			token.setFacettesLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
 					? parameters.getFacetLimit() : 10);
-			token.setFacettesMinCount((parameters.getFacetMinCount()  != null && parameters.getFacetMinCount() >= 0 )
+			token.setFacetsMinCount((parameters.getFacetMinCount()  != null && parameters.getFacetMinCount() >= 0 )
 					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 
-			NodeSearch search = NodeDao.searchFacettes(repoDao, mdsDao, query, parameters.getCriterias(), token);
+			NodeSearch search = NodeDao.searchFacets(repoDao, mdsDao, query, parameters.getCriterias(), token);
 			SearchResultNode response = new SearchResultNode();
 			response.setNodes(new ArrayList<>());
 			response.setIgnored(search.getIgnored());
-			response.setFacettes(search.getFacettes());
+			response.setFacets(search.getFacets());
 			return Response.status(Response.Status.OK).entity(search).build();
 
 		}  catch (Throwable t) {
@@ -235,7 +235,7 @@ public class SearchApi {
 			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
 			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@Parameter(description = "facettes", required = false) List<String> facettes,
+			@Parameter(description = "facets", required = false) List<String> facets,
 			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 
 			@Context HttpServletRequest req) {
@@ -249,7 +249,7 @@ public class SearchApi {
 							maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
 							contentType,
 							new SortDefinition(sortProperties,sortAscending),
-							facettes
+							facets
 							);
 			return Response.status(Response.Status.OK).entity(result).build();
 	    	}  catch (Throwable t) {
@@ -301,10 +301,7 @@ public class SearchApi {
 		    	pagination.setTotal(nodeSearch.getCount());
 		    	
 		    	response.setPagination(pagination);
-				
-				/*response.setPagination(pagination);
-				response.setFacettes(search.getFacettes());
-				*/
+
 				return Response.status(Response.Status.OK).entity(response).build();
 			} catch (Throwable t) {
 				return ErrorResponse.createResponse(t);
@@ -403,7 +400,7 @@ public class SearchApi {
 			SearchResultNode response = new SearchResultNode();
 	    	response.setNodes(data);
 	    	response.setPagination(pagination);	    	
-	    	response.setFacettes(search.getFacettes());
+	    	response.setFacets(search.getFacets());
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	
     	}  catch (Throwable t) {

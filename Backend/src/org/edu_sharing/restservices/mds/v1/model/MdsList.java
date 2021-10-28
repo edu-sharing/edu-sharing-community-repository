@@ -10,17 +10,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "")
-public class ListV2 {
+public class MdsList {
 		private String id;
-		private List<ColumnV2> columns;
+		private List<MdsColumn> columns;
 	
-		public ListV2(){}
-		public ListV2(MetadataList list) {
+		public MdsList(){}
+		public MdsList(MetadataList list) {
 			this.id=list.getId();
 			if(list.getColumns()!=null){
 				columns=new ArrayList<>();
 				for(MetadataColumn column : list.getColumns()){
-					columns.add(new ColumnV2(column));
+					columns.add(new MdsColumn(column));
 				}
 			}
 		}
@@ -34,10 +34,10 @@ public class ListV2 {
 		this.id = id;
 	}
 		@JsonProperty("columns")
-		public List<ColumnV2> getColumns() {
+		public List<MdsColumn> getColumns() {
 			return columns;
 		}
-		public void setColumns(List<ColumnV2> columns) {
+		public void setColumns(List<MdsColumn> columns) {
 			this.columns = columns;
 		}
 		
