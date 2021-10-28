@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { FacetAggregation, FacetValue, SearchService } from 'edu-sharing-api';
+import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';

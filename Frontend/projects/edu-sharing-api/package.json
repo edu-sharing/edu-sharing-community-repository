@@ -1,5 +1,5 @@
 {
-  "name": "edu-sharing-api",
+  "name": "ngx-edu-sharing-api",
   "version": "0.0.1",
   "scripts": {
     "generate-api:format-swagger-json": "prettier -w build/swagger.json",

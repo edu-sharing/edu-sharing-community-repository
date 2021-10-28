@@ -1,5 +1,5 @@
 /*
- * Public API Surface of edu-sharing-api
+ * Public API Surface of ngx-edu-sharing-api
  */
 
 export * from './lib/edu-sharing-api.module';

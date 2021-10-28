@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { MdsWidgetValue } from 'edu-sharing-api';
+import { MdsWidgetValue } from 'ngx-edu-sharing-api';
 import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 export {
@@ -9,7 +9,7 @@ export {
     MdsWidget,
     MdsWidgetCondition,
     MdsWidgetValue,
-} from 'edu-sharing-api';
+} from 'ngx-edu-sharing-api';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {

@@ -77,7 +77,7 @@ import {
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
-import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'edu-sharing-api';
+import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 
 @Component({

@@ -44,7 +44,7 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
 import {DateHelper} from '../../../core-ui-module/DateHelper';
-import { MdsService, MdsWidgetValue } from 'edu-sharing-api';
+import { MdsService, MdsWidgetValue } from 'ngx-edu-sharing-api';
 declare var noUiSlider: any;
 
 @Component({
