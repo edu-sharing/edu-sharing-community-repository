@@ -1,6 +1,7 @@
 {
   "name": "ngx-edu-sharing-api",
   "version": "0.0.1",
+  "description": "Angular bindings for Edu-Sharing's API",
   "scripts": {
     "generate-api:format-swagger-json": "prettier -w build/swagger.json",
     "generate-api:generate-openapi-yaml": "cd build && ./generate.sh",
