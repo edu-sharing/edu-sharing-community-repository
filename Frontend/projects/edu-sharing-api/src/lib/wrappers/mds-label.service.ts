@@ -71,14 +71,24 @@ export class MdsLabelService {
         );
     }
 
+    /**
+     * Gets values for a given property from the respective mds widget definitions.
+     */
     private getValueDefinitions(
         mdsId: MdsIdentifier,
         property: string,
     ): Observable<ValueV2[] | null> {
-        return this.mds
-            .getMetadataSet(mdsId)
-            .pipe(
-                map((mds) => mds.widgets?.find((widget) => widget.id === property)?.values ?? null),
-            );
+        return this.mds.getMetadataSet(mdsId).pipe(
+            map(
+                (mds) =>
+                    mds.widgets?.find(
+                        (widget) =>
+                            widget.id === property &&
+                            // Values are defined on the general widget and not on special
+                            // configurations for specific view.
+                            !widget.template,
+                    )?.values ?? null,
+            ),
+        );
     }
 }
