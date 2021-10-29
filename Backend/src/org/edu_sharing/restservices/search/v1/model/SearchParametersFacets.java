@@ -12,7 +12,7 @@ public class SearchParametersFacets {
     Integer facetMinCount;
     Integer facetLimit;
     String facetSuggest;
-    private List<MdsQueryCriteria> criterias;
+    private List<MdsQueryCriteria> criteria;
 
     @Schema(required = true, description = "")
     @JsonProperty("facets")
@@ -35,12 +35,12 @@ public class SearchParametersFacets {
     public void setFacetSuggest(String facetSuggest) { this.facetSuggest = facetSuggest; }
 
     @Schema(required = true, description = "")
-    @JsonProperty("criterias")
-    public List<MdsQueryCriteria> getCriterias() {
-        return criterias;
+    @JsonProperty("criteria")
+    public List<MdsQueryCriteria> getCriteria() {
+        return criteria;
     }
 
-    public void setCriterias(List<MdsQueryCriteria> criterias) {
-        this.criterias = criterias;
+    public void setCriteria(List<MdsQueryCriteria> criteria) {
+        this.criteria = criteria;
     }
 }

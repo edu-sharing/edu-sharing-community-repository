@@ -93,7 +93,7 @@ public class SearchApi {
 			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
 			token.setContentType(contentType);
 			token.setResolveCollections(parameters.isResolveCollections());
-			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriterias(), token, filter);
+			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter);
 
 		    	List<Node> data = null;//new ArrayList<Node>();
 		    	if(search.getNodes().size() < search.getResult().size()){
@@ -163,7 +163,7 @@ public class SearchApi {
 					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 
-			NodeSearch search = NodeDao.searchFacets(repoDao, mdsDao, query, parameters.getCriterias(), token);
+			NodeSearch search = NodeDao.searchFacets(repoDao, mdsDao, query, parameters.getCriteria(), token);
 			SearchResultNode response = new SearchResultNode();
 			response.setNodes(new ArrayList<>());
 			response.setIgnored(search.getIgnored());

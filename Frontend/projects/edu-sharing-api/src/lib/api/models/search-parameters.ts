@@ -2,7 +2,7 @@
 /* eslint-disable */
 import { MdsQueryCriteria } from './mds-query-criteria';
 export interface SearchParameters {
-    criterias: Array<MdsQueryCriteria>;
+    criteria: Array<MdsQueryCriteria>;
 
     /**
      * 10

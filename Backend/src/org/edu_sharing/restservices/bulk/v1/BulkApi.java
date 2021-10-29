@@ -67,7 +67,7 @@ public class BulkApi {
 	@POST
 	@Path("/find")
 
-	@Operation(summary = "gets a given node", description = "Get a given node based on the posted, multiple criterias. Make sure that they'll provide an unique result")
+	@Operation(summary = "gets a given node", description = "Get a given node based on the posted, multiple criteria. Make sure that they'll provide an unique result")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
