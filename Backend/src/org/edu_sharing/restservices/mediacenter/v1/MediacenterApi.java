@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -229,10 +229,10 @@ public class MediacenterApi {
 			}
 
 			searchToken.setAuthorityScope(Arrays.asList(new String[] {authorityScope}));
-			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, MdsDaoV2.DEFAULT);
+			MdsDao mdsDao = MdsDao.getMds(repoDao, MdsDao.DEFAULT);
 
 			searchToken.setFacets(new ArrayList<>());
-			NodeSearch search = NodeDao.searchV2(repoDao,mdsDao,"mediacenter_filter", parameters.getCriterias() ,searchToken,Filter.createShowAllFilter());
+			NodeSearch search = NodeDao.search(repoDao,mdsDao,"mediacenter_filter", parameters.getCriterias() ,searchToken,Filter.createShowAllFilter());
 
 			List<Node> data = null;
 			if(search.getNodes().size() < search.getResult().size()){
@@ -262,7 +262,7 @@ public class MediacenterApi {
 				}
 				node.getProperties().put("ccm:mediacenter",new String[]{newValue});
 
-				MetadataSetV2 mds = null;
+				MetadataSet mds = null;
 				try{mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), node.getProperties().get("cm:edu_metadataset")[0]);}catch(Exception e){};
 				String[] displayNames = MetadataHelper.getDisplayNames(mds, "ccm:mediacenter", newValue);
 				if(displayNames != null){

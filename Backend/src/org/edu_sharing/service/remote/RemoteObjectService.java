@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -177,7 +176,7 @@ public class RemoteObjectService {
 			propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, importMds);
 		} else {
 			// set the metadataset to keep the rendering of metadata consistent
-			propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, repInfo.getMetadatsetsV2()[0]);
+			propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, repInfo.getMetadatsets()[0]);
 		}
 		// set the wwwurl so that the rendering will redirect to the source
 		// @TODO: Check behaviour for each connected repository type

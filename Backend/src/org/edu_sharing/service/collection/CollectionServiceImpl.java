@@ -27,8 +27,8 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -46,7 +46,6 @@ import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
-import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -71,7 +70,6 @@ import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.Authentication;
 
 
 public class CollectionServiceImpl implements CollectionService{
@@ -718,7 +716,7 @@ public class CollectionServiceImpl implements CollectionService{
                 SearchParameters searchParams=new SearchParameters();
                 sortDefinition.applyToSearchParameters(searchParams);
 
-				MetadataSetV2 mds = MetadataHelper.getMetadataset(appInfo, CCConstants.metadatasetdefault_id);
+				MetadataSet mds = MetadataHelper.getMetadataset(appInfo, CCConstants.metadatasetdefault_id);
 
 				String queryId=null;
 				switch(SearchScope.valueOf(scope)){
@@ -740,7 +738,7 @@ public class CollectionServiceImpl implements CollectionService{
 					case RECENT:
 						return permissionService.getRecentProperty(CCConstants.CCM_PROP_PERSON_RECENT_COLLECTIONS);
 				}
-				String queryString=mds.findQuery(queryId, MetadataReaderV2.QUERY_SYNTAX_LUCENE).findBasequery(null);
+				String queryString=mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findBasequery(null);
 				/**
 				 * @TODO owner + inherit off -> node will be found even if search is done in edu-group context 
 				 */

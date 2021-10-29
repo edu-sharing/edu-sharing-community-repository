@@ -27,50 +27,18 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
-import java.io.File;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.StringTool;
+import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.server.AuthenticationTool;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.VCardConverter;
-import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 public class RefreshPublisherListJob extends AbstractJob {
 
@@ -113,7 +81,7 @@ public class RefreshPublisherListJob extends AbstractJob {
 			
 			AdminServiceFactory.getInstance().writePublisherToMDSXml(vcardProps, valuespaceProp, ignoreEntries, filePath, authInfo);
 
-			MetadataReaderV2.refresh();
+			MetadataReader.refresh();
 		}catch(org.alfresco.webservice.authentication.AuthenticationFault e){
 			logger.error("AuthenticationFault while excecuting RefreshPublisherListJob:"+e.getMessage());
 			throw new JobExecutionException(e);

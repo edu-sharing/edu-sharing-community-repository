@@ -11,25 +11,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.LoadingCache;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -43,8 +35,6 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.surf.util.URLEncoder;
-
-import com.google.common.collect.MapMaker;
 
 public class SearchServicePixabayImpl extends SearchServiceAdapter{
 	
@@ -193,17 +183,17 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 	}
 	
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 				
-		if(!MetadataSetV2.DEFAULT_CLIENT_QUERY.equals(query)){
+		if(!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)){
 			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
 		}
 		
 		boolean editorsChoice=false;
 		String imageType="all";
 		String orientation="all";
-		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
+		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 		if(criterias.containsKey("editors_choice"))
 			editorsChoice=criterias.get("editors_choice")[0].equals("true");
 		if(criterias.containsKey("image_type"))

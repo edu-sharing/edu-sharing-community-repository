@@ -10,8 +10,8 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -24,7 +24,6 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 // please refer to
@@ -490,7 +489,7 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
             if (entEle != null) {
                 String[] languages = new String[]{"de","en_US"};
                 for(String language : languages) {
-                    MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), metadataSet, language);
+                    MetadataSet mds = MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), metadataSet, language);
                     MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(property.toString()));
                     MetadataKey metadataKey = widget.getValuesAsMap().get(repoValue);
 
