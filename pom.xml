@@ -17,9 +17,9 @@
   <name>edu_sharing-community</name>
 
   <scm>
-    <connection>scm:git:https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git</connection>
-    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git</developerConnection>
-    <url>https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community.git</url>
+    <connection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community.git</connection>
+    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community.git</developerConnection>
+    <url>https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community.git</url>
   </scm>
 
   <properties>
