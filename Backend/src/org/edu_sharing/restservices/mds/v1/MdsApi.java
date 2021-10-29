@@ -39,7 +39,7 @@ public class MdsApi {
 	private static Logger logger = Logger.getLogger(MdsApi.class);
 
 	@GET
-	@Path("/metadatasetsV2/{repository}")
+	@Path("/metadatasets/{repository}")
 
 	@Operation(summary = "Get metadata sets V2 of repository.", description = "Get metadata sets V2 of repository.")
 
@@ -75,7 +75,7 @@ public class MdsApi {
 
 	}
 	@GET
-	@Path("/metadatasetsV2/{repository}/{metadataset}")
+	@Path("/metadatasets/{repository}/{metadataset}")
 
 	@Operation(summary = "Get metadata set new.", description = "Get metadata set new.")
 
@@ -125,7 +125,7 @@ public class MdsApi {
 	 */
 
 	@POST
-	@Path("/metadatasetsV2/{repository}/{metadataset}/values")
+	@Path("/metadatasets/{repository}/{metadataset}/values")
 
 	@Operation(summary = "Get values.", description = "Get values.")
 
@@ -170,7 +170,7 @@ public class MdsApi {
 	 */
 
 	@POST
-	@Path("/metadatasetsV2/{repository}/{metadataset}/values_for_keys")
+	@Path("/metadatasets/{repository}/{metadataset}/values_for_keys")
 
 	@Operation(summary = "Get values for keys.", description = "Get values for keys.")
 
