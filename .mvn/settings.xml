@@ -11,14 +11,14 @@
   </mirrors>
   <servers>
     <server>
-      <id>edu-sharing.community.releases</id>
-      <username>${env.MAVEN_REPO_USER}</username>
-      <password>${env.MAVEN_REPO_PASS}</password>
+      <id>maven.deploy.releases</id>
+      <username>${env.MAVEN_USERNAME}</username>
+      <password>${env.MAVEN_PASSWORD}</password>
     </server>
     <server>
-      <id>edu-sharing.community.snapshots</id>
-      <username>${env.MAVEN_REPO_USER}</username>
-      <password>${env.MAVEN_REPO_PASS}</password>
+      <id>maven.deploy.snapshots</id>
+      <username>${env.MAVEN_USERNAME}</username>
+      <password>${env.MAVEN_PASSWORD}</password>
     </server>
   </servers>
 </settings>

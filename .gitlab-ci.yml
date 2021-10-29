@@ -2,7 +2,7 @@ image: maven:3.6.3-jdk-8
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  MAVEN_CLI_OPTS: "-s .mvn/settings.xml --batch-mode --errors --show-version"
+  MAVEN_CLI_OPTS: "-Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS -s .mvn/settings.xml --batch-mode --errors --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 cache:

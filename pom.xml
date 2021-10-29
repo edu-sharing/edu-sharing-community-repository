@@ -37,6 +37,9 @@
 
     <license.skipAddThirdParty>true</license.skipAddThirdParty>
 
+    <maven.deploy.releases>https://artifacts.edu-sharing.com/repository/community-releases/</maven.deploy.releases>
+    <maven.deploy.snapshots>https://artifacts.edu-sharing.com/repository/community-snapshots/</maven.deploy.snapshots>
+
   </properties>
 
   <build>
@@ -228,13 +231,13 @@
   <distributionManagement>
 
     <repository>
-      <id>edu-sharing.community.releases</id>
-      <url>https://artifacts.edu-sharing.com/repository/community-releases/</url>
+      <id>maven.deploy.releases</id>
+      <url>${maven.deploy.releases}</url>
     </repository>
 
     <snapshotRepository>
-      <id>edu-sharing.community.snapshots</id>
-      <url>https://artifacts.edu-sharing.com/repository/community-snapshots/</url>
+      <id>maven.deploy.snapshots</id>
+      <url>${maven.deploy.snapshots}</url>
     </snapshotRepository>
 
   </distributionManagement>
