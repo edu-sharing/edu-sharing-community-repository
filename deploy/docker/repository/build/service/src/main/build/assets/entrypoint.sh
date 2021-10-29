@@ -50,6 +50,13 @@ repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-repository-sea
 repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
 repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
 
+repository_proxy_host="${REPOSITORY_PROXY_HOST:-}"
+repository_proxy_nonproxyhosts="${REPOSITORY_PROXY_NONPROXYHOSTS:-}"
+repository_proxy_proxyhost="${REPOSITORY_PROXY_PROXYHOST:-}"
+repository_proxy_proxypass="${REPOSITORY_PROXY_PROXYPASS:-}"
+repository_proxy_proxyport="${REPOSITORY_PROXY_PROXYPORT:-}"
+repository_proxy_proxyuser="${REPOSITORY_PROXY_PROXYUSER:-}"
+
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-repository-search-solr4}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
 
@@ -283,6 +290,46 @@ xmlstarlet ed -L \
 
 hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
 	set "elasticsearch.servers" '["'"${repository_search_elastic_host}:${repository_search_elastic_port}"'"]'
+
+[[ -n "${repository_proxy_host}" ]] && {
+	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		set "repository.proxy.host" "${repository_proxy_host}"
+}
+
+[[ -n "${repository_proxy_nonproxyhosts}" ]] && {
+	export CATALINA_OPTS="-Dhttp.nonProxyHosts=${repository_proxy_nonproxyhosts} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.nonProxyHosts=${repository_proxy_nonproxyhosts} $CATALINA_OPTS"
+	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		set "repository.proxy.nonproxyhosts" "${repository_proxy_nonproxyhosts}"
+}
+
+[[ -n "${repository_proxy_proxyhost}" ]] && {
+	export CATALINA_OPTS="-Dhttp.proxyHost=${repository_proxy_proxyhost} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.proxyHost=${repository_proxy_proxyhost} $CATALINA_OPTS"
+	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		set "repository.proxy.proxyhost" "${repository_proxy_proxyhost}"
+}
+
+[[ -n "${repository_proxy_proxypass}" ]] && {
+	export CATALINA_OPTS="-Dhttp.proxyPass=${repository_proxy_proxypass} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.proxyPass=${repository_proxy_proxypass} $CATALINA_OPTS"
+	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		set "repository.proxy.proxypass" "${repository_proxy_proxypass}"
+}
+
+[[ -n "${repository_proxy_proxyport}" ]] && {
+	export CATALINA_OPTS="-Dhttp.proxyPort=${repository_proxy_proxyport} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.proxyPort=${repository_proxy_proxyport} $CATALINA_OPTS"
+	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		set "repository.proxy.proxyport" "${repository_proxy_proxyport}"
+}
+
+[[ -n "${repository_proxy_proxyuser}" ]] && {
+	export CATALINA_OPTS="-Dhttp.proxyUser=${repository_proxy_proxyuser} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.proxyUser=${repository_proxy_proxyuser} $CATALINA_OPTS"
+	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		set "repository.proxy.proxyuser" "${repository_proxy_proxyuser}"
+}
 
 ########################################################################################################################
 

@@ -158,6 +158,13 @@ config:
 
   metrics: true
 
+  proxy:
+    host: ""
+    proxyhost: ""
+    proxyport: ""
+    proxyuser: ""
+    proxypass: ""
+
   saml:
     enabled: false
 #    config: ""
