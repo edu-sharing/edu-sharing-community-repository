@@ -45,7 +45,7 @@ public class SearchApi {
 	@Path("/queries/{repository}/{metadataset}/{query}")
 	@Consumes({ "application/json" })
 
-	@Operation(summary = "Perform queries based on metadata sets V2.", description = "Perform queries based on metadata sets V2.")
+	@Operation(operationId = "search", summary = "Perform queries based on metadata sets V2.", description = "Perform queries based on metadata sets V2.")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
