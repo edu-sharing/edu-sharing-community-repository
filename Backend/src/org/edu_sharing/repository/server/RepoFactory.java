@@ -40,9 +40,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.lightbend.LightbendConfigHelper;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSetInfo;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
@@ -234,7 +234,7 @@ public class RepoFactory {
 		ApplicationInfoList.refresh();
 		LightbendConfigHelper.refresh();
 		appClassCache.clear();
-		MetadataReaderV2.refresh();
+		MetadataReader.refresh();
 		ConfigServiceFactory.refresh();
 		VersionService.invalidateCache();
 		try {
@@ -243,15 +243,15 @@ public class RepoFactory {
 		eduSharingProps = null;
 	}
 
-	public static List<MetadataSetInfo> getMetadataSetsV2ForRepository(String repositoryId) throws Exception {
+	public static List<MetadataSetInfo> getMetadataSetsForRepository(String repositoryId) throws Exception {
 		if (repositoryId == null) {
 			repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 		}
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
 		ArrayList<MetadataSetInfo> sets = new ArrayList<MetadataSetInfo>();
-		for(String id : appInfo.getMetadatsetsV2()){
+		for(String id : appInfo.getMetadatsets()){
 			MetadataSetInfo info=new MetadataSetInfo();
-			MetadataSetV2 mds = MetadataHelper.getMetadataset(appInfo, id);
+			MetadataSet mds = MetadataHelper.getMetadataset(appInfo, id);
 			info.setId(id);
 			info.setName(mds.getName());
 			sets.add(info);

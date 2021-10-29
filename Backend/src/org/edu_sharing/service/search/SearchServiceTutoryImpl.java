@@ -17,7 +17,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -43,14 +43,14 @@ public class SearchServiceTutoryImpl extends SearchServiceAdapter{
 
 	
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 		
-		if(!MetadataSetV2.DEFAULT_CLIENT_QUERY.equals(query)){
+		if(!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)){
 			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
 		}
 		
-		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
+		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 		if(searchWordCriteria == null){
 			searchWordCriteria = new String[] {"*"};
 		}

@@ -36,18 +36,18 @@ public class RepoProxyDummyImpl extends RepoProxyAbstract {
 	}
 
 	@Override
-	public Response getMetadataSetsV2(String repository, HttpServletRequest req) {
+	public Response getMetadataSets(String repository, HttpServletRequest req) {
 		return ErrorResponse.createResponse(e);
 	}
 
 	@Override
-	public Response getMetadataSetV2(String repository, String mdsId, HttpServletRequest req) {
+	public Response getMetadataSet(String repository, String mdsId, HttpServletRequest req) {
 		return ErrorResponse.createResponse(e);
 	}
 
 	@Override
-	public Response getValuesV2(String repository, String mdsId, SuggestionParam suggestionParam,
-			HttpServletRequest req) {
+	public Response getValues(String repository, String mdsId, SuggestionParam suggestionParam,
+							  HttpServletRequest req) {
 		return ErrorResponse.createResponse(e);
 	}
 	

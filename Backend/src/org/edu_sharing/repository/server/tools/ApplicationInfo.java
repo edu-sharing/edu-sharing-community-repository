@@ -265,7 +265,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	private String searchable = "true";
 	
 	//file that contains metadatasets for the repository
-	private String metadatsetsV2 = null;
+	private String metadatsets = null;
 	
 	//devmode metadatasets will be parsed every time and not cached in RepoFactory
 	private String devmode = null;
@@ -421,7 +421,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		
 		path = properties.getProperty("path");
 
-		metadatsetsV2 = properties.getProperty(KEY_METADATASETS_V2);
+		metadatsets = properties.getProperty(KEY_METADATASETS_V2);
 		
 		devmode = properties.getProperty("devmode");
 
@@ -713,10 +713,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	/**
 	 * @return the metadatsetsV2
 	 */
-	public String[] getMetadatsetsV2() {
-		if(metadatsetsV2==null)
+	public String[] getMetadatsets() {
+		if(metadatsets ==null)
 			return new String[]{"mds"};
-		return metadatsetsV2.split(",");
+		return metadatsets.split(",");
 	}
 
 	/**

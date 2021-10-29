@@ -7,7 +7,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.MdsDaoV2;
+import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.mds.v1.model.MdsEntries;
@@ -53,19 +53,19 @@ public class MdsApi {
 					@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
-	public Response getMetadataSetsV2(
+	public Response getMetadataSets(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Context HttpServletRequest req) {
 
 		try {
 
 			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getMetadataSetsV2(repository, req);
+				return RepoProxyFactory.getRepoProxy().getMetadataSets(repository, req);
 			}
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			MdsEntries result=new MdsEntries();
-			result.setMetadatasets(MdsDaoV2.getAllMdsDesc(repoDao));
+			result.setMetadatasets(MdsDao.getAllMdsDesc(repoDao));
 
 			return Response.status(Response.Status.OK).entity(result).build();
 
@@ -89,7 +89,7 @@ public class MdsApi {
 					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
-	public Response getMetadataSetV2(
+	public Response getMetadataSet(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-" )) @PathParam("metadataset") String mdsId,
 			@Context HttpServletRequest req) {
@@ -97,12 +97,12 @@ public class MdsApi {
 		try {
 
 			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getMetadataSetV2(repository, mdsId, req);
+				return RepoProxyFactory.getRepoProxy().getMetadataSet(repository, mdsId, req);
 			}
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			return Response.status(Response.Status.OK).entity((MdsDaoV2.getMds(repoDao, mdsId).asMds())).build();
+			return Response.status(Response.Status.OK).entity((MdsDao.getMds(repoDao, mdsId).asMds())).build();
 
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
@@ -138,7 +138,7 @@ public class MdsApi {
 					@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
-	public Response getValuesV2(
+	public Response getValues(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-" )) @PathParam("metadataset") String mdsId,
 			@Parameter(description = "suggestionParam") SuggestionParam suggestionParam,
@@ -147,11 +147,11 @@ public class MdsApi {
 		try {
 
 			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-				return RepoProxyFactory.getRepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
+				return RepoProxyFactory.getRepoProxy().getValues(repository, mdsId, suggestionParam, req);
 			}
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			MdsDaoV2 mds = MdsDaoV2.getMds(repoDao, mdsId);
+			MdsDao mds = MdsDao.getMds(repoDao, mdsId);
 			Suggestions response = mds.getSuggestions(suggestionParam.getValueParameters().getQuery(),
 					suggestionParam.getValueParameters().getProperty(),
 					suggestionParam.getValueParameters().getPattern(),
@@ -183,7 +183,7 @@ public class MdsApi {
 					@ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
-	public Response getValues4KeysV2(
+	public Response getValues4Keys(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-" )) @PathParam("metadataset") String mdsId,
 			@Parameter(description = "query") @QueryParam("query") String query,
@@ -199,7 +199,7 @@ public class MdsApi {
 			}
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			MdsDaoV2 mds = MdsDaoV2.getMds(repoDao, mdsId);
+			MdsDao mds = MdsDao.getMds(repoDao, mdsId);
 
 			Suggestions response = null;
 			for(String key : keys){

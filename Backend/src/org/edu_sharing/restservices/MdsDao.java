@@ -12,12 +12,12 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.Mds;
 import org.edu_sharing.service.search.Suggestion;
 
-public class MdsDaoV2 {
+public class MdsDao {
 
 	public static final String DEFAULT = "-default-";
 
 	public static List<MetadataSetInfo> getAllMdsDesc(RepositoryDao repoDao) throws Exception {
-		return RepoFactory.getMetadataSetsV2ForRepository(repoDao.getId());
+		return RepoFactory.getMetadataSetsForRepository(repoDao.getId());
 	}
 	
 	public Suggestions getSuggestions(String queryId,String parameter,String value, List<MdsQueryCriteria> criterias) throws DAOException{
@@ -42,17 +42,17 @@ public class MdsDaoV2 {
 		return result;
 	}
 	
-	public static MdsDaoV2 getMds(RepositoryDao repoDao, String mdsId) throws DAOException {
+	public static MdsDao getMds(RepositoryDao repoDao, String mdsId) throws DAOException {
 
 		try {
 			
-			MetadataSetV2 mds=MetadataHelper.getMetadataset(repoDao.getApplicationInfo(),mdsId);
+			MetadataSet mds=MetadataHelper.getMetadataset(repoDao.getApplicationInfo(),mdsId);
 			
 			if (mds == null) {
 				throw new DAOMissingException(new IllegalArgumentException(mdsId));
 			}
 			
-			return new MdsDaoV2(repoDao, mds);
+			return new MdsDao(repoDao, mds);
 			
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
@@ -61,9 +61,9 @@ public class MdsDaoV2 {
 	}
 
 	private final RepositoryDao repoDao;	
-	private final MetadataSetV2 mds;
+	private final MetadataSet mds;
 	
-	private MdsDaoV2(RepositoryDao repoDao, MetadataSetV2 mds) {
+	private MdsDao(RepositoryDao repoDao, MetadataSet mds) {
 		this.repoDao = repoDao;		
 		this.mds = mds;		
 	}
@@ -123,7 +123,7 @@ public class MdsDaoV2 {
 		return result;
 	}
 	
-	public MetadataSetV2 getMds() {
+	public MetadataSet getMds() {
 		return mds;
 	}
 	

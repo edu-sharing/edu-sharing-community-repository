@@ -18,7 +18,6 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.exporter.OAILOMExporter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -39,7 +38,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -119,7 +117,7 @@ public class OaiServlet extends HttpServlet{
                 sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.CM_PROP_C_CREATED,true));
                 token.setSortDefinition(sort);
                 token.setContentType(SearchService.ContentType.FILES);
-                SearchResultNodeRef result = SearchServiceFactory.getLocalService().searchV2(
+                SearchResultNodeRef result = SearchServiceFactory.getLocalService().search(
                         MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id),
                         (set == null || set.equals("default") ? "oai" : "oai_" + set),
                         searchCriterias,

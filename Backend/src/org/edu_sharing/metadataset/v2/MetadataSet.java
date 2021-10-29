@@ -10,8 +10,8 @@ import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService
 import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
-public class MetadataSetV2 implements Serializable {
-	static Logger logger = Logger.getLogger(MetadataSetV2.class);
+public class MetadataSet implements Serializable {
+	static Logger logger = Logger.getLogger(MetadataSet.class);
 
 	public static String DEFAULT_CLIENT_QUERY="ngsearch";
 	public static String DEFAULT_CLIENT_QUERY_CRITERIA = "ngsearchword";	
@@ -117,7 +117,7 @@ public class MetadataSetV2 implements Serializable {
 		this.sorts = sorts;
 	}
 
-	public void overrideWith(MetadataSetV2 mdsOverride) {
+	public void overrideWith(MetadataSet mdsOverride) {
 		if(mdsOverride.getId()!=null)
 			setId(mdsOverride.getId());
 		if(mdsOverride.getName()!=null)

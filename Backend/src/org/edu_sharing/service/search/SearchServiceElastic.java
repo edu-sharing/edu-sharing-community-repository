@@ -136,15 +136,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return audienceQueryBuilder;
     }
     @Override
-    public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
-                                        SearchToken searchToken) throws Throwable {
+    public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
+                                      SearchToken searchToken) throws Throwable {
         checkClient();
         MetadataQuery queryData;
         try{
-            queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
+            queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         } catch(IllegalArgumentException e){
             logger.info("Query " + query + " is not defined within dsl language, switching to lucene...");
-            return super.searchV2(mds,query,criterias,searchToken);
+            return super.search(mds,query,criterias,searchToken);
         }
 
         String[] searchword = criterias.get("ngsearchword");
@@ -163,7 +163,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias);
+            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias);
             BoolQueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
                     ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
                     : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());

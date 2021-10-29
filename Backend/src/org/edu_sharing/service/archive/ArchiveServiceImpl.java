@@ -15,15 +15,12 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.AuthenticationTool;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
@@ -122,9 +119,9 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
 		searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
 		//searchToken.setQueryString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
-		MetadataQueries queries = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id).getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE);
+		MetadataQueries queries = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id).getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
 		Map<String, String[]> params=new HashMap<>();
-		params.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{searchWord});
+		params.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{searchWord});
 		if(user!=null && !user.isEmpty()) {
 			params.put("user", new String[]{user});
 		}

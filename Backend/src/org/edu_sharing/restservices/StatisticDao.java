@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -173,18 +173,18 @@ public class StatisticDao {
 	public static int countElements(String lucene) throws Throwable {
 		StatisticService statisticService = StatisticServiceFactory
 				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSetV2.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene);
+		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene);
 	}
 	public static List<Map<String,Integer>> countFacets(String lucene, Collection<String> facets) throws Throwable {
 		StatisticService statisticService = StatisticServiceFactory
 				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return statisticService.countFacetsForQuery(CCConstants.metadatasetdefault_id, MetadataSetV2.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene,facets);
+		return statisticService.countFacetsForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene,facets);
 	}
 	public static int countUser(String lucene) throws Throwable {
 		// does not work at the moment because of scoped search service and permissions
 		StatisticService statisticService = StatisticServiceFactory
 				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSetV2.DEFAULT_CLIENT_QUERY,"cm:person", lucene);
+		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,"cm:person", lucene);
 	}
 	public Statistics get(String context, List<String> properties, Filter filter) throws DAOException {
 

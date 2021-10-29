@@ -54,7 +54,7 @@ public class SearchApi {
 			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
-	public Response searchV2(
+	public Response search(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-")) @PathParam("metadataset") String mdsId,
 			@Parameter(description = "ID of query", required = true) @PathParam("query") String query,
@@ -77,7 +77,7 @@ public class SearchApi {
 			Filter filter = new Filter(propertyFilter);
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, mdsId);
+			MdsDao mdsDao = MdsDao.getMds(repoDao, mdsId);
 
 			SearchToken token = new SearchToken();
 			token.setFacets(parameters.getFacets());
@@ -87,7 +87,7 @@ public class SearchApi {
 			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
 			token.setContentType(contentType);
 			token.setResolveCollections(parameters.isResolveCollections());
-			NodeSearch search = NodeDao.searchV2(repoDao, mdsDao, query, parameters.getCriterias(), token, filter);
+			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriterias(), token, filter);
 
 		    	List<Node> data = null;//new ArrayList<Node>();
 		    	if(search.getNodes().size() < search.getResult().size()){
