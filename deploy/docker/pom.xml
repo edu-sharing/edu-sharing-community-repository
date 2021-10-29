@@ -29,7 +29,7 @@
     <docker.verbose>true</docker.verbose>
 
     <docker.from.apache.exporter>docker.io/bitnami/apache-exporter:0.10.1</docker.from.apache.exporter>
-    <docker.from.apache.server>docker.io/php:${rendering.php.version}-apache</docker.from.apache.server>
+    <docker.from.apache.server>docker.io/php:7.3-apache</docker.from.apache.server>
     <docker.from.elasticsearch.exporter>quay.io/prometheuscommunity/elasticsearch-exporter:v1.3.0</docker.from.elasticsearch.exporter>
     <docker.from.elasticsearch.server>docker.elastic.co/elasticsearch/elasticsearch:7.15.1</docker.from.elasticsearch.server>
     <docker.from.minideb>docker.io/bitnami/minideb:buster</docker.from.minideb>
@@ -40,6 +40,11 @@
     <docker.from.redis.server>docker.io/bitnami/redis:6.2.6</docker.from.redis.server>
     <docker.from.rediscluster.server>docker.io/bitnami/redis-cluster:6.2.6</docker.from.rediscluster.server>
     <docker.from.tomcat>docker.io/tomcat:${repository.tomcat.version}-jdk8</docker.from.tomcat>
+
+    <rendering.redis.client.version>5.3.2</rendering.redis.client.version>
+
+    <repository.prometheus.agent.version>0.14.0</repository.prometheus.agent.version>
+    <repository.redis.client.version>3.16.4</repository.redis.client.version>
 
   </properties>
 

@@ -49,12 +49,12 @@ RUN set -eux \
     && mkdir -p tomcat/logs \
     && touch tomcat/logs/catalina.out
 
-COPY --chown=worker:worker artifacts/jmx_prometheus_javaagent-${repository.prometheus.jmx.version}.jar tomcat/agent/jmx_prometheus_javaagent.jar
+COPY --chown=worker:worker artifacts/jmx_prometheus_javaagent-${io.prometheus.jmx:jmx_prometheus_javaagent:jar.version}.jar tomcat/agent/jmx_prometheus_javaagent.jar
 COPY --chown=worker:worker assets/agent/jmx-exporter-config.yaml tomcat/agent/
 
-COPY --chown=worker:worker artifacts/postgresql-${repository.postgresql.client.version}.jar tomcat/lib/
-COPY --chown=worker:worker artifacts/redisson-all-${repository.redis.client.version}.jar tomcat/lib/
-COPY --chown=worker:worker artifacts/redisson-tomcat-${repository.tomcat.major}-${repository.redis.client.version}.jar tomcat/lib/
+COPY --chown=worker:worker artifacts/postgresql-${org.postgresql:postgresql:jar.version}.jar tomcat/lib/
+COPY --chown=worker:worker artifacts/redisson-all-${org.redisson:redisson-all:jar.version}.jar tomcat/lib/
+COPY --chown=worker:worker artifacts/redisson-tomcat-8-${org.redisson:redisson-tomcat-8:jar.version}.jar tomcat/lib/
 
 COPY --chown=worker:worker assets/tomcat/logging.properties tomcat/conf/logging.properties
 COPY --chown=worker:worker assets/tomcat/redisson.yaml tomcat/conf/redisson.yaml
@@ -77,7 +77,7 @@ RUN set -eux \
         tomcat/conf/server.xml
 
 
-COPY --chown=worker:worker artifacts/alfresco-platform-community-distributionzip-${repository.alfresco.platform.version}.zip \
+COPY --chown=worker:worker artifacts/alfresco-platform-community-distributionzip-${org.alfresco:alfresco-platform-community-distributionzip:zip.version}.zip \
     /tmp/alfresco-platform-community-distributionzip.zip
 
 RUN set -eux \
@@ -132,7 +132,7 @@ COPY --chown=worker:worker assets/alfresco/log4j.properties tomcat/webapps/alfre
 COPY --chown=worker:worker assets/alfresco/web-scripts-config-custom.xml tomcat/shared/classes/alfresco/extension/web-scripts-config-custom.xml
 
 
-COPY --chown=worker:worker artifacts/alfresco-content-services-share-distribution-${repository.alfresco.share.version}.zip \
+COPY --chown=worker:worker artifacts/alfresco-content-services-share-distribution-${org.alfresco:alfresco-content-services-share-distribution:zip.version}.zip \
     /tmp/alfresco-content-services-share-distribution.zip
 
 RUN set -eux \
@@ -154,7 +154,7 @@ COPY --chown=worker:worker assets/share/log4j.properties tomcat/webapps/share/WE
 COPY --chown=worker:worker assets/share/share-config-custom.xml tomcat/shared/classes/alfresco/web-extension/share-config-custom.xml
 
 
-COPY --chown=worker:worker artifacts/alfresco-pdf-renderer-${repository.alfresco.pdf-renderer.version}-linux.tgz /tmp/alfresco-pdf-renderer.tgz
+COPY --chown=worker:worker artifacts/alfresco-pdf-renderer-${org.alfresco:alfresco-pdf-renderer:tgz:linux.version}-linux.tgz /tmp/alfresco-pdf-renderer.tgz
 
 RUN set -eux \
 	&& mkdir -p /tmp/install/alfresco-pdf-renderer \

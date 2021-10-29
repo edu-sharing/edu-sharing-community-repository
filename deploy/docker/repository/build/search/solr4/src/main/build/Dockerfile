@@ -36,14 +36,14 @@ USER worker
 
 ### Tomcat #############################################################################################################
 
-COPY --chown=worker:worker artifacts/jmx_prometheus_javaagent-${repository.prometheus.jmx.version}.jar tomcat/agent/jmx_prometheus_javaagent.jar
+COPY --chown=worker:worker artifacts/jmx_prometheus_javaagent-${io.prometheus.jmx:jmx_prometheus_javaagent:jar.version}.jar tomcat/agent/jmx_prometheus_javaagent.jar
 COPY --chown=worker:worker assets/agent/jmx-exporter-config.yaml tomcat/agent/
 
 COPY --chown=worker:worker assets/tomcat/logging.properties tomcat/conf/logging.properties
 
 ### Alfresco Solr4 #####################################################################################################
 
-COPY --chown=worker:worker artifacts/alfresco-solr4-distribution-${repository.alfresco.platform.version}.zip /tmp/alfresco-solr4-distribution.zip
+COPY --chown=worker:worker artifacts/alfresco-solr4-distribution-${org.alfresco:alfresco-solr4-distribution:zip.version}.zip /tmp/alfresco-solr4-distribution.zip
 
 RUN set -eux \
 	&& mkdir -p /tmp/install/alfresco-solr4 \
