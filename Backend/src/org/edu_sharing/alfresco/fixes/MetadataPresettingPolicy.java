@@ -14,8 +14,8 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -189,7 +189,7 @@ public class MetadataPresettingPolicy implements
 			mdsId=mdsProp;
 		}
 		try {
-			MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId,"default");
+			MetadataSet mds = MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId,"default");
 			for(MetadataWidget widget : mds.getWidgetsByTemplate("io_template")){
 				QName prop = QName.createQName(CCConstants.getValidGlobalName(widget.getId()));
 				Serializable value = nodeService.getProperty(templateRef, prop);

@@ -25,7 +25,7 @@ export class MdsV1Service extends BaseService {
     /**
      * Path part for operation getMetadataSetsV2
      */
-    static readonly GetMetadataSetsV2Path = '/mds/v1/metadatasetsV2/{repository}';
+    static readonly GetMetadataSetsV2Path = '/mds/v1/metadatasets/{repository}';
 
     /**
      * Get metadata sets V2 of repository.
@@ -87,7 +87,7 @@ export class MdsV1Service extends BaseService {
     /**
      * Path part for operation getMetadataSetV2
      */
-    static readonly GetMetadataSetV2Path = '/mds/v1/metadatasetsV2/{repository}/{metadataset}';
+    static readonly GetMetadataSetV2Path = '/mds/v1/metadatasets/{repository}/{metadataset}';
 
     /**
      * Get metadata set new.
@@ -160,7 +160,7 @@ export class MdsV1Service extends BaseService {
     /**
      * Path part for operation getValuesV2
      */
-    static readonly GetValuesV2Path = '/mds/v1/metadatasetsV2/{repository}/{metadataset}/values';
+    static readonly GetValuesV2Path = '/mds/v1/metadatasets/{repository}/{metadataset}/values';
 
     /**
      * Get values.
@@ -245,7 +245,7 @@ export class MdsV1Service extends BaseService {
      * Path part for operation getValues4KeysV2
      */
     static readonly GetValues4KeysV2Path =
-        '/mds/v1/metadatasetsV2/{repository}/{metadataset}/values_for_keys';
+        '/mds/v1/metadatasets/{repository}/{metadataset}/values_for_keys';
 
     /**
      * Get values for keys.

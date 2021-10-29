@@ -7,7 +7,7 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 public class SuggestionParam {
 	ValueParameters valueParameters;
 	
-	List<MdsQueryCriteria> criterias;
+	List<MdsQueryCriteria> criteria;
 
 	public ValueParameters getValueParameters() {
 		return valueParameters;
@@ -17,12 +17,12 @@ public class SuggestionParam {
 		this.valueParameters = valueParameters;
 	}
 
-	public List<MdsQueryCriteria> getCriterias() {
-		return criterias;
+	public List<MdsQueryCriteria> getCriteria() {
+		return criteria;
 	}
 	
-	public void setCriterias(List<MdsQueryCriteria> criterias) {
-		this.criterias = criterias;
+	public void setCriteria(List<MdsQueryCriteria> criteria) {
+		this.criteria = criteria;
 	}
 	
 	

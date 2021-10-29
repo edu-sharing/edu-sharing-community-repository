@@ -212,7 +212,7 @@ export class SearchService {
                 metadataset: searchParams.metadataset,
                 query: searchParams.query,
                 body: {
-                    criterias: this.getFilterCriteria(searchParams.body.criterias),
+                    criteria: this.getFilterCriteria(searchParams.body.criteria),
                     facets: facets,
                     facetLimit: size,
                     facetMinCount: 1,
@@ -295,9 +295,9 @@ export class SearchService {
      * This includes everything but the free-text search string.
      */
     private getFilterCriteria(
-        criteria: apiModels.SearchParameters['criterias'] = this.searchParamsSubject.value?.body
-            .criterias ?? [],
-    ): apiModels.SearchParameters['criterias'] {
+        criteria: apiModels.SearchParameters['criteria'] = this.searchParamsSubject.value?.body
+            .criteria ?? [],
+    ): apiModels.SearchParameters['criteria'] {
         return criteria.filter((criterion) => criterion.property !== 'ngsearchword');
     }
 
@@ -360,7 +360,7 @@ export class SearchService {
             .pipe(map((label) => ({ count, value, label })));
     }
 
-    private criteriaToRawValues(criteria: apiModels.SearchParameters['criterias']): RawValuesDict {
+    private criteriaToRawValues(criteria: apiModels.SearchParameters['criteria']): RawValuesDict {
         return criteria.reduce((acc, criterion) => {
             acc[criterion.property] = criterion.values;
             return acc;

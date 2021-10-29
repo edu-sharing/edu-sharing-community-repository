@@ -32,7 +32,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -196,16 +196,16 @@ public class NodeDao {
 		return transform(repoDao,searchService.search(searchToken,scoped));
 	}
 	
-	public static NodeSearch searchV2(RepositoryDao repoDao,MdsDaoV2 mdsDao,
-			String query, List<MdsQueryCriteria> criterias,SearchToken token, Filter filter) throws DAOException {
+	public static NodeSearch search(RepositoryDao repoDao, MdsDao mdsDao,
+									String query, List<MdsQueryCriteria> criterias, SearchToken token, Filter filter) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
 		Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
 		try {
-			NodeSearch result = transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
+			NodeSearch result = transform(repoDao,searchService.search(mdsDao.getMds(),query,criteriasMap,token),filter);
 			if(result.getCount()==0) {
 				// try to search for ignorable properties to be null
-				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query, MetadataReaderV2.QUERY_SYNTAX_LUCENE));
-				result=transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
+				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_LUCENE));
+				result=transform(repoDao,searchService.search(mdsDao.getMds(),query,criteriasMap,token),filter);
 				result.setIgnored(removed);
 				return result;
 			}
@@ -215,7 +215,7 @@ public class NodeDao {
 		}
 	}
 
-	public static NodeSearch searchFacets(RepositoryDao repoDao, MdsDaoV2 mdsDao, String query,
+	public static NodeSearch searchFacets(RepositoryDao repoDao, MdsDao mdsDao, String query,
 										  List<MdsQueryCriteria> criterias,
 										  SearchToken token) throws DAOException {
 		SearchService ss=SearchServiceFactory.getSearchService(repoDao.getId());
@@ -441,7 +441,7 @@ public class NodeDao {
 			HashMap<String, Object> props = getNativeProperties();
 			RepositoryDao repoDao = RepositoryDao
 					.getRepository((String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY));
-			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
+			MdsDao mdsDao = MdsDao.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
 
 			SearchToken token = new SearchToken();
 			token.setFacets(facets);
@@ -453,7 +453,7 @@ public class NodeDao {
 			ObjectMapper mapper = new ObjectMapper();
 			List<MdsQueryCriteria> parameters = Arrays.asList(mapper.readValue(
 					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS), MdsQueryCriteria[].class));
-			NodeSearch search = NodeDao.searchV2(repoDao, mdsDao,
+			NodeSearch search = NodeDao.search(repoDao, mdsDao,
 					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY), parameters, token, filter);
 
 			List<Node> data;

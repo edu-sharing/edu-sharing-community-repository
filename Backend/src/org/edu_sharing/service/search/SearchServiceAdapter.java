@@ -2,7 +2,7 @@ package org.edu_sharing.service.search;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -13,7 +13,6 @@ import org.edu_sharing.service.search.model.SharedToMeType;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.*;
 
 public class SearchServiceAdapter implements SearchService {
@@ -69,8 +68,8 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 		return null;
 	}
 

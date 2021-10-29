@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -77,8 +77,8 @@ public class SearchServiceWSImpl extends SearchServiceAdapter {
 	}
 
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 		return null;
 	}
 

@@ -1,7 +1,6 @@
 package org.edu_sharing.service.search;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,7 @@ import java.util.Set;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
@@ -62,8 +61,8 @@ public interface SearchService {
 
 	SearchResultNodeRef getRelevantNodes(int skipCount, int maxItems) throws Throwable;
 
-	SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable;
+	SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+							   SearchToken searchToken) throws Throwable;
 
 
  	/**
@@ -88,7 +87,7 @@ public interface SearchService {
 
 	HashMap<ContentType,SearchToken> getLastSearchTokens() throws Throwable;
 	
-	public default List<? extends  Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+	public default List<? extends  Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		return null;	
 	}
 

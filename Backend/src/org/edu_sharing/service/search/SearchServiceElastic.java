@@ -151,11 +151,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return audienceQueryBuilder;
     }
 
-    public SearchResultNodeRef searchFacets(MetadataSetV2 mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
+    public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
         List<NodeSearch.Facet> facetsResult = new ArrayList<>();
         BoolQueryBuilder globalConditions = getGlobalConditions(searchToken);
 
-        MetadataQuery queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
+        MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, new HashMap<>(), searchToken.getFacets());
         List<AggregationBuilder> aggregations = MetadataElasticSearchHelper.getAggregations(
                 mds,
@@ -203,15 +203,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
 
     @Override
-    public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
-                                        SearchToken searchToken) throws Throwable {
+    public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
+                                      SearchToken searchToken) throws Throwable {
         checkClient();
         MetadataQuery queryData;
         try{
-            queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
+            queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         } catch(IllegalArgumentException e){
             logger.info("Query " + query + " is not defined within dsl language, switching to lucene...");
-            return super.searchV2(mds,query,criterias,searchToken);
+            return super.search(mds,query,criterias,searchToken);
         }
 
         String[] searchword = criterias.get("ngsearchword");
@@ -231,8 +231,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
 
-            QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias,true);
-            QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias,false);
+            QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
+            QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,false);
             BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken);
 
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
