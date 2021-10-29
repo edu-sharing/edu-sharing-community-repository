@@ -21,9 +21,9 @@
   <name>edu_sharing-community-repository</name>
 
   <scm>
-    <connection>scm:git:https://scm.edu-sharing.com/Repository/edu-sharing.git</connection>
-    <developerConnection>scm:git:https://scm.edu-sharing.com/Repository/edu-sharing.git</developerConnection>
-    <url>https://scm.edu-sharing.com/Repository/edu-sharing.git</url>
+    <connection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository.git</connection>
+    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository.git</developerConnection>
+    <url>https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository.git</url>
   </scm>
 
   <modules>
