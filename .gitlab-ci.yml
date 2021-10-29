@@ -1,14 +1,14 @@
 image: maven:3.6.3-jdk-8
 
 services:
-  - name: docker:dind
+  - name: "$DIND_IMAGE"
     entrypoint: [ "env", "-u", "DOCKER_HOST" ]
     command: [ "dockerd-entrypoint.sh" ]
 
 variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375/
-  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: "$DIND_DRIVER"
+  DOCKER_HOST: "$DIND_HOST"
+  DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
   MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS -s .mvn/settings.xml --batch-mode --errors --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   PLUGIN_REMOTE_ENABLED: "false"
