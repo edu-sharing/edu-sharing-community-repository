@@ -43,7 +43,7 @@ public class SearchApi {
 	private static Logger logger = Logger.getLogger(SearchApi.class);
 
 	@POST
-	@Path("/queriesV2/{repository}/{metadataset}/{query}")
+	@Path("/queries/{repository}/{metadataset}/{query}")
 	@Consumes({ "application/json" })
 
 	@Operation(summary = "Perform queries based on metadata sets V2.", description = "Perform queries based on metadata sets V2.")
@@ -128,7 +128,7 @@ public class SearchApi {
 
 
 	@POST
-	@Path("/queriesV2/{repository}/{metadataset}/{query}/facets")
+	@Path("/queries/{repository}/{metadataset}/{query}/facets")
 	@Consumes({ "application/json" })
 
 	@Operation(summary = "Search in facets.", description = "Perform queries based on metadata sets V2.")
@@ -177,7 +177,7 @@ public class SearchApi {
 	}
 
 	@POST
-	@Path("/queriesV2/{repository}/{metadataset}/{query}/save")
+	@Path("/queries/{repository}/{metadataset}/{query}/save")
 	@Consumes({ "application/json" })
 
 	@Operation(summary = "Save a search query.", description = "Save a search query.")
@@ -216,7 +216,7 @@ public class SearchApi {
 	}
 
 	@GET
-	@Path("/queriesV2/load/{nodeId}")
+	@Path("/queries/load/{nodeId}")
 	@Consumes({ "application/json" })
 
 	@Operation(summary = "Load a saved search query.", description = "Load a saved search query.")
@@ -459,7 +459,7 @@ public class SearchApi {
 
 
 	@GET
-	@Path("/queriesV2/{repository}/contributor")
+	@Path("/queries/{repository}/contributor")
 	@Consumes({ "application/json" })
 
 	@Operation(summary = "Search for contributors", description = "")
