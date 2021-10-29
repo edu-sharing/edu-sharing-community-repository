@@ -43,7 +43,7 @@ public class ArchiveApi {
 	@GET
 	@Path("/search/{repository}/{pattern}")
 	
-	@Operation(summary = "Searches for archive nodes.", description = "Searches for archive nodes.")
+	@Operation(operationId = "searchArchive", summary = "Searches for archive nodes.", description = "Searches for archive nodes.")
 	
 	@ApiResponses(value = {
 			@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = SearchResult.class))),
@@ -79,7 +79,7 @@ public class ArchiveApi {
 	@GET
 	@Path("/search/{repository}/{pattern}/{person}")
 	
-	@Operation(summary = "Searches for archive nodes.", description = "Searches for archive nodes.")
+	@Operation(operationId = "searchArchivePerson", summary = "Searches for archive nodes.", description = "Searches for archive nodes.")
 	
 	@ApiResponses(value = {
 			@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = SearchResult.class))),
