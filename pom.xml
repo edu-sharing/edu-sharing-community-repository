@@ -36,10 +36,6 @@
   <properties>
 
     <license.skipAddThirdParty>true</license.skipAddThirdParty>
-    <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
-    <maven.compiler.showDeprecated>true</maven.compiler.showDeprecated>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
 
   </properties>
 
@@ -61,7 +57,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>${repository.java.version.range}</version>
+                  <version>[1.8.0, 9)</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
