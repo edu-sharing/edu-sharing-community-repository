@@ -232,7 +232,7 @@ public class MediacenterApi {
 			MdsDao mdsDao = MdsDao.getMds(repoDao, MdsDao.DEFAULT);
 
 			searchToken.setFacets(new ArrayList<>());
-			NodeSearch search = NodeDao.search(repoDao,mdsDao,"mediacenter_filter", parameters.getCriterias() ,searchToken,Filter.createShowAllFilter());
+			NodeSearch search = NodeDao.search(repoDao,mdsDao,"mediacenter_filter", parameters.getCriteria() ,searchToken,Filter.createShowAllFilter());
 
 			List<Node> data = null;
 			if(search.getNodes().size() < search.getResult().size()){
