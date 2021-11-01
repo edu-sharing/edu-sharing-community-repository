@@ -32,4 +32,8 @@ public class SearchParameters extends SearchParametersFacets{
 	public void setResolveCollections(boolean resolveCollections) {
 		this.resolveCollections = resolveCollections;
 	}
+
+	@Schema(required = false, description = "")
+	@JsonProperty("facets")
+	public List<String> getFacets() { return super.getFacets();}
 }
