@@ -119,7 +119,7 @@ function parseValue(value: string, type: Type): boolean | string | number | any 
     switch (type) {
         case 'boolean':
             console.log(value, type);
-            return value === 'true';
+            return value?.toLowerCase() === 'true';
         case 'number':
             return parseInt(value, 10);
         case 'string':
