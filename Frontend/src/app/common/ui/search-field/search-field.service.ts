@@ -8,7 +8,7 @@ import {
     RawValuesDict,
     SearchConfig,
     SearchService,
-} from 'edu-sharing-api';
+} from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, EMPTY, Observable, of, ReplaySubject, timer } from 'rxjs';
 import { debounce, filter, map, switchMap, tap } from 'rxjs/operators';
 

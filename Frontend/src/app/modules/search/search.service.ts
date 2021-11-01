@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SearchConfig, SearchService as SearchApiService } from 'edu-sharing-api';
+import { SearchConfig, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
 import { ListItem, Node } from '../../core-module/core.module';

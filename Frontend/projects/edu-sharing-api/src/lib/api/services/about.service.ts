@@ -91,8 +91,8 @@ export class AboutService extends BaseService {
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AboutService.StatusPath, 'get');
         if (params) {
-            rb.path('mode', params.mode, { style: 'simple', explode: false });
-            rb.query('timeoutSeconds', params.timeoutSeconds, { style: 'form', explode: true });
+            rb.path('mode', params.mode, {});
+            rb.query('timeoutSeconds', params.timeoutSeconds, {});
         }
 
         return this.http

@@ -42,7 +42,7 @@ export class ToolV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, ToolV1Service.GetAllToolDefinitionsPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
         }
 
         return this.http
@@ -125,9 +125,9 @@ export class ToolV1Service extends BaseService {
             'post',
         );
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('renameIfExists', params.renameIfExists, { style: 'form', explode: true });
-            rb.query('versionComment', params.versionComment, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.query('renameIfExists', params.renameIfExists, {});
+            rb.query('versionComment', params.versionComment, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -185,79 +185,6 @@ export class ToolV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation getInstance
-     */
-    static readonly GetInstancePath = '/tool/v1/tools/{repository}/{nodeid}/toolinstance';
-
-    /**
-     * Get Instances of a ToolDefinition.
-     *
-     * Get Instances of a ToolDefinition.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getInstance()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getInstance$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        nodeid: string;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, ToolV1Service.GetInstancePath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('nodeid', params.nodeid, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
-                }),
-            );
-    }
-
-    /**
-     * Get Instances of a ToolDefinition.
-     *
-     * Get Instances of a ToolDefinition.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getInstance$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getInstance(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        nodeid: string;
-    }): Observable<NodeEntry> {
-        return this.getInstance$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
      * Path part for operation getInstances
      */
     static readonly GetInstancesPath = '/tool/v1/tools/{repository}/{toolDefinition}/toolinstances';
@@ -285,8 +212,8 @@ export class ToolV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, ToolV1Service.GetInstancesPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('toolDefinition', params.toolDefinition, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('toolDefinition', params.toolDefinition, {});
         }
 
         return this.http
@@ -376,10 +303,10 @@ export class ToolV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, ToolV1Service.CreateToolInstancePath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('toolDefinition', params.toolDefinition, { style: 'simple', explode: false });
-            rb.query('renameIfExists', params.renameIfExists, { style: 'form', explode: true });
-            rb.query('versionComment', params.versionComment, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('toolDefinition', params.toolDefinition, {});
+            rb.query('renameIfExists', params.renameIfExists, {});
+            rb.query('versionComment', params.versionComment, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -486,10 +413,10 @@ export class ToolV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, ToolV1Service.CreateToolObjectPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('toolinstance', params.toolinstance, { style: 'simple', explode: false });
-            rb.query('renameIfExists', params.renameIfExists, { style: 'form', explode: true });
-            rb.query('versionComment', params.versionComment, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('toolinstance', params.toolinstance, {});
+            rb.query('renameIfExists', params.renameIfExists, {});
+            rb.query('versionComment', params.versionComment, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -547,6 +474,79 @@ export class ToolV1Service extends BaseService {
         };
     }): Observable<NodeEntry> {
         return this.createToolObject$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation getInstance
+     */
+    static readonly GetInstancePath = '/tool/v1/tools/{repository}/{nodeid}/toolinstance';
+
+    /**
+     * Get Instances of a ToolDefinition.
+     *
+     * Get Instances of a ToolDefinition.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getInstance()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getInstance$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        nodeid: string;
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, ToolV1Service.GetInstancePath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('nodeid', params.nodeid, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Get Instances of a ToolDefinition.
+     *
+     * Get Instances of a ToolDefinition.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getInstance$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getInstance(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        nodeid: string;
+    }): Observable<NodeEntry> {
+        return this.getInstance$Response(params).pipe(
             map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
         );
     }

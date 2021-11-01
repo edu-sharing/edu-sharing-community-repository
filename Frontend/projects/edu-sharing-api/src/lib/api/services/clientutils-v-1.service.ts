@@ -46,7 +46,7 @@ export class ClientutilsV1Service extends BaseService {
             'get',
         );
         if (params) {
-            rb.query('url', params.url, { style: 'form', explode: true });
+            rb.query('url', params.url, {});
         }
 
         return this.http

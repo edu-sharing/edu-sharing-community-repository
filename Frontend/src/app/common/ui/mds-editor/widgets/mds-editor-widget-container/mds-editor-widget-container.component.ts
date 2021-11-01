@@ -28,7 +28,7 @@ import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.com
 import { BulkMode, EditorBulkMode, InputStatus } from '../../types';
 import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { MdsWidget } from 'edu-sharing-api';
+import { MdsWidget } from 'ngx-edu-sharing-api';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
 // its `FormFieldControl`.

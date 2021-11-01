@@ -7,7 +7,7 @@ import {
     Output,
     ViewChild,
 } from '@angular/core';
-import { SearchService } from 'edu-sharing-api';
+import { SearchService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { first, map, switchMap, takeUntil } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';

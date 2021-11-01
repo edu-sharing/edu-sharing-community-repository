@@ -24,7 +24,6 @@ import { UserEntries } from '../models/user-entries';
 import { UserEntry } from '../models/user-entry';
 import { UserProfileEdit } from '../models/user-profile-edit';
 import { UserStats } from '../models/user-stats';
-import { PersonAvatarBody } from '../models/person-avatar-body';
 
 @Injectable({
     providedIn: 'root',
@@ -35,65 +34,41 @@ export class IamV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation searchAuthorities
+     * Path part for operation addMembership
      */
-    static readonly SearchAuthoritiesPath = '/iam/v1/authorities/{repository}';
+    static readonly AddMembershipPath = '/iam/v1/groups/{repository}/{group}/members/{member}';
 
     /**
-     * Search authorities.
+     * Add member to the group.
      *
-     * Search authorities.
+     * Add member to the group. (admin rights are required.)
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `searchAuthorities()` instead.
+     * To access only the response body, use `addMembership()` instead.
      *
      * This method doesn't expect any request body.
      */
-    searchAuthorities$Response(params: {
+    addMembership$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * pattern
+         * groupname
          */
-        pattern: string;
+        group: string;
 
         /**
-         * global search context, defaults to true, otherwise just searches for users within the organizations
+         * authorityName of member
          */
-        global?: boolean;
-
-        /**
-         * find a specific groupType (does nothing for persons)
-         */
-        groupType?: string;
-
-        /**
-         * find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)
-         */
-        signupMethod?: string;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-    }): Observable<StrictHttpResponse<AuthorityEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SearchAuthoritiesPath, 'get');
+        member: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.AddMembershipPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('pattern', params.pattern, { style: 'form', explode: true });
-            rb.query('global', params.global, { style: 'form', explode: true });
-            rb.query('groupType', params.groupType, { style: 'form', explode: true });
-            rb.query('signupMethod', params.signupMethod, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.path('member', params.member, {});
         }
 
         return this.http
@@ -106,86 +81,78 @@ export class IamV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<AuthorityEntries>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * Search authorities.
+     * Add member to the group.
      *
-     * Search authorities.
+     * Add member to the group. (admin rights are required.)
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `searchAuthorities$Response()` instead.
+     * To access the full response (for headers, for example), `addMembership$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    searchAuthorities(params: {
+    addMembership(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * pattern
+         * groupname
          */
-        pattern: string;
+        group: string;
 
         /**
-         * global search context, defaults to true, otherwise just searches for users within the organizations
+         * authorityName of member
          */
-        global?: boolean;
-
-        /**
-         * find a specific groupType (does nothing for persons)
-         */
-        groupType?: string;
-
-        /**
-         * find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)
-         */
-        signupMethod?: string;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-    }): Observable<AuthorityEntries> {
-        return this.searchAuthorities$Response(params).pipe(
-            map((r: StrictHttpResponse<AuthorityEntries>) => r.body as AuthorityEntries),
+        member: string;
+    }): Observable<any> {
+        return this.addMembership$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation getRecentlyInvited
+     * Path part for operation deleteMembership
      */
-    static readonly GetRecentlyInvitedPath = '/iam/v1/authorities/{repository}/recent';
+    static readonly DeleteMembershipPath = '/iam/v1/groups/{repository}/{group}/members/{member}';
 
     /**
-     * Get recently invited authorities.
+     * Delete member from the group.
      *
-     * Get the authorities the current user has recently invited.
+     * Delete member from the group. (admin rights are required.)
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getRecentlyInvited()` instead.
+     * To access only the response body, use `deleteMembership()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getRecentlyInvited$Response(params: {
+    deleteMembership$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
-    }): Observable<StrictHttpResponse<AuthorityEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetRecentlyInvitedPath, 'get');
+
+        /**
+         * groupname
+         */
+        group: string;
+
+        /**
+         * authorityName of member
+         */
+        member: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.DeleteMembershipPath, 'delete');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.path('member', params.member, {});
         }
 
         return this.http
@@ -198,104 +165,84 @@ export class IamV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<AuthorityEntries>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * Get recently invited authorities.
+     * Delete member from the group.
      *
-     * Get the authorities the current user has recently invited.
+     * Delete member from the group. (admin rights are required.)
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getRecentlyInvited$Response()` instead.
+     * To access the full response (for headers, for example), `deleteMembership$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getRecentlyInvited(params: {
+    deleteMembership(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
-    }): Observable<AuthorityEntries> {
-        return this.getRecentlyInvited$Response(params).pipe(
-            map((r: StrictHttpResponse<AuthorityEntries>) => r.body as AuthorityEntries),
+
+        /**
+         * groupname
+         */
+        group: string;
+
+        /**
+         * authorityName of member
+         */
+        member: string;
+    }): Observable<any> {
+        return this.deleteMembership$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation searchGroups
+     * Path part for operation addNodeList
      */
-    static readonly SearchGroupsPath = '/iam/v1/groups/{repository}';
+    static readonly AddNodeListPath = '/iam/v1/people/{repository}/{person}/nodeList/{list}/{node}';
 
     /**
-     * Search groups.
+     * Add a node to node a list of a user.
      *
-     * Search groups. (admin rights are required.)
+     * For guest users, the list will be temporary stored in the current session
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `searchGroups()` instead.
+     * To access only the response body, use `addNodeList()` instead.
      *
      * This method doesn't expect any request body.
      */
-    searchGroups$Response(params: {
+    addNodeList$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * pattern
+         * username (or &quot;-me-&quot; for current user)
          */
-        pattern: string;
+        person: string;
 
         /**
-         * find a specific groupType
+         * list name. If this list does not exist, it will be created
          */
-        groupType?: string;
+        list: string;
 
         /**
-         * find a specific signupMethod for groups (or asterisk for all including one)
+         * ID of node
          */
-        signupMethod?: string;
-
-        /**
-         * global search context, defaults to true, otherwise just searches for groups within the organizations
-         */
-        global?: boolean;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-    }): Observable<StrictHttpResponse<GroupEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SearchGroupsPath, 'get');
+        node: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.AddNodeListPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('pattern', params.pattern, { style: 'form', explode: true });
-            rb.query('groupType', params.groupType, { style: 'form', explode: true });
-            rb.query('signupMethod', params.signupMethod, { style: 'form', explode: true });
-            rb.query('global', params.global, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.path('list', params.list, {});
+            rb.path('node', params.node, {});
         }
 
         return this.http
@@ -308,69 +255,719 @@ export class IamV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<GroupEntries>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * Search groups.
+     * Add a node to node a list of a user.
      *
-     * Search groups. (admin rights are required.)
+     * For guest users, the list will be temporary stored in the current session
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `searchGroups$Response()` instead.
+     * To access the full response (for headers, for example), `addNodeList$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    searchGroups(params: {
+    addNodeList(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * pattern
+         * username (or &quot;-me-&quot; for current user)
          */
-        pattern: string;
+        person: string;
 
         /**
-         * find a specific groupType
+         * list name. If this list does not exist, it will be created
          */
-        groupType?: string;
+        list: string;
 
         /**
-         * find a specific signupMethod for groups (or asterisk for all including one)
+         * ID of node
          */
-        signupMethod?: string;
+        node: string;
+    }): Observable<any> {
+        return this.addNodeList$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation removeNodeList
+     */
+    static readonly RemoveNodeListPath =
+        '/iam/v1/people/{repository}/{person}/nodeList/{list}/{node}';
+
+    /**
+     * Deelete a node of a node list of a user.
+     *
+     * For guest users, the list will be temporary stored in the current session
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `removeNodeList()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    removeNodeList$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
         /**
-         * global search context, defaults to true, otherwise just searches for groups within the organizations
+         * username (or &quot;-me-&quot; for current user)
          */
-        global?: boolean;
+        person: string;
 
         /**
-         * maximum items per page
+         * list name
          */
-        maxItems?: number;
+        list: string;
 
         /**
-         * skip a number of items
+         * ID of node
          */
-        skipCount?: number;
+        node: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.RemoveNodeListPath, 'delete');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.path('list', params.list, {});
+            rb.path('node', params.node, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Deelete a node of a node list of a user.
+     *
+     * For guest users, the list will be temporary stored in the current session
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `removeNodeList$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    removeNodeList(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
         /**
-         * sort properties
+         * username (or &quot;-me-&quot; for current user)
          */
-        sortProperties?: Array<string>;
+        person: string;
 
         /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         * list name
          */
-        sortAscending?: Array<boolean>;
-    }): Observable<GroupEntries> {
-        return this.searchGroups$Response(params).pipe(
-            map((r: StrictHttpResponse<GroupEntries>) => r.body as GroupEntries),
+        list: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<any> {
+        return this.removeNodeList$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation changeGroupProfile
+     */
+    static readonly ChangeGroupProfilePath = '/iam/v1/groups/{repository}/{group}/profile';
+
+    /**
+     * Set profile of the group.
+     *
+     * Set profile of the group. (admin rights are required.)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeGroupProfile()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeGroupProfile$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * groupname
+         */
+        group: string;
+
+        /**
+         * properties
+         */
+        body: GroupProfile;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ChangeGroupProfilePath, 'put');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Set profile of the group.
+     *
+     * Set profile of the group. (admin rights are required.)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeGroupProfile$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeGroupProfile(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * groupname
+         */
+        group: string;
+
+        /**
+         * properties
+         */
+        body: GroupProfile;
+    }): Observable<any> {
+        return this.changeGroupProfile$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation changeUserAvatar
+     */
+    static readonly ChangeUserAvatarPath = '/iam/v1/people/{repository}/{person}/avatar';
+
+    /**
+     * Set avatar of the user.
+     *
+     * Set avatar of the user. (To set foreign avatars, admin rights are required.)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeUserAvatar()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeUserAvatar$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * username (or &quot;-me-&quot; for current user)
+         */
+        person: string;
+        body?: {
+            /**
+             * avatar image
+             */
+            avatar: {};
+        };
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ChangeUserAvatarPath, 'put');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Set avatar of the user.
+     *
+     * Set avatar of the user. (To set foreign avatars, admin rights are required.)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeUserAvatar$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeUserAvatar(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * username (or &quot;-me-&quot; for current user)
+         */
+        person: string;
+        body?: {
+            /**
+             * avatar image
+             */
+            avatar: {};
+        };
+    }): Observable<any> {
+        return this.changeUserAvatar$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation removeUserAvatar
+     */
+    static readonly RemoveUserAvatarPath = '/iam/v1/people/{repository}/{person}/avatar';
+
+    /**
+     * Remove avatar of the user.
+     *
+     * Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `removeUserAvatar()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    removeUserAvatar$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * username (or &quot;-me-&quot; for current user)
+         */
+        person: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.RemoveUserAvatarPath, 'delete');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Remove avatar of the user.
+     *
+     * Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `removeUserAvatar$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    removeUserAvatar(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * username (or &quot;-me-&quot; for current user)
+         */
+        person: string;
+    }): Observable<any> {
+        return this.removeUserAvatar$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation changeUserPassword
+     */
+    static readonly ChangeUserPasswordPath = '/iam/v1/people/{repository}/{person}/credential';
+
+    /**
+     * Change/Set password of the user.
+     *
+     * Change/Set password of the user. (To change foreign passwords or set passwords, admin rights are required.)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeUserPassword()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeUserPassword$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * username (or &quot;-me-&quot; for current user)
+         */
+        person: string;
+
+        /**
+         * credential
+         */
+        body: UserCredential;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ChangeUserPasswordPath, 'put');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Change/Set password of the user.
+     *
+     * Change/Set password of the user. (To change foreign passwords or set passwords, admin rights are required.)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeUserPassword$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeUserPassword(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * username (or &quot;-me-&quot; for current user)
+         */
+        person: string;
+
+        /**
+         * credential
+         */
+        body: UserCredential;
+    }): Observable<any> {
+        return this.changeUserPassword$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation changeUserProfile
+     */
+    static readonly ChangeUserProfilePath = '/iam/v1/people/{repository}/{person}/profile';
+
+    /**
+     * Set profile of the user.
+     *
+     * Set profile of the user. (To set foreign profiles, admin rights are required.)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeUserProfile()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeUserProfile$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * username (or &quot;-me-&quot; for current user)
+         */
+        person: string;
+
+        /**
+         * properties
+         */
+        body: UserProfileEdit;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ChangeUserProfilePath, 'put');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Set profile of the user.
+     *
+     * Set profile of the user. (To set foreign profiles, admin rights are required.)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeUserProfile$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeUserProfile(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * username (or &quot;-me-&quot; for current user)
+         */
+        person: string;
+
+        /**
+         * properties
+         */
+        body: UserProfileEdit;
+    }): Observable<any> {
+        return this.changeUserProfile$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation confirmSignup
+     */
+    static readonly ConfirmSignupPath = '/iam/v1/groups/{repository}/{group}/signup/list/{user}';
+
+    /**
+     * put the pending user into the group.
+     *
+     * Requires admin rights or org administrator on this group
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `confirmSignup()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    confirmSignup$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+
+        /**
+         * ID of user
+         */
+        user: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ConfirmSignupPath, 'put');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.path('user', params.user, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * put the pending user into the group.
+     *
+     * Requires admin rights or org administrator on this group
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `confirmSignup$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    confirmSignup(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+
+        /**
+         * ID of user
+         */
+        user: string;
+    }): Observable<string> {
+        return this.confirmSignup$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation rejectSignup
+     */
+    static readonly RejectSignupPath = '/iam/v1/groups/{repository}/{group}/signup/list/{user}';
+
+    /**
+     * reject the pending user.
+     *
+     * Requires admin rights or org administrator on this group
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `rejectSignup()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    rejectSignup$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+
+        /**
+         * ID of user
+         */
+        user: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.RejectSignupPath, 'delete');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.path('user', params.user, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * reject the pending user.
+     *
+     * Requires admin rights or org administrator on this group
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `rejectSignup$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    rejectSignup(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+
+        /**
+         * ID of user
+         */
+        user: string;
+    }): Observable<string> {
+        return this.rejectSignup$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
@@ -402,8 +999,8 @@ export class IamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<GroupEntry>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetGroupPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
         }
 
         return this.http
@@ -485,9 +1082,9 @@ export class IamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<Group>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.CreateGroupPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.query('parent', params.parent, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.query('parent', params.parent, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -567,26 +1164,24 @@ export class IamV1Service extends BaseService {
          * groupname
          */
         group: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.DeleteGroupPath, 'delete');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -611,1054 +1206,9 @@ export class IamV1Service extends BaseService {
          * groupname
          */
         group: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.deleteGroup$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getMembership
-     */
-    static readonly GetMembershipPath = '/iam/v1/groups/{repository}/{group}/members';
-
-    /**
-     * Get all members of the group.
-     *
-     * Get all members of the group. (admin rights are required.)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getMembership()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getMembership$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * authority name (begins with GROUP_)
-         */
-        group: string;
-
-        /**
-         * pattern
-         */
-        pattern?: string;
-
-        /**
-         * authorityType either GROUP or USER, empty to show all
-         */
-        authorityType?: string;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-    }): Observable<StrictHttpResponse<AuthorityEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetMembershipPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.query('pattern', params.pattern, { style: 'form', explode: true });
-            rb.query('authorityType', params.authorityType, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<AuthorityEntries>;
-                }),
-            );
-    }
-
-    /**
-     * Get all members of the group.
-     *
-     * Get all members of the group. (admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getMembership$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getMembership(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * authority name (begins with GROUP_)
-         */
-        group: string;
-
-        /**
-         * pattern
-         */
-        pattern?: string;
-
-        /**
-         * authorityType either GROUP or USER, empty to show all
-         */
-        authorityType?: string;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-    }): Observable<AuthorityEntries> {
-        return this.getMembership$Response(params).pipe(
-            map((r: StrictHttpResponse<AuthorityEntries>) => r.body as AuthorityEntries),
-        );
-    }
-
-    /**
-     * Path part for operation addMembership
-     */
-    static readonly AddMembershipPath = '/iam/v1/groups/{repository}/{group}/members/{member}';
-
-    /**
-     * Add member to the group.
-     *
-     * Add member to the group. (admin rights are required.)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `addMembership()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    addMembership$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * groupname
-         */
-        group: string;
-
-        /**
-         * authorityName of member
-         */
-        member: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.AddMembershipPath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.path('member', params.member, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Add member to the group.
-     *
-     * Add member to the group. (admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `addMembership$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    addMembership(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * groupname
-         */
-        group: string;
-
-        /**
-         * authorityName of member
-         */
-        member: string;
-    }): Observable<void> {
-        return this.addMembership$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation deleteMembership
-     */
-    static readonly DeleteMembershipPath = '/iam/v1/groups/{repository}/{group}/members/{member}';
-
-    /**
-     * Delete member from the group.
-     *
-     * Delete member from the group. (admin rights are required.)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `deleteMembership()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    deleteMembership$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * groupname
-         */
-        group: string;
-
-        /**
-         * authorityName of member
-         */
-        member: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.DeleteMembershipPath, 'delete');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.path('member', params.member, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Delete member from the group.
-     *
-     * Delete member from the group. (admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `deleteMembership$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    deleteMembership(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * groupname
-         */
-        group: string;
-
-        /**
-         * authorityName of member
-         */
-        member: string;
-    }): Observable<void> {
-        return this.deleteMembership$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation changeGroupProfile
-     */
-    static readonly ChangeGroupProfilePath = '/iam/v1/groups/{repository}/{group}/profile';
-
-    /**
-     * Set profile of the group.
-     *
-     * Set profile of the group. (admin rights are required.)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeGroupProfile()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeGroupProfile$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * groupname
-         */
-        group: string;
-
-        /**
-         * properties
-         */
-        body: GroupProfile;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ChangeGroupProfilePath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Set profile of the group.
-     *
-     * Set profile of the group. (admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeGroupProfile$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeGroupProfile(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * groupname
-         */
-        group: string;
-
-        /**
-         * properties
-         */
-        body: GroupProfile;
-    }): Observable<void> {
-        return this.changeGroupProfile$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation signupGroup
-     */
-    static readonly SignupGroupPath = '/iam/v1/groups/{repository}/{group}/signup';
-
-    /**
-     * let the current user signup to the given group.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `signupGroup()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    signupGroup$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-
-        /**
-         * Password for signup (only required if signupMethod &#x3D;&#x3D; password)
-         */
-        password?: string;
-    }): Observable<
-        StrictHttpResponse<'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok'>
-    > {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SignupGroupPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.query('password', params.password, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<
-                        'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok'
-                    >;
-                }),
-            );
-    }
-
-    /**
-     * let the current user signup to the given group.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `signupGroup$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    signupGroup(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-
-        /**
-         * Password for signup (only required if signupMethod &#x3D;&#x3D; password)
-         */
-        password?: string;
-    }): Observable<'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok'> {
-        return this.signupGroup$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<
-                        'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok'
-                    >,
-                ) => r.body as 'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok',
-            ),
-        );
-    }
-
-    /**
-     * Path part for operation signupGroupDetails
-     */
-    static readonly SignupGroupDetailsPath = '/iam/v1/groups/{repository}/{group}/signup/config';
-
-    /**
-     * set group signup options.
-     *
-     * requires admin rights
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `signupGroupDetails()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    signupGroupDetails$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-
-        /**
-         * Details to edit
-         */
-        body: GroupSignupDetails;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SignupGroupDetailsPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * set group signup options.
-     *
-     * requires admin rights
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `signupGroupDetails$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    signupGroupDetails(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-
-        /**
-         * Details to edit
-         */
-        body: GroupSignupDetails;
-    }): Observable<void> {
-        return this.signupGroupDetails$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation signupGroupList
-     */
-    static readonly SignupGroupListPath = '/iam/v1/groups/{repository}/{group}/signup/list';
-
-    /**
-     * list pending users that want to join this group.
-     *
-     * Requires admin rights or org administrator on this group
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `signupGroupList()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    signupGroupList$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-    }): Observable<StrictHttpResponse<Array<User>>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SignupGroupListPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<User>>;
-                }),
-            );
-    }
-
-    /**
-     * list pending users that want to join this group.
-     *
-     * Requires admin rights or org administrator on this group
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `signupGroupList$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    signupGroupList(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-    }): Observable<Array<User>> {
-        return this.signupGroupList$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<User>>) => r.body as Array<User>),
-        );
-    }
-
-    /**
-     * Path part for operation confirmSignup
-     */
-    static readonly ConfirmSignupPath = '/iam/v1/groups/{repository}/{group}/signup/list/{user}';
-
-    /**
-     * put the pending user into the group.
-     *
-     * Requires admin rights or org administrator on this group
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `confirmSignup()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    confirmSignup$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-
-        /**
-         * ID of user
-         */
-        user: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ConfirmSignupPath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.path('user', params.user, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * put the pending user into the group.
-     *
-     * Requires admin rights or org administrator on this group
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `confirmSignup$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    confirmSignup(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-
-        /**
-         * ID of user
-         */
-        user: string;
-    }): Observable<void> {
-        return this.confirmSignup$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation rejectSignup
-     */
-    static readonly RejectSignupPath = '/iam/v1/groups/{repository}/{group}/signup/list/{user}';
-
-    /**
-     * reject the pending user.
-     *
-     * Requires admin rights or org administrator on this group
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `rejectSignup()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    rejectSignup$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-
-        /**
-         * ID of user
-         */
-        user: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.RejectSignupPath, 'delete');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.path('user', params.user, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * reject the pending user.
-     *
-     * Requires admin rights or org administrator on this group
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `rejectSignup$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    rejectSignup(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of group
-         */
-        group: string;
-
-        /**
-         * ID of user
-         */
-        user: string;
-    }): Observable<void> {
-        return this.rejectSignup$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getSubgroupByType
-     */
-    static readonly GetSubgroupByTypePath = '/iam/v1/groups/{repository}/{group}/type/{type}';
-
-    /**
-     * Get a subgroup by the specified type.
-     *
-     * Get a subgroup by the specified type
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getSubgroupByType()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getSubgroupByType$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * authority name of the parent/primary group (begins with GROUP_)
-         */
-        group: string;
-
-        /**
-         * authorityType either GROUP or USER, empty to show all
-         */
-        type: string;
-    }): Observable<StrictHttpResponse<AuthorityEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetSubgroupByTypePath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.path('type', params.type, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<AuthorityEntries>;
-                }),
-            );
-    }
-
-    /**
-     * Get a subgroup by the specified type.
-     *
-     * Get a subgroup by the specified type
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getSubgroupByType$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getSubgroupByType(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * authority name of the parent/primary group (begins with GROUP_)
-         */
-        group: string;
-
-        /**
-         * authorityType either GROUP or USER, empty to show all
-         */
-        type: string;
-    }): Observable<AuthorityEntries> {
-        return this.getSubgroupByType$Response(params).pipe(
-            map((r: StrictHttpResponse<AuthorityEntries>) => r.body as AuthorityEntries),
-        );
-    }
-
-    /**
-     * Path part for operation searchUser
-     */
-    static readonly SearchUserPath = '/iam/v1/people/{repository}';
-
-    /**
-     * Search users.
-     *
-     * Search users. (admin rights are required.)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `searchUser()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    searchUser$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * pattern
-         */
-        pattern: string;
-
-        /**
-         * global search context, defaults to true, otherwise just searches for users within the organizations
-         */
-        global?: boolean;
-
-        /**
-         * the user status (e.g. active), if not set, all users are returned
-         */
-        status?: 'active' | 'blocked' | 'todelete';
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-    }): Observable<StrictHttpResponse<UserEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SearchUserPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('pattern', params.pattern, { style: 'form', explode: true });
-            rb.query('global', params.global, { style: 'form', explode: true });
-            rb.query('status', params.status, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<UserEntries>;
-                }),
-            );
-    }
-
-    /**
-     * Search users.
-     *
-     * Search users. (admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `searchUser$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    searchUser(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * pattern
-         */
-        pattern: string;
-
-        /**
-         * global search context, defaults to true, otherwise just searches for users within the organizations
-         */
-        global?: boolean;
-
-        /**
-         * the user status (e.g. active), if not set, all users are returned
-         */
-        status?: 'active' | 'blocked' | 'todelete';
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-    }): Observable<UserEntries> {
-        return this.searchUser$Response(params).pipe(
-            map((r: StrictHttpResponse<UserEntries>) => r.body as UserEntries),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -1690,8 +1240,8 @@ export class IamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<UserEntry>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetUserPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
         }
 
         return this.http
@@ -1773,9 +1323,9 @@ export class IamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<User>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.CreateUserPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.query('password', params.password, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.query('password', params.password, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -1860,27 +1410,25 @@ export class IamV1Service extends BaseService {
          * force the deletion (if false then only persons which are previously marked for deletion are getting deleted)
          */
         force?: boolean;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.DeleteUserPath, 'delete');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.query('force', params.force, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.query('force', params.force, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -1910,281 +1458,47 @@ export class IamV1Service extends BaseService {
          * force the deletion (if false then only persons which are previously marked for deletion are getting deleted)
          */
         force?: boolean;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.deleteUser$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation changeUserAvatar
+     * Path part for operation getMembership
      */
-    static readonly ChangeUserAvatarPath = '/iam/v1/people/{repository}/{person}/avatar';
+    static readonly GetMembershipPath = '/iam/v1/groups/{repository}/{group}/members';
 
     /**
-     * Set avatar of the user.
+     * Get all members of the group.
      *
-     * Set avatar of the user. (To set foreign avatars, admin rights are required.)
+     * Get all members of the group. (admin rights are required.)
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeUserAvatar()` instead.
-     *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
-     */
-    changeUserAvatar$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-        body: PersonAvatarBody;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ChangeUserAvatarPath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.body(params.body, 'multipart/form-data');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Set avatar of the user.
-     *
-     * Set avatar of the user. (To set foreign avatars, admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeUserAvatar$Response()` instead.
-     *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
-     */
-    changeUserAvatar(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-        body: PersonAvatarBody;
-    }): Observable<void> {
-        return this.changeUserAvatar$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation removeUserAvatar
-     */
-    static readonly RemoveUserAvatarPath = '/iam/v1/people/{repository}/{person}/avatar';
-
-    /**
-     * Remove avatar of the user.
-     *
-     * Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `removeUserAvatar()` instead.
+     * To access only the response body, use `getMembership()` instead.
      *
      * This method doesn't expect any request body.
      */
-    removeUserAvatar$Response(params: {
+    getMembership$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * username (or &quot;-me-&quot; for current user)
+         * authority name (begins with GROUP_)
          */
-        person: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.RemoveUserAvatarPath, 'delete');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Remove avatar of the user.
-     *
-     * Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `removeUserAvatar$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    removeUserAvatar(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-    }): Observable<void> {
-        return this.removeUserAvatar$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation changeUserPassword
-     */
-    static readonly ChangeUserPasswordPath = '/iam/v1/people/{repository}/{person}/credential';
-
-    /**
-     * Change/Set password of the user.
-     *
-     * Change/Set password of the user. (To change foreign passwords or set passwords, admin rights are required.)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeUserPassword()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeUserPassword$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-
-        /**
-         * credential
-         */
-        body: UserCredential;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ChangeUserPasswordPath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Change/Set password of the user.
-     *
-     * Change/Set password of the user. (To change foreign passwords or set passwords, admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeUserPassword$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeUserPassword(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-
-        /**
-         * credential
-         */
-        body: UserCredential;
-    }): Observable<void> {
-        return this.changeUserPassword$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getUserGroups
-     */
-    static readonly GetUserGroupsPath = '/iam/v1/people/{repository}/{person}/memberships';
-
-    /**
-     * Get all groups the given user is member of.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getUserGroups()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getUserGroups$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * authority name
-         */
-        person: string;
+        group: string;
 
         /**
          * pattern
          */
         pattern?: string;
+
+        /**
+         * authorityType either GROUP or USER, empty to show all
+         */
+        authorityType?: string;
 
         /**
          * maximum items per page
@@ -2205,16 +1519,17 @@ export class IamV1Service extends BaseService {
          * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
          */
         sortAscending?: Array<boolean>;
-    }): Observable<StrictHttpResponse<GroupEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetUserGroupsPath, 'get');
+    }): Observable<StrictHttpResponse<AuthorityEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetMembershipPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.query('pattern', params.pattern, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.query('pattern', params.pattern, {});
+            rb.query('authorityType', params.authorityType, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
         }
 
         return this.http
@@ -2227,36 +1542,41 @@ export class IamV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<GroupEntries>;
+                    return r as StrictHttpResponse<AuthorityEntries>;
                 }),
             );
     }
 
     /**
-     * Get all groups the given user is member of.
+     * Get all members of the group.
      *
-     *
+     * Get all members of the group. (admin rights are required.)
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getUserGroups$Response()` instead.
+     * To access the full response (for headers, for example), `getMembership$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getUserGroups(params: {
+    getMembership(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * authority name
+         * authority name (begins with GROUP_)
          */
-        person: string;
+        group: string;
 
         /**
          * pattern
          */
         pattern?: string;
+
+        /**
+         * authorityType either GROUP or USER, empty to show all
+         */
+        authorityType?: string;
 
         /**
          * maximum items per page
@@ -2277,9 +1597,9 @@ export class IamV1Service extends BaseService {
          * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
          */
         sortAscending?: Array<boolean>;
-    }): Observable<GroupEntries> {
-        return this.getUserGroups$Response(params).pipe(
-            map((r: StrictHttpResponse<GroupEntries>) => r.body as GroupEntries),
+    }): Observable<AuthorityEntries> {
+        return this.getMembership$Response(params).pipe(
+            map((r: StrictHttpResponse<AuthorityEntries>) => r.body as AuthorityEntries),
         );
     }
 
@@ -2331,12 +1651,12 @@ export class IamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntries>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetNodeListPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.path('list', params.list, { style: 'simple', explode: false });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.path('list', params.list, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
         }
 
         return this.http
@@ -2401,201 +1721,6 @@ export class IamV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation addNodeList
-     */
-    static readonly AddNodeListPath = '/iam/v1/people/{repository}/{person}/nodeList/{list}/{node}';
-
-    /**
-     * Add a node to node a list of a user.
-     *
-     * For guest users, the list will be temporary stored in the current session
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `addNodeList()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    addNodeList$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-
-        /**
-         * list name. If this list does not exist, it will be created
-         */
-        list: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.AddNodeListPath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.path('list', params.list, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Add a node to node a list of a user.
-     *
-     * For guest users, the list will be temporary stored in the current session
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `addNodeList$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    addNodeList(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-
-        /**
-         * list name. If this list does not exist, it will be created
-         */
-        list: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<void> {
-        return this.addNodeList$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation removeNodeList
-     */
-    static readonly RemoveNodeListPath =
-        '/iam/v1/people/{repository}/{person}/nodeList/{list}/{node}';
-
-    /**
-     * Deelete a node of a node list of a user.
-     *
-     * For guest users, the list will be temporary stored in the current session
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `removeNodeList()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    removeNodeList$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-
-        /**
-         * list name
-         */
-        list: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.RemoveNodeListPath, 'delete');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.path('list', params.list, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Deelete a node of a node list of a user.
-     *
-     * For guest users, the list will be temporary stored in the current session
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `removeNodeList$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    removeNodeList(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-
-        /**
-         * list name
-         */
-        list: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<void> {
-        return this.removeNodeList$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
      * Path part for operation getPreferences
      */
     static readonly GetPreferencesPath = '/iam/v1/people/{repository}/{person}/preferences';
@@ -2623,8 +1748,8 @@ export class IamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<Preferences>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetPreferencesPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
         }
 
         return this.http
@@ -2698,27 +1823,25 @@ export class IamV1Service extends BaseService {
          * preferences (json string)
          */
         body: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.SetPreferencesPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
             rb.body(params.body, 'application/json');
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -2748,95 +1871,9 @@ export class IamV1Service extends BaseService {
          * preferences (json string)
          */
         body: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.setPreferences$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation changeUserProfile
-     */
-    static readonly ChangeUserProfilePath = '/iam/v1/people/{repository}/{person}/profile';
-
-    /**
-     * Set profile of the user.
-     *
-     * Set profile of the user. (To set foreign profiles, admin rights are required.)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeUserProfile()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeUserProfile$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-
-        /**
-         * properties
-         */
-        body: UserProfileEdit;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, IamV1Service.ChangeUserProfilePath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Set profile of the user.
-     *
-     * Set profile of the user. (To set foreign profiles, admin rights are required.)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeUserProfile$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeUserProfile(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * username (or &quot;-me-&quot; for current user)
-         */
-        person: string;
-
-        /**
-         * properties
-         */
-        body: UserProfileEdit;
-    }): Observable<void> {
-        return this.changeUserProfile$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -2868,8 +1905,8 @@ export class IamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<ProfileSettings>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetProfileSettingsPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
         }
 
         return this.http
@@ -2943,27 +1980,25 @@ export class IamV1Service extends BaseService {
          * ProfileSetting Object
          */
         body: ProfileSettings;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.SetProfileSettingsPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
             rb.body(params.body, 'application/json');
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -2993,9 +2028,283 @@ export class IamV1Service extends BaseService {
          * ProfileSetting Object
          */
         body: ProfileSettings;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.setProfileSettings$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation getRecentlyInvited
+     */
+    static readonly GetRecentlyInvitedPath = '/iam/v1/authorities/{repository}/recent';
+
+    /**
+     * Get recently invited authorities.
+     *
+     * Get the authorities the current user has recently invited.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getRecentlyInvited()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getRecentlyInvited$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+    }): Observable<StrictHttpResponse<AuthorityEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetRecentlyInvitedPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<AuthorityEntries>;
+                }),
+            );
+    }
+
+    /**
+     * Get recently invited authorities.
+     *
+     * Get the authorities the current user has recently invited.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getRecentlyInvited$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getRecentlyInvited(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+    }): Observable<AuthorityEntries> {
+        return this.getRecentlyInvited$Response(params).pipe(
+            map((r: StrictHttpResponse<AuthorityEntries>) => r.body as AuthorityEntries),
+        );
+    }
+
+    /**
+     * Path part for operation getSubgroupByType
+     */
+    static readonly GetSubgroupByTypePath = '/iam/v1/groups/{repository}/{group}/type/{type}';
+
+    /**
+     * Get a subgroup by the specified type.
+     *
+     * Get a subgroup by the specified type
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getSubgroupByType()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getSubgroupByType$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * authority name of the parent/primary group (begins with GROUP_)
+         */
+        group: string;
+
+        /**
+         * authorityType either GROUP or USER, empty to show all
+         */
+        type: string;
+    }): Observable<StrictHttpResponse<AuthorityEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetSubgroupByTypePath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.path('type', params.type, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<AuthorityEntries>;
+                }),
+            );
+    }
+
+    /**
+     * Get a subgroup by the specified type.
+     *
+     * Get a subgroup by the specified type
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getSubgroupByType$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getSubgroupByType(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * authority name of the parent/primary group (begins with GROUP_)
+         */
+        group: string;
+
+        /**
+         * authorityType either GROUP or USER, empty to show all
+         */
+        type: string;
+    }): Observable<AuthorityEntries> {
+        return this.getSubgroupByType$Response(params).pipe(
+            map((r: StrictHttpResponse<AuthorityEntries>) => r.body as AuthorityEntries),
+        );
+    }
+
+    /**
+     * Path part for operation getUserGroups
+     */
+    static readonly GetUserGroupsPath = '/iam/v1/people/{repository}/{person}/memberships';
+
+    /**
+     * Get all groups the given user is member of.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getUserGroups()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getUserGroups$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * authority name
+         */
+        person: string;
+
+        /**
+         * pattern
+         */
+        pattern?: string;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+    }): Observable<StrictHttpResponse<GroupEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetUserGroupsPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.query('pattern', params.pattern, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<GroupEntries>;
+                }),
+            );
+    }
+
+    /**
+     * Get all groups the given user is member of.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getUserGroups$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getUserGroups(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * authority name
+         */
+        person: string;
+
+        /**
+         * pattern
+         */
+        pattern?: string;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+    }): Observable<GroupEntries> {
+        return this.getUserGroups$Response(params).pipe(
+            map((r: StrictHttpResponse<GroupEntries>) => r.body as GroupEntries),
         );
     }
 
@@ -3027,8 +2336,8 @@ export class IamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<UserStats>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.GetUserStatsPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
         }
 
         return this.http
@@ -3073,6 +2382,674 @@ export class IamV1Service extends BaseService {
     }
 
     /**
+     * Path part for operation searchAuthorities
+     */
+    static readonly SearchAuthoritiesPath = '/iam/v1/authorities/{repository}';
+
+    /**
+     * Search authorities.
+     *
+     * Search authorities.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `searchAuthorities()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    searchAuthorities$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * pattern
+         */
+        pattern: string;
+
+        /**
+         * global search context, defaults to true, otherwise just searches for users within the organizations
+         */
+        global?: boolean;
+
+        /**
+         * find a specific groupType (does nothing for persons)
+         */
+        groupType?: string;
+
+        /**
+         * find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)
+         */
+        signupMethod?: string;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+    }): Observable<StrictHttpResponse<AuthorityEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SearchAuthoritiesPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.query('pattern', params.pattern, {});
+            rb.query('global', params.global, {});
+            rb.query('groupType', params.groupType, {});
+            rb.query('signupMethod', params.signupMethod, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<AuthorityEntries>;
+                }),
+            );
+    }
+
+    /**
+     * Search authorities.
+     *
+     * Search authorities.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `searchAuthorities$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    searchAuthorities(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * pattern
+         */
+        pattern: string;
+
+        /**
+         * global search context, defaults to true, otherwise just searches for users within the organizations
+         */
+        global?: boolean;
+
+        /**
+         * find a specific groupType (does nothing for persons)
+         */
+        groupType?: string;
+
+        /**
+         * find a specific signupMethod for groups (or asterisk for all including one) (does nothing for persons)
+         */
+        signupMethod?: string;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+    }): Observable<AuthorityEntries> {
+        return this.searchAuthorities$Response(params).pipe(
+            map((r: StrictHttpResponse<AuthorityEntries>) => r.body as AuthorityEntries),
+        );
+    }
+
+    /**
+     * Path part for operation searchGroups
+     */
+    static readonly SearchGroupsPath = '/iam/v1/groups/{repository}';
+
+    /**
+     * Search groups.
+     *
+     * Search groups. (admin rights are required.)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `searchGroups()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    searchGroups$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * pattern
+         */
+        pattern: string;
+
+        /**
+         * find a specific groupType
+         */
+        groupType?: string;
+
+        /**
+         * find a specific signupMethod for groups (or asterisk for all including one)
+         */
+        signupMethod?: string;
+
+        /**
+         * global search context, defaults to true, otherwise just searches for groups within the organizations
+         */
+        global?: boolean;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+    }): Observable<StrictHttpResponse<GroupEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SearchGroupsPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.query('pattern', params.pattern, {});
+            rb.query('groupType', params.groupType, {});
+            rb.query('signupMethod', params.signupMethod, {});
+            rb.query('global', params.global, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<GroupEntries>;
+                }),
+            );
+    }
+
+    /**
+     * Search groups.
+     *
+     * Search groups. (admin rights are required.)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `searchGroups$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    searchGroups(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * pattern
+         */
+        pattern: string;
+
+        /**
+         * find a specific groupType
+         */
+        groupType?: string;
+
+        /**
+         * find a specific signupMethod for groups (or asterisk for all including one)
+         */
+        signupMethod?: string;
+
+        /**
+         * global search context, defaults to true, otherwise just searches for groups within the organizations
+         */
+        global?: boolean;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+    }): Observable<GroupEntries> {
+        return this.searchGroups$Response(params).pipe(
+            map((r: StrictHttpResponse<GroupEntries>) => r.body as GroupEntries),
+        );
+    }
+
+    /**
+     * Path part for operation searchUser
+     */
+    static readonly SearchUserPath = '/iam/v1/people/{repository}';
+
+    /**
+     * Search users.
+     *
+     * Search users. (admin rights are required.)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `searchUser()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    searchUser$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * pattern
+         */
+        pattern: string;
+
+        /**
+         * global search context, defaults to true, otherwise just searches for users within the organizations
+         */
+        global?: boolean;
+
+        /**
+         * the user status (e.g. active), if not set, all users are returned
+         */
+        status?: 'active' | 'blocked' | 'todelete';
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+    }): Observable<StrictHttpResponse<UserEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SearchUserPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.query('pattern', params.pattern, {});
+            rb.query('global', params.global, {});
+            rb.query('status', params.status, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<UserEntries>;
+                }),
+            );
+    }
+
+    /**
+     * Search users.
+     *
+     * Search users. (admin rights are required.)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `searchUser$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    searchUser(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * pattern
+         */
+        pattern: string;
+
+        /**
+         * global search context, defaults to true, otherwise just searches for users within the organizations
+         */
+        global?: boolean;
+
+        /**
+         * the user status (e.g. active), if not set, all users are returned
+         */
+        status?: 'active' | 'blocked' | 'todelete';
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+    }): Observable<UserEntries> {
+        return this.searchUser$Response(params).pipe(
+            map((r: StrictHttpResponse<UserEntries>) => r.body as UserEntries),
+        );
+    }
+
+    /**
+     * Path part for operation signupGroup
+     */
+    static readonly SignupGroupPath = '/iam/v1/groups/{repository}/{group}/signup';
+
+    /**
+     * let the current user signup to the given group.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `signupGroup()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    signupGroup$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+
+        /**
+         * Password for signup (only required if signupMethod &#x3D;&#x3D; password)
+         */
+        password?: string;
+    }): Observable<
+        StrictHttpResponse<'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok'>
+    > {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SignupGroupPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.query('password', params.password, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<
+                        'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok'
+                    >;
+                }),
+            );
+    }
+
+    /**
+     * let the current user signup to the given group.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `signupGroup$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    signupGroup(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+
+        /**
+         * Password for signup (only required if signupMethod &#x3D;&#x3D; password)
+         */
+        password?: string;
+    }): Observable<'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok'> {
+        return this.signupGroup$Response(params).pipe(
+            map(
+                (
+                    r: StrictHttpResponse<
+                        'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok'
+                    >,
+                ) => r.body as 'InvalidPassword' | 'AlreadyInList' | 'AlreadyMember' | 'Ok',
+            ),
+        );
+    }
+
+    /**
+     * Path part for operation signupGroupDetails
+     */
+    static readonly SignupGroupDetailsPath = '/iam/v1/groups/{repository}/{group}/signup/config';
+
+    /**
+     * requires admin rights.
+     *
+     * set group signup options
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `signupGroupDetails()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    signupGroupDetails$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+
+        /**
+         * Details to edit
+         */
+        body: GroupSignupDetails;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SignupGroupDetailsPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * requires admin rights.
+     *
+     * set group signup options
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `signupGroupDetails$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    signupGroupDetails(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+
+        /**
+         * Details to edit
+         */
+        body: GroupSignupDetails;
+    }): Observable<any> {
+        return this.signupGroupDetails$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation signupGroupList
+     */
+    static readonly SignupGroupListPath = '/iam/v1/groups/{repository}/{group}/signup/list';
+
+    /**
+     * list pending users that want to join this group.
+     *
+     * Requires admin rights or org administrator on this group
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `signupGroupList()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    signupGroupList$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, IamV1Service.SignupGroupListPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('group', params.group, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * list pending users that want to join this group.
+     *
+     * Requires admin rights or org administrator on this group
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `signupGroupList$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    signupGroupList(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of group
+         */
+        group: string;
+    }): Observable<string> {
+        return this.signupGroupList$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
      * Path part for operation updateUserStatus
      */
     static readonly UpdateUserStatusPath = '/iam/v1/people/{repository}/{person}/status/{status}';
@@ -3107,28 +3084,26 @@ export class IamV1Service extends BaseService {
          * notify the user via mail
          */
         notify: boolean;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, IamV1Service.UpdateUserStatusPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.path('status', params.status, { style: 'simple', explode: false });
-            rb.query('notify', params.notify, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('person', params.person, {});
+            rb.path('status', params.status, {});
+            rb.query('notify', params.notify, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -3163,9 +3138,9 @@ export class IamV1Service extends BaseService {
          * notify the user via mail
          */
         notify: boolean;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.updateUserStatus$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 }

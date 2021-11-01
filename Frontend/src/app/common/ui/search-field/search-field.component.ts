@@ -10,7 +10,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { FacetsDict, LabeledValue } from 'edu-sharing-api';
+import { FacetsDict, LabeledValue } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../mds-editor/search-field-facets/search-field-facets.component';

@@ -10,27 +10,17 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { AdminStatistics } from '../models/admin-statistics';
-import { Application } from '../models/application';
 import { CacheCluster } from '../models/cache-cluster';
 import { CacheInfo } from '../models/cache-info';
 import { CollectionsResult } from '../models/collections-result';
 import { ExcelResult } from '../models/excel-result';
-import { Group } from '../models/group';
-import { JobDescription } from '../models/job-description';
-import { JobInfo } from '../models/job-info';
 import { Node } from '../models/node';
 import { PersonDeleteOptions } from '../models/person-delete-options';
 import { PersonReport } from '../models/person-report';
 import { RepositoryConfig } from '../models/repository-config';
 import { SearchResult } from '../models/search-result';
 import { SearchResultElastic } from '../models/search-result-elastic';
-import { ServerUpdateInfo } from '../models/server-update-info';
 import { UploadResult } from '../models/upload-result';
-import { ApplicationsXmlBody } from '../models/applications-xml-body';
-import { ImportCollectionsBody } from '../models/import-collections-body';
-import { ImportExcelBody } from '../models/import-excel-body';
-import { OaiXmlBody } from '../models/oai-xml-body';
-import { TempNameBody } from '../models/temp-name-body';
 
 @Injectable({
     providedIn: 'root',
@@ -38,6 +28,72 @@ import { TempNameBody } from '../models/temp-name-body';
 export class AdminV1Service extends BaseService {
     constructor(config: ApiConfiguration, http: HttpClient) {
         super(config, http);
+    }
+
+    /**
+     * Path part for operation addApplication
+     */
+    static readonly AddApplicationPath = '/admin/v1/applications/xml';
+
+    /**
+     * register/add an application via xml file.
+     *
+     * register the xml file provided.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `addApplication()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    addApplication$Response(params?: {
+        body?: {
+            /**
+             * XML file for app to register
+             */
+            xml: {};
+        };
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.AddApplicationPath, 'put');
+        if (params) {
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * register/add an application via xml file.
+     *
+     * register the xml file provided.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `addApplication$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    addApplication(params?: {
+        body?: {
+            /**
+             * XML file for app to register
+             */
+            xml: {};
+        };
+    }): Observable<string> {
+        return this.addApplication$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
     }
 
     /**
@@ -55,7 +111,7 @@ export class AdminV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    getApplications$Response(params?: {}): Observable<StrictHttpResponse<Array<Application>>> {
+    getApplications$Response(params?: {}): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetApplicationsPath, 'get');
         if (params) {
         }
@@ -70,7 +126,7 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<Application>>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -85,16 +141,16 @@ export class AdminV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    getApplications(params?: {}): Observable<Array<Application>> {
+    getApplications(params?: {}): Observable<string> {
         return this.getApplications$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<Application>>) => r.body as Array<Application>),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
     /**
-     * Path part for operation addApplication
+     * Path part for operation addApplication1
      */
-    static readonly AddApplicationPath = '/admin/v1/applications';
+    static readonly AddApplication1Path = '/admin/v1/applications';
 
     /**
      * register/add an application.
@@ -102,23 +158,19 @@ export class AdminV1Service extends BaseService {
      * register the specified application.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `addApplication()` instead.
+     * To access only the response body, use `addApplication1()` instead.
      *
      * This method doesn't expect any request body.
      */
-    addApplication$Response(params: {
+    addApplication1$Response(params: {
         /**
          * Remote application metadata url
          */
         url: string;
-    }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.AddApplicationPath, 'put');
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.AddApplication1Path, 'put');
         if (params) {
-            rb.query('url', params.url, { style: 'form', explode: true });
+            rb.query('url', params.url, {});
         }
 
         return this.http
@@ -131,9 +183,7 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -144,55 +194,45 @@ export class AdminV1Service extends BaseService {
      * register the specified application.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `addApplication$Response()` instead.
+     * To access the full response (for headers, for example), `addApplication1$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    addApplication(params: {
+    addApplication1(params: {
         /**
          * Remote application metadata url
          */
         url: string;
-    }): Observable<{
-        [key: string]: {};
-    }> {
-        return this.addApplication$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
+    }): Observable<string> {
+        return this.addApplication1$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
     /**
-     * Path part for operation addApplication_1
+     * Path part for operation addToolpermission
      */
-    static readonly AddApplication_1Path = '/admin/v1/applications/xml';
+    static readonly AddToolpermissionPath = '/admin/v1/toolpermissions/add/{name}';
 
     /**
-     * register/add an application via xml file.
+     * add a new toolpermissions.
      *
-     * register the xml file provided.
+     *
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `addApplication_1()` instead.
+     * To access only the response body, use `addToolpermission()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method doesn't expect any request body.
      */
-    addApplication_1$Response(params: { body: ApplicationsXmlBody }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.AddApplication_1Path, 'put');
+    addToolpermission$Response(params: {
+        /**
+         * Name/ID of toolpermission
+         */
+        name: string;
+    }): Observable<StrictHttpResponse<Node>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.AddToolpermissionPath, 'post');
         if (params) {
-            rb.body(params.body, 'multipart/form-data');
+            rb.path('name', params.name, {});
         }
 
         return this.http
@@ -205,251 +245,29 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
+                    return r as StrictHttpResponse<Node>;
                 }),
             );
     }
 
     /**
-     * register/add an application via xml file.
+     * add a new toolpermissions.
      *
-     * register the xml file provided.
+     *
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `addApplication_1$Response()` instead.
-     *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
-     */
-    addApplication_1(params: { body: ApplicationsXmlBody }): Observable<{
-        [key: string]: {};
-    }> {
-        return this.addApplication_1$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
-        );
-    }
-
-    /**
-     * Path part for operation removeApplication
-     */
-    static readonly RemoveApplicationPath = '/admin/v1/applications/{id}';
-
-    /**
-     * remove an application.
-     *
-     * remove the specified application.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `removeApplication()` instead.
+     * To access the full response (for headers, for example), `addToolpermission$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    removeApplication$Response(params: {
+    addToolpermission(params: {
         /**
-         * Application id
+         * Name/ID of toolpermission
          */
-        id: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.RemoveApplicationPath, 'delete');
-        if (params) {
-            rb.path('id', params.id, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * remove an application.
-     *
-     * remove the specified application.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `removeApplication$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    removeApplication(params: {
-        /**
-         * Application id
-         */
-        id: string;
-    }): Observable<void> {
-        return this.removeApplication$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getApplicationXml
-     */
-    static readonly GetApplicationXmlPath = '/admin/v1/applications/{xml}';
-
-    /**
-     * list any xml properties (like from homeApplication.properties.xml).
-     *
-     * list any xml properties (like from homeApplication.properties.xml)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getApplicationXml()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getApplicationXml$Response(params: {
-        /**
-         * Properties Filename (*.xml)
-         */
-        xml: string;
-    }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetApplicationXmlPath, 'get');
-        if (params) {
-            rb.path('xml', params.xml, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
-                }),
-            );
-    }
-
-    /**
-     * list any xml properties (like from homeApplication.properties.xml).
-     *
-     * list any xml properties (like from homeApplication.properties.xml)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getApplicationXml$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getApplicationXml(params: {
-        /**
-         * Properties Filename (*.xml)
-         */
-        xml: string;
-    }): Observable<{
-        [key: string]: {};
-    }> {
-        return this.getApplicationXml$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
-        );
-    }
-
-    /**
-     * Path part for operation updateApplicationXml
-     */
-    static readonly UpdateApplicationXmlPath = '/admin/v1/applications/{xml}';
-
-    /**
-     * edit any properties xml (like homeApplication.properties.xml).
-     *
-     * if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `updateApplicationXml()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    updateApplicationXml$Response(params: {
-        /**
-         * Properties Filename (*.xml)
-         */
-        xml: string;
-        body?: {
-            [key: string]: string;
-        };
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UpdateApplicationXmlPath, 'put');
-        if (params) {
-            rb.path('xml', params.xml, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * edit any properties xml (like homeApplication.properties.xml).
-     *
-     * if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `updateApplicationXml$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    updateApplicationXml(params: {
-        /**
-         * Properties Filename (*.xml)
-         */
-        xml: string;
-        body?: {
-            [key: string]: string;
-        };
-    }): Observable<void> {
-        return this.updateApplicationXml$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+        name: string;
+    }): Observable<Node> {
+        return this.addToolpermission$Response(params).pipe(
+            map((r: StrictHttpResponse<Node>) => r.body as Node),
         );
     }
 
@@ -483,27 +301,25 @@ export class AdminV1Service extends BaseService {
          * Folder name
          */
         folder?: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ApplyTemplatePath, 'post');
         if (params) {
-            rb.query('template', params.template, { style: 'form', explode: true });
-            rb.query('group', params.group, { style: 'form', explode: true });
-            rb.query('folder', params.folder, { style: 'form', explode: true });
+            rb.query('template', params.template, {});
+            rb.query('group', params.group, {});
+            rb.query('folder', params.folder, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -533,9 +349,787 @@ export class AdminV1Service extends BaseService {
          * Folder name
          */
         folder?: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.applyTemplate$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation cancelJob
+     */
+    static readonly CancelJobPath = '/admin/v1/jobs/{job}';
+
+    /**
+     * cancel a running job.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `cancelJob()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    cancelJob$Response(params: { job: string }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.CancelJobPath, 'delete');
+        if (params) {
+            rb.path('job', params.job, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * cancel a running job.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `cancelJob$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    cancelJob(params: { job: string }): Observable<any> {
+        return this.cancelJob$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation changeLogging
+     */
+    static readonly ChangeLoggingPath = '/admin/v1/log';
+
+    /**
+     * Change the loglevel for classes at runtime.
+     *
+     * Root appenders are used. Check the appender treshold.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeLogging()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    changeLogging$Response(params: {
+        /**
+         * name
+         */
+        name: string;
+
+        /**
+         * loglevel
+         */
+        loglevel: string;
+
+        /**
+         * appender
+         */
+        appender?: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ChangeLoggingPath, 'post');
+        if (params) {
+            rb.query('name', params.name, {});
+            rb.query('loglevel', params.loglevel, {});
+            rb.query('appender', params.appender, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Change the loglevel for classes at runtime.
+     *
+     * Root appenders are used. Check the appender treshold.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeLogging$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    changeLogging(params: {
+        /**
+         * name
+         */
+        name: string;
+
+        /**
+         * loglevel
+         */
+        loglevel: string;
+
+        /**
+         * appender
+         */
+        appender?: string;
+    }): Observable<any> {
+        return this.changeLogging$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation clearCache
+     */
+    static readonly ClearCachePath = '/admin/v1/cache/clearCache';
+
+    /**
+     * clear cache.
+     *
+     * clear cache
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `clearCache()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    clearCache$Response(params?: {
+        /**
+         * bean
+         */
+        bean?: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ClearCachePath, 'post');
+        if (params) {
+            rb.query('bean', params.bean, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * clear cache.
+     *
+     * clear cache
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `clearCache$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    clearCache(params?: {
+        /**
+         * bean
+         */
+        bean?: string;
+    }): Observable<any> {
+        return this.clearCache$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation deletePerson
+     */
+    static readonly DeletePersonPath = '/admin/v1/deletePersons';
+
+    /**
+     * delete persons.
+     *
+     * delete the given persons. Their status must be set to "todelete"
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `deletePerson()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    deletePerson$Response(params: {
+        /**
+         * names of the users to delete
+         */
+        username: Array<string>;
+
+        /**
+         * options object what and how to delete user contents
+         */
+        body?: PersonDeleteOptions;
+    }): Observable<StrictHttpResponse<PersonReport>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.DeletePersonPath, 'put');
+        if (params) {
+            rb.query('username', params.username, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<PersonReport>;
+                }),
+            );
+    }
+
+    /**
+     * delete persons.
+     *
+     * delete the given persons. Their status must be set to "todelete"
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `deletePerson$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    deletePerson(params: {
+        /**
+         * names of the users to delete
+         */
+        username: Array<string>;
+
+        /**
+         * options object what and how to delete user contents
+         */
+        body?: PersonDeleteOptions;
+    }): Observable<PersonReport> {
+        return this.deletePerson$Response(params).pipe(
+            map((r: StrictHttpResponse<PersonReport>) => r.body as PersonReport),
+        );
+    }
+
+    /**
+     * Path part for operation exportByLucene
+     */
+    static readonly ExportByLucenePath = '/admin/v1/lucene/export';
+
+    /**
+     * Search for custom lucene query and choose specific properties to load.
+     *
+     * e.g. @cm\:name:"*"
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `exportByLucene()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    exportByLucene$Response(params?: {
+        /**
+         * query
+         */
+        query?: string;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+
+        /**
+         * properties to fetch, use parent::&lt;property&gt; to include parent property values
+         */
+        properties?: Array<string>;
+
+        /**
+         * store, workspace or archive
+         */
+        store?: 'Workspace' | 'Archive';
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ExportByLucenePath, 'get');
+        if (params) {
+            rb.query('query', params.query, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('properties', params.properties, {});
+            rb.query('store', params.store, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * Search for custom lucene query and choose specific properties to load.
+     *
+     * e.g. @cm\:name:"*"
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `exportByLucene$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    exportByLucene(params?: {
+        /**
+         * query
+         */
+        query?: string;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+
+        /**
+         * properties to fetch, use parent::&lt;property&gt; to include parent property values
+         */
+        properties?: Array<string>;
+
+        /**
+         * store, workspace or archive
+         */
+        store?: 'Workspace' | 'Archive';
+    }): Observable<string> {
+        return this.exportByLucene$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation exportLom
+     */
+    static readonly ExportLomPath = '/admin/v1/export/lom';
+
+    /**
+     * Export Nodes with LOM Metadata Format.
+     *
+     * Export Nodes with LOM Metadata Format.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `exportLom()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    exportLom$Response(params: {
+        /**
+         * filterQuery
+         */
+        filterQuery: string;
+
+        /**
+         * targetDir
+         */
+        targetDir: string;
+
+        /**
+         * subObjectHandler
+         */
+        subObjectHandler: boolean;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ExportLomPath, 'get');
+        if (params) {
+            rb.query('filterQuery', params.filterQuery, {});
+            rb.query('targetDir', params.targetDir, {});
+            rb.query('subObjectHandler', params.subObjectHandler, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Export Nodes with LOM Metadata Format.
+     *
+     * Export Nodes with LOM Metadata Format.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `exportLom$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    exportLom(params: {
+        /**
+         * filterQuery
+         */
+        filterQuery: string;
+
+        /**
+         * targetDir
+         */
+        targetDir: string;
+
+        /**
+         * subObjectHandler
+         */
+        subObjectHandler: boolean;
+    }): Observable<any> {
+        return this.exportLom$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation getAllJobs
+     */
+    static readonly GetAllJobsPath = '/admin/v1/jobs/all';
+
+    /**
+     * get all available jobs.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getAllJobs()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getAllJobs$Response(params?: {}): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetAllJobsPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * get all available jobs.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getAllJobs$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getAllJobs(params?: {}): Observable<string> {
+        return this.getAllJobs$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getAllToolpermissions
+     */
+    static readonly GetAllToolpermissionsPath = '/admin/v1/toolpermissions/{authority}';
+
+    /**
+     * get all toolpermissions for an authority.
+     *
+     * Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getAllToolpermissions()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getAllToolpermissions$Response(params: {
+        /**
+         * Authority to load (user or group)
+         */
+        authority: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            AdminV1Service.GetAllToolpermissionsPath,
+            'get',
+        );
+        if (params) {
+            rb.path('authority', params.authority, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * get all toolpermissions for an authority.
+     *
+     * Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getAllToolpermissions$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getAllToolpermissions(params: {
+        /**
+         * Authority to load (user or group)
+         */
+        authority: string;
+    }): Observable<string> {
+        return this.getAllToolpermissions$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation setToolpermissions
+     */
+    static readonly SetToolpermissionsPath = '/admin/v1/toolpermissions/{authority}';
+
+    /**
+     * set toolpermissions for an authority.
+     *
+     * If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `setToolpermissions()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    setToolpermissions$Response(params: {
+        /**
+         * Authority to set (user or group)
+         */
+        authority: string;
+        body?: {
+            [key: string]: 'ALLOWED' | 'DENIED' | 'UNDEFINED';
+        };
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.SetToolpermissionsPath, 'put');
+        if (params) {
+            rb.path('authority', params.authority, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * set toolpermissions for an authority.
+     *
+     * If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `setToolpermissions$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    setToolpermissions(params: {
+        /**
+         * Authority to set (user or group)
+         */
+        authority: string;
+        body?: {
+            [key: string]: 'ALLOWED' | 'DENIED' | 'UNDEFINED';
+        };
+    }): Observable<string> {
+        return this.setToolpermissions$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getApplicationXml
+     */
+    static readonly GetApplicationXmlPath = '/admin/v1/applications/{xml}';
+
+    /**
+     * list any xml properties (like from homeApplication.properties.xml).
+     *
+     * list any xml properties (like from homeApplication.properties.xml)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getApplicationXml()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getApplicationXml$Response(params: {
+        /**
+         * Properties Filename (*.xml)
+         */
+        xml: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetApplicationXmlPath, 'get');
+        if (params) {
+            rb.path('xml', params.xml, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * list any xml properties (like from homeApplication.properties.xml).
+     *
+     * list any xml properties (like from homeApplication.properties.xml)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getApplicationXml$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getApplicationXml(params: {
+        /**
+         * Properties Filename (*.xml)
+         */
+        xml: string;
+    }): Observable<string> {
+        return this.getApplicationXml$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation updateApplicationXml
+     */
+    static readonly UpdateApplicationXmlPath = '/admin/v1/applications/{xml}';
+
+    /**
+     * edit any properties xml (like homeApplication.properties.xml).
+     *
+     * if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `updateApplicationXml()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    updateApplicationXml$Response(params: {
+        /**
+         * Properties Filename (*.xml)
+         */
+        xml: string;
+        body?: {
+            [key: string]: string;
+        };
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UpdateApplicationXmlPath, 'put');
+        if (params) {
+            rb.path('xml', params.xml, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * edit any properties xml (like homeApplication.properties.xml).
+     *
+     * if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `updateApplicationXml$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    updateApplicationXml(params: {
+        /**
+         * Properties Filename (*.xml)
+         */
+        xml: string;
+        body?: {
+            [key: string]: string;
+        };
+    }): Observable<any> {
+        return this.updateApplicationXml$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -559,14 +1153,10 @@ export class AdminV1Service extends BaseService {
          * Id/bean name of the cache
          */
         id: string;
-    }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
+    }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetCacheEntriesPath, 'get');
         if (params) {
-            rb.path('id', params.id, { style: 'simple', explode: false });
+            rb.path('id', params.id, {});
         }
 
         return this.http
@@ -579,9 +1169,7 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -601,20 +1189,9 @@ export class AdminV1Service extends BaseService {
          * Id/bean name of the cache
          */
         id: string;
-    }): Observable<{
-        [key: string]: {};
-    }> {
+    }): Observable<string> {
         return this.getCacheEntries$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
@@ -641,7 +1218,7 @@ export class AdminV1Service extends BaseService {
     }): Observable<StrictHttpResponse<CacheInfo>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetCacheInfoPath, 'get');
         if (params) {
-            rb.path('id', params.id, { style: 'simple', explode: false });
+            rb.path('id', params.id, {});
         }
 
         return this.http
@@ -681,213 +1258,6 @@ export class AdminV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation clearCache
-     */
-    static readonly ClearCachePath = '/admin/v1/cache/clearCache';
-
-    /**
-     * clear cache.
-     *
-     * clear cache
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `clearCache()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    clearCache$Response(params?: {
-        /**
-         * bean
-         */
-        bean?: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ClearCachePath, 'post');
-        if (params) {
-            rb.query('bean', params.bean, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * clear cache.
-     *
-     * clear cache
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `clearCache$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    clearCache(params?: {
-        /**
-         * bean
-         */
-        bean?: string;
-    }): Observable<void> {
-        return this.clearCache$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation refreshEduGroupCache
-     */
-    static readonly RefreshEduGroupCachePath = '/admin/v1/cache/refreshEduGroupCache';
-
-    /**
-     * Refresh the Edu Group Cache.
-     *
-     * Refresh the Edu Group Cache.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `refreshEduGroupCache()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    refreshEduGroupCache$Response(params?: {
-        /**
-         * keep existing
-         */
-        keepExisting?: boolean;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(
-            this.rootUrl,
-            AdminV1Service.RefreshEduGroupCachePath,
-            'post',
-        );
-        if (params) {
-            rb.query('keepExisting', params.keepExisting, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Refresh the Edu Group Cache.
-     *
-     * Refresh the Edu Group Cache.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `refreshEduGroupCache$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    refreshEduGroupCache(params?: {
-        /**
-         * keep existing
-         */
-        keepExisting?: boolean;
-    }): Observable<void> {
-        return this.refreshEduGroupCache$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation removeCacheEntry
-     */
-    static readonly RemoveCacheEntryPath = '/admin/v1/cache/removeCacheEntry';
-
-    /**
-     * remove cache entry.
-     *
-     * remove cache entry
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `removeCacheEntry()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    removeCacheEntry$Response(params?: {
-        /**
-         * cacheIndex
-         */
-        cacheIndex?: number;
-
-        /**
-         * bean
-         */
-        bean?: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.RemoveCacheEntryPath, 'post');
-        if (params) {
-            rb.query('cacheIndex', params.cacheIndex, { style: 'form', explode: true });
-            rb.query('bean', params.bean, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * remove cache entry.
-     *
-     * remove cache entry
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `removeCacheEntry$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    removeCacheEntry(params?: {
-        /**
-         * cacheIndex
-         */
-        cacheIndex?: number;
-
-        /**
-         * bean
-         */
-        bean?: string;
-    }): Observable<void> {
-        return this.removeCacheEntry$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
      * Path part for operation getCatalinaOut
      */
     static readonly GetCatalinaOutPath = '/admin/v1/catalina';
@@ -902,7 +1272,7 @@ export class AdminV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    getCatalinaOut$Response(params?: {}): Observable<StrictHttpResponse<Array<string>>> {
+    getCatalinaOut$Response(params?: {}): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetCatalinaOutPath, 'get');
         if (params) {
         }
@@ -917,7 +1287,7 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<string>>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -932,9 +1302,9 @@ export class AdminV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    getCatalinaOut(params?: {}): Observable<Array<string>> {
+    getCatalinaOut(params?: {}): Observable<string> {
         return this.getCatalinaOut$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<string>>) => r.body as Array<string>),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
@@ -1041,6 +1411,109 @@ export class AdminV1Service extends BaseService {
     }
 
     /**
+     * Path part for operation getConfig
+     */
+    static readonly GetConfigPath = '/admin/v1/repositoryConfig';
+
+    /**
+     * get the repository config object.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getConfig()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getConfig$Response(params?: {}): Observable<StrictHttpResponse<RepositoryConfig>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetConfigPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<RepositoryConfig>;
+                }),
+            );
+    }
+
+    /**
+     * get the repository config object.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getConfig$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getConfig(params?: {}): Observable<RepositoryConfig> {
+        return this.getConfig$Response(params).pipe(
+            map((r: StrictHttpResponse<RepositoryConfig>) => r.body as RepositoryConfig),
+        );
+    }
+
+    /**
+     * Path part for operation setConfig
+     */
+    static readonly SetConfigPath = '/admin/v1/repositoryConfig';
+
+    /**
+     * set/update the repository config object.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `setConfig()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    setConfig$Response(params?: { body?: RepositoryConfig }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.SetConfigPath, 'put');
+        if (params) {
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * set/update the repository config object.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `setConfig$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    setConfig(params?: { body?: RepositoryConfig }): Observable<any> {
+        return this.setConfig$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
      * Path part for operation getConfigFile
      */
     static readonly GetConfigFilePath = '/admin/v1/configFile';
@@ -1063,7 +1536,7 @@ export class AdminV1Service extends BaseService {
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetConfigFilePath, 'get');
         if (params) {
-            rb.query('filename', params.filename, { style: 'form', explode: true });
+            rb.query('filename', params.filename, {});
         }
 
         return this.http
@@ -1123,26 +1596,24 @@ export class AdminV1Service extends BaseService {
          */
         filename: string;
         body?: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UpdateConfigFilePath, 'put');
         if (params) {
-            rb.query('filename', params.filename, { style: 'form', explode: true });
+            rb.query('filename', params.filename, {});
             rb.body(params.body, 'application/json');
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -1163,230 +1634,9 @@ export class AdminV1Service extends BaseService {
          */
         filename: string;
         body?: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.updateConfigFile$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation deletePerson
-     */
-    static readonly DeletePersonPath = '/admin/v1/deletePersons';
-
-    /**
-     * delete persons.
-     *
-     * delete the given persons. Their status must be set to "todelete"
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `deletePerson()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    deletePerson$Response(params: {
-        /**
-         * names of the users to delete
-         */
-        username: Array<string>;
-
-        /**
-         * options object what and how to delete user contents
-         */
-        body?: PersonDeleteOptions;
-    }): Observable<StrictHttpResponse<PersonReport>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.DeletePersonPath, 'put');
-        if (params) {
-            rb.query('username', params.username, { style: 'form', explode: true });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<PersonReport>;
-                }),
-            );
-    }
-
-    /**
-     * delete persons.
-     *
-     * delete the given persons. Their status must be set to "todelete"
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `deletePerson$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    deletePerson(params: {
-        /**
-         * names of the users to delete
-         */
-        username: Array<string>;
-
-        /**
-         * options object what and how to delete user contents
-         */
-        body?: PersonDeleteOptions;
-    }): Observable<PersonReport> {
-        return this.deletePerson$Response(params).pipe(
-            map((r: StrictHttpResponse<PersonReport>) => r.body as PersonReport),
-        );
-    }
-
-    /**
-     * Path part for operation searchByElasticDsl
-     */
-    static readonly SearchByElasticDslPath = '/admin/v1/elastic';
-
-    /**
-     * Search for custom elastic DSL query.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `searchByElasticDsl()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    searchByElasticDsl$Response(params?: {
-        /**
-         * dsl query (json encoded)
-         */
-        dsl?: string;
-    }): Observable<StrictHttpResponse<SearchResultElastic>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.SearchByElasticDslPath, 'get');
-        if (params) {
-            rb.query('dsl', params.dsl, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<SearchResultElastic>;
-                }),
-            );
-    }
-
-    /**
-     * Search for custom elastic DSL query.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `searchByElasticDsl$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    searchByElasticDsl(params?: {
-        /**
-         * dsl query (json encoded)
-         */
-        dsl?: string;
-    }): Observable<SearchResultElastic> {
-        return this.searchByElasticDsl$Response(params).pipe(
-            map((r: StrictHttpResponse<SearchResultElastic>) => r.body as SearchResultElastic),
-        );
-    }
-
-    /**
-     * Path part for operation exportLom
-     */
-    static readonly ExportLomPath = '/admin/v1/export/lom';
-
-    /**
-     * Export Nodes with LOM Metadata Format.
-     *
-     * Export Nodes with LOM Metadata Format.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `exportLom()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    exportLom$Response(params: {
-        /**
-         * filterQuery
-         */
-        filterQuery: string;
-
-        /**
-         * targetDir
-         */
-        targetDir: string;
-
-        /**
-         * subObjectHandler
-         */
-        subObjectHandler: boolean;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ExportLomPath, 'get');
-        if (params) {
-            rb.query('filterQuery', params.filterQuery, { style: 'form', explode: true });
-            rb.query('targetDir', params.targetDir, { style: 'form', explode: true });
-            rb.query('subObjectHandler', params.subObjectHandler, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Export Nodes with LOM Metadata Format.
-     *
-     * Export Nodes with LOM Metadata Format.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `exportLom$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    exportLom(params: {
-        /**
-         * filterQuery
-         */
-        filterQuery: string;
-
-        /**
-         * targetDir
-         */
-        targetDir: string;
-
-        /**
-         * subObjectHandler
-         */
-        subObjectHandler: boolean;
-    }): Observable<void> {
-        return this.exportLom$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -1405,7 +1655,7 @@ export class AdminV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    getGlobalGroups$Response(params?: {}): Observable<StrictHttpResponse<Array<Group>>> {
+    getGlobalGroups$Response(params?: {}): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetGlobalGroupsPath, 'get');
         if (params) {
         }
@@ -1420,7 +1670,7 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<Group>>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -1435,9 +1685,224 @@ export class AdminV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    getGlobalGroups(params?: {}): Observable<Array<Group>> {
+    getGlobalGroups(params?: {}): Observable<string> {
         return this.getGlobalGroups$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<Group>>) => r.body as Array<Group>),
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getJobs
+     */
+    static readonly GetJobsPath = '/admin/v1/jobs';
+
+    /**
+     * get all running jobs.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getJobs()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getJobs$Response(params?: {}): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetJobsPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * get all running jobs.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getJobs$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getJobs(params?: {}): Observable<string> {
+        return this.getJobs$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getOaiClasses
+     */
+    static readonly GetOaiClassesPath = '/admin/v1/import/oai/classes';
+
+    /**
+     * Get OAI class names.
+     *
+     * Get available importer classes for OAI import.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getOaiClasses()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getOaiClasses$Response(params?: {}): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetOaiClassesPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * Get OAI class names.
+     *
+     * Get available importer classes for OAI import.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getOaiClasses$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getOaiClasses(params?: {}): Observable<string> {
+        return this.getOaiClasses$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getPropertyToMds
+     */
+    static readonly GetPropertyToMdsPath = '/admin/v1/propertyToMds';
+
+    /**
+     * Get a Mds Valuespace for all values of the given properties.
+     *
+     * Get a Mds Valuespace for all values of the given properties.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getPropertyToMds()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getPropertyToMds$Response(params: {
+        /**
+         * one or more properties
+         */
+        properties: Array<string>;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetPropertyToMdsPath, 'get');
+        if (params) {
+            rb.query('properties', params.properties, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * Get a Mds Valuespace for all values of the given properties.
+     *
+     * Get a Mds Valuespace for all values of the given properties.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getPropertyToMds$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getPropertyToMds(params: {
+        /**
+         * one or more properties
+         */
+        properties: Array<string>;
+    }): Observable<string> {
+        return this.getPropertyToMds$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getStatistics
+     */
+    static readonly GetStatisticsPath = '/admin/v1/statistics';
+
+    /**
+     * get statistics.
+     *
+     * get statistics.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getStatistics()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getStatistics$Response(params?: {}): Observable<StrictHttpResponse<AdminStatistics>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetStatisticsPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<AdminStatistics>;
+                }),
+            );
+    }
+
+    /**
+     * get statistics.
+     *
+     * get statistics.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getStatistics$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getStatistics(params?: {}): Observable<AdminStatistics> {
+        return this.getStatistics$Response(params).pipe(
+            map((r: StrictHttpResponse<AdminStatistics>) => r.body as AdminStatistics),
         );
     }
 
@@ -1454,19 +1919,24 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `importCollections()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
-    importCollections$Response(params: {
+    importCollections$Response(params?: {
         /**
          * Id of the root to initialize the collection structure, or &#x27;-root-&#x27; to inflate them on the first level
          */
         parent?: string;
-        body: ImportCollectionsBody;
+        body?: {
+            /**
+             * XML file to parse (or zip file containing exactly 1 xml file to parse)
+             */
+            xml: {};
+        };
     }): Observable<StrictHttpResponse<CollectionsResult>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ImportCollectionsPath, 'post');
         if (params) {
-            rb.query('parent', params.parent, { style: 'form', explode: true });
-            rb.body(params.body, 'multipart/form-data');
+            rb.query('parent', params.parent, {});
+            rb.body(params.body, 'application/json');
         }
 
         return this.http
@@ -1492,14 +1962,19 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `importCollections$Response()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
-    importCollections(params: {
+    importCollections(params?: {
         /**
          * Id of the root to initialize the collection structure, or &#x27;-root-&#x27; to inflate them on the first level
          */
         parent?: string;
-        body: ImportCollectionsBody;
+        body?: {
+            /**
+             * XML file to parse (or zip file containing exactly 1 xml file to parse)
+             */
+            xml: {};
+        };
     }): Observable<CollectionsResult> {
         return this.importCollections$Response(params).pipe(
             map((r: StrictHttpResponse<CollectionsResult>) => r.body as CollectionsResult),
@@ -1519,7 +1994,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `importExcel()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
     importExcel$Response(params: {
         /**
@@ -1531,13 +2006,18 @@ export class AdminV1Service extends BaseService {
          * addToCollection
          */
         addToCollection: boolean;
-        body: ImportExcelBody;
+        body?: {
+            /**
+             * Excel file to import
+             */
+            excel: {};
+        };
     }): Observable<StrictHttpResponse<ExcelResult>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ImportExcelPath, 'post');
         if (params) {
-            rb.query('parent', params.parent, { style: 'form', explode: true });
-            rb.query('addToCollection', params.addToCollection, { style: 'form', explode: true });
-            rb.body(params.body, 'multipart/form-data');
+            rb.query('parent', params.parent, {});
+            rb.query('addToCollection', params.addToCollection, {});
+            rb.body(params.body, 'application/json');
         }
 
         return this.http
@@ -1563,7 +2043,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `importExcel$Response()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
     importExcel(params: {
         /**
@@ -1575,7 +2055,12 @@ export class AdminV1Service extends BaseService {
          * addToCollection
          */
         addToCollection: boolean;
-        body: ImportExcelBody;
+        body?: {
+            /**
+             * Excel file to import
+             */
+            excel: {};
+        };
     }): Observable<ExcelResult> {
         return this.importExcel$Response(params).pipe(
             map((r: StrictHttpResponse<ExcelResult>) => r.body as ExcelResult),
@@ -1672,51 +2157,37 @@ export class AdminV1Service extends BaseService {
          * periodInDays: internal sets from and until. only effective if from/until not set)
          */
         periodInDays?: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ImportOaiPath, 'post');
         if (params) {
-            rb.query('baseUrl', params.baseUrl, { style: 'form', explode: true });
-            rb.query('set', params.set, { style: 'form', explode: true });
-            rb.query('metadataPrefix', params.metadataPrefix, { style: 'form', explode: true });
-            rb.query('metadataset', params.metadataset, { style: 'form', explode: true });
-            rb.query('className', params.className, { style: 'form', explode: true });
-            rb.query('importerClassName', params.importerClassName, {
-                style: 'form',
-                explode: true,
-            });
-            rb.query('recordHandlerClassName', params.recordHandlerClassName, {
-                style: 'form',
-                explode: true,
-            });
-            rb.query('binaryHandlerClassName', params.binaryHandlerClassName, {
-                style: 'form',
-                explode: true,
-            });
-            rb.query('persistentHandlerClassName', params.persistentHandlerClassName, {
-                style: 'form',
-                explode: true,
-            });
-            rb.query('fileUrl', params.fileUrl, { style: 'form', explode: true });
-            rb.query('oaiIds', params.oaiIds, { style: 'form', explode: true });
-            rb.query('forceUpdate', params.forceUpdate, { style: 'form', explode: true });
-            rb.query('from', params.from, { style: 'form', explode: true });
-            rb.query('until', params.until, { style: 'form', explode: true });
-            rb.query('periodInDays', params.periodInDays, { style: 'form', explode: true });
+            rb.query('baseUrl', params.baseUrl, {});
+            rb.query('set', params.set, {});
+            rb.query('metadataPrefix', params.metadataPrefix, {});
+            rb.query('metadataset', params.metadataset, {});
+            rb.query('className', params.className, {});
+            rb.query('importerClassName', params.importerClassName, {});
+            rb.query('recordHandlerClassName', params.recordHandlerClassName, {});
+            rb.query('binaryHandlerClassName', params.binaryHandlerClassName, {});
+            rb.query('persistentHandlerClassName', params.persistentHandlerClassName, {});
+            rb.query('fileUrl', params.fileUrl, {});
+            rb.query('oaiIds', params.oaiIds, {});
+            rb.query('forceUpdate', params.forceUpdate, {});
+            rb.query('from', params.from, {});
+            rb.query('until', params.until, {});
+            rb.query('periodInDays', params.periodInDays, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -1806,9 +2277,9 @@ export class AdminV1Service extends BaseService {
          * periodInDays: internal sets from and until. only effective if from/until not set)
          */
         periodInDays?: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.importOai$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -1842,27 +2313,25 @@ export class AdminV1Service extends BaseService {
          * metadata prefix
          */
         metadataPrefix: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.RemoveOaiImportsPath, 'delete');
         if (params) {
-            rb.query('baseUrl', params.baseUrl, { style: 'form', explode: true });
-            rb.query('set', params.set, { style: 'form', explode: true });
-            rb.query('metadataPrefix', params.metadataPrefix, { style: 'form', explode: true });
+            rb.query('baseUrl', params.baseUrl, {});
+            rb.query('set', params.set, {});
+            rb.query('metadataPrefix', params.metadataPrefix, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -1892,60 +2361,9 @@ export class AdminV1Service extends BaseService {
          * metadata prefix
          */
         metadataPrefix: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.removeOaiImports$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getOaiClasses
-     */
-    static readonly GetOaiClassesPath = '/admin/v1/import/oai/classes';
-
-    /**
-     * Get OAI class names.
-     *
-     * Get available importer classes for OAI import.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getOaiClasses()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getOaiClasses$Response(params?: {}): Observable<StrictHttpResponse<Array<string>>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetOaiClassesPath, 'get');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<string>>;
-                }),
-            );
-    }
-
-    /**
-     * Get OAI class names.
-     *
-     * Get available importer classes for OAI import.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getOaiClasses$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getOaiClasses(params?: {}): Observable<Array<string>> {
-        return this.getOaiClasses$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<string>>) => r.body as Array<string>),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -1962,7 +2380,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `importOaiXml()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
     importOaiXml$Response(params?: {
         /**
@@ -1974,19 +2392,15 @@ export class AdminV1Service extends BaseService {
          * BinaryHandler class name (may be empty for none)
          */
         binaryHandlerClassName?: string;
-        body?: OaiXmlBody;
+        body?: {
+            xml?: {};
+        };
     }): Observable<StrictHttpResponse<Node>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ImportOaiXmlPath, 'post');
         if (params) {
-            rb.query('recordHandlerClassName', params.recordHandlerClassName, {
-                style: 'form',
-                explode: true,
-            });
-            rb.query('binaryHandlerClassName', params.binaryHandlerClassName, {
-                style: 'form',
-                explode: true,
-            });
-            rb.body(params.body, 'multipart/form-data');
+            rb.query('recordHandlerClassName', params.recordHandlerClassName, {});
+            rb.query('binaryHandlerClassName', params.binaryHandlerClassName, {});
+            rb.body(params.body, 'application/json');
         }
 
         return this.http
@@ -2012,7 +2426,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `importOaiXml$Response()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
     importOaiXml(params?: {
         /**
@@ -2024,10 +2438,63 @@ export class AdminV1Service extends BaseService {
          * BinaryHandler class name (may be empty for none)
          */
         binaryHandlerClassName?: string;
-        body?: OaiXmlBody;
+        body?: {
+            xml?: {};
+        };
     }): Observable<Node> {
         return this.importOaiXml$Response(params).pipe(
             map((r: StrictHttpResponse<Node>) => r.body as Node),
+        );
+    }
+
+    /**
+     * Path part for operation refreshAppInfo
+     */
+    static readonly RefreshAppInfoPath = '/admin/v1/refreshAppInfo';
+
+    /**
+     * refresh app info.
+     *
+     * Refresh the application info.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `refreshAppInfo()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    refreshAppInfo$Response(params?: {}): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.RefreshAppInfoPath, 'post');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * refresh app info.
+     *
+     * Refresh the application info.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `refreshAppInfo$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    refreshAppInfo(params?: {}): Observable<any> {
+        return this.refreshAppInfo$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -2056,26 +2523,24 @@ export class AdminV1Service extends BaseService {
          * sticky
          */
         sticky: boolean;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.RefreshCachePath, 'post');
         if (params) {
-            rb.path('folder', params.folder, { style: 'simple', explode: false });
-            rb.query('sticky', params.sticky, { style: 'form', explode: true });
+            rb.path('folder', params.folder, {});
+            rb.query('sticky', params.sticky, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -2100,109 +2565,40 @@ export class AdminV1Service extends BaseService {
          * sticky
          */
         sticky: boolean;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.refreshCache$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation startJob
+     * Path part for operation refreshEduGroupCache
      */
-    static readonly StartJobPath = '/admin/v1/job/{jobClass}';
+    static readonly RefreshEduGroupCachePath = '/admin/v1/cache/refreshEduGroupCache';
 
     /**
-     * Start a Job.
+     * Refresh the Edu Group Cache.
      *
-     * Start a Job.
+     * Refresh the Edu Group Cache.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `startJob()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    startJob$Response(params: {
-        /**
-         * jobClass
-         */
-        jobClass: string;
-
-        /**
-         * params
-         */
-        body: {
-            [key: string]: string;
-        };
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.StartJobPath, 'post');
-        if (params) {
-            rb.path('jobClass', params.jobClass, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Start a Job.
-     *
-     * Start a Job.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `startJob$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    startJob(params: {
-        /**
-         * jobClass
-         */
-        jobClass: string;
-
-        /**
-         * params
-         */
-        body: {
-            [key: string]: string;
-        };
-    }): Observable<void> {
-        return this.startJob$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getJobs
-     */
-    static readonly GetJobsPath = '/admin/v1/jobs';
-
-    /**
-     * get all running jobs.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getJobs()` instead.
+     * To access only the response body, use `refreshEduGroupCache()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getJobs$Response(params?: {}): Observable<StrictHttpResponse<Array<JobInfo>>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetJobsPath, 'get');
+    refreshEduGroupCache$Response(params?: {
+        /**
+         * keep existing
+         */
+        keepExisting?: boolean;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            AdminV1Service.RefreshEduGroupCachePath,
+            'post',
+        );
         if (params) {
+            rb.query('keepExisting', params.keepExisting, {});
         }
 
         return this.http
@@ -2215,45 +2611,56 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<JobInfo>>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * get all running jobs.
+     * Refresh the Edu Group Cache.
      *
-     *
+     * Refresh the Edu Group Cache.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getJobs$Response()` instead.
+     * To access the full response (for headers, for example), `refreshEduGroupCache$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getJobs(params?: {}): Observable<Array<JobInfo>> {
-        return this.getJobs$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<JobInfo>>) => r.body as Array<JobInfo>),
+    refreshEduGroupCache(params?: {
+        /**
+         * keep existing
+         */
+        keepExisting?: boolean;
+    }): Observable<any> {
+        return this.refreshEduGroupCache$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation getAllJobs
+     * Path part for operation removeApplication
      */
-    static readonly GetAllJobsPath = '/admin/v1/jobs/all';
+    static readonly RemoveApplicationPath = '/admin/v1/applications/{id}';
 
     /**
-     * get all available jobs.
+     * remove an application.
      *
-     *
+     * remove the specified application.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getAllJobs()` instead.
+     * To access only the response body, use `removeApplication()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getAllJobs$Response(params?: {}): Observable<StrictHttpResponse<Array<JobDescription>>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetAllJobsPath, 'get');
+    removeApplication$Response(params: {
+        /**
+         * Application id
+         */
+        id: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.RemoveApplicationPath, 'delete');
         if (params) {
+            rb.path('id', params.id, {});
         }
 
         return this.http
@@ -2266,164 +2673,164 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<JobDescription>>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * get all available jobs.
+     * remove an application.
      *
-     *
+     * remove the specified application.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getAllJobs$Response()` instead.
+     * To access the full response (for headers, for example), `removeApplication$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getAllJobs(params?: {}): Observable<Array<JobDescription>> {
-        return this.getAllJobs$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<JobDescription>>) => r.body as Array<JobDescription>),
+    removeApplication(params: {
+        /**
+         * Application id
+         */
+        id: string;
+    }): Observable<any> {
+        return this.removeApplication$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation cancelJob
+     * Path part for operation removeCacheEntry
      */
-    static readonly CancelJobPath = '/admin/v1/jobs/{job}';
+    static readonly RemoveCacheEntryPath = '/admin/v1/cache/removeCacheEntry';
 
     /**
-     * cancel a running job.
+     * remove cache entry.
      *
-     *
+     * remove cache entry
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `cancelJob()` instead.
+     * To access only the response body, use `removeCacheEntry()` instead.
      *
      * This method doesn't expect any request body.
      */
-    cancelJob$Response(params: { job: string }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.CancelJobPath, 'delete');
+    removeCacheEntry$Response(params?: {
+        /**
+         * cacheIndex
+         */
+        cacheIndex?: number;
+
+        /**
+         * bean
+         */
+        bean?: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.RemoveCacheEntryPath, 'post');
         if (params) {
-            rb.path('job', params.job, { style: 'simple', explode: false });
+            rb.query('cacheIndex', params.cacheIndex, {});
+            rb.query('bean', params.bean, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * cancel a running job.
+     * remove cache entry.
      *
-     *
+     * remove cache entry
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `cancelJob$Response()` instead.
+     * To access the full response (for headers, for example), `removeCacheEntry$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    cancelJob(params: { job: string }): Observable<void> {
-        return this.cancelJob$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+    removeCacheEntry(params?: {
+        /**
+         * cacheIndex
+         */
+        cacheIndex?: number;
+
+        /**
+         * bean
+         */
+        bean?: string;
+    }): Observable<any> {
+        return this.removeCacheEntry$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation changeLogging
+     * Path part for operation searchByElasticDsl
      */
-    static readonly ChangeLoggingPath = '/admin/v1/log';
+    static readonly SearchByElasticDslPath = '/admin/v1/elastic';
 
     /**
-     * Change the loglevel for classes at runtime.
+     * Search for custom elastic DSL query.
      *
-     * Root appenders are used. Check the appender treshold.
+     *
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeLogging()` instead.
+     * To access only the response body, use `searchByElasticDsl()` instead.
      *
      * This method doesn't expect any request body.
      */
-    changeLogging$Response(params: {
+    searchByElasticDsl$Response(params?: {
         /**
-         * name
+         * dsl query (json encoded)
          */
-        name: string;
-
-        /**
-         * loglevel
-         */
-        loglevel: string;
-
-        /**
-         * appender
-         */
-        appender?: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ChangeLoggingPath, 'post');
+        dsl?: string;
+    }): Observable<StrictHttpResponse<SearchResultElastic>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.SearchByElasticDslPath, 'get');
         if (params) {
-            rb.query('name', params.name, { style: 'form', explode: true });
-            rb.query('loglevel', params.loglevel, { style: 'form', explode: true });
-            rb.query('appender', params.appender, { style: 'form', explode: true });
+            rb.query('dsl', params.dsl, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<SearchResultElastic>;
                 }),
             );
     }
 
     /**
-     * Change the loglevel for classes at runtime.
+     * Search for custom elastic DSL query.
      *
-     * Root appenders are used. Check the appender treshold.
+     *
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeLogging$Response()` instead.
+     * To access the full response (for headers, for example), `searchByElasticDsl$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    changeLogging(params: {
+    searchByElasticDsl(params?: {
         /**
-         * name
+         * dsl query (json encoded)
          */
-        name: string;
-
-        /**
-         * loglevel
-         */
-        loglevel: string;
-
-        /**
-         * appender
-         */
-        appender?: string;
-    }): Observable<void> {
-        return this.changeLogging$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+        dsl?: string;
+    }): Observable<SearchResultElastic> {
+        return this.searchByElasticDsl$Response(params).pipe(
+            map((r: StrictHttpResponse<SearchResultElastic>) => r.body as SearchResultElastic),
         );
     }
 
@@ -2485,14 +2892,14 @@ export class AdminV1Service extends BaseService {
     }): Observable<StrictHttpResponse<SearchResult>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.SearchByLucenePath, 'get');
         if (params) {
-            rb.query('query', params.query, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
-            rb.query('store', params.store, { style: 'form', explode: true });
-            rb.query('authorityScope', params.authorityScope, { style: 'form', explode: true });
+            rb.query('query', params.query, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
+            rb.query('store', params.store, {});
+            rb.query('authorityScope', params.authorityScope, {});
         }
 
         return this.http
@@ -2567,53 +2974,23 @@ export class AdminV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation exportByLucene
+     * Path part for operation serverUpdateList
      */
-    static readonly ExportByLucenePath = '/admin/v1/lucene/export';
+    static readonly ServerUpdateListPath = '/admin/v1/serverUpdate/list';
 
     /**
-     * Search for custom lucene query and choose specific properties to load.
+     * list available update tasks.
      *
-     * e.g. @cm\:name:"*"
+     * list available update tasks
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `exportByLucene()` instead.
+     * To access only the response body, use `serverUpdateList()` instead.
      *
      * This method doesn't expect any request body.
      */
-    exportByLucene$Response(params?: {
-        /**
-         * query
-         */
-        query?: string;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-
-        /**
-         * properties to fetch, use parent::&lt;property&gt; to include parent property values
-         */
-        properties?: Array<string>;
-
-        /**
-         * store, workspace or archive
-         */
-        store?: 'Workspace' | 'Archive';
-    }): Observable<StrictHttpResponse<Array<{}>>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ExportByLucenePath, 'get');
+    serverUpdateList$Response(params?: {}): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ServerUpdateListPath, 'get');
         if (params) {
-            rb.query('query', params.query, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('properties', params.properties, { style: 'form', explode: true });
-            rb.query('store', params.store, { style: 'form', explode: true });
         }
 
         return this.http
@@ -2626,49 +3003,174 @@ export class AdminV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<{}>>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
 
     /**
-     * Search for custom lucene query and choose specific properties to load.
+     * list available update tasks.
      *
-     * e.g. @cm\:name:"*"
+     * list available update tasks
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `exportByLucene$Response()` instead.
+     * To access the full response (for headers, for example), `serverUpdateList$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    exportByLucene(params?: {
+    serverUpdateList(params?: {}): Observable<string> {
+        return this.serverUpdateList$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation serverUpdateList1
+     */
+    static readonly ServerUpdateList1Path = '/admin/v1/serverUpdate/run/{id}';
+
+    /**
+     * Run an update tasks.
+     *
+     * Run a specific update task (test or full update).
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `serverUpdateList1()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    serverUpdateList1$Response(params: {
         /**
-         * query
+         * Id of the update task
          */
-        query?: string;
+        id: string;
 
         /**
-         * sort properties
+         * Actually execute (if false, just runs in test mode)
          */
-        sortProperties?: Array<string>;
+        execute: boolean;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ServerUpdateList1Path, 'post');
+        if (params) {
+            rb.path('id', params.id, {});
+            rb.query('execute', params.execute, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * Run an update tasks.
+     *
+     * Run a specific update task (test or full update).
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `serverUpdateList1$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    serverUpdateList1(params: {
+        /**
+         * Id of the update task
+         */
+        id: string;
 
         /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         * Actually execute (if false, just runs in test mode)
          */
-        sortAscending?: Array<boolean>;
+        execute: boolean;
+    }): Observable<string> {
+        return this.serverUpdateList1$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation startJob
+     */
+    static readonly StartJobPath = '/admin/v1/job/{jobClass}';
+
+    /**
+     * Start a Job.
+     *
+     * Start a Job.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `startJob()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    startJob$Response(params: {
+        /**
+         * jobClass
+         */
+        jobClass: string;
 
         /**
-         * properties to fetch, use parent::&lt;property&gt; to include parent property values
+         * params
          */
-        properties?: Array<string>;
+        body: {
+            [key: string]: string;
+        };
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.StartJobPath, 'post');
+        if (params) {
+            rb.path('jobClass', params.jobClass, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Start a Job.
+     *
+     * Start a Job.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `startJob$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    startJob(params: {
+        /**
+         * jobClass
+         */
+        jobClass: string;
 
         /**
-         * store, workspace or archive
+         * params
          */
-        store?: 'Workspace' | 'Archive';
-    }): Observable<Array<{}>> {
-        return this.exportByLucene$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<{}>>) => r.body as Array<{}>),
+        body: {
+            [key: string]: string;
+        };
+    }): Observable<any> {
+        return this.startJob$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -2690,26 +3192,24 @@ export class AdminV1Service extends BaseService {
     testMail$Response(params: {
         receiver: string;
         template: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.TestMailPath, 'post');
         if (params) {
-            rb.path('receiver', params.receiver, { style: 'simple', explode: false });
-            rb.path('template', params.template, { style: 'simple', explode: false });
+            rb.path('receiver', params.receiver, {});
+            rb.path('template', params.template, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -2724,643 +3224,9 @@ export class AdminV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    testMail(params: { receiver: string; template: string }): Observable<void> {
+    testMail(params: { receiver: string; template: string }): Observable<any> {
         return this.testMail$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getPropertyToMds
-     */
-    static readonly GetPropertyToMdsPath = '/admin/v1/propertyToMds';
-
-    /**
-     * Get a Mds Valuespace for all values of the given properties.
-     *
-     * Get a Mds Valuespace for all values of the given properties.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getPropertyToMds()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getPropertyToMds$Response(params: {
-        /**
-         * one or more properties
-         */
-        properties: Array<string>;
-    }): Observable<StrictHttpResponse<string>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetPropertyToMdsPath, 'get');
-        if (params) {
-            rb.query('properties', params.properties, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<string>;
-                }),
-            );
-    }
-
-    /**
-     * Get a Mds Valuespace for all values of the given properties.
-     *
-     * Get a Mds Valuespace for all values of the given properties.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getPropertyToMds$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getPropertyToMds(params: {
-        /**
-         * one or more properties
-         */
-        properties: Array<string>;
-    }): Observable<string> {
-        return this.getPropertyToMds$Response(params).pipe(
-            map((r: StrictHttpResponse<string>) => r.body as string),
-        );
-    }
-
-    /**
-     * Path part for operation refreshAppInfo
-     */
-    static readonly RefreshAppInfoPath = '/admin/v1/refreshAppInfo';
-
-    /**
-     * refresh app info.
-     *
-     * Refresh the application info.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `refreshAppInfo()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    refreshAppInfo$Response(params?: {}): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.RefreshAppInfoPath, 'post');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * refresh app info.
-     *
-     * Refresh the application info.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `refreshAppInfo$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    refreshAppInfo(params?: {}): Observable<void> {
-        return this.refreshAppInfo$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getConfig
-     */
-    static readonly GetConfigPath = '/admin/v1/repositoryConfig';
-
-    /**
-     * get the repository config object.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getConfig()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getConfig$Response(params?: {}): Observable<StrictHttpResponse<RepositoryConfig>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetConfigPath, 'get');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<RepositoryConfig>;
-                }),
-            );
-    }
-
-    /**
-     * get the repository config object.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getConfig$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getConfig(params?: {}): Observable<RepositoryConfig> {
-        return this.getConfig$Response(params).pipe(
-            map((r: StrictHttpResponse<RepositoryConfig>) => r.body as RepositoryConfig),
-        );
-    }
-
-    /**
-     * Path part for operation setConfig
-     */
-    static readonly SetConfigPath = '/admin/v1/repositoryConfig';
-
-    /**
-     * set/update the repository config object.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `setConfig()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    setConfig$Response(params?: { body?: RepositoryConfig }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.SetConfigPath, 'put');
-        if (params) {
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * set/update the repository config object.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `setConfig$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    setConfig(params?: { body?: RepositoryConfig }): Observable<void> {
-        return this.setConfig$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation serverUpdateList
-     */
-    static readonly ServerUpdateListPath = '/admin/v1/serverUpdate/list';
-
-    /**
-     * list available update tasks.
-     *
-     * list available update tasks
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `serverUpdateList()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    serverUpdateList$Response(params?: {}): Observable<
-        StrictHttpResponse<Array<ServerUpdateInfo>>
-    > {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ServerUpdateListPath, 'get');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<ServerUpdateInfo>>;
-                }),
-            );
-    }
-
-    /**
-     * list available update tasks.
-     *
-     * list available update tasks
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `serverUpdateList$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    serverUpdateList(params?: {}): Observable<Array<ServerUpdateInfo>> {
-        return this.serverUpdateList$Response(params).pipe(
-            map(
-                (r: StrictHttpResponse<Array<ServerUpdateInfo>>) =>
-                    r.body as Array<ServerUpdateInfo>,
-            ),
-        );
-    }
-
-    /**
-     * Path part for operation serverUpdateList_1
-     */
-    static readonly ServerUpdateList_1Path = '/admin/v1/serverUpdate/run/{id}';
-
-    /**
-     * Run an update tasks.
-     *
-     * Run a specific update task (test or full update).
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `serverUpdateList_1()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    serverUpdateList_1$Response(params: {
-        /**
-         * Id of the update task
-         */
-        id: string;
-
-        /**
-         * Actually execute (if false, just runs in test mode)
-         */
-        execute: boolean;
-    }): Observable<StrictHttpResponse<Array<ServerUpdateInfo>>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ServerUpdateList_1Path, 'post');
-        if (params) {
-            rb.path('id', params.id, { style: 'simple', explode: false });
-            rb.query('execute', params.execute, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<ServerUpdateInfo>>;
-                }),
-            );
-    }
-
-    /**
-     * Run an update tasks.
-     *
-     * Run a specific update task (test or full update).
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `serverUpdateList_1$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    serverUpdateList_1(params: {
-        /**
-         * Id of the update task
-         */
-        id: string;
-
-        /**
-         * Actually execute (if false, just runs in test mode)
-         */
-        execute: boolean;
-    }): Observable<Array<ServerUpdateInfo>> {
-        return this.serverUpdateList_1$Response(params).pipe(
-            map(
-                (r: StrictHttpResponse<Array<ServerUpdateInfo>>) =>
-                    r.body as Array<ServerUpdateInfo>,
-            ),
-        );
-    }
-
-    /**
-     * Path part for operation getStatistics
-     */
-    static readonly GetStatisticsPath = '/admin/v1/statistics';
-
-    /**
-     * get statistics.
-     *
-     * get statistics.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getStatistics()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getStatistics$Response(params?: {}): Observable<StrictHttpResponse<AdminStatistics>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetStatisticsPath, 'get');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<AdminStatistics>;
-                }),
-            );
-    }
-
-    /**
-     * get statistics.
-     *
-     * get statistics.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getStatistics$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getStatistics(params?: {}): Observable<AdminStatistics> {
-        return this.getStatistics$Response(params).pipe(
-            map((r: StrictHttpResponse<AdminStatistics>) => r.body as AdminStatistics),
-        );
-    }
-
-    /**
-     * Path part for operation addToolpermission
-     */
-    static readonly AddToolpermissionPath = '/admin/v1/toolpermissions/add/{name}';
-
-    /**
-     * add a new toolpermissions.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `addToolpermission()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    addToolpermission$Response(params: {
-        /**
-         * Name/ID of toolpermission
-         */
-        name: string;
-    }): Observable<StrictHttpResponse<Node>> {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.AddToolpermissionPath, 'post');
-        if (params) {
-            rb.path('name', params.name, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Node>;
-                }),
-            );
-    }
-
-    /**
-     * add a new toolpermissions.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `addToolpermission$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    addToolpermission(params: {
-        /**
-         * Name/ID of toolpermission
-         */
-        name: string;
-    }): Observable<Node> {
-        return this.addToolpermission$Response(params).pipe(
-            map((r: StrictHttpResponse<Node>) => r.body as Node),
-        );
-    }
-
-    /**
-     * Path part for operation getAllToolpermissions
-     */
-    static readonly GetAllToolpermissionsPath = '/admin/v1/toolpermissions/{authority}';
-
-    /**
-     * get all toolpermissions for an authority.
-     *
-     * Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getAllToolpermissions()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getAllToolpermissions$Response(params: {
-        /**
-         * Authority to load (user or group)
-         */
-        authority: string;
-    }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
-        const rb = new RequestBuilder(
-            this.rootUrl,
-            AdminV1Service.GetAllToolpermissionsPath,
-            'get',
-        );
-        if (params) {
-            rb.path('authority', params.authority, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
-                }),
-            );
-    }
-
-    /**
-     * get all toolpermissions for an authority.
-     *
-     * Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getAllToolpermissions$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getAllToolpermissions(params: {
-        /**
-         * Authority to load (user or group)
-         */
-        authority: string;
-    }): Observable<{
-        [key: string]: {};
-    }> {
-        return this.getAllToolpermissions$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
-        );
-    }
-
-    /**
-     * Path part for operation setToolpermissions
-     */
-    static readonly SetToolpermissionsPath = '/admin/v1/toolpermissions/{authority}';
-
-    /**
-     * set toolpermissions for an authority.
-     *
-     * If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `setToolpermissions()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    setToolpermissions$Response(params: {
-        /**
-         * Authority to set (user or group)
-         */
-        authority: string;
-        body?: {
-            [key: string]: 'ALLOWED' | 'DENIED' | 'UNDEFINED';
-        };
-    }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
-        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.SetToolpermissionsPath, 'put');
-        if (params) {
-            rb.path('authority', params.authority, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
-                }),
-            );
-    }
-
-    /**
-     * set toolpermissions for an authority.
-     *
-     * If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `setToolpermissions$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    setToolpermissions(params: {
-        /**
-         * Authority to set (user or group)
-         */
-        authority: string;
-        body?: {
-            [key: string]: 'ALLOWED' | 'DENIED' | 'UNDEFINED';
-        };
-    }): Observable<{
-        [key: string]: {};
-    }> {
-        return this.setToolpermissions$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -3377,19 +3243,24 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `uploadTemp()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
     uploadTemp$Response(params: {
         /**
          * filename
          */
         name: string;
-        body: TempNameBody;
+        body?: {
+            /**
+             * file to upload
+             */
+            file: {};
+        };
     }): Observable<StrictHttpResponse<UploadResult>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UploadTempPath, 'put');
         if (params) {
-            rb.path('name', params.name, { style: 'simple', explode: false });
-            rb.body(params.body, 'multipart/form-data');
+            rb.path('name', params.name, {});
+            rb.body(params.body, 'application/json');
         }
 
         return this.http
@@ -3415,14 +3286,19 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `uploadTemp$Response()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method sends `application/json` and handles request body of type `application/json`.
      */
     uploadTemp(params: {
         /**
          * filename
          */
         name: string;
-        body: TempNameBody;
+        body?: {
+            /**
+             * file to upload
+             */
+            file: {};
+        };
     }): Observable<UploadResult> {
         return this.uploadTemp$Response(params).pipe(
             map((r: StrictHttpResponse<UploadResult>) => r.body as UploadResult),

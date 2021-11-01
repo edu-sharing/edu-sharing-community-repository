@@ -56,27 +56,25 @@ export class TrackingV1Service extends BaseService {
          * node id for which the event is tracked. For some event, this can be null
          */
         node?: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, TrackingV1Service.TrackEventPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('event', params.event, { style: 'simple', explode: false });
-            rb.query('node', params.node, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('event', params.event, {});
+            rb.query('node', params.node, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -115,9 +113,9 @@ export class TrackingV1Service extends BaseService {
          * node id for which the event is tracked. For some event, this can be null
          */
         node?: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.trackEvent$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 }
