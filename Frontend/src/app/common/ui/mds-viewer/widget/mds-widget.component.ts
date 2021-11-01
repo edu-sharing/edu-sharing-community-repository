@@ -14,9 +14,10 @@ import {DateHelper} from '../../../../core-ui-module/DateHelper';
 })
 export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
     readonly valueType = ValueType.String;
-    value:string[];
     @Input() widget: Widget;
 
+    ngOnInit(): void {
+    }
     getBasicType() {
         switch(this.widget.definition.type) {
             case 'text':
@@ -46,13 +47,19 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
         }
         return 'unknown';
     }
-    ngOnInit(): void {
+    getNodeValue() {
+        const id = this.widget.definition.id;
         if(this.widget.definition.type === 'range') {
-            const id = this.widget.definition.id;
             const values = this.mdsEditorInstance.values$.value;
-            this.value = [values[id + '_from']?.[0], values[id + '_to']?.[0]];
+            return [values[id + '_from']?.[0], values[id + '_to']?.[0]];
+        } else if (this.mdsEditorInstance.values$.value?.[id]) {
+            // support on the fly changes+updates of the values
+            return this.getValue(this.mdsEditorInstance.values$.value[id]);
         } else if (this.widget.getInitialValues()?.jointValues) {
-            this.value = this.getValue(this.widget.getInitialValues().jointValues);
+            return this.getValue(this.widget.getInitialValues().jointValues);
+        }
+        else {
+            return null;
         }
     }
     getValue(data: string[]) {
@@ -68,23 +75,20 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
         }
         return data;
     }
-    refresh() {
-        this.ngOnInit();
-    }
 
     click() {
         if(this.widget.definition.link === '_BLANK') {
-            window.open(this.value[0]);
+            window.open(this.getNodeValue()[0]);
         } else {
             console.warn('Unsupported link type ' + this.widget.definition.link);
         }
     }
 
     isEmpty() {
-        return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
+        return this.getNodeValue()?.every((v) => !v) || this.getNodeValue()?.length === 0 || !this.getNodeValue();
     }
     formatDate() {
-        return this.value.map((v) => {
+        return this.getNodeValue().map((v) => {
             if(this.widget.definition.format) {
                 return new DatePipe(null).transform(v, this.widget.definition.format);
             } else {
@@ -95,7 +99,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
         });
     }
     formatNumber() {
-        return this.value.map((v) => {
+        return this.getNodeValue().map((v) => {
             if(this.widget.definition.format === 'bytes') {
                 return new FormatSizePipe().transform(v);
             }

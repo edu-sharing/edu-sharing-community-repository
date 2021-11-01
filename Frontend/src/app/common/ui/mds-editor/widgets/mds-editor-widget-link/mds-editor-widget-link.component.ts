@@ -3,6 +3,8 @@ import {BehaviorSubject} from 'rxjs';
 import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {MainNavService} from '../../../../services/main-nav.service';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
+import {MdsEditorWidgetAuthorComponent} from '../mds-editor-widget-author/mds-editor-widget-author.component';
+import {NativeWidgetType} from '../../types';
 
 @Component({
     selector: 'app-mds-editor-widget-link',
@@ -14,7 +16,7 @@ export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidgetCompone
         requiresNode: true,
         supportsBulk: false,
     };
-    @Input() widgetName: 'maptemplate';
+    @Input() widgetName: NativeWidgetType.Maptemplate | NativeWidgetType.Contributor;
 
     hasChanges = new BehaviorSubject<boolean>(false);
 
@@ -31,6 +33,9 @@ export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidgetCompone
             case 'maptemplate':
                 this.linkLabel = 'MDS.TEMPLATE_LINK';
                 break;
+            case 'contributor':
+                this.linkLabel = 'MDS.CONTRIBUTOR_LINK';
+                break;
         }
     }
 
@@ -44,6 +49,11 @@ export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidgetCompone
 
             this.mainnav.getDialogs().nodeMetadata = null;
             this.mainnav.getDialogs().nodeTemplate = this.mdsEditorInstanceService.nodes$.value[0];
+        } else if (this.widgetName === 'contributor') {
+            await MdsEditorWidgetAuthorComponent.openContributorDialog(
+                this.mdsEditorInstanceService,
+                this.mainnav
+            );
         } else {
             throw new Error('not implemented');
         }

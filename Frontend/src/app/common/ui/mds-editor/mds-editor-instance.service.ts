@@ -30,7 +30,10 @@ import {
 import { SearchService } from '../../../modules/search/search.service';
 import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorCommonService } from './mds-editor-common.service';
-import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.component';
+import {
+    MdsEditorViewComponent,
+    NativeWidgetComponent
+} from './mds-editor-view/mds-editor-view.component';
 import {
     BulkMode,
     EditorBulkMode,
@@ -50,6 +53,9 @@ import {
 } from './types';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {InteractionType} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+import {MdsViewerComponent} from '../mds-viewer/mds-viewer.component';
+import {MdsWidgetComponent} from '../mds-viewer/widget/mds-widget.component';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -950,9 +956,9 @@ export class MdsEditorInstanceService implements OnDestroy {
         return this.isValid$.value;
     }
 
-    async getValues(node?: Node): Promise<Values> {
+    async getValues(node?: Node, validate = true): Promise<Values> {
         // same behaviour as old mds, do not return values until it is valid
-        if (!this.isValid$.value) {
+        if (validate && !this.isValid$.value) {
             this.showMissingRequiredWidgets(true);
             return null;
         }
@@ -1170,6 +1176,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);
+                console.log(widgetDefinition);
                 const widget = new MdsEditorInstanceService.Widget(
                     this,
                     widgetDefinition,
@@ -1354,6 +1361,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                 );
             }),
         );
+        // update current values to propagate to @MdsWidgetComponent
+        if(this.nodes$.value.length === 1) {
+            this.values$.next(this.nodes$.value[0].properties);
+        }
     }
 
     resetWidgets() {
