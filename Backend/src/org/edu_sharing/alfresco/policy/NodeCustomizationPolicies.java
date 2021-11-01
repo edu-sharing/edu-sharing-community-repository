@@ -2,7 +2,6 @@ package org.edu_sharing.alfresco.policy;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
@@ -541,7 +540,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			}
 			Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
 			props.addAll(Arrays.asList(LICENSE_PROPS));
-			props.addAll(MetadataReaderV2.getWidgetsByNode(ref,"de_DE").stream().
+			props.addAll(MetadataReader.getWidgetsByNode(ref,"de_DE").stream().
 					map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList()));
 			for (QName prop : after.keySet()) {
@@ -804,7 +803,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	private static byte[] getPreviewFromURLSplash(String httpURL) {
 		Config splash = LightbendConfigLoader.get().getConfig("repository.communication.splash");
-
 		if(splash != null && splash.hasPath("url")) {
 			try {
 				final StringBuilder url = new StringBuilder(splash.getString("url") + "?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));

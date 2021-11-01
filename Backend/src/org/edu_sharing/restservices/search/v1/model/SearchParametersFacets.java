@@ -4,28 +4,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
-import javax.ws.rs.QueryParam;
 import java.util.List;
 
 @Schema(description = "")
 public class SearchParametersFacets {
-    private List<String> facettes;
-    Integer facetMinCount;
-    Integer facetLimit;
+    private List<String> facets;
+    Integer facetMinCount = 5;
+    Integer facetLimit = 10;
     String facetSuggest;
-    private List<MdsQueryCriteria> criterias;
+    private List<MdsQueryCriteria> criteria;
 
     @Schema(required = true, description = "")
-    @JsonProperty("facettes")
-    public List<String> getFacettes() { return facettes;}
-    public void setFacettes(List<String> facettes) { this.facettes = facettes; }
+    @JsonProperty("facets")
+    public List<String> getFacets() { return facets;}
+    public void setFacets(List<String> facets) { this.facets = facets; }
 
-    @Schema(required = true, defaultValue = "5")
+    @Schema(required = false, defaultValue = "5")
     @JsonProperty("facetMinCount")
     public Integer getFacetMinCount() { return facetMinCount; }
     public void setFacetMinCount(Integer facetMinCount) { this.facetMinCount = facetMinCount;}
 
-    @Schema(required = true, defaultValue = "10")
+    @Schema(required = false, defaultValue = "10")
     @JsonProperty("facetLimit")
     public Integer getFacetLimit() { return facetLimit; }
     public void setFacetLimit(Integer facetLimit) { this.facetLimit = facetLimit; }
@@ -36,12 +35,12 @@ public class SearchParametersFacets {
     public void setFacetSuggest(String facetSuggest) { this.facetSuggest = facetSuggest; }
 
     @Schema(required = true, description = "")
-    @JsonProperty("criterias")
-    public List<MdsQueryCriteria> getCriterias() {
-        return criterias;
+    @JsonProperty("criteria")
+    public List<MdsQueryCriteria> getCriteria() {
+        return criteria;
     }
 
-    public void setCriterias(List<MdsQueryCriteria> criterias) {
-        this.criterias = criterias;
+    public void setCriteria(List<MdsQueryCriteria> criteria) {
+        this.criteria = criteria;
     }
 }

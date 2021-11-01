@@ -1,15 +1,11 @@
 package org.edu_sharing.service.search;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.XApiTool;
 import org.edu_sharing.service.stream.StreamServiceFactory;
@@ -38,9 +34,9 @@ public class SearchRelevancyTool {
 
 
         //throw new NotImplementedException("SearchRelevancyTool.getLuceneQuery is not implemented for this repository");
-        MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
+        MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id);
         // fetch all facettes for already viewed contents from xapi
-        List<String> facettes = XApiTool.getFacettesFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), property,lastActionsLimit);
+        List<String> facettes = XApiTool.getFacetsFromStore(AuthenticationUtil.getFullyAuthenticatedUser(), property,lastActionsLimit);
         // propably nothing viewed or xapi store failed, return empty query
         if(facettes==null)
             return "";

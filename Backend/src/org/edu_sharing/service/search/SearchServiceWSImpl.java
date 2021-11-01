@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -64,8 +64,8 @@ public class SearchServiceWSImpl extends SearchServiceAdapter {
 	@Override
 	public SearchResultNodeRef search(SearchToken _searchToken) {
 		org.edu_sharing.repository.client.rpc.SearchToken searchToken = new org.edu_sharing.repository.client.rpc.SearchToken();
-		searchToken.setCountProps(new ArrayList<String>(_searchToken.getFacettes()));
-		searchToken.setCountPropsMinCount(_searchToken.getFacettesMinCount());
+		searchToken.setCountProps(new ArrayList<String>(_searchToken.getFacets()));
+		searchToken.setCountPropsMinCount(_searchToken.getFacetsMinCount());
 		searchToken.setNrOfResults(_searchToken.getMaxResult());
 		searchToken.setRepositoryId(appId);
 		return null;
@@ -77,8 +77,8 @@ public class SearchServiceWSImpl extends SearchServiceAdapter {
 	}
 
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 		return null;
 	}
 

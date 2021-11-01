@@ -121,7 +121,7 @@ import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.exception.CCException;
@@ -160,6 +160,7 @@ import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
@@ -332,9 +333,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		SearchResult result = new SearchResult();
 		Map<String, Map<String, Integer>> countedProps = new HashMap<>();
 		if(srnr.getFacets() != null){
-			for(NodeSearch.Facette f : srnr.getFacets()){
+			for(NodeSearch.Facet f : srnr.getFacets()){
 				Map<String, Integer> values = new HashMap<>();
-				for(NodeSearch.Facette.Value value : f.getValues()){
+				for(NodeSearch.Facet.Value value : f.getValues()){
 					values.put(value.getValue(),value.getCount());
 				}
 				countedProps.put(f.getProperty(),values);
@@ -401,10 +402,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		// do the facette
 		if (facettes != null && facettes.size() > 0) {
-			List<NodeSearch.Facette> facetsResult = new ArrayList<>();
+			List<NodeSearch.Facet> facetsResult = new ArrayList<>();
 
 			for (String facetteProp : facettes) {
-				NodeSearch.Facette facet = new NodeSearch.Facette();
+				NodeSearch.Facet facet = new NodeSearch.Facet();
 				facet.setProperty(facetteProp);
 				facet.setValues(new ArrayList<>());
 				facetsResult.add(facet);
@@ -430,7 +431,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					 * --> pair.getSecond() > 0
 					 */
 					if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
-						NodeSearch.Facette.Value value = new NodeSearch.Facette.Value();
+						NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
 						value.setValue(first);
 						value.setCount(pair.getSecond());
 						facet.getValues().add(value);
@@ -903,7 +904,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		logger.debug("starting");
 
 		// making a copy so that the cached map will not be influenced
-		HashMap<String, Object> propsCopy = new HashMap<String, Object>(getPropertiesCached(nodeRef, true, true, false));
+		final HashMap<String, Object> propsCopy = new HashMap<String, Object>(getPropertiesCached(nodeRef, true, true, false));
 
 		logger.debug("starting extend several props with authentication and permission data");
 
@@ -972,7 +973,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
 				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 			}
-			MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
+			MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
 			HashMap<String, Object> addAndOverwriteDateMap = new HashMap<String, Object>();
 			for (Map.Entry<String, Object> entry : propsCopy.entrySet()) {
 
@@ -1151,10 +1152,15 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				return result;
 			}
 		}
-
-		return (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-				beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,propsCopy,
-						Arrays.asList(aspects)));
+		HashMap<String, Object> propsOutput = propsCopy;
+		for (PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+			propsOutput = new HashMap<>(i.beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(
+					nodeRef,
+					propsOutput,
+					Arrays.asList(aspects))
+			));
+		}
+		return propsOutput;
 	}
 
 	/**
@@ -1379,9 +1385,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 			if (mdate != null) {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
-				properties = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-						beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,properties,
-								aspects.stream().map(q -> q.toString()).collect(Collectors.toList())));
+				for(PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+					properties = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, properties,
+									aspects.stream().map(QName::toString).collect(Collectors.toList()))));
+				}
 				repCache.put(nodeRef.getId(), properties);
 			}
 		}

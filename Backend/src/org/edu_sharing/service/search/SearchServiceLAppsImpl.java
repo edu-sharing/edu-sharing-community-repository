@@ -7,12 +7,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -29,13 +26,10 @@ import javax.xml.xpath.XPathFactory;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.forms.VCardTool;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceLAppsImpl;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -129,10 +123,10 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 	}
 	
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 		
-		if(!MetadataSetV2.DEFAULT_CLIENT_QUERY.equals(query)){
+		if(!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)){
 			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
 		}
 		
@@ -141,7 +135,7 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 		String cat="";
 		String edusector="";
 		String educationsector="";
-		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
+		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 
 		boolean retval;		
 

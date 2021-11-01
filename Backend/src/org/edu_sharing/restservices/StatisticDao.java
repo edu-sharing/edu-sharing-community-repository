@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -59,7 +59,7 @@ public class StatisticDao {
 			List<StatisticsGlobal.StatisticsKeyGroup> groups=new ArrayList<>();
 			StatisticsGlobal.StatisticsGroup overall=new StatisticsGlobal.StatisticsGroup();
             overall.count=(countElements(null));
-            overall.subGroups =getFacettes(null,subGroup);
+            overall.subGroups = getFacets(null,subGroup);
             statistics.setOverall(overall);
             for(String g : getPrimaryGroup(group)) {
 				String lucene=escapeProperty(getGroupProperty(group))+":\""+g+"\"";
@@ -70,7 +70,7 @@ public class StatisticDao {
 					entry.displayName = I18nAngular.getTranslationAngular("common", "LICENSE." + g);
 					entry.count = count;
 					groups.add(entry);
-					entry.subGroups =getFacettes(lucene,subGroup);
+					entry.subGroups = getFacets(lucene,subGroup);
 				}
 			}
 			statistics.setGroups(groups);
@@ -111,7 +111,7 @@ public class StatisticDao {
         throw new IllegalArgumentException("Unsupported groupe type: "+group);
     }
 
-    private static List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup> getFacettes(String lucene, List<String> properties) throws Throwable {
+    private static List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup> getFacets(String lucene, List<String> properties) throws Throwable {
 	    if(properties.size()==0)
 	        return null;
         List<String> mappedProps = new ArrayList<>(properties.stream().map(prop -> {
@@ -121,13 +121,13 @@ public class StatisticDao {
             return CCConstants.getValidLocalName(mapped);
         }).collect(Collectors.toSet()));
 
-		List<Map<String, Integer>> data = countFacettes(lucene, mappedProps);
+		List<Map<String, Integer>> data = countFacets(lucene, mappedProps);
 		int i=0;
-		List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup> facettes = new ArrayList<>();
+		List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup> facets = new ArrayList<>();
 		for(String prop : properties) {
 		    String mapped=CCConstants.getValidLocalName(SUB_GROUP_MAPPING.get(prop));
-            StatisticsGlobal.StatisticsGroup.StatisticsSubGroup facette = new StatisticsGlobal.StatisticsGroup.StatisticsSubGroup();
-			facette.id=prop;
+            StatisticsGlobal.StatisticsGroup.StatisticsSubGroup facet = new StatisticsGlobal.StatisticsGroup.StatisticsSubGroup();
+			facet.id=prop;
 			Map<String, Integer> counts = data.get(mappedProps.indexOf(mapped));
 			List<StatisticsGlobal.StatisticsGroup.StatisticsSubGroup.SubGroupItem> result = new ArrayList<>();
 			if(prop.equals("fileFormat")) {
@@ -153,10 +153,10 @@ public class StatisticDao {
                 }
             }
 
-			facette.count=result;
-			facettes.add(facette);
+			facet.count=result;
+			facets.add(facet);
 		}
-		return facettes;
+		return facets;
 	}
 	private static String escapeProperty(String property) {
 		return "@"+CCConstants.getValidLocalName(property).replace(":","\\:");
@@ -173,18 +173,18 @@ public class StatisticDao {
 	public static int countElements(String lucene) throws Throwable {
 		StatisticService statisticService = StatisticServiceFactory
 				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSetV2.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene);
+		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene);
 	}
-	public static List<Map<String,Integer>> countFacettes(String lucene,Collection<String> facettes) throws Throwable {
+	public static List<Map<String,Integer>> countFacets(String lucene, Collection<String> facets) throws Throwable {
 		StatisticService statisticService = StatisticServiceFactory
 				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return statisticService.countFacettesForQuery(CCConstants.metadatasetdefault_id, MetadataSetV2.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene,facettes);
+		return statisticService.countFacetsForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO), lucene,facets);
 	}
 	public static int countUser(String lucene) throws Throwable {
 		// does not work at the moment because of scoped search service and permissions
 		StatisticService statisticService = StatisticServiceFactory
 				.getStatisticService(ApplicationInfoList.getHomeRepository().getAppId());
-		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSetV2.DEFAULT_CLIENT_QUERY,"cm:person", lucene);
+		return (int)statisticService.countForQuery(CCConstants.metadatasetdefault_id, MetadataSet.DEFAULT_CLIENT_QUERY,"cm:person", lucene);
 	}
 	public Statistics get(String context, List<String> properties, Filter filter) throws DAOException {
 

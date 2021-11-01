@@ -1,23 +1,19 @@
 package org.edu_sharing.restservices.mds.v1.model;
 
-import java.util.List;
-
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataTemplate;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "")
-public class ViewV2 {
+public class MdsView {
 	private String id,caption,icon,html;
 	private MetadataTemplate.REL_TYPE rel;
 	private boolean hideIfEmpty;
 	private boolean isExtended;
 
-	public ViewV2(){}
-	public ViewV2(MetadataTemplate template) {
+	public MdsView(){}
+	public MdsView(MetadataTemplate template) {
 		this.id=template.getId();
 		this.caption=template.getCaption();
 		this.hideIfEmpty=template.getHideIfEmpty();

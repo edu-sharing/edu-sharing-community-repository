@@ -4,13 +4,11 @@ import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
-import org.apache.axis2.databinding.types.soapencoding.Array;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataCondition.CONDITION_TYPE;
-import org.edu_sharing.metadataset.v2.valuespace_reader.OpenSALTReader;
 import org.edu_sharing.metadataset.v2.valuespace_reader.ValuespaceReader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -30,21 +28,18 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class MetadataReaderV2 {
+public class MetadataReader {
 	
 	public static final String SUGGESTION_SOURCE_SEARCH = "Search";
 	public static final String SUGGESTION_SOURCE_MDS = "Mds";
 	public static final String SUGGESTION_SOURCE_SQL = "Sql";
-	private static final String DEFAULT_QUERY_SYNTAX = MetadataReaderV2.QUERY_SYNTAX_LUCENE;
+	private static final String DEFAULT_QUERY_SYNTAX = MetadataReader.QUERY_SYNTAX_LUCENE;
 	public static final String QUERY_SYNTAX_LUCENE = "lucene";
 	public static final String QUERY_SYNTAX_DSL = "dsl";
-	private static Logger logger = Logger.getLogger(MetadataReaderV2.class);
-	private static SimpleCache<String,MetadataSetV2> mdsCache = (SimpleCache<String, MetadataSetV2>) AlfAppContextGate.getApplicationContext().getBean("eduSharingMdsCache");
+	private static Logger logger = Logger.getLogger(MetadataReader.class);
+	private static SimpleCache<String, MetadataSet> mdsCache = (SimpleCache<String, MetadataSet>) AlfAppContextGate.getApplicationContext().getBean("eduSharingMdsCache");
 	XPathFactory pfactory = XPathFactory.newInstance();
 	XPath xpath = pfactory.newXPath();
 	private Document doc;
@@ -53,7 +48,7 @@ public class MetadataReaderV2 {
 	private String locale;
 
 	public static void main(String[] args) throws Exception {
-		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id, "de_DE");
+		MetadataSet mds = MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id, "de_DE");
 		System.out.print(mds);
 	}
 
@@ -68,20 +63,20 @@ public class MetadataReaderV2 {
 		if(mdsSet==null || mdsSet.isEmpty()) {
 			mdsSet = CCConstants.metadatasetdefault_id;
 		}
-		MetadataSetV2 metadata = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet, locale);
+		MetadataSet metadata = MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet, locale);
 		return metadata.getWidgetsByNode(serviceRegistry.getNodeService().getType(node).toString(),
 				serviceRegistry.getNodeService().getAspects(node).stream().map(QName::toString).collect(Collectors.toList()));
 	}
-	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale) throws Exception{
+	public static MetadataSet getMetadataset(ApplicationInfo appId, String mdsSet, String locale) throws Exception{
 		return getMetadataset(appId, mdsSet, locale, true);
 	}
 
-	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale, boolean checkConfigurationState) throws Exception{
-        MetadataReaderV2 reader;
-        MetadataSetV2 mds;
+	public static MetadataSet getMetadataset(ApplicationInfo appId, String mdsSet, String locale, boolean checkConfigurationState) throws Exception{
+        MetadataReader reader;
+        MetadataSet mds;
         String mdsNameDefault = "mds";
-        if (appId.getMetadatsetsV2() != null) {
-            mdsNameDefault = appId.getMetadatsetsV2()[0];
+        if (appId.getMetadatsets() != null) {
+            mdsNameDefault = appId.getMetadatsets()[0];
             if (mdsNameDefault.toLowerCase().endsWith(".xml"))
                 mdsNameDefault = mdsNameDefault.substring(0, mdsNameDefault.length() - 4);
         }
@@ -89,7 +84,7 @@ public class MetadataReaderV2 {
          if(!mdsSet.equals("-default-") && !mdsSet.equals(CCConstants.metadatasetdefault_id)) {
 			if (checkConfigurationState) {
 
-				if (ApplicationInfoList.getApplicationInfos().values().stream().map((a) -> a.getMetadatsetsV2()).
+				if (ApplicationInfoList.getApplicationInfos().values().stream().map((a) -> a.getMetadatsets()).
 						anyMatch((a) -> Arrays.asList(a).contains(mdsSet))) {
 					mdsName = mdsSet;
 					if (mdsName.toLowerCase().endsWith(".xml"))
@@ -104,17 +99,17 @@ public class MetadataReaderV2 {
 	    try {
             String id = appId.getAppId() + "_" + mdsName + "_" + locale;
             if (mdsCache.getKeys().contains(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
-                return SerializationUtils.clone(mdsCache.get(id));
-            reader = new MetadataReaderV2(mdsNameDefault + ".xml", locale);
+				return mdsCache.get(id);
+            reader = new MetadataReader(mdsNameDefault + ".xml", locale);
             mds = reader.getMetadatasetForFile(mdsNameDefault);
             mds.setRepositoryId(appId.getAppId());
             if (mds.getInherit() != null && !mds.getInherit().isEmpty()) {
                 String inheritName = mds.getInherit() + ".xml";
-                reader = new MetadataReaderV2(inheritName, locale);
-                MetadataSetV2 mdsInherit = reader.getMetadatasetForFile(inheritName);
+                reader = new MetadataReader(inheritName, locale);
+                MetadataSet mdsInherit = reader.getMetadatasetForFile(inheritName);
                 try {
-                    reader = new MetadataReaderV2(mds.getInherit() + "_override.xml", locale);
-                    MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(inheritName);
+                    reader = new MetadataReader(mds.getInherit() + "_override.xml", locale);
+                    MetadataSet mdsOverride = reader.getMetadatasetForFile(inheritName);
                     mdsInherit.overrideWith(mdsOverride);
                 } catch (IOException e) {
                 }
@@ -122,14 +117,14 @@ public class MetadataReaderV2 {
                 mds = mdsInherit;
             }
             if (!mdsName.equals(mdsNameDefault)) {
-                reader = new MetadataReaderV2(mdsName + ".xml", locale);
-                MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
+                reader = new MetadataReader(mdsName + ".xml", locale);
+                MetadataSet mdsOverride = reader.getMetadatasetForFile(mdsName);
 				if (mdsOverride.getInherit() != null && !mdsOverride.getInherit().isEmpty()) {
 					logger.info("Mds " + mdsName + " is going to inherit data from mds " + mdsOverride.getInherit());
 					if(mdsOverride.getInherit().equals(mdsName)){
 						throw new RuntimeException("Detected cyclic dependency in your mds inherition. Please check your mds " + mdsName);
 					}
-					mds = getMetadataset(appId, mdsOverride.getInherit(), locale, false);
+					mds = SerializationUtils.clone(getMetadataset(appId, mdsOverride.getInherit(), locale, false));
 					mds.overrideWith(mdsOverride);
 				} else {
 					// fallback for backward compatibility: use the default mds for inherition
@@ -138,8 +133,8 @@ public class MetadataReaderV2 {
 				}
             }
             try {
-                reader = new MetadataReaderV2(mdsName + "_override.xml", locale);
-                MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
+                reader = new MetadataReader(mdsName + "_override.xml", locale);
+                MetadataSet mdsOverride = reader.getMetadatasetForFile(mdsName);
                 mds.overrideWith(mdsOverride);
             }catch(org.apache.http.conn.ConnectTimeoutException e){
             	logger.error(e.getMessage(),e);
@@ -192,7 +187,7 @@ public class MetadataReaderV2 {
 			Node syntax = attr.getNamedItem("syntax");
 			String syntaxName;
 			if(syntax==null || syntax.getNodeValue().isEmpty()){
-				syntaxName = MetadataReaderV2.DEFAULT_QUERY_SYNTAX;
+				syntaxName = MetadataReader.DEFAULT_QUERY_SYNTAX;
 			} else {
 				syntaxName = syntax.getNodeValue();
 			}
@@ -310,13 +305,13 @@ public class MetadataReaderV2 {
 		String prefix=getPath()+"xml/";
 		if(type.equals(Filetype.VALUESPACE))
 			prefix+="valuespaces/";
-		InputStream is=MetadataReaderV2.class.getResourceAsStream(prefix+name);
+		InputStream is= MetadataReader.class.getResourceAsStream(prefix+name);
 		if(is==null)
 			throw new IOException("file "+name+" not found: "+prefix+name);
 		return is;
 	}
 	
-	private MetadataReaderV2(String name, String locale) throws Exception {
+	private MetadataReader(String name, String locale) throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setIgnoringComments(true);
 		builder = factory.newDocumentBuilder();
@@ -326,8 +321,8 @@ public class MetadataReaderV2 {
 		this.locale = locale;
 	}
 	
-	private MetadataSetV2 getMetadatasetForFile(String filename) throws Exception{
-		MetadataSetV2 mds=new MetadataSetV2();
+	private MetadataSet getMetadatasetForFile(String filename) throws Exception{
+		MetadataSet mds=new MetadataSet();
 		Node nodeMetadataSet = (Node) xpath.evaluate("/metadataset", doc, XPathConstants.NODE);
 		String id;
 		try{
@@ -800,7 +795,7 @@ public class MetadataReaderV2 {
 			return translationBundles.get(i18nFile);
 		PropertyResourceBundle bundle = null;
 		try {
-			InputStream isLocale=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18nFile+".properties");
+			InputStream isLocale= MetadataReader.class.getResourceAsStream(getPath()+"i18n/"+i18nFile+".properties");
 			bundle = new PropertyResourceBundle(isLocale);
 		}catch(Throwable t) {
 		}

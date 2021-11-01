@@ -70,9 +70,9 @@ public class RepositoryCacheTool {
 					+ " size:" + newCache.size() + " linking the new cache to the cache reference");
 
 			RepositoryCache.setCache(newCache);
-			// clear facette cache
-			FacetteCache.getFacetteCache().clear();
-			logger.info("Facettes cleared");
+			// clear facet cache
+			FacetCache.getFacetCache().clear();
+			logger.info("Facets cleared");
 		} else {
 			logger.error("cache rebuilding is only available for MCAlfrescoAPIClient");
 		}
@@ -188,8 +188,8 @@ public class RepositoryCacheTool {
 					+ (time / threads.size()) + "ms per entry)");
 		}
 
-		FacetteCache.getFacetteCache().clear();
-		logger.info("Facettes cleared");
+		FacetCache.getFacetCache().clear();
+		logger.info("Facets cleared");
 
 		/*
 		 * MCAlfrescoAPIClient apiClient = (MCAlfrescoAPIClient)mcBaseClient; long

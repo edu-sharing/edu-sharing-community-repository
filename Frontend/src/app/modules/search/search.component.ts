@@ -578,7 +578,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.isSearchingCollections = true;
                 this.search
                     .searchWithBody(
-                      {criterias: this.getCriterias(this.currentValues, searchString, false), facettes: []},
+                      {criteria: this.getCriterias(this.currentValues, searchString, false), facets: []},
                         {sortBy: [
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
@@ -1034,7 +1034,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private searchRepository(
         repos: any[],
-        criterias: SearchRequestCriteria[],
+        criteria: SearchRequestCriteria[],
         init: boolean,
         position = 0,
         count = 0,
@@ -1049,7 +1049,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.dataSourceSearchResult[0].isLoading = true;
         let repo = repos[position];
         if (!repo.enabled) {
-            this.searchRepository(repos, criterias, init, position + 1, count);
+            this.searchRepository(repos, criteria, init, position + 1, count);
             return;
         }
 
@@ -1109,8 +1109,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     switchMap((neededFacets) =>
                         this.searchApi.search({
                             body: {
-                                criterias,
-                                facettes: neededFacets,
+                                criteria,
+                                facets: neededFacets,
                                 permissions,
                                 facetLimit: 5,
                                 facetMinCount: 1,
@@ -1151,7 +1151,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.searchService.showchosenfilters = true;
                     this.searchRepository(
                         repos,
-                        criterias,
+                        criteria,
                         init,
                         position + 1,
                         count + data.pagination.total,
@@ -1161,7 +1161,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         console.warn('Could not fetch frontpage data, will fallback to a regular search', error);
                         this.searchRepository(
                             repos,
-                            criterias,
+                            criteria,
                             init,
                             position,
                             count,
@@ -1172,7 +1172,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.toast.error(error);
                     this.searchRepository(
                         repos,
-                        criterias,
+                        criteria,
                         init,
                         position + 1,
                         count,

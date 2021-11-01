@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -25,16 +24,12 @@ import javax.net.ssl.X509TrustManager;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.forms.VCardTool;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.model.NodeRef;
-import org.edu_sharing.service.nodeservice.NodeServiceDDBImpl;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -227,11 +222,11 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	}
 
 
-	public List<? extends  Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
+	public List<? extends  Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value) {
 		
 		List<Suggestion> result = new ArrayList<Suggestion>();
 		
-		List<String> facets = mds.findQuery(queryId, MetadataReaderV2.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId).getFacets();
+		List<String> facets = mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId).getFacets();
 		//String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
 		String url = getUrl("/search","*",facets, 0, 0);
 		System.out.println("url:" + url);
@@ -303,11 +298,11 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	}
 	
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 		
 
-		if(!MetadataSetV2.DEFAULT_CLIENT_QUERY.equals(query)){
+		if(!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)){
 			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
 		}
 		
@@ -320,7 +315,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
          * 		
          */
 
-		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
+		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 
 		List<String> extSearch = new ArrayList<String>();
 		

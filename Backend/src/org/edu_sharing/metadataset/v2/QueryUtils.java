@@ -47,9 +47,9 @@ query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFull
     }
 
     public static ReplaceInterface replacerFromSyntax(String syntax) {
-        if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_DSL)){
+        if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)){
             return dslReplacer;
-        } else if (syntax.equals(MetadataReaderV2.QUERY_SYNTAX_LUCENE)) {
+        } else if (syntax.equals(MetadataReader.QUERY_SYNTAX_LUCENE)) {
             return luceneReplacer;
         } else {
             throw new IllegalArgumentException("No replacer for search syntax " + syntax);

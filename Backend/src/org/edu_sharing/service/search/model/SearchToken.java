@@ -22,7 +22,7 @@ public class SearchToken implements Serializable {
 	
 	String luceneString;
 	
-	List<String> facettes=null;
+	List<String> facets =null;
 
 	String storeProtocol = "workspace";
 	
@@ -52,22 +52,22 @@ public class SearchToken implements Serializable {
 		this.contentType=contentType;
 		updateSearchCriterias(true);
 	}
-	public int getFacettesMinCount() {
-		return facettesMinCount;
+	public int getFacetsMinCount() {
+		return facetsMinCount;
 	}
 
-	public void setFacettesMinCount(int facettesMinCount) {
-		this.facettesMinCount = facettesMinCount;
+	public void setFacetsMinCount(int facetsMinCount) {
+		this.facetsMinCount = facetsMinCount;
 	}
 
 
 	
-	public void setFacettesLimit(int facettesLimit) {
-		this.facettesLimit = facettesLimit;
+	public void setFacetLimit(int facetLimit) {
+		this.facetLimit = facetLimit;
 	}
 
-	private int facettesLimit=50;
-	private int facettesMinCount=4;
+	private int facetLimit =50;
+	private int facetsMinCount =4;
 
 	private SearchCriterias searchCriterias;
 
@@ -151,16 +151,16 @@ public class SearchToken implements Serializable {
 	public void setMaxResult(int maxResult) {
 		this.maxResult = maxResult;
 	}
-	public List<String> getFacettes() {
-		return facettes;
+	public List<String> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<String> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<String> facets) {
+		this.facets = facets;
 	}
 
-	public int getFacettesLimit() {
-		return facettesLimit;
+	public int getFacetLimit() {
+		return facetLimit;
 	}
 
 	public void setSearchCriterias(SearchCriterias searchCriterias) {

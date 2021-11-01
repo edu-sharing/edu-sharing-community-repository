@@ -9,15 +9,15 @@ import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.restservices.mds.v1.model.*;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.restservices.shared.MdsV2;
+import org.edu_sharing.restservices.shared.Mds;
 import org.edu_sharing.service.search.Suggestion;
 
-public class MdsDaoV2 {
+public class MdsDao {
 
 	public static final String DEFAULT = "-default-";
 
 	public static List<MetadataSetInfo> getAllMdsDesc(RepositoryDao repoDao) throws Exception {
-		return RepoFactory.getMetadataSetsV2ForRepository(repoDao.getId());
+		return RepoFactory.getMetadataSetsForRepository(repoDao.getId());
 	}
 	
 	public Suggestions getSuggestions(String queryId,String parameter,String value, List<MdsQueryCriteria> criterias) throws DAOException{
@@ -42,17 +42,17 @@ public class MdsDaoV2 {
 		return result;
 	}
 	
-	public static MdsDaoV2 getMds(RepositoryDao repoDao, String mdsId) throws DAOException {
+	public static MdsDao getMds(RepositoryDao repoDao, String mdsId) throws DAOException {
 
 		try {
 			
-			MetadataSetV2 mds=MetadataHelper.getMetadataset(repoDao.getApplicationInfo(),mdsId);
+			MetadataSet mds=MetadataHelper.getMetadataset(repoDao.getApplicationInfo(),mdsId);
 			
 			if (mds == null) {
 				throw new DAOMissingException(new IllegalArgumentException(mdsId));
 			}
 			
-			return new MdsDaoV2(repoDao, mds);
+			return new MdsDao(repoDao, mds);
 			
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
@@ -61,19 +61,19 @@ public class MdsDaoV2 {
 	}
 
 	private final RepositoryDao repoDao;	
-	private final MetadataSetV2 mds;
+	private final MetadataSet mds;
 	
-	private MdsDaoV2(RepositoryDao repoDao, MetadataSetV2 mds) {
+	private MdsDao(RepositoryDao repoDao, MetadataSet mds) {
 		this.repoDao = repoDao;		
 		this.mds = mds;		
 	}
 
-	public MdsV2 asMds() {
+	public Mds asMds() {
 		
-    	MdsV2 data = new MdsV2();
+    	Mds data = new Mds();
     	
     	data.setName(mds.getName());
-    	data.setCreate(mds.getCreate()!=null ? new MdsV2.Create(mds.getCreate()) : null);
+    	data.setCreate(mds.getCreate()!=null ? new Mds.Create(mds.getCreate()) : null);
     	data.setWidgets(getWidgets());
     	data.setViews(getViews());
     	data.setGroups(getGroups());
@@ -83,47 +83,47 @@ public class MdsDaoV2 {
     	return data; 
 	}
 
-	private List<WidgetV2> getWidgets() {
-		List<WidgetV2> result = new ArrayList<WidgetV2>();
+	private List<MdsWidget> getWidgets() {
+		List<MdsWidget> result = new ArrayList<MdsWidget>();
 		for (MetadataWidget type : this.mds.getWidgets()) {
-			result.add(new WidgetV2(type));
+			result.add(new MdsWidget(type));
 		}
 		return result;		
 	}
 	
-	private List<ViewV2> getViews() {
-		List<ViewV2> result = new ArrayList<ViewV2>();
+	private List<MdsView> getViews() {
+		List<MdsView> result = new ArrayList<MdsView>();
 		for (MetadataTemplate type : this.mds.getTemplates()) {
-			result.add(new ViewV2(type));
+			result.add(new MdsView(type));
 		}
 		return result;		
 	}
 	
-	private List<GroupV2> getGroups() {
-		List<GroupV2> result = new ArrayList<GroupV2>();
+	private List<MdsGroup> getGroups() {
+		List<MdsGroup> result = new ArrayList<MdsGroup>();
 		for (MetadataGroup type : this.mds.getGroups()) {
-			result.add(new GroupV2(type));
+			result.add(new MdsGroup(type));
 		}
 		return result;		
 	}
 	
-	private List<ListV2> getLists() {
-		List<ListV2> result = new ArrayList<>();
+	private List<MdsList> getLists() {
+		List<MdsList> result = new ArrayList<>();
 		for (MetadataList type : this.mds.getLists()) {
-			result.add(new ListV2(type));
+			result.add(new MdsList(type));
 		}
 		return result;		
 	}
 
-	private List<SortV2> getSorts() {
-		List<SortV2> result = new ArrayList<>();
+	private List<MdsSort> getSorts() {
+		List<MdsSort> result = new ArrayList<>();
 		for (MetadataSort type : this.mds.getSorts()) {
-			result.add(new SortV2(type));
+			result.add(new MdsSort(type));
 		}
 		return result;
 	}
 	
-	public MetadataSetV2 getMds() {
+	public MetadataSet getMds() {
 		return mds;
 	}
 	

@@ -31,7 +31,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -76,7 +76,7 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 				return;
 			}
 			try {
-				MetadataSetV2 mds = MetadataHelper.getMetadataset(nodeRef);
+				MetadataSet mds = MetadataHelper.getMetadataset(nodeRef);
 				MetadataWidget widget;
 				try {
 					widget = mds.findWidget(mdsWidgetId);

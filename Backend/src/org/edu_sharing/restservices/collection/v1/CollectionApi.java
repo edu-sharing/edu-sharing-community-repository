@@ -160,7 +160,7 @@ public class CollectionApi {
 
 	@GET
 	@Path("/collections/{repository}/search")
-	@Operation(summary = "Search collections.", description = "Search collections.")
+	@Operation(operationId = "searchCollections", summary = "Search collections.", description = "Search collections.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntries.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

@@ -340,7 +340,7 @@ export class SearchV1Service extends BaseService {
     /**
      * Path part for operation loadSaveSearch
      */
-    static readonly LoadSaveSearchPath = '/search/v1/queriesV2/load/{nodeId}';
+    static readonly LoadSaveSearchPath = '/search/v1/queries/load/{nodeId}';
 
     /**
      * Load a saved search query.
@@ -395,7 +395,7 @@ export class SearchV1Service extends BaseService {
         propertyFilter?: Array<string>;
 
         /**
-         * facettes
+         * facets
          */
         body?: Array<string>;
     }): Observable<StrictHttpResponse<Node>> {
@@ -479,7 +479,7 @@ export class SearchV1Service extends BaseService {
         propertyFilter?: Array<string>;
 
         /**
-         * facettes
+         * facets
          */
         body?: Array<string>;
     }): Observable<Node> {
@@ -491,7 +491,7 @@ export class SearchV1Service extends BaseService {
     /**
      * Path part for operation searchContributor
      */
-    static readonly SearchContributorPath = '/search/v1/queriesV2/{repository}/contributor';
+    static readonly SearchContributorPath = '/search/v1/queries/{repository}/contributor';
 
     /**
      * Search for contributors.
@@ -600,7 +600,7 @@ export class SearchV1Service extends BaseService {
     /**
      * Path part for operation searchV2
      */
-    static readonly SearchV2Path = '/search/v1/queriesV2/{repository}/{metadataset}/{query}';
+    static readonly SearchV2Path = '/search/v1/queries/{repository}/{metadataset}/{query}';
 
     /**
      * Perform queries based on metadata sets V2.
@@ -774,7 +774,7 @@ export class SearchV1Service extends BaseService {
      * Path part for operation searchFacets
      */
     static readonly SearchFacetsPath =
-        '/search/v1/queriesV2/{repository}/{metadataset}/{query}/facets';
+        '/search/v1/queries/{repository}/{metadataset}/{query}/facets';
 
     /**
      * Search in facets.
@@ -869,7 +869,7 @@ export class SearchV1Service extends BaseService {
     /**
      * Path part for operation saveSearch
      */
-    static readonly SaveSearchPath = '/search/v1/queriesV2/{repository}/{metadataset}/{query}/save';
+    static readonly SaveSearchPath = '/search/v1/queries/{repository}/{metadataset}/{query}/save';
 
     /**
      * Save a search query.

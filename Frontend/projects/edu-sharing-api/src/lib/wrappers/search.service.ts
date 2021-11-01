@@ -66,7 +66,7 @@ export class SearchService {
             body: {
                 ...params.body,
                 // Additionally fetch facets that have been subscribed to via `getFacets`.
-                facettes: this.getSubscribedFacets(params.body.facettes),
+                facets: this.getSubscribedFacets(params.body.facets),
             },
         }).pipe(tap((results) => this.resultsSubject.next(results)));
     }
@@ -89,7 +89,7 @@ export class SearchService {
             body: {
                 ...searchParams.body,
                 // Do not fetch facets again. These don't change for equal search criteria.
-                facettes: [],
+                facets: [],
             },
         });
     }
@@ -158,12 +158,12 @@ export class SearchService {
                 maxItems: 0,
                 body: {
                     ...searchParams.body,
-                    facettes: [property],
+                    facets: [property],
                     facetLimit: currentFacetSize + size,
                 },
             })
             .pipe(
-                map((results) => results.facettes.find((facet) => facet.property === property)),
+                map((results) => results.facets.find((facet) => facet.property === property)),
                 switchMap((facet) =>
                     facet
                         ? this.mapFacet(facet)
@@ -197,14 +197,14 @@ export class SearchService {
                 metadataset: searchParams.metadataset,
                 query: searchParams.query,
                 body: {
-                    criterias: this.getFilterCriteria(searchParams.body.criterias),
-                    facettes: facets,
+                    criteria: this.getFilterCriteria(searchParams.body.criteria),
+                    facets: facets,
                     facetLimit: size,
                     facetMinCount: 1,
                     facetSuggest: inputString,
                 },
             })
-            .pipe(switchMap((response) => this.mapFacets(response.facettes)));
+            .pipe(switchMap((response) => this.mapFacets(response.facets)));
     }
 
     /**
@@ -228,8 +228,8 @@ export class SearchService {
         this.resultsSubject
             .pipe(
                 switchMap((results) => {
-                    if (results?.facettes) {
-                        return this.mapFacets(results.facettes);
+                    if (results?.facets) {
+                        return this.mapFacets(results.facets);
                     } else {
                         return rxjs.of({});
                     }
@@ -294,9 +294,9 @@ export class SearchService {
      * This includes everything but the free-text search string.
      */
     private getFilterCriteria(
-        criteria: apiModels.SearchParameters['criterias'] = this.searchParamsSubject.value?.body
-            .criterias ?? [],
-    ): apiModels.SearchParameters['criterias'] {
+        criteria: apiModels.SearchParameters['criteria'] = this.searchParamsSubject.value?.body
+            .criteria ?? [],
+    ): apiModels.SearchParameters['criteria'] {
         return criteria.filter((criterion) => criterion.property !== 'ngsearchword');
     }
 
@@ -334,7 +334,7 @@ export class SearchService {
     /**
      * Maps the `facets` part of a search response to a facets dictionary with labeled facet values.
      */
-    private mapFacets(results: SearchResults['facettes']): Observable<FacetsDict> {
+    private mapFacets(results: SearchResults['facets']): Observable<FacetsDict> {
         if (results.length === 0) {
             return rxjs.of({});
         }
@@ -380,7 +380,7 @@ export class SearchService {
      * Maps the `criteria` array of a search request to a simple dictionary of values indexed by
      * properties.
      */
-    private criteriaToRawValues(criteria: apiModels.SearchParameters['criterias']): RawValuesDict {
+    private criteriaToRawValues(criteria: apiModels.SearchParameters['criteria']): RawValuesDict {
         return criteria.reduce((acc, criterion) => {
             acc[criterion.property] = criterion.values;
             return acc;

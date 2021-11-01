@@ -1,23 +1,17 @@
 package org.edu_sharing.restservices.mds.v1.model;
 
-import java.util.List;
-
 import org.edu_sharing.metadataset.v2.MetadataColumn;
-import org.edu_sharing.metadataset.v2.MetadataGroup;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataTemplate;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "")
-public class ColumnV2 {
+public class MdsColumn {
 		private String id;
 		private String format;
 		private boolean showDefault;
 	
-		public ColumnV2(MetadataColumn column) {
+		public MdsColumn(MetadataColumn column) {
 			this.id=column.getId();		
 			this.showDefault=column.isShowDefault();
 			this.format=column.getFormat();
