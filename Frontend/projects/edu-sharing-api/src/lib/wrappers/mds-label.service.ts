@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ValueV2 } from '../api/models';
+import { MdsValue } from '../api/models';
 import { MdsIdentifier, MdsService } from './mds.service';
 
 export interface LabeledValue {
@@ -71,14 +71,24 @@ export class MdsLabelService {
         );
     }
 
+    /**
+     * Gets values for a given property from the respective mds widget definitions.
+     */
     private getValueDefinitions(
         mdsId: MdsIdentifier,
         property: string,
-    ): Observable<ValueV2[] | null> {
-        return this.mds
-            .getMetadataSet(mdsId)
-            .pipe(
-                map((mds) => mds.widgets?.find((widget) => widget.id === property)?.values ?? null),
-            );
+    ): Observable<MdsValue[] | null> {
+        return this.mds.getMetadataSet(mdsId).pipe(
+            map(
+                (mds) =>
+                    mds.widgets?.find(
+                        (widget) =>
+                            widget.id === property &&
+                            // Values are defined on the general widget and not on special
+                            // configurations for specific view.
+                            !widget.template,
+                    )?.values ?? null,
+            ),
+        );
     }
 }

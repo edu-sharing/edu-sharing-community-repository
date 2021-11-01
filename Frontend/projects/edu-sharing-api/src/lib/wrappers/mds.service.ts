@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { MdsV1Service } from '../api/services';
-import { SortV2 } from '../model-overrides/sort-v-2';
-import { MdsDefinition, MdsView, MetadataSetInfo } from '../models';
+import { MdsDefinition, MdsView, MetadataSetInfo, MdsSort } from '../models';
 
 const DEFAULT = '-default-';
 const HOME_REPOSITORY = '-home-';
@@ -29,7 +28,7 @@ export class MdsService {
     ): Observable<MetadataSetInfo[] | null> {
         if (!(repository in this.availableSetsDict)) {
             this.availableSetsDict[repository] = this.mdsV1
-                .getMetadataSetsV2({
+                .getMetadataSets({
                     repository,
                 })
                 .pipe(
@@ -47,7 +46,7 @@ export class MdsService {
         const dictKey = this.getMdsDictKey({ repository, metadataSet });
         if (!(dictKey in this.mdsDict)) {
             this.mdsDict[dictKey] = this.mdsV1
-                .getMetadataSetV2({
+                .getMetadataSet({
                     repository,
                     metadataset: metadataSet,
                 })
@@ -57,7 +56,7 @@ export class MdsService {
                             ({
                                 ...mdsDefinition,
                                 views: mdsDefinition.views as MdsView[],
-                                sorts: mdsDefinition.sorts as SortV2[],
+                                sorts: mdsDefinition.sorts as MdsSort[],
                             } as MdsDefinition),
                     ),
                     shareReplay(),

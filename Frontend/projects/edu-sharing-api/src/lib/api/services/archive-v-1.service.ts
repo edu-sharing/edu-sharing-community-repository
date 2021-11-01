@@ -48,8 +48,8 @@ export class ArchiveV1Service extends BaseService {
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, ArchiveV1Service.PurgePath, 'delete');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('archivedNodeIds', params.archivedNodeIds, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.query('archivedNodeIds', params.archivedNodeIds, {});
         }
 
         return this.http
@@ -126,9 +126,9 @@ export class ArchiveV1Service extends BaseService {
     }): Observable<StrictHttpResponse<RestoreResults>> {
         const rb = new RequestBuilder(this.rootUrl, ArchiveV1Service.RestorePath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('archivedNodeIds', params.archivedNodeIds, { style: 'form', explode: true });
-            rb.query('target', params.target, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.query('archivedNodeIds', params.archivedNodeIds, {});
+            rb.query('target', params.target, {});
         }
 
         return this.http
@@ -178,9 +178,9 @@ export class ArchiveV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation search
+     * Path part for operation searchArchive
      */
-    static readonly SearchPath = '/archive/v1/search/{repository}/{pattern}';
+    static readonly SearchArchivePath = '/archive/v1/search/{repository}/{pattern}';
 
     /**
      * Searches for archive nodes.
@@ -188,11 +188,11 @@ export class ArchiveV1Service extends BaseService {
      * Searches for archive nodes.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `search()` instead.
+     * To access only the response body, use `searchArchive()` instead.
      *
      * This method doesn't expect any request body.
      */
-    search$Response(params: {
+    searchArchive$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -228,15 +228,15 @@ export class ArchiveV1Service extends BaseService {
          */
         propertyFilter?: Array<string>;
     }): Observable<StrictHttpResponse<SearchResult>> {
-        const rb = new RequestBuilder(this.rootUrl, ArchiveV1Service.SearchPath, 'get');
+        const rb = new RequestBuilder(this.rootUrl, ArchiveV1Service.SearchArchivePath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('pattern', params.pattern, { style: 'simple', explode: false });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('pattern', params.pattern, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
         }
 
         return this.http
@@ -260,11 +260,11 @@ export class ArchiveV1Service extends BaseService {
      * Searches for archive nodes.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `search$Response()` instead.
+     * To access the full response (for headers, for example), `searchArchive$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    search(params: {
+    searchArchive(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -300,15 +300,15 @@ export class ArchiveV1Service extends BaseService {
          */
         propertyFilter?: Array<string>;
     }): Observable<SearchResult> {
-        return this.search$Response(params).pipe(
+        return this.searchArchive$Response(params).pipe(
             map((r: StrictHttpResponse<SearchResult>) => r.body as SearchResult),
         );
     }
 
     /**
-     * Path part for operation search_1
+     * Path part for operation searchArchivePerson
      */
-    static readonly Search_1Path = '/archive/v1/search/{repository}/{pattern}/{person}';
+    static readonly SearchArchivePersonPath = '/archive/v1/search/{repository}/{pattern}/{person}';
 
     /**
      * Searches for archive nodes.
@@ -316,11 +316,11 @@ export class ArchiveV1Service extends BaseService {
      * Searches for archive nodes.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `search_1()` instead.
+     * To access only the response body, use `searchArchivePerson()` instead.
      *
      * This method doesn't expect any request body.
      */
-    search_1$Response(params: {
+    searchArchivePerson$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -361,16 +361,20 @@ export class ArchiveV1Service extends BaseService {
          */
         propertyFilter?: Array<string>;
     }): Observable<StrictHttpResponse<SearchResult>> {
-        const rb = new RequestBuilder(this.rootUrl, ArchiveV1Service.Search_1Path, 'get');
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            ArchiveV1Service.SearchArchivePersonPath,
+            'get',
+        );
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('pattern', params.pattern, { style: 'simple', explode: false });
-            rb.path('person', params.person, { style: 'simple', explode: false });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('pattern', params.pattern, {});
+            rb.path('person', params.person, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
         }
 
         return this.http
@@ -394,11 +398,11 @@ export class ArchiveV1Service extends BaseService {
      * Searches for archive nodes.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `search_1$Response()` instead.
+     * To access the full response (for headers, for example), `searchArchivePerson$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    search_1(params: {
+    searchArchivePerson(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -439,7 +443,7 @@ export class ArchiveV1Service extends BaseService {
          */
         propertyFilter?: Array<string>;
     }): Observable<SearchResult> {
-        return this.search_1$Response(params).pipe(
+        return this.searchArchivePerson$Response(params).pipe(
             map((r: StrictHttpResponse<SearchResult>) => r.body as SearchResult),
         );
     }

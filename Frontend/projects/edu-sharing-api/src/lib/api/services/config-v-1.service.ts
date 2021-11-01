@@ -23,6 +23,57 @@ export class ConfigV1Service extends BaseService {
     }
 
     /**
+     * Path part for operation getConfig1
+     */
+    static readonly GetConfig1Path = '/config/v1/values';
+
+    /**
+     * get repository config values.
+     *
+     * Current is the actual (context-based) active config. Global is the default global config if no context is active (may be identical to the current)
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getConfig1()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getConfig1$Response(params?: {}): Observable<StrictHttpResponse<Config>> {
+        const rb = new RequestBuilder(this.rootUrl, ConfigV1Service.GetConfig1Path, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<Config>;
+                }),
+            );
+    }
+
+    /**
+     * get repository config values.
+     *
+     * Current is the actual (context-based) active config. Global is the default global config if no context is active (may be identical to the current)
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getConfig1$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getConfig1(params?: {}): Observable<Config> {
+        return this.getConfig1$Response(params).pipe(
+            map((r: StrictHttpResponse<Config>) => r.body as Config),
+        );
+    }
+
+    /**
      * Path part for operation getDynamicValue
      */
     static readonly GetDynamicValuePath = '/config/v1/dynamic/{key}';
@@ -45,7 +96,7 @@ export class ConfigV1Service extends BaseService {
     }): Observable<StrictHttpResponse<DynamicConfig>> {
         const rb = new RequestBuilder(this.rootUrl, ConfigV1Service.GetDynamicValuePath, 'get');
         if (params) {
-            rb.path('key', params.key, { style: 'simple', explode: false });
+            rb.path('key', params.key, {});
         }
 
         return this.http
@@ -117,8 +168,8 @@ export class ConfigV1Service extends BaseService {
     }): Observable<StrictHttpResponse<DynamicConfig>> {
         const rb = new RequestBuilder(this.rootUrl, ConfigV1Service.SetDynamicValuePath, 'post');
         if (params) {
-            rb.path('key', params.key, { style: 'simple', explode: false });
-            rb.query('public', params.public, { style: 'form', explode: true });
+            rb.path('key', params.key, {});
+            rb.query('public', params.public, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -234,11 +285,7 @@ export class ConfigV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    getLanguageDefaults$Response(params?: {}): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
+    getLanguageDefaults$Response(params?: {}): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, ConfigV1Service.GetLanguageDefaultsPath, 'get');
         if (params) {
         }
@@ -253,9 +300,7 @@ export class ConfigV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -270,71 +315,9 @@ export class ConfigV1Service extends BaseService {
      *
      * This method doesn't expect any request body.
      */
-    getLanguageDefaults(params?: {}): Observable<{
-        [key: string]: {};
-    }> {
+    getLanguageDefaults(params?: {}): Observable<string> {
         return this.getLanguageDefaults$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
-        );
-    }
-
-    /**
-     * Path part for operation getConfig_1
-     */
-    static readonly GetConfig_1Path = '/config/v1/values';
-
-    /**
-     * get repository config values.
-     *
-     * Current is the actual (context-based) active config. Global is the default global config if no context is active (may be identical to the current)
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getConfig_1()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getConfig_1$Response(params?: {}): Observable<StrictHttpResponse<Config>> {
-        const rb = new RequestBuilder(this.rootUrl, ConfigV1Service.GetConfig_1Path, 'get');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Config>;
-                }),
-            );
-    }
-
-    /**
-     * get repository config values.
-     *
-     * Current is the actual (context-based) active config. Global is the default global config if no context is active (may be identical to the current)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getConfig_1$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getConfig_1(params?: {}): Observable<Config> {
-        return this.getConfig_1$Response(params).pipe(
-            map((r: StrictHttpResponse<Config>) => r.body as Config),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 

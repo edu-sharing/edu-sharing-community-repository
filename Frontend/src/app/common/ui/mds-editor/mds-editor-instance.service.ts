@@ -5,7 +5,7 @@ import {
     MdsService,
     MdsViewRelation,
     SearchService as SearchApiService,
-} from 'edu-sharing-api';
+} from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import {
     BehaviorSubject,

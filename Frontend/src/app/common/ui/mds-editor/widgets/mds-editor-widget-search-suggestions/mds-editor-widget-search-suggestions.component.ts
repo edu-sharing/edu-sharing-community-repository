@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatChip } from '@angular/material/chips';
-import { FacetAggregation, FacetValue } from 'edu-sharing-api';
+import { FacetAggregation, FacetValue } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';

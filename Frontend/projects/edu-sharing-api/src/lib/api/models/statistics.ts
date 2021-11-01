@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+import { StatisticEntry } from './statistic-entry';
 export interface Statistics {
-    groups?: Array<string>;
-    nodeGroup?: string;
+    entries: Array<StatisticEntry>;
 }

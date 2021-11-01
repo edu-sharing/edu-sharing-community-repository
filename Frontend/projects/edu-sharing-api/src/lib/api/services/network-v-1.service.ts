@@ -9,7 +9,6 @@ import { RequestBuilder } from '../request-builder';
 import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
-import { RepoEntries } from '../models/repo-entries';
 import { Service } from '../models/service';
 import { StoredService } from '../models/stored-service';
 
@@ -19,108 +18,6 @@ import { StoredService } from '../models/stored-service';
 export class NetworkV1Service extends BaseService {
     constructor(config: ApiConfiguration, http: HttpClient) {
         super(config, http);
-    }
-
-    /**
-     * Path part for operation getRepositories
-     */
-    static readonly GetRepositoriesPath = '/network/v1/repositories';
-
-    /**
-     * Get repositories.
-     *
-     * Get repositories.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getRepositories()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getRepositories$Response(params?: {}): Observable<StrictHttpResponse<Array<RepoEntries>>> {
-        const rb = new RequestBuilder(this.rootUrl, NetworkV1Service.GetRepositoriesPath, 'get');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<RepoEntries>>;
-                }),
-            );
-    }
-
-    /**
-     * Get repositories.
-     *
-     * Get repositories.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getRepositories$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getRepositories(params?: {}): Observable<Array<RepoEntries>> {
-        return this.getRepositories$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<RepoEntries>>) => r.body as Array<RepoEntries>),
-        );
-    }
-
-    /**
-     * Path part for operation getService
-     */
-    static readonly GetServicePath = '/network/v1/service';
-
-    /**
-     * Get own service.
-     *
-     * Get the servic entry from the current repository.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getService()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getService$Response(params?: {}): Observable<StrictHttpResponse<StoredService>> {
-        const rb = new RequestBuilder(this.rootUrl, NetworkV1Service.GetServicePath, 'get');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<StoredService>;
-                }),
-            );
-    }
-
-    /**
-     * Get own service.
-     *
-     * Get the servic entry from the current repository.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getService$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getService(params?: {}): Observable<StoredService> {
-        return this.getService$Response(params).pipe(
-            map((r: StrictHttpResponse<StoredService>) => r.body as StoredService),
-        );
     }
 
     /**
@@ -143,10 +40,10 @@ export class NetworkV1Service extends BaseService {
          * search or filter for services
          */
         query?: string;
-    }): Observable<StrictHttpResponse<Array<StoredService>>> {
+    }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, NetworkV1Service.GetServicesPath, 'get');
         if (params) {
-            rb.query('query', params.query, { style: 'form', explode: true });
+            rb.query('query', params.query, {});
         }
 
         return this.http
@@ -159,7 +56,7 @@ export class NetworkV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<StoredService>>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -179,9 +76,9 @@ export class NetworkV1Service extends BaseService {
          * search or filter for services
          */
         query?: string;
-    }): Observable<Array<StoredService>> {
+    }): Observable<string> {
         return this.getServices$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<StoredService>>) => r.body as Array<StoredService>),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
@@ -248,6 +145,108 @@ export class NetworkV1Service extends BaseService {
     }
 
     /**
+     * Path part for operation getRepositories
+     */
+    static readonly GetRepositoriesPath = '/network/v1/repositories';
+
+    /**
+     * Get repositories.
+     *
+     * Get repositories.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getRepositories()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getRepositories$Response(params?: {}): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, NetworkV1Service.GetRepositoriesPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * Get repositories.
+     *
+     * Get repositories.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getRepositories$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getRepositories(params?: {}): Observable<string> {
+        return this.getRepositories$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getService
+     */
+    static readonly GetServicePath = '/network/v1/service';
+
+    /**
+     * Get own service.
+     *
+     * Get the servic entry from the current repository.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getService()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getService$Response(params?: {}): Observable<StrictHttpResponse<StoredService>> {
+        const rb = new RequestBuilder(this.rootUrl, NetworkV1Service.GetServicePath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<StoredService>;
+                }),
+            );
+    }
+
+    /**
+     * Get own service.
+     *
+     * Get the servic entry from the current repository.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getService$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getService(params?: {}): Observable<StoredService> {
+        return this.getService$Response(params).pipe(
+            map((r: StrictHttpResponse<StoredService>) => r.body as StoredService),
+        );
+    }
+
+    /**
      * Path part for operation updateService
      */
     static readonly UpdateServicePath = '/network/v1/services/{id}';
@@ -275,7 +274,7 @@ export class NetworkV1Service extends BaseService {
     }): Observable<StrictHttpResponse<StoredService>> {
         const rb = new RequestBuilder(this.rootUrl, NetworkV1Service.UpdateServicePath, 'put');
         if (params) {
-            rb.path('id', params.id, { style: 'simple', explode: false });
+            rb.path('id', params.id, {});
             rb.body(params.body, 'application/json');
         }
 

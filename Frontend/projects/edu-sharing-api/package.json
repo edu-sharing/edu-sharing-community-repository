@@ -1,16 +1,17 @@
 {
-  "name": "edu-sharing-api",
+  "name": "ngx-edu-sharing-api",
   "version": "0.0.1",
+  "license": "GNU GPL v2",
+  "description": "Angular bindings for Edu-Sharing's API",
   "scripts": {
-    "generate-api:format-swagger-json": "prettier -w build/swagger.json",
-    "generate-api:generate-openapi-yaml": "cd build && ./generate.sh",
-    "generate-api:generate-code": "ng-openapi-gen --input build/openapi.yaml --output src/lib/api",
+    "generate-api:generate-code": "ng-openapi-gen --input build/openapi.json --output src/lib/api",
     "generate-api:prettify-code": "prettier -w src/lib/api/**/*.ts",
-    "generate-api": "npm run generate-api:format-swagger-json && npm run generate-api:generate-openapi-yaml && npm run generate-api:generate-code && npm run generate-api:prettify-code"
+    "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code"
   },
   "peerDependencies": {
     "@angular/common": "^12.2.0",
-    "@angular/core": "^12.2.0"
+    "@angular/core": "^12.2.0",
+    "rxjs": "^6.6.3"
   },
   "dependencies": {
     "tslib": "^2.3.0"

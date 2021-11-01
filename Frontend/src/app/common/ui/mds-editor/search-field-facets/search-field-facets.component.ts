@@ -9,7 +9,7 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { FacetsDict } from 'edu-sharing-api';
+import { FacetsDict } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';

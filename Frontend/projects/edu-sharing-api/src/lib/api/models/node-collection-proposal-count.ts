@@ -33,6 +33,9 @@ export interface NodeCollectionProposalCount {
     properties?: {
         [key: string]: Array<string>;
     };
+    proposalCount?: {
+        [key: string]: number;
+    };
     proposalCounts?: {
         [key: string]: number;
     };

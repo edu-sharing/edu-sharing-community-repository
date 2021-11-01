@@ -42,7 +42,7 @@ export class ConnectorV1Service extends BaseService {
     }): Observable<StrictHttpResponse<ConnectorList>> {
         const rb = new RequestBuilder(this.rootUrl, ConnectorV1Service.ListConnectorsPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
         }
 
         return this.http

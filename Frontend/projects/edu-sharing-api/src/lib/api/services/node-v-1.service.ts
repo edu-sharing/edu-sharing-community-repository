@@ -19,12 +19,9 @@ import { NodeShare } from '../models/node-share';
 import { NodeText } from '../models/node-text';
 import { NodeVersionEntry } from '../models/node-version-entry';
 import { NodeVersionRefEntries } from '../models/node-version-ref-entries';
-import { NotifyEntry } from '../models/notify-entry';
 import { ParentEntries } from '../models/parent-entries';
 import { SearchResult } from '../models/search-result';
 import { WorkflowHistory } from '../models/workflow-history';
-import { NodeContentBody } from '../models/node-content-body';
-import { NodePreviewBody } from '../models/node-preview-body';
 
 @Injectable({
     providedIn: 'root',
@@ -32,253 +29,6 @@ import { NodePreviewBody } from '../models/node-preview-body';
 export class NodeV1Service extends BaseService {
     constructor(config: ApiConfiguration, http: HttpClient) {
         super(config, http);
-    }
-
-    /**
-     * Path part for operation getNodes
-     */
-    static readonly GetNodesPath = '/node/v1/nodes/{repository}';
-
-    /**
-     * Searching nodes.
-     *
-     * Searching nodes.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getNodes()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getNodes$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * lucene query
-         */
-        query: string;
-
-        /**
-         * facets
-         */
-        facets?: Array<string>;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-    }): Observable<StrictHttpResponse<SearchResult>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetNodesPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('query', params.query, { style: 'form', explode: true });
-            rb.query('facets', params.facets, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<SearchResult>;
-                }),
-            );
-    }
-
-    /**
-     * Searching nodes.
-     *
-     * Searching nodes.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getNodes$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getNodes(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * lucene query
-         */
-        query: string;
-
-        /**
-         * facets
-         */
-        facets?: Array<string>;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-    }): Observable<SearchResult> {
-        return this.getNodes$Response(params).pipe(
-            map((r: StrictHttpResponse<SearchResult>) => r.body as SearchResult),
-        );
-    }
-
-    /**
-     * Path part for operation delete
-     */
-    static readonly DeletePath = '/node/v1/nodes/{repository}/{node}';
-
-    /**
-     * Delete node.
-     *
-     * Delete node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `delete()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    delete$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * move the node to recycle
-         */
-        recycle?: boolean;
-
-        /**
-         * protocol
-         */
-        protocol?: string;
-
-        /**
-         * store
-         */
-        store?: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.DeletePath, 'delete');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('recycle', params.recycle, { style: 'form', explode: true });
-            rb.query('protocol', params.protocol, { style: 'form', explode: true });
-            rb.query('store', params.store, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Delete node.
-     *
-     * Delete node.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `delete$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    delete(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * move the node to recycle
-         */
-        recycle?: boolean;
-
-        /**
-         * protocol
-         */
-        protocol?: string;
-
-        /**
-         * store
-         */
-        store?: string;
-    }): Observable<void> {
-        return this.delete$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
     }
 
     /**
@@ -314,8 +64,8 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.AddAspectsPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -366,21 +116,21 @@ export class NodeV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation getAssocs
+     * Path part for operation getWorkflowHistory
      */
-    static readonly GetAssocsPath = '/node/v1/nodes/{repository}/{node}/assocs';
+    static readonly GetWorkflowHistoryPath = '/node/v1/nodes/{repository}/{node}/workflow';
 
     /**
-     * Get related nodes.
+     * Get workflow history.
      *
-     * Get nodes related based on an assoc.
+     * Get workflow history of node.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getAssocs()` instead.
+     * To access only the response body, use `getWorkflowHistory()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getAssocs$Response(params: {
+    getWorkflowHistory$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -390,53 +140,11 @@ export class NodeV1Service extends BaseService {
          * ID of node
          */
         node: string;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-
-        /**
-         * Either where the given node should be the &quot;SOURCE&quot; or the &quot;TARGET&quot;
-         */
-        direction: 'SOURCE' | 'TARGET';
-
-        /**
-         * Association name (e.g. ccm:forkio).
-         */
-        assocName?: string;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-    }): Observable<StrictHttpResponse<NodeEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetAssocsPath, 'get');
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetWorkflowHistoryPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('direction', params.direction, { style: 'form', explode: true });
-            rb.query('assocName', params.assocName, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
         }
 
         return this.http
@@ -449,22 +157,53 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntries>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
 
     /**
-     * Get related nodes.
+     * Get workflow history.
      *
-     * Get nodes related based on an assoc.
+     * Get workflow history of node.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getAssocs$Response()` instead.
+     * To access the full response (for headers, for example), `getWorkflowHistory$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getAssocs(params: {
+    getWorkflowHistory(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<string> {
+        return this.getWorkflowHistory$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation addWorkflowHistory
+     */
+    static readonly AddWorkflowHistoryPath = '/node/v1/nodes/{repository}/{node}/workflow';
+
+    /**
+     * Add workflow.
+     *
+     * Add workflow entry to node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `addWorkflowHistory()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    addWorkflowHistory$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -476,42 +215,959 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * maximum items per page
+         * The history entry to put (editor and time can be null and will be filled automatically)
          */
-        maxItems?: number;
+        body: WorkflowHistory;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.AddWorkflowHistoryPath, 'put');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * Add workflow.
+     *
+     * Add workflow entry to node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `addWorkflowHistory$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    addWorkflowHistory(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
         /**
-         * skip a number of items
+         * ID of node
          */
-        skipCount?: number;
+        node: string;
 
         /**
-         * sort properties
+         * The history entry to put (editor and time can be null and will be filled automatically)
          */
-        sortProperties?: Array<string>;
+        body: WorkflowHistory;
+    }): Observable<any> {
+        return this.addWorkflowHistory$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation changeContent
+     */
+    static readonly ChangeContentPath = '/node/v1/nodes/{repository}/{node}/content';
+
+    /**
+     * Change content of node.
+     *
+     * Change content of node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeContent()` instead.
+     *
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     */
+    changeContent$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
         /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         * ID of node
          */
-        sortAscending?: Array<boolean>;
+        node: string;
 
         /**
-         * Either where the given node should be the &quot;SOURCE&quot; or the &quot;TARGET&quot;
+         * comment, leave empty &#x3D; no new version, otherwise new version is generated
          */
-        direction: 'SOURCE' | 'TARGET';
+        versionComment?: string;
 
         /**
-         * Association name (e.g. ccm:forkio).
+         * MIME-Type
          */
-        assocName?: string;
+        mimetype: string;
+        body?: {
+            file?: {};
+        };
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangeContentPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('versionComment', params.versionComment, {});
+            rb.query('mimetype', params.mimetype, {});
+            rb.body(params.body, 'multipart/form-data');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Change content of node.
+     *
+     * Change content of node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeContent$Response()` instead.
+     *
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     */
+    changeContent(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         */
+        versionComment?: string;
+
+        /**
+         * MIME-Type
+         */
+        mimetype: string;
+        body?: {
+            file?: {};
+        };
+    }): Observable<NodeEntry> {
+        return this.changeContent$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation getTextContent
+     */
+    static readonly GetTextContentPath = '/node/v1/nodes/{repository}/{node}/textContent';
+
+    /**
+     * Get the text content of a document.
+     *
+     * May fails with 500 if the node can not be read.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getTextContent()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getTextContent$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<StrictHttpResponse<NodeText>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetTextContentPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeText>;
+                }),
+            );
+    }
+
+    /**
+     * Get the text content of a document.
+     *
+     * May fails with 500 if the node can not be read.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getTextContent$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getTextContent(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<NodeText> {
+        return this.getTextContent$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeText>) => r.body as NodeText),
+        );
+    }
+
+    /**
+     * Path part for operation changeContentAsText
+     */
+    static readonly ChangeContentAsTextPath = '/node/v1/nodes/{repository}/{node}/textContent';
+
+    /**
+     * Change content of node as text.
+     *
+     * Change content of node as text.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeContentAsText()` instead.
+     *
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     */
+    changeContentAsText$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         */
+        versionComment?: string;
+
+        /**
+         * MIME-Type
+         */
+        mimetype: string;
+
+        /**
+         * The content data to write (text)
+         */
+        body: string;
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangeContentAsTextPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('versionComment', params.versionComment, {});
+            rb.query('mimetype', params.mimetype, {});
+            rb.body(params.body, 'multipart/form-data');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Change content of node as text.
+     *
+     * Change content of node as text.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeContentAsText$Response()` instead.
+     *
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     */
+    changeContentAsText(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         */
+        versionComment?: string;
+
+        /**
+         * MIME-Type
+         */
+        mimetype: string;
+
+        /**
+         * The content data to write (text)
+         */
+        body: string;
+    }): Observable<NodeEntry> {
+        return this.changeContentAsText$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation getMetadata
+     */
+    static readonly GetMetadataPath = '/node/v1/nodes/{repository}/{node}/metadata';
+
+    /**
+     * Get metadata of node.
+     *
+     * Get metadata of node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getMetadata()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getMetadata$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
 
         /**
          * property filter for result nodes (or &quot;-all-&quot; for all properties)
          */
         propertyFilter?: Array<string>;
-    }): Observable<NodeEntries> {
-        return this.getAssocs$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntries>) => r.body as NodeEntries),
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetMetadataPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Get metadata of node.
+     *
+     * Get metadata of node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getMetadata$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getMetadata(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+    }): Observable<NodeEntry> {
+        return this.getMetadata$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation changeMetadata
+     */
+    static readonly ChangeMetadataPath = '/node/v1/nodes/{repository}/{node}/metadata';
+
+    /**
+     * Change metadata of node.
+     *
+     * Change metadata of node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeMetadata()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeMetadata$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * properties
+         */
+        body: {
+            [key: string]: Array<string>;
+        };
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangeMetadataPath, 'put');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Change metadata of node.
+     *
+     * Change metadata of node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeMetadata$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeMetadata(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * properties
+         */
+        body: {
+            [key: string]: Array<string>;
+        };
+    }): Observable<NodeEntry> {
+        return this.changeMetadata$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation changeMetadataWithVersioning
+     */
+    static readonly ChangeMetadataWithVersioningPath =
+        '/node/v1/nodes/{repository}/{node}/metadata';
+
+    /**
+     * Change metadata of node (new version).
+     *
+     * Change metadata of node (new version).
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeMetadataWithVersioning()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeMetadataWithVersioning$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * comment
+         */
+        versionComment: string;
+
+        /**
+         * properties
+         */
+        body: {
+            [key: string]: Array<string>;
+        };
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            NodeV1Service.ChangeMetadataWithVersioningPath,
+            'post',
+        );
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('versionComment', params.versionComment, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Change metadata of node (new version).
+     *
+     * Change metadata of node (new version).
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeMetadataWithVersioning$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeMetadataWithVersioning(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * comment
+         */
+        versionComment: string;
+
+        /**
+         * properties
+         */
+        body: {
+            [key: string]: Array<string>;
+        };
+    }): Observable<NodeEntry> {
+        return this.changeMetadataWithVersioning$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation changePreview
+     */
+    static readonly ChangePreviewPath = '/node/v1/nodes/{repository}/{node}/preview';
+
+    /**
+     * Change preview of node.
+     *
+     * Change preview of node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changePreview()` instead.
+     *
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     */
+    changePreview$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * MIME-Type
+         */
+        mimetype: string;
+        body?: {
+            image?: {};
+        };
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangePreviewPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('mimetype', params.mimetype, {});
+            rb.body(params.body, 'multipart/form-data');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Change preview of node.
+     *
+     * Change preview of node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changePreview$Response()` instead.
+     *
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     */
+    changePreview(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * MIME-Type
+         */
+        mimetype: string;
+        body?: {
+            image?: {};
+        };
+    }): Observable<NodeEntry> {
+        return this.changePreview$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation deletePreview
+     */
+    static readonly DeletePreviewPath = '/node/v1/nodes/{repository}/{node}/preview';
+
+    /**
+     * Delete preview of node.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `deletePreview()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    deletePreview$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.DeletePreviewPath, 'delete');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Delete preview of node.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `deletePreview$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    deletePreview(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<NodeEntry> {
+        return this.deletePreview$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation getTemplateMetadata
+     */
+    static readonly GetTemplateMetadataPath =
+        '/node/v1/nodes/{repository}/{node}/metadata/template';
+
+    /**
+     * Get the metadata template + status for this folder.
+     *
+     * All the given metadata will be inherited to child nodes.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getTemplateMetadata()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getTemplateMetadata$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetTemplateMetadataPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Get the metadata template + status for this folder.
+     *
+     * All the given metadata will be inherited to child nodes.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getTemplateMetadata$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getTemplateMetadata(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<NodeEntry> {
+        return this.getTemplateMetadata$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation changeTemplateMetadata
+     */
+    static readonly ChangeTemplateMetadataPath =
+        '/node/v1/nodes/{repository}/{node}/metadata/template';
+
+    /**
+     * Set the metadata template for this folder.
+     *
+     * All the given metadata will be inherited to child nodes.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeTemplateMetadata()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeTemplateMetadata$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * Is the inherition currently enabled
+         */
+        enable: boolean;
+
+        /**
+         * properties
+         */
+        body: {
+            [key: string]: Array<string>;
+        };
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            NodeV1Service.ChangeTemplateMetadataPath,
+            'put',
+        );
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('enable', params.enable, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Set the metadata template for this folder.
+     *
+     * All the given metadata will be inherited to child nodes.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeTemplateMetadata$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    changeTemplateMetadata(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * Is the inherition currently enabled
+         */
+        enable: boolean;
+
+        /**
+         * properties
+         */
+        body: {
+            [key: string]: Array<string>;
+        };
+    }): Observable<NodeEntry> {
+        return this.changeTemplateMetadata$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
         );
     }
 
@@ -578,15 +1234,15 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntries>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetChildrenPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('filter', params.filter, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('assocName', params.assocName, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('filter', params.filter, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('assocName', params.assocName, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
         }
 
         return this.http
@@ -725,13 +1381,13 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.CreateChildPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('type', params.type, { style: 'form', explode: true });
-            rb.query('aspects', params.aspects, { style: 'form', explode: true });
-            rb.query('renameIfExists', params.renameIfExists, { style: 'form', explode: true });
-            rb.query('versionComment', params.versionComment, { style: 'form', explode: true });
-            rb.query('assocType', params.assocType, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('type', params.type, {});
+            rb.query('aspects', params.aspects, {});
+            rb.query('renameIfExists', params.renameIfExists, {});
+            rb.query('versionComment', params.versionComment, {});
+            rb.query('assocType', params.assocType, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -846,10 +1502,10 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.CreateChildByCopyingPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('source', params.source, { style: 'form', explode: true });
-            rb.query('withChildren', params.withChildren, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('source', params.source, {});
+            rb.query('withChildren', params.withChildren, {});
         }
 
         return this.http
@@ -904,6 +1560,90 @@ export class NodeV1Service extends BaseService {
     }
 
     /**
+     * Path part for operation createChildByMoving
+     */
+    static readonly CreateChildByMovingPath = '/node/v1/nodes/{repository}/{node}/children/_move';
+
+    /**
+     * Create a new child by moving.
+     *
+     * Create a new child by moving.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `createChildByMoving()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    createChildByMoving$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of parent node
+         */
+        node: string;
+
+        /**
+         * ID of source node
+         */
+        source: string;
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.CreateChildByMovingPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('source', params.source, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Create a new child by moving.
+     *
+     * Create a new child by moving.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `createChildByMoving$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    createChildByMoving(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of parent node
+         */
+        node: string;
+
+        /**
+         * ID of source node
+         */
+        source: string;
+    }): Observable<NodeEntry> {
+        return this.createChildByMoving$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
      * Path part for operation createForkOfNode
      */
     static readonly CreateForkOfNodePath = '/node/v1/nodes/{repository}/{node}/children/_fork';
@@ -941,10 +1681,10 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.CreateForkOfNodePath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('source', params.source, { style: 'form', explode: true });
-            rb.query('withChildren', params.withChildren, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('source', params.source, {});
+            rb.query('withChildren', params.withChildren, {});
         }
 
         return this.http
@@ -999,41 +1739,41 @@ export class NodeV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation createChildByMoving
+     * Path part for operation getShares
      */
-    static readonly CreateChildByMovingPath = '/node/v1/nodes/{repository}/{node}/children/_move';
+    static readonly GetSharesPath = '/node/v1/nodes/{repository}/{node}/shares';
 
     /**
-     * Create a new child by moving.
+     * Get shares of node.
      *
-     * Create a new child by moving.
+     * Get list of shares (via mail/token) for a node.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `createChildByMoving()` instead.
+     * To access only the response body, use `getShares()` instead.
      *
      * This method doesn't expect any request body.
      */
-    createChildByMoving$Response(params: {
+    getShares$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * ID of parent node
+         * ID of node
          */
         node: string;
 
         /**
-         * ID of source node
+         * Filter for a specific email or use LINK for link shares (Optional)
          */
-        source: string;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.CreateChildByMovingPath, 'post');
+        email?: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetSharesPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('source', params.source, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('email', params.email, {});
         }
 
         return this.http
@@ -1046,58 +1786,22 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
 
     /**
-     * Create a new child by moving.
+     * Get shares of node.
      *
-     * Create a new child by moving.
+     * Get list of shares (via mail/token) for a node.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `createChildByMoving$Response()` instead.
+     * To access the full response (for headers, for example), `getShares$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    createChildByMoving(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of parent node
-         */
-        node: string;
-
-        /**
-         * ID of source node
-         */
-        source: string;
-    }): Observable<NodeEntry> {
-        return this.createChildByMoving$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
-     * Path part for operation changeContent
-     */
-    static readonly ChangeContentPath = '/node/v1/nodes/{repository}/{node}/content';
-
-    /**
-     * Change content of node.
-     *
-     * Change content of node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeContent()` instead.
-     *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
-     */
-    changeContent$Response(params: {
+    getShares(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -1109,23 +1813,57 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         * Filter for a specific email or use LINK for link shares (Optional)
          */
-        versionComment?: string;
+        email?: string;
+    }): Observable<string> {
+        return this.getShares$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation createShare
+     */
+    static readonly CreateSharePath = '/node/v1/nodes/{repository}/{node}/shares';
+
+    /**
+     * Create a share for a node.
+     *
+     * Create a new share for a node
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `createShare()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    createShare$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
         /**
-         * MIME-Type
+         * ID of node
          */
-        mimetype: string;
-        body?: NodeContentBody;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangeContentPath, 'post');
+        node: string;
+
+        /**
+         * expiry date for this share, leave empty or -1 for unlimited
+         */
+        expiryDate?: number;
+
+        /**
+         * password for this share, use none to not use a password
+         */
+        password?: string;
+    }): Observable<StrictHttpResponse<NodeShare>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.CreateSharePath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('versionComment', params.versionComment, { style: 'form', explode: true });
-            rb.query('mimetype', params.mimetype, { style: 'form', explode: true });
-            rb.body(params.body, 'multipart/form-data');
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('expiryDate', params.expiryDate, {});
+            rb.query('password', params.password, {});
         }
 
         return this.http
@@ -1138,22 +1876,22 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
+                    return r as StrictHttpResponse<NodeShare>;
                 }),
             );
     }
 
     /**
-     * Change content of node.
+     * Create a share for a node.
      *
-     * Change content of node.
+     * Create a new share for a node
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeContent$Response()` instead.
+     * To access the full response (for headers, for example), `createShare$Response()` instead.
      *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     * This method doesn't expect any request body.
      */
-    changeContent(params: {
+    createShare(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -1165,39 +1903,38 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         * expiry date for this share, leave empty or -1 for unlimited
          */
-        versionComment?: string;
+        expiryDate?: number;
 
         /**
-         * MIME-Type
+         * password for this share, use none to not use a password
          */
-        mimetype: string;
-        body?: NodeContentBody;
-    }): Observable<NodeEntry> {
-        return this.changeContent$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        password?: string;
+    }): Observable<NodeShare> {
+        return this.createShare$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeShare>) => r.body as NodeShare),
         );
     }
 
     /**
-     * Path part for operation importNode
+     * Path part for operation delete
      */
-    static readonly ImportNodePath = '/node/v1/nodes/{repository}/{node}/import';
+    static readonly DeletePath = '/node/v1/nodes/{repository}/{node}';
 
     /**
-     * Import node.
+     * Delete node.
      *
-     * Import a node from a foreign repository to the local repository.
+     * Delete node.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `importNode()` instead.
+     * To access only the response body, use `delete()` instead.
      *
      * This method doesn't expect any request body.
      */
-    importNode$Response(params: {
+    delete$Response(params: {
         /**
-         * The id of the foreign repository
+         * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
@@ -1207,15 +1944,27 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * Parent node where to store it locally, may also use -userhome- or -inbox-
+         * move the node to recycle
          */
-        parent: string;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ImportNodePath, 'post');
+        recycle?: boolean;
+
+        /**
+         * protocol
+         */
+        protocol?: string;
+
+        /**
+         * store
+         */
+        store?: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.DeletePath, 'delete');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('parent', params.parent, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('recycle', params.recycle, {});
+            rb.query('protocol', params.protocol, {});
+            rb.query('store', params.store, {});
         }
 
         return this.http
@@ -1228,24 +1977,24 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * Import node.
+     * Delete node.
      *
-     * Import a node from a foreign repository to the local repository.
+     * Delete node.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `importNode$Response()` instead.
+     * To access the full response (for headers, for example), `delete$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    importNode(params: {
+    delete(params: {
         /**
-         * The id of the foreign repository
+         * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
@@ -1255,31 +2004,41 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * Parent node where to store it locally, may also use -userhome- or -inbox-
+         * move the node to recycle
          */
-        parent: string;
-    }): Observable<NodeEntry> {
-        return this.importNode$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        recycle?: boolean;
+
+        /**
+         * protocol
+         */
+        protocol?: string;
+
+        /**
+         * store
+         */
+        store?: string;
+    }): Observable<any> {
+        return this.delete$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation islocked
+     * Path part for operation getAssocs
      */
-    static readonly IslockedPath = '/node/v1/nodes/{repository}/{node}/lock/status';
+    static readonly GetAssocsPath = '/node/v1/nodes/{repository}/{node}/assocs';
 
     /**
-     * locked status of a node.
+     * Get related nodes.
      *
-     * locked status of a node.
+     * Get nodes related based on an assoc.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `islocked()` instead.
+     * To access only the response body, use `getAssocs()` instead.
      *
      * This method doesn't expect any request body.
      */
-    islocked$Response(params: {
+    getAssocs$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -1289,165 +2048,53 @@ export class NodeV1Service extends BaseService {
          * ID of node
          */
         node: string;
-    }): Observable<StrictHttpResponse<NodeLocked>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.IslockedPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeLocked>;
-                }),
-            );
-    }
-
-    /**
-     * locked status of a node.
-     *
-     * locked status of a node.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `islocked$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    islocked(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
 
         /**
-         * ID of node
+         * maximum items per page
          */
-        node: string;
-    }): Observable<NodeLocked> {
-        return this.islocked$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeLocked>) => r.body as NodeLocked),
-        );
-    }
-
-    /**
-     * Path part for operation unlock
-     */
-    static readonly UnlockPath = '/node/v1/nodes/{repository}/{node}/lock/unlock';
-
-    /**
-     * unlock node.
-     *
-     * unlock node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `unlock()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    unlock$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
+        maxItems?: number;
 
         /**
-         * ID of node
+         * skip a number of items
          */
-        node: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.UnlockPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * unlock node.
-     *
-     * unlock node.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `unlock$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    unlock(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
+        skipCount?: number;
 
         /**
-         * ID of node
+         * sort properties
          */
-        node: string;
-    }): Observable<void> {
-        return this.unlock$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getMetadata
-     */
-    static readonly GetMetadataPath = '/node/v1/nodes/{repository}/{node}/metadata';
-
-    /**
-     * Get metadata of node.
-     *
-     * Get metadata of node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getMetadata()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getMetadata$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
+        sortProperties?: Array<string>;
 
         /**
-         * ID of node
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
          */
-        node: string;
+        sortAscending?: Array<boolean>;
+
+        /**
+         * Either where the given node should be the &quot;SOURCE&quot; or the &quot;TARGET&quot;
+         */
+        direction: 'SOURCE' | 'TARGET';
+
+        /**
+         * Association name (e.g. ccm:forkio).
+         */
+        assocName?: string;
 
         /**
          * property filter for result nodes (or &quot;-all-&quot; for all properties)
          */
         propertyFilter?: Array<string>;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetMetadataPath, 'get');
+    }): Observable<StrictHttpResponse<NodeEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetAssocsPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('direction', params.direction, {});
+            rb.query('assocName', params.assocName, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
         }
 
         return this.http
@@ -1460,22 +2107,22 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
+                    return r as StrictHttpResponse<NodeEntries>;
                 }),
             );
     }
 
     /**
-     * Get metadata of node.
+     * Get related nodes.
      *
-     * Get metadata of node.
+     * Get nodes related based on an assoc.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getMetadata$Response()` instead.
+     * To access the full response (for headers, for example), `getAssocs$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getMetadata(params: {
+    getAssocs(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -1485,240 +2132,113 @@ export class NodeV1Service extends BaseService {
          * ID of node
          */
         node: string;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+
+        /**
+         * Either where the given node should be the &quot;SOURCE&quot; or the &quot;TARGET&quot;
+         */
+        direction: 'SOURCE' | 'TARGET';
+
+        /**
+         * Association name (e.g. ccm:forkio).
+         */
+        assocName?: string;
 
         /**
          * property filter for result nodes (or &quot;-all-&quot; for all properties)
          */
         propertyFilter?: Array<string>;
-    }): Observable<NodeEntry> {
-        return this.getMetadata$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+    }): Observable<NodeEntries> {
+        return this.getAssocs$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntries>) => r.body as NodeEntries),
         );
     }
 
     /**
-     * Path part for operation changeMetadata
+     * Path part for operation getNodes
      */
-    static readonly ChangeMetadataPath = '/node/v1/nodes/{repository}/{node}/metadata';
+    static readonly GetNodesPath = '/node/v1/nodes/{repository}';
 
     /**
-     * Change metadata of node.
+     * Searching nodes.
      *
-     * Change metadata of node.
+     * Searching nodes.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeMetadata()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeMetadata$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * properties
-         */
-        body: {
-            [key: string]: Array<string>;
-        };
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangeMetadataPath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
-                }),
-            );
-    }
-
-    /**
-     * Change metadata of node.
-     *
-     * Change metadata of node.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeMetadata$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeMetadata(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * properties
-         */
-        body: {
-            [key: string]: Array<string>;
-        };
-    }): Observable<NodeEntry> {
-        return this.changeMetadata$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
-     * Path part for operation changeMetadataWithVersioning
-     */
-    static readonly ChangeMetadataWithVersioningPath =
-        '/node/v1/nodes/{repository}/{node}/metadata';
-
-    /**
-     * Change metadata of node (new version).
-     *
-     * Change metadata of node (new version).
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeMetadataWithVersioning()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeMetadataWithVersioning$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * comment
-         */
-        versionComment: string;
-
-        /**
-         * properties
-         */
-        body: {
-            [key: string]: Array<string>;
-        };
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(
-            this.rootUrl,
-            NodeV1Service.ChangeMetadataWithVersioningPath,
-            'post',
-        );
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('versionComment', params.versionComment, { style: 'form', explode: true });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
-                }),
-            );
-    }
-
-    /**
-     * Change metadata of node (new version).
-     *
-     * Change metadata of node (new version).
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeMetadataWithVersioning$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeMetadataWithVersioning(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * comment
-         */
-        versionComment: string;
-
-        /**
-         * properties
-         */
-        body: {
-            [key: string]: Array<string>;
-        };
-    }): Observable<NodeEntry> {
-        return this.changeMetadataWithVersioning$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
-     * Path part for operation getTemplateMetadata
-     */
-    static readonly GetTemplateMetadataPath =
-        '/node/v1/nodes/{repository}/{node}/metadata/template';
-
-    /**
-     * Get the metadata template + status for this folder.
-     *
-     * All the given metadata will be inherited to child nodes.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getTemplateMetadata()` instead.
+     * To access only the response body, use `getNodes()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getTemplateMetadata$Response(params: {
+    getNodes$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * ID of node
+         * lucene query
          */
-        node: string;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetTemplateMetadataPath, 'get');
+        query: string;
+
+        /**
+         * facets
+         */
+        facets?: Array<string>;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+    }): Observable<StrictHttpResponse<SearchResult>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetNodesPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.query('query', params.query, {});
+            rb.query('facets', params.facets, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
         }
 
         return this.http
@@ -1731,138 +2251,64 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
+                    return r as StrictHttpResponse<SearchResult>;
                 }),
             );
     }
 
     /**
-     * Get the metadata template + status for this folder.
+     * Searching nodes.
      *
-     * All the given metadata will be inherited to child nodes.
+     * Searching nodes.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getTemplateMetadata$Response()` instead.
+     * To access the full response (for headers, for example), `getNodes$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getTemplateMetadata(params: {
+    getNodes(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
         repository: string;
 
         /**
-         * ID of node
+         * lucene query
          */
-        node: string;
-    }): Observable<NodeEntry> {
-        return this.getTemplateMetadata$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
-     * Path part for operation changeTemplateMetadata
-     */
-    static readonly ChangeTemplateMetadataPath =
-        '/node/v1/nodes/{repository}/{node}/metadata/template';
-
-    /**
-     * Set the metadata template for this folder.
-     *
-     * All the given metadata will be inherited to child nodes.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeTemplateMetadata()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeTemplateMetadata$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
+        query: string;
 
         /**
-         * ID of node
+         * facets
          */
-        node: string;
+        facets?: Array<string>;
 
         /**
-         * Is the inherition currently enabled
+         * maximum items per page
          */
-        enable: boolean;
+        maxItems?: number;
 
         /**
-         * properties
+         * skip a number of items
          */
-        body: {
-            [key: string]: Array<string>;
-        };
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(
-            this.rootUrl,
-            NodeV1Service.ChangeTemplateMetadataPath,
-            'put',
-        );
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('enable', params.enable, { style: 'form', explode: true });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
-                }),
-            );
-    }
-
-    /**
-     * Set the metadata template for this folder.
-     *
-     * All the given metadata will be inherited to child nodes.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeTemplateMetadata$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    changeTemplateMetadata(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
+        skipCount?: number;
 
         /**
-         * ID of node
+         * sort properties
          */
-        node: string;
+        sortProperties?: Array<string>;
 
         /**
-         * Is the inherition currently enabled
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
          */
-        enable: boolean;
+        sortAscending?: Array<boolean>;
 
         /**
-         * properties
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
          */
-        body: {
-            [key: string]: Array<string>;
-        };
-    }): Observable<NodeEntry> {
-        return this.changeTemplateMetadata$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        propertyFilter?: Array<string>;
+    }): Observable<SearchResult> {
+        return this.getNodes$Response(params).pipe(
+            map((r: StrictHttpResponse<SearchResult>) => r.body as SearchResult),
         );
     }
 
@@ -1891,11 +2337,11 @@ export class NodeV1Service extends BaseService {
          * ID of node
          */
         node: string;
-    }): Observable<StrictHttpResponse<Array<NotifyEntry>>> {
+    }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetNotifyListPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
         }
 
         return this.http
@@ -1908,7 +2354,7 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<NotifyEntry>>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -1933,95 +2379,9 @@ export class NodeV1Service extends BaseService {
          * ID of node
          */
         node: string;
-    }): Observable<Array<NotifyEntry>> {
+    }): Observable<string> {
         return this.getNotifyList$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<NotifyEntry>>) => r.body as Array<NotifyEntry>),
-        );
-    }
-
-    /**
-     * Path part for operation setOwner
-     */
-    static readonly SetOwnerPath = '/node/v1/nodes/{repository}/{node}/owner';
-
-    /**
-     * Set owner of node.
-     *
-     * Set owner of node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `setOwner()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    setOwner$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * username
-         */
-        username?: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.SetOwnerPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('username', params.username, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Set owner of node.
-     *
-     * Set owner of node.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `setOwner$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    setOwner(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * username
-         */
-        username?: string;
-    }): Observable<void> {
-        return this.setOwner$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
@@ -2063,10 +2423,10 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<ParentEntries>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetParentsPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
-            rb.query('fullPath', params.fullPath, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
+            rb.query('fullPath', params.fullPath, {});
         }
 
         return this.http
@@ -2148,8 +2508,8 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodePermissionEntry>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetPermissionPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
         }
 
         return this.http
@@ -2238,30 +2598,28 @@ export class NodeV1Service extends BaseService {
          * permissions
          */
         body: Acl;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.SetPermissionPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('mailtext', params.mailtext, { style: 'form', explode: true });
-            rb.query('sendMail', params.sendMail, { style: 'form', explode: true });
-            rb.query('sendCopy', params.sendCopy, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('mailtext', params.mailtext, {});
+            rb.query('sendMail', params.sendMail, {});
+            rb.query('sendCopy', params.sendCopy, {});
             rb.body(params.body, 'application/json');
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -2306,423 +2664,9 @@ export class NodeV1Service extends BaseService {
          * permissions
          */
         body: Acl;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.setPermission$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation hasPermission
-     */
-    static readonly HasPermissionPath = '/node/v1/nodes/{repository}/{node}/permissions/{user}';
-
-    /**
-     * Which permissions has user/group for node.
-     *
-     * Check for actual permissions (also when user is in groups) for a specific node
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `hasPermission()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    hasPermission$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * Authority (user/group) to check (use &quot;-me-&quot; for current user
-         */
-        user: string;
-    }): Observable<StrictHttpResponse<Array<string>>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.HasPermissionPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.path('user', params.user, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<string>>;
-                }),
-            );
-    }
-
-    /**
-     * Which permissions has user/group for node.
-     *
-     * Check for actual permissions (also when user is in groups) for a specific node
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `hasPermission$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    hasPermission(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * Authority (user/group) to check (use &quot;-me-&quot; for current user
-         */
-        user: string;
-    }): Observable<Array<string>> {
-        return this.hasPermission$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<string>>) => r.body as Array<string>),
-        );
-    }
-
-    /**
-     * Path part for operation prepareUsage
-     */
-    static readonly PrepareUsagePath = '/node/v1/nodes/{repository}/{node}/prepareUsage';
-
-    /**
-     * create remote object and get properties.
-     *
-     * create remote object and get properties.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `prepareUsage()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    prepareUsage$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<StrictHttpResponse<NodeRemote>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.PrepareUsagePath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeRemote>;
-                }),
-            );
-    }
-
-    /**
-     * create remote object and get properties.
-     *
-     * create remote object and get properties.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `prepareUsage$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    prepareUsage(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<NodeRemote> {
-        return this.prepareUsage$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeRemote>) => r.body as NodeRemote),
-        );
-    }
-
-    /**
-     * Path part for operation changePreview
-     */
-    static readonly ChangePreviewPath = '/node/v1/nodes/{repository}/{node}/preview';
-
-    /**
-     * Change preview of node.
-     *
-     * Change preview of node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changePreview()` instead.
-     *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
-     */
-    changePreview$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * MIME-Type
-         */
-        mimetype: string;
-        body?: NodePreviewBody;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangePreviewPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('mimetype', params.mimetype, { style: 'form', explode: true });
-            rb.body(params.body, 'multipart/form-data');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
-                }),
-            );
-    }
-
-    /**
-     * Change preview of node.
-     *
-     * Change preview of node.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changePreview$Response()` instead.
-     *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
-     */
-    changePreview(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * MIME-Type
-         */
-        mimetype: string;
-        body?: NodePreviewBody;
-    }): Observable<NodeEntry> {
-        return this.changePreview$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
-     * Path part for operation deletePreview
-     */
-    static readonly DeletePreviewPath = '/node/v1/nodes/{repository}/{node}/preview';
-
-    /**
-     * Delete preview of node.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `deletePreview()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    deletePreview$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.DeletePreviewPath, 'delete');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
-                }),
-            );
-    }
-
-    /**
-     * Delete preview of node.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `deletePreview$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    deletePreview(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<NodeEntry> {
-        return this.deletePreview$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
-     * Path part for operation setProperty
-     */
-    static readonly SetPropertyPath = '/node/v1/nodes/{repository}/{node}/property';
-
-    /**
-     * Set single property of node.
-     *
-     * When the property is unset (null), it will be removed
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `setProperty()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    setProperty$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * property
-         */
-        property: string;
-
-        /**
-         * value
-         */
-        value?: Array<string>;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.SetPropertyPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('property', params.property, { style: 'form', explode: true });
-            rb.query('value', params.value, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Set single property of node.
-     *
-     * When the property is unset (null), it will be removed
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `setProperty$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    setProperty(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * property
-         */
-        property: string;
-
-        /**
-         * value
-         */
-        value?: Array<string>;
-    }): Observable<void> {
-        return this.setProperty$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -2754,8 +2698,8 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntries>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetPublishedCopiesPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
         }
 
         return this.http
@@ -2832,9 +2776,9 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.PublishCopyPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('handleMode', params.handleMode, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('handleMode', params.handleMode, {});
         }
 
         return this.http
@@ -2884,21 +2828,22 @@ export class NodeV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation reportNode
+     * Path part for operation getVersionMetadata
      */
-    static readonly ReportNodePath = '/node/v1/nodes/{repository}/{node}/report';
+    static readonly GetVersionMetadataPath =
+        '/node/v1/nodes/{repository}/{node}/versions/{major}/{minor}/metadata';
 
     /**
-     * Report the node.
+     * Get metadata of node version.
      *
-     * Report a node to notify the admin about an issue)
+     * Get metadata of node version.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `reportNode()` instead.
+     * To access only the response body, use `getVersionMetadata()` instead.
      *
      * This method doesn't expect any request body.
      */
-    reportNode$Response(params: {
+    getVersionMetadata$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -2910,123 +2855,27 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * the reason for the report
+         * major version
          */
-        reason: string;
+        major: number;
 
         /**
-         * mail of reporting user
+         * minor version
          */
-        userEmail: string;
+        minor: number;
 
         /**
-         * additional user comment
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
          */
-        userComment?: string;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ReportNodePath, 'post');
+        propertyFilter?: Array<string>;
+    }): Observable<StrictHttpResponse<NodeVersionEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetVersionMetadataPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('reason', params.reason, { style: 'form', explode: true });
-            rb.query('userEmail', params.userEmail, { style: 'form', explode: true });
-            rb.query('userComment', params.userComment, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Report the node.
-     *
-     * Report a node to notify the admin about an issue)
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `reportNode$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    reportNode(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * the reason for the report
-         */
-        reason: string;
-
-        /**
-         * mail of reporting user
-         */
-        userEmail: string;
-
-        /**
-         * additional user comment
-         */
-        userComment?: string;
-    }): Observable<void> {
-        return this.reportNode$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
-     * Path part for operation getShares
-     */
-    static readonly GetSharesPath = '/node/v1/nodes/{repository}/{node}/shares';
-
-    /**
-     * Get shares of node.
-     *
-     * Get list of shares (via mail/token) for a node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getShares()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getShares$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * Filter for a specific email or use LINK for link shares (Optional)
-         */
-        email?: string;
-    }): Observable<StrictHttpResponse<Array<NodeShare>>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetSharesPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('email', params.email, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.path('major', params.major, {});
+            rb.path('minor', params.minor, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
         }
 
         return this.http
@@ -3039,22 +2888,22 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<NodeShare>>;
+                    return r as StrictHttpResponse<NodeVersionEntry>;
                 }),
             );
     }
 
     /**
-     * Get shares of node.
+     * Get metadata of node version.
      *
-     * Get list of shares (via mail/token) for a node.
+     * Get metadata of node version.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getShares$Response()` instead.
+     * To access the full response (for headers, for example), `getVersionMetadata$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getShares(params: {
+    getVersionMetadata(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3066,31 +2915,41 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * Filter for a specific email or use LINK for link shares (Optional)
+         * major version
          */
-        email?: string;
-    }): Observable<Array<NodeShare>> {
-        return this.getShares$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<NodeShare>>) => r.body as Array<NodeShare>),
+        major: number;
+
+        /**
+         * minor version
+         */
+        minor: number;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+    }): Observable<NodeVersionEntry> {
+        return this.getVersionMetadata$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeVersionEntry>) => r.body as NodeVersionEntry),
         );
     }
 
     /**
-     * Path part for operation createShare
+     * Path part for operation getVersions
      */
-    static readonly CreateSharePath = '/node/v1/nodes/{repository}/{node}/shares';
+    static readonly GetVersionsPath = '/node/v1/nodes/{repository}/{node}/versions';
 
     /**
-     * Create a share for a node.
+     * Get all versions of node.
      *
-     * Create a new share for a node
+     * Get all versions of node.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `createShare()` instead.
+     * To access only the response body, use `getVersions()` instead.
      *
      * This method doesn't expect any request body.
      */
-    createShare$Response(params: {
+    getVersions$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3100,23 +2959,11 @@ export class NodeV1Service extends BaseService {
          * ID of node
          */
         node: string;
-
-        /**
-         * expiry date for this share, leave empty or -1 for unlimited
-         */
-        expiryDate?: number;
-
-        /**
-         * password for this share, use none to not use a password
-         */
-        password?: string;
-    }): Observable<StrictHttpResponse<NodeShare>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.CreateSharePath, 'put');
+    }): Observable<StrictHttpResponse<NodeVersionRefEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetVersionsPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('expiryDate', params.expiryDate, { style: 'form', explode: true });
-            rb.query('password', params.password, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
         }
 
         return this.http
@@ -3129,22 +2976,53 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeShare>;
+                    return r as StrictHttpResponse<NodeVersionRefEntries>;
                 }),
             );
     }
 
     /**
-     * Create a share for a node.
+     * Get all versions of node.
      *
-     * Create a new share for a node
+     * Get all versions of node.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `createShare$Response()` instead.
+     * To access the full response (for headers, for example), `getVersions$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    createShare(params: {
+    getVersions(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<NodeVersionRefEntries> {
+        return this.getVersions$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeVersionRefEntries>) => r.body as NodeVersionRefEntries),
+        );
+    }
+
+    /**
+     * Path part for operation hasPermission
+     */
+    static readonly HasPermissionPath = '/node/v1/nodes/{repository}/{node}/permissions/{user}';
+
+    /**
+     * Which permissions has user/group for node.
+     *
+     * Check for actual permissions (also when user is in groups) for a specific node
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `hasPermission()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    hasPermission$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3156,17 +3034,290 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * expiry date for this share, leave empty or -1 for unlimited
+         * Authority (user/group) to check (use &quot;-me-&quot; for current user
          */
-        expiryDate?: number;
+        user: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.HasPermissionPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.path('user', params.user, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * Which permissions has user/group for node.
+     *
+     * Check for actual permissions (also when user is in groups) for a specific node
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `hasPermission$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    hasPermission(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
 
         /**
-         * password for this share, use none to not use a password
+         * ID of node
          */
-        password?: string;
-    }): Observable<NodeShare> {
-        return this.createShare$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeShare>) => r.body as NodeShare),
+        node: string;
+
+        /**
+         * Authority (user/group) to check (use &quot;-me-&quot; for current user
+         */
+        user: string;
+    }): Observable<string> {
+        return this.hasPermission$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation importNode
+     */
+    static readonly ImportNodePath = '/node/v1/nodes/{repository}/{node}/import';
+
+    /**
+     * Import node.
+     *
+     * Import a node from a foreign repository to the local repository.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `importNode()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    importNode$Response(params: {
+        /**
+         * The id of the foreign repository
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * Parent node where to store it locally, may also use -userhome- or -inbox-
+         */
+        parent: string;
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ImportNodePath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('parent', params.parent, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Import node.
+     *
+     * Import a node from a foreign repository to the local repository.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `importNode$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    importNode(params: {
+        /**
+         * The id of the foreign repository
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * Parent node where to store it locally, may also use -userhome- or -inbox-
+         */
+        parent: string;
+    }): Observable<NodeEntry> {
+        return this.importNode$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation islocked
+     */
+    static readonly IslockedPath = '/node/v1/nodes/{repository}/{node}/lock/status';
+
+    /**
+     * locked status of a node.
+     *
+     * locked status of a node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `islocked()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    islocked$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<StrictHttpResponse<NodeLocked>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.IslockedPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeLocked>;
+                }),
+            );
+    }
+
+    /**
+     * locked status of a node.
+     *
+     * locked status of a node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `islocked$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    islocked(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<NodeLocked> {
+        return this.islocked$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeLocked>) => r.body as NodeLocked),
+        );
+    }
+
+    /**
+     * Path part for operation prepareUsage
+     */
+    static readonly PrepareUsagePath = '/node/v1/nodes/{repository}/{node}/prepareUsage';
+
+    /**
+     * create remote object and get properties.
+     *
+     * create remote object and get properties.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `prepareUsage()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    prepareUsage$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<StrictHttpResponse<NodeRemote>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.PrepareUsagePath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeRemote>;
+                }),
+            );
+    }
+
+    /**
+     * create remote object and get properties.
+     *
+     * create remote object and get properties.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `prepareUsage$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    prepareUsage(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<NodeRemote> {
+        return this.prepareUsage$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeRemote>) => r.body as NodeRemote),
         );
     }
 
@@ -3213,11 +3364,11 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeShare>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.UpdateSharePath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.path('shareId', params.shareId, { style: 'simple', explode: false });
-            rb.query('expiryDate', params.expiryDate, { style: 'form', explode: true });
-            rb.query('password', params.password, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.path('shareId', params.shareId, {});
+            rb.query('expiryDate', params.expiryDate, {});
+            rb.query('password', params.password, {});
         }
 
         return this.http
@@ -3306,27 +3457,25 @@ export class NodeV1Service extends BaseService {
          * share id
          */
         shareId: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.RemoveSharePath, 'delete');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.path('shareId', params.shareId, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.path('shareId', params.shareId, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -3356,28 +3505,28 @@ export class NodeV1Service extends BaseService {
          * share id
          */
         shareId: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.removeShare$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation getTextContent
+     * Path part for operation reportNode
      */
-    static readonly GetTextContentPath = '/node/v1/nodes/{repository}/{node}/textContent';
+    static readonly ReportNodePath = '/node/v1/nodes/{repository}/{node}/report';
 
     /**
-     * Get the text content of a document.
+     * Report the node.
      *
-     * May fails with 500 if the node can not be read.
+     * Report a node to notify the admin about an issue)
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getTextContent()` instead.
+     * To access only the response body, use `reportNode()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getTextContent$Response(params: {
+    reportNode$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3387,11 +3536,29 @@ export class NodeV1Service extends BaseService {
          * ID of node
          */
         node: string;
-    }): Observable<StrictHttpResponse<NodeText>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetTextContentPath, 'get');
+
+        /**
+         * the reason for the report
+         */
+        reason: string;
+
+        /**
+         * mail of reporting user
+         */
+        userEmail: string;
+
+        /**
+         * additional user comment
+         */
+        userComment?: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ReportNodePath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('reason', params.reason, {});
+            rb.query('userEmail', params.userEmail, {});
+            rb.query('userComment', params.userComment, {});
         }
 
         return this.http
@@ -3404,53 +3571,22 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeText>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * Get the text content of a document.
+     * Report the node.
      *
-     * May fails with 500 if the node can not be read.
+     * Report a node to notify the admin about an issue)
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getTextContent$Response()` instead.
+     * To access the full response (for headers, for example), `reportNode$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getTextContent(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<NodeText> {
-        return this.getTextContent$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeText>) => r.body as NodeText),
-        );
-    }
-
-    /**
-     * Path part for operation changeContentAsText
-     */
-    static readonly ChangeContentAsTextPath = '/node/v1/nodes/{repository}/{node}/textContent';
-
-    /**
-     * Change content of node as text.
-     *
-     * Change content of node as text.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeContentAsText()` instead.
-     *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
-     */
-    changeContentAsText$Response(params: {
+    reportNode(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3462,155 +3598,22 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         * the reason for the report
          */
-        versionComment?: string;
+        reason: string;
 
         /**
-         * MIME-Type
+         * mail of reporting user
          */
-        mimetype: string;
+        userEmail: string;
 
         /**
-         * The content data to write (text)
+         * additional user comment
          */
-        body: string;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangeContentAsTextPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('versionComment', params.versionComment, { style: 'form', explode: true });
-            rb.query('mimetype', params.mimetype, { style: 'form', explode: true });
-            rb.body(params.body, 'multipart/form-data');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
-                }),
-            );
-    }
-
-    /**
-     * Change content of node as text.
-     *
-     * Change content of node as text.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeContentAsText$Response()` instead.
-     *
-     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
-     */
-    changeContentAsText(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-
-        /**
-         * comment, leave empty &#x3D; no new version, otherwise new version is generated
-         */
-        versionComment?: string;
-
-        /**
-         * MIME-Type
-         */
-        mimetype: string;
-
-        /**
-         * The content data to write (text)
-         */
-        body: string;
-    }): Observable<NodeEntry> {
-        return this.changeContentAsText$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
-     * Path part for operation getVersions
-     */
-    static readonly GetVersionsPath = '/node/v1/nodes/{repository}/{node}/versions';
-
-    /**
-     * Get all versions of node.
-     *
-     * Get all versions of node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getVersions()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getVersions$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<StrictHttpResponse<NodeVersionRefEntries>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetVersionsPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeVersionRefEntries>;
-                }),
-            );
-    }
-
-    /**
-     * Get all versions of node.
-     *
-     * Get all versions of node.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getVersions$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getVersions(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<NodeVersionRefEntries> {
-        return this.getVersions$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeVersionRefEntries>) => r.body as NodeVersionRefEntries),
+        userComment?: string;
+    }): Observable<any> {
+        return this.reportNode$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -3653,10 +3656,10 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.RevertVersionPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.path('major', params.major, { style: 'simple', explode: false });
-            rb.path('minor', params.minor, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.path('major', params.major, {});
+            rb.path('minor', params.minor, {});
         }
 
         return this.http
@@ -3711,22 +3714,21 @@ export class NodeV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation getVersionMetadata
+     * Path part for operation setOwner
      */
-    static readonly GetVersionMetadataPath =
-        '/node/v1/nodes/{repository}/{node}/versions/{major}/{minor}/metadata';
+    static readonly SetOwnerPath = '/node/v1/nodes/{repository}/{node}/owner';
 
     /**
-     * Get metadata of node version.
+     * Set owner of node.
      *
-     * Get metadata of node version.
+     * Set owner of node.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getVersionMetadata()` instead.
+     * To access only the response body, use `setOwner()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getVersionMetadata$Response(params: {
+    setOwner$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3738,27 +3740,15 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * major version
+         * username
          */
-        major: number;
-
-        /**
-         * minor version
-         */
-        minor: number;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-    }): Observable<StrictHttpResponse<NodeVersionEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetVersionMetadataPath, 'get');
+        username?: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.SetOwnerPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.path('major', params.major, { style: 'simple', explode: false });
-            rb.path('minor', params.minor, { style: 'simple', explode: false });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('username', params.username, {});
         }
 
         return this.http
@@ -3771,22 +3761,22 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeVersionEntry>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * Get metadata of node version.
+     * Set owner of node.
      *
-     * Get metadata of node version.
+     * Set owner of node.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getVersionMetadata$Response()` instead.
+     * To access the full response (for headers, for example), `setOwner$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getVersionMetadata(params: {
+    setOwner(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3798,41 +3788,31 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * major version
+         * username
          */
-        major: number;
-
-        /**
-         * minor version
-         */
-        minor: number;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-    }): Observable<NodeVersionEntry> {
-        return this.getVersionMetadata$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeVersionEntry>) => r.body as NodeVersionEntry),
+        username?: string;
+    }): Observable<any> {
+        return this.setOwner$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
     /**
-     * Path part for operation getWorkflowHistory
+     * Path part for operation setProperty
      */
-    static readonly GetWorkflowHistoryPath = '/node/v1/nodes/{repository}/{node}/workflow';
+    static readonly SetPropertyPath = '/node/v1/nodes/{repository}/{node}/property';
 
     /**
-     * Get workflow history.
+     * Set single property of node.
      *
-     * Get workflow history of node.
+     * When the property is unset (null), it will be removed
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getWorkflowHistory()` instead.
+     * To access only the response body, use `setProperty()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getWorkflowHistory$Response(params: {
+    setProperty$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3842,11 +3822,23 @@ export class NodeV1Service extends BaseService {
          * ID of node
          */
         node: string;
-    }): Observable<StrictHttpResponse<Array<WorkflowHistory>>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.GetWorkflowHistoryPath, 'get');
+
+        /**
+         * property
+         */
+        property: string;
+
+        /**
+         * value
+         */
+        value?: Array<string>;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.SetPropertyPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('property', params.property, {});
+            rb.query('value', params.value, {});
         }
 
         return this.http
@@ -3859,55 +3851,22 @@ export class NodeV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<WorkflowHistory>>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * Get workflow history.
+     * Set single property of node.
      *
-     * Get workflow history of node.
+     * When the property is unset (null), it will be removed
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getWorkflowHistory$Response()` instead.
+     * To access the full response (for headers, for example), `setProperty$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getWorkflowHistory(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of node
-         */
-        node: string;
-    }): Observable<Array<WorkflowHistory>> {
-        return this.getWorkflowHistory$Response(params).pipe(
-            map(
-                (r: StrictHttpResponse<Array<WorkflowHistory>>) => r.body as Array<WorkflowHistory>,
-            ),
-        );
-    }
-
-    /**
-     * Path part for operation addWorkflowHistory
-     */
-    static readonly AddWorkflowHistoryPath = '/node/v1/nodes/{repository}/{node}/workflow';
-
-    /**
-     * Add workflow.
-     *
-     * Add workflow entry to node.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `addWorkflowHistory()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    addWorkflowHistory$Response(params: {
+    setProperty(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -3919,62 +3878,17 @@ export class NodeV1Service extends BaseService {
         node: string;
 
         /**
-         * The history entry to put (editor and time can be null and will be filled automatically)
+         * property
          */
-        body: WorkflowHistory;
-    }): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.AddWorkflowHistoryPath, 'put');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Add workflow.
-     *
-     * Add workflow entry to node.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `addWorkflowHistory$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    addWorkflowHistory(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
+        property: string;
 
         /**
-         * ID of node
+         * value
          */
-        node: string;
-
-        /**
-         * The history entry to put (editor and time can be null and will be filled automatically)
-         */
-        body: WorkflowHistory;
-    }): Observable<void> {
-        return this.addWorkflowHistory$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+        value?: Array<string>;
+    }): Observable<any> {
+        return this.setProperty$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -4011,8 +3925,8 @@ export class NodeV1Service extends BaseService {
     }): Observable<StrictHttpResponse<{}>> {
         const rb = new RequestBuilder(this.rootUrl, NodeV1Service.StoreXApiDataPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -4059,6 +3973,79 @@ export class NodeV1Service extends BaseService {
     }): Observable<{}> {
         return this.storeXApiData$Response(params).pipe(
             map((r: StrictHttpResponse<{}>) => r.body as {}),
+        );
+    }
+
+    /**
+     * Path part for operation unlock
+     */
+    static readonly UnlockPath = '/node/v1/nodes/{repository}/{node}/lock/unlock';
+
+    /**
+     * unlock node.
+     *
+     * unlock node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `unlock()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    unlock$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.UnlockPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * unlock node.
+     *
+     * unlock node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `unlock$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    unlock(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+    }): Observable<any> {
+        return this.unlock$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 }
