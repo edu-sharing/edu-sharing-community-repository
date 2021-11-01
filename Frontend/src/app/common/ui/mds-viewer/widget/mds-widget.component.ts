@@ -30,6 +30,8 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
                 return 'number';
             case 'date':
                 return 'date';
+            case 'vcard':
+                return 'vcard';
             case 'multivalueFixedBadges':
             case 'multivalueSuggestBadges':
             case 'multivalueBadges':
@@ -65,6 +67,9 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
             }
         }
         return data;
+    }
+    refresh() {
+        this.ngOnInit();
     }
 
     click() {

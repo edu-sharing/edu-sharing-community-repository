@@ -16,6 +16,9 @@
       <div *ngIf="getBasicType()=='array'">
         <div class="array-entry" *ngFor="let v of value">{{v}}</div>
       </div>
+      <div *ngIf="getBasicType()=='vcard'">
+        <div class="array-entry" *ngFor="let v of value">{{v | vcardName}}</div>
+      </div>
       <div *ngIf="getBasicType()=='slider'">
         <span class="slider-value">{{value}}</span><span> / </span><span class="slider-max">{{widget.definition.max}}</span>
       </div>
