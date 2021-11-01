@@ -104,7 +104,7 @@ public class MetadataReaderV2 {
 	    try {
             String id = appId.getAppId() + "_" + mdsName + "_" + locale;
             if (mdsCache.getKeys().contains(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
-                return SerializationUtils.clone(mdsCache.get(id));
+				return mdsCache.get(id);
             reader = new MetadataReaderV2(mdsNameDefault + ".xml", locale);
             mds = reader.getMetadatasetForFile(mdsNameDefault);
             mds.setRepositoryId(appId.getAppId());
@@ -129,7 +129,7 @@ public class MetadataReaderV2 {
 					if(mdsOverride.getInherit().equals(mdsName)){
 						throw new RuntimeException("Detected cyclic dependency in your mds inherition. Please check your mds " + mdsName);
 					}
-					mds = getMetadataset(appId, mdsOverride.getInherit(), locale, false);
+					mds = SerializationUtils.clone(getMetadataset(appId, mdsOverride.getInherit(), locale, false));
 					mds.overrideWith(mdsOverride);
 				} else {
 					// fallback for backward compatibility: use the default mds for inherition
