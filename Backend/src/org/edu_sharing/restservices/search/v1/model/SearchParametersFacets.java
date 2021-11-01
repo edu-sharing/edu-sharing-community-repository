@@ -9,8 +9,8 @@ import java.util.List;
 @Schema(description = "")
 public class SearchParametersFacets {
     private List<String> facets;
-    Integer facetMinCount;
-    Integer facetLimit;
+    Integer facetMinCount = 5;
+    Integer facetLimit = 10;
     String facetSuggest;
     private List<MdsQueryCriteria> criteria;
 
@@ -19,12 +19,12 @@ public class SearchParametersFacets {
     public List<String> getFacets() { return facets;}
     public void setFacets(List<String> facets) { this.facets = facets; }
 
-    @Schema(required = true, defaultValue = "5")
+    @Schema(required = false, defaultValue = "5")
     @JsonProperty("facetMinCount")
     public Integer getFacetMinCount() { return facetMinCount; }
     public void setFacetMinCount(Integer facetMinCount) { this.facetMinCount = facetMinCount;}
 
-    @Schema(required = true, defaultValue = "10")
+    @Schema(required = false, defaultValue = "10")
     @JsonProperty("facetLimit")
     public Integer getFacetLimit() { return facetLimit; }
     public void setFacetLimit(Integer facetLimit) { this.facetLimit = facetLimit; }
