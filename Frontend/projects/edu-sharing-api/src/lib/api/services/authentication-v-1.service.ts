@@ -54,7 +54,7 @@ export class AuthenticationV1Service extends BaseService {
             'post',
         );
         if (params) {
-            rb.path('userId', params.userId, { style: 'simple', explode: false });
+            rb.path('userId', params.userId, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -100,59 +100,6 @@ export class AuthenticationV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation logout
-     */
-    static readonly LogoutPath = '/authentication/v1/destroySession';
-
-    /**
-     * Destroys the current session and logout the user.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `logout()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    logout$Response(params?: {}): Observable<StrictHttpResponse<void>> {
-        const rb = new RequestBuilder(this.rootUrl, AuthenticationV1Service.LogoutPath, 'get');
-        if (params) {
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
-                }),
-            );
-    }
-
-    /**
-     * Destroys the current session and logout the user.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `logout$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    logout(params?: {}): Observable<void> {
-        return this.logout$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
-        );
-    }
-
-    /**
      * Path part for operation hasAccessToScope
      */
     static readonly HasAccessToScopePath = '/authentication/v1/hasAccessToScope';
@@ -172,29 +119,27 @@ export class AuthenticationV1Service extends BaseService {
          * scope
          */
         scope: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(
             this.rootUrl,
             AuthenticationV1Service.HasAccessToScopePath,
             'get',
         );
         if (params) {
-            rb.query('scope', params.scope, { style: 'form', explode: true });
+            rb.query('scope', params.scope, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -214,9 +159,60 @@ export class AuthenticationV1Service extends BaseService {
          * scope
          */
         scope: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.hasAccessToScope$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation login
+     */
+    static readonly LoginPath = '/authentication/v1/validateSession';
+
+    /**
+     * Validates the Basic Auth Credentials and check if the session is a logged in user.
+     *
+     * Use the Basic auth header field to transfer the credentials
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `login()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    login$Response(params?: {}): Observable<StrictHttpResponse<Login>> {
+        const rb = new RequestBuilder(this.rootUrl, AuthenticationV1Service.LoginPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<Login>;
+                }),
+            );
+    }
+
+    /**
+     * Validates the Basic Auth Credentials and check if the session is a logged in user.
+     *
+     * Use the Basic auth header field to transfer the credentials
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `login$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    login(params?: {}): Observable<Login> {
+        return this.login$Response(params).pipe(
+            map((r: StrictHttpResponse<Login>) => r.body as Login),
         );
     }
 
@@ -287,22 +283,22 @@ export class AuthenticationV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation login
+     * Path part for operation logout
      */
-    static readonly LoginPath = '/authentication/v1/validateSession';
+    static readonly LogoutPath = '/authentication/v1/destroySession';
 
     /**
-     * Validates the Basic Auth Credentials and check if the session is a logged in user.
+     * Destroys the current session and logout the user.
      *
-     * Use the Basic auth header field to transfer the credentials
+     *
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `login()` instead.
+     * To access only the response body, use `logout()` instead.
      *
      * This method doesn't expect any request body.
      */
-    login$Response(params?: {}): Observable<StrictHttpResponse<Login>> {
-        const rb = new RequestBuilder(this.rootUrl, AuthenticationV1Service.LoginPath, 'get');
+    logout$Response(params?: {}): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AuthenticationV1Service.LogoutPath, 'get');
         if (params) {
         }
 
@@ -316,24 +312,24 @@ export class AuthenticationV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Login>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
 
     /**
-     * Validates the Basic Auth Credentials and check if the session is a logged in user.
+     * Destroys the current session and logout the user.
      *
-     * Use the Basic auth header field to transfer the credentials
+     *
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `login$Response()` instead.
+     * To access the full response (for headers, for example), `logout$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    login(params?: {}): Observable<Login> {
-        return this.login$Response(params).pipe(
-            map((r: StrictHttpResponse<Login>) => r.body as Login),
+    logout(params?: {}): Observable<any> {
+        return this.logout$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 }

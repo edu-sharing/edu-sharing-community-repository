@@ -9,7 +9,6 @@ export interface Organization {
     authorityType?: 'USER' | 'GROUP' | 'OWNER' | 'EVERYONE' | 'GUEST';
     editable?: boolean;
     groupName?: string;
-    organizations?: Array<Organization>;
     profile?: GroupProfile;
     properties?: {
         [key: string]: Array<string>;

@@ -1,10 +1,10 @@
 /* tslint:disable */
 /* eslint-disable */
-import { Facette } from './facette';
+import { Facet } from './facet';
 import { Pagination } from './pagination';
 export interface SearchResultElastic {
     elasticResponse?: string;
-    facets: Array<Facette>;
+    facets: Array<Facet>;
     ignored?: Array<string>;
     nodes: Array<{}>;
     pagination: Pagination;

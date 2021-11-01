@@ -12,7 +12,7 @@ opposed to how to get it. This library should provide `Observable`s which update
 Download an updated `swagger.json` to `build`, e.g.:
 
 ```sh
-wget https://redaktion-staging.openeduhub.net/edu-sharing/rest/swagger.json -O build/swagger.json
+wget https://redaktion-staging.openeduhub.net/edu-sharing/rest/openapi.json -O build/openapi.json
 ```
 
 Generate API Code:

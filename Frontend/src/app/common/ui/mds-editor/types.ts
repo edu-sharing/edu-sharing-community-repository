@@ -1,14 +1,13 @@
 import { Type } from '@angular/core';
-import { MdsWidgetValue } from 'ngx-edu-sharing-api';
 import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 export {
     MdsDefinition,
     MdsGroup,
+    MdsValue as MdsWidgetValue,
     MdsView,
     MdsWidget,
     MdsWidgetCondition,
-    MdsWidgetValue,
 } from 'ngx-edu-sharing-api';
 
 /** Error with a translatable message that is suitable to be shown to the user. */

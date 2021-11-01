@@ -52,28 +52,26 @@ export class RatingV1Service extends BaseService {
          * Text content of rating
          */
         body: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, RatingV1Service.AddOrUpdateRatingPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('rating', params.rating, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('rating', params.rating, {});
             rb.body(params.body, 'application/json');
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -108,9 +106,9 @@ export class RatingV1Service extends BaseService {
          * Text content of rating
          */
         body: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.addOrUpdateRating$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -139,26 +137,24 @@ export class RatingV1Service extends BaseService {
          * ID of node
          */
         node: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, RatingV1Service.DeleteRatingPath, 'delete');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -183,9 +179,9 @@ export class RatingV1Service extends BaseService {
          * ID of node
          */
         node: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.deleteRating$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 }

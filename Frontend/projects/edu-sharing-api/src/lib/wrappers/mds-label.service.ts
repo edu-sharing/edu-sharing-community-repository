@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ValueV2 } from '../api/models';
+import { MdsValue } from '../api/models';
 import { MdsIdentifier, MdsService } from './mds.service';
 
 export interface LabeledValue {
@@ -77,7 +77,7 @@ export class MdsLabelService {
     private getValueDefinitions(
         mdsId: MdsIdentifier,
         property: string,
-    ): Observable<ValueV2[] | null> {
+    ): Observable<MdsValue[] | null> {
         return this.mds.getMetadataSet(mdsId).pipe(
             map(
                 (mds) =>

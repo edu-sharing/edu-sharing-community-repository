@@ -44,7 +44,7 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
 import {DateHelper} from '../../../core-ui-module/DateHelper';
-import { MdsService, MdsWidgetValue } from 'ngx-edu-sharing-api';
+import { MdsService, MdsValue } from 'ngx-edu-sharing-api';
 declare var noUiSlider: any;
 
 @Component({
@@ -93,7 +93,7 @@ export class MdsComponent {
      */
     @Input() customTitle: string;
     private _setId = RestConstants.DEFAULT;
-    private _suggestions: { [property: string]: MdsWidgetValue[] };
+    private _suggestions: { [property: string]: MdsValue[] };
     private _groupId: string;
     private _repository = RestConstants.HOME_REPOSITORY;
     private createType: string;
@@ -122,7 +122,7 @@ export class MdsComponent {
     private mdsId = new Date().getTime();
     private childobjectDrag: number;
     private initialValues: any;
-    @Input() set suggestions(suggestions: {[property: string]: MdsWidgetValue[]}) {
+    @Input() set suggestions(suggestions: {[property: string]: MdsValue[]}) {
         this._suggestions = suggestions;
         this.applySuggestions();
     }

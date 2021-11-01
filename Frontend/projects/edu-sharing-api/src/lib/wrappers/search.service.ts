@@ -38,7 +38,7 @@ export type FacetsDict = {
 };
 
 /** Parameters to be provided to `search`. */
-export type SearchRequestParams = Parameters<SearchV1Service['searchV2']>[0];
+export type SearchRequestParams = Parameters<SearchV1Service['search']>[0];
 
 @Injectable({
     providedIn: 'root',
@@ -75,7 +75,7 @@ export class SearchService {
      * Sends a plain search request without updating any global state.
      */
     requestSearch(params: SearchRequestParams): Observable<SearchResults> {
-        return this.searchV1.searchV2(params);
+        return this.searchV1.search(params);
     }
 
     /**
@@ -153,7 +153,7 @@ export class SearchService {
         const searchParams = this.getSearchParams();
         const currentFacetSize = this.facetsSubject.value[property].values.length;
         return this.searchV1
-            .searchV2({
+            .search({
                 ...searchParams,
                 maxItems: 0,
                 body: {
@@ -350,7 +350,7 @@ export class SearchService {
      * Maps a facets list of a single property from a search response to a facet aggregation with
      * labeled facet values.
      */
-    private mapFacet(facet: apiModels.Facette): Observable<FacetAggregation> {
+    private mapFacet(facet: apiModels.Facet): Observable<FacetAggregation> {
         if (facet.values.length === 0) {
             return rxjs.of({ values: [], hasMore: false });
         }

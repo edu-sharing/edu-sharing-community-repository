@@ -61,10 +61,10 @@ export class RenderingV1Service extends BaseService {
             'get',
         );
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('version', params.version, { style: 'form', explode: true });
-            rb.query('displayMode', params.displayMode, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('version', params.version, {});
+            rb.query('displayMode', params.displayMode, {});
         }
 
         return this.http
@@ -168,10 +168,10 @@ export class RenderingV1Service extends BaseService {
             'post',
         );
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-            rb.query('version', params.version, { style: 'form', explode: true });
-            rb.query('displayMode', params.displayMode, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.query('version', params.version, {});
+            rb.query('displayMode', params.displayMode, {});
             rb.body(params.body, 'application/json');
         }
 
