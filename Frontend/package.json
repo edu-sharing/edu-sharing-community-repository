@@ -8,6 +8,7 @@
     "start": "ng serve",
     "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
     "build:edu-sharing-api": "ng build edu-sharing-api",
+    "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",
     "prebuild": "npm run build:edu-sharing-api",
     "build": "ng build --configuration production --delete-output-path false",
     "prebuild-dev": "ng build edu-sharing-api --configuration development",
