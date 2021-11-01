@@ -160,6 +160,7 @@ import org.edu_sharing.alfresco.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
@@ -903,7 +904,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		logger.debug("starting");
 
 		// making a copy so that the cached map will not be influenced
-		HashMap<String, Object> propsCopy = new HashMap<String, Object>(getPropertiesCached(nodeRef, true, true, false));
+		final HashMap<String, Object> propsCopy = new HashMap<String, Object>(getPropertiesCached(nodeRef, true, true, false));
 
 		logger.debug("starting extend several props with authentication and permission data");
 
@@ -1151,10 +1152,15 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				return result;
 			}
 		}
-
-		return (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-				beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,propsCopy,
-						Arrays.asList(aspects)));
+		HashMap<String, Object> propsOutput = propsCopy;
+		for (PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+			propsOutput = new HashMap<>(i.beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(
+					nodeRef,
+					propsOutput,
+					Arrays.asList(aspects))
+			));
+		}
+		return propsOutput;
 	}
 
 	/**
@@ -1379,9 +1385,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 			if (mdate != null) {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
-				properties = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-						beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,properties,
-								aspects.stream().map(q -> q.toString()).collect(Collectors.toList())));
+				for(PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+					properties = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, properties,
+									aspects.stream().map(QName::toString).collect(Collectors.toList()))));
+				}
 				repCache.put(nodeRef.getId(), properties);
 			}
 		}

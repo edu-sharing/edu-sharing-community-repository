@@ -803,7 +803,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	private static byte[] getPreviewFromURLSplash(String httpURL) {
 		Config splash = LightbendConfigLoader.get().getConfig("repository.communication.splash");
-
 		if(splash != null && splash.hasPath("url")) {
 			try {
 				final StringBuilder url = new StringBuilder(splash.getString("url") + "?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));

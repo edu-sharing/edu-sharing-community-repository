@@ -581,9 +581,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
 
         PropertiesInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(alfNodeRef,props,eduNodeRef.getAspects());
-        props = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().beforeDeliverProperties(propertiesContext);
-
-
+        for (PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+            props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
+        }
         eduNodeRef.setProperties(props);
 
         eduNodeRef.setOwner((String)sourceAsMap.get("owner"));
