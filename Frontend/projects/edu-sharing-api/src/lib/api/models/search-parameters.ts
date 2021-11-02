@@ -3,10 +3,10 @@
 import { MdsQueryCriteria } from './mds-query-criteria';
 export interface SearchParameters {
     criteria: Array<MdsQueryCriteria>;
-    facetLimit: number;
-    facetMinCount: number;
+    facetLimit?: number;
+    facetMinCount?: number;
     facetSuggest?: string;
-    facets: Array<string>;
+    facets?: Array<string>;
     permissions?: Array<string>;
     resolveCollections?: boolean;
 }

@@ -4,6 +4,7 @@ import { MdsSubwidget } from './mds-subwidget';
 import { MdsValue } from './mds-value';
 import { MdsWidgetCondition } from './mds-widget-condition';
 export interface MdsWidget {
+    allowValuespaceSuggestions?: boolean;
     allowempty?: boolean;
     bottomCaption?: string;
     caption?: string;

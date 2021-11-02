@@ -11,6 +11,7 @@ import { map, filter } from 'rxjs/operators';
 
 import { Mds } from '../models/mds';
 import { MdsEntries } from '../models/mds-entries';
+import { MdsValue } from '../models/mds-value';
 import { SuggestionParam } from '../models/suggestion-param';
 import { Suggestions } from '../models/suggestions';
 
@@ -187,7 +188,7 @@ export class MdsV1Service extends BaseService {
          * suggestionParam
          */
         body?: SuggestionParam;
-    }): Observable<StrictHttpResponse<Suggestions>> {
+    }): Observable<StrictHttpResponse<Mds>> {
         const rb = new RequestBuilder(this.rootUrl, MdsV1Service.GetValuesPath, 'post');
         if (params) {
             rb.path('repository', params.repository, {});
@@ -205,7 +206,7 @@ export class MdsV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Suggestions>;
+                    return r as StrictHttpResponse<Mds>;
                 }),
             );
     }
@@ -235,9 +236,9 @@ export class MdsV1Service extends BaseService {
          * suggestionParam
          */
         body?: SuggestionParam;
-    }): Observable<Suggestions> {
+    }): Observable<Mds> {
         return this.getValues$Response(params).pipe(
-            map((r: StrictHttpResponse<Suggestions>) => r.body as Suggestions),
+            map((r: StrictHttpResponse<Mds>) => r.body as Mds),
         );
     }
 
@@ -345,6 +346,113 @@ export class MdsV1Service extends BaseService {
     }): Observable<Suggestions> {
         return this.getValues4Keys$Response(params).pipe(
             map((r: StrictHttpResponse<Suggestions>) => r.body as Suggestions),
+        );
+    }
+
+    /**
+     * Path part for operation suggestValue
+     */
+    static readonly SuggestValuePath =
+        '/mds/v1/metadatasets/{repository}/{metadataset}/values/{widget}/suggest';
+
+    /**
+     * Suggest a value.
+     *
+     * Suggest a new value for a given metadataset and widget. The suggestion will be forwarded to the corresponding person in the metadataset file
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `suggestValue()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    suggestValue$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
+         */
+        metadataset: string;
+
+        /**
+         * widget id, e.g. cm:name
+         */
+        widget: string;
+
+        /**
+         * caption of the new entry (id will be auto-generated)
+         */
+        caption: string;
+
+        /**
+         * parent id of the new entry (might be null)
+         */
+        parent?: string;
+    }): Observable<StrictHttpResponse<MdsValue>> {
+        const rb = new RequestBuilder(this.rootUrl, MdsV1Service.SuggestValuePath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('metadataset', params.metadataset, {});
+            rb.path('widget', params.widget, {});
+            rb.query('caption', params.caption, {});
+            rb.query('parent', params.parent, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<MdsValue>;
+                }),
+            );
+    }
+
+    /**
+     * Suggest a value.
+     *
+     * Suggest a new value for a given metadataset and widget. The suggestion will be forwarded to the corresponding person in the metadataset file
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `suggestValue$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    suggestValue(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
+         */
+        metadataset: string;
+
+        /**
+         * widget id, e.g. cm:name
+         */
+        widget: string;
+
+        /**
+         * caption of the new entry (id will be auto-generated)
+         */
+        caption: string;
+
+        /**
+         * parent id of the new entry (might be null)
+         */
+        parent?: string;
+    }): Observable<MdsValue> {
+        return this.suggestValue$Response(params).pipe(
+            map((r: StrictHttpResponse<MdsValue>) => r.body as MdsValue),
         );
     }
 }

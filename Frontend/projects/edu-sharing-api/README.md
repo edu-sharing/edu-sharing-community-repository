@@ -21,6 +21,10 @@ Generate API Code:
 npm run generate-api
 ```
 
+## Windows quirks
+Configure your git to keep line endings to prevent changes to unmodified files
+`` git config core.autocrlf input``
+
 ## Code scaffolding
 
 Run `ng generate component component-name --project edu-sharing-api` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project edu-sharing-api`.

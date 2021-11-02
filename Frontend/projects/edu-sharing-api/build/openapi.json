@@ -5887,8 +5887,8 @@
           "description" : "status of the proposals to search for",
           "schema" : {
             "type" : "string",
-            "enum" : [ "PENDING", "ACCEPTED", "DECLINED" ],
-            "default" : "PENDING"
+            "default" : "PENDING",
+            "enum" : [ "PENDING", "ACCEPTED", "DECLINED" ]
           }
         }, {
           "name" : "fetchCounts",
@@ -6261,8 +6261,8 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "enum" : [ "EDU_ALL", "EDU_GROUPS", "TYPE_EDITORIAL", "TYPE_MEDIA_CENTER", "MY", "RECENT" ],
-            "default" : "MY"
+            "default" : "MY",
+            "enum" : [ "EDU_ALL", "EDU_GROUPS", "TYPE_EDITORIAL", "TYPE_MEDIA_CENTER", "MY", "RECENT" ]
           }
         }, {
           "name" : "fetchCounts",
@@ -11540,7 +11540,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Suggestions"
+                  "$ref" : "#/components/schemas/Mds"
                 }
               }
             }
@@ -11657,6 +11657,118 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Suggestions"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mds/v1/metadatasets/{repository}/{metadataset}/values/{widget}/suggest" : {
+      "post" : {
+        "tags" : [ "MDS v1" ],
+        "summary" : "Suggest a value.",
+        "description" : "Suggest a new value for a given metadataset and widget. The suggestion will be forwarded to the corresponding person in the metadataset file",
+        "operationId" : "suggestValue",
+        "parameters" : [ {
+          "name" : "repository",
+          "in" : "path",
+          "description" : "ID of repository (or \"-home-\" for home repository)",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "-home-"
+          }
+        }, {
+          "name" : "metadataset",
+          "in" : "path",
+          "description" : "ID of metadataset (or \"-default-\" for default metadata set)",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "-default-"
+          }
+        }, {
+          "name" : "widget",
+          "in" : "path",
+          "description" : "widget id, e.g. cm:name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "caption",
+          "in" : "query",
+          "description" : "caption of the new entry (id will be auto-generated)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "parent",
+          "in" : "query",
+          "description" : "parent id of the new entry (might be null)",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MdsValue"
                 }
               }
             }
@@ -19641,8 +19753,8 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "enum" : [ "PERSON", "ORGANIZATION" ],
-            "default" : "PERSON"
+            "default" : "PERSON",
+            "enum" : [ "PERSON", "ORGANIZATION" ]
           }
         }, {
           "name" : "fields",
@@ -23173,15 +23285,15 @@
               "type" : "string"
             }
           },
-          "vcard" : {
-            "type" : "string"
-          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
+          },
+          "vcard" : {
+            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -23773,14 +23885,14 @@
               "type" : "string"
             }
           },
+          "empty" : {
+            "type" : "boolean"
+          },
           "wrappedMap" : {
             "type" : "object",
             "additionalProperties" : {
               "type" : "object"
             }
-          },
-          "empty" : {
-            "type" : "boolean"
           }
         },
         "additionalProperties" : {
@@ -23814,14 +23926,14 @@
                   "type" : "string"
                 }
               },
+              "empty" : {
+                "type" : "boolean"
+              },
               "wrappedMap" : {
                 "type" : "object",
                 "additionalProperties" : {
                   "type" : "object"
                 }
-              },
-              "empty" : {
-                "type" : "boolean"
               }
             },
             "additionalProperties" : {
@@ -23839,15 +23951,11 @@
           "key" : {
             "$ref" : "#/components/schemas/Key"
           },
-          "requestsRecovery" : {
-            "type" : "boolean",
-            "writeOnly" : true
-          },
-          "durable" : {
+          "volatile" : {
             "type" : "boolean"
           },
-          "stateful" : {
-            "type" : "boolean"
+          "fullName" : {
+            "type" : "string"
           },
           "jobListenerNames" : {
             "type" : "array",
@@ -23855,10 +23963,14 @@
               "type" : "string"
             }
           },
-          "fullName" : {
-            "type" : "string"
+          "requestsRecovery" : {
+            "type" : "boolean",
+            "writeOnly" : true
           },
-          "volatile" : {
+          "stateful" : {
+            "type" : "boolean"
+          },
+          "durable" : {
             "type" : "boolean"
           }
         }
@@ -25460,15 +25572,15 @@
             "type" : "integer",
             "format" : "int64"
           },
-          "vcard" : {
-            "type" : "string"
-          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
+          },
+          "vcard" : {
+            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -25761,15 +25873,15 @@
               }
             }
           },
-          "vcard" : {
-            "type" : "string"
-          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
+          },
+          "vcard" : {
+            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -26057,6 +26169,9 @@
           "format" : {
             "type" : "string"
           },
+          "allowValuespaceSuggestions" : {
+            "type" : "boolean"
+          },
           "condition" : {
             "$ref" : "#/components/schemas/MdsWidgetCondition"
           },
@@ -26142,13 +26257,13 @@
           "defaultvalue" : {
             "type" : "string"
           },
-          "hideIfEmpty" : {
-            "type" : "boolean"
-          },
           "isExtended" : {
             "type" : "boolean"
           },
           "isSearchable" : {
+            "type" : "boolean"
+          },
+          "hideIfEmpty" : {
             "type" : "boolean"
           }
         }
@@ -26199,33 +26314,6 @@
           }
         }
       },
-      "Suggestion" : {
-        "required" : [ "displayString", "replacementString" ],
-        "type" : "object",
-        "properties" : {
-          "replacementString" : {
-            "type" : "string"
-          },
-          "displayString" : {
-            "type" : "string"
-          },
-          "key" : {
-            "type" : "string"
-          }
-        }
-      },
-      "Suggestions" : {
-        "required" : [ "values" ],
-        "type" : "object",
-        "properties" : {
-          "values" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Suggestion"
-            }
-          }
-        }
-      },
       "MdsQueryCriteria" : {
         "required" : [ "property", "values" ],
         "type" : "object",
@@ -26268,6 +26356,33 @@
           "pattern" : {
             "type" : "string",
             "description" : "prefix of the value (or \"-all-\" for all values)"
+          }
+        }
+      },
+      "Suggestion" : {
+        "required" : [ "displayString", "replacementString" ],
+        "type" : "object",
+        "properties" : {
+          "replacementString" : {
+            "type" : "string"
+          },
+          "displayString" : {
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Suggestions" : {
+        "required" : [ "values" ],
+        "type" : "object",
+        "properties" : {
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Suggestion"
+            }
           }
         }
       },
@@ -26383,7 +26498,7 @@
         }
       },
       "SearchParameters" : {
-        "required" : [ "criteria", "facetLimit", "facetMinCount", "facets" ],
+        "required" : [ "criteria" ],
         "type" : "object",
         "properties" : {
           "permissions" : {
@@ -26957,7 +27072,7 @@
         }
       },
       "SearchParametersFacets" : {
-        "required" : [ "criteria", "facetLimit", "facetMinCount", "facets" ],
+        "required" : [ "criteria", "facets" ],
         "type" : "object",
         "properties" : {
           "facets" : {

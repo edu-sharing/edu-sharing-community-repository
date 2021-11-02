@@ -36,63 +36,62 @@ import { UsageV1Service } from './services/usage-v-1.service';
  * Module that provides all services and configuration.
  */
 @NgModule({
-  imports: [],
-  exports: [],
-  declarations: [],
-  providers: [
-    AboutService,
-    AdminV1Service,
-    ArchiveV1Service,
-    BulkV1Service,
-    ClientutilsV1Service,
-    CollectionV1Service,
-    CommentV1Service,
-    ConfigV1Service,
-    ConnectorV1Service,
-    IamV1Service,
-    KnowledgeV1Service,
-    AuthenticationV1Service,
-    MdsV1Service,
-    MediacenterV1Service,
-    NetworkV1Service,
-    NodeV1Service,
-    OrganizationV1Service,
-    RatingV1Service,
-    RegisterV1Service,
-    RenderingV1Service,
-    SearchV1Service,
-    SharingV1Service,
-    StatisticV1Service,
-    StreamV1Service,
-    ToolV1Service,
-    TrackingV1Service,
-    UsageV1Service,
-    ApiConfiguration
-  ],
+    imports: [],
+    exports: [],
+    declarations: [],
+    providers: [
+        AboutService,
+        AdminV1Service,
+        ArchiveV1Service,
+        BulkV1Service,
+        ClientutilsV1Service,
+        CollectionV1Service,
+        CommentV1Service,
+        ConfigV1Service,
+        ConnectorV1Service,
+        IamV1Service,
+        KnowledgeV1Service,
+        AuthenticationV1Service,
+        MdsV1Service,
+        MediacenterV1Service,
+        NetworkV1Service,
+        NodeV1Service,
+        OrganizationV1Service,
+        RatingV1Service,
+        RegisterV1Service,
+        RenderingV1Service,
+        SearchV1Service,
+        SharingV1Service,
+        StatisticV1Service,
+        StreamV1Service,
+        ToolV1Service,
+        TrackingV1Service,
+        UsageV1Service,
+        ApiConfiguration,
+    ],
 })
 export class ApiModule {
-  static forRoot(params: ApiConfigurationParams): ModuleWithProviders<ApiModule> {
-    return {
-      ngModule: ApiModule,
-      providers: [
-        {
-          provide: ApiConfiguration,
-          useValue: params
-        }
-      ]
+    static forRoot(params: ApiConfigurationParams): ModuleWithProviders<ApiModule> {
+        return {
+            ngModule: ApiModule,
+            providers: [
+                {
+                    provide: ApiConfiguration,
+                    useValue: params,
+                },
+            ],
+        };
     }
-  }
 
-  constructor( 
-    @Optional() @SkipSelf() parentModule: ApiModule,
-    @Optional() http: HttpClient
-  ) {
-    if (parentModule) {
-      throw new Error('ApiModule is already loaded. Import in your base AppModule only.');
+    constructor(@Optional() @SkipSelf() parentModule: ApiModule, @Optional() http: HttpClient) {
+        if (parentModule) {
+            throw new Error('ApiModule is already loaded. Import in your base AppModule only.');
+        }
+        if (!http) {
+            throw new Error(
+                'You need to import the HttpClientModule in your AppModule! \n' +
+                    'See also https://github.com/angular/angular/issues/20575',
+            );
+        }
     }
-    if (!http) {
-      throw new Error('You need to import the HttpClientModule in your AppModule! \n' +
-      'See also https://github.com/angular/angular/issues/20575');
-    }
-  }
 }
