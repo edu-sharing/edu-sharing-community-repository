@@ -48,7 +48,15 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
 
     }
 
-    loadData() {
+    loadData(force = false) {
+        // @TODO: Maybe this is better handled in a more centraled service
+        if (!force) {
+            // check if there is a footer
+            const elements = document.getElementsByTagName('footer');
+            if (elements.length && elements.item(0).innerHTML.trim()) {
+                return;
+            }
+        }
         if (this.entriesService.dataSource.hasMore()) {
             this.entriesService.fetchData.emit({
                 offset: this.entriesService.dataSource.getData().length
