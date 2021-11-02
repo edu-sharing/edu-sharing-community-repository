@@ -9,9 +9,10 @@ export class TreeNode {
     caption: string;
     children?: TreeNode[];
     parent?: TreeNode;
-    isChecked: boolean;
-    isIndeterminate: boolean;
-    isHidden: boolean;
+    isChecked?: boolean;
+    isIndeterminate?: boolean;
+    isHidden?: boolean;
+    type?: null | 'suggestionInput';
 }
 
 export class Tree {

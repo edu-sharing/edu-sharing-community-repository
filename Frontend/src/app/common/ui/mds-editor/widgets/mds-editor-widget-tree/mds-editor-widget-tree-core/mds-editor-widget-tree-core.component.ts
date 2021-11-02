@@ -14,10 +14,14 @@ import {
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
-import { Widget } from '../../../mds-editor-instance.service';
+import {MdsEditorInstanceService, Widget} from '../../../mds-editor-instance.service';
 import { MdsWidgetType } from '../../../types';
 import { DisplayValue } from '../../DisplayValues';
 import { Tree, TreeNode } from '../tree';
+import {Toast} from '../../../../../../core-ui-module/toast';
+import {Helper} from '../../../../../../core-module/rest/helper';
+import {RestConstants} from '../../../../../../core-module/rest/rest-constants';
+import { MdsV1Service } from 'projects/edu-sharing-api/src/lib/api/services';
 
 let nextUniqueId = 0;
 
@@ -33,6 +37,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     @Input() tree: Tree;
     @Input() values: DisplayValue[];
     @Input() indeterminateValues: string[];
+    suggesting: boolean;
     get filterString() {
         return this.filterString$.value;
     }
@@ -59,11 +64,20 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
 
     private filterString$ = new BehaviorSubject<string>(null);
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
-
+    constructor(
+        private toast: Toast,
+        private mdsEditorInstanceService: MdsEditorInstanceService,
+        private mdsService: MdsV1Service
+    ) {
+    }
     ngOnInit(): void {
         this.isMultiValue = this.widget.definition.type === MdsWidgetType.MultiValueTree;
         this.clearFilter();
+        // deep copy for modifications
         this.dataSource.data = this.tree.rootNodes;
+        if(this.widget.definition.allowValuespaceSuggestions) {
+            this.dataSource.data = this.addSuggestionInput(Helper.deepCopyArray(this.dataSource.data));
+        }
         this.filterString$
             .pipe(
                 map((filterString) => (filterString?.length >= 2 ? filterString : null)),
@@ -355,5 +369,39 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         } else {
             return null;
         }
+    }
+
+    private addSuggestionInput(data: TreeNode[], parent: TreeNode = null) {
+        data.filter((t) => t.children).forEach(
+            (t) => t.children = this.addSuggestionInput(t.children, t)
+        );
+        // already processed, skip
+        if(data.some((d) => d.type === 'suggestionInput')) {
+            return data;
+        }
+        return data.concat([{
+            id: null,
+            uid: null,
+            caption: null,
+            parent,
+            type: 'suggestionInput'
+        }]);
+    }
+
+    async suggestValue(value: string, node: TreeNode) {
+        try {
+            this.suggesting = true;
+            await this.mdsService.suggestValue({
+                repository: RestConstants.HOME_REPOSITORY,
+                widget: this.widget.definition.id,
+                metadataset: this.mdsEditorInstanceService.mdsId,
+                parent: node.parent?.id,
+                caption: value
+            }).toPromise();
+            this.toast.toast('MDS.SUGGEST_VALUE_SENT');
+        } catch (e) {
+            this.toast.error(e);
+        }
+        this.suggesting = false;
     }
 }

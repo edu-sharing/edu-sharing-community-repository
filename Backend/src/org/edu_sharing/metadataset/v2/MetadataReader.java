@@ -437,6 +437,8 @@ public class MetadataReader {
 				if(name.equals("condition")) {
 					widget.setCondition(getCondition(data,widget.getId()));
 				}
+				if(name.equals("suggestionReceiver"))
+					widget.setSuggestionReceiver(value);
 				if(name.equals("suggestionSource"))
 					widget.setSuggestionSource(value);
 				if(name.equals("suggestionQuery"))

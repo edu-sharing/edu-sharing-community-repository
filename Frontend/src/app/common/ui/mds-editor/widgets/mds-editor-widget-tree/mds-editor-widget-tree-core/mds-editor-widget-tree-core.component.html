@@ -52,7 +52,7 @@
         [attr.aria-expanded]="treeControl.isExpanded(node)"
         [attr.aria-selected]="selectedNode === node"
         role="treeitem"
-        attr.aria-label="{{ node.caption }} 
+        attr.aria-label="{{ node.caption }}
           {{ (getIsChecked(node) ? 'CHECKBOX_CHECKED' : 'CHECKBOX_NOT_CHECKED') | translate }}
           {{ getIsDisabled(node) ? ('DISABLED' | translate) : '' }}
         "
@@ -83,32 +83,63 @@
   </mat-tree>
 
   <ng-template #checkBox let-node="node">
-    <mat-checkbox
-      [id]="getCheckboxId(node)"
-      [checked]="getIsChecked(node)"
-      [indeterminate]="node.isIndeterminate"
-      [disabled]="getIsDisabled(node)"
-      (change)="toggleNode(node, $event.checked)"
+    <ng-container *ngIf="node.type === 'suggestionInput'">
+      <ng-container *ngTemplateOutlet="inputTemplate; context: {node: node}"></ng-container>
+    </ng-container>
+    <ng-container *ngIf="node.type !== 'suggestionInput'">
+      <mat-checkbox
+        [id]="getCheckboxId(node)"
+        [checked]="getIsChecked(node)"
+        [indeterminate]="node.isIndeterminate"
+        [disabled]="getIsDisabled(node)"
+        (change)="toggleNode(node, $event.checked)"
       ><span [innerHTML]="node.caption | sanitizeHTML | highlight: filterString"></span
-    ></mat-checkbox>
-    <!-- Treeitems don't have a meaningful 'checked' state that is announced to screen-reader users.
-    We would need a new role like 'treeitemcheckbox' for that. This is our workaround. 'toggleNode'
-    will set this to 'role=alert' so state changes are announced properly. -->
-    <span class="cdk-visually-hidden" [id]="getCheckboxId(node) + '-state'">
+      ></mat-checkbox>
+      <!-- Treeitems don't have a meaningful 'checked' state that is announced to screen-reader users.
+      We would need a new role like 'treeitemcheckbox' for that. This is our workaround. 'toggleNode'
+      will set this to 'role=alert' so state changes are announced properly. -->
+      <span class="cdk-visually-hidden" [id]="getCheckboxId(node) + '-state'">
       {{ (getIsChecked(node) ? 'CHECKBOX_CHECKED' : 'CHECKBOX_NOT_CHECKED') | translate }}
     </span>
+    </ng-container>
   </ng-template>
 
   <ng-template #radioButton let-node="node">
-    <mat-radio-button
-      [id]="getCheckboxId(node)"
-      [checked]="getIsChecked(node)"
-      [disabled]="getIsDisabled(node)"
-      (change)="toggleNode(node, true)"
+    <ng-container *ngIf="node.type === 'suggestionInput'">
+      <ng-container *ngTemplateOutlet="inputTemplate; context: {node: node}"></ng-container>
+    </ng-container>
+    <ng-container *ngIf="node.type !== 'suggestionInput'">
+      <mat-radio-button
+        [id]="getCheckboxId(node)"
+        [checked]="getIsChecked(node)"
+        [disabled]="getIsDisabled(node)"
+        (change)="toggleNode(node, true)"
       ><span [innerHTML]="node.caption | sanitizeHTML | highlight: filterString"></span
-    ></mat-radio-button>
-    <span class="cdk-visually-hidden" [id]="getCheckboxId(node) + '-state'">
+      ></mat-radio-button>
+      <span class="cdk-visually-hidden" [id]="getCheckboxId(node) + '-state'">
       {{ (getIsChecked(node) ? 'RADIO_BUTTON_SELECTED' : 'RADIO_BUTTON_NOT_SELECTED') | translate }}
     </span>
+    </ng-container>
+  </ng-template>
+  <ng-template #inputTemplate let-node="node">
+    <div class="suggest-input">
+      <mat-form-field>
+        <mat-label>{{'MDS.SUGGEST_VALUE_LABEL' | translate}}</mat-label>
+        <i icon="add" matPrefix class="prefix"></i>
+        <input matInput
+               type="text"
+               #input
+               [disabled]="suggesting"
+               (keyup.enter)="suggestValue(input.value, node); input.value = '';">
+      </mat-form-field>
+      <spinner-small *ngIf="suggesting"></spinner-small>
+      <button *ngIf="!suggesting"
+              mat-button
+              color="primary"
+              #button
+              (click)="suggestValue(input.value, node); input.value = '';">
+        {{'MDS.SUGGEST_VALUE_SEND' | translate}}
+      </button>
+    </div>
   </ng-template>
 </div>

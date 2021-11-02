@@ -670,7 +670,10 @@
         "SHOW_OPTIONS_BUTTON": "Zeige Auswahlmöglichkeiten",
         "FILTER_FOR": "Nach \"{{value}}\" filtern ({{count}} passende(s) Element(e))",
         "FILTER_TREE": "Filtern...",
-        "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen"
+        "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen",
+        "SUGGEST_VALUE_LABEL": "Neuen Wert vorschlagen",
+        "SUGGEST_VALUE_SEND": "Vorschlagen",
+        "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht. Vielen Dank!"
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",

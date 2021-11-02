@@ -296,6 +296,19 @@
 		]]>
 		</message>
 	</template>
+	<template name="mdsValuespaceSuggestion">
+		<subject>A new metadata suggestion for {{widgetCaption}}</subject>
+		<message><![CDATA[
+			<h1>Hi!</h1>
+			<h2>{{firstName}} {{lastName}} has made a suggestion for a new valuespace entry:</h2>
+			<br>
+			Field: {{widgetCaption}} ({{widgetId}})<br>
+			Suggested Value: {{caption}} ({{id}})<br>
+			{{if parentId}}Parent Value: {{parentCaption}} ({{parentId}})<br>
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="footer">
 		<message><![CDATA[
 			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>

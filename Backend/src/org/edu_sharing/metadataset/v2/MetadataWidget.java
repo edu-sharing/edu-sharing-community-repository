@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class MetadataWidget extends MetadataTranslatable{
 
-	public enum Required{
+    public enum Required{
 		mandatory,
 		mandatoryForPublish,
 		recommended,
@@ -73,6 +73,15 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	private MetadataCondition condition;
 	private String link;
+	private String suggestionReceiver;
+
+	public void setSuggestionReceiver(String suggestionReceiver) {
+		this.suggestionReceiver = suggestionReceiver;
+	}
+
+	public String getSuggestionReceiver() {
+		return suggestionReceiver;
+	}
 
 	public void setLink(String link) {
 		this.link = link;

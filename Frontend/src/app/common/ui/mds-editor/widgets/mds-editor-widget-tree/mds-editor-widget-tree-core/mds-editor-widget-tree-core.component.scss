@@ -33,6 +33,20 @@
                 background-color: rgba(0, 0, 0, 0.04);
             }
         }
+        .suggest-input {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            > mat-form-field {
+                flex-grow: 1;
+                .prefix {
+                    color: $primary;
+                }
+            }
+            spinner-small, button {
+                margin: 0 20px;
+            }
+        }
         .children-group {
             padding-inline-start: 30px;
         }

@@ -55,7 +55,7 @@ public abstract class RepoProxyAbstract implements RepoProxy {
 		return null;
 	}
 	public RemoteRepoDetails myTurn(String repoId, String node) {
-		return myTurn(repoId, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node));
+		return myTurn(repoId, node == null ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node));
 	}
 	
 	@Override

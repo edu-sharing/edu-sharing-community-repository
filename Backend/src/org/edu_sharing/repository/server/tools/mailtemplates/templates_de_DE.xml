@@ -186,6 +186,19 @@
 		]]>
 		</message>
 	</template>
+	<template name="mdsValuespaceSuggestion">
+		<subject>Ein neuer Metadaten-Vorschlag für {{widgetCaption}}</subject>
+		<message><![CDATA[
+			<h1>Hallo!</h1>
+			<h2>{{firstName}} {{lastName}} hat einen neuen Wertebereichseintrag vorgeschlagen:</h2>
+			<br>
+			Feld: {{widgetCaption}} ({{widgetId}})<br>
+			Vorgeschlagener Wert: {{caption}} ({{id}})<br>
+			{{if parentId}}Übergerodneter Wert: {{parentCaption}} ({{parentId}})<br>
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="footer">
 		<message><![CDATA[
 			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>

@@ -89,6 +89,10 @@ public class MdsWidget {
 	private Integer defaultMax;
 	private Integer step;
 	private boolean isExtended;
+	/**
+	 * info if suggestions for new valuespace entries are allowed for this widget
+	 */
+	private boolean allowValuespaceSuggestions;
 	private boolean isHideIfEmpty;
 	private MetadataWidget.Required isRequired;
 	private boolean allowempty;
@@ -118,6 +122,7 @@ public class MdsWidget {
 		this.step=widget.getStep();
 		this.format=widget.getFormat();
 		this.template=widget.getTemplate();
+		this.allowValuespaceSuggestions =widget.getSuggestionReceiver() != null;
 		this.isExtended=widget.isExtended();
 		this.isHideIfEmpty=widget.isHideIfEmpty();
 		this.isRequired=widget.isRequired();
@@ -148,6 +153,16 @@ public class MdsWidget {
 		}
 
 	}
+
+	@JsonProperty
+	public boolean isAllowValuespaceSuggestions() {
+		return allowValuespaceSuggestions;
+	}
+
+	public void setAllowValuespaceSuggestions(boolean allowValuespaceSuggestions) {
+		this.allowValuespaceSuggestions = allowValuespaceSuggestions;
+	}
+
 	@JsonProperty
 	public MdsWidgetCondition getCondition() {
 		return condition;

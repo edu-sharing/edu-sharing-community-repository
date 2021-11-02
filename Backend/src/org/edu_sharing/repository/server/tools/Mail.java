@@ -266,7 +266,7 @@ public class Mail {
 				String condVar=cond.substring(0,end);
 				boolean isTrue=false;
 				if(replace!=null){
-					isTrue=replace.containsKey(condVar) && !replace.get(condVar).trim().isEmpty();
+					isTrue=replace.get(condVar) != null && !replace.get(condVar).trim().isEmpty();
 				}
 				int endif=cond.indexOf("{{endif}}");
 				String content=cond.substring(end+2,endif);
