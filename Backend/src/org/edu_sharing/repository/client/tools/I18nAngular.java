@@ -62,7 +62,7 @@ public class I18nAngular {
             String result=object.getString(list[list.length-1]);
             return result;
         } catch (Exception e) {
-            logger.info("No translation in Angular found for "+scope+" "+key);
+            logger.info("No translation in Angular found for " + scope + " " + key + " " + language);
             return key;
         }
     }
