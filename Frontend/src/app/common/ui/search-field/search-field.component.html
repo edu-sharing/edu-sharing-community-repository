@@ -10,7 +10,7 @@
   >
     <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
       <mat-label></mat-label>
-      <mat-chip-list #chipList>
+      <mat-chip-list attr.aria-label="{{placeholder | translate}}" #chipList>
         <div class="chips-wrapper" *ngIf="filters$ | async as filtersDict">
           <ng-container *ngFor="let filters of filtersDict | keyvalue">
             <!-- We considered injecting the chip list from the mds editor like the suggestions
