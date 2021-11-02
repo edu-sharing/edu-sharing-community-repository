@@ -52,8 +52,9 @@
             mat-icon-button
             type="button"
             (click)="onClear()"
+            attr.aria-label="{{'SEARCH_CLEAR' | translate}}"
           >
-            <i icon="clear"></i>
+            <i icon="clear" [aria]="false"></i>
           </button>
           <button
             class="submit-button"
