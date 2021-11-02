@@ -8,7 +8,7 @@ import {
     Output,
     ViewChild,
     OnChanges,
-    SimpleChanges,
+    SimpleChanges, ApplicationRef,
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
@@ -60,6 +60,7 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
 
     constructor(private route: ActivatedRoute,
                 public entriesService: NodeEntriesService<T>,
+                private applicationRef: ApplicationRef,
                 private router: Router
     ) {
     }
@@ -211,5 +212,12 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
 
     getDragState() {
         return DragCursorDirective.dragState;
+    }
+
+    async openMenu(node: T) {
+        this.entriesService.selection.clear();
+        this.entriesService.selection.select(node);
+        await this.applicationRef.tick();
+        this.dropdown.menu.focusFirstItem();
     }
 }

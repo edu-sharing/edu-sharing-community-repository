@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {ApplicationRef, Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
 import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../node-helper.service';
@@ -29,6 +29,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
     constructor(
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
+        public applicationRef: ApplicationRef,
     ) {
     }
 
@@ -64,5 +65,12 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
 
     getVisibleColumns() {
         return this.entriesService.columns.filter((c) => c.visible);
+    }
+
+    async openMenu(node: T) {
+        this.entriesService.selection.clear();
+        this.entriesService.selection.select(node);
+        await this.applicationRef.tick();
+        this.dropdown.menu.focusFirstItem();
     }
 }

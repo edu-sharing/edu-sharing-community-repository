@@ -103,7 +103,7 @@
     <div class="card-options-spacer"></div>
     <button mat-icon-button
             color="primary"
-            (click)="entriesService.selection.clear(); entriesService.selection.select(node)"
+            (click)="openMenu(node)"
             [matMenuTriggerFor]="dropdown.menu"
     >
       <i icon="more_vert" [aria]="true"></i>
