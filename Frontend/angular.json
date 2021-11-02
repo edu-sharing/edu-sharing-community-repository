@@ -27,11 +27,11 @@
               "src/styles/main.scss"
             ],
             "scripts": [
-              "src/assets/js/jquery-3.4.1.min.js",
+              "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
               "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/moment/min/moment-with-locales.min.js",
-              "src/assets/js/chart.js"
+              "node_modules/chart.js/dist/chart.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
