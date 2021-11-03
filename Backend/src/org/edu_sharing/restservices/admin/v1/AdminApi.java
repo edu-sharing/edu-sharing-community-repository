@@ -718,7 +718,7 @@ public class AdminApi {
 
 	@POST
 	@Path("/import/collections")
-
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "import collections via a xml file", description = "xml file must be structured as defined by the xsd standard")
 
 	@ApiResponses(value = {
@@ -747,7 +747,7 @@ public class AdminApi {
 
 	@POST
 	@Path("/import/excel")
-
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "Import excel data", description = "Import excel data.")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ExcelResult.class))),
@@ -773,7 +773,7 @@ public class AdminApi {
 
 	@PUT
 	@Path("/upload/temp/{name}")
-
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "Upload a file", description = "Upload a file to tomcat temp directory, to use it on the server (e.g. an update)")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UploadResult.class))),
