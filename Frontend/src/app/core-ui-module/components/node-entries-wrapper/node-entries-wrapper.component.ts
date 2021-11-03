@@ -79,7 +79,7 @@ export type FetchEvent = {
     amount?: number;
 }
 export type GridConfig = {
-    maxCols?: number
+    maxRows?: number
 }
 export interface ListEventInterface<T extends Node> {
     updateNodes(nodes: void | T[]): void;

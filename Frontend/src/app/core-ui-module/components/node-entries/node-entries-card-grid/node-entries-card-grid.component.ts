@@ -80,8 +80,8 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         */
     }
     getVisibleNodes(nodes: T[]) {
-        if (this.entriesService.gridConfig?.maxCols > 0 && this.getItemsPerRow() !== undefined) {
-            const count = this.getItemsPerRow() * this.entriesService.gridConfig.maxCols;
+        if (this.entriesService.gridConfig?.maxRows > 0 && this.getItemsPerRow() !== undefined) {
+            const count = this.getItemsPerRow() * this.entriesService.gridConfig.maxRows;
             this.entriesService.dataSource.setDisplayCount(count);
             return nodes.slice(0, this.entriesService.dataSource.getDisplayCount());
         }
