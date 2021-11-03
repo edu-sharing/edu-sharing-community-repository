@@ -17,6 +17,7 @@ mat-tab-group {
 .collectionsContainer {
     width: 100%;
     display: grid;
+    overflow-x: hidden;
     grid-template-columns: $sidenavWidth auto;
     position: relative;
     top: $mainnavHeight;
@@ -298,9 +299,8 @@ section {
 }
 .breadcrumb-space {
     padding: 15px 30px;
+    width: calc(100vw - #{$sidenavWidth});
     background: #fff;
-    margin-left: -35px;
-    margin-right: -35px;
     @include materialShadow();
 }
 .collections-header-textarea{

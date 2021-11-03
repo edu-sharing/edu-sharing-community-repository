@@ -217,6 +217,20 @@
           <spinner></spinner>
         </section>
         <div
+          role="navigation"
+          [attr.aria-label]="'NAV.COLLECTIONS' | translate"
+          class="breadcrumb-space"
+          *ngIf="!isRootLevelCollection() && !isLoading"
+        >
+          <breadcrumbs
+            class="collections-breadcrumb"
+            [home]="'COLLECTIONS.TAB.' + tabSelected"
+            [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
+            [breadcrumbsAsNode]="path"
+            (onDrop)="dropOnCollection($event.target, $event.source)"
+          ></breadcrumbs>
+        </div>
+        <div
           role="main"
           appSkipTarget="MAIN_CONTENT"
           class="collections-master-div"
@@ -228,21 +242,6 @@
             class="cdk-visually-hidden"
           >{{ 'COLLECTIONS.TITLE' | translate }}</h1>
           <!-- breadcrumbs -->
-          <div
-            role="navigation"
-            [attr.aria-label]="'NAV.COLLECTIONS' | translate"
-            class="breadcrumb-space"
-            *ngIf="!isRootLevelCollection() && !isLoading"
-          >
-            <breadcrumbs
-              class="collections-breadcrumb"
-              [home]="'COLLECTIONS.TAB.' + tabSelected"
-              [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
-              [breadcrumbsAsNode]="path"
-              (onDrop)="dropOnCollection($event.target, $event.source)"
-            ></breadcrumbs>
-          </div>
-
           <button
             *ngIf="!isLoading && isGuest"
             mat-button
