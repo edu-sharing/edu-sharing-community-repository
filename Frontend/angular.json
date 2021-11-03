@@ -31,7 +31,7 @@
               "src/assets/js/nouislider.min.js",
               "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/moment/min/moment-with-locales.min.js",
-              "node_modules/chart.js/dist/chart.js"
+              "node_modules/chart.js/dist/Chart.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
