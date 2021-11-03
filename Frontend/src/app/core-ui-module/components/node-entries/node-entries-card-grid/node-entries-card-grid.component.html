@@ -120,7 +120,7 @@
     </ng-container>
   </ul>
 </ng-container>
-<ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.hasMore()">
+<ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.getCanLoadMore() && entriesService.dataSource.hasMore()">
   <div class="load-more">
     <button mat-button color="primary" (click)="loadData(true)">
       <i icon="refresh"></i>

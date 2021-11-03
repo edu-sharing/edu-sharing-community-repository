@@ -7,6 +7,7 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
     private pagination: Pagination;
     public isLoading: boolean;
     private displayCount: number|null = null;
+    private canLoadMore = true;
 
     constructor(initialData: T[] = []) {
         super();
@@ -43,11 +44,11 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
         this.setData([]);
     }
 
-    async hasMore() {
+    hasMore() {
         if(!this.pagination) {
             return undefined;
         }
-        return this.pagination.total < (await this.dataStream.asObservable().toPromise()).length;
+        return this.pagination.total < this.getData()?.length;
     }
 
     getData() {
@@ -88,5 +89,16 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
 
     isFullyLoaded() {
         return this.getTotal() <= this.getData()?.length;
+    }
+
+    /**
+     * set info if this datasource is able to fetch more data from the list
+     * @param _canLoadMore
+     */
+    setCanLoadMore(canLoadMore: boolean) {
+        this.canLoadMore = canLoadMore;
+    }
+    getCanLoadMore() {
+        return this.canLoadMore;
     }
 }

@@ -775,6 +775,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                 collection => {
                     // transfere sub collections and content
                     this.dataSourceCollections.setData(collection.collections, collection.pagination);
+                    this.dataSourceCollections.setCanLoadMore(false);
                     if (this.isRootLevelCollection()) {
                         this.finishCollectionLoading(callback);
                         return;
@@ -799,6 +800,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                             this.collectionContent.node.ref.repo,
                         )
                         .subscribe(refs => {
+                            console.log(refs);
                             this.dataSourceReferences.setData(refs.references, refs.pagination);
                             this.finishCollectionLoading(callback);
                         });

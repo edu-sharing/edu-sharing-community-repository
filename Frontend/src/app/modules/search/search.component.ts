@@ -598,6 +598,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         (data: NodeList) => {
                             this.isSearchingCollections = false;
                             this.searchService.dataSourceCollections.setData(data.nodes, data.pagination);
+                            this.searchService.dataSourceCollections.setCanLoadMore(false);
                         },
                         (error: any) => {
                             this.isSearchingCollections = false;
