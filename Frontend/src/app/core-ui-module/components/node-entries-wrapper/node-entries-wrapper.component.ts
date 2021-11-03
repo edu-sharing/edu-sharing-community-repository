@@ -20,7 +20,7 @@ import {TemporaryStorageService} from '../../../core-module/rest/services/tempor
 import {UIHelper} from '../../ui-helper';
 import {NodeEntriesComponent} from '../node-entries/node-entries.component';
 import {NodeDataSource} from './node-data-source';
-import {Node} from '../../../core-module/rest/data-object';
+import {CollectionReference, Node} from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
 import {OptionItem} from '../../option-item';
 import {MainNavService} from '../../../common/services/main-nav.service';
@@ -36,6 +36,7 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType
 } from './entries-model';
+import {NodeHelperService} from '../../node-helper.service';
 
 @Component({
     selector: 'app-node-entries-wrapper',
@@ -83,6 +84,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         private ngZone: NgZone,
         private entriesService: NodeEntriesService<T>,
         private optionsHelper: OptionsHelperService,
+        private nodeHelperService: NodeHelperService,
         private mainNav: MainNavService,
         private elementRef: ElementRef,
     ) {
@@ -172,7 +174,21 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     }
 
     updateNodes(nodes: void | T[]): void {
-        // @TODO
+        if(!nodes) {
+            return;
+        }
+        this.dataSource.getData().forEach((d) => {
+            let hits = (nodes as T[]).filter((n) => n.ref.id === d.ref.id);
+            if(hits.length === 0) {
+                // handle if the original has changed (for collection refs)
+                hits = (nodes as T[]).filter((n) => n.ref.id === (d as unknown as CollectionReference).originalId);
+            }
+            console.log(d, hits);
+            if(hits.length === 1) {
+                this.nodeHelperService.copyDataToNode(d, hits[0]);
+            }
+        });
+        console.log(nodes);
     }
 
     showReorderColumnsDialog(): void {

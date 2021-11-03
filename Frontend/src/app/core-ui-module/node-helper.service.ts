@@ -691,6 +691,12 @@ export class NodeHelperService {
         }
         return data.queryParams;
     }
+
+    copyDataToNode<T extends Node>(target: T, source: T) {
+        target.properties = source.properties;
+        target.name = source.name;
+        target.title = source.title;
+    }
 }
 
 export class LinkData {
