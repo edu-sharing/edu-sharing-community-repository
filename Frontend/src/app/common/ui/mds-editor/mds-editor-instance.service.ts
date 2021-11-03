@@ -1176,7 +1176,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);
-                console.log(widgetDefinition);
                 const widget = new MdsEditorInstanceService.Widget(
                     this,
                     widgetDefinition,
