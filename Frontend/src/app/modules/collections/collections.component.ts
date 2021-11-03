@@ -79,12 +79,14 @@ import {
 import {DataSource} from '@angular/cdk/collections';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {
-    DropSource, DropTarget,
-    ListEventInterface, ListSortConfig, NodeEntriesDisplayType,
     NodeEntriesWrapperComponent
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {Sort} from '@angular/material/sort';
 import {first} from 'rxjs/operators';
+import {
+    DropSource, DropTarget,
+    ListEventInterface, ListSortConfig, NodeEntriesDisplayType
+} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 // component class
 @Component({

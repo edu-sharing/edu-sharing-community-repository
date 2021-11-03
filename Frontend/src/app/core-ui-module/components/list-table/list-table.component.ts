@@ -67,13 +67,12 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
 import {NodeTitlePipe} from '../../pipes/node-title.pipe';
 import {NodeUrlComponent} from '../node-url/node-url.component';
+import {SelectionModel} from '@angular/cdk/collections';
 import {
     ListEventInterface,
     ListOptions,
-    ListOptionsConfig,
-    NodeEntriesDisplayType
-} from '../node-entries-wrapper/node-entries-wrapper.component';
-import {SelectionModel} from '@angular/cdk/collections';
+    ListOptionsConfig, NodeEntriesDisplayType
+} from '../node-entries-wrapper/entries-model';
 
 
 @Component({

@@ -3,13 +3,10 @@ import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../node-helper.service';
 import {ColorHelper, PreferredColor} from '../../../../core-module/ui/color-helper';
-import {
-    ClickSource,
-    InteractionType
-} from '../../node-entries-wrapper/node-entries-wrapper.component';
 import {OptionItem, Target} from '../../../option-item';
 import {DropdownComponent} from '../../dropdown/dropdown.component';
 import {MatMenuTrigger} from '@angular/material/menu';
+import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'app-node-entries-card',

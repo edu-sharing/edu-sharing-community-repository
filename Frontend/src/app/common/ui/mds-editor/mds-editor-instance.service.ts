@@ -53,9 +53,9 @@ import {
 } from './types';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {InteractionType} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {MdsViewerComponent} from '../mds-viewer/mds-viewer.component';
 import {MdsWidgetComponent} from '../mds-viewer/widget/mds-widget.component';
+import {InteractionType} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 export interface CompletionStatusField {
     widget: Widget;

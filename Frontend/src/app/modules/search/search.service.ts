@@ -6,8 +6,8 @@ import { ListItem, Node } from '../../core-module/core.module';
 import { NodeDataSource } from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {
     ListSortConfig,
-    NodeEntriesDisplayType,
-} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+    NodeEntriesDisplayType
+} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 /**
  * Session state for search.component.

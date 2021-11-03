@@ -12,10 +12,10 @@ import {ListItemSort, Node} from '../../../../core-module/rest/data-object';
 import {SortEvent} from '../../sort-dropdown/sort-dropdown.component';
 import {$e} from 'codelyzer/angular/styles/chars';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray} from '@angular/cdk/drag-drop';
-import {NodeEntriesDisplayType} from '../../node-entries-wrapper/node-entries-wrapper.component';
 import {DragCursorDirective, DragDropState} from '../../../directives/drag-cursor.directive';
 import {Target} from '../../../option-item';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
+import {NodeEntriesDisplayType} from '../../node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'app-node-entries-card-grid',

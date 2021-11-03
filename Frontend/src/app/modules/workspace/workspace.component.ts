@@ -55,11 +55,11 @@ import {delay} from 'rxjs/operators';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {
-    DropSource, DropTarget,
-    NodeEntriesDisplayType, NodeRoot
-} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import {
+    DropSource, DropTarget, NodeEntriesDisplayType,
+    NodeRoot
+} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'workspace-main',

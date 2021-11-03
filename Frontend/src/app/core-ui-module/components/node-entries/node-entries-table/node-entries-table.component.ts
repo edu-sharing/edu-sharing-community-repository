@@ -19,16 +19,13 @@ import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {ListItem} from '../../../../core-module/ui/list-item';
 import {MatCheckboxChange} from '@angular/material/checkbox';
-import {
-    ClickSource,
-    InteractionType
-} from '../../node-entries-wrapper/node-entries-wrapper.component';
 import {Target} from '../../../option-item';
 import {DropdownComponent} from '../../dropdown/dropdown.component';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDropList} from '@angular/cdk/drag-drop';
 import {DragCursorDirective, DragDropState} from '../../../directives/drag-cursor.directive';
 import {CdkDrag} from '@angular/cdk/drag-drop/directives/drag';
+import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'app-node-entries-table',

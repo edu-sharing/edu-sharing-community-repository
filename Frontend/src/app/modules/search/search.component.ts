@@ -70,8 +70,6 @@ import {delay, distinctUntilChanged, first, map, switchMap, takeUntil, tap} from
 import {MatTabGroup} from '@angular/material/tabs';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {
-    InteractionType, ListSortConfig,
-    NodeEntriesDisplayType,
     NodeEntriesWrapperComponent
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
@@ -79,6 +77,7 @@ import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component'
 import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
 import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
+import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'app-search',

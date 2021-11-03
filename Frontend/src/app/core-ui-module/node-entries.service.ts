@@ -2,15 +2,6 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {Node} from '../core-module/rest/data-object';
 import {NodeDataSource} from './components/node-entries-wrapper/node-data-source';
 import {
-    FetchEvent,
-    GridConfig,
-    InteractionType,
-    ListDragGropConfig,
-    ListEventInterface,
-    ListOptions,
-    ListSortConfig,
-    NodeClickEvent,
-    NodeEntriesDisplayType,
     NodeEntriesWrapperComponent
 } from './components/node-entries-wrapper/node-entries-wrapper.component';
 import {ListItem} from '../core-module/ui/list-item';
@@ -18,6 +9,11 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {OptionItem} from './option-item';
 import {Sort} from '@angular/material/sort';
 import {UIService} from '../core-module/rest/services/ui.service';
+import {
+    FetchEvent,
+    GridConfig, InteractionType, ListDragGropConfig,
+    ListEventInterface, ListOptions, ListSortConfig, NodeClickEvent, NodeEntriesDisplayType
+} from './components/node-entries-wrapper/entries-model';
 
 @Injectable()
 export class NodeEntriesService<T extends Node> {

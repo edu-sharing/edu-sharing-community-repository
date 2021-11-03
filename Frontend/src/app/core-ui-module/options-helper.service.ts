@@ -50,11 +50,11 @@ import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from './components/dropdown/dropdown.component';
 import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
+import {PlatformLocation} from '@angular/common';
 import {
     ListEventInterface,
     NodeEntriesDisplayType
-} from './components/node-entries-wrapper/node-entries-wrapper.component';
-import {PlatformLocation} from '@angular/common';
+} from './components/node-entries-wrapper/entries-model';
 
 
 export class OptionsHelperConfig {

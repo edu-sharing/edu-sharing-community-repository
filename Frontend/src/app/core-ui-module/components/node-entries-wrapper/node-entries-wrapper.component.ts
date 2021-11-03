@@ -1,4 +1,4 @@
-import {OptionsHelperService} from '../../options-helper.service';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper.service';
 import {
     Component,
     ComponentFactoryResolver,
@@ -8,7 +8,8 @@ import {
     EventEmitter,
     Input,
     NgZone,
-    OnChanges, Output,
+    OnChanges,
+    Output,
     SimpleChange,
     TemplateRef,
     Type,
@@ -19,88 +20,23 @@ import {TemporaryStorageService} from '../../../core-module/rest/services/tempor
 import {UIHelper} from '../../ui-helper';
 import {NodeEntriesComponent} from '../node-entries/node-entries.component';
 import {NodeDataSource} from './node-data-source';
-import {List, ListItemSort, Node, SortColumn} from '../../../core-module/rest/data-object';
+import {Node} from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
-import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
-import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {OptionItem} from '../../option-item';
 import {MainNavService} from '../../../common/services/main-nav.service';
-import {SelectionModel} from '@angular/cdk/collections';
-import {Sort} from '@angular/material/sort';
-import {DragDropState} from '../../directives/drag-cursor.directive';
-import {DropAction} from '../../directives/drag-nodes/drag-nodes';
+import {
+    FetchEvent,
+    GridConfig,
+    InteractionType,
+    ListDragGropConfig,
+    ListEventInterface,
+    ListOptions,
+    ListOptionsConfig,
+    ListSortConfig,
+    NodeClickEvent,
+    NodeEntriesDisplayType
+} from './entries-model';
 
-export type NodeRoot = 'MY_FILES' | 'SHARED_FILES' | 'MY_SHARED_FILES' | 'TO_ME_SHARED_FILES' | 'WORKFLOW_RECEIVE' | 'RECYCLE' | 'ALL_FILES';
-export enum NodeEntriesDisplayType {
-    Table,
-    Grid,
-    SmallGrid
-}
-export enum InteractionType {
-    DefaultActionLink,
-    Emitter,
-    None
-}
-export type ListOptions = { [key in Target]?: OptionItem[]};
-export type ListOptionsConfig = {
-    scope: Scope,
-    actionbar: ActionbarComponent,
-    parent?: Node,
-    customOptions?: CustomOptions,
-};
-export interface ListSortConfig extends Sort {
-    columns: ListItemSort[];
-    allowed?: boolean;
-    customSortingInProgress?: boolean;
-}
-export type DropTarget = Node | NodeRoot;
-export interface DropSource<T extends Node> {
-    element: T[];
-    sourceList: ListEventInterface<T>;
-    mode: DropAction;
-}
-export interface ListDragGropConfig<T extends Node> {
-    dragAllowed: boolean;
-    dropAllowed?: (target: T, source: DropSource<T>) => boolean;
-    dropped?: (target: T, source: DropSource<T>) => void;
-}
-export enum ClickSource {
-    Preview,
-    Icon,
-    Metadata,
-    Comments
-}
-export type NodeClickEvent<T extends Node> = {
-    element: T,
-    source: ClickSource,
-    attribute?: ListItem // only when source === Metadata
-}
-export type FetchEvent = {
-    offset: number,
-    amount?: number;
-}
-export type GridConfig = {
-    maxRows?: number
-}
-export interface ListEventInterface<T extends Node> {
-    updateNodes(nodes: void | T[]): void;
-
-    getDisplayType(): NodeEntriesDisplayType;
-
-    setDisplayType(displayType: NodeEntriesDisplayType): void;
-
-    showReorderColumnsDialog(): void;
-
-    addVirtualNodes(virtual: T[]): void;
-
-    setOptions(options: ListOptions): void;
-
-    /**
-     * activate option (dropdown) generation
-     */
-    initOptionsGenerator(actionbar: ListOptionsConfig): void|Promise<void>;
-
-    getSelection(): SelectionModel<T>;
-}
 @Component({
     selector: 'app-node-entries-wrapper',
     template: `
@@ -112,6 +48,10 @@ export interface ListEventInterface<T extends Node> {
         </app-node-entries>`,
     providers: [
         NodeEntriesService,
+        OptionsHelperService,
+        {provide: OPTIONS_HELPER_CONFIG, useValue: {
+                subscribeEvents: false
+        }}
     ]
 })
 export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, ListEventInterface<T> {

@@ -30,11 +30,14 @@ import {ListTableComponent} from '../../../core-ui-module/components/list-table/
 import {DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_version';
 import {
-    DropSource, DropTarget,
-    InteractionType, ListSortConfig, NodeClickEvent,
-    NodeEntriesDisplayType, NodeEntriesWrapperComponent, NodeRoot
+    NodeEntriesWrapperComponent
 } from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import {
+    DropSource, DropTarget, InteractionType, ListSortConfig,
+    NodeClickEvent, NodeEntriesDisplayType,
+    NodeRoot
+} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'workspace-explorer',

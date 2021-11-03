@@ -9,9 +9,9 @@ import {
 } from '@angular/core';
 import {NodeEntriesService} from '../../node-entries.service';
 import {Node} from '../../../core-module/rest/data-object';
-import {NodeEntriesDisplayType} from '../node-entries-wrapper/node-entries-wrapper.component';
 import {KeyEvents} from '../../../core-module/ui/key-events';
 import {UIService} from '../../../core-module/rest/services/ui.service';
+import {NodeEntriesDisplayType} from '../node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'app-node-entries',
