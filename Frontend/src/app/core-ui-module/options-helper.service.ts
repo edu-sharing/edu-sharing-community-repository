@@ -1,4 +1,4 @@
-import {forkJoin as observableForkJoin, fromEvent, Subscription} from 'rxjs';
+import {forkJoin as observableForkJoin, fromEvent, of, Subscription} from 'rxjs';
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
@@ -527,7 +527,7 @@ export class OptionsHelperService implements OnDestroy {
             management.addProposalsToCollection(this.getObjects(object))
         );
         acceptProposal.customEnabledCallback = ((nodes) =>
-            nodes.every((n) => (n as ProposalNode).accessible)
+                nodes.every((n) => (n as ProposalNode).accessible)
         );
         acceptProposal.elementType = [ElementType.NodeProposal];
         acceptProposal.constrains = [Constrain.User];
@@ -559,12 +559,12 @@ export class OptionsHelperService implements OnDestroy {
             options.push(openFolder);
          */
 
-        const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', (object) =>
-            this.goToWorkspace(this.getObjects(object)[0])
+        const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
+            this.goToWorkspace((await this.getObjectsAsync(object, true))[0])
         );
         openParentNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
         openParentNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
-        openParentNode.scopes = [Scope.Search, Scope.Render];
+        openParentNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
         openParentNode.customEnabledCallback = (nodes) => {
             if (nodes && nodes.length === 1) {
                 openParentNode.customEnabledCallback = null;
@@ -665,7 +665,7 @@ export class OptionsHelperService implements OnDestroy {
             if (nodes) {
                 // do not show variant if it's a licensed material and user doesn't has change permission rights
                 return nodes[0].properties?.[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] !== 'true' ||
-                        this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS, NodesRightMode.Original);
+                    this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS, NodesRightMode.Original);
             }
             return true;
         };
@@ -679,15 +679,16 @@ export class OptionsHelperService implements OnDestroy {
         createNodeVariant.group = DefaultGroups.Reuse;
         createNodeVariant.priority = 30;
 
-        const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', (object) =>
-            management.nodeShare = this.getObjects(object)
+        const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', async (object) =>
+            management.nodeShare = await this.getObjectsAsync(object, true)
         );
         inviteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         inviteNode.showAsAction = true;
         inviteNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         inviteNode.permissionsMode = HideMode.Hide;
+        inviteNode.permissionsRightMode = NodesRightMode.Original;
         // inviteNode.key = 'S';
-        inviteNode.constrains = [Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        inviteNode.constrains = [Constrain.HomeRepository, Constrain.User];
         inviteNode.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
         inviteNode.group = DefaultGroups.Edit;
         inviteNode.priority = 10;
@@ -806,39 +807,26 @@ export class OptionsHelperService implements OnDestroy {
             }
             return nodes[0].downloadUrl != null;
         };
-        const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'edu-quick_edit', (object) =>
-            management.nodeSimpleEdit = this.getObjects(object)
+        const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'edu-quick_edit', async (object) =>
+            management.nodeSimpleEdit = await this.getObjectsAsync(object, true)
         );
-        simpleEditNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        simpleEditNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.User];
         simpleEditNode.permissions = [RestConstants.ACCESS_WRITE];
+        simpleEditNode.permissionsRightMode = NodesRightMode.Original;
         simpleEditNode.permissionsMode = HideMode.Disable;
         simpleEditNode.group = DefaultGroups.Edit;
         simpleEditNode.priority = 15;
 
-        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', (object) =>
-            management.nodeMetadata = this.getObjects(object)
+        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) =>
+            management.nodeMetadata = await this.getObjectsAsync(object, true)
         );
         editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
-        editNode.constrains = [Constrain.FilesAndDirectories, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        editNode.constrains = [Constrain.FilesAndDirectories, Constrain.HomeRepository, Constrain.User];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;
+        editNode.permissionsRightMode = NodesRightMode.Original;
         editNode.group = DefaultGroups.Edit;
         editNode.priority = 20;
-
-
-        const editNodeOriginal = new OptionItem('OPTIONS.EDIT_ORIGINAL', 'edit', (object) => {
-            this.nodeService.getNodeMetadata(this.getObjects(object)[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0]).subscribe((node) => {
-                management.nodeMetadata = [node.node];
-            });
-        });
-        editNodeOriginal.constrains = [Constrain.CollectionReference, Constrain.HomeRepository, Constrain.User];
-        editNodeOriginal.permissions = [RestConstants.ACCESS_WRITE];
-        editNodeOriginal.permissionsRightMode = NodesRightMode.Original;
-        editNodeOriginal.permissionsMode = HideMode.Disable;
-        editNodeOriginal.group = DefaultGroups.Edit;
-        editNodeOriginal.showAsAction = true;
-        editNodeOriginal.priority = 20;
-
 
         const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
             management.nodeTemplate = this.getObjects(object)[0]
@@ -1142,7 +1130,6 @@ export class OptionsHelperService implements OnDestroy {
         options.push(feedbackCollectionView);
         options.push(simpleEditNode);
         options.push(editNode);
-        options.push(editNodeOriginal);
         // add to collection
         options.push(addNodeToCollection);
         // create variant
@@ -1225,7 +1212,24 @@ export class OptionsHelperService implements OnDestroy {
             UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), node);
         }
     }
-
+    private async getObjectsAsync(object: Node | any, resolveOriginals = false) {
+        const nodes = NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
+        if(resolveOriginals) {
+            const originals = await observableForkJoin(
+                nodes.map((n) => {
+                    if(n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
+                        return this.nodeService.getNodeMetadata(n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
+                    } else {
+                        return of({
+                            node: n
+                        });
+                    }
+                })
+            ).toPromise();
+            return originals.map((o) => o.node);
+        }
+        return nodes;
+    }
     private getObjects(object: Node | any) {
         return NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
     }
