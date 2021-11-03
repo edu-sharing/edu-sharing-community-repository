@@ -66,7 +66,7 @@ import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
 import {BehaviorSubject, ReplaySubject, combineLatest, Observable} from 'rxjs';
-import {delay, distinctUntilChanged, first, map, switchMap, takeUntil, tap} from 'rxjs/operators';
+import {delay, distinctUntilChanged, first, map, shareReplay, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {
@@ -78,6 +78,8 @@ import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.
 import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
+
+const DID_YOU_MEAN_SUGGESTION_MINIMUM_SCORE = 0.01;
 
 @Component({
     selector: 'app-search',
@@ -186,6 +188,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         .areAllDisplayed()
         // Prevent changed-after-checked error
         .pipe(delay(0));
+    readonly didYouMeanSuggestion$ = this.searchApi
+        .getDidYouMeanSuggestion(DID_YOU_MEAN_SUGGESTION_MINIMUM_SCORE)
+        .pipe(shareReplay(1));
 
     constructor(
         private router: Router,
@@ -213,7 +218,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private temporaryStorageService: TemporaryStorageService,
         private searchField: SearchFieldService,
         private searchApi: SearchApiService,
-    ) {}
+    ) {
+        // Subscribe early to make sure the suggestions are requested with search requests.
+        this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
+    }
 
     ngOnInit() {
         setTimeout(() => {
@@ -375,7 +383,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.routeSearch(null, repository, null, {});
     }
 
-    async applyParameters(origin: 'mainnav' | 'mds', props: Values = null) {
+    acceptDidYouMeanSuggestion(text: string): void {
+        this.searchService.searchTerm = text;
+        this.applyParameters('did-you-mean-suggestion')
+    }
+
+    async applyParameters(origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion', props: Values = null) {
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
         if(origin === 'mds') {

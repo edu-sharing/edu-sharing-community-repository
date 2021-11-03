@@ -4,6 +4,7 @@
         "SEARCH_OPTIONS_LABEL": "Search Options",
         "TUTORIAL_HEADING": "searching and finding",
         "TUTORIAL_DESCRIPTION": "The search field allows you to quickly find interesting materials. Use filters to narrow down your search results.",
+        "DID_YOU_MEAN": "Did you mean",
         "COLLECTIONS": "Collections",
         "MATERIALS": "Materials",
         "IGNORED_PARAMETERS": "The result contains objects which may not fit all given search criterias",

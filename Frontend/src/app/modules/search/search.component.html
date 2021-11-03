@@ -252,6 +252,21 @@
         >
             <h1 appTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
+              <ng-container *ngIf="!searchService.dataSourceSearchResult[0]?.isLoading">
+                <p
+                  *ngIf="didYouMeanSuggestion$ | async as didYouMeanSuggestion"
+                  class="did-you-mean-suggestion"
+                >
+                  {{ 'SEARCH.DID_YOU_MEAN' | translate }}: <a
+                    class="did-you-mean-suggestion-link"
+                    [innerHTML]="didYouMeanSuggestion.highlighted"
+                    routerLink="."
+                    [queryParams]="{ query: didYouMeanSuggestion.text }"
+                    queryParamsHandling="merge"
+                    (click)="acceptDidYouMeanSuggestion(didYouMeanSuggestion.text)"
+                  ></a>
+              </p>
+              </ng-container>
               <div *ngIf="!searchService.dataSourceCollections.isEmpty() && !addToCollection">
 
                     <div #collections class="collections">

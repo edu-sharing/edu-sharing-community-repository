@@ -133,6 +133,15 @@ sort-dropdown{
         display:none!important;
     }
 }
+
+.did-you-mean-suggestion {
+    padding: 0 20px;
+    .did-you-mean-suggestion-link ::ng-deep em {
+        font-style: normal;
+        font-weight: bold;
+    }
+}
+
 .noResults,.noResultsMatched{
     color: $noResultsColor;
     text-align: center;

@@ -58,6 +58,7 @@ export class SearchService {
 
     constructor(private searchV1: SearchV1Service, private mdsLabel: MdsLabelService) {
         this.registerFacetsSubject();
+        this.registerDidYouMeanSuggestionSubject();
     }
 
     /**
@@ -196,8 +197,15 @@ export class SearchService {
                 onUnsubscribe: () => this.didYouMeanSuggestionsSubscribers--,
             }),
             map((suggestions) => {
-                if (suggestions && suggestions.length > 0 && suggestions[0].score >= minimumScore) {
-                    return suggestions[0];
+                const suggestion = suggestions?.[0];
+                if (
+                    suggestion &&
+                    // If there are no "<em>" tags in `highlighted`, the suggestion equals the
+                    // original string.
+                    suggestion.text !== suggestion.highlighted &&
+                    suggestion.score >= minimumScore
+                ) {
+                    return suggestion;
                 } else {
                     return null;
                 }
@@ -264,6 +272,14 @@ export class SearchService {
                 }),
             )
             .subscribe((facets) => this.facetsSubject.next(facets));
+    }
+
+    private registerDidYouMeanSuggestionSubject(): void {
+        this.resultsSubject
+            .pipe(map((results) => results?.suggests ?? null))
+            .subscribe((didYouMeanSuggestion) =>
+                this.didYouMeanSuggestionsSubject.next(didYouMeanSuggestion),
+            );
     }
 
     /** Adds given properties to the list of facets to be fetched with search requests. */
