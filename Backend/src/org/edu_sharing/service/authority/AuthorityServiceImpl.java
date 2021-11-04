@@ -301,7 +301,11 @@ public EduGroup getEduGroup(String authority){
 	}
 	@Override
 	public Set<String> getMemberships(String username) {
-		return serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
+		if(AuthenticationUtil.getFullyAuthenticatedUser() != null && AuthenticationUtil.getFullyAuthenticatedUser().equals(username)){
+			return serviceRegistry.getAuthorityService().getAuthorities();
+		}else {
+			return serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
+		}
 	}
 	@Override
 	public String createGroup(String groupName, String displayName,String parentGroup) throws Exception {

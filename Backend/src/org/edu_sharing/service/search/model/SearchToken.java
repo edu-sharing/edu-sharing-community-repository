@@ -1,12 +1,13 @@
 package org.edu_sharing.service.search.model;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -152,7 +153,46 @@ public class SearchToken implements Serializable {
 		this.maxResult = maxResult;
 	}
 	public List<String> getFacets() {
+		if(this.query != null && facets != null) {
+			List<String> combined = new ArrayList<>();
+			this.facets.forEach((facet) -> {
+				List<String> sublist = this.query.findParameterByName(facet).getFacets();
+				if(sublist != null) {
+					combined.addAll(sublist);
+				} else {
+					combined.add(facet);
+				}
+			});
+			return combined;
+		}
 		return facets;
+	}
+
+	/**
+	 *
+	 * re aggregates splitted facettes from the current mds query to a single list for the client
+	 */
+	public Map<String, Map<String, Integer>> aggregateFacetes(Map<String, Map<String, Integer>> propsMap) {
+		Map<String, Map<String, Integer>> combined = new HashMap<>();
+		if(this.query != null && facets != null) {
+			Stream<MetadataQueryParameter> facetParams = this.query.getParameters().stream().filter((p) -> p.getFacets() != null);
+			for(Map.Entry<String, Map<String, Integer>> entry : propsMap.entrySet()) {
+				Optional<MetadataQueryParameter> param = facetParams.filter((p) -> p.getFacets().contains(entry.getKey())).findFirst();
+				String key = entry.getKey();
+				if(param.isPresent()) {
+					key = param.get().getName();
+				}
+				if(combined.containsKey(key)) {
+					Map<String, Integer> current = combined.get(key);
+					current.putAll(entry.getValue());
+					combined.put(key, current);
+				} else {
+					combined.put(key, entry.getValue());
+				}
+			}
+			return combined;
+		}
+		return propsMap;
 	}
 
 	public void setFacets(List<String> facets) {

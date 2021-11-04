@@ -5,7 +5,8 @@ public abstract class Authority implements java.io.Serializable {
 
 	String authorityName;
 	String authorityType;
-	
+	boolean editable = true;
+
 	public Authority(String authorityType) {
 		this.authorityType = authorityType;
 	}
@@ -27,6 +28,16 @@ public abstract class Authority implements java.io.Serializable {
 	public String getAuthorityType() {
 		return this.authorityType;
 	}
+
+
+	public void setEditable(boolean editable) {
+		this.editable = editable;
+	}
+
+	public boolean isEditable() {
+		return editable;
+	}
+
 
 	@Override
 	public boolean equals(Object obj) {

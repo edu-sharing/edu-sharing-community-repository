@@ -153,7 +153,7 @@ public class UsageDao {
 				throw new SecurityException("Can not modify usages on node " + nodeId);
 			}
 			if(usage == null) {
-				throw new IllegalArgumentException(usageId + " is not an usage of " + nodeId);
+				throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
 			}
 			AuthenticationUtil.runAsSystem(() -> {
 				if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,

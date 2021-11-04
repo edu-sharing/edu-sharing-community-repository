@@ -34,6 +34,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.client.tools.MimeTypes;
+
 public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable{
 
 	public static final long DEFAULT_OFFSET_MS = 10000;
@@ -544,7 +549,18 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	}
 
 	public String getString(String key,String defaultValue){
-		return properties.getProperty(key,defaultValue);
+		return replaceDynamicVariables(properties.getProperty(key,defaultValue));
+	}
+
+	private String replaceDynamicVariables(String data) {
+		String contextDomain = Context.getCurrentInstance() == null ? null : Context.getCurrentInstance().getRequest() == null ? null : Context.getCurrentInstance().getRequest().getServerName();
+		Map<String, String> searchReplace = new HashMap<>();
+		searchReplace.put("${context.id}", NodeCustomizationPolicies.getEduSharingContext());
+		searchReplace.put("${context.domain}", contextDomain);
+		for(Map.Entry<String, String> entry: searchReplace.entrySet()) {
+			data = data.replace(entry.getKey(),entry.getValue()==null ? "" : entry.getValue());
+		}
+		return data;
 	}
 
 	public int getInteger(String key,int defaultValue){
@@ -650,8 +666,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	 * @return the renderServiceUrl
 	 */
 	public String getContentUrl() {
-		
-		return contentUrl;
+		return replaceDynamicVariables(contentUrl);
 	}
 
 	/**

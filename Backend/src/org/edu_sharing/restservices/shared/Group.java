@@ -19,12 +19,6 @@ public class Group extends Authority {
 	private GroupProfile profile = null;
 	private NodeRef ref = null;
 
-	/**
-	 * editable in context of grouptype and loction(shared nodes)
-	 * 
-	 * @TODO is an prop for the ACE Object, remove when not longer needed
-	 */
-	private boolean editable = true;
 	private List<String> aspects;
 
 	private List<Organization> organizations;
@@ -69,14 +63,7 @@ public class Group extends Authority {
 	public void setProfile(GroupProfile profile) {
 		this.profile = profile;
 	}
-	
-	public boolean isEditable() {
-		return editable;
-	}
-	
-	public void setEditable(boolean editable) {
-		this.editable = editable;
-	}
+
 	@JsonProperty
 	public NodeRef getRef() {
 		return ref;

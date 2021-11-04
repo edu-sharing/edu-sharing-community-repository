@@ -41,20 +41,7 @@ import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.transaction.UserTransaction;
@@ -157,6 +144,7 @@ import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -3331,6 +3319,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 								user.setEmail((String) personProps.get(ContentModel.PROP_EMAIL));
 								user.setGivenName((String) personProps.get(ContentModel.PROP_FIRSTNAME));
 								user.setSurname((String) personProps.get(ContentModel.PROP_LASTNAME));
+								user.setEditable(
+										AuthorityServiceHelper.isAdmin() ||
+										!Objects.equals(AuthenticationUtil.getFullyAuthenticatedUser(), alfAuthority)
+								);
 
 								String repository = (String) personProps.get(QName.createQName(CCConstants.PROP_USER_REPOSITORYID));
 								if (repository == null || repository.trim().equals("")) repository = appInfo.getAppId();

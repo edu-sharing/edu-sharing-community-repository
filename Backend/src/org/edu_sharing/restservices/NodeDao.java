@@ -1246,9 +1246,10 @@ public class NodeDao {
 							Group g = (Group)authority;
 							g.setProfile(new GroupProfile());
 							g.getProfile().setGroupType(ace.getGroup().getGroupType());
-							g.setEditable(ace.getGroup().isEditable());
+							authority.setEditable(ace.getGroup().isEditable());
+						} else if(ace.getUser() != null) {
+							authority.setEditable(ace.getUser().isEditable());
 						}
-						
 						authority.setAuthorityName(ace.getAuthority());
 						authority.setAuthorityType(Authority.Type.valueOf(ace.getAuthorityType()));
 						
@@ -1279,9 +1280,7 @@ public class NodeDao {
 				for(Map.Entry<Authority,List<String>> entry : authPerm.entrySet()){
 					ACE ace = getACEAsSystem(entry.getKey());
 					ace.setPermissions(entry.getValue());
-					if(entry.getKey() instanceof Group) {
-						ace.setEditable(((Group)entry.getKey()).isEditable());
-					}
+					ace.setEditable(entry.getKey().isEditable());
 					result.getLocalPermissions().getPermissions().add(ace);
 				}
 				

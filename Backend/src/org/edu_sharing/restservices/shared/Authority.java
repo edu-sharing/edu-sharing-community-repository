@@ -16,6 +16,7 @@ public class Authority {
 	private String authorityName;
 	private Type authorityType;
 	private Map<String, String[]> properties;
+	boolean editable;
 
 	public Authority(){}
 	public Authority(String authorityName, String authorityType) {
@@ -72,7 +73,17 @@ public class Authority {
 	public void setProperties(Map<String, String[]> properties) {
 		this.properties = properties;
 	}
-	
+
+	@JsonProperty
+	public void setEditable(boolean editable) {
+		this.editable = editable;
+	}
+
+	public boolean isEditable() {
+		return editable;
+	}
+
+
 	@Override
 	public boolean equals(Object obj) {
 		

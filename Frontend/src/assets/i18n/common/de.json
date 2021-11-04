@@ -362,7 +362,7 @@
         "FILE_PICKER_TITLE": "Speicherort wählen",
         "CREATE": "Anlegen",
         "CREATE_EDIT": "Anlegen & Öffnen",
-        "CREATED": "Die Variante wurde angelegt und im Ordner <b>\"{{folder}}\"</b> gespeichert",
+        "CREATED": "Die Variante wurde angelegt und im Ordner \"{{folder}}\" gespeichert",
         "CREATED_LINK": "anzeigen",
         "WARNING": {
             "NO_LICENSE": "Dieses Material besitzt noch keine Lizenz.\nSetzen Sie sich ggf. mit dem Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
@@ -379,7 +379,7 @@
         "CHOOSE": "Speicherort ändern",
         "FILE_PICKER_TITLE": "Speicherort wählen",
         "CREATE": "Link erstellen",
-        "CREATED": "Der Link wurde angelegt und im Ordner <b>\"{{folder}}\"</b> gespeichert",
+        "CREATED": "Der Link wurde angelegt und im Ordner \"{{folder}}\" gespeichert",
         "CREATED_LINK": "anzeigen"
     },
     "NODE_REPORT": {

@@ -26,27 +26,27 @@ import java.util.List;
 import java.util.Map;
 
 public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
-	
+
 	PolicyComponent policyComponent;
-	
+
 	NodeService nodeService;
-	
+
 	Logger logger = Logger.getLogger(BeforeDeleteIOPolicy.class);
-	
+
 	HandleService handleService = null;
-	
+
 	VersionService versionService = null;
-	
+
 	public void init(){
 		policyComponent.bindClassBehaviour(BeforeDeleteNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "beforeDeleteNode"));
-		
+
 		try {
 			handleService = new HandleService();
 		} catch (HandleServiceNotConfiguredException e) {
 			logger.info(e.getMessage());
 		}
 	}
-	
+
 	@Override
 	public void beforeDeleteNode(NodeRef nodeRef) {
 		if(nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
@@ -105,22 +105,21 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 	private void removeCollectionRefUsage(NodeRef nodeRef) {
 		logger.info("removing usage of collection ref: "+nodeRef.getId());
 		try {
-			
-			String originalId = (String)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
-			if(nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId))) {
-				// run as system, because:
-				// the user deleting the ref has permissions to edit the collection (and can delete refs inside),
-				// but he may not has any access to the original node(s)
-				// however, the collection ref will be deleted, so the usage has to be removed
-				AuthenticationUtil.runAsSystem(()-> {
+			AuthenticationUtil.runAsSystem(()-> {
+				String originalId = (String)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+				if(nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId))) {
+					// run as system, because:
+					// the user deleting the ref has permissions to edit the collection (and can delete refs inside),
+					// but he may not has any access to the original node(s)
+					// however, the collection ref will be deleted, so the usage has to be removed
 					new UsageTool().removeUsage(ApplicationInfoList.getHomeRepository().getAppId(),
 							nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
 							originalId,
 							nodeRef.getId()
 					);
-					return null;
-				});
-			}
+				}
+				return null;
+			});
 		} catch (Exception e) {
 			logger.warn("failed to delete ref usage",e);
 		}
@@ -131,11 +130,11 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
 	}
-	
+
 	public void setNodeService(NodeService nodeService) {
 		this.nodeService = nodeService;
 	}
-	
+
 	public void setVersionService(VersionService versionService) {
 		this.versionService = versionService;
 	}

@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.shared;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,7 +41,7 @@ public class NodeSearch {
 		}
 
 		private String property = null;
-		private List<Value> values = null;
+		private List<Value> values = new ArrayList<>();
 		private Long sumOtherDocCount = null;
 
 		@Schema(required = true, description = "")

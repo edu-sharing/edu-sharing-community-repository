@@ -13,9 +13,7 @@ public class Group extends Authority {
 	String scope;
 	
 	String groupType;
-	
-	boolean editable = true;
-	
+
 	public Group() {
 		super("GROUP");
 	}
@@ -72,13 +70,4 @@ public class Group extends Authority {
 	public void setGroupType(String groupType) {
 		this.groupType = groupType;
 	}
-	
-	public void setEditable(boolean editable) {
-		this.editable = editable;
-	}
-	
-	public boolean isEditable() {
-		return editable;
-	}
-	
 }
