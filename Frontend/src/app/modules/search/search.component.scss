@@ -42,7 +42,6 @@ $sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
 }
 .rowRepositories{
     position: fixed;
-    top:$mainnavHeight;
     width: 100%;
     z-index: 13;
     >div {

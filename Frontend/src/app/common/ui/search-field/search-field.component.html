@@ -10,7 +10,68 @@
   >
     <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
       <mat-label></mat-label>
-      <mat-chip-list attr.aria-label="{{placeholder | translate}}" #chipList>
+      <div class="search-field-input-wrapper">
+        <div matPrefix
+             class="filter-prefix"
+             matTooltip="{{'SEARCH.ACTIVE_FILTER_TOOLTIP' | translate:{count: filtersCount} }}"
+             *ngIf="filtersCount">
+          {{filtersCount}}
+        </div>
+        <input
+          class="search-input"
+          #input
+          name="search"
+          type="search"
+          matInput
+          [formControl]="inputControl"
+          autocomplete="off"
+          placeholder="{{ placeholder | translate }}"
+          [attr.aria-label]="placeholder | translate"
+          (focus)="onInputFocus()"
+          (blur)="onInputBlur($event)"
+          (keydown.tab)="focusOverlayIfOpen($event)"
+          (keydown.enter)="onSubmit()"
+        />
+        <button
+          class="clear-button"
+          *ngIf="inputControl.value"
+          mat-icon-button
+          type="button"
+          (click)="onClear()"
+          attr.aria-label="{{'SEARCH_CLEAR' | translate}}"
+        >
+          <i icon="clear" [aria]="false"></i>
+        </button>
+        <button
+          class="submit-button"
+          mat-icon-button
+          attr.aria-label="{{ 'WORKSPACE.SEARCH_ACTION' | translate }}"
+        >
+          <i icon="search" [aria]="false"></i>
+        </button>
+      </div>
+    </mat-form-field>
+  </div>
+</form>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="showOverlay && (!!filtersCount || hasSuggestions)"
+  [cdkConnectedOverlayPositions]="overlayPositions"
+  [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
+  (overlayOutsideClick)="onOutsideClick($event)"
+  (detach)="onDetach()"
+>
+  <!-- FIXME: The focus trap doesn't seem to work, when there are suggestions for only one facet
+  category. -->
+  <div class="suggestion-card mat-elevation-z2" cdkTrapFocus>
+    <div *ngIf="filtersCount"
+         class="suggestion-active-filter"
+         [class.suggestion-active-filter-separator]="!facets.isEmpty()"
+    >
+      <label #label>{{'SEARCH.ACTIVE_FILTER' | translate:{count:filtersCount} }}</label>
+      <mat-chip-list [attr.aria-labelledby]="label" #chipList>
         <div class="chips-wrapper" *ngIf="filters$ | async as filtersDict">
           <ng-container *ngFor="let filters of filtersDict | keyvalue">
             <!-- We considered injecting the chip list from the mds editor like the suggestions
@@ -29,58 +90,8 @@
             </ng-container>
           </ng-container>
         </div>
-        <div class="search-field-input-wrapper">
-          <input
-            class="search-input"
-            #input
-            name="search"
-            type="search"
-            matInput
-            [formControl]="inputControl"
-            [matChipInputFor]="chipList"
-            autocomplete="off"
-            placeholder="{{ placeholder | translate }}"
-            [attr.aria-label]="placeholder | translate"
-            (focus)="onInputFocus()"
-            (blur)="onInputBlur($event)"
-            (keydown.tab)="focusOverlayIfOpen($event)"
-            (keydown.enter)="onSubmit()"
-          />
-          <button
-            class="clear-button"
-            *ngIf="inputControl.value"
-            mat-icon-button
-            type="button"
-            (click)="onClear()"
-            attr.aria-label="{{'SEARCH_CLEAR' | translate}}"
-          >
-            <i icon="clear" [aria]="false"></i>
-          </button>
-          <button
-            class="submit-button"
-            mat-icon-button
-            attr.aria-label="{{ 'WORKSPACE.SEARCH_ACTION' | translate }}"
-          >
-            <i icon="search" [aria]="false"></i>
-          </button>
-        </div>
       </mat-chip-list>
-    </mat-form-field>
-  </div>
-</form>
-
-<ng-template
-  cdkConnectedOverlay
-  [cdkConnectedOverlayOrigin]="trigger"
-  [cdkConnectedOverlayOpen]="showOverlay && hasSuggestions"
-  [cdkConnectedOverlayPositions]="overlayPositions"
-  [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
-  (overlayOutsideClick)="onOutsideClick($event)"
-  (detach)="onDetach()"
->
-  <!-- FIXME: The focus trap doesn't seem to work, when there are suggestions for only one facet
-  category. -->
-  <div class="suggestion-card mat-elevation-z2" cdkTrapFocus>
+    </div>
     <ng-container *ngTemplateOutlet="facets.suggestionsPanel"></ng-container>
   </div>
 </ng-template>

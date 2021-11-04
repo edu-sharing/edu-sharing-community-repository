@@ -16,6 +16,7 @@ import { map, takeUntil, tap } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../mds-editor/types';
 import { SearchFieldService } from './search-field.service';
+import {LabeledValuesDict} from '../../../../../projects/edu-sharing-api/src/lib/wrappers/mds-label.service';
 
 @Component({
     selector: 'app-search-field',
@@ -23,6 +24,7 @@ import { SearchFieldService } from './search-field.service';
     styleUrls: ['./search-field.component.scss'],
 })
 export class SearchFieldComponent implements OnInit, OnDestroy {
+    filtersCount: number;
     @Input()
     set searchString(s: string) {
         this.searchString_ = s;
@@ -83,6 +85,10 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
                 this.searchStringChange.emit(inputString);
             }
         });
+        this.filters$
+            .pipe(
+                takeUntil(this.destroyed$),
+            ).subscribe((filters) => this.updateFilterCount(filters));
         this.suggestions$
             .pipe(
                 takeUntil(this.destroyed$),
@@ -93,7 +99,9 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
                 // We only fetch new suggestions when the user types into the search field. In case
                 // the user dismissed the suggestions overlay earlier (`showOverlay = false`), this
                 // is the time to show it again.
-                this.showOverlay = true;
+                if(this.hasSuggestions) {
+                    this.showOverlay = true;
+                }
             });
     }
 
@@ -154,6 +162,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     onInputFocus(): void {
+        console.log('focus');
         Promise.resolve().then(() => (this.inputHasFocus = true));
         this.showOverlay = true;
     }
@@ -174,5 +183,14 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             suggestions &&
             Object.values(suggestions).some((suggestion) => suggestion.values.length > 0)
         );
+    }
+
+    updateFilterCount(filters: LabeledValuesDict) {
+        const mapped = Object.keys(filters).map((k) => filters[k].length);
+        if(!mapped.length) {
+            this.filtersCount = 0;
+        } else {
+            this.filtersCount = mapped.reduce((a, b) => a + b);
+        }
     }
 }
