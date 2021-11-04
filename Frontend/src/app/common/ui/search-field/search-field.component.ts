@@ -186,7 +186,9 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     updateFilterCount(filters: LabeledValuesDict) {
-        const mapped = Object.keys(filters).map((k) => filters[k].length);
+        const mapped = Object.keys(filters).filter(
+            (f) => this.categories$.value.includes(f)
+        ).map((k) => filters[k].length);
         if(!mapped.length) {
             this.filtersCount = 0;
         } else {
