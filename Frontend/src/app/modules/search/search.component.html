@@ -12,7 +12,7 @@
     [canOpen]="true"
     [create]="{allowed: isHomeRepository(), allowBinary: true}"
     [(searchQuery)]="searchService.searchTerm"
-    (onSearch)="routeAndClearSearch($event)"
+    (onSearch)="applyParameters('mainnav')"
     (onCreate)="list.addVirtualNodes($event)"
   ></main-nav>
 
@@ -115,7 +115,7 @@
             [mode]="'search'"
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
-            (onDone)="applyParameters($any($event))">
+            (onDone)="applyParameters('mds', $any($event))">
       </app-mds-editor-wrapper>
   </card>
   <div class="sidenav-container">
@@ -159,7 +159,7 @@
             [mode]="'search'"
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
-            (onDone)="applyParameters($any($event))"
+            (onDone)="applyParameters('mds', $any($event))"
           >
           </app-mds-editor-wrapper>
           <div class="mdsSelect" *ngIf="initalized">

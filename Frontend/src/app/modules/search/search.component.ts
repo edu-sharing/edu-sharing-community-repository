@@ -371,10 +371,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.routeSearch(null, repository, null, {});
     }
 
-    applyParameters(props: Values = null) {
+    async applyParameters(origin: 'mainnav' | 'mds', props: Values = null) {
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
-        this.currentValues = props;
+        if(origin === 'mds') {
+            this.currentValues = props;
+        }
         this.updateGroupedRepositories();
         if (
             UIHelper.evaluateMediaQuery(
@@ -384,8 +386,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
             this.searchService.sidenavOpened = false;
         }
-        this.routeSearchParameters(props);
-        //this.getSearch(null,true,props);
+        await this.routeSearchParameters(props);
+        this.getSearch(
+            this.searchService.searchTerm,
+            true);
     }
 
     downloadNode() {
@@ -523,8 +527,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             },
         });
         if(result !== true) {
-            this.invalidateMds();
-            this.searchService.init();
+            // this.invalidateMds();
+            // this.searchService.init();
         }
     }
 
@@ -533,10 +537,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         init = false,
     ) {
         if ((this.isSearching && init) || this.repositoryIds.length == 0) {
-            setTimeout(
+            /*setTimeout(
                 () => this.getSearch(searchString, init),
                 100,
-            );
+            );*/
             return;
         }
         if (this.isSearching && !init) {
@@ -962,10 +966,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             if (!this.currentValues && this.getActiveMds()) {
                 this.currentValues = await this.getMdsValues();
             }
-            if (this.searchService.reinit)
-                this.getSearch(
-                    this.searchService.searchTerm,
-                    true);
         }
         if (this.mainNavRef && !this.bannerInitalized) {
             await this.mainNavRef.refreshBanner();
@@ -1242,7 +1242,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             );
         }
         const searchAction = new OptionItem('SEARCH.APPLY_FILTER', 'search', async () => {
-            this.applyParameters(await this.getActiveMds().getValues());
+            this.applyParameters('mds', await this.getActiveMds().getValues());
         });
         searchAction.isPrimary = true;
         if (this.mdsDesktopRef?.editorType === 'legacy') {
@@ -1390,11 +1390,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    private invalidateMds() {
+    private async invalidateMds() {
         if (this.currentRepository == RestConstants.ALL) {
             this.onMdsReady();
         } else {
-            this.getActiveMds().loadMds();
+            await this.getActiveMds().loadMds();
+            //this.onMdsReady();
+            //this.getActiveMds().loadMds();
         }
     }
 
@@ -1633,7 +1635,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 distinctUntilChanged(),
                 map((json) => JSON.parse(json)),
             )
-            .subscribe((values) => this.applyParameters(values));
+            .subscribe((values) => this.applyParameters('mds', values));
         this.mdsDesktopRef.mdsEditorInstance.mdsInitDone
             .pipe(
                 takeUntil(this.destroyed$),
