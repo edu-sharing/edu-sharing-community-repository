@@ -154,7 +154,7 @@ public class UsageDao {
 						throw new Exception("Error deleting usage " + usage.getNodeId());
 				}
 			}
-			throw new IllegalArgumentException(usageId + " is not an usage of " + nodeId);
+			throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
