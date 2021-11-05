@@ -78,7 +78,9 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
 
     click() {
         if(this.widget.definition.link === '_BLANK') {
-            window.open(this.getNodeValue()[0]);
+            window.open(this.formatText()[0]);
+        } else if(this.widget.definition.link === '_SELF') {
+            window.location.href = this.formatText()[0];
         } else {
             console.warn('Unsupported link type ' + this.widget.definition.link);
         }
@@ -102,6 +104,15 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
         return this.getNodeValue().map((v) => {
             if(this.widget.definition.format === 'bytes') {
                 return new FormatSizePipe().transform(v);
+            }
+            return v;
+        });
+    }
+
+    formatText() {
+        return this.getNodeValue().map((v) => {
+            if(this.widget.definition.format) {
+                return this.widget.definition.format.replace('${value}', v);
             }
             return v;
         });
