@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { TranslateLoader } from '@ngx-translate/core';
+import { ConfigService } from 'ngx-edu-sharing-api';
 import {Observable, Observer, of, concat} from 'rxjs';
-import {tap, switchMap, map, catchError, reduce} from 'rxjs/operators';
+import {tap, switchMap, map, catchError, reduce, first} from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { RestLocatorService } from '../core-module/core.module';
 import { Translation } from './translation';
 import { TranslationSource } from './translation-source';
 
@@ -28,13 +28,13 @@ export const TRANSLATION_LIST = [
 type Dictionary = { [key: string]: string | Dictionary };
 
 export class TranslationLoader implements TranslateLoader {
-    static create(http: HttpClient, locator: RestLocatorService) {
-        return new TranslationLoader(http, locator);
+    static create(http: HttpClient, config: ConfigService) {
+        return new TranslationLoader(http, config);
     }
 
-    constructor(
+    private constructor(
         private http: HttpClient,
-        private locator: RestLocatorService,
+        private config: ConfigService,
         private prefix: string = 'assets/i18n',
         private suffix: string = '.json',
     ) {}
@@ -63,9 +63,9 @@ export class TranslationLoader implements TranslateLoader {
     private getOriginalTranslations(lang: string): Observable<Dictionary> {
         switch (this.getSource()) {
             case 'repository':
-                return this.locator.getLanguageDefaults(
+                return this.config.getDefaultTranslations(
                     Translation.LANGUAGES[lang],
-                );
+                ).pipe(first());
             case 'local':
                 return this.mergeTranslations(this.fetchTranslations(lang));
         }
@@ -118,9 +118,12 @@ export class TranslationLoader implements TranslateLoader {
         translations: Dictionary,
         lang: string,
     ): Observable<Dictionary> {
-        return this.locator
-            .getConfigLanguage(Translation.LANGUAGES[lang])
-            .pipe(map(overrides => this.applyOverrides(translations, overrides)));
+        return this.config
+            .getCustomTranslations(Translation.LANGUAGES[lang])
+            .pipe(
+                first(),
+                map(overrides => this.applyOverrides(translations, overrides)),
+            );
     }
 
     /**

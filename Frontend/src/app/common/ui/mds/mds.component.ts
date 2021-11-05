@@ -44,7 +44,8 @@ import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';
 import {DateHelper} from '../../../core-ui-module/DateHelper';
-import { MdsService, MdsValue } from 'ngx-edu-sharing-api';
+import { MdsService, MdsValue, ConfigService } from 'ngx-edu-sharing-api';
+import { first } from 'rxjs/operators';
 declare var noUiSlider: any;
 
 @Component({
@@ -116,7 +117,7 @@ export class MdsComponent {
     dialogMessage: string;
     dialogParameters: any;
     dialogButtons: DialogButton[];
-    private variables: string[];
+    private variables: { [key: string]: string };
     currentWidgetSuggestion: string;
     private static GROUP_MULTIVALUE_DELIMITER = '[+]';
     private mdsId = new Date().getTime();
@@ -170,8 +171,8 @@ export class MdsComponent {
         this.isLoading = true;
         this.mdsService.getSet(this._setId, this._repository).subscribe(
             (data: any) => {
-                this.locator.getConfigVariables().subscribe(
-                    (variables: string[]) => {
+                this.config.getVariables().pipe(first()).subscribe(
+                    (variables) => {
                         this.mds = data;
                         this.variables = variables;
                         this.loadMdsFinal();
@@ -296,7 +297,7 @@ export class MdsComponent {
         private storage: SessionStorageService,
         private connector: RestConnectorService,
         private sanitizer: DomSanitizer,
-        private config: ConfigurationService,
+        private config: ConfigService,
         private mdsEditorCommon: MdsEditorCommonService,
         private nodeHelper: NodeHelperService,
         private _ngZone: NgZone,
@@ -3060,7 +3061,7 @@ export class MdsComponent {
         widget.defaultvalue = this.replaceVariableString(widget.defaultvalue, this.variables);
     }
 
-    private replaceVariableString(string: string, variables: string[]) {
+    private replaceVariableString(string: string, variables: { [key: string]: string }) {
         if (!string) return string;
         if (!string.match('\\${.+}')) {
             return string;
@@ -3225,7 +3226,7 @@ export class MdsComponent {
     }
 
     private loadConfig() {
-        this.locator.getConfigVariables().subscribe((variables: string[]) => {
+        this.config.getVariables().pipe(first()).subscribe((variables) => {
             this.variables = variables;
             const node = this.currentNodes[0];
             for (const property in node.properties) {

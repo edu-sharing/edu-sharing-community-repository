@@ -101,6 +101,7 @@ import {MatSortModule} from '@angular/material/sort';
 import {OverlayModule} from '@angular/cdk/overlay';
 import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
 import {DragCursorDirective} from './directives/drag-cursor.directive';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
 @NgModule({
     declarations: [
@@ -198,7 +199,7 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
             loader: {
                 provide: TranslateLoader,
                 useFactory: TranslationLoader.create,
-                deps: [HttpClient, RestLocatorService],
+                deps: [HttpClient, ConfigService],
             },
             missingTranslationHandler: {
                 provide: MissingTranslationHandler,

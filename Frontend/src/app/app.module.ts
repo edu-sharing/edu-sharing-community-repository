@@ -83,6 +83,7 @@ import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
 import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pipe';
 import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
 import { BorderBoxObserverDirective } from './common/directives/border-box-observer.directive';
+import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -161,6 +162,7 @@ import { BorderBoxObserverDirective } from './common/directives/border-box-obser
     imports: [
         IMPORTS,
         CommonModule,
+        EduSharingApiModule.forRoot(),
         NgxSliderModule,
         DragDropModule,
         extensionImports,
