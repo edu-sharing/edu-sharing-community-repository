@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MetadataKey extends MetadataTranslatable {
+
 	public static class MetadataKeyRelated extends MetadataKey {
 		public enum Relation {
 			exactMatch,
@@ -27,6 +28,26 @@ public class MetadataKey extends MetadataTranslatable {
 	private List<String> preceds;
 
 	private final List<MetadataKeyRelated> related = new ArrayList<>();
+
+	private List<String> alternativeKeys;
+
+	private String url;
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setAlternativeKeys(List<String> alternativeKeys) {
+		this.alternativeKeys = alternativeKeys;
+	}
+
+	public List<String> getAlternativeKeys() {
+		return alternativeKeys;
+	}
 
 	public String getParent() {
 		return parent;

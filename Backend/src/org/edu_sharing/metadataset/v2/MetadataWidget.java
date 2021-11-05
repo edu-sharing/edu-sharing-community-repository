@@ -328,6 +328,11 @@ public class MetadataWidget extends MetadataTranslatable{
 			return map;
 		for(MetadataKey value : values){
 			map.put(value.getKey(), value);
+			if(value.getAlternativeKeys() != null) {
+				value.getAlternativeKeys().forEach(
+						(key) -> map.put(key, value)
+				);
+			}
 		}
 		return map;
 	}
