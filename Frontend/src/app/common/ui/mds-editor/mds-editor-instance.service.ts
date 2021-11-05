@@ -686,7 +686,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                                 ),
                         )
                         // Filter out widgets that are not shown to the user.
-                        .filter((widget) => widget.definition.type !== MdsWidgetType.DefaultValue);
+                        .filter((widget) => (
+                            widget.definition.type !== MdsWidgetType.DefaultValue &&
+                            widget.definition.interactionType !== 'None'
+                        ));
                     return combineLatest(
                         filteredWidgets.map((widget) =>
                             widget.observeHasChanged().pipe(map(() => widget)),
