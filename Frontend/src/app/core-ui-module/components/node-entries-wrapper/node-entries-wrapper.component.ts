@@ -199,7 +199,14 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
             o.virtual = true;
             return o;
         });
-        this.dataSource.appendData(virtual, 'before');
+        virtual.forEach((v) => {
+            const contains = this.dataSource.getData().some((d) => d.ref.id === v.ref.id);
+            if(contains) {
+                this.updateNodes([v]);
+            } else {
+                this.dataSource.appendData([v], 'before');
+            }
+        })
         this.entriesService.selection.clear();
         this.entriesService.selection.select(...virtual);
     }
