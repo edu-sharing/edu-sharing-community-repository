@@ -462,7 +462,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private displayNode(event: Node) {
         const list = this.getNodeList(event);
         this.closeMetadata();
-        if (list[0].isDirectory) {
+        if (list[0].isDirectory || list[0].type === RestConstants.SYS_TYPE_CONTAINER) {
             if(list[0].collection) {
                 UIHelper.goToCollection(this.router,list[0]);
             } else {

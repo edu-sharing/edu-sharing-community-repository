@@ -1015,6 +1015,7 @@
 			<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT @ccm\:collectiontype:"EDITORIAL" AND NOT @ccm\:collectiontype:"MEDIA_CENTER"</basequery>
 		</query>
 		<query join="AND" id="archive" applyBasequery="false">
+			<basequery>ASPECT:"sys:archived"</basequery>
 			<property name="ngsearchword">
 				<statement>@cm\:name:"${value}"</statement>
 			</property>
