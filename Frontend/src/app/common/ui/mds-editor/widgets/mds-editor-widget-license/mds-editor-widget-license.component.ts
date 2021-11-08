@@ -78,9 +78,10 @@ export class MdsEditorWidgetLicenseComponent extends MdsEditorWidgetBase impleme
         UIHelper.waitForComponent(this.ngZone, this.mainnav.getDialogs(), 'licenseComponent').subscribe(() =>
             this.mainnav.getDialogs().licenseComponent.priority = 2
         );
-        this.mainnav.getDialogs().onRefresh.first().subscribe((nodes: Node[]) =>
-            this.nodes = nodes
-        );
+        this.mainnav.getDialogs().onRefresh.first().subscribe((nodes: Node[]) => {
+            this.nodes = nodes;
+            this.mdsEditorValues.updateNodes(nodes);
+        });
     }
 
     updateValue(license: License, status: boolean) {
