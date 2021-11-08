@@ -48,6 +48,12 @@ import java.util.stream.Collectors;
 
 @JobDescription(description = "Migrate a metadata field to a new valuespace (The new valuespace must already be configured for this field in the mds and must provide related-keys in order to transform)")
 public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams{
+	public enum Mode {
+		Merge,
+		Replace
+	}
+
+
 	protected Logger logger = Logger.getLogger(MigrateMetadataValuespaceJob.class);
 	@JobFieldDescription(description = "type of objects to modify, usually ccm:io", sampleValue = "ccm:io")
 	private String type;
@@ -59,6 +65,8 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	private String targetProperty;
 	@JobFieldDescription(description = "The relation to use")
 	private MetadataKey.MetadataKeyRelated.Relation relation;
+	@JobFieldDescription(description = "The mode to use (Merge = Merge any existing target field values with the mapping values, Replace = replace the target field valiues")
+	private Mode mode;
 	@JobFieldDescription(description = "Only test and output, but do not modify/store the metadata")
 	private boolean testRun;
 
@@ -84,13 +92,16 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 					logger.warn("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
 					return;
 				}
-				Serializable value = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(sourceProperty));
+				Object value = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(sourceProperty));
 				if(value == null){
 					logger.info("Skipping null value, node " + nodeRef);
 					return;
 				}
-				Map<MetadataKey.MetadataKeyRelated, MetadataKey> mapping = widget.getValuespaceMappingByRelation(relation);
-				if(value instanceof List) {
+				if(value instanceof String || value instanceof List) {
+					if(value instanceof String) {
+						value = Collections.singletonList(value);
+					}
+					Map<MetadataKey.MetadataKeyRelated, MetadataKey> mapping = widget.getValuespaceMappingByRelation(relation);
 					ArrayList<String> valueMapped = new ArrayList<>();
 					((List<?>) value).stream().forEach((v) -> {
 						Serializable mapped = mapValue(nodeRef, (String) v, mapping);
@@ -100,13 +111,20 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 							valueMapped.add((String) mapped);
 						}
 					});
-					if(!testRun) {
-						NodeServiceHelper.setProperty(nodeRef, CCConstants.getValidGlobalName(targetProperty), valueMapped);
+					HashSet<String> target = new HashSet<>();
+					if(mode.equals(Mode.Merge)) {
+						Serializable targetValue = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(targetProperty));
+						if(targetValue == null) {
+						} else if (targetValue instanceof String) {
+							target.add((String) targetValue);
+						} else if (targetValue instanceof List) {
+							target.addAll((Collection<? extends String>) targetValue);
+						}
+						target.addAll(valueMapped);
 					}
-				} else if (value instanceof String) {
-					Serializable valueMapped = mapValue(nodeRef, (String) value, mapping);
+					target.addAll(valueMapped);
 					if(!testRun) {
-						NodeServiceHelper.setProperty(nodeRef, CCConstants.getValidGlobalName(targetProperty), valueMapped);
+						NodeServiceHelper.setProperty(nodeRef, CCConstants.getValidGlobalName(targetProperty), target);
 					}
 				} else {
 					logger.error("Unable to map a property of type " + value.getClass().getName() + " via valuespace, node " + nodeRef);
