@@ -4,9 +4,8 @@ import {
     FacetsDict,
     MdsService,
     MdsViewRelation,
-    SearchService as SearchApiService,
+    ConfigService
 } from 'ngx-edu-sharing-api';
-import * as rxjs from 'rxjs';
 import {
     BehaviorSubject,
     combineLatest,
@@ -23,7 +22,6 @@ import {
     Node,
     RestConnectorService,
     RestConstants,
-    RestLocatorService,
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
@@ -31,7 +29,6 @@ import { SearchService } from '../../../modules/search/search.service';
 import { BulkBehavior } from '../mds/mds.component';
 import { MdsEditorCommonService } from './mds-editor-common.service';
 import {
-    MdsEditorViewComponent,
     NativeWidgetComponent
 } from './mds-editor-view/mds-editor-view.component';
 import {
@@ -53,9 +50,6 @@ import {
 } from './types';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {MdsViewerComponent} from '../mds-viewer/mds-viewer.component';
-import {MdsWidgetComponent} from '../mds-viewer/widget/mds-widget.component';
-import {InteractionType} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -162,7 +156,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             public readonly viewId: string,
             public readonly repositoryId: string,
             public readonly relation: MdsViewRelation = null,
-            public readonly variables: string[] = null,
+            public readonly variables: { [key: string]: string } = null,
         ) {
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
@@ -228,7 +222,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
         }
 
-        private replaceVariableString(str: string, variables: string[] = this.variables) {
+        private replaceVariableString(str: string, variables: { [key: string]: string } = this.variables) {
             if (!str || !str.match('\\${.+}')) {
                 return str;
             }
@@ -618,12 +612,11 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     constructor(
         private mdsEditorCommonService: MdsEditorCommonService,
-        private restLocator: RestLocatorService,
         private mdsService: MdsService,
         private restMdsService: RestMdsService,
         private restConnector: RestConnectorService,
         private searchService: SearchService,
-        private searchApi: SearchApiService,
+        private config: ConfigService,
     ) {
         this.registerInitMds();
         this.register_new_valuesChange();
@@ -1175,7 +1168,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         const availableWidgets = mdsDefinition.widgets
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
             .filter((widget) => this.meetsCondition(widget, nodes, values, false));
-        const variables = await this.restLocator.getConfigVariables().toPromise();
+        const variables = await this.config.getVariables().pipe(first()).toPromise();
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);
