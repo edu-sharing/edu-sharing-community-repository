@@ -180,21 +180,18 @@ export class LoginAppComponent  implements OnInit {
     }
     private init() {
         Translation.initialize(this.translation,this.configService,this.storage,this.route).subscribe(()=>{
-            this.locator.locateApi().subscribe(()=>{
-                this.serverurl=this.locator.endpointUrl;
-                this.configService.getAll().subscribe((config)=>{
-                    this.config=config;
-                    if(!this.config.register)
-                    // default register mode: allow local registration if not disabled
-                        this.config.register={local:true};
+            this.serverurl=this.locator.endpointUrl;
+            this.configService.getAll().subscribe((config)=>{
+                this.config=config;
+                if(!this.config.register)
+                // default register mode: allow local registration if not disabled
+                    this.config.register={local:true};
 
-                    this.isLoading=false;
+                this.isLoading=false;
 
-                    this.handleCurrentState();
+                this.handleCurrentState();
 
-                });
             });
-
         });
     }
     register(){

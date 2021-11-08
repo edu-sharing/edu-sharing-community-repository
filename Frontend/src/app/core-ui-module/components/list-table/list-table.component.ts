@@ -577,14 +577,12 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             return;
         }
         this.locator.setRoute(this.route).subscribe(() => {
-            this.locator.locateApi().subscribe(() => {
-                this.network
-                    .getRepositories()
-                    .subscribe((data: NetworkRepositories) => {
-                        this.repositories = data.repositories;
-                        this.changeDetectorRef.detectChanges();
-                    });
-            });
+            this.network
+                .getRepositories()
+                .subscribe((data: NetworkRepositories) => {
+                    this.repositories = data.repositories;
+                    this.changeDetectorRef.detectChanges();
+                });
         });
     }
 

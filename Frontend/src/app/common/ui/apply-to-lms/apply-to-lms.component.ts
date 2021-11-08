@@ -52,18 +52,16 @@ export class ApplyToLmsComponent {
           this.forward();
         }
         else if(params.node) {
-          this.locator.locateApi().subscribe(()=> {
-            this.nodeApi.getNodeMetadata(params.node, [RestConstants.ALL],params.repo).subscribe(
-              (data : NodeWrapper) => {
-                this.node = data.node;
-                this.forward();
-              },(error:any)=> {
-                Translation.initialize(this.translate,this.config,this.storage,this.route).subscribe(()=> {
-                  this.toast.error(error);
-                });
-              }
-            )
-          });
+          this.nodeApi.getNodeMetadata(params.node, [RestConstants.ALL],params.repo).subscribe(
+            (data : NodeWrapper) => {
+              this.node = data.node;
+              this.forward();
+            },(error:any)=> {
+              Translation.initialize(this.translate,this.config,this.storage,this.route).subscribe(()=> {
+                this.toast.error(error);
+              });
+            }
+          )
         }
       });
     });

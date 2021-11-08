@@ -2388,32 +2388,30 @@ export class MdsComponent {
             `</div>
               </div>`;
         preview += `<img id="` + this.getDomId('preview') + `" ` + attr + ` alt=""></div>`;
-        if (this.connector.getApiVersion() >= RestConstants.API_VERSION_4_0) {
-            preview +=
-                `<div class="changePreview">
-                      <a tabindex="0"
-                      onclick="document.getElementById('` +
-                this.getDomId('preview-select') +
-                `').click()"
-                      onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="` +
-                this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') +
-                `">file_upload</i></a>
-                          <a tabindex="0"
-                          id="` +
-                this.getDomId('preview-delete') +
-                `"
-                          ` +
-                (this.currentNodes[0].preview.isGenerated ? 'style="display:none"' : '') +
-                `
-                          onclick="` +
-                this.getWindowComponent() +
-                `.deletePreview()"
-                          onkeydown="if(event.keyCode==13) this.click();"
-                          class="btn-circle"><i class="material-icons" aria-label="` +
-                this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW') +
-                `">delete</i></a>
-                      </div>`;
-        }
+        preview +=
+            `<div class="changePreview">
+                    <a tabindex="0"
+                    onclick="document.getElementById('` +
+            this.getDomId('preview-select') +
+            `').click()"
+                    onkeydown="if(event.keyCode==13)this.click();" class="btn-circle"><i class="material-icons" aria-label="` +
+            this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') +
+            `">file_upload</i></a>
+                        <a tabindex="0"
+                        id="` +
+            this.getDomId('preview-delete') +
+            `"
+                        ` +
+            (this.currentNodes[0].preview.isGenerated ? 'style="display:none"' : '') +
+            `
+                        onclick="` +
+            this.getWindowComponent() +
+            `.deletePreview()"
+                        onkeydown="if(event.keyCode==13) this.click();"
+                        class="btn-circle"><i class="material-icons" aria-label="` +
+            this.translate.instant('WORKSPACE.EDITOR.DELETE_PREVIEW') +
+            `">delete</i></a>
+                    </div>`;
         preview += `</div>`;
         return preview;
     }
