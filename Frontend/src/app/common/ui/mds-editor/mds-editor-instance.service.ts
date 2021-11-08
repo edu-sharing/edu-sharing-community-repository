@@ -128,7 +128,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             public readonly viewId: string,
             public readonly repositoryId: string,
             public readonly relation: ViewRelation = null,
-            public readonly variables: string[] = null,
+            public readonly variables: { [key: string]: string } = null,
         ) {
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
@@ -194,7 +194,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             }
         }
 
-        private replaceVariableString(str: string, variables: string[] = this.variables) {
+        private replaceVariableString(str: string, variables: { [key: string]: string } = this.variables) {
             if (!str || !str.match('\\${.+}')) {
                 return str;
             }
@@ -213,7 +213,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         initWithNodes(nodes: Node[]): void {
-            const nodeValues = nodes.map((node) => this.readPropertyValue(node.properties, this.definition));
+            const nodeValues = nodes.map((node) => this.readNodeValue(node, this.definition));
             if (nodeValues.every((nodeValue) => nodeValue === undefined)) {
                 const defaultValue = this.definition.defaultvalue
                     ? [this.definition.defaultvalue]
@@ -236,8 +236,12 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                const nodeValues = this.readPropertyValue(values, this.definition);
-                this.initialValues =  this.calculateInitialValues([nodeValues]);
+                console.log(this.definition.id, this.definition.defaultvalue);
+                this.initialValues = {
+                    jointValues:
+                        values?.[this.definition.id] ||
+                        (this.definition.defaultvalue ? [this.definition.defaultvalue] : []),
+                };
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
@@ -422,17 +426,17 @@ export class MdsEditorInstanceService implements OnDestroy {
                 .toPromise();
         }
 
-        private readPropertyValue(properties: Values, definition: MdsWidget): string[] {
+        private readNodeValue(node: Node, definition: MdsWidget): string[] {
             if (definition.type === MdsWidgetType.Range) {
-                const from: string[] = properties[`${definition.id}_from`];
-                const to: string[] = properties[`${definition.id}_to`];
+                const from: string[] = node.properties[`${definition.id}_from`];
+                const to: string[] = node.properties[`${definition.id}_to`];
                 if (from !== undefined && to !== undefined) {
                     return [from?.[0], to?.[0]];
                 } else {
                     return undefined;
                 }
             } else {
-                return properties[definition.id];
+                return node.properties[definition.id];
             }
         }
     };
@@ -681,14 +685,15 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
         await this.initMds(groupId, mdsId, repository, null, initialValues);
-        if(initialValues) {
-            for (const widget of this.widgets.value) {
-                widget.initWithValues(initialValues);
-            }
-            for (const widget of this.nativeWidgets.value) {
-                if (widget instanceof MdsEditorWidgetCore) {
-                    (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
-                }
+        if(!initialValues) {
+            initialValues = {};
+        }
+        for (const widget of this.widgets.value) {
+            widget.initWithValues(initialValues);
+        }
+        for (const widget of this.nativeWidgets.value) {
+            if (widget instanceof MdsEditorWidgetCore) {
+                (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
             }
         }
         // to lower case because of remote repos wrong mapping
@@ -963,7 +968,8 @@ export class MdsEditorInstanceService implements OnDestroy {
                     view.id,
                     this.repository,
                     view.rel,
-                    variables,
+                    // temporary fix for 6.0
+                    (variables as any),
                 );
                 result.push(widget);
             }
