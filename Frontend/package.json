@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ng serve",
     "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
-    "build": "..\\Edu-Sharing-Internal\\Frontend\\build.sh",
+    "build": "ng build --configuration production --delete-output-path false",
     "build-dev": "ng build --base-href /edu-sharing/",
     "lint": "ng lint",
     "test": "ng test",
