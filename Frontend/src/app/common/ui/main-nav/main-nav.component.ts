@@ -20,7 +20,6 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
-    About,
     ConfigurationHelper,
     ConfigurationService, Connector,
     DialogButton,
@@ -56,6 +55,7 @@ import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
+import {About, AboutService} from 'ngx-edu-sharing-api';
 
 /**
  * The main nav (top bar + menus)
@@ -234,6 +234,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         private event: FrameEventsService,
         private nodeService: RestNodeService,
         private configService: ConfigurationService,
+        private aboutService: AboutService,
         private uiService: UIService,
         private mainnavService: MainNavService,
         private storage: TemporaryStorageService,
@@ -251,7 +252,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.setMenuStyle();
 
         this.connector.setRoute(this.route).subscribe(() => {
-            this.connector.getAbout().subscribe(about => {
+            this.aboutService.getAbout().subscribe(about => {
                 this.about = about;
                 this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                     if (!data.isValidLogin) {

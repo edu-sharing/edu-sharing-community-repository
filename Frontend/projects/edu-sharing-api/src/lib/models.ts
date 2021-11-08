@@ -1,6 +1,7 @@
 // Reexport API models that are exposed by wrappers.
 
 export {
+    About,
     Mds as MdsDefinition,
     MdsGroup,
     MdsSort,

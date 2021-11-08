@@ -44,6 +44,7 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
+import {AboutService} from 'ngx-edu-sharing-api';
 
 
 type LuceneData = {
@@ -83,6 +84,7 @@ export class AdminComponent {
               private viewContainerRef : ViewContainerRef,
               private admin : RestAdminService,
               private connector: RestConnectorService,
+              private about: AboutService,
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private organization: RestOrganizationService) {
@@ -817,12 +819,12 @@ export class AdminComponent {
         this.systemChecks=[];
 
         // check versions render service
-        this.connector.getAbout().subscribe((about:any)=> {
-            about.version.repository=this.getMajorVersion(about.version.repository);
-            about.version.renderservice=this.getMajorVersion(about.version.renderservice);
+        this.about.getAbout().subscribe((about)=> {
+            const repositoryVersion = this.getMajorVersion(about.version.repository);
+            const renderServiceVersion = this.getMajorVersion(about.version.renderservice);
             this.systemChecks.push({
               name:'RENDERING',
-                status:about.version.repository=='unknown' ? 'WARN' : about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
+                status:repositoryVersion=='unknown' ? 'WARN' : repositoryVersion==renderServiceVersion ? 'OK' : 'FAIL',
                 translate:about.version,
               callback:()=> {
                   this.setMode('APPLICATIONS');
