@@ -1,5 +1,5 @@
 
-<div #drag class="dragBadge" [style.top]="(id*-9999999)+'px'" aria-hidden="true"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
+<div #drag class="dragBadge" [style.top]="(id*-9999 - 100)+'px'" aria-hidden="true"><div class="badge">{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
 <button
   #menuTrigger="matMenuTrigger"
   mat-button
@@ -155,7 +155,6 @@
             <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
               <img
                 src="{{getIconUrl(node)}}"
-                tabindex="0"
                 [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
                 [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
               />
@@ -176,15 +175,8 @@
                  class="collectionEditorial"
                  aria-hidden="true"><i class="material-icons">star</i></div>
             <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon="edu-pin"></i></div>
-            <!-- FIXME: Interactive elements should be outside of links (app-node-url). -->
             <div class="checkbox column" *ngIf="hasCheckbox">
-              <mat-checkbox
-                [ngModel]="getSelectedPos(node)!=-1"
-                (change)="onCheckboxClick(node)"
-                (click)="$event.stopPropagation()"
-                aria-label="{{ 'SELECT' | translate:{element: getPrimaryTitle(node)} }}">
-                &nbsp;
-              </mat-checkbox>
+              <!-- dummy placeholder for the checkbox, will be placed outside for code validation -->
             </div>
             <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
             <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
@@ -271,6 +263,15 @@
               </div>
             </div>
           </app-node-url>
+          <mat-checkbox
+            *ngIf="hasCheckbox"
+            class="mat-checkbox"
+            [ngModel]="getSelectedPos(node)!=-1"
+            (change)="onCheckboxClick(node)"
+            (click)="$event.stopPropagation()"
+            aria-label="{{ 'SELECT' | translate:{element: getPrimaryTitle(node)} }}">
+            &nbsp;
+          </mat-checkbox>
           <ng-container *ngIf="viewType !== 0">
             <div *ngFor="let option of getOptionsAlways()"
                  class="more moreAlways column">

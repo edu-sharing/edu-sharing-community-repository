@@ -2720,9 +2720,13 @@ definitions:
         items:
           $ref: '#/definitions/Facette'
         type: array
+      ignored:
+        items:
+          type: string
+        type: array
       nodes:
         items:
-          $ref: '#/definitions/Node'
+          type: object
         type: array
       pagination:
         $ref: '#/definitions/Pagination'
@@ -2794,15 +2798,39 @@ definitions:
     type: object
   Service:
     properties:
-      instances:
+      about:
         items:
-          $ref: '#/definitions/ServiceInstance'
+          type: string
         type: array
+      audience:
+        items:
+          $ref: '#/definitions/Audience'
+        type: array
+      description:
+        type: string
+      icon:
+        type: string
+      inLanguage:
+        type: string
+      interfaces:
+        items:
+          $ref: '#/definitions/Interface'
+        type: array
+      isAccessibleForFree:
+        default: false
+        type: boolean
+      logo:
+        type: string
       name:
         type: string
-    required:
-      - instances
-      - name
+      provider:
+        $ref: '#/definitions/Provider'
+      startDate:
+        type: string
+      type:
+        type: string
+      url:
+        type: string
     type: object
   ServiceInstance:
     properties:
@@ -2954,12 +2982,12 @@ definitions:
     type: object
   Statistics:
     properties:
-      entries:
+      groups:
         items:
-          $ref: '#/definitions/StatisticEntry'
+          type: string
         type: array
-    required:
-      - entries
+      nodeGroup:
+        type: string
     type: object
   StatisticsGlobal:
     properties:

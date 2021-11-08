@@ -91,15 +91,15 @@ a{
   .badgeIconLeft{
     left:0;
   }
-  .mat-chip-group{
-    display: flex;
-    flex-direction: column;
-    >.secondary{
-      font-size: 80%;
-      color: $textLight;
-      margin-top: -3px;
-      min-height: 3px;
-    }
+}
+.mat-chip-group{
+  display: flex;
+  flex-direction: column;
+  >.secondary{
+    font-size: 80%;
+    color: $textLight;
+    margin-top: -3px;
+    min-height: 3px;
   }
 }
 .workflowStatus{

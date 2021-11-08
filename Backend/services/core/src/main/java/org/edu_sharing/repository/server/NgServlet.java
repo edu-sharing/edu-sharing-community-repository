@@ -52,14 +52,17 @@ public class NgServlet extends HttpServlet {
 			ApplicationInfo home = ApplicationInfoList.getHomeRepository();
 			String head=home.getCustomHtmlHeaders();
 			// store url for shibboleth/sso, regardless if login is present or not (for guest redirects)
-			req.getSession().setAttribute(PREVIOUS_ANGULAR_URL,
-					req.getRequestURI() +( req.getQueryString() != null ? "?"+req.getQueryString() : ""));
+			URL url = new URL(req.getRequestURL().toString()+"?"+req.getQueryString());
+			if(!url.getPath().contains(COMPONENTS_ERROR)) {
+				req.getSession().setAttribute(PREVIOUS_ANGULAR_URL,
+						req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : ""));
+			}
 			File index=new File(req.getSession().getServletContext().getRealPath("index.html"));
 			String html=FileUtils.readFileToString(index);
 			if(head!=null) {
 				html = addToHead(head, html);
 			}
-			URL url = new URL(req.getRequestURL().toString()+"?"+req.getQueryString());
+
 			if(url.getPath().contains(COMPONENTS_RENDER)){
 				html = addLicenseMetadata(html,url);
 				html = addLRMI(html,url);

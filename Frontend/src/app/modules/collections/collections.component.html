@@ -2,7 +2,7 @@
   *ngIf="mainnav"
   #mainNav
   [create]="{
-        allowed: !isGuest && isAllowedToEditCollection(),
+        allowed: createAllowed(),
         allowBinary: !isRootLevelCollection() && isAllowedToEditCollection(),
         parent: collectionContent ? collectionContent.node : null
     }"
@@ -275,7 +275,7 @@
             <app-custom-node-list-wrapper
               #listCollections
               [optionItems]="
-                        isAllowedToEditCollection()
+                        createAllowed()
                         ? [createSubCollectionOptionItem]
                         : []
                     "

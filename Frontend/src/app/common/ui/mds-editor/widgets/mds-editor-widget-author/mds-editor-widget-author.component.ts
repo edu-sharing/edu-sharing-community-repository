@@ -95,7 +95,11 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         if (!values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]) {
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [''];
         }
-        values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] = this.author.author.toVCardString();
+        if(this.author.author.isValid()) {
+            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] = this.author.author.toVCardString();
+        } else {
+            delete values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0];
+        }
         return values;
     }
     private updateValues(nodes: Node[]) {

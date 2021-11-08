@@ -53,6 +53,7 @@ import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import { CardService } from '../../core-ui-module/card.service';
 import { Observable } from 'rxjs';
 import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 
 @Component({
     selector: 'workspace-main',
@@ -71,7 +72,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
-    private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files-', '-workflow_receive-'];
+    private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files_personal-', '-to_me_shared_files-', '-workflow_receive-'];
+
 
     cardHasOpenModals$: Observable<boolean>;
     private isRootFolder: boolean;
@@ -127,7 +129,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
-    viewType: 0|1 = 0;
+    viewType: 0|1|null = null;
     private reurlDirectories: boolean;
     reorderDialog: boolean;
     @HostListener('window:beforeunload', ['$event'])
@@ -383,7 +385,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 if (params.viewType != null) {
                     this.setViewType(params.viewType, false);
                 } else {
-                    this.setViewType(this.config.instant('workspaceViewType', 0), false);
+                    this.setViewType(this.config.instant('workspaceViewType', ListTableComponent.VIEW_TYPE_LIST), false);
                 }
                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
                     this.root = params.root;
@@ -578,6 +580,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
         else {
             this.isRootFolder = true;
+            if(id === '-my_shared_files-'
+                || id === '-to_me_shared_files_personal-'
+                || id === '-to_me_shared_files-') {
+                this.isRootFolder = false;
+            }
+
             if (id === RestConstants.USERHOME) {
                 this.createAllowed = true;
             }
@@ -630,7 +638,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     private refresh(refreshPath = true,nodes: Node[] = null) {
         // only refresh properties in this case
-        if(nodes && nodes.length){
+        if(nodes && nodes.length) {
             this.updateNodes(nodes);
             return;
         }
@@ -659,7 +667,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
     private routeTo(root: string, node: string = null, search: string = null) {
         const params: any = { root, id: node, query: search, mainnav: this.mainnav };
-        params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
+        // tslint:disable-next-line:triple-equals
+        if(this.viewType !== null) {
+            params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
+        }
         if (this.reurl) {
             params.reurl = this.reurl;
         }

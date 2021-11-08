@@ -161,8 +161,8 @@ export class CollectionNewComponent {
           this.shareToAll=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
           this.createEditorial=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL);
           this.createCurriculum=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM);
-          this.mediacenterService.getMediacenters().subscribe((mediacenters)=>{
-            this.createMediacenter=mediacenters.filter((m)=>m.administrationAccess).length==1;
+          this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
+            this.createMediacenter=mediacenters.filter((m)=>m.administrationAccess).length === 1;
             if(this.createMediacenter)
               this.mediacenter=mediacenters[0];
           });

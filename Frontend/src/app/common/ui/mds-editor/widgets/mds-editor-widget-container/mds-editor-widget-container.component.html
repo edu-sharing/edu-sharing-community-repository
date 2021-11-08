@@ -18,7 +18,7 @@
     *ngIf="!wrapInFormField"
     [attr.role]="wrapInGroup ? 'group' : null"
     [attr.aria-labelledby]="wrapInGroup ? labelId : null"
-    [attr.aria-describedby]="wrapInGroup ? descriptionId : null"
+    [attr.aria-describedby]="widget?.definition.bottomCaption && !shouldShowError() && wrapInGroup ? descriptionId : null"
   >
     <ng-container *ngTemplateOutlet="content"></ng-container>
     <p

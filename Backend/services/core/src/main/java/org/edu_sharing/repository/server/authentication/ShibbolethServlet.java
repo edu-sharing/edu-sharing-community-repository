@@ -198,17 +198,6 @@ public class ShibbolethServlet extends HttpServlet {
 				req.getSession().setAttribute(SSOAuthorityMapper.SSO_REFERER,referer);
 			}
 
-
-			Object alfAuthService = AlfAppContextGate.getApplicationContext().getBean("authenticationService");
-			if(alfAuthService instanceof SubsystemChainingAuthenticationService) {
-				SubsystemChainingAuthenticationService scAuthService = (SubsystemChainingAuthenticationService)alfAuthService;
-				String userName = ssoMap.get(ssoMapper.getSSOUsernameProp());
-				if(ssoMapper.isHashUserName()){
-					userName=ssoMapper.digest(userName);
-				}
-				scAuthService.setEsLastLoginToNow(userName);
-			}
-
 			//federated repositoryies arixs(edunex)
 			for (Map.Entry<String, ApplicationInfo> entry : ApplicationInfoList.getApplicationInfos().entrySet()) {
 				ApplicationInfo appInfo = entry.getValue();

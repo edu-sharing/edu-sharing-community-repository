@@ -78,21 +78,22 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
         	@Override
         	public Void doWork() throws Exception {
         		//alfresco share login is in readOnlyMode, so check to prevent exception
-        		if (AlfrescoTransactionSupport.getTransactionReadState() == TxnReadState.TXN_READ_WRITE) {
-        			
-        			RetryingTransactionCallback<Void> txnWork = new RetryingTransactionCallback<Void>() {
-						public Void execute() throws Exception {
-							try {
-								nodeService.setProperty(nodeRefPerson, QName.createQName(CCConstants.PROP_USER_ESLASTLOGIN), new Date());
-							}catch(ConcurrencyFailureException e) {
-								logger.info("failed to set EsLastLogin for user " + userName + " cause of " + e.getClass().getSimpleName());
-							}
-							return null;
-						}
-					};
-					return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
-        		}
-        		return null;
+        		if (AlfrescoTransactionSupport.getTransactionReadState() == TxnReadState.TXN_READ_ONLY) {
+                    logger.debug("unable to set cm:esLastLogin  for user " + userName + " cause of "+AlfrescoTransactionSupport.getTransactionReadState());
+                    return null;
+                }
+
+                RetryingTransactionCallback<Void> txnWork = new RetryingTransactionCallback<Void>() {
+                    public Void execute() throws Exception {
+                        try {
+                            nodeService.setProperty(nodeRefPerson, QName.createQName(CCConstants.PROP_USER_ESLASTLOGIN), new Date());
+                        }catch(ConcurrencyFailureException e) {
+                            logger.info("failed to set cm:esLastLogin for user " + userName + " cause of " + e.getClass().getSimpleName());
+                        }
+                        return null;
+                    }
+                };
+                return transactionService.getRetryingTransactionHelper().doInTransaction(txnWork, false);
         	}
         };
         AuthenticationUtil.runAsSystem(runAs);
