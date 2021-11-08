@@ -6,6 +6,7 @@ import {tap, switchMap, map, catchError, reduce, first} from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Translation } from './translation';
 import { TranslationSource } from './translation-source';
+import * as rxjs from 'rxjs';
 
 export const TRANSLATION_LIST = [
     'common',
@@ -42,30 +43,35 @@ export class TranslationLoader implements TranslateLoader {
     /**
      * Gets the translations from the server
      */
-    getTranslation(lang: string): Observable<Dictionary> {
+     getTranslation(lang: string): Observable<Dictionary> {
         if (lang === 'none') {
             return of({});
         }
-        return this.getOriginalTranslations(lang).pipe(
-            // Default to empty dictionary if we got nothing
-            map(translations => translations || {}),
-            switchMap(translations =>
-                this.fetchAndApplyOverrides(translations, lang).pipe(
-                    catchError((error, obs) => {
-                        console.error(error);
-                        return of(error);
-                    })
-                )
-            ),
-        );
+        this.config.setLocale(Translation.LANGUAGES[lang]);
+        return rxjs
+            .forkJoin({
+                originalTranslations: this.getOriginalTranslations(lang).pipe(
+                    // Default to empty dictionary if we got nothing
+                    map((translations) => translations || {}),
+                ),
+                translationOverrides: this.config.getTranslationOverrides().pipe(first()),
+            })
+            .pipe(
+                map(({ originalTranslations, translationOverrides }) =>
+                    // FIXME: This will alter the object returned by `getOriginalTranslations`.
+                    this.applyOverrides(originalTranslations, translationOverrides),
+                ),
+                catchError((error, obs) => {
+                    console.error(error);
+                    return of(error);
+                }),
+            );
     }
 
     private getOriginalTranslations(lang: string): Observable<Dictionary> {
         switch (this.getSource()) {
             case 'repository':
-                return this.config.getDefaultTranslations(
-                    Translation.LANGUAGES[lang],
-                ).pipe(first());
+                return this.config.getDefaultTranslations().pipe(first());
             case 'local':
                 return this.mergeTranslations(this.fetchTranslations(lang));
         }
@@ -112,18 +118,6 @@ export class TranslationLoader implements TranslateLoader {
             },
             {},
         ));
-    }
-
-    private fetchAndApplyOverrides(
-        translations: Dictionary,
-        lang: string,
-    ): Observable<Dictionary> {
-        return this.config
-            .getCustomTranslations(Translation.LANGUAGES[lang])
-            .pipe(
-                first(),
-                map(overrides => this.applyOverrides(translations, overrides)),
-            );
     }
 
     /**

@@ -8,22 +8,24 @@ import {
     SessionStorageService,
 } from '../core-module/core.module';
 import { TranslationSource } from './translation-source';
+import { Locale } from 'ngx-edu-sharing-api';
 
 export class Translation {
-    /**
-     * Initializes ng translate and returns the choosen language
-     * @param translate
-     */
-    static LANGUAGES: any = {
+    static LANGUAGES: { [key: string]: Locale } = {
         de: 'de_DE',
         en: 'en_US',
     };
+
     private static language: string;
     private static languageLoaded = new BehaviorSubject(false);
     // none means that only labels should be shown (for dev)
     private static DEFAULT_SUPPORTED_LANGUAGES = ['de', 'en', 'none'];
     private static source = TranslationSource.Auto;
 
+    /**
+     * Initializes ng translate and returns the chosen language
+     * @param translate
+     */
     static initialize(
         translate: TranslateService,
         config: ConfigurationService,

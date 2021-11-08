@@ -9,6 +9,8 @@ export type ClientConfig = apiModels.Values;
 export type Variables = apiModels.Variables['current'];
 export type TranslationsDict = { [key: string]: string | TranslationsDict };
 
+export type Locale = 'de_DE' | 'en_US';
+
 /**
  * Provides system configuration.
  */
@@ -17,7 +19,7 @@ export type TranslationsDict = { [key: string]: string | TranslationsDict };
 })
 export class ConfigService {
     private readonly updateTrigger = new Subject<void>();
-    private readonly localeSubject = new Subject<string>();
+    private readonly localeSubject = new Subject<Locale>();
 
     private readonly config$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
@@ -31,17 +33,17 @@ export class ConfigService {
         map((variables) => variables.current ?? null),
         shareReplay(1),
     );
-    private readonly customTranslations$ = this.localeSubject.pipe(
-        distinctUntilChanged(),
-        switchMap(() => this.configV1.getLanguage()),
-        map((language) => language.current ?? null),
-        shareReplay(1),
-    );
     private readonly defaultTranslations$ = this.localeSubject.pipe(
         distinctUntilChanged(),
         switchMap(() => this.configV1.getLanguageDefaults()),
         shareReplay(1),
     ) as unknown as Observable<TranslationsDict>;
+    private readonly translationOverrides$ = this.localeSubject.pipe(
+        distinctUntilChanged(),
+        switchMap(() => this.configV1.getLanguage()),
+        map((language) => language.current ?? null),
+        shareReplay(1),
+    );
 
     constructor(
         private configV1: ConfigV1Service,
@@ -72,39 +74,38 @@ export class ConfigService {
     }
 
     /**
-     * Returns custom translations for the given locale.
+     * Sets the locale for future API requests.
      *
-     * Sets the given locale for future API requests.
-     *
-     * The observable will update on locale changes and might emit translations for other locales.
-     * 
-     * @param locale - Locale to initially fetch translations for.
+     * This affects translations and localized MDS widget values.
      */
-    getCustomTranslations(locale: string): Observable<{ [key: string]: string } | null> {
-        this.setLocale(locale);
-        return this.customTranslations$;
-    }
-
-    /**
-     * Returns accumulated default translations for the given locale.
-     *
-     * Sets the given locale for future API requests.
-     *
-     * The observable will update on locale changes and might emit translations for other locales.
-     * 
-     * @param locale - Locale to initially fetch translations for.
-     */
-    getDefaultTranslations(locale: string): Observable<TranslationsDict> {
-        this.setLocale(locale);
-        return this.defaultTranslations$;
-    }
-
-    private setLocale(locale: string): void {
+    setLocale(locale: Locale): void {
         if (locale) {
             this.apiRequestConfiguration.setLocale(locale);
             this.localeSubject.next(locale);
         } else {
-            console.warn('Called translation getter with undefined `locale`');
+            console.warn('Called `setLocale` with undefined `locale`');
         }
+    }
+
+    /**
+     * Returns accumulated default translations.
+     *
+     * The observable will update on locale changes.
+     *
+     * @returns a nested dictionary of default translations
+     */
+    getDefaultTranslations(): Observable<TranslationsDict> {
+        return this.defaultTranslations$;
+    }
+
+    /**
+     * Returns translation overrides.
+     *
+     * The observable will update on locale changes.
+     *
+     * @returns a flat dictionary of translation overrides, key parts separated by "."
+     */
+    getTranslationOverrides(): Observable<{ [key: string]: string } | null> {
+        return this.translationOverrides$;
     }
 }
