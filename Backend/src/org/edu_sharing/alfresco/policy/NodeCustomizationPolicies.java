@@ -514,19 +514,26 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 		// for async prozessed properties like exif: remove from cache
 		new RepositoryCache().remove(nodeRef.getId());
-		
-		// URL link update
-		String beforeURL = null;
-		String afterURL = null;
-		for (QName qName : before.keySet()) if ("wwwurl".equals(qName.getLocalName())) beforeURL = ""+before.get(qName);
-		for (QName qName : after.keySet()) if ("wwwurl".equals(qName.getLocalName())) afterURL = ""+after.get(qName);
-		if ((afterURL!=null) && (!afterURL.equals(beforeURL))) {
-			
-			logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK("+afterURL+") ON NODE("+nodeRef.getId()+")");
-			
-			String linktype = (String)after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
-			if(linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) {
-				generateWebsitePreview(nodeRef, afterURL);
+
+		if(
+				!nodeService.hasAspect(nodeService.getPrimaryParent(nodeRef).getParentRef(),
+						QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))
+		) {
+			// URL link update
+			String beforeURL = null;
+			String afterURL = null;
+			for (QName qName : before.keySet())
+				if ("wwwurl".equals(qName.getLocalName())) beforeURL = "" + before.get(qName);
+			for (QName qName : after.keySet())
+				if ("wwwurl".equals(qName.getLocalName())) afterURL = "" + after.get(qName);
+			if ((afterURL != null) && (!afterURL.equals(beforeURL))) {
+
+				logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK(" + afterURL + ") ON NODE(" + nodeRef.getId() + ")");
+
+				String linktype = (String) after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
+				if (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) {
+					generateWebsitePreview(nodeRef, afterURL);
+				}
 			}
 		}
 
@@ -813,6 +820,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				});
 				HttpClient client = new HttpClient();
 				GetMethod method = new GetMethod(url.toString());
+				int timeout = (int) ((splash.getDouble("wait") + splash.getDouble("timeout")) * 1000);
+				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
 				int statusCode = client.executeMethod(method);
 				if (statusCode == HttpStatus.SC_OK) {
 					return method.getResponseBody();
