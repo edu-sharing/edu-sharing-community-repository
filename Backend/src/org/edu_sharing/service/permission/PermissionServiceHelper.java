@@ -72,4 +72,11 @@ public class PermissionServiceHelper {
 					nodeRef.getId(),
 					permission);
 	}
+	public static boolean hasPermission(NodeRef nodeRef, String authority, String permission){
+		return PermissionServiceFactory.getLocalService().hasPermission(nodeRef.getStoreRef().getProtocol(),
+				nodeRef.getStoreRef().getIdentifier(),
+				nodeRef.getId(),
+				authority,
+				permission);
+	}
 }
