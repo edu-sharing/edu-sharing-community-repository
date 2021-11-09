@@ -264,8 +264,12 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                const nodeValues = this.readPropertyValue(values, this.definition);
-                this.initialValues =  this.calculateInitialValues([nodeValues]);
+                console.log(this.definition.id, this.definition.defaultvalue);
+                this.initialValues = {
+                    jointValues:
+                        values?.[this.definition.id] ||
+                        (this.definition.defaultvalue ? [this.definition.defaultvalue] : []),
+                };
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
@@ -480,7 +484,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 .toPromise();
         }
 
-        private readPropertyValue(properties: Values, definition: MdsWidget): string[] {
+        private readNodeValue(node: Node, definition: MdsWidget): string[] {
             if (definition.type === MdsWidgetType.Range) {
                 const from: string[] = node.properties[`${definition.id}_from`];
                 const to: string[] = node.properties[`${definition.id}_to`];
