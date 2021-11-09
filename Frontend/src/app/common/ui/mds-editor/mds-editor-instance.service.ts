@@ -264,11 +264,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                this.initialValues = {
-                    jointValues:
-                        values?.[this.definition.id] ||
-                        (this.definition.defaultvalue ? [this.definition.defaultvalue] : []),
-                };
+                const nodeValues = this.readPropertyValue(values, this.definition);
+                this.initialValues =  this.calculateInitialValues([nodeValues]);
             }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
@@ -483,20 +480,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 .toPromise();
         }
 
-        public getValuesForKeys(keys: string[]) {
-            const mdsvl = this.mdsEditorInstanceService.restMdsService
-                .getValuesForKeys(
-                    keys,
-                    this.mdsEditorInstanceService.mdsId,
-                    RestConstants.DEFAULT_QUERY_NAME,
-                    this.definition.id,
-                    RestConstants.HOME_REPOSITORY,
-                )
-                .toPromise();
-            return mdsvl;
-        }
-
-        private readNodeValue(node: Node, definition: MdsWidget): string[] {
+        private readPropertyValue(properties: Values, definition: MdsWidget): string[] {
             if (definition.type === MdsWidgetType.Range) {
                 const from: string[] = node.properties[`${definition.id}_from`];
                 const to: string[] = node.properties[`${definition.id}_to`];
@@ -815,16 +799,15 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
-        const hasInitialized = await this.initMds(groupId, mdsId, repository, null, initialValues);
-        if (!hasInitialized) {
-            return null;
-        }
-        for (const widget of this.widgets.value) {
-            widget.initWithValues(initialValues);
-        }
-        for (const widget of this.nativeWidgets.value) {
-            if (widget instanceof MdsEditorWidgetCore) {
-                (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
+        await this.initMds(groupId, mdsId, repository, null, initialValues);
+        if(initialValues) {
+            for (const widget of this.widgets.value) {
+                widget.initWithValues(initialValues);
+            }
+            for (const widget of this.nativeWidgets.value) {
+                if (widget instanceof MdsEditorWidgetCore) {
+                    (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
+                }
             }
         }
 

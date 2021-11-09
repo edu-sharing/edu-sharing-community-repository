@@ -553,6 +553,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	}
 
 	private String replaceDynamicVariables(String data) {
+		if(data == null) return data;
 		String contextDomain = Context.getCurrentInstance() == null ? null : Context.getCurrentInstance().getRequest() == null ? null : Context.getCurrentInstance().getRequest().getServerName();
 		Map<String, String> searchReplace = new HashMap<>();
 		searchReplace.put("${context.id}", NodeCustomizationPolicies.getEduSharingContext());

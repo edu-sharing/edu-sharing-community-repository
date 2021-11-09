@@ -694,9 +694,9 @@ export class OptionsHelperService implements OnDestroy {
         inviteNode.priority = 10;
         // invite is not allowed for collections of type editorial
         inviteNode.customShowCallback = ((objects) =>
-                objects[0].collection ?
-                    objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL :
-                    true
+            objects[0].collection ?
+                objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL :
+                objects[0].type !== RestConstants.SYS_TYPE_CONTAINER
         );
 
         const streamNode = new OptionItem('OPTIONS.STREAM', 'event',(object) =>
