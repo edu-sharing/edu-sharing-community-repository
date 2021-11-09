@@ -51,11 +51,66 @@ export class EduSharingService {
         return this.nodeService.getNode(EduSharingService.repository, id);
     }
 }
-
 ```
 
-Do not forget to unsubscribe from `Observable`s when using inside components or locally scoped
-services:
+### Things to Keep in Mind When Using This Library
+
+> Most observables emit more then once.
+
+```ts
+this.authenticationService.getLoginInfo().subscribe((loginInfo) => {
+    // This will be called multiple times!
+});
+```
+
+```ts
+// This will never resolve!
+await this.authenticationService.getLoginInfo().toPromise();
+```
+
+Use `first()` to get an observable that emits once and completes:
+```ts
+import { first } from 'rxjs/operators';
+
+this.authenticationService
+    .getLoginInfo()
+    .pipe(first())
+    .subscribe((loginInfo) => {
+        // This will be called only once.
+    });
+```
+
+> Subscribe to observables even if you are not interested in the result.
+
+```ts
+this.authenticationService.login(username, password).subscribe();
+```
+
+> Do not alter objects returned by this library.
+
+```ts
+this.aboutService.getAbout().subscribe((about) => {
+    // Don't to this!
+    about.version.repository = getMajorVersion(about.version.repository);
+});
+```
+
+Instead, create new objects and replace properties:
+
+```ts
+this.aboutService.getAbout().subscribe((about) => {
+    const aboutCopy = {
+        ...about,
+        version: {
+            ...about.version,
+            repository: getMajorVersion(about.version.repository),
+        },
+    };
+});
+```
+
+> Do not forget to unsubscribe from observables when using inside components or locally scoped
+> services.
 
 ```ts
 import { Component, OnDestroy, OnInit } from '@angular/core';

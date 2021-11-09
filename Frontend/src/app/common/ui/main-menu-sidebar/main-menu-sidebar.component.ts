@@ -8,11 +8,12 @@ import {
     Output
 } from '@angular/core';
 import {
-    ConfigurationService, LoginResult,
+    ConfigurationService,
     RestConnectorService, RestConstants, RestIamService,
     UIConstants
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { LoginInfo } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'app-main-menu-sidebar',
@@ -34,7 +35,7 @@ export class MainMenuSidebarComponent implements OnInit {
     show = false;
 
     // Global state, set on init
-    loginInfo: LoginResult;
+    loginInfo: LoginInfo;
 
     constructor(
         private configService: ConfigurationService,

@@ -18,6 +18,7 @@ import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
 import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import { LoginInfo } from 'ngx-edu-sharing-api';
 
 
 @Component({
@@ -261,7 +262,7 @@ export class LoginComponent implements OnInit {
         return filtered;
     }
 
-    private goToNext(data: LoginResult) {
+    private goToNext(data: LoginInfo) {
         if (this.next) {
             this.next = Helper.addGetParameter('fromLogin', 'true', this.next);
             RouterHelper.navigateToAbsoluteUrl(this.platformLocation, this.router, this.next);

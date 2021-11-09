@@ -8,7 +8,6 @@ import {
     Collection, CollectionReference,
     Connector,
     Filetype,
-    LoginResult,
     MdsInfo,
     Node,
     NodeLock,
@@ -47,7 +46,7 @@ import {Helper} from '../core-module/rest/helper';
 import {NodeHelperService} from './node-helper.service';
 import { RestIamService } from '../core-module/rest/services/rest-iam.service';
 import { DialogButton } from '../core-module/ui/dialog-button';
-import {ObservedValueOf} from "rxjs/internal/types";
+import { LoginInfo } from 'ngx-edu-sharing-api';
 
 export class UIHelper {
     public static evaluateMediaQuery(type: string, value: number) {
@@ -245,7 +244,7 @@ export class UIHelper {
     public static goToWorkspace(
         nodeService: RestNodeService,
         router: Router,
-        login: LoginResult,
+        login: LoginInfo,
         node: Node,
         extras: NavigationExtras = {},
     ) {
@@ -277,7 +276,7 @@ export class UIHelper {
     public static goToWorkspaceFolder(
         nodeService: RestNodeService,
         router: Router,
-        login: LoginResult,
+        login: LoginInfo,
         folder: string,
         extras: NavigationExtras = {},
     ) {
