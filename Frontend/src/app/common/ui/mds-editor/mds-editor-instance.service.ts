@@ -484,6 +484,19 @@ export class MdsEditorInstanceService implements OnDestroy {
                 .toPromise();
         }
 
+        public getValuesForKeys(keys: string[]) {
+            const mdsvl = this.mdsEditorInstanceService.restMdsService
+                .getValuesForKeys(
+                    keys,
+                    this.mdsEditorInstanceService.mdsId,
+                    RestConstants.DEFAULT_QUERY_NAME,
+                    this.definition.id,
+                    RestConstants.HOME_REPOSITORY,
+                )
+                .toPromise();
+            return mdsvl;
+        }
+
         private readNodeValue(node: Node, definition: MdsWidget): string[] {
             if (definition.type === MdsWidgetType.Range) {
                 const from: string[] = node.properties[`${definition.id}_from`];
