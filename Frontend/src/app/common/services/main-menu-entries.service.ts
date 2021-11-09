@@ -6,7 +6,6 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,
-    LoginResult,
     RestConnectorService,
     RestConstants,
     UIConstants,
@@ -19,6 +18,7 @@ import {
 import { OPEN_URL_MODE } from '../../core-module/ui/ui-constants';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import {ConfigEntry} from '../../core-ui-module/node-helper.service';
+import { LoginInfo } from 'ngx-edu-sharing-api';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
 
@@ -56,7 +56,7 @@ export class MainMenuEntriesService {
         hideMainMenu?: string[];
         stream?: { enabled: boolean };
     };
-    private loginInfo: LoginResult;
+    private loginInfo: LoginInfo;
 
     // Conditionally initialized on construction.
     private safeScope: AccessScope;
