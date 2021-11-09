@@ -1,10 +1,7 @@
 package org.edu_sharing.service.remote;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -159,7 +156,7 @@ public class RemoteObjectService {
 		return !repInfo.ishomeNode() && !repInfo.isRemoteAlfresco();
 	}
 
-	public String getOrCreateRemoteMetadataObject(String sourceRepositoryId, String originalNodeId) throws Throwable {
+	public static synchronized String getOrCreateRemoteMetadataObject(String sourceRepositoryId, String originalNodeId) throws Throwable {
 		String ROOT_PATH = "/app:company_home/ccm:remote_ios";
 		ApplicationInfo repInfo = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
 		NodeService nsSourceRepo = NodeServiceFactory.getNodeService(sourceRepositoryId);
@@ -168,7 +165,9 @@ public class RemoteObjectService {
 			throw new Exception("no properties found for source nodeId:" + originalNodeId + ", appId: " + sourceRepositoryId);
 		}
 		if(propsIn.containsKey(CCConstants.CM_NAME)) {
-			propsIn.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName((String) propsIn.get(CCConstants.CM_NAME)));
+			propsIn.put(CCConstants.CM_NAME,
+					NodeServiceHelper.cleanupCmName((String) propsIn.get(CCConstants.CM_NAME) + "_" + UUID.randomUUID())
+			);
 		}
 		String importMds = repInfo.getString(ApplicationInfo.KEY_IMPORT_METADATASET, null);
 		if(importMds != null && !importMds.isEmpty()){
@@ -209,6 +208,9 @@ public class RemoteObjectService {
 				}
 				if(nodes.size()==0) {
 					// create
+					ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+					ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+					BehaviourFilter policyBehaviourFilter = (BehaviourFilter) applicationContext.getBean("policyBehaviourFilter");
 					return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
 						String containerId = NodeServiceHelper.getContainerIdByPath(ROOT_PATH, "yyyy/MM/dd");
 						props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_REMOTE_OBJECT_INIT);

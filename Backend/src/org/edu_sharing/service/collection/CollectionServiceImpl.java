@@ -333,7 +333,7 @@ public class CollectionServiceImpl implements CollectionService{
 			if (rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())) {
 				return originalNodeId;
 			}
-			return new RemoteObjectService().getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
+			return RemoteObjectService.getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
 		}
 		return originalNodeId;
 	}
