@@ -94,9 +94,9 @@ export class MdsEditorWidgetLicenseComponent
         this.mainnav
             .getDialogs()
             .onRefresh.pipe(first())
-            .subscribe((nodes: Node[]) => (
-                this.nodes = nodes);
-                this.mdsEditorValues.updateNodes(nodes););
+            .subscribe((nodes: Node[]) => {
+                this.nodes = nodes;
+                this.mdsEditorValues.updateNodes(this.nodes); });
     }
 
     updateValue(license: License, status: boolean) {
