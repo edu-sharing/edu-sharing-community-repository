@@ -10,6 +10,8 @@ import org.edu_sharing.service.model.NodeRef;
 public class SearchResultNodeRef extends Result<List<NodeRef>> {
 
 	List<NodeSearch.Facet> facets = null;
+	List<NodeSearch.Suggest> suggests = null;
+
 	
 	private SearchCriterias searchCriterias = null;
 	
@@ -19,6 +21,14 @@ public class SearchResultNodeRef extends Result<List<NodeRef>> {
 
 	public List<NodeSearch.Facet> getFacets() {
 		return facets;
+	}
+
+	public void setSuggests(List<NodeSearch.Suggest> suggests) {
+		this.suggests = suggests;
+	}
+
+	public List<NodeSearch.Suggest> getSuggests() {
+		return suggests;
 	}
 
 	public SearchCriterias getSearchCriterias() {

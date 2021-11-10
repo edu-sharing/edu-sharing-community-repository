@@ -325,6 +325,16 @@ public class NodeDao {
 			result.setFacets(search.getFacets());
 		}
 
+		if(search.getSuggests() != null){
+			Collections.sort(search.getSuggests(), new Comparator<NodeSearch.Suggest>() {
+				@Override
+				public int compare(NodeSearch.Suggest suggest, NodeSearch.Suggest t1) {
+					return new Float(suggest.getScore()).compareTo(new Float(t1.getScore()));
+				}
+			});
+			result.setSuggests(search.getSuggests());
+		}
+
 		return result;
 	}
 	

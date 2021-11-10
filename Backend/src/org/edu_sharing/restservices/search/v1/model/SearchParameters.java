@@ -1,11 +1,9 @@
 package org.edu_sharing.restservices.search.v1.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
+;
 
 import java.util.List;
-
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -14,7 +12,7 @@ public class SearchParameters extends SearchParametersFacets{
 
 	private List<String> permissions;
 	private boolean resolveCollections = false;
-
+	private boolean returnSuggestions = true;
 
 	@JsonProperty
 	public List<String> getPermissions() {
@@ -36,4 +34,12 @@ public class SearchParameters extends SearchParametersFacets{
 	@Schema(required = false, description = "")
 	@JsonProperty("facets")
 	public List<String> getFacets() { return super.getFacets();}
+
+	public void setReturnSuggestions(boolean returnSuggestions) {
+		this.returnSuggestions = returnSuggestions;
+	}
+
+	public boolean isReturnSuggestions() {
+		return returnSuggestions;
+	}
 }

@@ -17,6 +17,7 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -54,8 +55,15 @@ import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
+import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
+import org.elasticsearch.search.suggest.phrase.PhraseSuggestionBuilder;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -284,6 +292,27 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             }
 
+            if(searchToken.isReturnSuggestion()){
+
+
+
+                String[] ngsearches = criterias.get("ngsearchword");
+                if(ngsearches != null){
+                    SuggestBuilder suggest = new SuggestBuilder()
+                            .setGlobalText(ngsearches[0])
+                            .addSuggestion("ngsearchword",
+                                    SuggestBuilders.phraseSuggestion("properties.cclom:title.trigram")
+                                            .size(10)
+                                            .gramSize(3)
+                                            .highlight("<em>","</em>")
+                                            .addCandidateGenerator(new DirectCandidateGeneratorBuilder("properties.cclom:title.trigram")
+                                            .suggestMode("always"))
+                                              );
+                    searchSourceBuilder.suggest(suggest);
+                }
+            }
+
+
 
             searchSourceBuilder.query(queryBuilder);
 
@@ -348,7 +377,28 @@ public class SearchServiceElastic extends SearchServiceImpl {
                    logger.error("non supported aggreagtion "+a.getName());
                }
            }
-           if(total == null){
+
+           if(searchResponse.getSuggest() != null) {
+               PhraseSuggestion phraseSuggestion = searchResponse.getSuggest().getSuggestion("ngsearchword");
+               if (phraseSuggestion.getEntries() != null && phraseSuggestion.getEntries().size() > 0) {
+                   List<PhraseSuggestion.Entry> entries = phraseSuggestion.getEntries();
+
+                   List<NodeSearch.Suggest> suggests = new ArrayList<>();
+                   for (PhraseSuggestion.Entry entry : entries) {
+                       NodeSearch.Suggest suggest = new NodeSearch.Suggest();
+                       suggest.setText(entry.getOptions().get(0).getText().string());
+                       suggest.setHighlighted((entry.getOptions().get(0).getHighlighted().hasString())
+                               ? entries.get(0).getOptions().get(0).getHighlighted().string() : null);
+                       suggest.setScore(entry.getOptions().get(0).getScore());
+                       suggests.add(suggest);
+                       logger.info("SUGGEST:" + entry.getOptions().get(0).getText() +" " + entry.getOptions().get(0).getScore() +" "+ entries.get(0).getOptions().get(0).getHighlighted());
+                   }
+                   sr.setSuggests(suggests);
+
+               }
+           }
+
+            if(total == null){
                total = hits.getTotalHits().value;
            }
             sr.setFacets(facetsResult);
