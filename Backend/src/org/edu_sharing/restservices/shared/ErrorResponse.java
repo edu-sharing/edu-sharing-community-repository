@@ -52,7 +52,7 @@ public class ErrorResponse {
 	public static Response createResponse(Throwable t,ErrorResponseLogging logging){
 		handleLog(t,logging);
 		// in case alfresco transaction exception, map to causing exception which is the DAO exception
-		if(t instanceof AlfrescoRuntimeException) {
+		if(t instanceof AlfrescoRuntimeException && t.getCause() != null) {
 			t = t.getCause();
 		}
 		if(t instanceof RuntimeException && t.getCause() != null) {

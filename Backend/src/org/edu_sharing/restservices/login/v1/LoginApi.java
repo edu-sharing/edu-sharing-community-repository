@@ -255,7 +255,7 @@ public class LoginApi  {
 			 * @TODO check if host validation still needed
 			 * @org.edu_sharing.service.authentication.AuthMethodTrustedApplication.authenticate
 			 */
-			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP,verifiedApp.getHost());
+			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP,req.getRemoteAddr());
 
 			if(userProfile != null){
 				String firstNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_FIRSTNAME);
