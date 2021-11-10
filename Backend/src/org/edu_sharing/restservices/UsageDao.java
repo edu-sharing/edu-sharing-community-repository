@@ -137,6 +137,9 @@ public class UsageDao {
 				}
 				return null;
 			});
+			if(usage == null) {
+				throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
+			}
 			boolean permission = (ContextManagementFilter.accessTool.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
 					CCConstants.PERMISSION_CHANGEPERMISSIONS);
@@ -152,9 +155,6 @@ public class UsageDao {
 			if (!permission) {
 				throw new SecurityException("Can not modify usages on node " + nodeId);
 			}
-			if(usage == null) {
-				throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
-			}
 			AuthenticationUtil.runAsSystem(() -> {
 				if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,
 						usage.getResourceId())) {
@@ -164,7 +164,14 @@ public class UsageDao {
 				}
 			});
 		} catch (Throwable t) {
-			throw DAOException.mapping(t);
+			// unmarshall exception
+			if(t instanceof DAOException) {
+				throw t;
+			} else if(t.getCause() != null) {
+				throw DAOException.mapping(t.getCause().getCause());
+			} else {
+				throw DAOException.mapping(t);
+			}
 		}
 	}
 

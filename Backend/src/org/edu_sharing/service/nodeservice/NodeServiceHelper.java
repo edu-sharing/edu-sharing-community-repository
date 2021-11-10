@@ -470,4 +470,9 @@ public class NodeServiceHelper {
 		);
 		return properties;
 	}
+
+    public static boolean exists(NodeRef ref) {
+		return NodeServiceFactory.getLocalService().exists(ref.getStoreRef().getProtocol(),
+				ref.getStoreRef().getIdentifier(), ref.getId());
+    }
 }
