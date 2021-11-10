@@ -46,7 +46,7 @@ export BUILD_PATH
 
 COMPOSE_DIR="compose/target/compose"
 
-[[ ! -d "${COMPOSE_DIR}" || -z "${CLI_OPT1}" ]] && {
+[[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Building ..."
 	pushd "compose" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true package || exit

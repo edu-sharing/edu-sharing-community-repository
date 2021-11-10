@@ -38,7 +38,7 @@ pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || e
 
 COMPOSE_DIR="compose/target/compose"
 
-[[ ! -d "${COMPOSE_DIR}" || -z "${CLI_OPT1}" ]] && {
+[[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Building ..."
 	pushd "rendering/compose" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true install || exit
