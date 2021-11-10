@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server;
 
+import com.typesafe.config.Config;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -8,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -62,7 +64,7 @@ public class NgServlet extends HttpServlet {
 			if(head!=null) {
 				html = addToHead(head, html);
 			}
-
+            addResponseHeaders(resp);
 			if(url.getPath().contains(COMPONENTS_RENDER)){
 				html = addLicenseMetadata(html,url);
 				html = addLRMI(html,url);
@@ -100,6 +102,18 @@ public class NgServlet extends HttpServlet {
 			t.printStackTrace();
 			resp.sendError(500, "Fatal error preparing index.html: "+t.getMessage());
 		}
+	}
+
+	private void addResponseHeaders(HttpServletResponse resp) {
+		Config headers = LightbendConfigLoader.get().getConfig("angular.headers");
+		resp.setHeader("X-XSS-Protection", headers.getString("X-XSS-Protection"));
+		resp.setHeader("X-Frame-Options", headers.getString("X-Frame-Options"));
+		Config securityConfigs = headers.getConfig("Content-Security-Policy");
+		StringBuilder joined = new StringBuilder();
+		securityConfigs.entrySet().forEach((e) ->
+				joined.append(e.getKey()).append(" ").append(e.getValue().unwrapped().toString()).append("; ")
+		);
+		resp.setHeader("Content-Security-Policy", joined.toString());
 	}
 
 	private static String addSEO(String html, URL url) {
