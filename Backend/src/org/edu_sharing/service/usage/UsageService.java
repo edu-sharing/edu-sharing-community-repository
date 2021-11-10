@@ -83,7 +83,7 @@ public class UsageService {
 			usage = usageDao.getUsage(appId, courseId, parentNodeId, resourceId);
 		}catch(Exception e){
 			logger.error(e.getMessage(), e);
-			throw new UsageException(e.getMessage());
+			throw new UsageException(e.getMessage(), e);
 		}
 		
 		if (usage != null) {
@@ -130,12 +130,12 @@ public class UsageService {
 		
 		ApplicationInfo lmsAppInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		if(lmsAppInfo == null){	
-			throw new UsageException("lmsId:"+ this.appId + " does not exist!!!");
+			throw new UsageException("lmsId:"+ this.appId + " does not exist!!!", null);
 		}
 		
 		String permissionWebservice = lmsAppInfo.getPermissionwebservice();
 		if(permissionWebservice == null){
-			throw new UsageException("permissionWebservice location is null");
+			throw new UsageException("permissionWebservice location is null", null);
 		}
 		
 		//ask the app if operation is allowed
@@ -155,14 +155,14 @@ public class UsageService {
 			if(!deleteAllowed){
 				
 				logger.info("deleteUsages is not allowed for params: repositoryTicket:"+repositoryTicket+ "appSessionId:"+appSessionId +" appCurrentUserId:"+appCurrentUserId +" lmsId:"+appId+" courseId:"+courseId);
-				throw new UsageException("deleteUsages is not allowed for params: repositoryTicket:"+repositoryTicket+ "appSessionId:"+appSessionId +" appCurrentUserId:"+appCurrentUserId +" lmsId:"+appId+" courseId:"+courseId);
+				throw new UsageException("deleteUsages is not allowed for params: repositoryTicket:"+repositoryTicket+ "appSessionId:"+appSessionId +" appCurrentUserId:"+appCurrentUserId +" lmsId:"+appId+" courseId:"+courseId, null);
 			}
 		}catch(ServiceException e){
 			logger.error(e.getMessage(),e);
-			throw new UsageException(e.getMessage());
+			throw new UsageException(e.getMessage(), e);
 		}catch(RemoteException e){
 			logger.error(e.getMessage(),e);
-			throw new UsageException(e.getMessage());
+			throw new UsageException(e.getMessage(), e);
 		}
 		
 		//admin Authentication 
@@ -178,7 +178,7 @@ public class UsageService {
 			return true;
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
-			throw new UsageException(e.getMessage());
+			throw new UsageException(e.getMessage(), e);
 		} finally{
 			//make admin session invalid
 			serviceRegistry.getAuthenticationService().invalidateTicket(serviceRegistry.getAuthenticationService().getCurrentTicket());
@@ -235,7 +235,7 @@ public class UsageService {
 			isAccessAllowed();
 			if (appUser == null || appUser.trim().equals("") || this.appId == null || this.appId.trim().equals("") || courseId == null || courseId.trim().equals("") || parentNodeId == null
 					|| parentNodeId.trim().equals("")) {
-				throw new UsageException(MISSING_PARAM);
+				throw new UsageException(MISSING_PARAM, null);
 			}
 			
 			//admin Authentication 
@@ -257,13 +257,13 @@ public class UsageService {
 					boolean hasPublishPerm = ((MCAlfrescoClient)RepoFactory.getInstance(homeRepository.getAppId(), (HashMap)null)).hasPermissions(parentNodeId, repositoryUsername, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
 					
 					if(!hasPublishPerm){
-						throw new UsageException(NO_CCPUBLISH_PERMISSION);
+						throw new UsageException(NO_CCPUBLISH_PERMISSION, null);
 					}
 				}
 
 			}catch(Throwable e){
 				logger.error(e.getMessage(), e);
-				throw new UsageException(e.getMessage());
+				throw new UsageException(e.getMessage(), e);
 			}
 			
 			HashMap<String, Object> properties = new HashMap<String,  Object>();
@@ -338,12 +338,12 @@ public class UsageService {
 		
 		ApplicationInfo lmsAppInfo = ApplicationInfoList.getRepositoryInfoById(this.appId);
 		if(lmsAppInfo == null){		
-			throw new UsageException("lmsId:"+this.appId + " does not exist!!!");
+			throw new UsageException("lmsId:"+this.appId + " does not exist!!!", null);
 		}
 		
 		String permissionWebservice = lmsAppInfo.getPermissionwebservice();
 		if(permissionWebservice == null){
-			throw new UsageException("permissionWebservice location is null");
+			throw new UsageException("permissionWebservice location is null", null);
 		}
 			
 		//ask the app if operation is allowed
@@ -359,14 +359,14 @@ public class UsageService {
 			}
 			boolean deleteAllowed = ccpermission.getPermission(appSessionId, Integer.parseInt(courseId), deletecode, "-1");
 			if(!deleteAllowed){
-				throw new UsageException("deleteUsages is not allowed for params: repositoryTicket:"+repositoryTicket+ " appSessionId:"+appSessionId +" appCurrentUserId:"+appCurrentUserId +" lmsId:"+this.appId+" courseId:"+courseId);
+				throw new UsageException("deleteUsages is not allowed for params: repositoryTicket:"+repositoryTicket+ " appSessionId:"+appSessionId +" appCurrentUserId:"+appCurrentUserId +" lmsId:"+this.appId+" courseId:"+courseId, null);
 			}
 		}catch(ServiceException e){
 			logger.error(e.getMessage(),e);
-			throw new UsageException(e.getMessage());
+			throw new UsageException(e.getMessage(), e);
 		}catch(RemoteException e){
 			logger.error(e.getMessage(),e);
-			throw new UsageException(e.getMessage());
+			throw new UsageException(e.getMessage(), e);
 		}
 		
 		//admin User
@@ -396,7 +396,7 @@ public class UsageService {
 			return result;
 		}catch(Throwable e){
 			logger.error(e.getMessage(),e);
-			throw new UsageException(e.getMessage());
+			throw new UsageException(e.getMessage(), e);
 		}finally{
 			//make admin session invalid
 			serviceRegistry.getAuthenticationService().invalidateTicket(serviceRegistry.getAuthenticationService().getCurrentTicket());
