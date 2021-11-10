@@ -15,8 +15,8 @@ my_host_internal="${RENDERING_SERVICE_HOST_INTERNAL:-rendering-service}"
 my_port_internal="${RENDERING_SERVICE_PORT_INTERNAL:-8080}"
 my_base_internal="http://${my_host_internal}:${my_port_internal}/esrender"
 
-rendering_cache_host="${RENDERING_CACHE_HOST:-rendering-cache}"
-rendering_cache_port="${RENDERING_CACHE_PORT:-6379}"
+rendering_cache_host="${RENDERING_CACHE_HOST:-}"
+rendering_cache_port="${RENDERING_CACHE_PORT:-}"
 rendering_cache_prot="${RENDERING_CACHE_PROT:-tcp://}"
 rendering_cache_opts="${RENDERING_CACHE_OPTS:-}"
 rendering_cache_type="${RENDERING_CACHE_TYPE:-redis}"
@@ -35,13 +35,17 @@ repository_service_base="http://${repository_service_host}:${repository_service_
 
 ### Wait ###############################################################################################################
 
-until wait-for-it "${rendering_cache_host}:${rendering_cache_port}" -t 3; do sleep 1; done
+[[ -n "${rendering_cache_host}" && -n "${rendering_cache_port}" ]] && {
 
-[[ "${rendering_cache_type}" == "rediscluster" ]] && {
-	until [[ $(redis-cli --cluster info "${rendering_cache_host}" "${rendering_cache_port}" | grep '[OK]' | cut -d ' ' -f5) -gt 1 ]]; do
-		echo "."
-		sleep 2
-	done
+	until wait-for-it "${rendering_cache_host}:${rendering_cache_port}" -t 3; do sleep 1; done
+
+	[[ "${rendering_cache_type}" == "rediscluster" ]] && {
+		until [[ $(redis-cli --cluster info "${rendering_cache_host}" "${rendering_cache_port}" | grep '[OK]' | cut -d ' ' -f5) -gt 1 ]]; do
+			echo "."
+			sleep 2
+		done
+	}
+
 }
 
 until wait-for-it "${rendering_database_host}:${rendering_database_port}" -t 3; do sleep 1; done
@@ -82,8 +86,12 @@ sed -i 's|^Listen \([0-9]+\)|Listen '"${my_bind}"':\1|g' /etc/apache2/ports.conf
 sed -i 's|^\(\s*\)[#]*ServerName.*|\1ServerName '"${my_host_external}"'|' /etc/apache2/sites-available/external.conf
 sed -i 's|^\(\s*\)[#]*ServerName.*|\1ServerName '"${my_host_internal}"'|' /etc/apache2/sites-available/internal.conf
 
-sed -i 's|^[;\s]*session\.save_handler.*|session.save_handler = '"${rendering_cache_type}"'|' "${PHP_INI_DIR}/php.ini"
-echo "session.save_path = \"${rendering_cache_prot}${rendering_cache_host}:${rendering_cache_port}${rendering_cache_opts}\"" >>"${PHP_INI_DIR}/php.ini"
+[[ -n "${rendering_cache_host}" && -n "${rendering_cache_port}" ]] && {
+
+	sed -i 's|^[;\s]*session\.save_handler.*|session.save_handler = '"${rendering_cache_type}"'|' "${PHP_INI_DIR}/php.ini"
+	echo "session.save_path = \"${rendering_cache_prot}${rendering_cache_host}:${rendering_cache_port}${rendering_cache_opts}\"" >>"${PHP_INI_DIR}/php.ini"
+
+}
 
 ########################################################################################################################
 

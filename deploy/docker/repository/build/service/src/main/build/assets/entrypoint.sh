@@ -31,8 +31,8 @@ my_wait_internal="${REPOSITORY_SERVICE_WAIT_INTERNAL:--1}"
 
 my_session_timeout="${REPOSITORY_SERVICE_SESSION_TIMEOUT:-60}"
 
-repository_cache_host="${REPOSITORY_CACHE_HOST:-repository-cache}"
-repository_cache_port="${REPOSITORY_CACHE_PORT:-6379}"
+repository_cache_host="${REPOSITORY_CACHE_HOST:-}"
+repository_cache_port="${REPOSITORY_CACHE_PORT:-}"
 
 repository_database_driv="${REPOSITORY_DATABASE_DRIV:-"org.postgresql.Driver"}"
 repository_database_host="${REPOSITORY_DATABASE_HOST:-repository-database}"
@@ -73,13 +73,17 @@ repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
 
 ### Wait ###############################################################################################################
 
-until wait-for-it "${repository_cache_host}:${repository_cache_port}" -t 3; do sleep 1; done
+[[ -n "${repository_cache_host}" && -n "${repository_cache_port}" ]] && {
 
-grep -Fq 'clusterServersConfig' tomcat/conf/redisson.yaml && {
-	until [[ $(redis-cli --cluster info "${repository_cache_host}" "${repository_cache_port}" | grep '[OK]' | cut -d ' ' -f5) -gt 1 ]]; do
-		echo >&2 "Waiting for ${repository_cache_host} ..."
-		sleep 3
-	done
+	until wait-for-it "${repository_cache_host}:${repository_cache_port}" -t 3; do sleep 1; done
+
+	grep -Fq 'clusterServersConfig' tomcat/conf/redisson.yaml && {
+		until [[ $(redis-cli --cluster info "${repository_cache_host}" "${repository_cache_port}" | grep '[OK]' | cut -d ' ' -f5) -gt 1 ]]; do
+			echo >&2 "Waiting for ${repository_cache_host} ..."
+			sleep 3
+		done
+	}
+
 }
 
 until wait-for-it "${repository_search_elastic_host}:${repository_search_elastic_port}" -t 3; do sleep 1; done
@@ -212,6 +216,20 @@ sed -i -r 's|^[#]*\s*index\.subsystem\.name=.*|index.subsystem.name=solr4|' "${g
 grep -q '^[#]*\s*index\.subsystem\.name=' "${global}" || echo "index.subsystem.name=solr4" >>"${global}"
 
 ### edu-sharing ########################################################################################################
+
+[[ -n "${repository_cache_host}" && -n "${repository_cache_port}" ]] && {
+	xmlstarlet ed -L \
+		-d '/Context/Manager[@className="org.redisson.tomcat.RedissonSessionManager"]' \
+		-s '/Context' -t elem -n "Manager" -v "" \
+		--var redis '$prev' \
+		-i '$redis' -t attr -n "className" -v "org.redisson.tomcat.RedissonSessionManager" \
+		-i '$redis' -t attr -n "configPath" -v "tomcat/conf/redisson.yaml" \
+		-i '$redis' -t attr -n "readMode" -v "MEMORY" \
+		-i '$redis' -t attr -n "updateMode" -v "AFTER_REQUEST" \
+		-i '$redis' -t attr -n "broadcastSessionEvents" -v "true" \
+		-i '$redis' -t attr -n "broadcastSessionUpdates" -v "true" \
+		tomcat/conf/Catalina/localhost/edu-sharing.xml
+}
 
 xmlstarlet ed -L \
 	-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \

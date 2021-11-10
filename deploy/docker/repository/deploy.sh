@@ -46,29 +46,21 @@ export BUILD_PATH
 
 COMPOSE_DIR="compose/target/compose"
 
+[[ -f ".env" ]] && {
+	cp -f ".env" "${COMPOSE_DIR}"
+}
+
 [[ ! -d "${COMPOSE_DIR}" ]] && {
-	echo "Building ..."
+	echo "Initializing ..."
 	pushd "compose" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
-}
-
-[[ -f ".env" ]] && {
-	cp -f ".env" "${COMPOSE_DIR}"
 }
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
 
 info() {
 	[[ -f ".env" ]] && source .env
-	echo ""
-	echo "#########################################################################"
-	echo ""
-	echo "repository-cache:"
-	echo ""
-	echo "  Services:"
-	echo ""
-	echo "    REDIS:          127.0.0.1:${REPOSITORY_CACHE_PORT_REDIS:-8001}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -174,6 +166,12 @@ logs() {
 		logs -f || exit
 }
 
+ps() {
+	$COMPOSE_EXEC \
+		-f "repository.yml" \
+		ps || exit
+}
+
 up() {
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
@@ -187,12 +185,6 @@ up() {
 		up -d || exit
 }
 
-down() {
-	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		down || exit
-}
-
 it() {
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
@@ -200,15 +192,10 @@ it() {
 		up -d || exit
 }
 
-plugins() {
-	echo "Checking plugins ..."
-	echo "- remote             [ ${PLUGIN_REMOTE_ENABLED:-false} ]"
-}
-
-build() {
+debug() {
 	[[ -z "${CLI_OPT2}" ]] && {
 		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <repository-project>"
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
 		exit
 	}
 
@@ -217,47 +204,6 @@ build() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
-	echo "Checking artifactId ..."
-
-	EXPECTED_ARTIFACTID="edu_sharing-community-repository"
-
-	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	PROJECT_ARTIFACTID=$($MVN_EXEC -q -ff -nsu -N help:evaluate -Dexpression=project.artifactId -DforceStdout)
-	echo "- repository         [ ${PROJECT_ARTIFACTID} ]"
-	popd >/dev/null || exit
-
-	[[ "${EXPECTED_ARTIFACTID}" != "${PROJECT_ARTIFACTID}" ]] && {
-		echo "Error: expected artifactId [ ${EXPECTED_ARTIFACTID} ] is different."
-		exit
-	}
-
-	echo "Building ..."
-
-	echo "- repository"
-	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-
-	echo "- docker"
-	pushd "${BUILD_PATH}/../build" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-	pushd "${BUILD_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-	
-	echo "export COMMUNITY_PATH=${COMMUNITY_PATH}" > .ctx
-}
-
-debug() {
-	[[ -f ".ctx" ]] && source .ctx
-	echo "<repository-path>:   ${COMMUNITY_PATH}"
-	[[ -z "${COMMUNITY_PATH}" ]] && {
-		echo ""
-		echo "Error: missing context, build first."
-		exit
-	}
-
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
 		-f "repository-network-dev.yml" \
@@ -265,87 +211,28 @@ debug() {
 		up -d || exit
 }
 
-package-alfresco() {
-	[[ -f ".ctx" ]] && source .ctx
-	echo "<repository-path>:   ${COMMUNITY_PATH}"
-	[[ -z "${COMMUNITY_PATH}" ]] && {
-		echo ""
-		echo "Error: missing context, build first."
-		exit
-	}
-
-	SUBMODULE_PATH="Backend/alfresco"
-
-	echo "Building ..."
-
-	echo "- repository         [ ${SUBMODULE_PATH} ]"
-	pushd "${COMMUNITY_PATH}/${SUBMODULE_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -nsu -Dmaven.test.skip=true package || exit
-	popd >/dev/null || exit
+down() {
+	$COMPOSE_EXEC \
+		-f "repository.yml" \
+		down || exit
 }
 
-package-config() {
-	[[ -f ".ctx" ]] && source .ctx
-	echo "<repository-path>:   ${COMMUNITY_PATH}"
-	[[ -z "${COMMUNITY_PATH}" ]] && {
-		echo ""
-		echo "Error: missing context, build first."
-		exit
-	}
-	
-	SUBMODULE_PATH="config"
-
+build() {
 	echo "Building ..."
 
-	echo "- repository         [ ${SUBMODULE_PATH} ]"
-	pushd "${COMMUNITY_PATH}/${SUBMODULE_PATH}" >/dev/null || exit
-	pushd "src/main/resources/org" >/dev/null || exit
-	find . -type d -exec mkdir -p "../../../../target/classes/org/{}" \;
+	pushd "${BUILD_PATH}/../build/elasticsearch" >/dev/null || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
-	diff -qr "src/main/resources/org" "target/classes/org" |
-		grep "Files src/main/resources/org" |
-		awk '{print $2}' |
-		sed "s!src/main/resources/org!\.!" |
-		xargs -I {} cp "src/main/resources/org/{}" "target/classes/org/{}" || true
-	diff -qr "src/main/resources/org" "target/classes/org" |
-		grep "Only in src/main/resources/org" |
-		awk '{print $3,$4 }' |
-		sed "s!: !/!" |
-		sed "s!src/main/resources/org!\.!" |
-		xargs -I {} cp "src/main/resources/org/{}" "target/classes/org/{}" || true
+	pushd "${BUILD_PATH}/../build/postgresql" >/dev/null || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
-}
-
-package-services() {
-	[[ -f ".ctx" ]] && source .ctx
-	echo "<repository-path>:   ${COMMUNITY_PATH}"
-	[[ -z "${COMMUNITY_PATH}" ]] && {
-		echo ""
-		echo "Error: missing context, build first."
-		exit
-	}
-
-	SUBMODULE_PATH="Backend/services"
-
-	echo "Building ..."
-
-	echo "- repository         [ ${SUBMODULE_PATH} ]"
-	pushd "${COMMUNITY_PATH}/${SUBMODULE_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -nsu -Dmaven.test.skip=true package || exit
+	pushd "${BUILD_PATH}" >/dev/null || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 }
 
 reload-alfresco() {
-	[[ -f ".ctx" ]] && source .ctx
-	echo "<repository-path>:   ${COMMUNITY_PATH}"
-	[[ -z "${COMMUNITY_PATH}" ]] && {
-		echo ""
-		echo "Error: missing context, build first."
-		exit
-	}
-
-	echo "Restarting ..."
-	echo "- repository         [ Backend/alfresco ]"
+	echo "Reloading alfresco ..."
 
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
@@ -357,60 +244,26 @@ reload-alfresco() {
 		exec repository-service \
 		touch tomcat/webapps/alfresco/WEB-INF/web.xml || exit
 
-	sleep 10
-
-	echo "Waiting for ..."
-	echo "- repository         [ Backend/alfresco ]"
-
-	[[ -f ".env" ]] && source .env
-	curl -sSf -o /dev/null "http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/alfresco/" || exit
-
 	echo "Done."
 }
 
 reload-services() {
-	[[ -f ".ctx" ]] && source .ctx
-	echo "<repository-path>:   ${COMMUNITY_PATH}"
-	[[ -z "${COMMUNITY_PATH}" ]] && {
-		echo ""
-		echo "Error: missing context, build first."
-		exit
-	}
-
-	echo "Restarting ..."
-	echo "- repository         [ Backend/services ]"
+	echo "Reloading services ..."
 
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
 		exec repository-service \
 		touch tomcat/webapps/edu-sharing/WEB-INF/web.xml || exit
 
-	sleep 10
-
-	echo "Waiting for ..."
-	echo "- repository         [ Backend/services ]"
-
-	[[ -f ".env" ]] && source .env
-	curl -sSf -o /dev/null "http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/" || exit
-
 	echo "Done."
 }
 
 case "${CLI_OPT1}" in
 build)
-	plugins && build
+	build
 	;;
 info)
 	info
-	;;
-init)
-	init
-	;;
-logs)
-	logs
-	;;
-plugins)
-	plugins
 	;;
 purge)
 	purge
@@ -421,20 +274,8 @@ start)
 test)
 	init && it && logs
 	;;
-stop)
-	down
-	;;
 debug)
 	init && debug && logs
-	;;
-rebuild-alfresco)
-	package-alfresco && reload-alfresco
-	;;
-rebuild-config)
-	package-config && reload-services
-	;;
-rebuild-services)
-	package-services && reload-services
 	;;
 reload-alfresco)
 	reload-alfresco
@@ -442,26 +283,35 @@ reload-alfresco)
 reload-services)
 	reload-services
 	;;
+ps)
+	ps
+	;;
+logs)
+	logs
+	;;
+stop)
+	down
+	;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
 	echo ""
 	echo "Option:"
-	echo "  - build <repository-project>"
-	echo "  - debug"
-	echo "  - info"
-	echo "  - init"
-	echo "  - logs"
-	echo "  - rebuild-alfresco"
-	echo "  - rebuild-config"
-	echo "  - rebuild-services"
-	echo "  - reload-alfresco"
-	echo "  - reload-services"
-	echo "  - plugins"
-	echo "  - purge"
-	echo "  - start"
-	echo "  - stop"
-	echo "  - test"
+	echo ""
+	echo "  - start:              startup with remote images"
+	echo "  - stop:               shutdown"
+	echo ""
+	echo "  - build:              build local images"
+	echo "  - test:               startup with local images"
+	echo "  - debug <path>:       startup with local images and mounted artifacts"
+	echo "  - reload-alfresco:    reloading alfresco webapp"
+	echo "  - reload-services:    reloading services webapp"
+	echo ""
+	echo "  - info:               show all information"
+	echo "  - logs:               show all logs"
+	echo "  - ps:                 show all running containers"
+	echo ""
+	echo "  - purge:              purge all data volumes"
 	echo ""
 	;;
 esac

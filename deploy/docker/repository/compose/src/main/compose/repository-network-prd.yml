@@ -1,9 +1,5 @@
 services:
 
-  repository-cache:
-    expose:
-      - "6379"
-
   repository-database:
     expose:
       - "5432"

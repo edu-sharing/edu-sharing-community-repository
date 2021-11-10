@@ -7,7 +7,8 @@ Prerequisites
 - Docker Engine 19.03.0+
 - Docker Compose 1.27.4+ 
 - Apache Maven 3.6.3+
-- Java SE Development Kit 1.8+ (<9)
+- Java SE Development Kit 1.8+
+- Git
 
 Installation
 ------------
@@ -62,17 +63,11 @@ Build
    ```
    export PLUGIN_REMOTE_ENABLED="true"
    ```
-   
-   and check this by calling:
-   
-   ```
-   ./deploy.sh plugins
-   ```                         
  
 3. Build local docker images by calling:                        
 
    ```
-   ./deploy.sh build <repository-project>
+   ./deploy.sh build
    ```
    
 Test
@@ -92,12 +87,18 @@ Test
    ./deploy.sh info
    ```
    
-   and stream out the log messages by calling:
+   and print out all running containers by calling:
     
+   ```
+   ./deploy.sh ps
+   ```
+
+   and stream out the log messages by calling:
+
    ```
    ./deploy.sh logs
    ```
-   
+
 4. Shut down the instance by calling:
 
    ```
@@ -116,9 +117,9 @@ Debugging
 1. [Build](#build) local docker images first.
       
 2. Start up an instance from local docker images that has mounted the local artifacts by calling: 
-
+   
    ```
-   ./deploy.sh debug 
+   ./deploy.sh debug <path>
    ```
 
 3. Request all necessary information by calling:
@@ -133,45 +134,25 @@ Debugging
    ./deploy.sh logs
    ```
    
-4. If you have made changes then you can rebuild and reload the local artifacts by calling:
+4. If you have made changes then you can reload the local artifacts by calling:
 
-   * for changes inside `<repository-project>/Backend/alfresco`: 
+   * for changes inside backend-alfresco modules: 
    
-     ```
-     ./deploy.sh rebuild-alfresco
-     ```
-     
-     If you already built it, then you just have to trigger reloading by calling: 
-      
      ```
      ./deploy.sh reload-alfresco
      ```
    
-   * for changes inside `<repository-project>/Backend/services`: 
+   * for changes inside backend-services modules: 
    
-     ```
-     ./deploy.sh rebuild-services
-     ```
-     
-     If you already built it, then you just have to trigger reloading by calling: 
-      
      ```
      ./deploy.sh reload-services
      ```
 
-   * for changes inside `<repository-project>/config/src/main/resources/org`:
-
-     ```
-     ./deploy.sh rebuild-config
-     ```
-      
-   * for changes inside `<repository-project>/Frontend`:
+   * for changes inside frontend-modules:
 
      > You have to start the Angular dev server once at the beginning by calling:        
      > ```
-     > pushd <repository-project>/Frontend
      > ./node/npm run start
-     > popd
      > ```     
      > and use the special URL shown (instead of the usual one).  
 

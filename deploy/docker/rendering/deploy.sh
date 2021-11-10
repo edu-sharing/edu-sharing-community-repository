@@ -46,29 +46,21 @@ export BUILD_PATH
 
 COMPOSE_DIR="compose/target/compose"
 
+[[ -f ".env" ]] && {
+	cp -f ".env" "${COMPOSE_DIR}"
+}
+
 [[ ! -d "${COMPOSE_DIR}" ]] && {
-	echo "Building ..."
+	echo "Initializing ..."
 	pushd "compose" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
-}
-
-[[ -f ".env" ]] && {
-	cp -f ".env" "${COMPOSE_DIR}"
 }
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
 
 info() {
 	[[ -f ".env" ]] && source .env
-	echo ""
-	echo "#########################################################################"
-	echo ""
-	echo "rendering-cache:"
-	echo ""
-	echo "  Services:"
-	echo ""
-	echo "    REDIS:          127.0.0.1:${RENDERING_CACHE_PORT_REDIS:-9001}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -119,6 +111,12 @@ logs() {
 		logs -f || exit
 }
 
+ps() {
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		ps || exit
+}
+
 up() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
@@ -132,12 +130,6 @@ up() {
 		up -d || exit
 }
 
-down() {
-	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		down || exit
-}
-
 it() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
@@ -145,10 +137,10 @@ it() {
 		up -d || exit
 }
 
-build() {
+debug() {
 	[[ -z "${CLI_OPT2}" ]] && {
 		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <rendering-project>"
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
 		exit
 	}
 
@@ -157,47 +149,6 @@ build() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
-	echo "Checking artifactId ..."
-
-	EXPECTED_ARTIFACTID="edu_sharing-community-rendering"
-
-	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	PROJECT_ARTIFACTID=$($MVN_EXEC -q -ff -nsu -N help:evaluate -Dexpression=project.artifactId -DforceStdout)
-	echo "- rendering          [ ${PROJECT_ARTIFACTID} ]"
-	popd >/dev/null || exit
-
-	[[ "${EXPECTED_ARTIFACTID}" != "${PROJECT_ARTIFACTID}" ]] && {
-		echo "Error: expected artifactId [ ${EXPECTED_ARTIFACTID} ] is different."
-		exit
-	}
-
-	echo "Building ..."
-
-	echo "- rendering"
-	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-
-	echo "- docker"
-	pushd "${BUILD_PATH}/../build" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-	pushd "${BUILD_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-
-	echo "export COMMUNITY_PATH=${COMMUNITY_PATH}" > .ctx
-}
-
-debug() {
-	[[ -f ".ctx" ]] && source .ctx
-	echo "<rendering-path>:   ${COMMUNITY_PATH}"
-	[[ -z "${COMMUNITY_PATH}" ]] && {
-		echo ""
-		echo "Error: missing context, build first."
-		exit
-	}
-
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-network-dev.yml" \
@@ -205,20 +156,20 @@ debug() {
 		up -d || exit
 }
 
-package() {
-	[[ -f ".ctx" ]] && source .ctx
-	echo "<rendering-path>:   ${COMMUNITY_PATH}"
-	[[ -z "${COMMUNITY_PATH}" ]] && {
-		echo ""
-		echo "Error: missing context, build first."
-		exit
-	}
+down() {
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		down || exit
+}
 
+build() {
 	echo "Building ..."
 
-	echo "- rendering"
-	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -nsu -Dmaven.test.skip=true package || exit
+	pushd "${BUILD_PATH}/../build/postgresql" >/dev/null || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
+	popd >/dev/null || exit
+	pushd "${BUILD_PATH}" >/dev/null || exit
+	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
 }
 
@@ -229,12 +180,6 @@ build)
 info)
 	info
 	;;
-init)
-	init
-	;;
-logs)
-	logs
-	;;
 purge)
 	purge
 	;;
@@ -244,30 +189,36 @@ start)
 test)
 	init && it && logs
 	;;
-stop)
-	down
-	;;
 debug)
 	init && debug && logs
 	;;
-rebuild)
-	package
+logs)
+	logs
+	;;
+ps)
+	ps
+	;;
+stop)
+	down
 	;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
 	echo ""
 	echo "Option:"
-	echo "  - build <rendering-project>"
-	echo "  - debug"
-	echo "  - info"
-	echo "  - init"
-	echo "  - logs"
-	echo "  - purge"
-	echo "  - rebuild"
-	echo "  - start"
-	echo "  - stop"
-	echo "  - test"
+	echo ""
+	echo "  - start:              startup with remote images"
+	echo "  - stop:               shutdown"
+	echo ""
+	echo "  - build:              build local images"
+	echo "  - test:               startup with local images"
+	echo "  - debug <path>:       startup with local images and mounted artifacts"
+	echo ""
+	echo "  - info:               show all information"
+	echo "  - logs:               show all logs"
+	echo "  - ps:                 show all running containers"
+	echo ""
+	echo "  - purge:              purge all data volumes"
 	echo ""
 	;;
 esac

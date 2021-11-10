@@ -2,12 +2,6 @@ version: '3.4'
 
 services:
 
-  rendering-cache:
-    image: "${docker.image}-redis:${docker.tag}"
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-      REDIS_NODES: rendering-cache_1
-
   rendering-database:
     image: "${docker.image}-postgresql:${docker.tag}"
     environment:
@@ -21,8 +15,6 @@ services:
   rendering-service:
     image: "${docker.image}-rendering-service:${docker.tag}"
     environment:
-      RENDERING_CACHE_HOST: rendering-cache
-      RENDERING_CACHE_PORT: "6379"
       RENDERING_DATABASE_DRIV: pgsql
       RENDERING_DATABASE_HOST: rendering-database
       RENDERING_DATABASE_NAME: "${RENDERING_DATABASE_NAME:-rendering}"
@@ -42,7 +34,6 @@ services:
     volumes:
       - "rendering-service-volume:/var/cache/esrender"
     depends_on:
-      - rendering-cache
       - rendering-database
 
   rendering-service-init:

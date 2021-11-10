@@ -1,8 +1,5 @@
 services:
 
-  rendering-cache:
-    image: "${docker.registry}/${docker.image}-redis:${docker.tag}"
-
   rendering-database:
     image: "${docker.registry}/${docker.image}-postgresql:${docker.tag}"
 

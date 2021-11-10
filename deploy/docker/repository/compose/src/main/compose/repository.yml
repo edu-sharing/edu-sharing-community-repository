@@ -2,12 +2,6 @@ version: '3.4'
 
 services:
 
-  repository-cache:
-    image: "${docker.image}-redis:${docker.tag}"
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-      REDIS_NODES: repository-cache_1
-
   repository-database:
     image: "${docker.image}-postgresql:${docker.tag}"
     environment:
@@ -90,8 +84,6 @@ services:
         -Dcom.sun.management.jmxremote.port=7199
         -Dcom.sun.management.jmxremote.ssl=false
         -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
-      REPOSITORY_CACHE_HOST: repository-cache
-      REPOSITORY_CACHE_PORT: "6379"
       REPOSITORY_DATABASE_HOST: repository-database
       REPOSITORY_DATABASE_NAME: "${REPOSITORY_DATABASE_NAME:-repository}"
       REPOSITORY_DATABASE_PASS: "${REPOSITORY_DATABASE_PASS:-repository}"
@@ -107,8 +99,8 @@ services:
       REPOSITORY_SERVICE_HOME_APPID: "${COMPOSE_PROJECT_NAME:-compose}"
       REPOSITORY_SERVICE_HOME_PROVIDER: "${REPOSITORY_SERVICE_PROVIDER:-org.edu_sharing.service.provider.ElasticSearchProvider}"
       REPOSITORY_SERVICE_HOST_EXTERNAL: "${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
-      REPOSITORY_SERVICE_HOST_INTERNAL: repository-service
       REPOSITORY_SERVICE_PORT_EXTERNAL: "${REPOSITORY_SERVICE_PORT_HTTP:-8100}"
+      REPOSITORY_SERVICE_HOST_INTERNAL: repository-service
       REPOSITORY_SERVICE_PORT_INTERNAL: "8080"
       REPOSITORY_SMTP_AUTH: "${REPOSITORY_SMTP_AUTH:-}"
       REPOSITORY_SMTP_FROM: "${REPOSITORY_SMTP_FROM:-noreply@repository.127.0.0.1.nip.io}"
@@ -129,7 +121,6 @@ services:
       - "repository-service-volume-data:/opt/alfresco/alf_data"
       - "repository-service-volume-shared:/usr/local/tomcat/shared"
     depends_on:
-      - repository-cache
       - repository-database
       - repository-transform
 

@@ -39,7 +39,7 @@ pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || e
 COMPOSE_DIR="compose/target/compose"
 
 [[ ! -d "${COMPOSE_DIR}" ]] && {
-	echo "Building ..."
+	echo "Initializing ..."
 	pushd "rendering/compose" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true install || exit
 	popd >/dev/null || exit
@@ -58,7 +58,6 @@ COMPOSE_DIR="compose/target/compose"
 pushd "${COMPOSE_DIR}" >/dev/null || exit
 
 info() {
-
 	[[ -f ".env" ]] && source .env
 	echo ""
 	echo "#########################################################################"
@@ -93,6 +92,13 @@ logs() {
 		-f "rendering.yml" \
 		-f "repository.yml" \
 		logs -f || exit
+}
+
+ps() {
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		-f "repository.yml" \
+		ps || exit
 }
 
 purge() {
@@ -137,7 +143,7 @@ down() {
 backup() {
 	[[ -z "${CLI_OPT2}" ]] && {
 		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <backup-directory>"
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
 		exit
 	}
 
@@ -160,7 +166,7 @@ backup() {
 restore() {
 	[[ -z "${CLI_OPT2}" ]] && {
 		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <backup-directory>"
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
 		exit
 	}
 
@@ -184,17 +190,17 @@ case "${CLI_OPT1}" in
 info)
 	info
 	;;
-init)
-	init
-	;;
-logs)
-	logs
-	;;
 purge)
 	purge
 	;;
 start)
 	init && up && info
+	;;
+logs)
+	logs
+	;;
+ps)
+	ps
 	;;
 stop)
 	down
@@ -210,14 +216,18 @@ restore)
 	echo "Usage: ${CLI_CMD} [option]"
 	echo ""
 	echo "Option:"
-	echo "  - backup           <backup-directory>"
-	echo "  - info"
-	echo "  - init"
-	echo "  - logs"
-	echo "  - purge"
-	echo "  - restore          <backup-directory>"
-	echo "  - start"
-	echo "  - stop"
+	echo ""
+	echo "  - start:              startup with remote images"
+	echo "  - stop:               shutdown"
+	echo ""
+	echo "  - info:               show all information"
+	echo "  - logs:               show all logs"
+	echo "  - ps:                 show all running containers"
+	echo ""
+	echo "  - backup <path>:      backup all data volumes"
+	echo "  - restore <path>:     restore all data volumes"
+	echo ""
+	echo "  - purge:              purge all data volumes"
 	echo ""
 	;;
 esac

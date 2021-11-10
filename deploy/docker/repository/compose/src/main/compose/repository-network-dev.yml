@@ -1,9 +1,5 @@
 services:
 
-  repository-cache:
-    ports:
-      - "127.0.0.1:${REPOSITORY_CACHE_PORT_REDIS:-8001}:6379"
-
   repository-database:
     ports:
       - "127.0.0.1:${REPOSITORY_DATABASE_PORT_SQL:-8000}:5432"

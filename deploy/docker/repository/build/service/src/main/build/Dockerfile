@@ -181,20 +181,6 @@ RUN set -eux \
 
 COPY --chown=worker:worker assets/edu-sharing/log4j2.xml tomcat/webapps/edu-sharing/WEB-INF/log4j2.xml
 
-RUN set -eux \
-    && xmlstarlet ed -L \
-        -d '/Context/Manager[@className="org.redisson.tomcat.RedissonSessionManager"]' \
-        -s '/Context' -t elem -n "Manager" -v "" \
-        --var redis '$prev' \
-        -i '$redis' -t attr -n "className" -v "org.redisson.tomcat.RedissonSessionManager" \
-        -i '$redis' -t attr -n "configPath" -v "tomcat/conf/redisson.yaml" \
-        -i '$redis' -t attr -n "readMode" -v "MEMORY" \
-        -i '$redis' -t attr -n "updateMode" -v "AFTER_REQUEST" \
-        -i '$redis' -t attr -n "broadcastSessionEvents" -v "true" \
-        -i '$redis' -t attr -n "broadcastSessionUpdates" -v "true" \
-        tomcat/conf/Catalina/localhost/edu-sharing.xml
-
-
 COPY --chown=worker:worker amps amps/
 
 RUN set -eux \
