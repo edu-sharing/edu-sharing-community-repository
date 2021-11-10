@@ -1,26 +1,39 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
 import * as rxjs from 'rxjs';
-import { filter, first, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter, first, map, mapTo, scan, share, startWith, switchMap, tap } from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { AuthenticationV1Service as AuthenticationApiService } from '../api/services';
+import { switchRelay } from '../utils/switch-relay';
 
 export type LoginInfo = apiModels.Login;
 
 type LoginAction =
     | {
+          // Logs the user in with the provided credentials.
           kind: 'login';
           username: string;
           password: string;
           scope?: string;
       }
     | {
+          // Logs the user out.
           kind: 'logout';
       }
     | {
-          kind: 'refresh';
+          // Initially fetches login information from the backend.
+          kind: 'initial';
+      }
+    | {
+          // Triggers a refresh of login information after the state was changed from outside.
+          kind: 'forceRefresh';
       };
+
+type LoginActionResponse = {
+    loginInfo: LoginInfo;
+    loginAction: LoginAction;
+};
 
 @Injectable({
     providedIn: 'root',
@@ -31,22 +44,55 @@ export class AuthenticationService {
     // `loginInfoSubject` uncontrolled but unfinished actions will be canceled cleanly.
     private readonly loginActionTrigger = new BehaviorSubject<LoginAction | null>(null);
     /**
-     * Current login information.
+     * The last login action with its returned login information..
      *
      * Becomes `null` while a request is underway, so subscribers to `loginInfo$` who subscribed
      * after triggering an action will receive the login information after the action has completed
      * (or was canceled).
      */
-    private readonly loginInfoSubject = new BehaviorSubject<LoginInfo | null>(null);
-    private readonly loginInfo$ = this.loginInfoSubject.pipe(
-        filter((loginInfo): loginInfo is LoginInfo => loginInfo !== null),
+    private readonly loginActionResponseSubject = new BehaviorSubject<LoginActionResponse | null>(
+        null,
     );
+    /**
+     * Whether there is currently a request underway that affects the login state.
+     *
+     * This being `true` means that we cannot currently provide information that depend on the login
+     * state and should withhold any cached information until we learn whether they have to be
+     * invalidated.
+     *
+     * The observable becomes `true` for all requests but the initial login-information fetch, which
+     * doesn't affect the login state on the backend.
+     *
+     * A `forceRefresh` will also set this to `true` since we must assume the refresh was triggered
+     * as a result of a state change.
+     */
+    private readonly loginActionInFlight$ = this.createLoginActionInFlight();
+    /**
+     * The currently known login information.
+     *
+     * The observable will replay the last state as long as there is no request in-flight which will
+     * update the information once completed.
+     */
+    private readonly loginInfo$ = this.loginActionResponseSubject.pipe(
+        filter((response): response is LoginActionResponse => response !== null),
+        map((response) => response.loginInfo ?? null),
+    );
+    /** Emits when the logged-in user changes. */
+    private readonly userChanges$ = this.createUserChanges();
+    /**
+     * A dictionary of observables for calls to `hasAccessToScope`.
+     *
+     * This functions as a cache to already fetched information. The observables inside invalidate
+     * and update themselves when appropriate and stop doing work when there are no more
+     * subscribers.
+     */
+    private readonly accessToScopeObservables: { [scope: string]: Observable<boolean> } = {};
 
     constructor(
         private authentication: AuthenticationApiService,
         private apiRequestConfiguration: ApiRequestConfiguration,
     ) {
-        this.registerLoginInfoSubject();
+        this.registerLoginActionResponseSubject();
     }
 
     /**
@@ -83,7 +129,7 @@ export class AuthenticationService {
      */
     getLoginInfo(): Observable<LoginInfo> {
         if (this.loginActionTrigger.value === null) {
-            this.loginActionTrigger.next({ kind: 'refresh' });
+            this.loginActionTrigger.next({ kind: 'initial' });
         }
         return this.loginInfo$;
     }
@@ -94,19 +140,35 @@ export class AuthenticationService {
      * This is usually not needed since `login` and `logout` will update login information
      * automatically. Use only if the login state was affected by some outside actor.
      */
-    updateLoginInfo(): Observable<LoginInfo> {
-        this.loginActionTrigger.next({ kind: 'refresh' });
+    forceLoginInfoRefresh(): Observable<LoginInfo> {
+        this.loginActionTrigger.next({ kind: 'forceRefresh' });
         return this.loginInfo$.pipe(first());
     }
 
-    private registerLoginInfoSubject(): void {
+    /**
+     * Returns whether the user has access to the given scope.
+     *
+     * The observable is updated when the user logs in or out.
+     */
+    hasAccessToScope(scope: string): Observable<boolean> {
+        if (!this.accessToScopeObservables[scope]) {
+            this.accessToScopeObservables[scope] = this.createHasAccessToScope(scope);
+        }
+        return this.accessToScopeObservables[scope];
+    }
+
+    private registerLoginActionResponseSubject(): void {
         this.loginActionTrigger
             .pipe(
-                filter((action): action is LoginAction => action !== null),
-                tap(() => this.loginInfoSubject.next(null)),
-                switchMap((action) => this.handleLoginAction(action)),
+                filter((loginAction): loginAction is LoginAction => loginAction !== null),
+                tap(() => this.loginActionResponseSubject.next(null)),
+                switchMap((loginAction) =>
+                    this.handleLoginAction(loginAction).pipe(
+                        map((loginInfo) => ({ loginInfo, loginAction })),
+                    ),
+                ),
             )
-            .subscribe((loginInfo) => this.loginInfoSubject.next(loginInfo));
+            .subscribe((response) => this.loginActionResponseSubject.next(response));
     }
 
     private handleLoginAction(action: LoginAction) {
@@ -119,7 +181,8 @@ export class AuthenticationService {
                 }
             case 'logout':
                 return this.authentication.logout().pipe(switchMap(() => this.fetchLoginInfo()));
-            case 'refresh':
+            case 'initial':
+            case 'forceRefresh':
                 return this.fetchLoginInfo();
         }
     }
@@ -143,5 +206,76 @@ export class AuthenticationService {
 
     private fetchLoginInfo(): Observable<LoginInfo> {
         return this.authentication.login();
+    }
+
+    private createLoginActionInFlight(): Observable<boolean> {
+        return rxjs.combineLatest([this.loginActionTrigger, this.loginActionResponseSubject]).pipe(
+            map(
+                ([actionTrigger, response]) =>
+                    // An action was requested.
+                    actionTrigger !== null &&
+                    // We don't have a response yet.
+                    response === null &&
+                    // The requested action was not the initial data fetch.
+                    actionTrigger.kind !== 'initial',
+            ),
+        );
+    }
+
+    private createUserChanges(): Observable<void> {
+        return this.loginActionResponseSubject.pipe(
+            filter((response): response is LoginActionResponse => response !== null),
+            scan((acc, response) => {
+                if (acc === null && response.loginAction.kind === 'initial') {
+                    // We had no information about the logged-in user so far and just refreshed the
+                    // login information. We learned about the logged-in user, but they really were
+                    // already logged-in before.
+                    return {
+                        changed: false,
+                        authorityName: response.loginInfo.authorityName,
+                    };
+                } else if (acc?.authorityName !== response.loginInfo.authorityName) {
+                    // The logged-in user changed.
+                    return {
+                        changed: true,
+                        authorityName: response.loginInfo.authorityName,
+                    };
+                } else {
+                    return {
+                        changed: false,
+                        authorityName: response.loginInfo.authorityName,
+                    };
+                }
+            }, null as { changed: boolean; authorityName?: string } | null),
+            filter((acc) => acc?.changed ?? false),
+            mapTo(void 0),
+            share(),
+        );
+    }
+
+    /**
+     * Creates the observable for `hasAccessToScope` requests for a given scope.
+     *
+     * The returned observable
+     *   - updates on changes,
+     *   - triggers a single api call for all subscribers,
+     *   - guarantees up-to-date values to new subscribers, i.e., does not replay old values after a
+     *     login request is made.
+     */
+    private createHasAccessToScope(scope: string): Observable<boolean> {
+        // We use `userChanges` as starting point, so the cached response will be refreshed when
+        // needed.
+        const inner$ = this.userChanges$.pipe(
+            startWith(void 0 as void),
+            switchRelay(() => this.authentication.hasAccessToScope({ scope })),
+            map((response: { hasAccess: boolean }) => response.hasAccess),
+        );
+        // Do not resolve the observable for new subscribers while a login request is in-flight.
+        // Instead, make sure the first value they see is the one relevant after the login request
+        // has completed.
+        return this.loginActionInFlight$.pipe(
+            first((inFlight) => !inFlight),
+            switchMap(() => inner$),
+        );
     }
 }
