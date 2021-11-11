@@ -1,10 +1,18 @@
 
-# edu-sharing community
+# edu-sharing community deployment
 
 The edu-sharing open-source project started in 2007 to develop networked E-Learning environments for managing and sharing educational contents inter-organisationally.
 
 Documentation
 -------------
+
+- [Docker](deploy/docker/README.md)
+  - [Rendering](deploy/docker/rendering/README.md)
+  - [Repository](deploy/docker/repository/README.md)
+- Installer
+  - [Rendering](deploy/installer/rendering/README.md)
+  - [Repository](deploy/installer/repository/README.md)
+
 More information can be found on the [homepage](http://www.edu-sharing.com).
 
 Or visit the edu-sharing [documentation](http://docs.edu-sharing.com/confluence/edp).
