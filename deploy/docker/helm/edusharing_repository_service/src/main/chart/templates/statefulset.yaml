@@ -110,8 +110,6 @@ spec:
             httpHeaders:
             - name: Accept
               value: application/json
-            - name: Content-Type
-              value: application/json
             port: api-internal
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}

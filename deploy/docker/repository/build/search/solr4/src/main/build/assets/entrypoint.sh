@@ -17,7 +17,7 @@ repository_service_base="http://${repository_service_host}:${repository_service_
 
 until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
 
-until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3" ) -eq 200 ]]
+until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3" ) -eq 200 ]]
 do
   >&2 echo "Waiting for ${repository_service_host} ..."
   sleep 3
