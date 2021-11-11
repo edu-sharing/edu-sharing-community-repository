@@ -387,8 +387,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                    List<NodeSearch.Suggest> suggests = new ArrayList<>();
                    for (PhraseSuggestion.Entry entry : entries) {
                        if(entry.getOptions() == null || entry.getOptions().size() == 0) continue;
-                       NodeSearch.Suggest suggest = new NodeSearch.Suggest();
+                       logger.info("phrase:" +entry.getCutoffScore());
                        for(PhraseSuggestion.Entry.Option option: entry.getOptions()){
+                           NodeSearch.Suggest suggest = new NodeSearch.Suggest();
                            suggest.setText(option.getText().string());
                            suggest.setHighlighted((option.getHighlighted().hasString())
                                    ? option.getHighlighted().string() : null);
