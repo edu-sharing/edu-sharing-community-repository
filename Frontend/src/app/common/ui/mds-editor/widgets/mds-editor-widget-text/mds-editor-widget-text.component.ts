@@ -162,13 +162,13 @@ class FileNameChecker {
         }
         const oldComponents = oldValue.split('.');
         const newComponents = newValue.split('.');
-        if (oldComponents.length !== newComponents.length) {
+        if (oldComponents.length === 0 && newComponents.length !== 0 ||
+            oldComponents.length !== 0 && newComponents.length === 0) {
             return true;
         } else {
             // Whether the extension has changed
-            return !oldComponents.every(
-                (component, index) => index === 0 || newComponents[index] === component,
-            );
+            return oldComponents[oldComponents.length - 1]?.toLowerCase() !==
+                newComponents[newComponents.length - 1]?.toLowerCase();
         }
     }
 
