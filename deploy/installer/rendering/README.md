@@ -4,64 +4,139 @@
 Prerequisites
 -------------
 
-- Apache2 Webserver
-- PHP Framework 7.1+
-- MySQL Community Server / MariaDB Server / PostgreSQL Server
 - Apache Maven 3.6.3+
-
-Download
---------
-
-1. Download the installer artifact:
-
-   * [releases](https://artifacts.edu-sharing.com/#browse/browse:community-releases:org%2Fedu_sharing%2Fedu_sharing-community-deploy-installer-rendering)
-   * [snapshots](https://artifacts.edu-sharing.com/#browse/browse:community-snapshots:org%2Fedu_sharing%2Fedu_sharing-community-deploy-installer-rendering)
+- Git SCM
 
 Build
 -----
 
-1. Check out the [rendering-project](https://scm.edu-sharing.com/edu-sharing/rendering-service) outside of this project.
- 
-2. Build installer artifact by calling: 
-                                                    
+1. Build installer artifact by calling:
+
    ```
-   ./deploy.sh build <rendering-project>
-   ```
+   ./deploy.sh build
+   ```    
 
    After that you can find the installer artifact inside the `target` subdirectory.
 
 Installation
 ------------
 
-1. Open a bash shell and go to the document root of your website.
+1. Install following requirements:
 
-2. Unpack the [downloaded](#download) or [builted](#build) installer artifact.
-
-3. Edit the configuration of your website like:
+   - [Apache HTTP Server](https://httpd.apache.org) and activate following modules:
+     - mod_headers
+     - mod_rewrite
+     - [mod_php](https://www.php.net/manual/en/install.unix.apache2.php) with following extensions:
+       - curl 
+       - dom 
+       - exif
+       - fileinfo 
+       - gd 
+       - iconv 
+       - mbstring 
+       - openssl 
+       - pdo
+       - pdo_pgsql
+       - session 
+       - soap 
+       - sockets 
+       - wddx
+       - zip
+       - zlib
+   - [PostgreSQL Server](https://www.postgresql.org)
+   
+2. Edit the configuration of your website by calling:
 
    ```
-   <Directory <docroot>/esrender>  
-     Options -Indexes +FollowSymLinks
-     AllowOverride All  
-     Require all granted
-   </Directory>
+   cat > /etc/apache2/sites-available/000-default.conf << EOL  
+   <VirtualHost *:80>
+        DocumentRoot /var/www/html
+        <Directory "/var/www/html">
+            Options -Indexes +FollowSymLinks
+            AllowOverride All
+            Require all granted
+        </Directory>
+   </VirtualHost>
+   EOL
    ```
 
-4. Create a new directory for caching files. 
-   Make sure the user under which the webserver is running has read/write access in this directory.
+3. Create a directory for caching files and grant read/write permissions to the webserver by calling:
 
-   > This cache directory should not be inside the document root. 
+   ```
+   mkdir -p /var/cache/esrender
+   chown www-data:www-data /var/cache/esrender
+   ```
 
-5. Start the installation wizard by opening `http://yourdomain.de/esrender/admin/`.
-  
+4. Unpack the installer artifact (see [Build](#build)) into the document root of your website 
+   and grant read/write permissions to the webserver by calling:
+
+   ```
+   tar -xzvf target/edu_sharing-community-deploy-installer-rendering-<version>-bin.tar.gz -C /var/www/html
+   chown -R www-data:www-data /var/www/html/esrender
+   ```
+
+5. Start the webserver and run the installation wizard under `http://<webserver>/esrender/admin/`.
+
+6. Initialize version control for your configuration by calling:
+
+   ```
+   pushd /var/www
+   git init
+   git branch -m custom
+   git add html/esrender/conf/*
+   git add html/esrender/**/config.php
+   git commit -m "After install."
+   popd
+   ```
+   
 Update
 ------
 
-1. Open a bash shell and go to the document root of your website.
+1. Stop the webserver.
 
-2. Unpack the [downloaded](#download) or [builted](#build) installer artifact.
+2. Save your custom configuration by calling:
 
-3. Start the update wizard by opening `http://yourdomain.de/esrender/admin/`.
-    
+   ```
+   pushd /var/www
+   git add html/esrender/conf/*
+   git add html/esrender/**/config.php
+   git commit -m "Before update."
+   popd
+   ```
+
+3. Cleanup your document root by calling:
+
+   ```
+   rm -rf /var/www/html/esrender
+   ```
+
+4. Unpack the installer artifact (see [Build](#build)) into the document root of your website
+   and grant read/write permissions to the webserver by calling:
+
+   ```
+   tar -xzvf target/edu_sharing-community-deploy-installer-rendering-<version>-bin.tar.gz -C /var/www/html
+   chown -R www-data:www-data /var/www/html/esrender
+   ```
+
+5. Restore your custom configuration by calling:
+
+   ```
+   pushd /var/www
+   git reset --hard
+   popd
+   ```
+
+6. Start the webserver and run the update wizard under `http://yourdomain.de/esrender/admin/`.
+
+7. Save your custom configuration by calling:
+
+   ```
+   pushd /var/www
+   git add html/esrender/conf/*
+   git add html/esrender/**/config.php
+   git commit -m "After update."
+   popd
+   ```
+
 ---
 If you need more information, please consult our [edu-sharing community sdk](https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community-sdk) project.

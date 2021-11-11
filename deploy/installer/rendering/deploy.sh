@@ -33,39 +33,8 @@ BUILD_PATH="$(
 export BUILD_PATH
 
 build() {
-	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <rendering-project>"
-		exit
-	}
-
-	pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit
-	COMMUNITY_PATH=$(pwd)
-	export COMMUNITY_PATH
-	popd >/dev/null || exit
-
-	echo "Checking artifactId ..."
-
-	EXPECTED_ARTIFACTID="edu_sharing-community-rendering"
-
-	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	PROJECT_ARTIFACTID=$($MVN_EXEC -q -ff -nsu -N help:evaluate -Dexpression=project.artifactId -DforceStdout)
-	echo "- rendering          [ ${PROJECT_ARTIFACTID} ]"
-	popd >/dev/null || exit
-
-	[[ "${EXPECTED_ARTIFACTID}" != "${PROJECT_ARTIFACTID}" ]] && {
-		echo "Error: expected artifactId [ ${EXPECTED_ARTIFACTID} ] is different."
-		exit
-	}
-
 	echo "Building ..."
 
-	echo "- rendering"
-	pushd "${COMMUNITY_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-
-	echo "- installer"
 	pushd "${BUILD_PATH}" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
@@ -80,7 +49,8 @@ build)
 	echo "Usage: ${CLI_CMD} [option]"
 	echo ""
 	echo "Option:"
-	echo "  - build <rendering-project>"
+	echo ""
+	echo "  - build:              build installer"
 	echo ""
 	;;
 esac

@@ -7,8 +7,7 @@ Prerequisites
 - Docker Engine 19.03.0+
 - Docker Compose 1.27.4+ 
 - Apache Maven 3.6.3+
-- Java SE Development Kit 1.8+
-- Git
+- Git SCM
 
 Installation
 ------------

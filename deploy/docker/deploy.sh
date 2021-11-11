@@ -193,6 +193,9 @@ info)
 purge)
 	purge
 	;;
+init)
+	init
+	;;
 start)
 	init && up && info
 	;;
@@ -209,7 +212,7 @@ backup)
 	backup
 	;;
 restore)
-	init && restore
+	restore
 	;;
 *)
 	echo ""
@@ -227,7 +230,8 @@ restore)
 	echo "  - backup <path>:      backup all data volumes"
 	echo "  - restore <path>:     restore all data volumes"
 	echo ""
-	echo "  - purge:              purge all data volumes"
+	echo "  - init:               create all data volumes"
+	echo "  - purge:              remove all data volumes"
 	echo ""
 	;;
 esac

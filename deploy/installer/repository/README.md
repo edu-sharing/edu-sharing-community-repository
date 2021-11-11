@@ -4,26 +4,13 @@
 Prerequisites
 -------------
 
-- PostgreSQL Server 12+
-- Alfresco Community Platform 5.2.g
-- Java SE Development Kit 1.8+ (<9)
 - Apache Maven 3.6.3+
 - Git SCM
-
-Download
---------
-
-1. Download the installer artifact:
-
-   * [releases](https://artifacts.edu-sharing.com/#browse/browse:community-releases:org%2Fedu_sharing%2Fedu_sharing-community-deploy-installer-repository)
-   * [snapshots](https://artifacts.edu-sharing.com/#browse/browse:community-snapshots:org%2Fedu_sharing%2Fedu_sharing-community-deploy-installer-repository)
 
 Build
 -----
 
-1. Check out the [repository-project](https://scm.edu-sharing.com/Repository/edu-sharing) outside of this project.
- 
-2. If you have switched on additional plugins (see below), 
+0. If you have switched on additional plugins (see below), 
    then you have to add your credentials for each plugin in `$HOME/.m2/settings.xml` too:
    
    ```
@@ -44,17 +31,11 @@ Build
    ```
    export PLUGIN_REMOTE_ENABLED="true"
    ```
-   
-   and check this by calling:
-   
-   ```
-   ./deploy.sh plugins
-   ```                         
- 
-3. Build installer artifact by calling:
+    
+1. Build installer artifact by calling:
   
    ```
-   ./deploy.sh build <repository-project>
+   ./deploy.sh build
    ```    
 
    After that you can find the installer artifact inside the `target` subdirectory.
@@ -62,101 +43,136 @@ Build
 Installation
 ------------
 
-1. Open a bash shell and go to the home directory of your Alfresco installation.
+0. Install [Alfresco Community Platform 5.2.g](https://hub.alfresco.com/t5/alfresco-content-services-hub/alfresco-community-edition-201707-ga-file-list/ba-p/290487)
+   by using a PostgreSQL 12+ database. 
+
+1. Set the environment variable `ALF_HOME` with the home directory of your Alfresco installation, for example:
+
+   ```
+   export ALF_HOME=/opt/alfresco
+   ```
 
 2. Clean up outdated libraries by calling:
 
    ```
-   rm -f tomcat/lib/postgresql*
-   rm -f tomcat/webapps/alfresco/WEB-INF/lib/hazelcast*
+   rm -f $ALF_HOME/tomcat/lib/postgresql*
+   rm -f $ALF_HOME/tomcat/webapps/alfresco/WEB-INF/lib/hazelcast*
    ```
 
-3. Unpack the [downloaded](#download) or [builted](#build) installer artifact. 
-
-4. Initialize a git repo for your configuration by calling:
- 
-   ```
-   pushd tomcat/shared
-   git init
-   git add .
-   git commit -m "Initial config"
-   popd
-   ```
-
-5. Deploy the Alfresco Module Packages (AMP) by calling:
+   and adding following lines into `$ALF_HOME/tomcat/bin/setenv.sh` by calling:
 
    ```
-   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/1 $CATALINA_HOME/webapps/alfresco -directory -force
-   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/2 $CATALINA_HOME/webapps/alfresco -directory -force
-   java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/edu-sharing/1 $CATALINA_HOME/webapps/edu-sharing -directory -force
-   ```
-
-6. Change the environment variables `CATALINA_OPTS` by calling:
-
-   ```
+   tee -a $ALF_HOME/tomcat/bin/setenv.sh << EOL
    CATALINA_OPTS="-Dfile.encoding=UTF-8 $CATALINA_OPTS"    
    CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS"
    CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS"
    CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS"
-
-   export CATALINA_OPTS
+   EOL
    ```
 
-7. Start the server by calling:
+3. Make an initial snapshot of the tomcat subdirectory by calling:
+
+   ```
+   pushd $ALF_HOME
+   tar -czvf snapshot.tar.gz tomcat
+   popd
+   ```
+ 
+4. Unpack the installer artifact (see [Build](#build)) into the home directory of your Alfresco installation by calling:
+
+   ```
+   tar -xzvf target/edu_sharing-community-deploy-installer-repository-<version>-bin.tar.gz -C $ALF_HOME
+   ```
    
+5. Deploy the Alfresco Module Packages (AMP) by calling:
+
    ```
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/0 $ALF_HOME/tomcat/webapps/alfresco -directory -force
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/1 $ALF_HOME/tomcat/webapps/alfresco -directory -force
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/edu-sharing/1 $ALF_HOME/tomcat/webapps/edu-sharing -directory -force
+   ```
+
+6. Initialize version control for your configuration by calling:
+
+   ```
+   pushd $ALF_HOME
+   git init
+   git branch -m original
+   git add tomcat/shared/*
+   git commit -m "After install."
+   git checkout -b custom
+   popd
+   ```
+   
+7. Start the server by calling:
+
+   ```
+   pushd $ALF_HOME
    ./alfresco.sh start
+   popd
    ```
    
 Update
 ------
 
-1. Open a bash shell and go to the home directory of your Alfresco installation.
+1. Stop the server by calling:
 
-2. Stop the server by calling:
-   
    ```
+   pushd $ALF_HOME
    ./alfresco.sh stop
-   ```
-
-3. Save your configuration by calling:
- 
-   ```
-   pushd tomcat/shared
-   git checkout master
-   git add .
-   git commit -m "Current config"
-   git checkout -b update
    popd
    ```
 
-4. Unpack the [downloaded](#download) or [builted](#build) installer artifact 
-   into the home directory of your Alfresco installation. 
+2. Save your custom configuration by calling:
 
-5. Merge changes into your configuration by calling:
- 
    ```
-   pushd tomcat/shared
-   git add .
-   git commit -m "New config"
-   git checkout master
-   git merge update
-   git add .
-   git commit -m "Updated config"
-   git branch -d update
+   pushd $ALF_HOME
+   git add tomcat/shared/*
+   git commit -m "Before update."
+   git checkout original
    popd
    ```
-
-6. Deploy the Alfresco Module Packages (AMP) by calling:
-
-   ```
-   ./bin/apply_amps.sh -force
-   ```
-
-7. Start the server again by calling:
    
+3. Rollback the tomcat subdirectory based on your initial snapshot by calling:
+
    ```
+   pushd $ALF_HOME
+   rm -rf $ALF_HOME/tomcat
+   tar -xzvf $ALF_HOME/snapshot.tar.gz -C $ALF_HOME
+   popd
+   ```
+
+4. Unpack the installer artifact (see [Build](#build)) into the home directory of your Alfresco installation `$ALF_HOME`.
+
+   ```
+   tar -xzvf target/edu_sharing-community-deploy-installer-repository-<version>-bin.tar.gz -C $ALF_HOME
+   ```
+
+5. Deploy the Alfresco Module Packages (AMP) by calling:
+
+   ```
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/0 $ALF_HOME/tomcat/webapps/alfresco -directory -force
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/1 $ALF_HOME/tomcat/webapps/alfresco -directory -force
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/edu-sharing/1 $ALF_HOME/tomcat/webapps/edu-sharing -directory -force
+   ```
+
+6. Merge changes into your custom configuration by calling:
+
+   ```
+   pushd $ALF_HOME
+   git add tomcat/shared/*
+   git commit -m "After update."
+   git checkout custom
+   git merge original -m "Merge update."
+   popd
+   ```
+   
+7. Start the server again by calling:
+
+   ```
+   pushd $ALF_HOME
    ./alfresco.sh start
+   popd
    ```
       
 ---
