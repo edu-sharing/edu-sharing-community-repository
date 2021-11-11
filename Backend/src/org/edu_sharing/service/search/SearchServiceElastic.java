@@ -302,8 +302,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             .setGlobalText(ngsearches[0])
                             .addSuggestion("ngsearchword",
                                     SuggestBuilders.phraseSuggestion("properties.cclom:title.trigram")
-                                            .size(10)
+                                            //.size(10)
                                             .gramSize(3)
+                                            .confidence((float)0.9)
                                             .highlight("<em>","</em>")
                                             .addCandidateGenerator(new DirectCandidateGeneratorBuilder("properties.cclom:title.trigram")
                                             .suggestMode("always"))
@@ -385,13 +386,17 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
                    List<NodeSearch.Suggest> suggests = new ArrayList<>();
                    for (PhraseSuggestion.Entry entry : entries) {
+                       if(entry.getOptions() == null || entry.getOptions().size() == 0) continue;
                        NodeSearch.Suggest suggest = new NodeSearch.Suggest();
-                       suggest.setText(entry.getOptions().get(0).getText().string());
-                       suggest.setHighlighted((entry.getOptions().get(0).getHighlighted().hasString())
-                               ? entries.get(0).getOptions().get(0).getHighlighted().string() : null);
-                       suggest.setScore(entry.getOptions().get(0).getScore());
-                       suggests.add(suggest);
-                       logger.info("SUGGEST:" + entry.getOptions().get(0).getText() +" " + entry.getOptions().get(0).getScore() +" "+ entries.get(0).getOptions().get(0).getHighlighted());
+                       for(PhraseSuggestion.Entry.Option option: entry.getOptions()){
+                           suggest.setText(option.getText().string());
+                           suggest.setHighlighted((option.getHighlighted().hasString())
+                                   ? option.getHighlighted().string() : null);
+                           suggest.setScore(option.getScore());
+                           suggests.add(suggest);
+                           logger.info("SUGGEST:" + option.getText() +" " + option.getScore() +" "+ option.getHighlighted());
+                       }
+
                    }
                    sr.setSuggests(suggests);
 
