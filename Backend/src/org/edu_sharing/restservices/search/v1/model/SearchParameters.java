@@ -12,7 +12,7 @@ public class SearchParameters extends SearchParametersFacets{
 
 	private List<String> permissions;
 	private boolean resolveCollections = false;
-	private boolean returnSuggestions = true;
+	private boolean returnSuggestions = false;
 
 	@JsonProperty
 	public List<String> getPermissions() {
