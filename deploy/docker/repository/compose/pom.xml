@@ -66,8 +66,12 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-alfresco-common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
-      <type>amp</type>
     </dependency>
 
     <dependency>
