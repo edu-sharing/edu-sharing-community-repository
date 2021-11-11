@@ -162,9 +162,11 @@ class FileNameChecker {
         }
         const oldComponents = oldValue.split('.');
         const newComponents = newValue.split('.');
-        if (oldComponents.length === 0 && newComponents.length !== 0 ||
-            oldComponents.length !== 0 && newComponents.length === 0) {
+        if (oldComponents.length === 1 && newComponents.length !== 1 ||
+            oldComponents.length !== 1 && newComponents.length === 1) {
             return true;
+        } else if(oldComponents.length === 1 && newComponents.length === 1) {
+            return false;
         } else {
             // Whether the extension has changed
             return oldComponents[oldComponents.length - 1]?.toLowerCase() !==
