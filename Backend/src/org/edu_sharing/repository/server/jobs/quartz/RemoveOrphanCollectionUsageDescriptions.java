@@ -82,7 +82,7 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJob{
 			if(localApp.equals(appId)){
 				String refNodeId = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_USAGE_RESSOURCEID);
 				if(!nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, refNodeId))) {
-					logger.info("Delete orphan usage from node: " + nodeService.getPrimaryParent(ref).getChildRef().getId() +
+					logger.info("Delete orphan usage from node: " + nodeService.getPrimaryParent(ref).getParentRef().getId() +
 							" Target Ref id: " + refNodeId +
 							" Collection id: " + NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_USAGE_COURSEID)
 					);
