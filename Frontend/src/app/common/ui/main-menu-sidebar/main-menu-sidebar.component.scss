@@ -29,15 +29,15 @@ $licenseInfoHeight: 40px;
             height: 66px;
         }
         .top {
+            display: flex;
+            align-items: center;
             position: relative;
             height: 200px;
             overflow: hidden;
             @include unselectableText();
             > .profile {
-                position: absolute;
                 z-index: 2;
                 left: 0;
-                top: 60px;
                 width: 100%;
                 text-align: center;
                 color: #fff;
