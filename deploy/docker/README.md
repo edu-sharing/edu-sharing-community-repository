@@ -9,13 +9,13 @@ Prerequisites
 - Apache Maven 3.6.3+
 - Git SCM
 
-Installation
-------------
+Startup
+-------
 
-1. Start up an instance by calling:
+1. Start up an instance from remote docker images by calling:
 
    ```
-   ./deploy.sh start
+   ./deploy.sh rstart
    ```
 
 2. Stream out the log messages by calling:
@@ -39,43 +39,19 @@ Installation
 Backup
 ------
 
-1. Shut down the instance by calling:
-
-   ```
-   ./deploy.sh stop
-   ```
-  
-2. Save all data volumes on disk by calling:
+1. Save all data volumes on disk by calling:
 
    ```
    ./deploy.sh backup <path>
    ```
 
-3. Clean up all data volumes by calling:
-
-   ```
-   ./deploy.sh purge
-   ```
-
 Restore
 -------
 
-1. Create all data volumes by calling:
-
-   ```
-   ./deploy.sh init
-   ```
-
-2. Restore all data volumes from disk by calling:
+1. Restore all data volumes from disk by calling:
 
    ```
    ./deploy.sh restore <path>
-   ```
-
-3. Start up the instance by calling:
-
-   ```
-   ./deploy.sh start
    ```
 
 ---

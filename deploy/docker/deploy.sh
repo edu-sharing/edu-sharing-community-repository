@@ -61,19 +61,23 @@ info() {
 	[[ -f ".env" ]] && source .env
 	echo ""
 	echo "#########################################################################"
+	echo ""
+	echo "  edu-sharing community repository:"
+	echo ""
+	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo ""
+	echo "    username: admin"
+	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+	echo ""
+	echo "  edu-sharing community services rendering:"
+	echo ""
+	echo "    http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo ""
+	echo "    username: ${RENDERING_DATABASE_USER:-rendering}"
+	echo "    password: ${RENDERING_DATABASE_PASS:-rendering}"
+	echo ""
 	echo "#########################################################################"
 	echo ""
-	echo "  edu-sharing is starting. This might take a few minutes."
-	echo ""
-	echo "  When ready:"
-	echo ""
-	echo "  1. Open:   http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
-	echo ""
-	echo "  2. Login:  username:  admin"
-	echo "             password:  ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
-	echo ""
-	echo "#########################################################################"
-	echo "#########################################################################"
 	echo ""
 }
 
@@ -111,7 +115,7 @@ purge() {
 	docker volume rm -f "${COMPOSE_NAME}_repository-service-volume-shared" || exit
 }
 
-up() {
+rstart() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-image-remote.yml" \
@@ -129,7 +133,16 @@ up() {
 		up -d || exit
 }
 
-down() {
+lstart() {
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		-f "rendering-network-prd.yml" \
+		-f "repository.yml" \
+		-f "repository-network-prd.yml" \
+		up -d || exit
+}
+
+stop() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-image-remote.yml" \
@@ -193,11 +206,11 @@ info)
 purge)
 	purge
 	;;
-init)
-	init
+rstart)
+	init && rstart && info
 	;;
-start)
-	init && up && info
+lstart)
+	init && lstart && info
 	;;
 logs)
 	logs
@@ -206,13 +219,13 @@ ps)
 	ps
 	;;
 stop)
-	down
+	stop
 	;;
 backup)
-	backup
+	init && backup
 	;;
 restore)
-	restore
+	init && restore
 	;;
 *)
 	echo ""
@@ -220,18 +233,18 @@ restore)
 	echo ""
 	echo "Option:"
 	echo ""
-	echo "  - start:              startup with remote images"
-	echo "  - stop:               shutdown"
+	echo "  - rstart            startup remote images"
+	echo "  - lstart            startup local images"
 	echo ""
-	echo "  - info:               show all information"
-	echo "  - logs:               show all logs"
-	echo "  - ps:                 show all running containers"
+	echo "  - info              show information"
+	echo "  - logs              show logs"
+	echo "  - ps                show running containers"
 	echo ""
-	echo "  - backup <path>:      backup all data volumes"
-	echo "  - restore <path>:     restore all data volumes"
+	echo "  - stop              shutdown"
+	echo "  - purge             purge all data volumes"
 	echo ""
-	echo "  - init:               create all data volumes"
-	echo "  - purge:              remove all data volumes"
+	echo "  - backup <path>     backup all data volumes"
+	echo "  - restore <path>    restore all data volumes"
 	echo ""
 	;;
 esac

@@ -144,6 +144,23 @@ info() {
 	echo ""
 }
 
+note() {
+	[[ -f ".env" ]] && source .env
+	echo ""
+	echo "#########################################################################"
+	echo ""
+	echo "  edu-sharing community repository:"
+	echo ""
+	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo ""
+	echo "    username: admin"
+	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+	echo ""
+	echo "#########################################################################"
+	echo ""
+	echo ""
+}
+
 init() {
 	docker volume create "${COMPOSE_NAME}_repository-database-volume" || exit
 	docker volume create "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
@@ -172,30 +189,24 @@ ps() {
 		ps || exit
 }
 
-up() {
+lstart() {
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		pull || exit
-
-	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
 		-f "repository-network-prd.yml" \
 		up -d || exit
 }
 
-it() {
+ltest() {
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
 		-f "repository-network-dev.yml" \
 		up -d || exit
 }
 
-debug() {
+ldebug() {
 	[[ -z "${CLI_OPT2}" ]] && {
 		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <edu-sharing community repository>"
 		exit
 	}
 
@@ -211,7 +222,58 @@ debug() {
 		up -d || exit
 }
 
-down() {
+rstart() {
+	$COMPOSE_EXEC \
+		-f "repository.yml" \
+		-f "repository-image-remote.yml" \
+		pull || exit
+
+	$COMPOSE_EXEC \
+		-f "repository.yml" \
+		-f "repository-image-remote.yml" \
+		-f "repository-network-prd.yml" \
+		up -d || exit
+}
+
+rtest() {
+	$COMPOSE_EXEC \
+		-f "repository.yml" \
+		-f "repository-image-remote.yml" \
+		pull || exit
+
+	$COMPOSE_EXEC \
+		-f "repository.yml" \
+		-f "repository-image-remote.yml" \
+		-f "repository-network-dev.yml" \
+		up -d || exit
+}
+
+rdebug() {
+	[[ -z "${CLI_OPT2}" ]] && {
+		echo ""
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <edu-sharing community repository>"
+		exit
+	}
+
+	pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit
+	COMMUNITY_PATH=$(pwd)
+	export COMMUNITY_PATH
+	popd >/dev/null || exit
+
+	$COMPOSE_EXEC \
+		-f "repository.yml" \
+		-f "repository-image-remote.yml" \
+		pull || exit
+
+	$COMPOSE_EXEC \
+		-f "repository.yml" \
+		-f "repository-image-remote.yml" \
+		-f "repository-network-dev.yml" \
+		-f "repository-debug.yml" \
+		up -d || exit
+}
+
+stop() {
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
 		down || exit
@@ -231,19 +293,8 @@ build() {
 	popd >/dev/null || exit
 }
 
-reload-alfresco() {
-	echo "Reloading alfresco ..."
-
-	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		exec repository-service \
-		touch tomcat/webapps/alfresco/WEB-INF/web.xml || exit
-
-	echo "Done."
-}
-
-reload-services() {
-	echo "Reloading services ..."
+reload() {
+	echo "Reloading ..."
 
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
@@ -254,38 +305,44 @@ reload-services() {
 }
 
 case "${CLI_OPT1}" in
+rstart)
+	init && rstart && note
+	;;
+rtest)
+	init && rtest && logs
+	;;
+rdebug)
+	init && rdebug && logs
+	;;
 build)
 	build
+	;;
+lstart)
+	init && lstart && note
+	;;
+ltest)
+	init && ltest && logs
+	;;
+ldebug)
+	init && ldebug && logs
+	;;
+reload)
+	reload
 	;;
 info)
 	info
 	;;
-purge)
-	purge
-	;;
-start)
-	init && up && logs
-	;;
-test)
-	init && it && logs
-	;;
-debug)
-	init && debug && logs
-	;;
-reload-alfresco)
-	reload-alfresco
-	;;
-reload-services)
-	reload-services
+logs)
+	logs
 	;;
 ps)
 	ps
 	;;
-logs)
-	logs
-	;;
 stop)
-	down
+	stop
+	;;
+purge)
+	purge
 	;;
 *)
 	echo ""
@@ -293,20 +350,24 @@ stop)
 	echo ""
 	echo "Option:"
 	echo ""
-	echo "  - start:              startup with remote images"
-	echo "  - stop:               shutdown"
+	echo "  - rstart            startup remote images"
+	echo "  - rtest             startup remote images with dev ports"
+	echo "  - rdebug <path>     startup remote images with dev ports and artifacts"
 	echo ""
-	echo "  - build:              build local images"
-	echo "  - test:               startup with local images"
-	echo "  - debug <path>:       startup with local images and mounted artifacts"
-	echo "  - reload-alfresco:    reloading alfresco webapp"
-	echo "  - reload-services:    reloading services webapp"
+	echo "  - build             build local images"
 	echo ""
-	echo "  - info:               show all information"
-	echo "  - logs:               show all logs"
-	echo "  - ps:                 show all running containers"
+	echo "  - lstart            startup local images"
+	echo "  - ltest             startup local images with dev ports"
+	echo "  - ldebug <path>     startup local images with dev ports and artifacts"
 	echo ""
-	echo "  - purge:              purge all data volumes"
+	echo "  - reload            reload services"
+	echo ""
+	echo "  - info              show information"
+	echo "  - logs              show logs"
+	echo "  - ps                show running containers"
+	echo ""
+	echo "  - stop              shutdown"
+	echo "  - purge             purge all data volumes"
 	echo ""
 	;;
 esac

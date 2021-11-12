@@ -95,6 +95,23 @@ info() {
 	echo ""
 }
 
+note() {
+	[[ -f ".env" ]] && source .env
+	echo ""
+	echo "#########################################################################"
+	echo ""
+	echo "  edu-sharing community services rendering:"
+	echo ""
+	echo "    http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo ""
+	echo "    username: ${RENDERING_DATABASE_USER:-rendering}"
+	echo "    password: ${RENDERING_DATABASE_PASS:-rendering}"
+	echo ""
+	echo "#########################################################################"
+	echo ""
+	echo ""
+}
+
 init() {
 	docker volume create "${COMPOSE_NAME}_rendering-database-volume" || exit
 	docker volume create "${COMPOSE_NAME}_rendering-service-volume" || exit
@@ -117,7 +134,7 @@ ps() {
 		ps || exit
 }
 
-up() {
+rstart() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-image-remote.yml" \
@@ -130,17 +147,62 @@ up() {
 		up -d || exit
 }
 
-it() {
+rtest() {
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		-f "rendering-image-remote.yml" \
+		pull || exit
+
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		-f "rendering-image-remote.yml" \
+		-f "rendering-network-dev.yml" \
+		up -d || exit
+}
+
+rdebug() {
+	[[ -z "${CLI_OPT2}" ]] && {
+		echo ""
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <edu-sharing community services rendering>"
+		exit
+	}
+
+	pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit
+	COMMUNITY_PATH=$(pwd)
+	export COMMUNITY_PATH
+	popd >/dev/null || exit
+
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		-f "rendering-image-remote.yml" \
+		pull || exit
+
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		-f "rendering-image-remote.yml" \
+		-f "rendering-network-dev.yml" \
+		-f "rendering-debug.yml" \
+		up -d || exit
+}
+
+lstart() {
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		-f "rendering-network-prd.yml" \
+		up -d || exit
+}
+
+ltest() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		-f "rendering-network-dev.yml" \
 		up -d || exit
 }
 
-debug() {
+ldebug() {
 	[[ -z "${CLI_OPT2}" ]] && {
 		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <edu-sharing community services rendering>"
 		exit
 	}
 
@@ -156,7 +218,7 @@ debug() {
 		up -d || exit
 }
 
-down() {
+stop() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
 		down || exit
@@ -174,23 +236,29 @@ build() {
 }
 
 case "${CLI_OPT1}" in
+rstart)
+	init && rstart && note
+	;;
+rtest)
+	init && rtest && logs
+	;;
+rdebug)
+	init && rdebug && logs
+	;;
 build)
 	build
 	;;
+lstart)
+	init && lstart && note
+	;;
+ltest)
+	init && ltest && logs
+	;;
+ldebug)
+	init && ldebug && logs
+	;;
 info)
 	info
-	;;
-purge)
-	purge
-	;;
-start)
-	init && up && logs
-	;;
-test)
-	init && it && logs
-	;;
-debug)
-	init && debug && logs
 	;;
 logs)
 	logs
@@ -199,7 +267,10 @@ ps)
 	ps
 	;;
 stop)
-	down
+	stop
+	;;
+purge)
+	purge
 	;;
 *)
 	echo ""
@@ -207,18 +278,22 @@ stop)
 	echo ""
 	echo "Option:"
 	echo ""
-	echo "  - start:              startup with remote images"
-	echo "  - stop:               shutdown"
+	echo "  - rstart            startup remote images"
+	echo "  - rtest             startup remote images with dev ports"
+	echo "  - rdebug <path>     startup remote images with dev ports and artifacts"
 	echo ""
-	echo "  - build:              build local images"
-	echo "  - test:               startup with local images"
-	echo "  - debug <path>:       startup with local images and mounted artifacts"
+	echo "  - build             build local images"
 	echo ""
-	echo "  - info:               show all information"
-	echo "  - logs:               show all logs"
-	echo "  - ps:                 show all running containers"
+	echo "  - lstart            startup local images"
+	echo "  - ltest             startup local images with dev ports"
+	echo "  - ldebug <path>     startup local images with dev ports and artifacts"
 	echo ""
-	echo "  - purge:              purge all data volumes"
+	echo "  - info              show information"
+	echo "  - logs              show logs"
+	echo "  - ps                show running containers"
+	echo ""
+	echo "  - stop              shutdown"
+	echo "  - purge             purge all data volumes"
 	echo ""
 	;;
 esac

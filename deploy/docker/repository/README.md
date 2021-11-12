@@ -8,13 +8,13 @@ Prerequisites
 - Apache Maven 3.6.3+
 - Git SCM
 
-Installation
-------------
+Startup
+-------
 
 1. Start up an instance from remote docker images by calling:
 
    ```
-   ./deploy.sh start
+   ./deploy.sh rstart
    ```
 
 2. Stream out the log messages by calling:
@@ -71,10 +71,10 @@ Test
 
 1. [Build](#build) local docker images first.
 
-2. Start up an instance from local docker images by calling:
+2. Start up an instance from local docker images with dev ports by calling:
 
    ```
-   ./deploy.sh test
+   ./deploy.sh ltest
    ```
 
 3. Request all necessary information by calling:
@@ -112,17 +112,23 @@ Debugging
 
 1. [Build](#build) local docker images first.
 
-2. Start up an instance from local docker images that has mounted the local artifacts from your development project by
-   calling:
+2. Start up an instance from local docker images with dev ports and artifacts from your local   
+   [edu-sharing-community-repository](https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository) project by calling:
 
    ```
-   ./deploy.sh debug <path>
+   ./deploy.sh ldebug <path>
    ```
 
 3. Request all necessary information by calling:
 
    ```
    ./deploy.sh info
+   ```
+
+   and print out all running containers by calling:
+
+   ```
+   ./deploy.sh ps
    ```
 
    and stream out the log messages by calling:
@@ -133,21 +139,16 @@ Debugging
 
 4. If you have made changes then you can reload the local artifacts by calling:
 
-    * for changes inside backend-alfresco modules:
-
-      ```
-      ./deploy.sh reload-alfresco
-      ```
-
     * for changes inside backend-services modules:
 
       ```
-      ./deploy.sh reload-services
+      ./deploy.sh reload
       ```
 
     * for changes inside frontend-modules:
 
-      > You have to start the Angular dev server once at the beginning by calling:
+      > You have to start the Angular dev server once at the beginning by calling
+      (inside [edu-sharing-community-repository](https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository)):
       > ```
       > ./node/npm run start
       > ```     
