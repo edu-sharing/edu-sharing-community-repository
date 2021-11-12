@@ -1,5 +1,5 @@
 
-# edu-sharing community deployment
+# edu-sharing community deploy
 
 The edu-sharing open-source project started in 2007 to develop networked E-Learning environments for managing and sharing educational contents inter-organisationally.
 
