@@ -55,8 +55,10 @@ Installation
 2. Clean up outdated libraries by calling:
 
    ```
-   rm -f $ALF_HOME/tomcat/lib/postgresql*
-   rm -f $ALF_HOME/tomcat/webapps/alfresco/WEB-INF/lib/hazelcast*
+   rm -f $ALF_HOME/tomcat/lib/postgresql-*
+   rm -f $ALF_HOME/tomcat/webapps/alfresco/WEB-INF/lib/commons-lang3-*
+   rm -f $ALF_HOME/tomcat/webapps/alfresco/WEB-INF/lib/hazelcast-*
+   rm -f $ALF_HOME/tomcat/webapps/alfresco/WEB-INF/lib/jackson-*
    ```
 
    and adding following lines into `$ALF_HOME/tomcat/bin/setenv.sh` by calling:

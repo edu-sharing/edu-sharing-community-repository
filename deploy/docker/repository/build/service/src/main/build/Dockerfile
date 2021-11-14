@@ -94,7 +94,7 @@ RUN set -eux \
     && xmlstarlet ed -L -d '/Context/Loader' tomcat/conf/Catalina/localhost/alfresco.xml \
     && rm -rf /tmp/install/alfresco-platform \
     && mkdir -p tomcat/webapps/alfresco \
-    && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco -x "WEB-INF/lib/hazelcast*" \
+    && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco -x "WEB-INF/lib/hazelcast-*" -x "WEB-INF/lib/jackson-*" -x "WEB-INF/lib/commons-lang3-*" \
     && rm -f tomcat/webapps/alfresco.war \
     && mv tomcat/shared/classes/alfresco-global.properties.sample tomcat/shared/classes/alfresco-global.properties \
     && sed -i 's/$/\n/' tomcat/shared/classes/alfresco-global.properties \
