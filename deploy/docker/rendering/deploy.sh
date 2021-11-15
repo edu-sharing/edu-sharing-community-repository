@@ -206,7 +206,10 @@ ldebug() {
 		exit
 	}
 
-	pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit
+	case $CLI_OPT2 in
+		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
@@ -232,6 +235,10 @@ remove() {
 
 build() {
 	echo "Building ..."
+
+	[[ -z "${MVN_EXEC_OPTS}" ]] && {
+		export MVN_EXEC_OPTS="-ff"
+	}
 
 	pushd "${BUILD_PATH}/../build/postgresql" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit

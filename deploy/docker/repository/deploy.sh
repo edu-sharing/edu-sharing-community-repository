@@ -255,7 +255,10 @@ rdebug() {
 		exit
 	}
 
-	pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit
+	case $CLI_OPT2 in
+		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
@@ -288,6 +291,10 @@ remove() {
 build() {
 	echo "Building ..."
 
+	[[ -z "${MVN_EXEC_OPTS}" ]] && {
+		export MVN_EXEC_OPTS="-ff"
+	}
+
 	pushd "${BUILD_PATH}/../build/elasticsearch" >/dev/null || exit
 	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
 	popd >/dev/null || exit
@@ -308,6 +315,29 @@ reload() {
 		touch tomcat/webapps/edu-sharing/WEB-INF/web.xml || exit
 
 	echo "Done."
+}
+
+watch() {
+	[[ -z "${CLI_OPT2}" ]] && {
+		echo ""
+		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <edu-sharing community repository>"
+		exit
+	}
+
+	case $CLI_OPT2 in
+		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
+	COMMUNITY_PATH=$(pwd)
+	export COMMUNITY_PATH
+	popd >/dev/null || exit
+
+	echo "Watching ..."
+	fswatch -o "${COMMUNITY_PATH}/Backend/services/webapp/target/edu-sharing.war" | tee /dev/tty | xargs -n1 \
+		$COMPOSE_EXEC \
+			-f "repository.yml" \
+			exec repository-service \
+			touch tomcat/webapps/edu-sharing/WEB-INF/web.xml
 }
 
 case "${CLI_OPT1}" in
@@ -334,6 +364,9 @@ ldebug)
 	;;
 reload)
 	reload
+	;;
+watch)
+	watch
 	;;
 info)
 	info
@@ -370,6 +403,7 @@ purge)
 	echo "  - ldebug <path>     startup containers from local images with dev ports and artifacts"
 	echo ""
 	echo "  - reload            reload services"
+	echo "  - watch <path>      reload services if artifact changed"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"
