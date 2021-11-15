@@ -17,7 +17,7 @@ $custom-typography: mat.define-typography-config(
     $headline: mat.define-typography-level(150%, normal, 400),
     $title: mat.define-typography-level(130%, normal, 400),
     $input: mat.define-typography-level(inherit, 1.25, 400)
-);
+) !default;
 // Override typography for all Angular Material, including mat-base-typography and all components.
 @include mat.all-component-typographies($custom-typography);
 $mat-custom: (
