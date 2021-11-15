@@ -27,12 +27,45 @@
     </server>
 
     <server>
+      <id>edu-sharing.plugin.cluster.releases</id>
+      <username>${env.EDUSHARING_USERNAME}</username>
+      <password>${env.EDUSHARING_PASSWORD}</password>
+    </server>
+    <server>
+      <id>edu-sharing.plugin.cluster.snapshots</id>
+      <username>${env.EDUSHARING_USERNAME}</username>
+      <password>${env.EDUSHARING_PASSWORD}</password>
+    </server>
+
+    <server>
+      <id>edu-sharing.plugin.logineo-idm.releases</id>
+      <username>${env.EDUSHARING_USERNAME}</username>
+      <password>${env.EDUSHARING_PASSWORD}</password>
+    </server>
+    <server>
+      <id>edu-sharing.plugin.logineo-idm.snapshots</id>
+      <username>${env.EDUSHARING_USERNAME}</username>
+      <password>${env.EDUSHARING_PASSWORD}</password>
+    </server>
+
+    <server>
       <id>edu-sharing.plugin.remote.releases</id>
       <username>${env.EDUSHARING_USERNAME}</username>
       <password>${env.EDUSHARING_PASSWORD}</password>
     </server>
     <server>
       <id>edu-sharing.plugin.remote.snapshots</id>
+      <username>${env.EDUSHARING_USERNAME}</username>
+      <password>${env.EDUSHARING_PASSWORD}</password>
+    </server>
+
+    <server>
+      <id>edu-sharing.plugin.transform.releases</id>
+      <username>${env.EDUSHARING_USERNAME}</username>
+      <password>${env.EDUSHARING_PASSWORD}</password>
+    </server>
+    <server>
+      <id>edu-sharing.plugin.transform.snapshots</id>
       <username>${env.EDUSHARING_USERNAME}</username>
       <password>${env.EDUSHARING_PASSWORD}</password>
     </server>

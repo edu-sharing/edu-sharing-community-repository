@@ -69,7 +69,10 @@
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-plugin-remote-repository-backend-alfresco-module
+                edu_sharing-plugin-cluster-repository-backend-alfresco-module,
+                edu_sharing-plugin-logineo-idm-repository-backend-alfresco-module,
+                edu_sharing-plugin-remote-repository-backend-alfresco-module,
+                edu_sharing-plugin-transform-repository-backend-alfresco-module
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/amps/alfresco/1</outputDirectory>
             </configuration>
@@ -82,7 +85,10 @@
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-plugin-remote-repository-backend-services-module
+                edu_sharing-plugin-cluster-repository-backend-services-module,
+                edu_sharing-plugin-logineo-idm-repository-backend-services-module,
+                edu_sharing-plugin-remote-repository-backend-services-module,
+                edu_sharing-plugin-transform-repository-backend-services-module
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/amps/edu-sharing/1</outputDirectory>
             </configuration>
@@ -204,6 +210,66 @@
 
     <profile>
 
+      <id>plugin-cluster</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_CLUSTER_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-plugin-cluster-repository-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-plugin-cluster-repository-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+    <profile>
+
+      <id>plugin-logineo-idm</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_LOGINEO_IDM_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-plugin-logineo-idm-repository-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-plugin-logineo-idm-repository-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+    <profile>
+
       <id>plugin-remote</id>
 
       <activation>
@@ -225,6 +291,36 @@
         <dependency>
           <groupId>${project.groupId}</groupId>
           <artifactId>edu_sharing-plugin-remote-repository-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+    <profile>
+
+      <id>plugin-transform</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_TRANSFORM_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-plugin-transform-repository-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-plugin-transform-repository-backend-services-module</artifactId>
           <type>amp</type>
         </dependency>
 

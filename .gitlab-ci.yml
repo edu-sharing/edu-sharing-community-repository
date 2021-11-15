@@ -11,7 +11,10 @@ variables:
   DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
   MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS -s .mvn/settings.xml --batch-mode --errors --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  PLUGIN_CLUSTER_ENABLED: "false"
+  PLUGIN_LOGINEO_IDM_ENABLED: "false"
   PLUGIN_REMOTE_ENABLED: "false"
+  PLUGIN_TRANSFORM_ENABLED: "false"
 
 cache:
   paths:

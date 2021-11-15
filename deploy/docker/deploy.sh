@@ -25,7 +25,7 @@ else
 fi
 
 [[ -z "${MVN_EXEC_OPTS}" ]] && {
-	export MVN_EXEC_OPTS="-ff"
+	export MVN_EXEC_OPTS="-q -ff"
 }
 
 ROOT_PATH="$(
