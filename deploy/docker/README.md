@@ -27,7 +27,7 @@ Startup
 3. Shut down the instance by calling:
 
    ```
-   ./deploy.sh stop
+   ./deploy.sh remove
    ```
 
 4. Clean up all data volumes by calling:

@@ -145,11 +145,14 @@ lstart() {
 stop() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
-		-f "rendering-network-prd.yml" \
 		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		-f "repository-network-prd.yml" \
+		stop || exit
+}
+
+remove() {
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
+		-f "repository.yml" \
 		down || exit
 }
 
@@ -200,17 +203,14 @@ restore() {
 }
 
 case "${CLI_OPT1}" in
-info)
-	info
-	;;
-purge)
-	purge
-	;;
 rstart)
 	init && rstart && info
 	;;
 lstart)
 	init && lstart && info
+	;;
+info)
+	info
 	;;
 logs)
 	logs
@@ -221,11 +221,17 @@ ps)
 stop)
 	stop
 	;;
+remove)
+	remove
+	;;
 backup)
 	init && backup
 	;;
 restore)
 	init && restore
+	;;
+purge)
+	purge
 	;;
 *)
 	echo ""
@@ -233,18 +239,19 @@ restore)
 	echo ""
 	echo "Option:"
 	echo ""
-	echo "  - rstart            startup remote images"
-	echo "  - lstart            startup local images"
+	echo "  - rstart            startup containers from remote images"
+	echo "  - lstart            startup containers from local images"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"
-	echo "  - ps                show running containers"
+	echo "  - ps                show containers"
 	echo ""
-	echo "  - stop              shutdown"
-	echo "  - purge             purge all data volumes"
+	echo "  - stop              stop all containers"
+	echo "  - remove            remove all containers"
 	echo ""
 	echo "  - backup <path>     backup all data volumes"
 	echo "  - restore <path>    restore all data volumes"
+	echo "  - purge             remove all data volumes"
 	echo ""
 	;;
 esac

@@ -221,6 +221,12 @@ ldebug() {
 stop() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
+		stop || exit
+}
+
+remove() {
+	$COMPOSE_EXEC \
+		-f "rendering.yml" \
 		down || exit
 }
 
@@ -269,6 +275,9 @@ ps)
 stop)
 	stop
 	;;
+remove)
+	remove
+	;;
 purge)
 	purge
 	;;
@@ -278,21 +287,23 @@ purge)
 	echo ""
 	echo "Option:"
 	echo ""
-	echo "  - rstart            startup remote images"
-	echo "  - rtest             startup remote images with dev ports"
-	echo "  - rdebug <path>     startup remote images with dev ports and artifacts"
+	echo "  - rstart            startup containers from remote images"
+	echo "  - rtest             startup containers from remote images with dev ports"
+	echo "  - rdebug <path>     startup containers from remote images with dev ports and artifacts"
 	echo ""
 	echo "  - build             build local images"
 	echo ""
-	echo "  - lstart            startup local images"
-	echo "  - ltest             startup local images with dev ports"
-	echo "  - ldebug <path>     startup local images with dev ports and artifacts"
+	echo "  - lstart            startup containers from local images"
+	echo "  - ltest             startup containers from local images with dev ports"
+	echo "  - ldebug <path>     startup containers from local images with dev ports and artifacts"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"
-	echo "  - ps                show running containers"
+	echo "  - ps                show containers"
 	echo ""
-	echo "  - stop              shutdown"
+	echo "  - stop              stop all containers"
+	echo "  - remove            remove all containers"
+	echo ""
 	echo "  - purge             purge all data volumes"
 	echo ""
 	;;

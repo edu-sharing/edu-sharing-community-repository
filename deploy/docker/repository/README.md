@@ -26,7 +26,7 @@ Startup
 3. Shut down the instance by calling:
 
    ```
-   ./deploy.sh stop
+   ./deploy.sh remove
    ```
 
 4. Clean up all data volumes by calling:
@@ -98,7 +98,7 @@ Test
 4. Shut down the instance by calling:
 
    ```
-   ./deploy.sh stop
+   ./deploy.sh remove
    ```
 
 5. Clean up all data volumes by calling:
@@ -157,7 +157,7 @@ Debugging
 5. Shut down the instance by calling:
 
    ```
-   ./deploy.sh stop
+   ./deploy.sh remove
    ```
 
 6. Clean up all data volumes by calling:
