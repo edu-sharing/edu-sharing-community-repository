@@ -403,7 +403,7 @@ purge)
 	echo "  - ldebug <path>     startup containers from local images with dev ports and artifacts"
 	echo ""
 	echo "  - reload            reload services"
-	echo "  - watch <path>      reload services if artifact changed"
+	echo "  - watch <path>      reload services if webapp artifact changed"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"
