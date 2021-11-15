@@ -42,7 +42,6 @@ import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.server.tools.cache.FacetteCache;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -60,6 +59,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.xpath.XPathConstants;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job
@@ -68,6 +68,11 @@ public class JobHandler {
 
 	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
 	private static List<JobInfo> jobs = new ArrayList<>();
+
+	ApplicationContext eduApplicationContext =
+			org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
+
+	JobClusterLocker jobClusterLocker = (JobClusterLocker)eduApplicationContext.getBean("jobClusterLocker");
 
 	public boolean cancelJob(String jobName) throws SchedulerException {
 		boolean result=quartzScheduler.interrupt(jobName, null);
@@ -236,7 +241,16 @@ public class JobHandler {
 							logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
 						}
 					}
-					
+
+					//check cluster singeltons
+					if(jobExecutionContext.getJobInstance() instanceof JobClusterLocker.ClusterSingelton){
+						boolean aquiredLock = jobClusterLocker.tryLock(jobExecutionContext.getJobInstance().getClass().getName());
+						if(!aquiredLock){
+							veto = true;
+							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "same job is running on another cluster node");
+						}
+					}
+
 					logger.info("TriggerListener.vetoJobExecution returning:" + veto);
 					return veto;
 					
@@ -273,6 +287,10 @@ public class JobHandler {
 				}
 				finishJob(context.getJobDetail(),status);
 
+				if(job instanceof JobClusterLocker.ClusterSingelton){
+					jobClusterLocker.releaseLock(job.getClass().getName());
+				}
+
 			}
 
 			@Override
@@ -301,7 +319,8 @@ public class JobHandler {
 			}
 		});
 
-		quartzScheduler.start();
+		// use startDelayed() to not block server startup by IMMEDIATE jobs
+		quartzScheduler.startDelayed(10);
 
 		refresh();
 

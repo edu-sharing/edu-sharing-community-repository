@@ -48,7 +48,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-public class ImporterJob extends AbstractJob {
+public class ImporterJob extends AbstractJob implements JobClusterLocker.ClusterSingelton {
 
 	public static Logger logger=Logger.getLogger(ImporterJob.class);
 	private JobExecutionContext context;
