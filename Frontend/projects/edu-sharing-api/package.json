@@ -11,7 +11,7 @@
   "homepage": "https://edu-sharing-network.org/",
   "scripts": {
     "generate-api:generate-code": "ng-openapi-gen --input build/openapi.json --output src/lib/api",
-    "generate-api:prettify-code": "prettier -w src/lib/api/**/*.ts --end-of-line auto",
+    "generate-api:prettify-code": "prettier -w 'src/lib/api/**/*.ts' --end-of-line auto",
     "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code"
   },
   "peerDependencies": {

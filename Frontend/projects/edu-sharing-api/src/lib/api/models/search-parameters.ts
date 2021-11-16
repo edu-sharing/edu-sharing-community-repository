@@ -9,4 +9,5 @@ export interface SearchParameters {
     facets?: Array<string>;
     permissions?: Array<string>;
     resolveCollections?: boolean;
+    returnSuggestions?: boolean;
 }

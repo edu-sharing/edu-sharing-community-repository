@@ -2532,7 +2532,7 @@
         } ],
         "requestBody" : {
           "content" : {
-            "application/json" : {
+            "multipart/form-data" : {
               "schema" : {
                 "required" : [ "xml" ],
                 "type" : "object",
@@ -2636,7 +2636,7 @@
         } ],
         "requestBody" : {
           "content" : {
-            "application/json" : {
+            "multipart/form-data" : {
               "schema" : {
                 "required" : [ "excel" ],
                 "type" : "object",
@@ -4053,7 +4053,7 @@
         } ],
         "requestBody" : {
           "content" : {
-            "application/json" : {
+            "multipart/form-data" : {
               "schema" : {
                 "required" : [ "file" ],
                 "type" : "object",
@@ -5887,8 +5887,8 @@
           "description" : "status of the proposals to search for",
           "schema" : {
             "type" : "string",
-            "default" : "PENDING",
-            "enum" : [ "PENDING", "ACCEPTED", "DECLINED" ]
+            "enum" : [ "PENDING", "ACCEPTED", "DECLINED" ],
+            "default" : "PENDING"
           }
         }, {
           "name" : "fetchCounts",
@@ -6261,8 +6261,8 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "default" : "MY",
-            "enum" : [ "EDU_ALL", "EDU_GROUPS", "TYPE_EDITORIAL", "TYPE_MEDIA_CENTER", "MY", "RECENT" ]
+            "enum" : [ "EDU_ALL", "EDU_GROUPS", "TYPE_EDITORIAL", "TYPE_MEDIA_CENTER", "MY", "RECENT" ],
+            "default" : "MY"
           }
         }, {
           "name" : "fetchCounts",
@@ -19753,8 +19753,8 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "default" : "PERSON",
-            "enum" : [ "PERSON", "ORGANIZATION" ]
+            "enum" : [ "PERSON", "ORGANIZATION" ],
+            "default" : "PERSON"
           }
         }, {
           "name" : "fields",
@@ -23285,15 +23285,15 @@
               "type" : "string"
             }
           },
+          "vcard" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
-          },
-          "vcard" : {
-            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -23766,15 +23766,15 @@
               }
             }
           },
+          "editable" : {
+            "type" : "boolean"
+          },
           "signupMethod" : {
             "type" : "string",
             "enum" : [ "simple", "password", "list" ]
           },
           "ref" : {
             "$ref" : "#/components/schemas/NodeRef"
-          },
-          "editable" : {
-            "type" : "boolean"
           },
           "aspects" : {
             "type" : "array",
@@ -23833,15 +23833,15 @@
               }
             }
           },
+          "editable" : {
+            "type" : "boolean"
+          },
           "signupMethod" : {
             "type" : "string",
             "enum" : [ "simple", "password", "list" ]
           },
           "ref" : {
             "$ref" : "#/components/schemas/NodeRef"
-          },
-          "editable" : {
-            "type" : "boolean"
           },
           "aspects" : {
             "type" : "array",
@@ -23885,14 +23885,14 @@
               "type" : "string"
             }
           },
-          "empty" : {
-            "type" : "boolean"
-          },
           "wrappedMap" : {
             "type" : "object",
             "additionalProperties" : {
               "type" : "object"
             }
+          },
+          "empty" : {
+            "type" : "boolean"
           }
         },
         "additionalProperties" : {
@@ -23926,14 +23926,14 @@
                   "type" : "string"
                 }
               },
-              "empty" : {
-                "type" : "boolean"
-              },
               "wrappedMap" : {
                 "type" : "object",
                 "additionalProperties" : {
                   "type" : "object"
                 }
+              },
+              "empty" : {
+                "type" : "boolean"
               }
             },
             "additionalProperties" : {
@@ -23951,26 +23951,26 @@
           "key" : {
             "$ref" : "#/components/schemas/Key"
           },
-          "volatile" : {
-            "type" : "boolean"
-          },
-          "fullName" : {
-            "type" : "string"
-          },
           "jobListenerNames" : {
             "type" : "array",
             "items" : {
               "type" : "string"
             }
           },
-          "requestsRecovery" : {
-            "type" : "boolean",
-            "writeOnly" : true
+          "durable" : {
+            "type" : "boolean"
           },
           "stateful" : {
             "type" : "boolean"
           },
-          "durable" : {
+          "requestsRecovery" : {
+            "type" : "boolean",
+            "writeOnly" : true
+          },
+          "fullName" : {
+            "type" : "string"
+          },
+          "volatile" : {
             "type" : "boolean"
           }
         }
@@ -24138,6 +24138,12 @@
         "required" : [ "facets", "nodes", "pagination" ],
         "type" : "object",
         "properties" : {
+          "suggests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Suggest"
+            }
+          },
           "elasticResponse" : {
             "type" : "string"
           },
@@ -24161,6 +24167,25 @@
             "items" : {
               "type" : "string"
             }
+          }
+        }
+      },
+      "Suggest" : {
+        "required" : [ "score", "text" ],
+        "type" : "object",
+        "properties" : {
+          "text" : {
+            "type" : "string",
+            "description" : "suggested text"
+          },
+          "highlighted" : {
+            "type" : "string",
+            "description" : "suggested text with corrected words highlighted"
+          },
+          "score" : {
+            "type" : "number",
+            "description" : "score of the suggestion",
+            "format" : "float"
           }
         }
       },
@@ -24669,6 +24694,9 @@
                 "type" : "string"
               }
             }
+          },
+          "editable" : {
+            "type" : "boolean"
           },
           "status" : {
             "$ref" : "#/components/schemas/UserStatus"
@@ -25572,15 +25600,15 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "vcard" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
-          },
-          "vcard" : {
-            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -25611,6 +25639,9 @@
                 "type" : "string"
               }
             }
+          },
+          "editable" : {
+            "type" : "boolean"
           },
           "status" : {
             "$ref" : "#/components/schemas/UserStatus"
@@ -25685,6 +25716,9 @@
                 "type" : "string"
               }
             }
+          },
+          "editable" : {
+            "type" : "boolean"
           },
           "authorityName" : {
             "type" : "string"
@@ -25873,15 +25907,15 @@
               }
             }
           },
+          "vcard" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
-          },
-          "vcard" : {
-            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -26130,6 +26164,15 @@
           },
           "parent" : {
             "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          },
+          "alternativeIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
@@ -26183,16 +26226,16 @@
             "type" : "string",
             "enum" : [ "Input", "None" ]
           },
-          "required" : {
-            "type" : "string",
-            "writeOnly" : true,
-            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
-          },
           "subwidgets" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/MdsSubwidget"
             }
+          },
+          "required" : {
+            "type" : "string",
+            "writeOnly" : true,
+            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
           },
           "id" : {
             "type" : "string"
@@ -26257,13 +26300,13 @@
           "defaultvalue" : {
             "type" : "string"
           },
-          "isExtended" : {
+          "hideIfEmpty" : {
             "type" : "boolean"
           },
           "isSearchable" : {
             "type" : "boolean"
           },
-          "hideIfEmpty" : {
+          "isExtended" : {
             "type" : "boolean"
           }
         }
@@ -26399,15 +26442,15 @@
               }
             }
           },
+          "editable" : {
+            "type" : "boolean"
+          },
           "signupMethod" : {
             "type" : "string",
             "enum" : [ "simple", "password", "list" ]
           },
           "ref" : {
             "$ref" : "#/components/schemas/NodeRef"
-          },
-          "editable" : {
-            "type" : "boolean"
           },
           "aspects" : {
             "type" : "array",
@@ -26508,6 +26551,9 @@
             }
           },
           "resolveCollections" : {
+            "type" : "boolean"
+          },
+          "returnSuggestions" : {
             "type" : "boolean"
           },
           "facets" : {
@@ -27040,6 +27086,12 @@
         "required" : [ "facets", "nodes", "pagination" ],
         "type" : "object",
         "properties" : {
+          "suggests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Suggest"
+            }
+          },
           "nodes" : {
             "type" : "array",
             "items" : {

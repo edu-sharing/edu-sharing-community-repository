@@ -40,6 +40,7 @@ export { ExcelResult } from './models/excel-result';
 export { Facet } from './models/facet';
 export { Pagination } from './models/pagination';
 export { SearchResultElastic } from './models/search-result-elastic';
+export { Suggest } from './models/suggest';
 export { Value } from './models/value';
 export { SearchResult } from './models/search-result';
 export { UploadResult } from './models/upload-result';

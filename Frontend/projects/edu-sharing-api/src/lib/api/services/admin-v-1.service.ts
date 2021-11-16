@@ -1919,7 +1919,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `importCollections()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importCollections$Response(params?: {
         /**
@@ -1936,7 +1936,7 @@ export class AdminV1Service extends BaseService {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ImportCollectionsPath, 'post');
         if (params) {
             rb.query('parent', params.parent, {});
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -1962,7 +1962,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `importCollections$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importCollections(params?: {
         /**
@@ -1994,7 +1994,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `importExcel()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importExcel$Response(params: {
         /**
@@ -2017,7 +2017,7 @@ export class AdminV1Service extends BaseService {
         if (params) {
             rb.query('parent', params.parent, {});
             rb.query('addToCollection', params.addToCollection, {});
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -2043,7 +2043,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `importExcel$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importExcel(params: {
         /**
@@ -3243,7 +3243,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `uploadTemp()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     uploadTemp$Response(params: {
         /**
@@ -3260,7 +3260,7 @@ export class AdminV1Service extends BaseService {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UploadTempPath, 'put');
         if (params) {
             rb.path('name', params.name, {});
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -3286,7 +3286,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `uploadTemp$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     uploadTemp(params: {
         /**
