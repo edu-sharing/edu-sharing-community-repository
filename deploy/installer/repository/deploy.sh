@@ -8,7 +8,7 @@ export CLI_OPT2="$2"
 export CLI_OPT3="$3"
 export CLI_OPT4="$4"
 
-if [ -z "${M2_HOME}" ]; then
+if [ -d "${M2_HOME}" ]; then
 	export MVN_EXEC="mvn"
 else
 	export MVN_EXEC="${M2_HOME}/bin/mvn"
