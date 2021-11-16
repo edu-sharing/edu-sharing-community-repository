@@ -10,6 +10,11 @@ public class LightbendConfigLoader {
     public static String SERVER_FILE = "edu-sharing.server.conf";
     public static String CUSTOM_FILE = "edu-sharing.conf";
 
+    /**
+     * parsing of lightbend config is expensive
+     * use @org.edu_sharing.alfresco.lightbend.LightbendConfigCache
+     * @return Config
+     */
     public static Config get() {
         String base = PATH_PREFIX + BASE_FILE;
         String deployment = PATH_PREFIX + DEPLOYMENT_FILE;
