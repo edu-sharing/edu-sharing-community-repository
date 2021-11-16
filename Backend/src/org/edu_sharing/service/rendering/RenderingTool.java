@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -154,7 +155,11 @@ public class RenderingTool {
 		prepareExecutor.execute(()->{
 			AuthenticationUtil.runAsSystem(()-> {
 				try {
+					// Deprecated, use the Lightbend config!
 					if(!ConfigServiceFactory.getCurrentConfig().getValue("rendering.prerender",true)) {
+						return null;
+					}
+					if(!LightbendConfigCache.getBoolean("rendering.prerender")) {
 						return null;
 					}
 					// @TODO: May we need to build up caches just for particular file types?

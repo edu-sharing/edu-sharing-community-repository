@@ -11,7 +11,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-public class TrashcanCleanerSolrJob extends AbstractJob {
+public class TrashcanCleanerSolrJob extends AbstractJob implements JobClusterLocker.ClusterSingelton {
 
 	public static final String PARAM_DAYS_TO_KEEP = "DAYS_TO_KEEP";
 	

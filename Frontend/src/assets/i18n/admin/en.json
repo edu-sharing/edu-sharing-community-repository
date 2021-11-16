@@ -114,7 +114,8 @@
                 "resolve_website_title": "If true, the repository resolves title and metadata when creating links",
                 "url_dynamic": "If true, all generated links (e.g. to previews) are always mapped to the requesting domain of the client. If false, the value is always generated based on client protocol, client port and domain",
                 "allow_origin": "Comma-separated list of all Origin addresses for which CORS access is allowed. An empty value allows CORS from any requesting domain. Example: \"https://example.com\"",
-                "notify_fetch_limit": "Maximum number of Notify objects that can be created when loading the \" Shared by me\" / \" Shared with me\" folder is retrieved. Recommended values are between 200-1000. 0 disables the limit"
+                "notify_fetch_limit": "Maximum number of Notify objects that can be created when loading the \" Shared by me\" / \" Shared with me\" folder is retrieved. Recommended values are between 200-1000. 0 disables the limit",
+                "cookie_attributes": "Flags for the session-cookie, typically \"secure\" so it will only be sent via https. Also same-site behaviour can be configured, e.g. \"SameSite=None\""
             },
             "CCMAIL": {
                 "mail.authtype": "Authentication type on the mail server. Currently either empty (= without authentication) or \"tls\"",

@@ -30,7 +30,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-public class AssignedLicenseManagerJob  extends AbstractJob {
+public class AssignedLicenseManagerJob  extends AbstractJob implements JobClusterLocker.ClusterSingelton {
 	
 	Logger logger = Logger.getLogger(AssignedLicenseManagerJob.class);
 	
