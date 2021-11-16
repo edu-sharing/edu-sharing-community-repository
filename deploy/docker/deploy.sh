@@ -163,7 +163,10 @@ backup() {
 		exit
 	}
 
-	pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit
+	case $CLI_OPT2 in
+		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
 	BACKUP_PATH=$(pwd)
 	popd >/dev/null || exit
 
@@ -186,7 +189,10 @@ restore() {
 		exit
 	}
 
-	pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit
+	case $CLI_OPT2 in
+		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
 	BACKUP_PATH=$(pwd)
 	popd >/dev/null || exit
 
