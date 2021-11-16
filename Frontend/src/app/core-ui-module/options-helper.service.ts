@@ -319,6 +319,8 @@ export class OptionsHelperService implements OnDestroy {
         let options: OptionItem[] = [];
         if (this.mainNav) {
             options = this.prepareOptions(this.mainNav.management, objects);
+        } else {
+            console.warn('options helper was called without main nav. Can not load default options');
         }
         /*
          // DO NOT DELETE
@@ -1230,7 +1232,7 @@ export class OptionsHelperService implements OnDestroy {
         }
         return nodes;
     }
-    private getObjects(object: Node | any) {
+    public getObjects(object: Node | any) {
         return NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
     }
 
