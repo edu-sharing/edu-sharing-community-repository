@@ -88,7 +88,7 @@
               {{'PROFILES.STATS.MATERIALS' | translate}}
             </div>
             <div class="value">
-              {{ user.stats?.nodeCount || '-' }}
+              {{ userStats?.nodeCount ?? '-' }}
             </div>
           </div>
           <div>
@@ -96,7 +96,7 @@
               {{'PROFILES.STATS.COLLECTIONS' | translate}}
             </div>
             <div class="value">
-              {{ user.stats?.collectionCount || '-' }}
+              {{ userStats?.collectionCount ?? '-' }}
             </div>
           </div>
           <div>
@@ -104,7 +104,7 @@
               {{'PROFILES.STATS.MATERIALS_CC' | translate}}
             </div>
             <div class="value">
-              {{ user.stats?.nodeCountCC || '-' }}
+              {{ userStats?.nodeCountCC ?? '-' }}
             </div>
           </div>
         </div>
