@@ -31,7 +31,7 @@ describe('TranslationLoader', () => {
     beforeEach(() => {
         httpClient = new HttpClientStub();
         config = new ConfigStub();
-        translationLoader = new TranslationLoader(
+        translationLoader = TranslationLoader.create(
             httpClient as HttpClient,
             config as unknown as ConfigService,
         );
