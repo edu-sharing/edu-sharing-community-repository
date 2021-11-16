@@ -38,7 +38,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 
-public class RefreshCacheJob extends AbstractJob{
+public class RefreshCacheJob extends AbstractJob implements JobClusterLocker.ClusterSingelton {
 	
 	
 	public RefreshCacheJob(){

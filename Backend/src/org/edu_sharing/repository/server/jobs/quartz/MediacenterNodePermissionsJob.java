@@ -40,7 +40,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-public class MediacenterNodePermissionsJob extends AbstractJob {
+public class MediacenterNodePermissionsJob extends AbstractJob implements JobClusterLocker.ClusterSingelton{
 	
 	Logger logger = Logger.getLogger(MediacenterNodePermissionsJob.class);
 	

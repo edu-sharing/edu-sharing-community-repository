@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -386,6 +387,9 @@ public class PersonDao {
 		return status;
 	}
 	public UserStats getStats() {
+		if(!LightbendConfigCache.getBoolean("repository.statistics.byUser")){
+			return null;
+		}
 		UserStats stats = new UserStats();
 		// run as admin so solr counts all materials and collections
 		return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {

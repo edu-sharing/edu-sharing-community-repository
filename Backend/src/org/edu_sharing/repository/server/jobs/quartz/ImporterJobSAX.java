@@ -22,7 +22,7 @@ import org.edu_sharing.repository.server.importer.sax.RecordHandlerLOM;
  *        RemoveDeletedImports: könnte man beschleunigen wenn sodis wie im edmond pool gelöschte Datensätze bei ListIdentifiers markiert mit:
  *        	<header status="deleted">
  */
-public class ImporterJobSAX extends ImporterJob {
+public class ImporterJobSAX extends ImporterJob  {
 	
 	
 	@Override
