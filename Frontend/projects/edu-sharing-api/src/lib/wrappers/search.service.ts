@@ -5,6 +5,7 @@ import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { LabeledValue, MdsIdentifier, SearchResults } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
+import { onSubscription } from '../utils/on-subscription';
 import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
 
 /** Configuration for `SearchService`. */
@@ -37,6 +38,8 @@ export type FacetsDict = {
     [property: string]: FacetAggregation;
 };
 
+export type DidYouMeanSuggestion = Pick<apiModels.Suggest, 'highlighted' | 'text'>;
+
 /** Parameters to be provided to `search`. */
 export type SearchRequestParams = Parameters<SearchV1Service['search']>[0];
 
@@ -46,8 +49,12 @@ export type SearchRequestParams = Parameters<SearchV1Service['search']>[0];
 export class SearchService {
     private readonly resultsSubject = new BehaviorSubject<SearchResults | null>(null);
     private readonly facetsSubject = new BehaviorSubject<FacetsDict>({});
+    private readonly didYouMeanSuggestionsSubject = new BehaviorSubject<apiModels.Suggest[] | null>(
+        null,
+    );
     private readonly searchParamsSubject = new BehaviorSubject<SearchRequestParams | null>(null);
     private readonly subscribedFacetsSubject = new BehaviorSubject<string[][]>([]);
+    private didYouMeanSuggestionsSubscribers = 0;
 
     constructor(private searchV1: SearchV1Service, private mdsLabel: MdsLabelService) {
         this.registerFacetsSubject();
@@ -67,6 +74,8 @@ export class SearchService {
                 ...params.body,
                 // Additionally fetch facets that have been subscribed to via `getFacets`.
                 facets: this.getSubscribedFacets(params.body.facets),
+                returnSuggestions:
+                    params.body.returnSuggestions || this.didYouMeanSuggestionsSubscribers > 0,
             },
         }).pipe(tap((results) => this.resultsSubject.next(results)));
     }
@@ -110,23 +119,15 @@ export class SearchService {
      * list---even if the facet does not have any results (`count` is 0).
      */
     getFacets(properties: string[], { includeActiveFilters = false } = {}): Observable<FacetsDict> {
-        return new Observable((subscriber) => {
-            this.subscribeFacets(properties);
-            const destroyed$ = new Subject<void>();
-            this.facetsSubject
-                .pipe(
-                    takeUntil(destroyed$),
-                    includeActiveFilters
-                        ? switchMap((facets) => this.includeActiveFilters(facets))
-                        : rxjs.identity,
-                )
-                .subscribe((value) => subscriber.next(value));
-            return () => {
-                this.unsubscribeFacets(properties);
-                destroyed$.next();
-                destroyed$.complete();
-            };
-        });
+        return this.facetsSubject.pipe(
+            onSubscription({
+                onSubscribe: () => this.subscribeFacets(properties),
+                onUnsubscribe: () => this.unsubscribeFacets(properties),
+            }),
+            includeActiveFilters
+                ? switchMap((facets) => this.includeActiveFilters(facets))
+                : rxjs.identity,
+        );
     }
 
     /**
@@ -175,6 +176,33 @@ export class SearchService {
                 map(() => {}),
             )
             .toPromise();
+    }
+
+    /**
+     * Returns the highest-scored did-you-mean suggestion for the last search request.
+     *
+     * The observable is updated as new search requests are resolved.
+     *
+     * Did-you-mean suggestions are only requested, when there is at least one active subscriber
+     * when the search request is triggered.
+     *
+     * @param minimumScore The minimum score assigned my ElasticSearch for a suggestion to be
+     * returned. If no suggestion meets the minimum score, `null` is returned.
+     */
+    getDidYouMeanSuggestion(minimumScore = 0.5): Observable<DidYouMeanSuggestion | null> {
+        return this.didYouMeanSuggestionsSubject.pipe(
+            onSubscription({
+                onSubscribe: () => this.didYouMeanSuggestionsSubscribers++,
+                onUnsubscribe: () => this.didYouMeanSuggestionsSubscribers--,
+            }),
+            map((suggestions) => {
+                if (suggestions && suggestions.length > 0 && suggestions[0].score >= minimumScore) {
+                    return suggestions[0];
+                } else {
+                    return null;
+                }
+            }),
+        );
     }
 
     /**
