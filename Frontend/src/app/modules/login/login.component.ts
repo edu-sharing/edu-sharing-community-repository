@@ -85,8 +85,6 @@ export class LoginComponent implements OnInit {
                     }
 
                     this.connector.onAllRequestsReady().subscribe(() => {
-                        this.isLoading = false;
-                        GlobalContainerComponent.finishPreloading();
                         setTimeout(() => {
                             if (this.username && this.passwordInput) {
                                 this.passwordInput.nativeInput.nativeElement.focus();
@@ -128,6 +126,8 @@ export class LoginComponent implements OnInit {
                             this.openLoginUrl();
                             return;
                         }
+                        this.isLoading = false;
+                        GlobalContainerComponent.finishPreloading();
                     });
                     this.isSafeLogin=this.scope==RestConstants.SAFE_SCOPE;
                     this.next = params.next;
