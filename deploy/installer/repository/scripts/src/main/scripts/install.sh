@@ -2,9 +2,15 @@
 set -e
 set -o pipefail
 
- [[ -z "${CLI_OPT2}" ]] && {
+export CLI_CMD="$0"
+export CLI_OPT1="$1"
+export CLI_OPT2="$2"
+export CLI_OPT3="$3"
+export CLI_OPT4="$4"
+
+ [[ -z "${CLI_OPT1}" ]] && {
     echo ""
-    echo "Usage: ${CLI_CMD} ${CLI_OPT1} <alfresco directory>"
+    echo "Usage: ${CLI_CMD} <alfresco directory>"
     exit
   }
 
@@ -13,7 +19,7 @@ set -o pipefail
 
   # set the environment variable ALF_HOME
   echo "set the environment variable ALF_HOME"
-  export ALF_HOME="${CLI_OPT2}"
+  export ALF_HOME="${CLI_OPT1}"
 
   [[ ! -f $ALF_HOME/alfresco.sh ]] && {
     echo ""
@@ -67,9 +73,13 @@ set -o pipefail
   # unpack the installer artifact into the home directory of your Alfresco installation
   echo "unpack the installer artifact into the home directory of your Alfresco installation"
   pushd $ALF_HOME >/dev/null || exit
-  mvn dependency:copy -Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${project.version}:tar.gz:bin #>/dev/null || exit
+
+  # HIER KRACHT ES!!!  Authentication failed
+  #ggf mit get und dann aus dem localen copy holen?
+  mvn dependency:copy -DremoteRepositories=https://artifacts.edu-sharing.com/repository/community-snapshots/,https://artifacts.edu-sharing.com/repository/community-releases/ -Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-rendering-scripts:${project.version}:tar.gz:bin #>/dev/null || exit
+  #mvn dependency:copy -Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${project.version}:tar.gz:bin #>/dev/null || exit
   #PROJECT_VERSION=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
-  tar -xzvf ${BUILD_PATH}/target/edu_sharing-community-deploy-installer-repository-distribution-${project.version}-bin.tar.gz -C $ALF_HOME >/dev/null || exit
+  tar -xzvf ${BUILD_PATH}/target/edu_sharing-community-deploy-installer-repository-distribution-${project.version}-bin.tar.gz -C $ALF_HOME #>/dev/null || exit
   popd >/dev/null || exit
 
   # deploy the Alfresco Module Packages (AMP)
