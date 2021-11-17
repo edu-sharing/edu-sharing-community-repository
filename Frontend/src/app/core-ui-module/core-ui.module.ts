@@ -102,6 +102,7 @@ import {OverlayModule} from '@angular/cdk/overlay';
 import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
 import {DragCursorDirective} from './directives/drag-cursor.directive';
 import { ConfigService } from 'ngx-edu-sharing-api';
+import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
 
 @NgModule({
     declarations: [
@@ -172,7 +173,8 @@ import { ConfigService } from 'ngx-edu-sharing-api';
         ColumnChooserComponent,
         CheckTextOverflowDirective,
         ListItemLabelPipe,
-        DragCursorDirective
+        DragCursorDirective,
+        BorderBoxObserverDirective,
     ],
     imports: [
         A11yModule,
@@ -266,7 +268,8 @@ import { ConfigService } from 'ngx-edu-sharing-api';
         ElementRefDirective,
         NodeEntriesWrapperComponent,
         CheckTextOverflowDirective,
-        DragCursorDirective
+        DragCursorDirective,
+        BorderBoxObserverDirective,
     ],
 })
 export class CoreUiModule {}

@@ -264,7 +264,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                console.log(this.definition.id, this.definition.defaultvalue);
                 this.initialValues = {
                     jointValues:
                         values?.[this.definition.id] ||

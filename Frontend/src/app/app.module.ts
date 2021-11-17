@@ -82,7 +82,6 @@ import { SearchFieldFacetsComponent } from './common/ui/mds-editor/search-field-
 import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
 import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pipe';
 import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
-import { BorderBoxObserverDirective } from './common/directives/border-box-observer.directive';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 
 
@@ -157,7 +156,6 @@ import { EduSharingApiModule } from 'ngx-edu-sharing-api';
         LabelPipe,
         PropertySlugPipe,
         MdsEditorWidgetSearchSuggestionsComponent,
-        BorderBoxObserverDirective,
     ],
     imports: [
         IMPORTS,

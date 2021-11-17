@@ -31,10 +31,10 @@
 <ul *ngIf="entriesService.sort?.customSortingInProgress"
     class="card-grid card-grid-reorder"
 >
-  <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+  <ng-container *ngIf="(visibleNodes$ | async) as nodes">
     <div
       class="card-grid-order-wrapper"
-      *ngFor="let node of getVisibleNodes(nodes); let i = index"
+      *ngFor="let node of nodes; let i = index"
       role="none"
       cdkDropList
       cdkDropListOrientation="horizontal"
@@ -61,6 +61,7 @@
   <ul *ngIf="!entriesService.dragDrop?.dragAllowed"
       class="card-grid"
       #grid
+      (appBorderBoxObserver)="onGridSizeChanges()"
       infiniteScroll
       (scrolled)="loadData()"
   >
@@ -69,6 +70,7 @@
   <ul *ngIf="entriesService.dragDrop?.dragAllowed"
       class="card-grid"
       #grid
+      (appBorderBoxObserver)="onGridSizeChanges()"
       infiniteScroll
       (dragleave)="dragExit($event)"
       (scrolled)="loadData()"
@@ -76,10 +78,10 @@
     <ng-container
       *ngTemplateOutlet="globalOptions"
     ></ng-container>
-    <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+    <ng-container *ngIf="(visibleNodes$ | async) as nodes">
       <div
         class="card-grid-drag-wrapper"
-        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        *ngFor="let node of nodes; let i = index"
         role="none"
         cdkDropList
         cdkDropListOrientation="vertical"
@@ -139,17 +141,17 @@
   <ng-container
     *ngTemplateOutlet="globalOptions"
   ></ng-container>
-  <ng-container *ngIf="(entriesService.dataSource?.connect() | async) as nodes">
+  <ng-container *ngIf="(visibleNodes$ | async) as nodes">
     <ng-container *ngIf="displayType === NodeEntriesDisplayType.SmallGrid">
       <app-node-entries-card-small
-        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        *ngFor="let node of nodes; let i = index"
         [node]="node"
         role="listitem"
       ></app-node-entries-card-small>
     </ng-container>
     <ng-container *ngIf="displayType === NodeEntriesDisplayType.Grid">
       <app-node-entries-card
-        *ngFor="let node of getVisibleNodes(nodes); let i = index"
+        *ngFor="let node of nodes; let i = index"
         [node]="node"
         [dropdown]="dropdown"
         role="listitem"
@@ -160,7 +162,7 @@
   <div style="display: flex; flex-wrap: wrap" cdkDropListGroup>
     <mat-card cdkDropList cdkDropListOrientation="horizontal" (cdkDropListEntered)="debug($event)"
               (cdkDropListExited)="debug($event)"
-      *ngFor="let node of (entriesService.dataSource?.connect() | async)"
+      *ngFor="let node of (nodes$ | async)"
     ><div cdkDrag>
       {{node.name}}
     </div>
