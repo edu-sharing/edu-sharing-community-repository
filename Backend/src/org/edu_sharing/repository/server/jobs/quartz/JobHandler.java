@@ -320,6 +320,10 @@ public class JobHandler {
 				if (job instanceof AbstractJob) {
 					((AbstractJob) job).setStarted(false);
 				}
+				if(context.getJobDetail() != null && context.getJobDetail().getJobDataMap() != null){
+					String vetoBy = (String)context.getJobDetail().getJobDataMap().get(JobHandler.VETO_BY_KEY);
+					Logger.getLogger(context.getJobDetail().getJobClass()).info("Job was vetoed by "+vetoBy);
+				}
 			}
 
 			@Override
