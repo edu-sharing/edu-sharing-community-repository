@@ -1,7 +1,9 @@
 import * as rxjs from 'rxjs';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
+/**
+ * Provides hooks to subscribe- and unsubscribe events on the observable.
+ */
 export function onSubscription<T>({
     onSubscribe,
     onUnsubscribe,
@@ -11,13 +13,10 @@ export function onSubscription<T>({
 }): rxjs.MonoTypeOperatorFunction<T> {
     return (source$: Observable<T>) => {
         return new Observable((subscriber) => {
-            const destroyed$ = new Subject<void>();
             onSubscribe?.();
-            source$.pipe(takeUntil(destroyed$)).subscribe(subscriber);
+            source$.subscribe(subscriber);
             return () => {
                 onUnsubscribe?.();
-                destroyed$.next();
-                destroyed$.complete();
             };
         });
     };

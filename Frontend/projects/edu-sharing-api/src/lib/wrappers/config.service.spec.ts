@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import { ConfigService } from './config.service';
@@ -9,14 +9,8 @@ describe('ConfigService', () => {
     beforeEach(() => {
         // const httpClientSpy = jasmine.createSpyObj('ValueService', []);
         TestBed.configureTestingModule({
-            providers: [
-                {
-                    provide: HttpClient,
-                    useValue: {},
-                },
-                ApiRequestConfiguration,
-            ],
-            // imports: [EduSharingApiModule]
+            imports: [HttpClientTestingModule],
+            providers: [ApiRequestConfiguration],
         });
         service = TestBed.inject(ConfigService);
     });

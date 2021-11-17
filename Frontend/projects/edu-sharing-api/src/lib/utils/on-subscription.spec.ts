@@ -1,4 +1,5 @@
 import { Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { onSubscription } from './on-subscription';
 
 describe('onSubscription', () => {
@@ -54,5 +55,16 @@ describe('onSubscription', () => {
             },
         });
         subject.error('foo');
+    });
+
+    it('should unsubscribe from source', () => {
+        const observable = subject.pipe(onSubscription({}));
+        expect(subject.observers.length).toBe(0);
+        observable.pipe(take(2)).subscribe();
+        expect(subject.observers.length).toBe(1);
+        subject.next('foo');
+        expect(subject.observers.length).toBe(1);
+        subject.next('bar');
+        expect(subject.observers.length).toBe(0);
     });
 });
