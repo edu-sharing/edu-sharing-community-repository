@@ -60,7 +60,7 @@ export class MdsEditorWidgetLicenseComponent
             }
             return license;
         });
-        this.checked = this.widget.getInitialValues().jointValues ?? [];
+        this.checked = this.widget.getInitialValues()?.jointValues ?? [];
     }
 
     async getValues(values: Values) {
