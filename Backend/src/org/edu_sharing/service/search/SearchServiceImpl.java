@@ -295,7 +295,9 @@ public class SearchServiceImpl implements SearchService {
 							}
 						} else if(!isAdmin) {
 							additionalQuery = new StringBuilder();
-							additionalQuery.append(" AND NOT ISNULL:\"ccm:group_signup_method\"");
+							// seems not necessary since we filter by user groups anyway
+							// + this will also hide any groups in the user manager for org admins
+							// additionalQuery.append(" AND NOT ISNULL:\"ccm:group_signup_method\"");
 						}
 						
 						parameters

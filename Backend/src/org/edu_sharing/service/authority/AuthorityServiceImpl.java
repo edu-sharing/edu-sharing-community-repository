@@ -117,9 +117,13 @@ public class AuthorityServiceImpl implements AuthorityService {
 	@Override
 	public synchronized boolean hasModifyAccessToGroup(String groupName){
     	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
-    	if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+    	if(AuthorityServiceHelper.isAdmin()) {
 			return true;
-    	// Detect the group prefix and decide
+		}
+		if(!LightbendConfigLoader.get().getBoolean("repository.organizations.admins.canManage")) {
+			return false;
+		}
+				// Detect the group prefix and decide
     	String[] split=groupName.split("_");
     	if(split.length<2)
     		return false;
@@ -184,7 +188,12 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public boolean hasAdminAccessToGroup(String groupName){
-		return hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP);
+		if(AuthenticationUtil.isRunAsUserTheSystemUser() || AuthorityServiceHelper.isAdmin()){
+			return true;
+		}
+		return
+				LightbendConfigLoader.get().getBoolean("repository.organizations.admins.canManage") &&
+				hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP);
 	}
 	@Override
 	public boolean hasAdminAccessToMediacenter(String groupName){
@@ -197,8 +206,12 @@ public class AuthorityServiceImpl implements AuthorityService {
 	public synchronized boolean hasAdminAccessToOrganization(String orgName){
 		try {
 	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
-			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+			if(AuthorityServiceHelper.isAdmin()) {
 				return true;
+			}
+			if(!LightbendConfigLoader.get().getBoolean("repository.organizations.admins.canManage")) {
+				return false;
+			}
 
 
 			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP,orgName);
