@@ -271,7 +271,7 @@
                                 {{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.dataSourceCollections.getTotal()}})
                               </h2>
                               <button
-                                *ngIf="!searchService.dataSourceCollections.areAllDisplayed() || collectionsMore"
+                                *ngIf="(areAllCollectionsDisplayed$ | async) === false || collectionsMore"
                                 mat-button
                                 color="primary"
                                 class="toggle"

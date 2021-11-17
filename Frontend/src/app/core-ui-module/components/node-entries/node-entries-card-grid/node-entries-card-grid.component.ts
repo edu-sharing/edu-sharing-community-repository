@@ -37,6 +37,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     );
     private readonly maxRows$ = this.entriesService.gridConfig$.pipe(
         map((gridConfig) => gridConfig?.maxRows || null),
+        distinctUntilChanged(),
     );
     private readonly itemsPerRowSubject = new BehaviorSubject<number | null>(null);
     readonly visibleNodes$ = rxjs
