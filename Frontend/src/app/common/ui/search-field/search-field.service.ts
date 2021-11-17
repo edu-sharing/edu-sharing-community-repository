@@ -23,7 +23,7 @@ export class SearchFieldService {
     /** Properties for which to fetch suggestions. */
     readonly categoriesSubject = new BehaviorSubject<string[]>(null);
     /** Active filters for use by search field. */
-    readonly filters$: Observable<LabeledValuesDict>;
+    readonly filters$: Observable<LabeledValuesDict | null>;
     /** Active suggestions for use by search field. */
     readonly suggestions$: Observable<FacetsDict>;
     /** Emits when the user added or removed filters through the search field. */

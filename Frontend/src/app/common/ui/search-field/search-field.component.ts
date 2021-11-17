@@ -16,7 +16,7 @@ import { map, takeUntil, tap } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../mds-editor/types';
 import { SearchFieldService } from './search-field.service';
-import {LabeledValuesDict} from '../../../../../projects/edu-sharing-api/src/lib/wrappers/mds-label.service';
+import { LabeledValuesDict } from '../../../../../projects/edu-sharing-api/src/lib/wrappers/mds-label.service';
 
 @Component({
     selector: 'app-search-field',
@@ -88,7 +88,9 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         this.filters$
             .pipe(
                 takeUntil(this.destroyed$),
-            ).subscribe((filters) => this.updateFilterCount(filters));
+                map((filters) => this.getFiltersCount(filters)),
+            )
+            .subscribe((filtersCount) => (this.filtersCount = filtersCount));
         this.suggestions$
             .pipe(
                 takeUntil(this.destroyed$),
@@ -99,7 +101,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
                 // We only fetch new suggestions when the user types into the search field. In case
                 // the user dismissed the suggestions overlay earlier (`showOverlay = false`), this
                 // is the time to show it again.
-                if(this.hasSuggestions) {
+                if (this.hasSuggestions) {
                     this.showOverlay = true;
                 }
             });
@@ -185,14 +187,17 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         );
     }
 
-    updateFilterCount(filters: LabeledValuesDict) {
-        const mapped = Object.keys(filters).filter(
-            (f) => this.categories$.value.includes(f)
-        ).map((k) => filters[k].length);
-        if(!mapped.length) {
-            this.filtersCount = 0;
+    getFiltersCount(filters: LabeledValuesDict | null): number {
+        if (!filters) {
+            return 0;
+        }
+        const mapped = Object.keys(filters)
+            .filter((f) => this.categories$.value.includes(f))
+            .map((k) => filters[k].length);
+        if (!mapped.length) {
+            return 0;
         } else {
-            this.filtersCount = mapped.reduce((a, b) => a + b);
+            return mapped.reduce((a, b) => a + b);
         }
     }
 }
