@@ -164,7 +164,6 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     onInputFocus(): void {
-        console.log('focus');
         Promise.resolve().then(() => (this.inputHasFocus = true));
         this.showOverlay = true;
     }
