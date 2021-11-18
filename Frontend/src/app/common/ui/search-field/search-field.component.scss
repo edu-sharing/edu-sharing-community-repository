@@ -16,16 +16,6 @@
         padding: 0;
         border: none;
     }
-    .mat-chip-list-wrapper {
-        // flex-wrap: nowrap;
-    }
-    .mat-chip {
-        flex-shrink: 0;
-    }
-    .mat-chip-list .mat-chip.mat-standard-chip .mat-chip-remove {
-        color: inherit;
-        opacity: 0.4;
-    }
 }
 
 mat-form-field {
@@ -75,6 +65,10 @@ mat-form-field {
                     background-color: $color;
                 }
             }
+            .mat-chip-remove {
+                color: inherit;
+                opacity: 0.4;
+            }
         }
     }
 }
@@ -86,7 +80,7 @@ mat-form-field {
     min-width: 220px;
     .filter-prefix {
         font-weight: bold;
-        padding:5px;
+        padding: 5px;
         width: 24px;
         font-size: $fontSizeXSmall;
         text-align: center;
