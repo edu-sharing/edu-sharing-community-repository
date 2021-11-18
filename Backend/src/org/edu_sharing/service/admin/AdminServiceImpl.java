@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
@@ -20,6 +21,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import net.sf.acegisecurity.Authentication;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -987,5 +989,18 @@ public class AdminServiceImpl implements AdminService  {
 			result.add(desc);
 		}
 		return result;
+	}
+
+	@Override
+	public void switchAuthentication(String authorityName) {
+		HttpSession session = Context.getCurrentInstance().getRequest().getSession(true);
+		//session.setMaxInactiveInterval(30);
+		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+		String ticket = authTool.setUser(authorityName);
+		authTool.storeAuthInfoInSession(
+				authorityName,
+				ticket,
+				CCConstants.AUTH_TYPE_OAUTH,
+				session);
 	}
 }

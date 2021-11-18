@@ -45,6 +45,8 @@ import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
 import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {AuthoritySearchMode} from '../../common/ui/authority-search-input/authority-search-input.component';
+import {PlatformLocation} from '@angular/common';
 
 
 type LuceneData = {
@@ -69,12 +71,14 @@ type LuceneData = {
   ]
 })
 export class AdminComponent {
+  readonly AuthoritySearchMode = AuthoritySearchMode;
   readonly SCOPES = Scope;
   readonly SkipTarget = SkipTarget;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
+              private platformLocation: PlatformLocation,
               private config: ConfigurationService,
               private translate: TranslateService,
               private iamService: RestIamService,
@@ -211,6 +215,7 @@ export class AdminComponent {
   private loginResult: LoginResult;
   private mediacenters: any[];
   ownAppMode='repository';
+  authenticateAuthority: Authority;
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -1249,5 +1254,32 @@ export class AdminComponent {
       this.job.params = JSON.stringify(data, null, 2);
     }
   }
+
+    async authenticateAsUser(force = false) {
+        if (!force) {
+            this.toast.showConfigurableDialog({
+                title: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER',
+                message: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER_DETAILS',
+                buttons: DialogButton.getOkCancel(
+                    () => this.toast.closeModalDialog(),
+                    () => {
+                        this.toast.closeModalDialog();
+                        this.authenticateAsUser(true);
+                    })
+            });
+            return;
+        }
+        try {
+            await this.admin.switchAuthentication(this.authenticateAuthority.authorityName).toPromise();
+            UIHelper.goToDefaultLocation(
+                this.router,
+                this.platformLocation,
+                this.config,
+                true
+            );
+        } catch (e) {
+
+        }
+    }
 }
 

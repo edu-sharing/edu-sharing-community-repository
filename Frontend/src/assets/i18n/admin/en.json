@@ -272,7 +272,10 @@
             "UPLOAD_TEMP": "Upload files to temporary directory",
             "CHOOSE_UPLOAD_TEMP": "Select file",
             "UPLOAD_TEMP_START": "Upload",
-            "UPLOAD_TEMP_DONE": "File was stored on the server as {{filename}}"
+            "UPLOAD_TEMP_DONE": "File was stored on the server as {{filename}}",
+            "AUTHENTICATE": "Start session",
+            "AUTHENTICATE_AS_USER": "Start session as user",
+            "AUTHENTICATE_AS_USER_DETAILS": "If you continue the current admin session will be closed and you will be authenticated as the coosen user. You will need to relogin as admin after you've finished your test. Do you want to continue?"
         },
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",

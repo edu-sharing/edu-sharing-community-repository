@@ -274,7 +274,10 @@
             "UPLOAD_TEMP": "Dateien in temporäres Verzeichnis hochladen",
             "CHOOSE_UPLOAD_TEMP": "Datei wählen",
             "UPLOAD_TEMP_START": "Hochladen",
-            "UPLOAD_TEMP_DONE": "Datei wurde unter {{filename}} auf dem Server abgelegt"
+            "UPLOAD_TEMP_DONE": "Datei wurde unter {{filename}} auf dem Server abgelegt",
+            "AUTHENTICATE": "Sitzung starten",
+            "AUTHENTICATE_AS_USER": "Sitzung als Nutzer starten",
+            "AUTHENTICATE_AS_USER_DETAILS": "Wenn sie fortfahren, wird die bestehende Admin-Sitzung beendet und eine Sitzung als der gewählte Nutzer gestartet. Um die Admin-Rechte wieder zu erlangen, müssen Sie sich erneut anmelden. Fortfahren?"
         },
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",

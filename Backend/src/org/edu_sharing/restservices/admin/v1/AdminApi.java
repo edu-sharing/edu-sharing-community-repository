@@ -65,6 +65,7 @@ import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.lifecycle.PersonDeleteOptions;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.PersonReport;
@@ -1543,6 +1544,25 @@ public class AdminApi {
 									 String content) {
 		try {
 			AdminServiceFactory.getInstance().updateConfigFile(filename,content);
+			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@POST
+	@Path("/authenticate/{authorityName}")
+	@ApiOperation(value = "switch the session to a known authority name")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response switchAuthority(@Context HttpServletRequest req,
+									 @ApiParam(value = "the authority to use (must be a person)") @PathParam("authorityName") String authorityName) {
+		try {
+			AdminServiceFactory.getInstance().switchAuthentication(authorityName);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

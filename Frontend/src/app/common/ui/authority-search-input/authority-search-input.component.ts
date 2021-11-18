@@ -9,11 +9,12 @@ import {
     Group, RestConnectorService,
     RestConstants,
     RestIamService,
-    RestOrganizationService,
+    RestOrganizationService, User,
 } from '../../../core-module/core.module';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import { PermissionNamePipe } from '../../../core-ui-module/pipes/permission-name.pipe';
 import { SuggestItem } from '../autocomplete/autocomplete.component';
+import {GroupProfile} from '../../../../../dist/edu-sharing-api/lib/api/models';
 
 interface SuggestionGroup {
     label: string,
@@ -108,6 +109,8 @@ export class AuthoritySearchInputComponent {
             }
         } else {
             switch (this.mode) {
+                case AuthoritySearchMode.Users:
+                    return this.getUsersSuggestions(inputValue);
                 case AuthoritySearchMode.UsersAndGroups:
                     return this.getUsersAndGroupsSuggestions(inputValue);
                 case AuthoritySearchMode.Organizations:
@@ -168,7 +171,43 @@ export class AuthoritySearchInputComponent {
             map((suggestionGroups) => suggestionGroups.filter((group) => group.values.length > 0)),
         );
     }
-
+    private getUsersSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
+        const observables: Observable<SuggestionGroup>[] = [];
+        observables.push(
+            this.iam.searchUsers(inputValue, false).pipe(
+                map(({ users }) => ({
+                    label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
+                    values: this.convertData(users),
+                })),
+            ),
+        );
+        if (this.globalSearchAllowed) {
+            observables.push(
+                this.iam.searchUsers(inputValue, true).pipe(
+                    map(({ users }) => ({
+                        label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
+                        values: this.convertData(users),
+                    })),
+                ),
+            );
+        }
+        return forkJoin(observables).pipe(
+            // Filter double entries from global results
+            map((suggestionGroups) => {
+                if (suggestionGroups.length === 2) {
+                    suggestionGroups[1].values = suggestionGroups[1].values.filter(
+                        (globalSuggestion) =>
+                            suggestionGroups[0].values.every(
+                                (localSuggestion) => localSuggestion.id !== globalSuggestion.id,
+                            ),
+                    );
+                }
+                return suggestionGroups;
+            }),
+            // Filter empty lists
+            map((suggestionGroups) => suggestionGroups.filter((group) => group.values.length > 0)),
+        );
+    }
     private getOrganizationsSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
         return this.organization.getOrganizations(inputValue).pipe(
             map(({ organizations }) => [
@@ -180,14 +219,14 @@ export class AuthoritySearchInputComponent {
         );
     }
 
-    private convertData(authorities: AuthorityProfile[] | Group[]): SuggestItem[] {
+    private convertData(authorities: AuthorityProfile[] | Group[] | User[]): SuggestItem[] {
         const result: SuggestItem[] = [];
         for (const user of authorities) {
-            const group = user.profile.displayName != null;
+            const group = (user.profile as GroupProfile).displayName != null;
             const item = new SuggestItem(
                 user.authorityName,
                 group
-                    ? user.profile.displayName
+                    ? (user.profile as GroupProfile).displayName
                     : this.nodeHelper.getUserDisplayName(user as AuthorityProfile),
                 group ? 'group' : 'person',
                 '',
@@ -203,6 +242,7 @@ export class AuthoritySearchInputComponent {
 }
 
 export enum AuthoritySearchMode {
+    Users = 'Users',
     UsersAndGroups = 'UsersAndGroups',
     Organizations = 'Organizations',
 }
