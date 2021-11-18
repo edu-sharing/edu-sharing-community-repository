@@ -732,9 +732,9 @@ export class MdsEditorInstanceService implements OnDestroy {
                         .map((nativeWidget) =>
                             nativeWidget.component.hasChanges.pipe(
                                 switchMap((hasChanges) =>
-                                    // TODO: check if this nlp can happen and should be catched
-                                    // from(nativeWidget.component.getValues ? nativeWidget.component.getValues({}, null) : of({})),
-                                    from(nativeWidget.component.getValues({}, null)),
+                                    nativeWidget.component.getValues
+                                        ? from(nativeWidget.component.getValues({}, null))
+                                        : of({}),
                                 ),
                             ),
                         ),
