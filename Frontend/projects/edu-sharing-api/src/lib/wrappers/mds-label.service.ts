@@ -66,18 +66,28 @@ export class MdsLabelService {
 
     /** Gets a label for a single value. */
     getLabel(mdsId: MdsIdentifier, property: string, value: string): Observable<string> {
+        return this.findValue(mdsId, property, value).pipe(
+            map((msdValue) => msdValue?.caption ?? value),
+        );
+    }
+
+    /** Returns the first mds-value definition for the given id. */
+    findValue(
+        mdsId: MdsIdentifier,
+        property: string,
+        id: string,
+    ): Observable<MdsValue | undefined> {
         return this.getValueDefinitions(mdsId, property).pipe(
-            map((definitions) => definitions?.find((d) => d.id === value)?.caption ?? value),
+            map((definitions) =>
+                definitions?.find((value) => value.id === id || value.alternativeIds?.includes(id)),
+            ),
         );
     }
 
     /**
      * Gets values for a given property from the respective mds widget definitions.
      */
-    private getValueDefinitions(
-        mdsId: MdsIdentifier,
-        property: string,
-    ): Observable<MdsValue[] | null> {
+    getValueDefinitions(mdsId: MdsIdentifier, property: string): Observable<MdsValue[] | null> {
         return this.mds.getMetadataSet(mdsId).pipe(
             map(
                 (mds) =>
