@@ -10,13 +10,14 @@ import {
     ViewChild,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { MatChip } from '@angular/material/chips';
 import { FacetsDict, LabeledValue } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
-import { map, takeUntil, tap } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
+import { LabeledValuesDict } from '../../../../../projects/edu-sharing-api/src/lib/wrappers/mds-label.service';
 import { SearchFieldFacetsComponent } from '../mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../mds-editor/types';
 import { SearchFieldService } from './search-field.service';
-import { LabeledValuesDict } from '../../../../../projects/edu-sharing-api/src/lib/wrappers/mds-label.service';
 
 @Component({
     selector: 'app-search-field',
@@ -50,6 +51,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     @ViewChild('input') input: ElementRef;
     @ViewChild(CdkConnectedOverlay) private overlay: CdkConnectedOverlay;
     @ViewChild(SearchFieldFacetsComponent) private searchFieldFacets: SearchFieldFacetsComponent;
+    @ViewChild(MatChip) private firstActiveChip: MatChip;
 
     readonly inputControl = new FormControl('');
     readonly filters$ = this.searchField.filters$;
@@ -141,7 +143,11 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     focusOverlayIfOpen(event: Event): void {
-        if (this.showOverlay && this.hasSuggestions) {
+        if (this.firstActiveChip) {
+            this.firstActiveChip._elementRef.nativeElement.focus();
+            event.stopPropagation();
+            event.preventDefault();
+        } else if (this.showOverlay && this.hasSuggestions) {
             this.searchFieldFacets.focus();
             event.stopPropagation();
             event.preventDefault();
