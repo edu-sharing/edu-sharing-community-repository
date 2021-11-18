@@ -17,17 +17,6 @@
 
   <properties>
 
-    <docker.registry>community.docker.edu-sharing.com</docker.registry>
-    <!--suppress UnresolvedMavenProperty -->
-    <docker.username>${env.DOCKER_USERNAME}</docker.username>
-    <!--suppress UnresolvedMavenProperty -->
-    <docker.password>${env.DOCKER_PASSWORD}</docker.password>
-
-    <docker.image>community/edusharing</docker.image>
-    <docker.tag>${project.version}</docker.tag>
-
-    <docker.verbose>true</docker.verbose>
-
     <docker.from.apache.exporter>docker.io/bitnami/apache-exporter:0.10.1</docker.from.apache.exporter>
     <docker.from.apache.server>docker.io/php:7.3-apache</docker.from.apache.server>
     <docker.from.elasticsearch.exporter>quay.io/prometheuscommunity/elasticsearch-exporter:v1.3.0</docker.from.elasticsearch.exporter>
@@ -47,40 +36,6 @@
     <repository.redis.client.version>3.16.4</repository.redis.client.version>
 
   </properties>
-
-  <build>
-
-    <pluginManagement>
-
-      <plugins>
-
-        <plugin>
-          <groupId>io.fabric8</groupId>
-          <artifactId>docker-maven-plugin</artifactId>
-          <configuration>
-            <authConfig>
-              <push>
-                <username>${docker.username}</username>
-                <password>${docker.password}</password>
-              </push>
-            </authConfig>
-            <images>
-              <image>
-                <registry>${docker.registry}</registry>
-                <build>
-                  <contextDir>${project.build.directory}/build</contextDir>
-                  <dockerFile>Dockerfile</dockerFile>
-                </build>
-              </image>
-            </images>
-          </configuration>
-        </plugin>
-
-      </plugins>
-
-    </pluginManagement>
-
-  </build>
 
   <profiles>
 

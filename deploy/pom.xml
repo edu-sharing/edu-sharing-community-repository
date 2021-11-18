@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -17,6 +18,18 @@
 
   <properties>
     <build.timestamp>${maven.build.timestamp}</build.timestamp>
+
+    <docker.registry>community.docker.edu-sharing.com</docker.registry>
+    <!--suppress UnresolvedMavenProperty -->
+    <docker.username>${env.DOCKER_USERNAME}</docker.username>
+    <!--suppress UnresolvedMavenProperty -->
+    <docker.password>${env.DOCKER_PASSWORD}</docker.password>
+
+    <docker.image>community/edusharing</docker.image>
+    <docker.tag>${project.version}</docker.tag>
+
+    <docker.verbose>true</docker.verbose>
+
     <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
   </properties>
 
@@ -38,13 +51,36 @@
           <version>2.8.2</version>
         </plugin>
 
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>docker-maven-plugin</artifactId>
+          <configuration>
+            <authConfig>
+              <push>
+                <username>${docker.username}</username>
+                <password>${docker.password}</password>
+              </push>
+            </authConfig>
+            <images>
+              <image>
+                <registry>${docker.registry}</registry>
+                <build>
+                  <contextDir>${project.build.directory}/build</contextDir>
+                  <dockerFile>Dockerfile</dockerFile>
+                </build>
+              </image>
+            </images>
+          </configuration>
+        </plugin>
+
       </plugins>
 
     </pluginManagement>
 
   </build>
 
-<modules>  <module>docker</module>
+  <modules>
+    <module>docker</module>
     <module>installer</module>
   </modules>
 </project>
