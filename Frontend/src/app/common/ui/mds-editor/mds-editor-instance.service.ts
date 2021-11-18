@@ -812,20 +812,18 @@ export class MdsEditorInstanceService implements OnDestroy {
         mdsId: string = '-default-',
         repository: string = '-home-',
         editorMode: EditorMode = 'search',
-        initialValues?: Values,
+        initialValues: Values = {},
     ): Promise<EditorType> {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
         await this.initMds(groupId, mdsId, repository, null, initialValues);
-        if(initialValues) {
-            for (const widget of this.widgets.value) {
-                widget.initWithValues(initialValues);
-            }
-            for (const widget of this.nativeWidgets.value) {
-                if (widget instanceof MdsEditorWidgetCore) {
-                    (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
-                }
+        for (const widget of this.widgets.value) {
+            widget.initWithValues(initialValues);
+        }
+        for (const widget of this.nativeWidgets.value) {
+            if (widget instanceof MdsEditorWidgetCore) {
+                (widget as MdsEditorWidgetCore).widget.initWithValues(initialValues);
             }
         }
 
