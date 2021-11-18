@@ -6,7 +6,7 @@ import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
-    Group, RestConnectorService,
+    Group, GroupProfile, RestConnectorService,
     RestConstants,
     RestIamService,
     RestOrganizationService, User,
@@ -14,7 +14,6 @@ import {
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import { PermissionNamePipe } from '../../../core-ui-module/pipes/permission-name.pipe';
 import { SuggestItem } from '../autocomplete/autocomplete.component';
-import {GroupProfile} from '../../../../../dist/edu-sharing-api/lib/api/models';
 
 interface SuggestionGroup {
     label: string,
