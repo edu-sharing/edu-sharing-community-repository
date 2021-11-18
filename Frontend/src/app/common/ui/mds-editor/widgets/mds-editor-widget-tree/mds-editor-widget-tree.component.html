@@ -6,6 +6,8 @@
   [control]="chipsControl"
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
+  appBorderBoxObserver
+  #triggerBorderBox="borderBoxObserver"
 >
   <mat-chip-list
     #chipList
@@ -55,7 +57,7 @@
   [cdkConnectedOverlayOrigin]="trigger"
   [cdkConnectedOverlayPositions]="overlayPositions"
   [cdkConnectedOverlayFlexibleDimensions]="true"
-  [cdkConnectedOverlayWidth]="trigger.elementRef.nativeElement.getBoundingClientRect().width"
+  [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"
 >
