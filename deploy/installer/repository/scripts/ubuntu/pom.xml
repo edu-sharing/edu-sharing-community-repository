@@ -13,17 +13,17 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-deploy-installer-repository-scripts-debian</artifactId>
+  <artifactId>edu_sharing-community-deploy-installer-repository-scripts-ubuntu</artifactId>
   <packaging>pom</packaging>
 
-  <name>edu_sharing-community-deploy-installer-repository-scripts-debian</name>
+  <name>edu_sharing-community-deploy-installer-repository-scripts-ubuntu</name>
 
   <properties>
-    <os.distribution>debian</os.distribution>
+    <os.distribution>ubuntu</os.distribution>
   </properties>
 
   <modules>
-    <module>bullseye</module>
+    <module>focal</module>
   </modules>
 
 </project>
