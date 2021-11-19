@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { LabeledValue, MdsIdentifier, SearchResults } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
@@ -190,7 +190,7 @@ export class SearchService {
      * @param minimumScore The minimum score assigned my ElasticSearch for a suggestion to be
      * returned. If no suggestion meets the minimum score, `null` is returned.
      */
-    getDidYouMeanSuggestion(minimumScore = 0.5): Observable<DidYouMeanSuggestion | null> {
+    getDidYouMeanSuggestion(minimumScore = 0): Observable<DidYouMeanSuggestion | null> {
         return this.didYouMeanSuggestionsSubject.pipe(
             onSubscription({
                 onSubscribe: () => this.didYouMeanSuggestionsSubscribers++,
