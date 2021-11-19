@@ -79,8 +79,6 @@ import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiS
 import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
-const DID_YOU_MEAN_SUGGESTION_MINIMUM_SCORE = 0.01;
-
 @Component({
     selector: 'app-search',
     templateUrl: 'search.component.html',
@@ -189,7 +187,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         // Prevent changed-after-checked error
         .pipe(delay(0));
     readonly didYouMeanSuggestion$ = this.searchApi
-        .getDidYouMeanSuggestion(DID_YOU_MEAN_SUGGESTION_MINIMUM_SCORE)
+        .getDidYouMeanSuggestion()
         .pipe(shareReplay(1));
 
     constructor(
