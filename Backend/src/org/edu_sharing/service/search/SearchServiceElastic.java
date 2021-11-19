@@ -64,6 +64,7 @@ import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestionBuilder;
+import org.elasticsearch.search.suggest.phrase.SmoothingModel;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -307,7 +308,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                                             .confidence((float)0.9)
                                             .highlight("<em>","</em>")
                                             .addCandidateGenerator(new DirectCandidateGeneratorBuilder("properties.cclom:title.trigram")
-                                            .suggestMode("always"))
+                                            .suggestMode("popular"))
+                                            .smoothingModel( new org.elasticsearch.search.suggest.phrase.Laplace(0.5))
                                               );
                     searchSourceBuilder.suggest(suggest);
                 }
