@@ -198,7 +198,9 @@
                 "NO_RECEIVER": "It was specified that one or more elements should be assigned to another user, but no target user or organization was selected. Please define a target user and the responsible organization",
                 "DELETE_COLLECTIONS": "It was specified that collections created by this user should be removed. If there are collections or materials of other users in subordinate collections, these will also be removed",
                 "NON_CONFORM": "It was specified that one or more elements remain unchanged. The user ID of the user will be retained on these elements. If necessary, check whether this is possible under data protection law, or assign the files to another user",
-                "ASSIGNING_DELETED_USER": "For all items that are not deleted, the user name \"deleted user\" will be displayed in the future"
+                "ASSIGNING_DELETED_USER": "For all items that are not deleted, the user name \"deleted user\" will be displayed in the future",
+                "HOME_FOLDER_NONE": "If the home folder won't be deleted it will get orphan and receive a deleted user-id",
+                "HOME_FOLDER_DELETE": "If the home folder will be deleted elements from other users created in this folder might be also deleted"
             },
             "DELETE_MODE": {
                 "none": "do nothing",

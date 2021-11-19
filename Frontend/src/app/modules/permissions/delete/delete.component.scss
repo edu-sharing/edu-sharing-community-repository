@@ -28,7 +28,12 @@
     display: flex;
     flex-wrap: wrap;
     >div{
+      width: 0;
       flex-grow: 1;
+        info-message {
+            display: flex;
+            padding: 10px;
+        }
     }
   }
   .structure,.move{
