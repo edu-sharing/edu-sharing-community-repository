@@ -20,7 +20,6 @@
 
   <modules>
     <module>debian</module>
-    <module>ubuntu</module>
   </modules>
 
 </project>
