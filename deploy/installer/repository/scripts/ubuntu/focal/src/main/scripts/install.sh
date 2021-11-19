@@ -35,7 +35,7 @@ pushd "$ALF_HOME"
 }
 
 echo "- make a snapshot of Alfresco Platform"
-tar -czvf snapshot.tar.gz alf_data solr4 tomcat
+tar -czf snapshot.tar.gz alf_data solr4 tomcat
 
 echo "- clean up outdated libraries"
 rm -f tomcat/lib/postgresql-*
@@ -57,9 +57,9 @@ sed -i -r 's|javax\.xml\.parsers\.SAXParserFactory=.*\"|javax.xml.parsers.SAXPar
 grep -q 'javax\.xml\.parsers\.SAXParserFactory' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
 
 echo "- download edu-sharing distribution"
-mvn -q dependency:get \
-	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
-	-DremoteRepositories=https://artifacts.edu-sharing.com/repository/community-releases/,https://artifacts.edu-sharing.com/repository/community-snapshots/ \
+mvn dependency:get \
+	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:maven-develop-SNAPSHOT:tar.gz:bin \
+	-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
 	-Dtransitive=false
 
 echo "- unpack edu-sharing distribution"
@@ -68,13 +68,15 @@ mvn -q dependency:unpack \
 	-DoutputDirectory=.
 
 echo "- install Alfresco Module Packages"
-java -jar bin/alfresco-mmt.jar install amps/alfresco/0    tomcat/webapps/alfresco    -directory -force
-java -jar bin/alfresco-mmt.jar install amps/alfresco/1    tomcat/webapps/alfresco    -directory -force
-java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -force
+[[ -d amps/alfresco/0 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/0    tomcat/webapps/alfresco    -directory -force
+[[ -d amps/alfresco/1 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/1    tomcat/webapps/alfresco    -directory -force
+[[ -d amps/edu-sharing/1 ]] && java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -force
 
 echo "- initialize git-repo for custom configuration"
 git init
 git add tomcat/shared/*
+git config --local user.email "you@example.com"
+git config --local user.name  "Your name"
 git commit -m "After install."
 git branch -m master original
 git checkout -b custom
