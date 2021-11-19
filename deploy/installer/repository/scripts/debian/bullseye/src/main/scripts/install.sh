@@ -57,7 +57,7 @@ sed -i -r 's|javax\.xml\.parsers\.SAXParserFactory=.*\"|javax.xml.parsers.SAXPar
 grep -q 'javax\.xml\.parsers\.SAXParserFactory' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
 
 echo "- download edu-sharing distribution"
-mvn dependency:get \
+mvn -q dependency:get \
 	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:maven-develop-SNAPSHOT:tar.gz:bin \
 	-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
 	-Dtransitive=false

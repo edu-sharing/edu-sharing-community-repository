@@ -6,6 +6,8 @@ export CATALINA_PID
 
 if [ "x$1" = "xstart" ]; then
   "$ALF_HOME"/tomcat/bin/startup.sh
+elif [ "x$1" = "xdaemon" ]; then
+  "$ALF_HOME"/tomcat/bin/catalina.sh run
 elif [ "x$1" = "xstop" ]; then
   "$ALF_HOME"/tomcat/bin/shutdown.sh 300 -force
 elif [ "x$1" = "xstatus" ]; then

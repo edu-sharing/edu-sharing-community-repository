@@ -181,6 +181,16 @@ COPY install.sh .
 RUN set -eux \
     && ./install.sh
 
+ENTRYPOINT ["./entrypoint.sh"]
+
 EXPOSE 8080
 
 VOLUME alf_data
+
+LABEL git.branch=${git.branch}
+LABEL git.closest.tag.name=${git.closest.tag.fixed}
+LABEL git.commit.id=${git.commit.id}
+LABEL git.dirty=${git.dirty}
+LABEL mvn.project.artifactId=${project.artifactId}
+LABEL mvn.project.groupId=${project.groupId}
+LABEL mvn.project.version=${project.version}
