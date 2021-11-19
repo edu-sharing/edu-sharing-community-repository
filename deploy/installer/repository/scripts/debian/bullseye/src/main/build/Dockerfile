@@ -92,6 +92,9 @@ RUN set -eux \
     && mkdir -p tomcat/webapps/alfresco \
     && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco \
     && rm tomcat/webapps/alfresco.war \
+    && mkdir -p tomcat/webapps/share \
+    && unzip tomcat/webapps/share.war -d tomcat/webapps/share \
+    && rm tomcat/webapps/share.war \
     && mkdir -p tomcat/webapps/solr4 \
     && unzip tomcat/webapps/solr4.war -d tomcat/webapps/solr4 \
     && rm tomcat/webapps/solr4.war

@@ -63,14 +63,17 @@ mvn -q dependency:get \
 	-Dtransitive=false
 
 echo "- unpack edu-sharing distribution"
-mvn -q dependency:unpack \
+mvn -q dependency:copy \
 	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
 	-DoutputDirectory=.
 
+tar xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
+rm edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
+
 echo "- install Alfresco Module Packages"
-[[ -d amps/alfresco/0 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/0    tomcat/webapps/alfresco    -directory -force
-[[ -d amps/alfresco/1 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/1    tomcat/webapps/alfresco    -directory -force
-[[ -d amps/edu-sharing/1 ]] && java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -force
+[[ -d amps/alfresco/0 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/0    tomcat/webapps/alfresco    -directory -nobackup -force
+[[ -d amps/alfresco/1 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/1    tomcat/webapps/alfresco    -directory -nobackup -force
+[[ -d amps/edu-sharing/1 ]] && java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
 
 echo "- initialize git-repo for custom configuration"
 git init

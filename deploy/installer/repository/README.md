@@ -89,9 +89,9 @@ Installation
 5. Deploy the Alfresco Module Packages (AMP) by calling:
 
    ```
-   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/0 $ALF_HOME/tomcat/webapps/alfresco -directory -force
-   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/1 $ALF_HOME/tomcat/webapps/alfresco -directory -force
-   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/edu-sharing/1 $ALF_HOME/tomcat/webapps/edu-sharing -directory -force
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/0 $ALF_HOME/tomcat/webapps/alfresco -directory -nobackup -force
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/1 $ALF_HOME/tomcat/webapps/alfresco -directory -nobackup -force
+   $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/edu-sharing/1 $ALF_HOME/tomcat/webapps/edu-sharing -directory -nobackup -force
    ```
 
 6. Initialize version control for your configuration by calling:
