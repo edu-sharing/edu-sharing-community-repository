@@ -27,52 +27,60 @@
  */
 package org.edu_sharing.repository.server.tools;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletContext;
+import javax.swing.table.TableCellRenderer;
 
-import com.typesafe.config.Config;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 
 
 public class Mail {
 	
 
 	public static String AUTH_TYPE_TLS = "tls";
+	public static String mailConfigFile = "ccmail.properties.xml";
 	private org.apache.log4j.Category logger = null;
 
-	private Config configSMTP = null;
-	private Config config = null;
+	private Properties props = null;
 
 	public Mail() {
 		logger = Logger.getInstance(Mail.class);
 		try{
-			config = LightbendConfigLoader.get().getConfig("repository.mail");
-			configSMTP = config.getConfig("server.smtp");
+			props = PropertiesHelper.getProperties(mailConfigFile, PropertiesHelper.XML);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 		}
 	}
-
+	public Properties getProperties(){
+		return props;
+	}
+	
 	private void sendMail(String sender, String senderName, String receiver, String subject, String message) throws EmailException {
 		logger.info("start mailing sender:" + sender + " receiver" + receiver + " message" + message);
 
 		
-		String mailServer = configSMTP.getString("host");
-		int smtpPort = configSMTP.getInt("port");
-		String username = configSMTP.getString("username");
-		String password = configSMTP.getString("password");
-		String authType = configSMTP.getString("authtype");
+		String mailServer = props.getProperty("mail.smtp.server");
+		logger.info("props:" + props);
+		Integer smtpPort = new Integer(props.getProperty("mail.smtp.port", "25"));
+		String username = props.getProperty("mail.smtp.username");
+		String password = props.getProperty("mail.smtp.passwd");
+		String authType = props.getProperty("mail.authtype");
 		logger.info("mailServer:" + mailServer + " smtpPort:" + smtpPort + "username:" + username + "password:" + password);
 		SimpleEmail email = new SimpleEmail();
 		
@@ -81,7 +89,7 @@ public class Mail {
 		
 		email.setDebug(true);
 		email.setHostName(mailServer);
-		email.setSmtpPort((int) smtpPort);
+		email.setSmtpPort(smtpPort.intValue());
 		
 		if(authType != null && !authType.trim().equals("")){
 			if(authType.trim().equals(AUTH_TYPE_TLS)){
@@ -131,11 +139,13 @@ public class Mail {
 	private void sendMailHtml(ServletContext context, String sender, String senderName, String replyTo, String receiver, String subject, String message) throws EmailException {
 		logger.info("start mailing sender:" + sender + " receiver" + receiver + " message" + message);
 
-		String mailServer = configSMTP.getString("host");
-		int smtpPort = configSMTP.getInt("port");
-		String username = configSMTP.getString("username");
-		String password = configSMTP.getString("password");
-		String authType = configSMTP.getString("authtype");
+		
+		String mailServer = props.getProperty("mail.smtp.server");
+		logger.info("props:" + props);
+		Integer smtpPort = new Integer(props.getProperty("mail.smtp.port", "25"));
+		String username = props.getProperty("mail.smtp.username");
+		String password = props.getProperty("mail.smtp.passwd");
+		String authType = props.getProperty("mail.authtype");
 		logger.info("mailServer:" + mailServer + " smtpPort:" + smtpPort + "username:" + username + "password:" + password);
 		HtmlEmail email = new HtmlEmail();
 		
@@ -144,7 +154,7 @@ public class Mail {
 		
 		email.setDebug(true);
 		email.setHostName(mailServer);
-		email.setSmtpPort((int) smtpPort);
+		email.setSmtpPort(smtpPort.intValue());
 		
 		if(authType != null && !authType.trim().equals("")){
 			if(authType.toLowerCase().trim().equals(AUTH_TYPE_TLS)){
@@ -175,7 +185,8 @@ public class Mail {
 			
 			email.addTo(receiver);
 			email.setSubject(subject);
-			if(replyTo != null && config.getBoolean("addReplyTo")) {
+			if(replyTo != null &&
+					props.getOrDefault("mail.addReplyTo","true").toString().equalsIgnoreCase("true")) {
 				try {
 					email.setReplyTo(Arrays.asList(InternetAddress.parse(replyTo)));
 				}catch(Throwable t){
@@ -218,19 +229,19 @@ public class Mail {
 	}
 
 	public void sendMail(String receiver, String subject, String message) throws EmailException {
-		sendMail(config.getString("from"), null, receiver, subject, message);
+		sendMail(props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"), null, receiver, subject, message);
 	}
 	
 	public void sendMail(String senderName, String receiver, String subject, String message) throws EmailException {
-		sendMail(config.getString("from"),senderName, receiver, subject, message);
+		sendMail(props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"),senderName, receiver, subject, message);
 	}
 	public void sendMailHtml(ServletContext context, String senderName, String replyTo, String receiver,String subject,String message,Map<String,String> replace) throws Exception {
 		subject=replaceString(subject,replace);
 		message=replaceString(message,replace);
-		sendMailHtml(context,config.getString("from"),senderName, replyTo, receiver, subject, message);
+		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"),senderName, replyTo, receiver, subject, message);
 	}
 	public void sendMailHtml(ServletContext context,String receiver,String subject,String message,Map<String,String> replace) throws Exception {
-		sendMailHtml(context,config.getString("from"), null, receiver, subject, message,replace);
+		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"), null, receiver, subject, message,replace);
 	}
 
 	private String replaceString(String string, Map<String, String> replace) throws Exception {
@@ -268,9 +279,5 @@ public class Mail {
 		string=StringUtils.join(conds,"");
 		return string;
 		
-	}
-
-	public Config getConfig() {
-		return config;
 	}
 }

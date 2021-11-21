@@ -118,6 +118,4 @@ public interface AdminService {
 	List<JobDescription> getJobDescriptions();
 
     void switchAuthentication(String authorityName);
-
-    Object getLightbendConfig();
 }

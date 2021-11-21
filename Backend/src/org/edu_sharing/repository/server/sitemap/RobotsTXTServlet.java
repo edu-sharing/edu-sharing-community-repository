@@ -1,9 +1,7 @@
 package org.edu_sharing.repository.server.sitemap;
 
 import com.google.common.net.InternetDomainName;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -42,8 +40,8 @@ public class RobotsTXTServlet extends HttpServlet{
             throws ServletException, IOException {
         try {
 
-            String robots = StringUtils.join(LightbendConfigLoader.get().getStringList("angular.robots"), "\n");
-            robots = robots.replace("{{sitemap}}",req.getRequestURL().toString().replace("robots.txt","eduservlet/sitemap"));
+            String robots=StreamUtils.copyToString(getClass().getResourceAsStream("robots.txt.properties"), Charset.forName("UTF-8"));
+            robots=robots.replace("{{sitemap}}",req.getRequestURL().toString().replace("robots.txt","eduservlet/sitemap"));
             resp.getOutputStream().print(robots);
         } catch (Throwable t) {
             t.printStackTrace();

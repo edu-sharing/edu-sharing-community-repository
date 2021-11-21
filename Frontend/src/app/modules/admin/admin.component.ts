@@ -199,6 +199,7 @@ export class AdminComponent {
   currentAppXml: string;
   public editableXmls=[
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
+    {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
   ]
   searchResponse: NodeList | NodeListElastic;
   searchColumns: ListItem[]=[];
@@ -882,19 +883,18 @@ export class AdminComponent {
             });
         });
         // check status of nodeReport + mail server
-        this.admin.getConfigMerged().subscribe((config)=> {
-            const mail = config.repository.mail;
+        this.admin.getApplicationXML(RestConstants.CCMAIL_APPLICATION_XML).subscribe((mail)=> {
             if(this.config.instant('nodeReport',false)) {
                 this.systemChecks.push({
                     name:'MAIL_REPORT',
-                    status:mail.report.receiver && mail.server.smtp.host ? 'OK' : 'FAIL',
-                    translate:mail.report
+                    status:mail['mail.report.receiver'] && mail['mail.smtp.server'] ? 'OK' : 'FAIL',
+                    translate:mail
                 });
             }
             this.systemChecks.push({
                 name:'MAIL_SETUP',
-                status:mail.server.smtp.host ? 'OK' : 'FAIL',
-                translate:mail.server.smtp
+                status:mail['mail.smtp.server'] ? 'OK' : 'FAIL',
+                translate:mail
             });
         });
       this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=> {
