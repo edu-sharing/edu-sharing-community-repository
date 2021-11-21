@@ -8,6 +8,7 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -206,6 +207,14 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     .size(searchToken.getFacetLimit())
                     .minDocCount(searchToken.getFacetsMinCount())
                     .field("properties." + facet+".keyword")));
+
+            if(parameters.get(facet) != null && parameters.get(facet).length > 0) {
+                result.add(AggregationBuilders.filter(facet + "_selected", bqb).subAggregation(AggregationBuilders.terms(facet)
+                        .size(parameters.get(facet).length)
+                        .minDocCount(1)
+                        .field("properties." + facet + ".keyword")
+                        .includeExclude(new IncludeExclude(parameters.get(facet), null))));
+            }
 
 
         }
