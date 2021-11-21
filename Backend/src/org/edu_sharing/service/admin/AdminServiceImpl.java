@@ -771,6 +771,7 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public void updateConfigFile(String filename, String content) throws Throwable {
 		throwIfInvalidConfigFile(filename);
+		filename = mapConfigFile(filename);
 		File file = new File(getCatalinaBase() + "/shared/classes/" + LightbendConfigLoader.PATH_PREFIX + filename);
 		try {
 			Files.copy(file, new File(file.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
@@ -784,8 +785,16 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public String getConfigFile(String filename) throws Throwable {
 		throwIfInvalidConfigFile(filename);
+		filename = mapConfigFile(filename);
 		File file = new File(getCatalinaBase()+"/shared/classes/"+ LightbendConfigLoader.PATH_PREFIX+filename);
 		return FileUtils.readFileToString(file);
+	}
+
+	private String mapConfigFile(String filename) {
+		if(filename.equals(LightbendConfigLoader.SERVER_FILE)) {
+			return LightbendConfigLoader.getServerConfigName();
+		}
+		return filename;
 	}
 
 	@Override
@@ -1002,5 +1011,10 @@ public class AdminServiceImpl implements AdminService  {
 				ticket,
 				CCConstants.AUTH_TYPE_OAUTH,
 				session);
+	}
+
+	@Override
+	public Object getLightbendConfig() {
+		return LightbendConfigLoader.get().root().unwrapped();
 	}
 }

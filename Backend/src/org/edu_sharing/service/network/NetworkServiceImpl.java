@@ -1,9 +1,12 @@
 package org.edu_sharing.service.network;
 
 import com.google.gson.Gson;
+import com.typesafe.config.ConfigBeanFactory;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.service.connector.ConnectorList;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -56,12 +59,10 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public StoredService getOwnService() {
         try{
-        Service service = new Service();
-        ClassLoader classLoader = Thread.currentThread()
-                .getContextClassLoader();
-        URL url = classLoader.getResource("service-description.json");
-
-        service = new Gson().fromJson(new FileReader(Paths.get(url.toURI()).toFile()),service.getClass());
+        Service service = new Gson().fromJson(
+                new Gson().toJson(LightbendConfigLoader.get().getConfig("repository.serviceDescription").root().unwrapped()),
+                Service.class
+        );
 
         service.setUrl(URLTool.getBaseUrl());
         service.setIcon(URLTool.getNgAssetsUrl()+"images/app-icon.svg");

@@ -1529,6 +1529,26 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+	@GET
+	@Path("/config/merged")
+	@ApiOperation(value = "Get the fully merged & parsed (lightbend) backend config")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Object.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getLightbendConfig(@Context HttpServletRequest req) {
+		try {
+			return Response.ok().entity(
+					AdminServiceFactory.getInstance().getLightbendConfig()
+			).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
 	@PUT
 	@Path("/configFile")
 	@ApiOperation(value = "update a base system config file (e.g. edu-sharing.conf)")
