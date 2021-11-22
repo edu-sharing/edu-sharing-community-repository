@@ -35,7 +35,8 @@
     </mat-cell>
   </ng-container>
   <ng-container matColumnDef="icon">
-    <mat-header-cell *matHeaderCellDef class="cell-icon">
+    <mat-header-cell *matHeaderCellDef class="cell-icon cell-count">
+      ({{entriesService.selection.selected.length}} / {{entriesService.dataSource.getTotal()}})
     </mat-header-cell>
     <mat-cell *matCellDef="let node" class="cell-icon">
       <ng-container *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink">
