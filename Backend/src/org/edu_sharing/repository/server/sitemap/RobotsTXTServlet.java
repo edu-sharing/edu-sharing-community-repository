@@ -1,6 +1,24 @@
 package org.edu_sharing.repository.server.sitemap;
 
+import com.google.common.net.InternetDomainName;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.sitemap.xml.Sitemapindex;
+import org.edu_sharing.repository.server.sitemap.xml.Urlset;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.util.StreamUtils;
 
 import javax.servlet.ServletException;
@@ -19,8 +37,8 @@ public class RobotsTXTServlet extends HttpServlet{
             throws ServletException, IOException {
         try {
 
-            String robots=StreamUtils.copyToString(getClass().getResourceAsStream("robots.txt.properties"), Charset.forName("UTF-8"));
-            robots=robots.replace("{{sitemap}}",req.getRequestURL().toString().replace("robots.txt","eduservlet/sitemap"));
+            String robots = StringUtils.join(LightbendConfigLoader.get().getStringList("angular.robots"), "\n");
+            robots = robots.replace("{{sitemap}}",req.getRequestURL().toString().replace("robots.txt","eduservlet/sitemap"));
             resp.getOutputStream().print(robots);
         } catch (Throwable t) {
             t.printStackTrace();

@@ -573,6 +573,23 @@
         <button mat-raised-button (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</button>
       </div>
       <div class="group">
+        <div class="heading"><i class="material-icons">person</i><span>{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}</span></div>
+        <authority-search-input
+          [mode]="AuthoritySearchMode.Users"
+          label="{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}"
+          [showRecent]="false"
+          (onChooseAuthority)="authenticateAuthority = $event"></authority-search-input>
+        <mat-chip-list>
+          <mat-chip *ngIf="authenticateAuthority" (removed)="authenticateAuthority = null">
+            <span>{{authenticateAuthority | authorityName}}</span>
+            <i matChipRemove icon="cancel"></i>
+          </mat-chip>
+        </mat-chip-list>
+        <button mat-raised-button
+                [disabled]="!authenticateAuthority"
+                (click)="authenticateAsUser()">{{'ADMIN.TOOLKIT.AUTHENTICATE' | translate }}</button>
+      </div>
+      <div class="group">
         <div class="info">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
         <button mat-raised-button (click)="refreshEduGroupCache()">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</button>
       </div>

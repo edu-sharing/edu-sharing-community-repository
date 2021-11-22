@@ -196,13 +196,13 @@ public class PersonLifecycleService {
 			//shared files are "mounted" in the user home, so always process them first!
 			//handleSharedFiles(personNodeRef,options); -> is now done via foreignFiles
 
-			result.homeFolder.put("default",handleHomeHolder(personNodeRef, options, null));
+			result.homeFolder.put("default",handleHomeHolder(personNodeRef, options, null, deletedUsername));
 			List<NodeRef> filesToIgnore=result.homeFolder.get("default").
 					getElements().stream().map((e)->new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,e.getId())).collect(Collectors.toList());
-			result.homeFolder.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleHomeHolder(personNodeRef, options, CCConstants.CCM_VALUE_SCOPE_SAFE));
+			result.homeFolder.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleHomeHolder(personNodeRef, options, CCConstants.CCM_VALUE_SCOPE_SAFE, deletedUsername));
 
-			result.sharedFolders.put("default",handleForeignFiles(personNodeRef,filesToIgnore,options,null));
-			result.sharedFolders.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleForeignFiles(personNodeRef,filesToIgnore,options,CCConstants.CCM_VALUE_SCOPE_SAFE));
+			result.sharedFolders.put("default",handleForeignFiles(personNodeRef,filesToIgnore,options,null, deletedUsername));
+			result.sharedFolders.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleForeignFiles(personNodeRef,filesToIgnore,options,CCConstants.CCM_VALUE_SCOPE_SAFE, deletedUsername));
 			result.collections=handleCollections(personNodeRef,options);
 
 			handleStream(personNodeRef,options);
@@ -302,6 +302,10 @@ public class PersonLifecycleService {
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		List<NodeRef> refs = getAllNodeRefs(username,type, scope);
 		logger.info("Reassigning deleted to all files of type "+type+" ("+refs.size()+")");
+		return assignUserToNodes(newUsername, username, refs);
+	}
+
+	private List<NodeRef> assignUserToNodes(String newUsername, String username, List<NodeRef> refs) {
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		refs.forEach((nodeRef)->{
 			rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
@@ -319,6 +323,7 @@ public class PersonLifecycleService {
 		});
 		return refs;
 	}
+
 	private void handleStream(NodeRef personNodeRef, PersonDeleteOptions options) {
 		if(options.stream.delete) {
 			String username = (String)nodeService.getProperty(personNodeRef,
@@ -399,7 +404,7 @@ public class PersonLifecycleService {
 	 * @param filesToIgnore
 	 * @param options
 	 */
-	private PersonDeleteResult.Counts handleForeignFiles(NodeRef personNodeRef, List<NodeRef> filesToIgnore, PersonDeleteOptions options, String scope) {
+	private PersonDeleteResult.Counts handleForeignFiles(NodeRef personNodeRef, List<NodeRef> filesToIgnore, PersonDeleteOptions options, String scope, String deletedUsername) {
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		// getting all ios (files) and maps (folders) where this user is the creator, but not any which should be ignored
 
@@ -437,6 +442,8 @@ public class PersonLifecycleService {
 		// assign the new user to all folders
 		if(options.sharedFolders.folders.equals(PersonDeleteOptions.FolderDeleteMode.assign)) {
 			setOwnerAndPermissions(refsMaps, userName, options);
+		} else if (options.sharedFolders.folders.equals(PersonDeleteOptions.FolderDeleteMode.none)) {
+			assignUserToNodes(deletedUsername, userName, refsMaps);
 		}
 		return counts;
 	}
@@ -508,7 +515,7 @@ public class PersonLifecycleService {
 	}
 	 */
 
-	private PersonDeleteResult.Counts handleHomeHolder(NodeRef personNodeRef, PersonDeleteOptions options, String scope) {
+	private PersonDeleteResult.Counts handleHomeHolder(NodeRef personNodeRef, PersonDeleteOptions options, String scope, String deletedUsername) {
 		NodeRef homeFolder;
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		if(scope==null){
@@ -590,8 +597,17 @@ public class PersonLifecycleService {
 				}
 				moveNodes(folders, foldersTarget);
 			}
+			nodeService.setProperty(homeFolder, ContentModel.PROP_NAME, deletedUsername);
+			nodeService.setProperty(homeFolder, ContentModel.PROP_TITLE, deletedUsername);
+			folders.add(homeFolder);
+			if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.none)) {
+				// remove the authority name on all folders
+				assignUserToNodes(deletedUsername, userName, folders);
+			}
 		}
-		NodeServiceFactory.getLocalService().removeNode(homeFolder.getId(),null,false);
+		if(options.homeFolder.folders.equals(PersonDeleteOptions.FolderDeleteMode.delete)) {
+			NodeServiceFactory.getLocalService().removeNode(homeFolder.getId(), null, false);
+		}
 		return counts;
 	}
 

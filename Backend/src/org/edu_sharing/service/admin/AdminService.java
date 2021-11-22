@@ -116,4 +116,8 @@ public interface AdminService {
 	String getConfigFile(String filename) throws Throwable;
 
 	List<JobDescription> getJobDescriptions();
+
+    void switchAuthentication(String authorityName);
+
+    Object getLightbendConfig();
 }

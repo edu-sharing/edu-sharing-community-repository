@@ -39,8 +39,10 @@
         <div>
           <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.FOLDERS_CAPTION' | translate}}</h4>
           <mat-radio-group [(ngModel)]="options.homeFolder.folders" (ngModelChange)="updateForm()">
-            <mat-radio-button *ngFor="let mode of deleteModesFolder" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+            <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
           </mat-radio-group>
+          <info-message *ngIf="options.homeFolder.folders === 'none'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_NONE' | translate}}"></info-message>
+          <info-message *ngIf="options.homeFolder.folders === 'delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_DELETE' | translate}}"></info-message>
         </div>
         <div>
           <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.PRIVATE_FILES_CAPTION' | translate}}</h4>

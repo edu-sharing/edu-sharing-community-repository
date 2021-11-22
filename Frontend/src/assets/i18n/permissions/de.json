@@ -200,7 +200,9 @@
                 "NO_RECEIVER": "Es wurde festgelegt, dass ein oder mehrere Elemente einen anderen Nutzer zugewiesen werden sollen, jedoch wurde kein Ziel-Nutzer bzw. eine Ziel-Organisation ausgewählt. Bitte legen Sie einen Zielnutzer sowie die verantwortliche Organisation fest",
                 "DELETE_COLLECTIONS": "Es wurde festgelegt, dass erstellte Sammlungen von diesem Nutzer entfernt werden soll. Sollten sich unterhalb dieser Sammlung Sammlungen oder Materialien anderer Nutzer befinden, werden diese ebenfalls entfernt",
                 "NON_CONFORM": "Es wurde festgelegt, dass ein oder mehrere Elemente unverändert bleiben. An diesen Elementen wird die User-Id des Nutzers erhalten bleiben. Prüfen Sie ggf., ob dies Datenschutzrechtlich möglich ist, oder weisen Sie die Dateien einem anderen Nutzer zu",
-                "ASSIGNING_DELETED_USER": "Für alle Elemente, die nicht gelöscht werden, wird zukünftig als Benutzer \"gelöschter Benutzer\" angezeigt"
+                "ASSIGNING_DELETED_USER": "Für alle Elemente, die nicht gelöscht werden, wird zukünftig als Benutzer \"gelöschter Benutzer\" angezeigt",
+                "HOME_FOLDER_NONE": "Wenn der Home-Ordner nicht gelöscht wird, verwaist er im System und erhält eine gelöschte Nutzer-Id",
+                "HOME_FOLDER_DELETE": "Wenn der Home-Ordner gelöscht wird werden möglicherweise Objekte anderer Nutzer, die darin abgelegt wurden, ebenfalls gelöscht"
             },
             "DELETE_MODE": {
                 "none": "Nichts unternehmen",

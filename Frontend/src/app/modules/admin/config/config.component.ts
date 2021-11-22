@@ -18,7 +18,7 @@ declare var Chart:any;
 export class AdminConfigComponent {
   public static CONFIG_FILE_BASE="edu-sharing.base.conf";
   public static EXTENSION_CONFIG_FILE="edu-sharing.conf";
-  public static SERVER_CONFIG_FILE="edu-sharing.server.conf";
+  public static SERVER_CONFIG_FILE="edu-sharing.server-{{hostname}}.conf";
   public static CONFIG_DEPLOYMENT_FILE="edu-sharing.deployment.conf";
   public static CLIENT_CONFIG_FILE="client.config.xml";
   codeOptionsGlobal = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};

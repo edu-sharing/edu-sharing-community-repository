@@ -697,7 +697,12 @@ public class PersonDao {
 		}
 	}
 
-	public void setStatus(PersonLifecycleService.PersonStatus status,boolean notifyMail) {
+	public void setStatus(PersonLifecycleService.PersonStatus status,boolean notifyMail) throws DAOValidationException {
+		if(getAuthorityName().equals(ApplicationInfoList.getHomeRepository().getUsername())) {
+			throw new DAOValidationException(
+					new Exception("Method not allowed for the primary admin")
+			);
+		}
 		String oldStatus= (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
 		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name());
 		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date());

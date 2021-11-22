@@ -45,6 +45,9 @@ import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
 import {AboutService} from 'ngx-edu-sharing-api';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {AuthoritySearchMode} from '../../common/ui/authority-search-input/authority-search-input.component';
+import {PlatformLocation} from '@angular/common';
 
 
 type LuceneData = {
@@ -69,11 +72,13 @@ type LuceneData = {
   ]
 })
 export class AdminComponent {
+  readonly AuthoritySearchMode = AuthoritySearchMode;
   readonly SCOPES = Scope;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
+              private platformLocation: PlatformLocation,
               private config: ConfigurationService,
               private translate: TranslateService,
               private iamService: RestIamService,
@@ -195,7 +200,6 @@ export class AdminComponent {
   currentAppXml: string;
   public editableXmls=[
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
-    {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
   ]
   searchResponse: NodeList | NodeListElastic;
   searchColumns: ListItem[]=[];
@@ -211,6 +215,7 @@ export class AdminComponent {
   private loginResult: LoginResult;
   private mediacenters: any[];
   ownAppMode='repository';
+  authenticateAuthority: Authority;
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -878,18 +883,19 @@ export class AdminComponent {
             });
         });
         // check status of nodeReport + mail server
-        this.admin.getApplicationXML(RestConstants.CCMAIL_APPLICATION_XML).subscribe((mail)=> {
+        this.admin.getConfigMerged().subscribe((config)=> {
+            const mail = config.repository.mail;
             if(this.config.instant('nodeReport',false)) {
                 this.systemChecks.push({
                     name:'MAIL_REPORT',
-                    status:mail['mail.report.receiver'] && mail['mail.smtp.server'] ? 'OK' : 'FAIL',
-                    translate:mail
+                    status:mail.report.receiver && mail.server.smtp.host ? 'OK' : 'FAIL',
+                    translate:mail.report
                 });
             }
             this.systemChecks.push({
                 name:'MAIL_SETUP',
-                status:mail['mail.smtp.server'] ? 'OK' : 'FAIL',
-                translate:mail
+                status:mail.server.smtp.host ? 'OK' : 'FAIL',
+                translate:mail.server.smtp
             });
         });
       this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=> {
@@ -1249,5 +1255,32 @@ export class AdminComponent {
       this.job.params = JSON.stringify(data, null, 2);
     }
   }
+
+    async authenticateAsUser(force = false) {
+        if (!force) {
+            this.toast.showConfigurableDialog({
+                title: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER',
+                message: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER_DETAILS',
+                buttons: DialogButton.getOkCancel(
+                    () => this.toast.closeModalDialog(),
+                    () => {
+                        this.toast.closeModalDialog();
+                        this.authenticateAsUser(true);
+                    })
+            });
+            return;
+        }
+        try {
+            await this.admin.switchAuthentication(this.authenticateAuthority.authorityName).toPromise();
+            UIHelper.goToDefaultLocation(
+                this.router,
+                this.platformLocation,
+                this.config,
+                true
+            );
+        } catch (e) {
+
+        }
+    }
 }
 
