@@ -28,27 +28,13 @@ pushd "$ALF_HOME"
 	exit
 }
 
-if [[ -f ../snapshot.tar.gz ]] ; then
-
-	echo ""
-	echo "Update ... "
-	exit
-
-	# TODO
-
-else
-
-	echo "- make a snapshot of Alfresco Platform"
-	tar -czf ../snapshot.tar.gz .
+install_edu_sharing() {
 
 	echo "- clean up outdated libraries"
 	rm -f tomcat/lib/postgresql-*
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/commons-lang3-*
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/hazelcast-*
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/jackson-*
-
-	echo "- clean up solr4 index"
-	rm -rf alf_data/solr4
 
 	echo "- update tomcat env"
 	sed -i -r 's|file\.encoding=.*\"|file.encoding=UTF-8 $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
@@ -75,12 +61,61 @@ else
 	rm edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
 
 	echo "- install Alfresco Module Packages"
-	[[ -d amps/alfresco/0 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/0    tomcat/webapps/alfresco    -directory -nobackup -force
-	[[ -d amps/alfresco/1 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/1    tomcat/webapps/alfresco    -directory -nobackup -force
-	[[ -d amps/edu-sharing/1 ]] && java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
+	if [[ -d amps/alfresco/0 ]]; then
+	  java -jar bin/alfresco-mmt.jar install amps/alfresco/0    tomcat/webapps/alfresco    -directory -nobackup -force
+	fi
+
+	if [[ -d amps/alfresco/1 ]]; then
+	  java -jar bin/alfresco-mmt.jar install amps/alfresco/1    tomcat/webapps/alfresco    -directory -nobackup -force
+  fi
+
+  if [[ -d amps/edu-sharing/1 ]]; then
+    java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
+  fi
+
+#	[[ -d amps/alfresco/0 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/0    tomcat/webapps/alfresco    -directory -nobackup -force
+#	[[ -d amps/alfresco/1 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/1    tomcat/webapps/alfresco    -directory -nobackup -force
+#	[[ -d amps/edu-sharing/1 ]] && java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
+
+}
+
+alfresco_base_snapshot="alfresco-base-SNAPSHOT.tar.gz"
+if [[ -f ../$alfresco_base_snapshot ]] ; then
+
+	echo ""
+	echo "Update ... "
+
+	echo "- make a snapshot of edu-sharing platform"
+  snapshot_name=edu-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
+	tar -czf ../$snapshot_name amps tomcat
+
+	echo "- cleanup amps and tomcat"
+  rm -rf amps
+  rm -rf tomcat
+
+  echo "- restore amps and tomcat"
+  tar -zxf ../$alfresco_base_snapshot
+
+	install_edu_sharing
+
+  echo "- restore persistent data of Alfresco platform"
+  if [[ $(tar -tf  ../$snapshot_name | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
+    tar -zxf ../$snapshot_name tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
+  fi
+
+else
+
+	echo ""
+	echo "Install ... "
+
+	echo "- make a snapshot of Alfresco platform"
+ 	tar -czf ../$alfresco_base_snapshot amps tomcat
+
+  install_edu_sharing
 
 fi
 
 popd
 
 echo "- done."
+echo "- you may need to delete the solr4 index, model and content folders!"
