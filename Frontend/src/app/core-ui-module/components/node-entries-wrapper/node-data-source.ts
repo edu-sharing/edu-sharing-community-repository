@@ -54,7 +54,7 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
         if (!this.pagination) {
             return undefined;
         }
-        return this.pagination.total < this.getData()?.length;
+        return this.pagination.total > this.getData()?.length;
     }
 
     getData() {
