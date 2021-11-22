@@ -58,7 +58,7 @@ grep -q 'javax\.xml\.parsers\.SAXParserFactory' tomcat/bin/setenv.sh || echo 'CA
 
 echo "- download edu-sharing distribution"
 mvn -q dependency:get \
-	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:maven-develop-SNAPSHOT:tar.gz:bin \
+	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
 	-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
 	-Dtransitive=false
 
