@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { LabeledValue, MdsIdentifier, SearchResults } from '../../public-api';
 import * as apiModels from '../api/models';
 import { SearchV1Service } from '../api/services';
@@ -43,11 +43,32 @@ export type DidYouMeanSuggestion = Pick<apiModels.Suggest, 'highlighted' | 'text
 /** Parameters to be provided to `search`. */
 export type SearchRequestParams = Parameters<SearchV1Service['search']>[0];
 
+interface CompletedRequest {
+    /** Parameters sent with the API request. */
+    requestParams: SearchRequestParams;
+    /** API response. */
+    results: SearchResults;
+    facetUpdates: FacetUpdates;
+}
+
+interface CompletedRequestRecord extends CompletedRequest {
+    previousRequest: CompletedRequest | null;
+}
+
+interface FacetUpdates {
+    /** Facets that have been subscribed to at the time of the request. */
+    subscribedFacets: string[];
+    /** Facets that have been subscribed to and are updated with this request. */
+    facetsToUpdate: string[];
+}
+
 @Injectable({
     providedIn: 'root',
 })
 export class SearchService {
-    private readonly resultsSubject = new BehaviorSubject<SearchResults | null>(null);
+    private readonly completedRequestSubject = new BehaviorSubject<CompletedRequestRecord | null>(
+        null,
+    );
     private readonly facetsSubject = new BehaviorSubject<FacetsDict>({});
     private readonly didYouMeanSuggestionsSubject = new BehaviorSubject<apiModels.Suggest[] | null>(
         null,
@@ -68,17 +89,28 @@ export class SearchService {
      * `getAsYouTypeFacetSuggestions`.
      */
     search(params: SearchRequestParams): Observable<SearchResults> {
+        let previousRequest = omitProperty(this.completedRequestSubject.value, 'previousRequest');
+        const facetUpdates = this.getFacetUpdates(previousRequest, params);
         this.searchParamsSubject.next(params);
-        return this.requestSearch({
+        const requestParams = {
             ...params,
             body: {
                 ...params.body,
-                // Additionally fetch facets that have been subscribed to via `getFacets`.
-                facets: this.getSubscribedFacets(params.body.facets),
+                facets: this.getFacetsToFetch(params, facetUpdates),
                 returnSuggestions:
                     params.body.returnSuggestions || this.didYouMeanSuggestionsSubscribers > 0,
             },
-        }).pipe(tap((results) => this.resultsSubject.next(results)));
+        };
+        return this.requestSearch(requestParams).pipe(
+            tap((results) =>
+                this.completedRequestSubject.next({
+                    results,
+                    requestParams,
+                    facetUpdates,
+                    previousRequest,
+                }),
+            ),
+        );
     }
 
     /**
@@ -261,22 +293,17 @@ export class SearchService {
 
     /** Registers the internal `facetsSubject` to be updated with search responses. */
     private registerFacetsSubject(): void {
-        this.resultsSubject
+        this.completedRequestSubject
             .pipe(
-                switchMap((results) => {
-                    if (results?.facets) {
-                        return this.mapFacets(results.facets);
-                    } else {
-                        return rxjs.of({});
-                    }
-                }),
+                filter((request): request is CompletedRequestRecord => request !== null),
+                switchMap((request) => this.updateFacetsDict(this.facetsSubject.value, request)),
             )
             .subscribe((facets) => this.facetsSubject.next(facets));
     }
 
     private registerDidYouMeanSuggestionSubject(): void {
-        this.resultsSubject
-            .pipe(map((results) => results?.suggests ?? null))
+        this.completedRequestSubject
+            .pipe(map((request) => request?.results.suggests ?? null))
             .subscribe((didYouMeanSuggestion) =>
                 this.didYouMeanSuggestionsSubject.next(didYouMeanSuggestion),
             );
@@ -376,6 +403,155 @@ export class SearchService {
     }
 
     /**
+     * Returns the properties which have to be fetched with the upcoming search request.
+     */
+    private getFacetsToFetch(
+        searchParams: SearchRequestParams,
+        facetUpdates: FacetUpdates,
+    ): string[] {
+        return (
+            [...(searchParams.body.facets ?? []), ...facetUpdates.facetsToUpdate]
+                // Remove duplicates
+                .filter((value, index, array) => array.indexOf(value) === index)
+        );
+    }
+
+    /**
+     * Produces an object containing information on what facets are currently being subscribed to
+     * and which of these need to be updated due to changed search parameters.
+     *
+     * We want to avoid updating existing facets when possible. This makes it easier for the UI
+     * implementation because Angular won't recreate the facets table when not changed which would
+     * mess up keyboard focus. Also, we want to keep longer facet lists, that have been loaded with
+     * `loadMoreFacets`.
+     */
+    private getFacetUpdates(
+        previousRequest: CompletedRequest | null,
+        searchParams: SearchRequestParams,
+    ): FacetUpdates {
+        const subscribedFacets = this.getSubscribedFacets();
+        if (previousRequest === null) {
+            return { subscribedFacets, facetsToUpdate: subscribedFacets };
+        } else {
+            const facetsToUpdate = subscribedFacets.filter(
+                (facet) => !this.canKeepFacet(previousRequest, searchParams, facet),
+            );
+            return { subscribedFacets, facetsToUpdate };
+        }
+    }
+
+    /**
+     * Generates an updated facets dictionary from a previous facets dictionary and a completed
+     * search request.
+     *
+     * The completed search request contains information on what facets to update. The remaining
+     * facets are reused from the previous facets dictionary.
+     */
+    private updateFacetsDict(
+        facetsDict: FacetsDict | null,
+        completedRequest: CompletedRequest,
+    ): Observable<FacetsDict> {
+        const facetsToUpdate = completedRequest.facetUpdates.facetsToUpdate;
+        const facetsToKeep = completedRequest.facetUpdates.subscribedFacets.filter(
+            (facet) => !facetsToUpdate.includes(facet),
+        );
+        const updatedFacets =
+            completedRequest.results.facets?.filter((facet) =>
+                facetsToUpdate.includes(facet.property),
+            ) ?? [];
+        return this.mapFacets(updatedFacets).pipe(
+            map((mappedUpdatedFacets) => ({
+                ...mappedUpdatedFacets,
+                ...pickProperties(facetsDict ?? {}, facetsToKeep),
+            })),
+        );
+    }
+
+    /**
+     * Returns `true` if the facet for the given `facetProperty` has been fetched with the last
+     * search request and does not need to be updated.
+     */
+    private canKeepFacet(
+        previousRequest: CompletedRequest,
+        searchParams: SearchRequestParams,
+        facetProperty: string,
+    ): boolean {
+        const previousSearchParams = previousRequest.requestParams;
+        // We compare the previous request params that have actually been sent to the request
+        // params, which will be modified for the next request, so some non-critical parameters are
+        // going to be different even if they were provided equally to `search()`.
+        const changedParams = this.getChangedProperties(previousSearchParams, searchParams);
+        // Non-critical parameters. Any change of these doesn't affect facets.
+        const nonCriticalParams = [
+            'maxItems',
+            'skipCount',
+            'sortProperties',
+            'sortAscending',
+            'propertyFilter',
+        ];
+        if (!changedParams.every((param) => [...nonCriticalParams, 'body'].includes(param))) {
+            // Some critical parameter was changed and results facets might be different.
+            return false;
+        } else if (!changedParams.includes('body')) {
+            // Only non-critical have changed.
+            return true;
+        }
+        // 'body' (and maybe non-critical parameters) have changed.
+        const changedBodyProperties = this.getChangedProperties(
+            previousSearchParams.body,
+            searchParams.body,
+        );
+        const nonCriticalBodyParams = [
+            'criteria',
+            'facetSuggest',
+            'facets',
+            'resolveCollections',
+            'returnSuggestions',
+        ];
+        if (!changedBodyProperties.every((param) => [...nonCriticalBodyParams].includes(param))) {
+            // Critical body params have changed.
+            return false;
+        }
+        const changedCriteria = this.getChangedCriteria(
+            previousSearchParams.body.criteria,
+            searchParams.body.criteria,
+        );
+        // If the only criterion that has changed is the facet in question, we can keep the facet.
+        return (
+            changedCriteria.length === 0 ||
+            (changedCriteria.length === 1 && changedCriteria[0] === facetProperty)
+        );
+    }
+
+    /** Compares two objects and return the keys of properties that are not deep-equal in a string
+     * array. */
+    private getChangedProperties<T>(lhs: T, rhs: T): (keyof T)[] {
+        const keys = [...new Set([...Object.keys(lhs), ...Object.keys([rhs])])] as (keyof T)[];
+        return keys.filter(
+            (key) => JSON.stringify((lhs as any)[key]) !== JSON.stringify((rhs as any)[key]),
+        );
+    }
+
+    /** Compares the criteria arrays of two search-request parameters and returns the properties for
+     * which the entries differ as a string array. */
+    private getChangedCriteria(
+        lhs: apiModels.MdsQueryCriteria[],
+        rhs: apiModels.MdsQueryCriteria[],
+    ): string[] {
+        const properties = [
+            ...new Set([
+                ...lhs.map((criterion) => criterion.property),
+                ...rhs.map((criterion) => criterion.property),
+            ]),
+        ];
+        return properties.filter(
+            (property) =>
+                JSON.stringify(lhs.find((c) => c.property === property)?.values) !==
+                JSON.stringify(rhs.find((c) => c.property === property)?.values),
+        );
+    }
+
+    /**
      * Maps the `facets` part of a search response to a facets dictionary with labeled facet values.
      */
     private mapFacets(results: SearchResults['facets']): Observable<FacetsDict> {
@@ -429,5 +605,29 @@ export class SearchService {
             acc[criterion.property] = criterion.values;
             return acc;
         }, {} as RawValuesDict);
+    }
+}
+
+function omitProperty<T, K extends keyof T>(obj: T, property: K): Omit<T, K>;
+function omitProperty<T, K extends keyof T>(obj: T | null, property: K): Omit<T, K> | null;
+function omitProperty<T, K extends keyof T>(obj: T | null, property: K): Omit<T, K> | null {
+    if (obj === null) {
+        return null;
+    } else {
+        const { [property]: _, ...result } = obj;
+        return result;
+    }
+}
+
+function pickProperties<T, K extends keyof T>(obj: T, properties: K[]): Pick<T, K>;
+function pickProperties<T, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null;
+function pickProperties<T, K extends keyof T>(obj: T | null, properties: K[]): Pick<T, K> | null {
+    if (obj === null) {
+        return null;
+    } else {
+        return properties.reduce((acc, prop) => {
+            acc[prop] = obj[prop];
+            return acc;
+        }, {} as Pick<T, K>);
     }
 }
