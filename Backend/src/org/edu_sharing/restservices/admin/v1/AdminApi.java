@@ -1510,14 +1510,14 @@ public class AdminApi {
 	}
 	@GET
 	@Path("/config/merged")
-	@ApiOperation(value = "Get the fully merged & parsed (lightbend) backend config")
+	@Operation(description = "Get the fully merged & parsed (lightbend) backend config")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Object.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getLightbendConfig(@Context HttpServletRequest req) {
 		try {
 			return Response.ok().entity(
@@ -1550,16 +1550,16 @@ public class AdminApi {
 	}
 	@POST
 	@Path("/authenticate/{authorityName}")
-	@ApiOperation(value = "switch the session to a known authority name")
+	@Operation(summary = "switch the session to a known authority name")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response switchAuthority(@Context HttpServletRequest req,
-									 @ApiParam(value = "the authority to use (must be a person)") @PathParam("authorityName") String authorityName) {
+									 @Parameter(description = "the authority to use (must be a person)") @PathParam("authorityName") String authorityName) {
 		try {
 			AdminServiceFactory.getInstance().switchAuthentication(authorityName);
 			return Response.ok().build();
