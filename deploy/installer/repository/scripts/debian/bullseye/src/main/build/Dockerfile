@@ -184,7 +184,7 @@ COPY install.sh .
 #Test Install and Update
 RUN set -eux \
     && ./install.sh \
-    && ./install.sh \
+    && ./install.sh
 
 
 ENTRYPOINT ["./entrypoint.sh"]

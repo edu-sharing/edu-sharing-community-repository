@@ -73,10 +73,6 @@ install_edu_sharing() {
     java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
   fi
 
-#	[[ -d amps/alfresco/0 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/0    tomcat/webapps/alfresco    -directory -nobackup -force
-#	[[ -d amps/alfresco/1 ]]    && java -jar bin/alfresco-mmt.jar install amps/alfresco/1    tomcat/webapps/alfresco    -directory -nobackup -force
-#	[[ -d amps/edu-sharing/1 ]] && java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
-
 }
 
 alfresco_base_snapshot="alfresco-base-SNAPSHOT.tar.gz"
@@ -101,6 +97,8 @@ if [[ -f ../$alfresco_base_snapshot ]] ; then
   echo "- restore persistent data of Alfresco platform"
   if [[ $(tar -tf  ../$snapshot_name | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
     tar -zxf ../$snapshot_name tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
+  else
+    echo "nothing to restore"
   fi
 
 else
