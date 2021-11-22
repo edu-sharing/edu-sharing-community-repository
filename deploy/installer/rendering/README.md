@@ -76,18 +76,6 @@ Installation
    ```
 
 5. Start the webserver and run the installation wizard under `http://<webserver>/esrender/admin/`.
-
-6. Initialize version control for your configuration by calling:
-
-   ```
-   pushd /var/www
-   git init
-   git branch -m custom
-   git add html/esrender/conf/*
-   git add html/esrender/**/config.php
-   git commit -m "After install."
-   popd
-   ```
    
 Update
 ------

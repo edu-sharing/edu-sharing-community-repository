@@ -93,20 +93,8 @@ Installation
    $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/alfresco/1 $ALF_HOME/tomcat/webapps/alfresco -directory -nobackup -force
    $ALF_HOME/java/bin/java -jar $ALF_HOME/bin/alfresco-mmt.jar install $ALF_HOME/amps/edu-sharing/1 $ALF_HOME/tomcat/webapps/edu-sharing -directory -nobackup -force
    ```
-
-6. Initialize version control for your configuration by calling:
-
-   ```
-   pushd $ALF_HOME
-   git init
-   git branch -m original
-   git add tomcat/shared/*
-   git commit -m "After install."
-   git checkout -b custom
-   popd
-   ```
    
-7. Start the server by calling:
+6. Start the server by calling:
 
    ```
    pushd $ALF_HOME
