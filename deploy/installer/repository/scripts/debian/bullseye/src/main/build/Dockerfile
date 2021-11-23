@@ -145,7 +145,16 @@ RUN set -eux \
     && pg_ctlcluster 13 alfresco stop \
     && rm tomcat/lib/postgresql-* \
     && wget -q https://jdbc.postgresql.org/download/postgresql-42.3.1.jar \
-    && mv postgresql-42.3.1.jar tomcat/lib
+    && mv postgresql-42.3.1.jar tomcat/lib \
+    && sed -i -r \
+        "s|^[#]*\s*listen_addresses\s*=\s*.*|listen_addresses = '\*'|" \
+        /etc/postgresql/13/alfresco/postgresql.conf \
+    && sed -i -r \
+        's|host    all             all             127.0.0.1/32            md5|host    all             all             0.0.0.0/0            md5|' \
+        /etc/postgresql/13/alfresco/pg_hba.conf \
+    && sed -i -r \
+        's|host    all             all             ::1/128                 md5|host    all             all             ::0/0                 md5|' \
+        /etc/postgresql/13/alfresco/pg_hba.conf
 
 RUN set -eux \
     && rm -rf common/lib \
@@ -176,6 +185,7 @@ RUN set -eux \
         lsof \
         nano \
         net-tools \
+        vim \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
