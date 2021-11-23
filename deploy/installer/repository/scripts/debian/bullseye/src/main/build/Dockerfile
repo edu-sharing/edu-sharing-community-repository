@@ -147,7 +147,7 @@ RUN set -eux \
     && wget -q https://jdbc.postgresql.org/download/postgresql-42.3.1.jar \
     && mv postgresql-42.3.1.jar tomcat/lib \
     && sed -i -r \
-        "s|^[#]*\s*listen_addresses\s*=\s*.*|listen_addresses = '\*'|" \
+        "s|^[#]*\s*listen_addresses\s*=\s*.*|listen_addresses = '\*'                 # what IP address(es) to listen on;|" \
         /etc/postgresql/13/alfresco/postgresql.conf \
     && sed -i -r \
         's|host    all             all             127.0.0.1/32            md5|host    all             all             0.0.0.0/0            md5|' \
