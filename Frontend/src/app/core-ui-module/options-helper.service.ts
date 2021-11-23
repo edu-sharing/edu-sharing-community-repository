@@ -926,7 +926,7 @@ export class OptionsHelperService implements OnDestroy {
             management.nodeDelete = this.getObjects(object);
         });
         unpublishNode.elementType = [ElementType.NodePublishedCopy];
-        unpublishNode.constrains = [Constrain.HomeRepository, Constrain.User];
+        unpublishNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
         unpublishNode.permissions = [RestConstants.PERMISSION_DELETE];
         unpublishNode.permissionsMode = HideMode.Hide;
         unpublishNode.group = DefaultGroups.Delete;
@@ -936,6 +936,7 @@ export class OptionsHelperService implements OnDestroy {
         const removeNodeRef =  new OptionItem('OPTIONS.REMOVE_REF', 'remove_circle_outline', (object) =>
             this.removeFromCollection(this.getObjects(object))
         );
+        removeNodeRef.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         removeNodeRef.constrains = [Constrain.HomeRepository, Constrain.CollectionReference, Constrain.User];
         removeNodeRef.permissions = [RestConstants.PERMISSION_DELETE];
         removeNodeRef.permissionsMode = HideMode.Disable;
@@ -956,6 +957,7 @@ export class OptionsHelperService implements OnDestroy {
         const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>
             management.nodeReport = this.getObjects(node)[0]
         );
+        reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
         reportNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.Render];
         reportNode.customShowCallback = (() => this.configService.instant('nodeReport', false));
