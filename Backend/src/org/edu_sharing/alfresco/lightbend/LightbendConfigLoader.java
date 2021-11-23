@@ -5,17 +5,16 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigRenderOptions;
 import org.alfresco.repo.cache.SimpleCache;
+import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.util.StreamUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-import static org.edu_sharing.restservices.CollectionDao.logger;
-
 public class LightbendConfigLoader {
     private static SimpleCache<String, String> configCache = (SimpleCache) AlfAppContextGate.getApplicationContext().getBean("eduSharingLightBendConfigCache");
-
+    private static Logger logger = Logger.getLogger(LightbendConfigLoader.class);
     public static String PATH_PREFIX = "config/";
     public static String BASE_FILE = "edu-sharing.base.conf";
     public static String DEPLOYMENT_FILE = "edu-sharing.deployment.conf";
