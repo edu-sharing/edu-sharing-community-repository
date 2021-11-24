@@ -246,6 +246,16 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
             BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
+            if(searchToken.getSearchCriterias().getContentkind() != null && searchToken.getSearchCriterias().getContentkind().length > 0){
+                BoolQueryBuilder criteriasBool = new BoolQueryBuilder();
+                Arrays.stream(searchToken.getSearchCriterias().getContentkind()).forEach((content) ->
+                        criteriasBool.should(
+                                new MatchQueryBuilder("type", CCConstants.getValidLocalName(content)))
+                );
+                queryBuilder = queryBuilder.filter(
+                        criteriasBool
+                );
+            }
             queryBuilder = queryBuilder.filter(filterBuilder);
             queryBuilder = queryBuilder.must(metadataQueryBuilderAsQuery);
 
