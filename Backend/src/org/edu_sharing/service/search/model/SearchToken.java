@@ -236,6 +236,9 @@ public class SearchToken implements Serializable {
 		if(getContentType().equals(ContentType.TOOLPERMISSIONS)){
 			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_TOOLPERMISSION});
 		}
+		if(getContentType().equals(ContentType.COLLECTION_PROPOSALS)){
+			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_COLLECTION_PROPOSAL});
+		}
 	}
 	/**
 	 * Get and set query string (for ui purposes/info)
