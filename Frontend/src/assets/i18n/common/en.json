@@ -269,6 +269,11 @@
         }
 
     },
+    "PROPOSAL_STATUS" : {
+      "DECLINED":  "declined",
+      "ACCEPTED":  "accepted",
+      "PENDING":  "pending"
+    },
     "COOKIE_INFO": {
         "ACCEPT": " Accept",
         "DECLINE": " Decline & Exit",

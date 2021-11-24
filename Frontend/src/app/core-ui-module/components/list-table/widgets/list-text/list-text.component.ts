@@ -29,6 +29,8 @@ export class ListTextComponent extends ListWidget {
     getNode() {
         if(this.item.type === 'NODE_PROPOSAL') {
             return (this.node as ProposalNode).proposal;
+        } else if((this.node as Node).type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
+            return (this.node as Node).relations.Original ?? this.node;
         }
         return this.node;
     }

@@ -288,6 +288,11 @@
             "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
     },
+    "PROPOSAL_STATUS" : {
+      "DECLINED":  "abgelehnt",
+      "ACCEPTED":  "akzeptiert",
+      "PENDING":  "ausstehend"
+    },
     "NODE_PROPOSAL": {
         "cm:created": "Zeitpunkt des Vorschlags",
         "cm:creator": "Vorgeschlagen von"
