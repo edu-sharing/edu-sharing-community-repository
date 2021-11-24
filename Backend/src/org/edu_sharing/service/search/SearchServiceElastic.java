@@ -399,28 +399,30 @@ public class SearchServiceElastic extends SearchServiceImpl {
             /**
              * add selected when missing
              */
-            for(String facet : searchToken.getFacets()){
-                if(!criterias.containsKey(facet)){
-                    continue;
-                }
-                for(String value : criterias.get(facet)){
-                    Optional<NodeSearch.Facet> facetResult = facetsResult.stream()
-                            .filter(f -> f.getProperty().equals(facet)).findFirst();
-                    Optional<NodeSearch.Facet> selected = facetsResultSelected
-                            .stream()
-                            .filter(f ->
-                                    f.getProperty().equals(facet))
-                            .findFirst();
-                    if(selected.isPresent()) {
-                        if (facetResult.isPresent()) {
-                            if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
-                                if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                    facetResult.get().getValues().addAll(selected.get().getValues());
+            if(searchToken != null && searchToken.getFacets() != null && searchToken.getFacets().size() > 0) {
+                for (String facet : searchToken.getFacets()) {
+                    if (!criterias.containsKey(facet)) {
+                        continue;
+                    }
+                    for (String value : criterias.get(facet)) {
+                        Optional<NodeSearch.Facet> facetResult = facetsResult.stream()
+                                .filter(f -> f.getProperty().equals(facet)).findFirst();
+                        Optional<NodeSearch.Facet> selected = facetsResultSelected
+                                .stream()
+                                .filter(f ->
+                                        f.getProperty().equals(facet))
+                                .findFirst();
+                        if (selected.isPresent()) {
+                            if (facetResult.isPresent()) {
+                                if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
+                                    if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
+                                        facetResult.get().getValues().addAll(selected.get().getValues());
+                                    }
                                 }
-                            }
-                        } else {
-                            if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                facetsResult.add(selected.get());
+                            } else {
+                                if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
+                                    facetsResult.add(selected.get());
+                                }
                             }
                         }
                     }
