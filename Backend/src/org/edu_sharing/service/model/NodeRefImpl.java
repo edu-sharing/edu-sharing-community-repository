@@ -13,6 +13,8 @@ public class NodeRefImpl implements NodeRef {
 
 	List<CollectionRef> usedInCollections = new ArrayList<>();
 
+	Map<Relation, NodeRef> relations = new HashMap<>();
+
 	public static class PreviewImpl implements Preview {
 		String mimetype;
 		byte[] data;
@@ -161,4 +163,18 @@ public class NodeRefImpl implements NodeRef {
 
 	@Override
 	public void setOwner(String owner) { this.owner = owner; }
+
+	public enum Relation {
+		Original
+	}
+
+	@Override
+	public Map<Relation, NodeRef> getRelations() {
+		return relations;
+	}
+
+	@Override
+	public void setRelations(Map<Relation, NodeRef> relations) {
+		this.relations = relations;
+	}
 }

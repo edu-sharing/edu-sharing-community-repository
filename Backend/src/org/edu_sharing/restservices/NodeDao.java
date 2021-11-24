@@ -26,6 +26,7 @@ import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.model.CollectionRef;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -98,6 +99,7 @@ public class NodeDao {
 	// true if the current Dao is the collection home folder
 	private final boolean isCollectionHomePath;
 	private final String ownerUsername;
+	private final Map<NodeRefImpl.Relation, NodeDao> relations = new HashMap<>();
 	private CollectionRef collectionRef;
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
@@ -591,7 +593,17 @@ public class NodeDao {
 			}
 
 			this.filter = filter;
-
+			if(nodeRef.getRelations() != null) {
+				nodeRef.getRelations().forEach((relation, ref) -> {
+					try {
+						relations.put(relation,
+								new NodeDao(repoDao, ref, filter)
+						);
+					} catch (DAOException e) {
+						logger.info("Can not add relation to node: " + e.getMessage());
+					}
+				});
+			}
 			for(org.edu_sharing.service.model.CollectionRef usedInCollection : nodeRef.getUsedInCollections()){
 				NodeDao collection = new NodeDao(repoDao, usedInCollection, filter);
 				if(usedInCollection.getRelationType()!=null) {
@@ -1133,6 +1145,17 @@ public class NodeDao {
 
 		for(NodeDao nodeDao : usedInCollections){
 			data.getUsedInCollections().add(nodeDao.asNode());
+		}
+		if(!relations.isEmpty()) {
+			Map<NodeRefImpl.Relation, Node> relationsConverted = new HashMap<>();
+			relations.forEach((relation, dao) -> {
+				try {
+					relationsConverted.put(relation, dao.asNode(false));
+				} catch (DAOException e) {
+					logger.info("Could not convert relation: " + e.getMessage());
+				}
+			});
+			data.setRelations(relationsConverted);
 		}
 	}
 	public RepositoryDao getRepositoryDao(){

@@ -13,6 +13,7 @@ public interface CollectionRef extends NodeRef{
 
     public enum RelationType {
         Usage,
-        Proposal
+        Proposal,
+        Original
     }
 }

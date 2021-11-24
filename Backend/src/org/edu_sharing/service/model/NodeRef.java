@@ -10,6 +10,10 @@ public interface NodeRef {
 
 	void setOwner(String owner);
 
+	Map<NodeRefImpl.Relation, NodeRef> getRelations();
+
+	void setRelations(Map<NodeRefImpl.Relation, NodeRef> relations);
+
 	interface Preview{
 		String getMimetype();
 		byte[] getData();

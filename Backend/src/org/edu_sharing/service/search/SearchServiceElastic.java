@@ -746,7 +746,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         eduNodeRef.setPermissions(permissions);
-
+        boolean isProposal = sourceAsMap.get("type").equals(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL));
         if(resolveCollections) {
             List<Map<String, Object>> collections = (List) sourceAsMap.get("collections");
             if (collections != null) {
@@ -764,10 +764,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     }
                     if (hasPermission) {
                         CollectionRefImpl transform = transform(CollectionRefImpl.class, authorities, user, collection, false);
+                        if(isProposal) {
+                            transform.setRelationType(CollectionRef.RelationType.Proposal);
+                        }
                         eduNodeRef.getUsedInCollections().add(transform);
                     }
                 }
             }
+        }
+        if(isProposal && sourceAsMap.containsKey("original")) {
+            eduNodeRef.getRelations().put(
+                    NodeRefImpl.Relation.Original,
+                    transform(NodeRefImpl.class, authorities, user, (Map) sourceAsMap.get("original"), false)
+            );
         }
         if(eduNodeRef instanceof CollectionRefImpl) {
             CollectionRefImpl collectionRef = (CollectionRefImpl) eduNodeRef;
