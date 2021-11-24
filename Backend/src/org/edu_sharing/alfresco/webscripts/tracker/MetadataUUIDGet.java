@@ -63,7 +63,6 @@ public class MetadataUUIDGet extends DeclarativeWebScript {
     private Map<String, Object> buildModel(WebScriptRequest req) throws JSONException, IOException
     {
         String uuid = req.getParameter("uuid");
-        logger.info(uuid);
         if (uuid == null)
         {
             throw new WebScriptException("no uuid found");
@@ -72,8 +71,6 @@ public class MetadataUUIDGet extends DeclarativeWebScript {
                 ContentModel.PROP_NODE_DBID
         );
 
-
-        logger.info(dbid);
         NodeMetaDataParameters params = new NodeMetaDataParameters();
         params.setNodeIds(Collections.singletonList(dbid));
         final NodesMetaDataGet.FreemarkerNodeMetaData[] result = new NodesMetaDataGet.FreemarkerNodeMetaData[1];
