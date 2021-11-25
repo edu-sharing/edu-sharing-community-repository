@@ -102,7 +102,9 @@ if [[ -f ../$alfresco_base_snapshot ]] ; then
   fi  
 
   echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
-  ls -t | tail -n +4 | xargs -I {} rm {}
+  pushd ..
+  ls -pt ../ | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
+	popd
 
 else
 
