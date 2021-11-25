@@ -75,14 +75,14 @@ install_edu_sharing() {
 
 }
 
-alfresco_base_snapshot="alfresco-base-SNAPSHOT.tar.gz"
+alfresco_base_snapshot="alfresco-base-SNAPSHOT-DO-NOT-DELETE-ME.tar.gz"
 if [[ -f ../$alfresco_base_snapshot ]] ; then
 
 	echo ""
 	echo "Update ... "
 
 	echo "- make a snapshot of edu-sharing platform"
-  snapshot_name=edu-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
+  snapshot_name=edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
 	tar -czf ../$snapshot_name amps tomcat
 
 	echo "- cleanup amps and tomcat"
@@ -99,7 +99,10 @@ if [[ -f ../$alfresco_base_snapshot ]] ; then
     tar -zxf ../$snapshot_name tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
   else
     echo "nothing to restore"
-  fi
+  fi  
+
+  echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
+  ls -t | tail -n +4 | xargs -I {} rm {}
 
 else
 
