@@ -7,7 +7,7 @@
     width: 100%;
     max-width: 100%;
     z-index: $topBarZIndex;
-    .user div {
+    .user span {
         max-width: 160px;
     }
     > div {
@@ -208,7 +208,7 @@ es-user-profile {
     margin: 0px 10px;
     height: 40px;
     align-items: center;
-    div {
+    span {
         overflow: hidden;
         margin-top: 1px;
         word-break: break-all;
@@ -332,7 +332,7 @@ es-user-profile {
         .material-icons {
             margin-left: 0;
         }
-        div {
+        span {
             display: none;
         }
         .iconArrow {

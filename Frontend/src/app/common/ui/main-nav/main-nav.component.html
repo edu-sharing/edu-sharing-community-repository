@@ -197,8 +197,8 @@
             title="{{ 'USERMENU' | translate }}"
           >
             <es-user-avatar [user]="iam.getCurrentUser()" [size]="'xsmall'"></es-user-avatar>
-            <div *ngIf="!connector.getCurrentLogin()?.isGuest">{{ iam.getCurrentUser() | authorityName }}</div>
-            <div *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</div>
+            <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ iam.getCurrentUser() | authorityName }}</span>
+            <span *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</span>
             <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
             <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
           </button>
