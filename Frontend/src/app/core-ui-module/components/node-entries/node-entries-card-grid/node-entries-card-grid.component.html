@@ -28,7 +28,11 @@
   </div>
 </div>
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
-<ul *ngIf="entriesService.sort?.customSortingInProgress"
+<!-- FIXME: Ideally, we would use native `ul` and `li` elements, but these have a strict model, that
+only allows `li` elements as direct children of `ul` elements. So we would need to use the native
+elements at all places without any elements between `ul` and `li`. -->
+<div *ngIf="entriesService.sort?.customSortingInProgress"
+    role="list"
     class="card-grid card-grid-reorder"
 >
   <ng-container *ngIf="(visibleNodes$ | async) as nodes">
@@ -56,9 +60,10 @@
       ></es-node-entries-card-small>
     </div>
   </ng-container>
-</ul>
+</div>
 <ng-container *ngIf="!entriesService.sort?.customSortingInProgress">
-  <ul *ngIf="!entriesService.dragDrop?.dragAllowed"
+  <div *ngIf="!entriesService.dragDrop?.dragAllowed"
+      role="list"
       class="card-grid"
       #grid
       (esBorderBoxObserver)="onGridSizeChanges()"
@@ -66,8 +71,9 @@
       (scrolled)="loadData()"
   >
     <ng-container *ngTemplateOutlet="list"></ng-container>
-  </ul>
-  <ul *ngIf="entriesService.dragDrop?.dragAllowed"
+  </div>
+  <div *ngIf="entriesService.dragDrop?.dragAllowed"
+      role="list"
       class="card-grid"
       #grid
       (esBorderBoxObserver)="onGridSizeChanges()"
@@ -120,7 +126,7 @@
         </div>
       </div>
     </ng-container>
-  </ul>
+  </div>
 </ng-container>
 <ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.getCanLoadMore() && entriesService.dataSource.hasMore()">
   <div class="load-more">
@@ -172,7 +178,8 @@
 
 </ng-template>
 <ng-template #globalOptions>
-  <li *ngIf="entriesService.globalOptions?.length"
+  <div *ngIf="entriesService.globalOptions?.length"
+      role="listitem"
       class="global-options"
       [class.global-options-small]="displayType === NodeEntriesDisplayType.SmallGrid"
   >
@@ -185,7 +192,7 @@
         *ngTemplateOutlet="globalOption; context: {option}"
       ></ng-container>
     </button>
-  </li>
+  </div>
 </ng-template>
 <ng-template #globalOption let-option="option">
   <div class="global-option">
