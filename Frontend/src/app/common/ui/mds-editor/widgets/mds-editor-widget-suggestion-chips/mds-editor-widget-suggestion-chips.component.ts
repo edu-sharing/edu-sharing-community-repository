@@ -6,7 +6,7 @@ import { map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 
 @Component({
-    selector: 'app-mds-editor-widget-suggestion-chips',
+    selector: 'es-mds-editor-widget-suggestion-chips',
     templateUrl: './mds-editor-widget-suggestion-chips.component.html',
     styleUrls: ['./mds-editor-widget-suggestion-chips.component.scss'],
 })

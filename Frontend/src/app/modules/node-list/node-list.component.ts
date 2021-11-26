@@ -13,7 +13,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {ActionbarComponent} from "../../common/ui/actionbar/actionbar.component";
 
 @Component({
-  selector: 'node-list',
+  selector: 'es-node-list',
   templateUrl: 'node-list.component.html',
   styleUrls: ['node-list.component.scss']
   /*encapsulation:ViewEncapsulation.None*/

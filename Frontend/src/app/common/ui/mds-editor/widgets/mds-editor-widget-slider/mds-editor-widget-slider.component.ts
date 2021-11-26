@@ -5,7 +5,7 @@ import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-slider',
+    selector: 'es-mds-editor-widget-slider',
     templateUrl: './mds-editor-widget-slider.component.html',
     styleUrls: ['./mds-editor-widget-slider.component.scss'],
 })

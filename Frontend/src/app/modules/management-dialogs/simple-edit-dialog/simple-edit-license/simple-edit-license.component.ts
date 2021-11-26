@@ -26,7 +26,7 @@ import {VCard} from '../../../../core-module/ui/VCard';
 import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
 
 @Component({
-  selector: 'app-simple-edit-license',
+  selector: 'es-simple-edit-license',
   templateUrl: 'simple-edit-license.component.html',
   styleUrls: ['simple-edit-license.component.scss'],
   animations: [

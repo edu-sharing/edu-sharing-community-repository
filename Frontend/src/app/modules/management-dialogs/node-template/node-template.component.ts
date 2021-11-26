@@ -12,7 +12,7 @@ import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 
 @Component({
-  selector: 'node-template',
+  selector: 'es-node-template',
   templateUrl: 'node-template.component.html',
   styleUrls: ['node-template.component.scss'],
   animations: [

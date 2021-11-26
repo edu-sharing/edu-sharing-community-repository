@@ -72,7 +72,7 @@ type NativeWidgetClass = {
 } & Type<NativeWidgetComponent>;
 
 @Component({
-    selector: 'app-mds-editor-view',
+    selector: 'es-mds-editor-view',
     templateUrl: './mds-editor-view.component.html',
     styleUrls: ['./mds-editor-view.component.scss'],
     animations: [

@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate }}"
+<es-card title="{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate }}"
       [node]="_node"
       width="small"
       height="large"
@@ -6,7 +6,7 @@
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-  <spinner *ngIf="loading"></spinner>
+  <es-spinner *ngIf="loading"></es-spinner>
   <div class="contributor-content" *ngIf="!loading">
     <h4 class="mat-heading-4 lifecycleHeading">{{'WORKSPACE.CONTRIBUTOR.LIFECYCLECONTRIBUTOR' | translate}}</h4>
     <div *ngFor="let role of rolesLifecycle">
@@ -29,8 +29,8 @@
     </div>
     <button mat-raised-button class="btnAdd" (click)="addVCard('metadata')"><i icon="add"></i> {{'ADD' | translate}}</button>
   </div>
-</card>
-<card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
+</es-card>
+<es-card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
       subtitle="{{'WORKSPACE.CONTRIBUTOR.TYPE.'+editScopeNew.toUpperCase() | translate}}"
       [priority]="3"
       (onCancel)="cancel()"
@@ -38,7 +38,7 @@
       *ngIf="edit"
       width="small" height="xlarge">
   <div *ngIf="editDisabled && !userAuthor">
-    <info-message message="{{'WORKSPACE.CONTRIBUTOR.EDIT_DISABLED' | translate}}"></info-message>
+    <es-info-message message="{{'WORKSPACE.CONTRIBUTOR.EDIT_DISABLED' | translate}}"></es-info-message>
     <div class="edit-reset">
       <button mat-button color="primary" (click)="resetVCard()"><i icon="delete"></i>
         {{'WORKSPACE.CONTRIBUTOR.RESET' | translate}}
@@ -130,7 +130,7 @@
             <mat-hint innerHTML="{{'VCARD_HINT.X-GND-URI' | translate}}"></mat-hint>
           </mat-form-field>
         </div>
-        <info-message *ngIf="edit.orcid || edit.gnduri">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</info-message>
+        <es-info-message *ngIf="edit.orcid || edit.gnduri">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</es-info-message>
       </div>
     </mat-tab>
 
@@ -188,7 +188,7 @@
             <mat-hint innerHTML="{{'VCARD_HINT.X-Wikidata' | translate}}"></mat-hint>
           </mat-form-field>
         </div>
-        <info-message *ngIf="edit.ror || edit.wikidata">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</info-message>
+        <es-info-message *ngIf="edit.ror || edit.wikidata">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</es-info-message>
       </div>
     </mat-tab>
   </mat-tab-group>
@@ -212,11 +212,11 @@
         </mat-form-field>
       </div>
       <div class="calendar">
-        <calendar label="{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}"
+        <es-calendar label="{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}"
                   [isResettable]="true"
                   [(date)]="date"
                   [disabled]="editDisabled"
-        ></calendar>
+        ></es-calendar>
       </div>
     </div>
     <button mat-button color="primary" class="more clickable" (click)="more=!more">
@@ -302,4 +302,4 @@
       </div>
     </div>
   </div>
-</card>
+</es-card>

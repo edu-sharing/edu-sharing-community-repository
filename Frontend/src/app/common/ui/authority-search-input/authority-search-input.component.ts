@@ -21,7 +21,7 @@ interface SuggestionGroup {
 }
 
 @Component({
-    selector: 'authority-search-input',
+    selector: 'es-authority-search-input',
     templateUrl: 'authority-search-input.component.html',
     styleUrls: ['authority-search-input.component.scss'],
 })

@@ -8,7 +8,7 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-facet-list',
+    selector: 'es-mds-editor-widget-facet-list',
     templateUrl: './mds-editor-widget-facet-list.component.html',
     styleUrls: ['./mds-editor-widget-facet-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,

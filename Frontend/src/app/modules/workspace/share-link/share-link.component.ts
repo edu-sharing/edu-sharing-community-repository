@@ -13,7 +13,7 @@ import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 
 @Component({
-  selector: 'workspace-share-link',
+  selector: 'es-workspace-share-link',
   templateUrl: 'share-link.component.html',
   styleUrls: ['share-link.component.scss'],
   animations: [

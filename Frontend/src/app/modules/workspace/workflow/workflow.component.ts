@@ -29,7 +29,7 @@ import {
 type WorkflowReceiver = UserSimple | Group;
 
 @Component({
-    selector: 'workspace-workflow',
+    selector: 'es-workspace-workflow',
     templateUrl: 'workflow.component.html',
     styleUrls: ['workflow.component.scss'],
     animations: [

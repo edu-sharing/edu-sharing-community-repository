@@ -11,7 +11,7 @@ import {Router} from '@angular/router';
 
 
 @Component({
-  selector: 'app-map-link',
+  selector: 'es-map-link',
   templateUrl: 'map-link.component.html',
   styleUrls: ['map-link.component.scss'],
   animations: [

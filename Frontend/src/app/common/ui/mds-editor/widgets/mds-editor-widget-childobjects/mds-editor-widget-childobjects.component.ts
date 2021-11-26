@@ -33,7 +33,7 @@ interface ChildobjectEdit {
     properties: Values;
 }
 @Component({
-    selector: 'app-mds-editor-widget-childobjects',
+    selector: 'es-mds-editor-widget-childobjects',
     templateUrl: './mds-editor-widget-childobjects.component.html',
     styleUrls: ['./mds-editor-widget-childobjects.component.scss'],
 })

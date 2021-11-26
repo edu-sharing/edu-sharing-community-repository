@@ -5,7 +5,7 @@
 import { Component} from '@angular/core';
 
 @Component({
-  selector: 'global-progress',
+  selector: 'es-global-progress',
   templateUrl: 'global-progress.component.html',
   styleUrls: ['global-progress.component.scss']
 })

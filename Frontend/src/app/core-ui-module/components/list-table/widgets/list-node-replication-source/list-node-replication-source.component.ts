@@ -4,7 +4,7 @@ import { ListItem } from '../../../../../core-module/ui/list-item';
 import { ListWidget } from '../list-widget';
 
 @Component({
-    selector: 'app-list-node-replication-source',
+    selector: 'es-list-node-replication-source',
     templateUrl: './list-node-replication-source.component.html',
 })
 export class ListNodeReplicationSourceComponent extends ListWidget {

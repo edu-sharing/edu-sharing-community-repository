@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   #container
   [injectedView]="this"
   [widget]="widget"
@@ -70,7 +70,7 @@
       <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
     </mat-option>
   </mat-autocomplete>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>
 
 <!-- Load styles for mat-select-arrow. -->
 <mat-select hidden style="display: none"></mat-select>

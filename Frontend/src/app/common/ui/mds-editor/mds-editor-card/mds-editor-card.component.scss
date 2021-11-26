@@ -1,12 +1,12 @@
 $expandToggleWidthThreshold: 400px;
 
-app-input-fill-progress {
+es-input-fill-progress {
     display: flex;
     min-width: 200px;
     height: 36px;
 }
 
-:host ::ng-deep app-mds-editor-core {
+:host ::ng-deep es-mds-editor-core {
     .extended-toggle-container {
         position: sticky;
         top: 0;

@@ -4,7 +4,7 @@ import {ListItem} from '../../../../../core-module/ui/list-item';
 import {NodeHelperService} from '../../../../node-helper.service';
 
 @Component({
-    selector: 'app-list-collection-info',
+    selector: 'es-list-collection-info',
     templateUrl: './list-collection-info.component.html',
 })
 export class ListCollectionInfoComponent extends ListWidget {

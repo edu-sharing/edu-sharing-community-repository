@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container [widget]="widget" [label]="widget.definition.caption" [valueType]="valueType">
+<es-mds-editor-widget-container [widget]="widget" [label]="widget.definition.caption" [valueType]="valueType">
   <ngx-slider
     *ngIf="isRange"
     class="ngx-slider-small"
@@ -15,4 +15,4 @@
     [options]="sliderOptions"
     (valueChange)="updateValues()"
   ></ngx-slider>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>

@@ -22,7 +22,7 @@ import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
 
 
 @Component({
-    selector: 'workspace-login',
+    selector: 'es-workspace-login',
     templateUrl: 'login.component.html',
     styleUrls: ['login.component.scss'],
     animations: [

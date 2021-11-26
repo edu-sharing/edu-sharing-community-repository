@@ -5,7 +5,7 @@ import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {RestConstants} from '../../../../../core-module/rest/rest-constants';
 
 @Component({
-    selector: 'app-mds-editor-widget-version',
+    selector: 'es-mds-editor-widget-version',
     templateUrl: './mds-editor-widget-version.component.html',
     styleUrls: ['./mds-editor-widget-version.component.scss'],
 })

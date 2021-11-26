@@ -24,15 +24,15 @@ import {
 } from '../types';
 
 /**
- * Wrapper component to select between the legacy `<mds>` component and the Angular-native
- * `<app-mds-editor>`.
+ * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
+ * `<es-mds-editor>`.
  *
  * Input properties have to be stable after initialization.
  *
- * In case <app-mds-editor> is selected, do some data preprocessing.
+ * In case <es-mds-editor> is selected, do some data preprocessing.
  */
 @Component({
-    selector: 'app-mds-editor-wrapper',
+    selector: 'es-mds-editor-wrapper',
     templateUrl: './mds-editor-wrapper.component.html',
     styleUrls: ['./mds-editor-wrapper.component.scss'],
     providers: [MdsEditorInstanceService],

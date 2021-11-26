@@ -99,7 +99,7 @@
 <!-- We need to have `SearchFieldFacets` permanently injected, so we can get the `categories`
 parameter that tells us which facets to request for suggestions. When there are any suggestions, we
 show the suggestion panel via template outlet. -->
-<app-search-field-facets
+<es-search-field-facets
   #facets
   [repository]="(mdsInfo$ | async)?.repository"
   [metadataSet]="(mdsInfo$ | async)?.metadataSet"
@@ -108,4 +108,4 @@ show the suggestion panel via template outlet. -->
   (valuesChange)="onValuesChange($event)"
   [suggestions]="suggestions$ | async"
   (categories)="onCategories($event)"
-></app-search-field-facets>
+></es-search-field-facets>

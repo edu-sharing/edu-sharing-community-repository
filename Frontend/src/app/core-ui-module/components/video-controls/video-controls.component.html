@@ -69,7 +69,7 @@
             <button mat-raised-button color="primary" (click)="save()" *ngIf="!isLoading">
               {{ 'SAVE' | translate }}
             </button>
-            <spinner-small *ngIf="isLoading">{{ 'SAVE' | translate }}</spinner-small>
+            <es-spinner-small *ngIf="isLoading">{{ 'SAVE' | translate }}</es-spinner-small>
           </div>
         </form>
       </div>

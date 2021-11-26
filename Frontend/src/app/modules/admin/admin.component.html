@@ -1,16 +1,16 @@
-<main-nav
+<es-main-nav
   #mainNav
   [title]="'ADMIN.TITLE'"
   [currentScope]="'admin'"
   [searchEnabled]="false"
-></main-nav>
-<modal-dialog
+></es-main-nav>
+<es-modal-dialog
   [title]="showWarning ? 'ADMIN.WARNING_TITLE' : null"
   [message]="'ADMIN.WARNING_INFO'"
   [buttons]="warningButtons"
   [isCancelable]="false"
-></modal-dialog>
-<card width="normal" height="xxlarge" [buttons]="xmlCardButtons" [isCancelable]="true" (onCancel)="xmlAppProperties=null" title="{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:currentAppXml} }}" *ngIf="xmlAppProperties">
+></es-modal-dialog>
+<es-card width="normal" height="xxlarge" [buttons]="xmlCardButtons" [isCancelable]="true" (onCancel)="xmlAppProperties=null" title="{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:currentAppXml} }}" *ngIf="xmlAppProperties">
   <div class="card-content-padding card-xml">
     <div class="warning">{{'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate}}</div>
     <div *ngFor="let value of xmlAppKeys;let i=index;" class="appEditor">
@@ -39,33 +39,33 @@
       </mat-form-field>
     </div>
   </div>
-</card>
-<node-info *ngIf="nodeInfo"
+</es-card>
+<es-node-info *ngIf="nodeInfo"
            [node]="nodeInfo"
            (onClose)="nodeInfo=null"
-></node-info>
-<modal-dialog
+></es-node-info>
+<es-modal-dialog
   [title]="dialogTitle"
   [message]="dialogMessage"
   [buttons]="dialogButtons"
   [messageParameters]="dialogParameters"
   [isCancelable]="true"
   (onCancel)="dialogTitle=null"
-></modal-dialog>
-<file-chooser *ngIf="chooseDirectory"
+></es-modal-dialog>
+<es-file-chooser *ngIf="chooseDirectory"
               [isCancelable]="true"
               [title]="'ADMIN.IMPORT.CHOOSE_DIRECTORY'"
               [pickDirectory]="true"
               (onCancel)="chooseDirectory=false"
               (onChoose)="pickDirectory($event)"
-></file-chooser>
-<file-chooser *ngIf="chooseCollection"
+></es-file-chooser>
+<es-file-chooser *ngIf="chooseCollection"
               [isCancelable]="true"
               [title]="'ADMIN.IMPORT.CHOOSE_COLLECTION'"
               [collections]="true"
               (onCancel)="chooseCollection=false"
               (onChoose)="pickCollection($event)"
-></file-chooser>
+></es-file-chooser>
 <div class="main">
   <div class="main-nav">
     <div>
@@ -170,21 +170,21 @@
       </div>
     </div>
     <div *ngIf="modeIsActive('STATISTICS')" class="content statistics">
-      <app-admin-statistics
+      <es-admin-statistics
         (onOpenNode)="debugNode($event)"
-      ></app-admin-statistics>
+      ></es-admin-statistics>
     </div>
     <div *ngIf="modeIsActive('MEDIACENTER')" class="content mediacenter">
-      <app-admin-mediacenter
-      ></app-admin-mediacenter>
+      <es-admin-mediacenter
+      ></es-admin-mediacenter>
     </div>
     <div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
-      <app-admin-frontpage
+      <es-admin-frontpage
         (onOpenNode)="debugNode($event)"
-      ></app-admin-frontpage>
+      ></es-admin-frontpage>
     </div>
     <div *ngIf="modeIsActive('GLOBAL_CONFIG')" class="content global-config">
-      <app-admin-config></app-admin-config>
+      <es-admin-config></es-admin-config>
     </div>
     <div *ngIf="modeIsActive('APPLICATIONS')" class="content applications">
       <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
@@ -437,14 +437,14 @@
           <div class="inputGroupGrow">
             <div class="info">{{'ADMIN.JOBS.JOB_CLASS' | translate }}</div>
             <div class="autocomplete">
-              <autocomplete
+              <es-autocomplete
                 [suggestions]="jobClassesSuggested"
                 [allowAny]="true"
                 [inputMinLength]="1"
                 [maxSuggestions]="1000"
                 (updateInput)="updateJobSuggestions($event)"
                 (addItem)="setJob($event)"
-                (addAny)="job.name='';job.class=$event"></autocomplete>
+                (addAny)="job.name='';job.class=$event"></es-autocomplete>
               <div class="job-title" *ngIf="job && job.name">{{job.name | translate}}</div>
               <div class="job-class" *ngIf="job && job.class">{{job.class}}</div>
             </div>
@@ -524,7 +524,7 @@
                               <span *ngIf="job.worstLevel.syslogEquivalent==4">{{'ADMIN.JOBS.WITH_WARNINGS' | translate}}</span>
                                 <span *ngIf="job.worstLevel.syslogEquivalent<4">{{'ADMIN.JOBS.WITH_ERRORS' | translate}}</span>
                             </span>
-                  <spinner-small *ngIf="job.status=='Running'"></spinner-small>
+                  <es-spinner-small *ngIf="job.status=='Running'"></es-spinner-small>
                   <button mat-icon-button *ngIf="job.status=='Running'" (click)="cancelJob(job)" class="close"><i icon="close"></i></button>
                 </div>
               </div>
@@ -574,11 +574,11 @@
       </div>
       <div class="group">
         <div class="heading"><i class="material-icons">person</i><span>{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}</span></div>
-        <authority-search-input
+        <es-authority-search-input
           [mode]="AuthoritySearchMode.Users"
           label="{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}"
           [showRecent]="false"
-          (onChooseAuthority)="authenticateAuthority = $event"></authority-search-input>
+          (onChooseAuthority)="authenticateAuthority = $event"></es-authority-search-input>
         <mat-chip-list>
           <mat-chip *ngIf="authenticateAuthority" (removed)="authenticateAuthority = null">
             <span>{{authenticateAuthority | authorityName}}</span>
@@ -717,7 +717,7 @@
         <ng-container *ngIf="lucene.mode === 'SOLR' && lucene.outputMode=='view'">
           <div class="inputGroupGrow">
             <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
-            <authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
+            <es-authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></es-authority-search-input>
           </div>
           <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.authorities && lucene.authorities.length">
             <div></div>
@@ -754,8 +754,8 @@
           ></ngx-monaco-editor>
       </div>
       <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'" class="search-list">
-        <actionbar #actionbarComponent></actionbar>
-        <listTable *ngIf="searchResponse?.nodes?.length"
+        <es-actionbar #actionbarComponent></es-actionbar>
+        <es-listTable *ngIf="searchResponse?.nodes?.length"
                    [viewType]="0"
                    [columns]="searchColumns"
                    [scope]="SCOPES.Admin"
@@ -768,25 +768,25 @@
                    [totalCount]="searchResponse.pagination.total"
                    [isClickable]="true"
                    (clickRow)="debugNode($event.node)"
-        ></listTable>
+        ></es-listTable>
         <div class="no-results" *ngIf="!searchResponse?.nodes?.length">
           {{'WORKSPACE.NO_MATCHING_ITEMS' | translate}}
         </div>
       </div>
-      <app-lucene-template-memory
+      <es-lucene-template-memory
         [(query)]="lucene.query"
         [(properties)]="lucene.properties"
-      ></app-lucene-template-memory>
+      ></es-lucene-template-memory>
     </div>
     <div *ngIf="mode=='FOLDERTEMPLATES'" class="content foldertemplates">
       <form>
-        <autocomplete
+        <es-autocomplete
           [inputMinLength]="2"
           (addItem)="addEduGroup($event)"
           [placeholder]="'ADMIN.FOLDERTEMPLATES.EDUGROUP'"
           [suggestions]="eduGroupSuggestions"
           (updateInput)="updateEduGroupSuggestions($event)"
-        ></autocomplete>
+        ></es-autocomplete>
         <div class="eduGroupsSelected">
           <div class="badge" *ngFor="let eduGroup of eduGroupsSelected">
             <span>{{eduGroup.title}}</span>
@@ -819,4 +819,4 @@
     </div>
   </div>
 </div>
-<global-progress *ngIf="globalProgress"></global-progress>
+<es-global-progress *ngIf="globalProgress"></es-global-progress>

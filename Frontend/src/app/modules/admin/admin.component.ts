@@ -64,7 +64,7 @@ type LuceneData = {
 }
 
 @Component({
-  selector: 'admin-main',
+  selector: 'es-admin-main',
   templateUrl: 'admin.component.html',
   styleUrls: ['admin.component.scss'],
   animations: [

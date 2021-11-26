@@ -17,7 +17,7 @@ export interface AuthorData {
 }
 
 @Component({
-    selector: 'app-mds-editor-widget-author',
+    selector: 'es-mds-editor-widget-author',
     templateUrl: './mds-editor-widget-author.component.html',
     styleUrls: ['./mds-editor-widget-author.component.scss'],
 })

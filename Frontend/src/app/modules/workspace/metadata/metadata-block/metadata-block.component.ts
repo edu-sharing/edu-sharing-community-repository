@@ -33,7 +33,7 @@ import {NodeImageSizePipe} from '../../../../core-ui-module/pipes/node-image-siz
 declare var Chart: any;
 
 @Component({
-    selector: 'app-workspace-metadata-block',
+    selector: 'es-workspace-metadata-block',
     templateUrl: 'metadata-block.component.html',
     styleUrls: ['metadata-block.component.scss']
 })

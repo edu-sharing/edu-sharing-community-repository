@@ -31,7 +31,7 @@ import {RestConnectorService} from '../../../../../core-module/rest/services/res
 import {RestConstants} from '../../../../../core-module/rest/rest-constants';
 
 @Component({
-    selector: 'app-mds-editor-widget-authority',
+    selector: 'es-mds-editor-widget-authority',
     templateUrl: './mds-editor-widget-authority.component.html',
     styleUrls: ['./mds-editor-widget-authority.component.scss'],
 })

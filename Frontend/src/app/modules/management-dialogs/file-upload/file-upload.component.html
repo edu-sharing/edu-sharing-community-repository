@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.UPLOAD_TITLE' | translate }}" subtitle="{{'WORKSPACE.UPLOAD_SUBTITLE' | translate:{progress:processed,total:progress.length} }}" width="small" height="normal" (onCancel)="close()" [isCancelable]="showClose">
+<es-card title="{{'WORKSPACE.UPLOAD_TITLE' | translate }}" subtitle="{{'WORKSPACE.UPLOAD_SUBTITLE' | translate:{progress:processed,total:progress.length} }}" width="small" height="normal" (onCancel)="close()" [isCancelable]="showClose">
   <div class="content">
   <div *ngFor="let item of progress" class="group">
     <div class="icon">
@@ -43,4 +43,4 @@
     -->
   </div>
   </div>
-</card>
+</es-card>

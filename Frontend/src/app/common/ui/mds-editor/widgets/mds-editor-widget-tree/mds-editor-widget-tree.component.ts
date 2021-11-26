@@ -12,7 +12,7 @@ import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/
 import { Tree } from './tree';
 import { FocusOrigin } from '@angular/cdk/a11y';
 @Component({
-    selector: 'app-mds-editor-widget-tree',
+    selector: 'es-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
     styleUrls: ['./mds-editor-widget-tree.component.scss'],
 })

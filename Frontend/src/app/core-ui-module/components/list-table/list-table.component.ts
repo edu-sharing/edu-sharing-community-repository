@@ -76,7 +76,7 @@ import {
 
 
 @Component({
-    selector: 'listTable',
+    selector: 'es-listTable',
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
     providers: [

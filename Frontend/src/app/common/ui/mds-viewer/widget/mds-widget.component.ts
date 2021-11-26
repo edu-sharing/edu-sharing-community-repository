@@ -8,7 +8,7 @@ import {NodeDatePipe} from '../../../../core-ui-module/pipes/date.pipe';
 import {DateHelper} from '../../../../core-ui-module/DateHelper';
 
 @Component({
-    selector: 'mds-widget',
+    selector: 'es-mds-widget',
     templateUrl: 'mds-widget.component.html',
     styleUrls: ['mds-widget.component.scss'],
 })

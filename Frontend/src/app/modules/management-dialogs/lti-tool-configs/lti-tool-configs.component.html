@@ -5,21 +5,21 @@
       <div class="card-title">{{'WORKSPACE.LTI_TOOLS.TITLE_CONFIG' | translate:{tool:_tool.name} }}</div>
       <div class="card-title-actionbar">
         <div class="actionbar">
-          <actionbar
+          <es-actionbar
             [options]="actionOptions"
-          ></actionbar>
+          ></es-actionbar>
         </div>
       </div>
 
-      <spinner *ngIf="loading"></spinner>
+      <es-spinner *ngIf="loading"></es-spinner>
       <div class="card-scroll" *ngIf="!loading">
-        <listTable
+        <es-listTable
         [customOptions]="explorerOptions"
         [columns]="columns"
         [nodes]="configs"
         [hasIcon]="true"
         [hasHeading]="false"
-        ></listTable>
+        ></es-listTable>
       </div>
   </div>
   <div class="card-action">
@@ -27,10 +27,10 @@
   </div>
   </div>
 </div>
-<modal-dialog
+<es-modal-dialog
 [title]="dialogTitle"
 [message]="dialogMessage"
 [buttons]="dialogButtons"
 [isCancelable]="true"
 (onCancel)="dialogTitle=null"
-></modal-dialog>
+></es-modal-dialog>

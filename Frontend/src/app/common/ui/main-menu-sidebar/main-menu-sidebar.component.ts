@@ -16,7 +16,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { LoginInfo } from 'ngx-edu-sharing-api';
 
 @Component({
-    selector: 'app-main-menu-sidebar',
+    selector: 'es-main-menu-sidebar',
     templateUrl: './main-menu-sidebar.component.html',
     styleUrls: ['./main-menu-sidebar.component.scss'],
     animations: [

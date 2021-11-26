@@ -7,7 +7,7 @@ import {TimePipe} from "../../../common/ui/time.pipe";
 import {TranslateService} from "@ngx-translate/core";
 
 @Component({
-  selector: 'workspace-file-upload',
+  selector: 'es-workspace-file-upload',
   templateUrl: 'file-upload.component.html',
   styleUrls: ['file-upload.component.scss']
 })

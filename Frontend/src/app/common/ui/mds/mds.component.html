@@ -1,16 +1,16 @@
-<global-progress *ngIf="globalProgress && !embedded"></global-progress>
+<es-global-progress *ngIf="globalProgress && !embedded"></es-global-progress>
 <div *ngIf="!embedded">
   <!--
     <div class="card-title" *ngIf="currentNode || _groupId">{{currentNode ? currentNode.name : _currentValues['cm:name']}}</div>
     <div class="card-title" *ngIf="!(currentNode || _groupId)">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
   -->
-  <card height="xlarge" width="large" title="{{(customTitle ? customTitle : 'MDS.TITLE') | translate}}" [jumpmarks]="displayJumpmarks ? jumpmarks : null" [node]="currentNodes" [priority]="priority" [buttons]="buttons" (onCancel)="cancel()">
+  <es-card height="xlarge" width="large" title="{{(customTitle ? customTitle : 'MDS.TITLE') | translate}}" [jumpmarks]="displayJumpmarks ? jumpmarks : null" [node]="currentNodes" [priority]="priority" [buttons]="buttons" (onCancel)="cancel()">
     <div class="mdsCard">
-      <spinner class="loading" *ngIf="isLoading"></spinner>
+      <es-spinner class="loading" *ngIf="isLoading"></es-spinner>
       <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>
       <div [innerHTML]="rendered"></div>
     </div>
-   </card>
+   </es-card>
 </div>
 <div *ngIf="embedded">
   <div class="mdsEmbeddedGroup">
@@ -20,7 +20,7 @@
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
   </div>
 </div>
-<mds
+<es-mds
   #mdsChildobject
   *ngIf="editChildobject"
   [priority]="2"
@@ -29,15 +29,15 @@
   (onCancel)="editChildobject=null"
   (onDone)="setChildobjectProperties($event)"
   [invalidate]="editChildobject!=null"
-  ></mds>
-<workspace-license
+  ></es-mds>
+<es-workspace-license
   *ngIf="editChildobjectLicense"
   [priority]="2"
   [properties]="editChildobjectLicense.properties"
   (onDone)="setChildobjectProperties($event)"
   (onCancel)="editChildobjectLicense=null"
-></workspace-license>
-<workspace-file-upload-select
+></es-workspace-license>
+<es-workspace-file-upload-select
   *ngIf="addChildobject"
   [priority]="2"
   [multiple]="true"
@@ -46,8 +46,8 @@
   (onCancel)="addChildobject=false"
   (onFileSelected)="addChildobjectFile($event)"
   (onLinkSelected)="addChildobjectLink($event)"
-></workspace-file-upload-select>
-<modal-dialog
+></es-workspace-file-upload-select>
+<es-modal-dialog
               [priority]="1 + priority"
               [title]="dialogTitle"
               [message]="dialogMessage"
@@ -55,4 +55,4 @@
               [messageParameters]="dialogParameters"
               [buttons]="dialogButtons"
               (onCancel)="dialogTitle=null"
-></modal-dialog>
+></es-modal-dialog>

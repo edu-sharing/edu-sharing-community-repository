@@ -62,7 +62,7 @@ import {
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'workspace-main',
+    selector: 'es-workspace-main',
     templateUrl: 'workspace.component.html',
     styleUrls: ['workspace.component.scss'],
     animations: [

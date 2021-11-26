@@ -7,7 +7,7 @@ import {MdsEditorWidgetAuthorComponent} from '../mds-editor-widget-author/mds-ed
 import {NativeWidgetType} from '../../types';
 
 @Component({
-    selector: 'app-mds-editor-widget-link',
+    selector: 'es-mds-editor-widget-link',
     templateUrl: './mds-editor-widget-link.component.html',
     styleUrls: ['./mds-editor-widget-link.component.scss'],
 })

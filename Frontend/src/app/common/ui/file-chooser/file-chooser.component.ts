@@ -18,7 +18,7 @@ import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 @Component({
-    selector: 'file-chooser',
+    selector: 'es-file-chooser',
     templateUrl: 'file-chooser.component.html',
     styleUrls: ['file-chooser.component.scss'],
 })

@@ -10,7 +10,7 @@ import {RouterComponent} from '../../router/router.component';
 import {UIConstants} from '../../core-module/ui/ui-constants';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 @Component({
-    selector: 'messages-main',
+    selector: 'es-messages-main',
     templateUrl: 'messages.component.html',
     styleUrls: ['messages.component.scss'],
 })

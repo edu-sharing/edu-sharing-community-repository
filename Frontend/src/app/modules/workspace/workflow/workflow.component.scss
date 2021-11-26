@@ -28,11 +28,11 @@ h2{
     font-weight: bold;
     padding-top:30px;
 }
-app-workflow-list {
+es-workflow-list {
     display: flex;
     padding:0 $cardPadding $cardPadding $cardPadding;
 }
-:host ::ng-deep authority-search-input .mat-form-field-wrapper{
+:host ::ng-deep es-authority-search-input .mat-form-field-wrapper{
     padding-bottom: 0;
 }
 .inputs{
@@ -40,7 +40,7 @@ app-workflow-list {
     align-items: center;
     width:100%;
     margin-bottom: 20px;
-    authority-search-input{
+    es-authority-search-input{
         display: flex;
         width:0;
         flex-grow: 1;
@@ -97,7 +97,7 @@ app-workflow-list {
 @media screen and (max-width: $mobileWidth - $mobileStage*1) {
     .inputs {
         flex-direction: column;
-        authority-search-input {
+        es-authority-search-input {
             width: 100%;
             margin-bottom: 30px;
         }

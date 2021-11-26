@@ -1,6 +1,6 @@
 <div class="sub-tree-wrapper">
-  <dropdown #dropdown
-  ></dropdown>
+  <es-dropdown #dropdown
+  ></es-dropdown>
   <button #dropdownTrigger="matMenuTrigger" mat-button class="dropdown-dummy"
           [style.left]="dropdownLeft" [style.top]="dropdownTop"
           tabindex="-1"
@@ -41,7 +41,7 @@
           </div>
         </div>
       </div>
-      <workspace-sub-tree class="sub-tree" *ngIf="isOpen(node)"
+      <es-workspace-sub-tree class="sub-tree" *ngIf="isOpen(node)"
                           [node]="node.ref.id"
                           [openPath]="openPath"
                           [mainNav]="mainNav"
@@ -55,15 +55,15 @@
                           (onToggleTree)="toggleTreeEvent($event)"
                           (onDrop)="dropToParent($event)"
                           [depth]="depth + 1"
-      ></workspace-sub-tree>
+      ></es-workspace-sub-tree>
     </div>
     <button mat-flat-button color="primary" class="more-items" (click)="loadAll()" *ngIf="moreItems>0 && !loadingMore" [style.marginLeft.px]="30 + depth*20">
       {{'WORKSPACE.TREE_MORE_ITEMS' | translate:{count:moreItems} }}
     </button>
-    <spinner class="more-items-loading" *ngIf="loadingMore" [style.marginLeft.px]="30 + depth*20"></spinner>
+    <es-spinner class="more-items-loading" *ngIf="loadingMore" [style.marginLeft.px]="30 + depth*20"></es-spinner>
   </div>
   <div class="spinner" *ngIf="loading">
-    <spinner-small></spinner-small>
+    <es-spinner-small></es-spinner-small>
   </div>
 </div>
 <!--

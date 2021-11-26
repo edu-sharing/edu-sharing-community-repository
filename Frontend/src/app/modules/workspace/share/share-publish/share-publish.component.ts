@@ -28,7 +28,7 @@ import {MdsEditorInstanceService, CompletionStatusEntry} from '../../../../commo
 import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
 
 @Component({
-    selector: 'app-share-publish',
+    selector: 'es-share-publish',
     templateUrl: 'share-publish.component.html',
     styleUrls: ['share-publish.component.scss'],
     providers: [MdsEditorInstanceService],

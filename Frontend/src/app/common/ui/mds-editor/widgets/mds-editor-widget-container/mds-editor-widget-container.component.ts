@@ -30,7 +30,7 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
 
 @Component({
-    selector: 'app-mds-editor-widget-container',
+    selector: 'es-mds-editor-widget-container',
     templateUrl: './mds-editor-widget-container.component.html',
     styleUrls: ['./mds-editor-widget-container.component.scss'],
     providers: [FormFieldRegistrationService],

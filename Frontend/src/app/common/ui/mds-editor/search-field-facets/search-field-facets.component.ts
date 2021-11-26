@@ -25,7 +25,7 @@ interface InitInfo {
 }
 
 @Component({
-    selector: 'app-search-field-facets',
+    selector: 'es-search-field-facets',
     templateUrl: './search-field-facets.component.html',
     styleUrls: ['./search-field-facets.component.scss'],
     providers: [MdsEditorInstanceService],

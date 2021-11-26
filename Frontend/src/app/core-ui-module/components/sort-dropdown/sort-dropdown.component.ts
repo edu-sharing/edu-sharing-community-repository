@@ -6,7 +6,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {ListItemType} from '../../../core-module/ui/list-item';
 
 @Component({
-    selector: 'sort-dropdown',
+    selector: 'es-sort-dropdown',
     templateUrl: 'sort-dropdown.component.html',
     styleUrls: ['sort-dropdown.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],

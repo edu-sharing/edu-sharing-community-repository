@@ -12,7 +12,7 @@ import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 
 @Component({
-    selector: 'tutorial',
+    selector: 'es-tutorial',
     templateUrl: 'tutorial.component.html',
     styleUrls: ['tutorial.component.scss'],
     animations: [trigger('fade', UIAnimation.fade())],

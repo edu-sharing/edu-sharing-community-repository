@@ -9,7 +9,7 @@ import {MatMenuTrigger} from '@angular/material/menu';
 import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'app-node-entries-card',
+    selector: 'es-node-entries-card',
     templateUrl: 'node-entries-card.component.html',
     styleUrls: ['node-entries-card.component.scss']
 })

@@ -13,7 +13,7 @@ import {CardType} from '../../../core-ui-module/components/card/card.component';
 import {MessageType} from '../../../core-module/ui/message-type';
 
 @Component({
-  selector: 'modal-dialog-toast',
+  selector: 'es-modal-dialog-toast',
   templateUrl: 'modal-dialog-toast.component.html',
   styleUrls: ['modal-dialog-toast.component.scss'],
   animations: [

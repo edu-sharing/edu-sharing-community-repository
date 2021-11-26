@@ -4,13 +4,13 @@
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
 >
-  <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+  <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 mode="wrapper"
                 [node]="node"
   >
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
-  </app-node-url>
+  </es-node-url>
   <ng-container *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
@@ -44,34 +44,34 @@
       class="card-meta-row"
     >
       <ng-container *ngIf="first">
-        <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+        <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                       [node]="node"
                       #link
         >
-          <app-list-base
+          <es-list-base
             [item]="displayPart"
             [node]="node"
             [showFieldTooltip]="false"
           >
-          </app-list-base>
-        </app-node-url>
+          </es-list-base>
+        </es-node-url>
         <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
         >
-          <app-list-base
+          <es-list-base
             [item]="displayPart"
             [node]="node"
             [showFieldTooltip]="false"
           >
-          </app-list-base>
+          </es-list-base>
         </div>
       </ng-container>
       <ng-container *ngIf="!first">
-        <app-list-base
+        <es-list-base
           [item]="displayPart"
           [node]="node"
           [showFieldTooltip]="false"
         >
-        </app-list-base>
+        </es-list-base>
       </ng-container>
     </div>
   </div>

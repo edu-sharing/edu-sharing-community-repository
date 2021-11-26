@@ -8,7 +8,7 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { ReplaySubject, Observable } from 'rxjs';
 
 @Component({
-    selector: 'app-mds-editor-card',
+    selector: 'es-mds-editor-card',
     templateUrl: './mds-editor-card.component.html',
     styleUrls: ['./mds-editor-card.component.scss'],
 })

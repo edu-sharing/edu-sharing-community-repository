@@ -1,9 +1,9 @@
-<main-nav *ngIf="mainnav"
+<es-main-nav *ngIf="mainnav"
           #mainNav
           [title]="'COLLECTIONS.TITLE'"
           [currentScope]="'collections'"
           [searchEnabled]="false"
-></main-nav>
+></es-main-nav>
 <div
   role="main"
   appSkipTarget="MAIN_CONTENT"
@@ -11,7 +11,7 @@
   [class.collections-master-div-mainnav]="mainnav"
 >
 
-<global-progress *ngIf="isLoading"></global-progress>
+<es-global-progress *ngIf="isLoading"></es-global-progress>
 
 <div *ngIf="!isLoading" class="createContainer">
   <div class="createProgress" *ngIf="newCollectionStep!=STEP_NEW">
@@ -26,7 +26,7 @@
       <div class="circle"></div><div class="label">{{ 'COLLECTIONS.STEP.DONE' | translate }}</div>
     </div>
   </div>
-  <card *ngIf="(newCollectionStep==STEP_NEW)"
+  <es-card *ngIf="(newCollectionStep==STEP_NEW)"
         class="collection-new-container"
         width="normal"
         height="auto"
@@ -87,8 +87,8 @@
               <i icon="keyboard_arrow_right" class="next"></i>
           </button>
       </div>
-  </card>
-  <card *ngIf="newCollectionStep==STEP_GENERAL"
+  </es-card>
+  <es-card *ngIf="newCollectionStep==STEP_GENERAL"
         [buttons]="buttons"
         [isCancelable]="false"
         title="{{ 'collectionNew_preview' | translate }}"
@@ -234,8 +234,8 @@
               </div>
           </div>
         </div>
-  </card>
-  <card *ngIf="newCollectionStep==STEP_METADATA"
+  </es-card>
+  <es-card *ngIf="newCollectionStep==STEP_METADATA"
         title="{{ 'COLLECTIONS.STEP.METADATA' | translate }}"
         [subtitle]="currentCollection.title"
         [isCancelable]="false"
@@ -245,16 +245,16 @@
         [buttons]="buttons"
         class="collection-metadata">
       <div class="card-content">
-        <app-mds-editor-wrapper #mds
+        <es-mds-editor-wrapper #mds
           [groupId]="'collection_'+newCollectionType.toLowerCase()"
           [setId]="mdsSet"
           [editorMode]="'form'"
           [embedded]="true"
           [currentValues]="properties"
-        ></app-mds-editor-wrapper>
+        ></es-mds-editor-wrapper>
       </div>
-  </card>
-  <card *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS"
+  </es-card>
+  <es-card *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS"
         title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
         [subtitle]="currentCollection.title"
         [isCancelable]="false"
@@ -270,7 +270,7 @@
           <h4>{{'TOOLPERMISSION_ERROR_HEADER' | translate}}</h4>
           <h5>{{'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate}}</h5>
         </div>
-        <listTable
+        <es-listTable
           *ngIf="editorialGroups.length!=0 && shareToAll"
           [nodes]="$any(editorialGroups)"
           [columns]="editorialColumns"
@@ -280,23 +280,23 @@
           [hasHeading]="false"
           (selectionChanged)="editorialGroupsSelected=$event"
           [icon]="'star'"
-        ></listTable>
+        ></es-listTable>
       </div>
       <div class="editorial-public">
         <mat-slide-toggle [(ngModel)]="editorialPublic">
-          <app-multi-line-label>
+          <es-multi-line-label>
             <ng-container slot="label">
               {{'COLLECTIONS.EDITORIAL_PUBLIC' | translate}}
             </ng-container>
             <ng-container slot="description">
               {{'COLLECTIONS.EDITORIAL_PUBLIC_INFO' | translate}}
             </ng-container>
-          </app-multi-line-label>
+          </es-multi-line-label>
         </mat-slide-toggle>
       </div>
     </div>
-  </card>
-  <card *ngIf="newCollectionStep==STEP_PERMISSIONS"
+  </es-card>
+  <es-card *ngIf="newCollectionStep==STEP_PERMISSIONS"
         title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"
         modal="auto"
         [isCancelable]="false"
@@ -312,11 +312,11 @@
         </div>
         <div class="status">{{('COLLECTIONS.PERMISSIONS_STATUS_'+getShareStatus()) | translate}}</div>
       </div>
-  </card>
+  </es-card>
 </div>
 
 </div>
-<workspace-share #share
+<es-workspace-share #share
                  *ngIf="showPermissions"
                  [nodeId]="editPermissionsId"
                  [node]="editPermissionsDummy"
@@ -325,4 +325,4 @@
                  [currentPermissions]="permissions"
                  (onClose)="setPermissions($event)"
 >
-</workspace-share>
+</es-workspace-share>

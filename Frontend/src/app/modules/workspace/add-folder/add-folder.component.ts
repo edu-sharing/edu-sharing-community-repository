@@ -10,7 +10,7 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 
 @Component({
-  selector: 'workspace-add-folder',
+  selector: 'es-workspace-add-folder',
   templateUrl: 'add-folder.component.html',
   styleUrls: ['add-folder.component.scss'],
   animations: [

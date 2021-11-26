@@ -49,7 +49,7 @@ import { first } from 'rxjs/operators';
 declare var noUiSlider: any;
 
 @Component({
-    selector: 'mds',
+    selector: 'es-mds',
     templateUrl: 'mds.component.html',
     styleUrls: ['mds.component.scss'],
     animations: [

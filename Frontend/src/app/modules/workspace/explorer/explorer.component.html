@@ -1,4 +1,4 @@
-<!--<listTable #list
+<!--<es-listTable #list
   [(nodes)]="_nodes"
   [parent]="_node"
   [columns]="columns"
@@ -34,9 +34,9 @@
   (openNode)="doubleClick($event)"
   (onViewNode)="onViewNode.emit($event)"
   (onInvalidateColumns)="initColumns()"
-  (loadMore)="load(false)"></listTable>
+  (loadMore)="load(false)"></es-listTable>
   -->
-<app-node-entries-wrapper
+<es-node-entries-wrapper
   [dataSource]="_dataSource"
   [columns]="columns"
   [configureColumns]="true"
@@ -63,5 +63,5 @@
       <div *ngIf="!_node">{{'WORKSPACE.NO_MATCHING_ITEMS' | translate }}</div>
     </h5>
   </ng-template>
-</app-node-entries-wrapper>
+</es-node-entries-wrapper>
 

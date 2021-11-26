@@ -7,7 +7,7 @@ import { DateAdapter } from "@angular/material/core";
 import {Translation} from "../../../core-ui-module/translation";
 
 @Component({
-  selector: 'calendar',
+  selector: 'es-calendar',
   templateUrl: 'calendar.component.html',
   styleUrls: ['calendar.component.scss'],
     animations: [

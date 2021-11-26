@@ -18,7 +18,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 declare var Chart:any;
 
 @Component({
-  selector: 'app-admin-frontpage',
+  selector: 'es-admin-frontpage',
   templateUrl: 'frontpage.component.html',
   styleUrls: ['frontpage.component.scss']
 })

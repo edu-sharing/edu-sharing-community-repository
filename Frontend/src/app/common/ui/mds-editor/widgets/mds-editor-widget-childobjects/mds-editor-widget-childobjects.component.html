@@ -1,4 +1,4 @@
-<workspace-file-upload-select
+<es-workspace-file-upload-select
         *ngIf="add"
         [priority]="2"
         [multiple]="true"
@@ -7,8 +7,8 @@
         (onCancel)="add=false"
         (onFileSelected)="addFiles($event)"
         (onLinkSelected)="addLink($event)"
-></workspace-file-upload-select>
-<app-mds-editor-wrapper
+></es-workspace-file-upload-select>
+<es-mds-editor-wrapper
         *ngIf="_edit"
         [priority]="2"
         groupId="io_childobject"
@@ -17,17 +17,17 @@
         (onCancel)="_edit=null"
         (onDone)="setProperties($any($event))"
         [invalidate]="_edit!=null"
-></app-mds-editor-wrapper>
-<workspace-license
+></es-mds-editor-wrapper>
+<es-workspace-license
         *ngIf="_editLicense"
         [priority]="2"
         [properties]="_editLicense.properties"
         (onDone)="setProperties($any($event))"
         (onCancel)="_editLicense=null"
-></workspace-license>
+></es-workspace-license>
 
 <div class="childobject-wrapper">
-  <app-mds-editor-widget-container [label]="'MDS.ADD_CHILD_OBJECT' | translate">
+  <es-mds-editor-widget-container [label]="'MDS.ADD_CHILD_OBJECT' | translate">
     <div class="group">
       <label>{{'MDS.ADD_CHILD_OBJECT_DESCRIPTION' | translate}}</label>
       <div cdkDropList
@@ -63,5 +63,5 @@
         </button>
       </div>
     </div>
-  </app-mds-editor-widget-container>
+  </es-mds-editor-widget-container>
 </div>

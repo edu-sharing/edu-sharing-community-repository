@@ -14,7 +14,7 @@ import {RestRegisterService} from "../../../core-module/core.module";
 import {FormControl, Validators} from '@angular/forms';
 
 @Component({
-  selector: 'app-register-request',
+  selector: 'es-register-request',
   templateUrl: 'register-request.component.html',
   styleUrls: ['register-request.component.scss']
 })

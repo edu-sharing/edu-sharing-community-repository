@@ -11,7 +11,7 @@ import { first } from "rxjs/operators";
 declare var Chart:any;
 
 @Component({
-  selector: 'app-admin-config',
+  selector: 'es-admin-config',
   templateUrl: 'config.component.html',
   styleUrls: ['config.component.scss']
 })

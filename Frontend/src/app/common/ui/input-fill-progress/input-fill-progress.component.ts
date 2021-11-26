@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RequiredMode } from '../mds-editor/types';
 
 @Component({
-    selector: 'app-input-fill-progress',
+    selector: 'es-input-fill-progress',
     templateUrl: 'input-fill-progress.component.html',
     styleUrls: ['input-fill-progress.component.scss'],
 })

@@ -14,7 +14,7 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 
 @Component({
-  selector: 'node-report',
+  selector: 'es-node-report',
   templateUrl: 'node-report.component.html',
   styleUrls: ['node-report.component.scss'],
   animations: [

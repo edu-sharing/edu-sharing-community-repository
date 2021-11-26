@@ -24,7 +24,7 @@ import { OptionItem } from '../../option-item';
  * An edu-sharing sidebar dialog for adding data to a collection
  */
 @Component({
-    selector: 'collection-chooser',
+    selector: 'es-collection-chooser',
     templateUrl: 'collection-chooser.component.html',
     styleUrls: ['collection-chooser.component.scss'],
 })

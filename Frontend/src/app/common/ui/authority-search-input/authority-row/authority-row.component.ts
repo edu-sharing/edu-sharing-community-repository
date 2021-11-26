@@ -4,7 +4,7 @@ import {RestIamService, RestOrganizationService} from '../../../../core-module/c
 import {PermissionNamePipe} from '../../../../core-ui-module/pipes/permission-name.pipe';
 
 @Component({
-    selector: 'app-authority-row',
+    selector: 'es-authority-row',
     templateUrl: 'authority-row.component.html',
     styleUrls: ['authority-row.component.scss'],
 })

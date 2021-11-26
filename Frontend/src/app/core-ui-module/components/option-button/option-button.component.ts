@@ -10,7 +10,7 @@ import {OptionItem} from '../../option-item';
 // readers.
 
 @Component({
-    selector: 'app-option-button',
+    selector: 'es-option-button',
     template: `
         <button mat-icon-button
                 color="primary"

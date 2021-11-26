@@ -1,4 +1,4 @@
-<dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
+<es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 <button
   #menuTrigger="matMenuTrigger"
   mat-button
@@ -92,21 +92,21 @@
     <mat-cell *matCellDef="let node" #cell>
       <ng-container *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
       >
-        <app-node-url
+        <es-node-url
           cdkMonitorSubtreeFocus
           [node]="node"
           [mode]="first ? 'link' : 'wrapper'"
         >
-          <app-list-text
+          <es-list-text
             [node]="node"
             [item]="column"
             appCheckTextOverflow
             #text="appCheckTextOverflow"
             [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-          ></app-list-text>
-        </app-node-url>
+          ></es-list-text>
+        </es-node-url>
       </ng-container>
-      <app-list-text
+      <es-list-text
         *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
         [node]="node"
         [item]="column"
@@ -115,7 +115,7 @@
         appCheckTextOverflow
         #text="appCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-      ></app-list-text>
+      ></es-list-text>
     </mat-cell>
   </ng-container>
   <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>
@@ -165,15 +165,15 @@
 
 <!-- Wait for 'ready' state to avoid changed-after-checked error when `columnChooserTrigger` becomes
 available. -->
-<app-column-chooser
+<es-column-chooser
   *ngIf="ready"
   [columns]="entriesService.columns"
   [(columnChooserVisible)]="columnChooserVisible"
   [origin]="columnChooserTrigger"
   (columnsChange)="entriesService.columnsChange.emit($event)"
-></app-column-chooser>
+></es-column-chooser>
 <ng-template #loading>
-  <spinner></spinner>
+  <es-spinner></es-spinner>
 </ng-template>
 <ng-template #icon let-node="node">
   <div class="icon-bg">

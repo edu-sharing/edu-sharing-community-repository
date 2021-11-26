@@ -15,7 +15,7 @@ import {NodeHelperService} from '../../../../core-ui-module/node-helper.service'
 type WorkflowReceiver = UserSimple | Group;
 
 @Component({
-    selector: 'app-workflow-list',
+    selector: 'es-workflow-list',
     templateUrl: 'workflow-history.component.html',
     styleUrls: ['workflow-history.component.scss'],
 })

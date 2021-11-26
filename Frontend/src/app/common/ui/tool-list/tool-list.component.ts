@@ -10,7 +10,7 @@ import {Node} from '../../../core-module/core.module';
 
 
 @Component({
-  selector: 'toolList',
+  selector: 'es-toolList',
   templateUrl: 'tool-list.component.html',
   styleUrls: ['tool-list.component.scss'],
   animations: [

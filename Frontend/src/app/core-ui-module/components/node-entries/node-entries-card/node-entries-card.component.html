@@ -73,13 +73,13 @@
       ></mat-checkbox>
     </div>
   </div>
-  <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+  <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 mode="wrapper"
                 [node]="node"
   >
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
-  </app-node-url>
+  </es-node-url>
   <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
        class="clickable"
        (click)="entriesService.clickItem.emit({
@@ -95,11 +95,11 @@
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </div>
   <div class="card-options" *ngIf="entriesService.options">
-    <app-option-button *ngFor="let option of optionsOnCard()"
+    <es-option-button *ngFor="let option of optionsOnCard()"
                        class="card-options-always"
                        [option]="option"
                        [node]="node"
-    ></app-option-button>
+    ></es-option-button>
     <div class="card-options-spacer"></div>
     <button mat-icon-button
             color="primary"
@@ -138,37 +138,37 @@
       class="card-meta-row"
     >
       <ng-container *ngIf="first">
-        <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+        <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                       [node]="node"
                       #link
         >
-          <app-list-base
+          <es-list-base
             [item]="displayPart"
             [node]="node"
             [showFieldTooltip]="false"
           >
-          </app-list-base>
-        </app-node-url>
+          </es-list-base>
+        </es-node-url>
         <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
         >
-          <app-list-base
+          <es-list-base
             [item]="displayPart"
             [node]="node"
             [showFieldTooltip]="false"
           >
-          </app-list-base>
+          </es-list-base>
         </div>
       </ng-container>
       <ng-container *ngIf="!first">
         <label>
           {{ (displayPart | appListItemLabel) }}
         </label>
-        <app-list-base
+        <es-list-base
           [item]="displayPart"
           [node]="node"
           [showFieldTooltip]="false"
         >
-        </app-list-base>
+        </es-list-base>
       </ng-container>
     </div>
   </div>

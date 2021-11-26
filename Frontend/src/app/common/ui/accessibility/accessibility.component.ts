@@ -7,7 +7,7 @@ import {Options} from '@angular-slider/ngx-slider';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-accessibility',
+    selector: 'es-accessibility',
     templateUrl: 'accessibility.component.html',
     styleUrls: ['accessibility.component.scss'],
     animations: [

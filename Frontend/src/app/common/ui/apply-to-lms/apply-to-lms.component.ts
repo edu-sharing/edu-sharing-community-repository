@@ -22,7 +22,7 @@ export class NodeLMS extends Node {
 }
 
 @Component({
-  selector: 'add-node-to-lms',
+  selector: 'es-add-node-to-lms',
   templateUrl: 'apply-to-lms.component.html',
   styleUrls: ['apply-to-lms.component.scss']
 })

@@ -23,7 +23,7 @@ import {DateHelper} from "../../core-ui-module/DateHelper";
 import {RestConnectorsService} from "../../core-module/core.module";
 import {FrameEventsService} from "../../core-module/core.module";
 @Component({
-  selector: 'share-app',
+  selector: 'es-share-app',
   templateUrl: 'share-app.component.html',
   styleUrls: ['share-app.component.scss'],
   animations: [

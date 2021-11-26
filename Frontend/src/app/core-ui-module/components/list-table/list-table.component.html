@@ -10,9 +10,9 @@
   tabindex="-1"
   aria-hidden="true"
 ></button>
-<dropdown #dropdown [options]="dropdownOptions"></dropdown>
+<es-dropdown #dropdown [options]="dropdownOptions"></es-dropdown>
 
-<card
+<es-card
   *ngIf="reorderDialog"
   height="large"
   title="{{'LIST.REORDER_TITLE' | translate }}"
@@ -32,7 +32,7 @@
       <mat-checkbox [disabled]="i==0" [(ngModel)]="item.visible" *ngIf="item.label">{{item.label}}</mat-checkbox>
     </div>
   </div>
-</card>
+</es-card>
 <div [className]="listClass + ' list list-type-'+(viewType == 0 ? 'table' : 'card')"
      cdkMonitorSubtreeFocus
      infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)"
@@ -51,7 +51,7 @@
       >
         ({{ (selectedNodes?.length || 0) + '/' + totalCount }})
       </div>
-      <sort-dropdown #sortDropdown class="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
+      <es-sort-dropdown #sortDropdown class="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></es-sort-dropdown>
       <button *ngIf="sortDropdown?.menu" #sortDropdownMenuTrigger [matMenuTriggerFor]="sortDropdown.menu" class="cdk-visually-hidden" aria-hidden="true" tabindex="-1"></button>
 
       <div class="heading" role="row">
@@ -98,11 +98,11 @@
            class="item-container option-item-container"
            [attr.role]="viewType === 0 ? 'rowgroup' : 'listitem'"
            >
-        <app-list-option-item
+        <es-list-option-item
           *ngFor="let option of optionItems"
           [option]="option"
           class="option-item item"
-        ></app-list-option-item>
+        ></es-list-option-item>
       </div>
       <div *ngFor="let node of _nodes; let i = index"
            class="rowFrame item-container item"
@@ -137,7 +137,7 @@
              (keyup.enter)="doubleClick(node)"
         >
           <!-- custom data binding from outside -->
-          <app-node-url
+          <es-node-url
             [node]="node"
             [listTable]="this"
             [attr.role]="viewType === 0 ? 'row' : null"
@@ -259,14 +259,14 @@
                    [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
               <div class="row-group">
                 <div class="rowInner">
-                  <app-list-base [node]="node" [item]="item" [showFieldTooltip]="viewType !== 0"></app-list-base>
+                  <es-list-base [node]="node" [item]="item" [showFieldTooltip]="viewType !== 0"></es-list-base>
                 </div>
                 <div *ngIf="j==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                   <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
                 </div>
               </div>
             </div>
-          </app-node-url>
+          </es-node-url>
           <mat-checkbox
             *ngIf="hasCheckbox"
             class="mat-checkbox"
@@ -316,7 +316,7 @@
           <div>{{'LOAD_MORE' | translate}}</div>
         </button>
       </div>
-      <spinner *ngIf="isLoading"></spinner>
+      <es-spinner *ngIf="isLoading"></es-spinner>
     </div>
 <ng-template #itemOrderHint>
   <div class="item-order-overlay">

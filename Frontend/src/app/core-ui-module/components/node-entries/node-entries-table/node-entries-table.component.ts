@@ -28,7 +28,7 @@ import {CdkDrag} from '@angular/cdk/drag-drop/directives/drag';
 import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'app-node-entries-table',
+    selector: 'es-node-entries-table',
     templateUrl: './node-entries-table.component.html',
     styleUrls: ['./node-entries-table.component.scss'],
 })

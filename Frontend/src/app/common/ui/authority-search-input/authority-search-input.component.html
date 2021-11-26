@@ -1,4 +1,4 @@
-<!--<autocomplete
+<!--<es-autocomplete
   [id]="'searchAuthority'"
   [inputMinLength]="2"
   (addItem)="addSuggestion($event)"
@@ -10,7 +10,7 @@
   [hintBottom]="hintBottom"
   [suggestions]="authoritySuggestions"
   (updateInput)="updateSuggestions($event)"
-></autocomplete>
+></es-autocomplete>
 -->
 <form (ngSubmit)="onSubmit()">
   <mat-form-field class="authority-search-input" floatLabel="always">
@@ -40,10 +40,10 @@
           *ngFor="let suggestion of group.values"
           [value]="suggestion"
         >
-          <app-authority-row
+          <es-authority-row
             [authority]="suggestion.originalObject"
             [secondaryTitle]="suggestion.secondaryTitle"
-          ></app-authority-row>
+          ></es-authority-row>
         </mat-option>
       </mat-optgroup>
     </mat-autocomplete>

@@ -11,7 +11,7 @@ import {
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
-  selector: 'small-collection',
+  selector: 'es-small-collection',
   templateUrl: 'small-collection.component.html',
   styleUrls: ['small-collection.component.scss']
 })

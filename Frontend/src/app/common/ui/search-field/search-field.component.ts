@@ -20,7 +20,7 @@ import { Values } from '../mds-editor/types';
 import { SearchFieldService } from './search-field.service';
 
 @Component({
-    selector: 'app-search-field',
+    selector: 'es-search-field',
     templateUrl: './search-field.component.html',
     styleUrls: ['./search-field.component.scss'],
 })

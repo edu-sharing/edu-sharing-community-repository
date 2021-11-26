@@ -1,4 +1,4 @@
-<card title="{{'SIMPLE_EDIT.TITLE' | translate}}" [node]="_nodes" width="normal" height="xxxlarge"
+<es-card title="{{'SIMPLE_EDIT.TITLE' | translate}}" [node]="_nodes" width="normal" height="xxxlarge"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
@@ -14,11 +14,11 @@
                     </button>
                 </div>
             </div>
-            <app-simple-edit-metadata #metadata
+            <es-simple-edit-metadata #metadata
                                       [nodes]="_nodes"
                                       [fromUpload]="fromUpload"
                                       (onError)="handleError($event)"
-            ></app-simple-edit-metadata>
+            ></es-simple-edit-metadata>
         </div>
         <div class="block">
             <div class="top">
@@ -31,12 +31,12 @@
                     </button>
                 </div>
             </div>
-            <app-simple-edit-invite #invite
+            <es-simple-edit-invite #invite
                                     [nodes]="_nodes"
                                     [fromUpload]="fromUpload"
                                     (onError)="handleError($event)"
                                     (onInitFinished)="updateInitState('invite')"
-            ></app-simple-edit-invite>
+            ></es-simple-edit-invite>
         </div>
         <div class="block">
             <div class="top">
@@ -49,12 +49,12 @@
                     </button>
                 </div>
             </div>
-            <app-simple-edit-license #license
+            <es-simple-edit-license #license
                                     [nodes]="_nodes"
                                     [fromUpload]="fromUpload"
                                      (onError)="handleError($event)"
                                      (onInitFinished)="updateInitState('license')"
-            ></app-simple-edit-license>
+            ></es-simple-edit-license>
         </div>
     </div>
-</card>
+</es-card>

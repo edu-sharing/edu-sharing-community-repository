@@ -43,7 +43,7 @@ import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
 
 @Component({
-    selector: 'router',
+    selector: 'es-router',
     templateUrl: 'router.component.html',
     providers: [MainNavService],
 })

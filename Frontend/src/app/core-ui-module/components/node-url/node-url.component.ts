@@ -11,7 +11,7 @@ import {PlatformLocation} from '@angular/common';
 // readers.
 
 @Component({
-    selector: 'app-node-url',
+    selector: 'es-node-url',
     template: `
         <ng-template #content><ng-content></ng-content></ng-template>
         <ng-container *ngIf="mode === 'link'">

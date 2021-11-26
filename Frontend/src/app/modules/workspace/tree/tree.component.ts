@@ -16,7 +16,7 @@ import {
 } from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'workspace-tree',
+    selector: 'es-workspace-tree',
     templateUrl: 'tree.component.html',
     styleUrls: ['tree.component.scss'],
 })

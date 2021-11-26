@@ -3,7 +3,7 @@ import {UIHelper} from "../../../../core-ui-module/ui-helper";
 import { MatSlideToggle, MatSlideToggleChange } from "@angular/material/slide-toggle";
 
 @Component({
-  selector: 'workspace-share-choose-type',
+  selector: 'es-workspace-share-choose-type',
   templateUrl: 'choose-type.component.html',
   styleUrls: ['choose-type.component.scss']
 })

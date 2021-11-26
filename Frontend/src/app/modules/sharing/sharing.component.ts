@@ -23,7 +23,7 @@ import {Helper} from '../../core-module/rest/helper';
 
 
 @Component({
-  selector: 'app-sharing',
+  selector: 'es-sharing',
   templateUrl: 'sharing.component.html',
   styleUrls: ['sharing.component.scss'],
   })

@@ -57,7 +57,7 @@ import { StreamV1Service } from 'projects/edu-sharing-api/src/lib/api/services';
 
 
 @Component({
-    selector: 'app-stream',
+    selector: 'es-stream',
     templateUrl: 'stream.component.html',
     styleUrls: ['stream.component.scss'],
     animations: [

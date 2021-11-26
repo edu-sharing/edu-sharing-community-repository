@@ -26,7 +26,7 @@ import { MdsV1Service } from 'projects/edu-sharing-api/src/lib/api/services';
 let nextUniqueId = 0;
 
 @Component({
-    selector: 'app-mds-editor-widget-tree-core',
+    selector: 'es-mds-editor-widget-tree-core',
     templateUrl: './mds-editor-widget-tree-core.component.html',
     styleUrls: ['./mds-editor-widget-tree-core.component.scss'],
 })

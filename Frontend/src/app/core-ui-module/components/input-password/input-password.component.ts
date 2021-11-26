@@ -10,7 +10,7 @@ import { UIHelper } from '../../ui-helper';
 import { FloatLabelType } from '@angular/material/form-field';
 
 @Component({
-    selector: 'input-password',
+    selector: 'es-input-password',
     templateUrl: 'input-password.component.html',
     styleUrls: ['input-password.component.scss'],
 })

@@ -23,7 +23,7 @@ import {PlatformLocation} from '@angular/common';
 enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3}
 
 @Component({
-    selector: 'app-login',
+    selector: 'es-login',
     templateUrl: 'login-app.component.html',
     styleUrls: ['login-app.component.scss']
 })

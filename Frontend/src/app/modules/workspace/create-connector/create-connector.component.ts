@@ -2,7 +2,7 @@ import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@an
 import {Connector, DialogButton} from '../../../core-module/core.module';
 
 @Component({
-  selector: 'workspace-create-connector',
+  selector: 'es-workspace-create-connector',
   templateUrl: 'create-connector.component.html',
   styleUrls: ['create-connector.component.scss']
 })

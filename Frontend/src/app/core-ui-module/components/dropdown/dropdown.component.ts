@@ -10,7 +10,7 @@ import { UIHelper } from '../../ui-helper';
  * but can also be used standalone.
  */
 @Component({
-    selector: 'dropdown',
+    selector: 'es-dropdown',
     templateUrl: 'dropdown.component.html',
     styleUrls: ['dropdown.component.scss'],
 })

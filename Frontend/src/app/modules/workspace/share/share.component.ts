@@ -40,7 +40,7 @@ import {SharePublishComponent} from './share-publish/share-publish.component';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
-    selector: 'workspace-share',
+    selector: 'es-workspace-share',
     templateUrl: 'share.component.html',
     styleUrls: ['share.component.scss'],
     animations: [

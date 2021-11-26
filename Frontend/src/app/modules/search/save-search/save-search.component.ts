@@ -6,7 +6,7 @@ import {DateHelper} from '../../../core-ui-module/DateHelper';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
-  selector: 'search-save-search',
+  selector: 'es-search-save-search',
   templateUrl: 'save-search.component.html',
   styleUrls: ['save-search.component.scss']
 })

@@ -9,7 +9,7 @@ import {KeyCombination, OptionItem} from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 @Component({
-    selector: 'actionbar',
+    selector: 'es-actionbar',
     templateUrl: 'actionbar.component.html',
     styleUrls: ['actionbar.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],

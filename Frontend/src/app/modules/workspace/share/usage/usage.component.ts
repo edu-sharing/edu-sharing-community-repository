@@ -6,7 +6,7 @@ import {trigger} from '@angular/animations';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
-  selector: 'workspace-share-usages',
+  selector: 'es-workspace-share-usages',
   templateUrl: 'usage.component.html',
   styleUrls: ['usage.component.scss'],
     animations: [

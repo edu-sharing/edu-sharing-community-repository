@@ -19,7 +19,7 @@ import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
-  selector: 'node-variant',
+  selector: 'es-node-variant',
   templateUrl: 'node-variant.component.html',
   styleUrls: ['node-variant.component.scss'],
   animations: [

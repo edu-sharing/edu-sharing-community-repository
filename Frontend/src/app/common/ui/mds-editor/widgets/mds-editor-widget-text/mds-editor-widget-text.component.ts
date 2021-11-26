@@ -9,7 +9,7 @@ import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.serv
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-text',
+    selector: 'es-mds-editor-widget-text',
     templateUrl: './mds-editor-widget-text.component.html',
     styleUrls: ['./mds-editor-widget-text.component.scss'],
 })

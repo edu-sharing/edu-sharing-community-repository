@@ -26,7 +26,7 @@ import {Toast} from "../../../../core-ui-module/toast";
 
 
 @Component({
-  selector: 'comments-list',
+  selector: 'es-comments-list',
   templateUrl: 'comments-list.component.html',
   styleUrls: ['comments-list.component.scss'],
   animations: [

@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   #container
   [widget]="widget"
   [label]="true"
@@ -31,6 +31,6 @@
   >
     {{ 'LOAD_MORE' | translate }}
     <i *ngIf="!isLoading" icon="keyboard_arrow_down"></i>
-    <spinner-small *ngIf="isLoading" class="spinner"></spinner-small>
+    <es-spinner-small *ngIf="isLoading" class="spinner"></es-spinner-small>
   </button>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>

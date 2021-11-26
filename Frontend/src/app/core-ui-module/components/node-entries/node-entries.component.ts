@@ -14,7 +14,7 @@ import {UIService} from '../../../core-module/rest/services/ui.service';
 import {NodeEntriesDisplayType} from '../node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'app-node-entries',
+    selector: 'es-node-entries',
     templateUrl: 'node-entries.component.html',
     styleUrls: ['node-entries.component.scss'],
 })

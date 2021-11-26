@@ -1,6 +1,6 @@
 <div class="frame" cdkDropListGroup>
 
-  <main-nav
+  <es-main-nav
     #mainNav
     [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
     [currentScope]="isSafe ? 'safe' : 'workspace'"
@@ -13,7 +13,7 @@
     (onSearch)="doSearch($event)"
   >
 
-  </main-nav>
+  </es-main-nav>
 <div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
 <div *ngIf="!isBlocked" [class.hide]="globalProgress">
 
@@ -28,7 +28,7 @@
     <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i icon="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
   <div class="tree" *ngIf="isLoggedIn">
-      <workspace-tree
+      <es-workspace-tree
                   [class.tree-quota]="user.person.quota.enabled"
                   [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
@@ -41,8 +41,8 @@
                   (onSetRoot)="setRoot($event)"
                   (onOpenNode)="openNode($event)"
                   (onDeleteNodes)="mainNav.management.nodeDelete=$event"
-  ></workspace-tree>
-  <user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></user-quota>
+  ></es-workspace-tree>
+  <es-user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></es-user-quota>
   </div>
 <div class="breadcrumbFrame">
     <div class="mobile-move-top">
@@ -51,25 +51,25 @@
             queryParams: { id: null },
             queryParamsHandling: 'merge'
           } : null"-->
-        <breadcrumbs *ngIf="isLoggedIn"
+        <es-breadcrumbs *ngIf="isLoggedIn"
           [breadcrumbsAsNode]="path"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.'+root"
           (onDrop)="handleDrop($event)"
           (onClick)="openBreadcrumb($event)"
-        ></breadcrumbs>
+        ></es-breadcrumbs>
     </div>
 </div>
-  <recycle *ngIf="root=='RECYCLE'" class="explorer"
+  <es-recycle *ngIf="root=='RECYCLE'" class="explorer"
            [actionbar]="actionbar"
            [searchWorkspace]="searchQuery ? searchQuery.query : null"
-           [isInsideWorkspace]="true"></recycle>
+           [isInsideWorkspace]="true"></es-recycle>
 <div class="actionbarFrame"><div class="mobile-move-top">
-  <actionbar #actionbar
-></actionbar>
+  <es-actionbar #actionbar
+></es-actionbar>
 </div></div>
 <h1 appTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
-  <workspace-explorer class="explorer"
+  <es-workspace-explorer class="explorer"
                       #explorer
                       role="main"
                       appSkipTarget="MAIN_CONTENT"
@@ -91,9 +91,9 @@
                       (onViewNode)="openNode($event, false)"
                       (onOpenNode)="openNode($event, false)"
                       (onReset)="resetWorkspace()"
-></workspace-explorer>
+></es-workspace-explorer>
 
 </div>
-  <global-progress *ngIf="globalProgress"></global-progress>
+  <es-global-progress *ngIf="globalProgress"></es-global-progress>
 </div>
 

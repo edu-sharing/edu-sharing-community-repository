@@ -5,7 +5,7 @@ import { MdsWidgetType } from '../../types';
 import { DisplayValues } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 @Component({
-    selector: 'app-mds-editor-widget-checkboxes',
+    selector: 'es-mds-editor-widget-checkboxes',
     templateUrl: './mds-editor-widget-checkboxes.component.html',
     styleUrls: ['./mds-editor-widget-checkboxes.component.scss'],
 })

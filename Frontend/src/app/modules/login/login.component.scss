@@ -9,7 +9,7 @@
     width: calc(100% - .2rem);
   }
 }
-powered-by{
+es-powered-by{
   position: fixed;
   left: 0;
   bottom: 5%;
@@ -118,7 +118,7 @@ powered-by{
   }
 }
 @media screen and (max-height: $mobileHeight) {
-  powered-by{
+  es-powered-by{
     display: none;
   }
 }
@@ -140,7 +140,7 @@ powered-by{
   }
 }
 @media screen and (max-width: $mobileTabSwitchWidth){
-  powered-by{
+  es-powered-by{
     display: none;
   }
   .login-help{

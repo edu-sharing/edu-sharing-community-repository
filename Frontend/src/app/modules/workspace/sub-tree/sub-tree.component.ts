@@ -21,7 +21,7 @@ import {DragCursorDirective} from '../../../core-ui-module/directives/drag-curso
 import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'workspace-sub-tree',
+    selector: 'es-workspace-sub-tree',
     templateUrl: 'sub-tree.component.html',
     styleUrls: ['sub-tree.component.scss'],
     animations: [

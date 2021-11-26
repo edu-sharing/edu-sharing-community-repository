@@ -52,7 +52,7 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
 
 // component class
 @Component({
-  selector: 'app-collection-new',
+  selector: 'es-collection-new',
   templateUrl: 'collection-new.component.html',
   styleUrls: ['collection-new.component.scss']
 })

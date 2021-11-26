@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {Collection, DialogButton, RestCollectionService, RestConnectorService, RestConstants} from '../../../core-module/core.module';
 
 @Component({
-  selector: 'app-modal-test',
+  selector: 'es-modal-test',
   styleUrls: ['./modal-test.component.scss'],
   templateUrl: './modal-test.component.html',
 })

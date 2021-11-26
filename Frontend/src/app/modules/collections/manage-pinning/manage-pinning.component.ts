@@ -11,7 +11,7 @@ import {RestCollectionService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
 
 @Component({
-  selector: 'collections-manage-pinning',
+  selector: 'es-collections-manage-pinning',
   templateUrl: 'manage-pinning.component.html',
   styleUrls: ['manage-pinning.component.scss']
 })

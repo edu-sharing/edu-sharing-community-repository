@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   #container
   [widget]="widget"
   [label]="false"
@@ -50,7 +50,7 @@
       </button>
     </div>
   </mat-chip-list>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>
 
 <ng-template
   cdkConnectedOverlay
@@ -66,7 +66,7 @@
        role="dialog"
        [attr.aria-labelledby]="container.labelId"
   >
-    <app-mds-editor-widget-tree-core
+    <es-mds-editor-widget-tree-core
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
       #treeRef
@@ -78,7 +78,7 @@
       (close)="closeOverlay()"
       (valuesChange)="onValuesChange($event)"
       (indeterminateValuesChange)="indeterminateValues$.next($event)"
-    ></app-mds-editor-widget-tree-core>
+    ></es-mds-editor-widget-tree-core>
   </div>
 </ng-template>
 

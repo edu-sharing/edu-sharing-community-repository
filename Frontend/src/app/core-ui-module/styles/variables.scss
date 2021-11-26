@@ -30,7 +30,7 @@ $itemSelectedBackground: $primaryVeryLight !default;
 $itemSelectedTextColor: $primaryMediumDark !default;
 $buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.08) !default;
 $workspaceNewBackground: $itemSelectedBackground !default;
-// the white bar height in search and workspace
+// the white bar height in search and es-workspace
 $secondaryBarHeight: 65px !default;
 $listItemSelectedBackground: #f1f6fa !default;
 $workspaceSelectedBackgroundEffect: linear-gradient(

@@ -1,14 +1,14 @@
 <ng-container *ngIf="visible">
-  <app-skip-nav></app-skip-nav>
-  <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
+  <es-skip-nav></es-skip-nav>
+  <es-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></es-banner>
 
   <div role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
     <div class="preload" *ngIf="getPreloading()">
       <img src="assets/images/edu-sharing-loading-animation.svg" image-config alt="" />
     </div>
-    <user-profile *ngIf="showProfile" (onCancel)="showProfile = false"></user-profile>
+    <es-user-profile *ngIf="showProfile" (onCancel)="showProfile = false"></es-user-profile>
 
-    <card
+    <es-card
       *ngIf="licenseDialog"
       title="{{ 'LICENSE_INFORMATION' | translate }}"
       width="xxlarge"
@@ -17,18 +17,18 @@
       (onCancel)="licenseDialog = false"
     >
       <div class="card-content-padding card-licenses">
-        <spinner *ngIf="!licenseDetails"></spinner>
+        <es-spinner *ngIf="!licenseDetails"></es-spinner>
         <div [innerHTML]="licenseDetails"></div>
       </div>
-    </card>
+    </es-card>
 
-    <global-progress *ngIf="globalProgress"></global-progress>
-    <tutorial
+    <es-global-progress *ngIf="globalProgress"></es-global-progress>
+    <es-tutorial
       [element]="tutorialElement"
       [heading]="'USER_TUTORIAL_HEADING'"
       [description]="'USER_TUTORIAL_DESCRIPTION'"
       [showSkip]="false"
-    ></tutorial>
+    ></es-tutorial>
 
     <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
     <div
@@ -66,14 +66,14 @@
       </div>
     </div>
 
-    <app-create-menu
+    <es-create-menu
       #createMenu
       [allowed]="isCreateAllowed()"
       [allowBinary]="create.allowBinary"
       [parent]="create.parent"
       [folder]="create.folder"
       (onCreate)="onCreate.emit($event)"
-    ></app-create-menu>
+    ></es-create-menu>
     <div
       #topbar
       class="topBar {{ 'topBar-' + _currentScope }} scrollWithBanner"
@@ -82,10 +82,10 @@
       <div class="mobile-move-top2">
         <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle">
           <ng-container *ngSwitchCase="'dropdown'">
-            <app-main-menu-dropdown
+            <es-main-menu-dropdown
               #mainMenuDropdown
               [currentScope]="_currentScope"
-            ></app-main-menu-dropdown>
+            ></es-main-menu-dropdown>
             <button
               *ngIf="showScope"
               mat-button
@@ -101,11 +101,11 @@
             </button>
           </ng-container>
           <ng-container *ngSwitchCase="'sidebar'">
-            <app-main-menu-sidebar
+            <es-main-menu-sidebar
               #mainMenuSidebar
               [currentScope]="_currentScope"
               (showLicenses)="showLicenses()"
-            ></app-main-menu-sidebar>
+            ></es-main-menu-sidebar>
             <button
               *ngIf="showScope"
               mat-button
@@ -151,7 +151,7 @@
         </div>
         <div class="topBarSearch" [class.noScope]="!showScope">
           <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
-          <app-search-field
+          <es-search-field
             *ngIf="searchEnabled"
             [(searchString)]="searchQuery"
             (searchStringChange)="searchQueryChange.emit($event)"
@@ -159,7 +159,7 @@
             [enableFiltersAndSuggestions]="currentScope === 'search'"
             (search)="doSearch($event)"
             (clear)="clearSearch()"
-          ></app-search-field>
+          ></es-search-field>
         </div>
         <div class="topbar-search-right">
           <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
@@ -196,13 +196,13 @@
             [matMenuTriggerFor]="userDropdown.menu"
             title="{{ 'USERMENU' | translate }}"
           >
-            <user-avatar [user]="iam.getCurrentUser()" [size]="'xsmall'"></user-avatar>
+            <es-user-avatar [user]="iam.getCurrentUser()" [size]="'xsmall'"></es-user-avatar>
             <div *ngIf="!connector.getCurrentLogin()?.isGuest">{{ iam.getCurrentUser() | authorityName }}</div>
             <div *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</div>
             <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
             <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
           </button>
-          <dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></dropdown>
+          <es-dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></es-dropdown>
         </div>
       </div>
     </div>
@@ -218,11 +218,11 @@
       <i icon="arrow_upward"></i> {{ 'GO_TO_TOP' | translate }}
     </button>
     <div *ngIf="canOpen && _currentScope != 'render'" #tabNav class="tab-nav">
-      <app-main-menu-bottom
+      <es-main-menu-bottom
         class="mobile-move-bottom"
         [currentScope]="_currentScope"
-      ></app-main-menu-bottom>
+      ></es-main-menu-bottom>
     </div>
-    <search-node-store *ngIf="showNodeStore" (onClose)="setNodeStore(false)"></search-node-store>
+    <es-search-node-store *ngIf="showNodeStore" (onClose)="setNodeStore(false)"></es-search-node-store>
   </div>
 </ng-container>

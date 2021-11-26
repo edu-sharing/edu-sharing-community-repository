@@ -13,7 +13,7 @@ $collectionIconSize: 40px;
     grid-template-rows: $topBarHeight auto $optionBarHeight;
     .card-meta {
         .card-meta-row {
-            > app-list-base {
+            > es-list-base {
                 @include limitLineCount(2, 1.25);
             }
         }
@@ -21,7 +21,7 @@ $collectionIconSize: 40px;
 }
 :host ::ng-deep {
     .grid-card {
-        app-node-url {
+        es-node-url {
             .node-url-wrapper {
                 height: 100%;
             }

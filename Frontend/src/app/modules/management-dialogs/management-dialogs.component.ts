@@ -56,7 +56,7 @@ export interface ManagementEvent {
     data?: any
 }
 @Component({
-  selector: 'workspace-management',
+  selector: 'es-workspace-management',
   templateUrl: 'management-dialogs.component.html',
   styleUrls: ['management-dialogs.component.scss'],
   animations: [

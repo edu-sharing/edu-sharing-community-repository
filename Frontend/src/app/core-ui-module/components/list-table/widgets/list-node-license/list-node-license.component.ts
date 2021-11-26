@@ -6,7 +6,7 @@ import {NodeHelperService} from '../../../../node-helper.service';
 import {Node} from '../../../../../core-module/rest/data-object';
 
 @Component({
-    selector: 'app-list-node-license',
+    selector: 'es-list-node-license',
     templateUrl: './list-node-license.component.html',
 })
 export class ListNodeLicenseComponent extends ListWidget {

@@ -53,7 +53,7 @@ import { WorkspaceManagementDialogsComponent } from '../management-dialogs/manag
 import { delay } from "rxjs/operators";
 
 @Component({
-    selector: 'app-create-menu',
+    selector: 'es-create-menu',
     templateUrl: 'create-menu.component.html',
     styleUrls: ['create-menu.component.scss'],
     animations: [

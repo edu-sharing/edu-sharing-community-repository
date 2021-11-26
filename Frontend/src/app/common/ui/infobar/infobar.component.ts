@@ -8,7 +8,7 @@ import {trigger} from "@angular/animations";
 import {DialogButton} from "../../../core-module/core.module";
 
 @Component({
-  selector: 'infobar',
+  selector: 'es-infobar',
   templateUrl: 'infobar.component.html',
   styleUrls: ['infobar.component.scss'],
   animations: [

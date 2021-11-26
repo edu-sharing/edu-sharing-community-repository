@@ -7,7 +7,7 @@ import {OptionItem, Target} from '../../../option-item';
 import {InteractionType} from '../../node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'app-node-entries-card-small',
+    selector: 'es-node-entries-card-small',
     templateUrl: 'node-entries-card-small.component.html',
     styleUrls: ['node-entries-card-small.component.scss']
 })

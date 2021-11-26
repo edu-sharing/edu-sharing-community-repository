@@ -6,7 +6,7 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode, MdsView } from '../types';
 
 @Component({
-    selector: 'app-mds-editor-core',
+    selector: 'es-mds-editor-core',
     templateUrl: './mds-editor-core.component.html',
     styleUrls: ['./mds-editor-core.component.scss'],
 })

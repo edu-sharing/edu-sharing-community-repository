@@ -89,7 +89,7 @@ import {
 
 // component class
 @Component({
-    selector: 'app-collections',
+    selector: 'es-collections',
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances

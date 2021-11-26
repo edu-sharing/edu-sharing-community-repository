@@ -61,7 +61,7 @@ import {About, AboutService} from 'ngx-edu-sharing-api';
  * The main nav (top bar + menus)
  */
 @Component({
-    selector: 'main-nav',
+    selector: 'es-main-nav',
     templateUrl: 'main-nav.component.html',
     styleUrls: ['main-nav.component.scss'],
     providers: [MainMenuEntriesService],

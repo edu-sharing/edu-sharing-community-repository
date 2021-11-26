@@ -18,16 +18,16 @@
       <i *ngIf="entriesService.sort.active !== 'ccm:collection_ordered_position'"
          [icon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"></i>
     </button>
-    <sort-dropdown
+    <es-sort-dropdown
       #sortDropdown
       [columns]="getSortColumns()"
       [sortBy]="entriesService.sort.active"
       [sortAscending]="entriesService.sort.direction === 'asc'"
       (onSort)="changeSort($event)"
-    ></sort-dropdown>
+    ></es-sort-dropdown>
   </div>
 </div>
-<dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></dropdown>
+<es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 <ul *ngIf="entriesService.sort?.customSortingInProgress"
     class="card-grid card-grid-reorder"
 >
@@ -41,19 +41,19 @@
       [cdkDropListData]="i"
       (cdkDropListDropped)="reorder($event)"
     >
-      <app-node-entries-card
+      <es-node-entries-card
         *ngIf="displayType === NodeEntriesDisplayType.Grid"
         [node]="node"
         [dropdown]="dropdown"
         role="listitem"
         cdkDrag
-      ></app-node-entries-card>
-      <app-node-entries-card-small
+      ></es-node-entries-card>
+      <es-node-entries-card-small
         *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
         [node]="node"
         role="listitem"
         cdkDrag
-      ></app-node-entries-card-small>
+      ></es-node-entries-card-small>
     </div>
   </ng-container>
 </ul>
@@ -93,7 +93,7 @@
         (cdkDropListExited)="dragExit($event)"
         (cdkDropListDropped)="drop($event)"
       >
-        <app-node-entries-card
+        <es-node-entries-card
           *ngIf="displayType === NodeEntriesDisplayType.Grid"
           [node]="node"
           [dropdown]="dropdown"
@@ -101,15 +101,15 @@
           cdkDrag
           [cdkDragData]="node"
           appDragCursor
-        ></app-node-entries-card>
-        <app-node-entries-card-small
+        ></es-node-entries-card>
+        <es-node-entries-card-small
           *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
           [node]="node"
           role="listitem"
           cdkDrag
           [cdkDragData]="node"
           appDragCursor
-        ></app-node-entries-card-small>
+        ></es-node-entries-card-small>
         <div *ngIf="getDragState()?.element === node && !getDragState().dropAllowed"
              class="card-grid-drop-blocked-container">
           <i icon="cancel"></i>
@@ -135,7 +135,7 @@
 </ng-container>
 
 <ng-template #loading>
-  <spinner></spinner>
+  <es-spinner></es-spinner>
 </ng-template>
 <ng-template #list>
   <ng-container
@@ -143,19 +143,19 @@
   ></ng-container>
   <ng-container *ngIf="(visibleNodes$ | async) as nodes">
     <ng-container *ngIf="displayType === NodeEntriesDisplayType.SmallGrid">
-      <app-node-entries-card-small
+      <es-node-entries-card-small
         *ngFor="let node of nodes; let i = index"
         [node]="node"
         role="listitem"
-      ></app-node-entries-card-small>
+      ></es-node-entries-card-small>
     </ng-container>
     <ng-container *ngIf="displayType === NodeEntriesDisplayType.Grid">
-      <app-node-entries-card
+      <es-node-entries-card
         *ngFor="let node of nodes; let i = index"
         [node]="node"
         [dropdown]="dropdown"
         role="listitem"
-      ></app-node-entries-card>
+      ></es-node-entries-card>
     </ng-container>
   </ng-container>
   <!--

@@ -121,7 +121,7 @@ $sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
     padding: 5px;
 }
 
-sort-dropdown{
+es-sort-dropdown{
     position: absolute;
     right: 250px;
 }
@@ -311,7 +311,7 @@ a, a:hover, a:visited, a:active, button {
     &.no-mainnav{
         top: 48px;
     }
-    actionbar{
+    es-actionbar{
         margin-right: -5px;
     }
     >div {
@@ -323,7 +323,7 @@ a, a:hover, a:visited, a:active, button {
         @include materialShadow();
     }
 }
-small-collection{
+es-small-collection{
     position: absolute;
     top: 0;
     left: $sidenavWidth;
@@ -490,7 +490,7 @@ small-collection{
     clear: both;
 }
 
-app-node-entries-wrapper {
+es-node-entries-wrapper {
     display: block;
     padding: 0 20px;
 }
@@ -532,7 +532,7 @@ app-node-entries-wrapper {
         float:left;
         width:100%;
     }
-    listTable,.noResults{
+    es-listTable,.noResults{
         width:calc(100% + #{$cardWidth + 60px});
         float: left;
         overflow: hidden;
@@ -568,7 +568,7 @@ app-node-entries-wrapper {
     }
 }
 .sidenav-container{
-    app-mds-editor-wrapper {
+    es-mds-editor-wrapper {
         display: block;
         margin-top: 15px;
     }
@@ -635,7 +635,7 @@ div.dialog.darken {
     .sidenav .list > div{
         margin-bottom: 20px;
     }
-    .sidenav-container actionbar {
+    .sidenav-container es-actionbar {
         .action-always-caption {
             display: inline-block !important;
         }
@@ -645,7 +645,7 @@ div.dialog.darken {
             width: 220px;
         }
     }
-    mds {
+    es-mds {
         .mdsEmbeddedGroup {
             float:left;
             width: 100%;
@@ -653,8 +653,8 @@ div.dialog.darken {
             /* margin-bottom: 40px; */
         }
     }
-    app-mds-editor-embedded {
-        app-mds-editor-core {
+    es-mds-editor-embedded {
+        es-mds-editor-core {
             padding: 0 20px;
         }
     }
@@ -703,7 +703,7 @@ div.dialog.darken {
             width:max-content;
         }
     }
-    small-collection {
+    es-small-collection {
         left: 0;
         width: 100%;
     }

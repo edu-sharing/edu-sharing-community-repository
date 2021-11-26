@@ -1,4 +1,4 @@
-<main-nav
+<es-main-nav
   *ngIf="mainnav"
   #mainNav
   [create]="{
@@ -10,20 +10,20 @@
   [currentScope]="'collections'"
   [searchEnabled]="false"
   (onCreate)="addNodesToCollection($event)"
-></main-nav>
-<tutorial
+></es-main-nav>
+<es-tutorial
   [element]="tutorialElement"
   [heading]="'COLLECTIONS.TUTORIAL_HEADING'"
   [description]="'COLLECTIONS.TUTORIAL_DESCRIPTION'"
   [showSkip]="false"
-></tutorial>
-<infobar
+></es-tutorial>
+<es-infobar
   [title]="infoTitle"
   [message]="infoMessage"
   [buttons]="infoButtons"
   [isCancelable]="true"
   (onCancel)="infoClose()"
-></infobar>
+></es-infobar>
 <mat-tab-group
   role="navigation"
   [attr.aria-label]="'NAV.COLLECTIONS' | translate"
@@ -66,7 +66,7 @@
   </mat-tab>
 </mat-tab-group>
 <div class="collections-header-group">
-  <actionbar
+  <es-actionbar
     *ngIf="collectionContentTemplateRef"
     #actionbarCollection
     [numberOfAlwaysVisibleOptions]="1"
@@ -74,7 +74,7 @@
     appearance="round"
     [style]="'flat'"
     [dropdownPosition]="'right'"
-  ></actionbar>
+  ></es-actionbar>
   <!-- collection header -->
   <ng-container
     [ngTemplateOutlet]="collectionContentTemplateRef ? collectionContentTemplateRef : collectionContentTemplateRefDefault"
@@ -96,7 +96,7 @@
         [class.dark-color]="isBrightColor()"
         [style.background-color]="collectionContent?.node?.collection?.color"
       >
-        <div *ngIf="isLoading" class="collection-loading"><spinner-small></spinner-small></div>
+        <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div>
         <div class="card-collection-image-container"
              [class.card-collection-icon-container]="!hasNonIconPreview()"
              style="width:100%;">
@@ -138,14 +138,14 @@
         </div>
         <div class="collections-header-textarea" [class.collections-header-textarea-bright]="isBrightColor()">
           <div class="collection-option">
-            <actionbar
+            <es-actionbar
               #actionbarCollection
               [numberOfAlwaysVisibleOptions]="1"
               [numberOfAlwaysVisibleOptionsMobile]="1"
               appearance="round"
               [style]="'flat'"
               [dropdownPosition]="'right'"
-            ></actionbar>
+            ></es-actionbar>
           </div>
           <h1
             appTitle
@@ -187,10 +187,10 @@
           </div>
           <div class="collection-permissions collection-label"></div>
           <div class="collections-metadata">
-            <mds-viewer *ngIf="collectionContent?.node?.properties"
+            <es-mds-viewer *ngIf="collectionContent?.node?.properties"
                         [data]="collectionContent.node.properties"
                         groupId="collection_sidebar"
-            ></mds-viewer>
+            ></es-mds-viewer>
           </div>
 
           <ng-container *ngIf="collectionContent?.node?.access?.indexOf('ChangePermissions') !== -1">
@@ -200,7 +200,7 @@
             <div class="collection-permissions collection-content">
               <div *ngFor="let permission of permissions">
                 <ng-container *ngIf="permission.authority.authorityType !== 'EVERYONE'">
-                  <user-avatar [user]="permission" size="xsmall"></user-avatar>
+                  <es-user-avatar [user]="permission" size="xsmall"></es-user-avatar>
                   <span>{{(permission.authority.authorityType === 'GROUP' ? permission.group : permission.user) | authorityName }}</span>
                 </ng-container>
               </div>
@@ -214,7 +214,7 @@
           class="collections-loading-div"
           style="padding-top: 24px;text-align: center;"
         >
-          <spinner></spinner>
+          <es-spinner></es-spinner>
         </section>
         <div
           role="navigation"
@@ -222,13 +222,13 @@
           class="breadcrumb-space"
           *ngIf="!isRootLevelCollection() && !isLoading"
         >
-          <breadcrumbs
+          <es-breadcrumbs
             class="collections-breadcrumb"
             [home]="'COLLECTIONS.TAB.' + tabSelected"
             [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
             [breadcrumbsAsNode]="path"
             (onDrop)="dropOnCollection($event.target, $event.source)"
-          ></breadcrumbs>
+          ></es-breadcrumbs>
         </div>
         <div
           role="main"
@@ -259,7 +259,7 @@
 
           <section class="collections-cards-div" *ngIf="!isLoading">
             <!-- COLLECTION CARDS -->
-            <app-node-entries-wrapper
+            <es-node-entries-wrapper
               [dataSource]="dataSourceCollections"
               [columns]="collectionsColumns"
               [displayType]="NodeEntriesDisplayType.SmallGrid"
@@ -308,7 +308,7 @@
                   </ng-container>
                 </div>
               </ng-template>
-            </app-node-entries-wrapper>
+            </es-node-entries-wrapper>
             <!-- when empty at root level -->
           </section>
 
@@ -322,7 +322,7 @@
               </h2>
             </div>
 
-            <app-custom-node-list-wrapper
+            <es-custom-node-list-wrapper
               [parent]="collectionContent.node"
               [hasHeading]="false"
               [viewType]="1"
@@ -337,18 +337,18 @@
               [nodes]="$any(collectionProposals.nodes)"
               (nodesChange)="collectionProposals.nodes = $any($event)"
               class="no-padding"
-            ></app-custom-node-list-wrapper>
+            ></es-custom-node-list-wrapper>
           </section>
           <section
             class="collections-cards-div"
             *ngIf="!isLoading && isReady && !isRootLevelCollection()"
           >
-            <actionbar
+            <es-actionbar
               #actionbarReferences
               class="actionbarMaterials"
               [numberOfAlwaysVisibleOptions]="1"
-            ></actionbar>
-            <app-node-entries-wrapper
+            ></es-actionbar>
+            <es-node-entries-wrapper
               #listReferences
               [dataSource]="dataSourceReferences"
               [columns]="referencesColumns"
@@ -381,9 +381,9 @@
                   </h2>
                 </div>
               </ng-template>
-            </app-node-entries-wrapper>
+            </es-node-entries-wrapper>
             <!--
-          <app-custom-node-list-wrapper
+          <es-custom-node-list-wrapper
         #listReferences
             [parent]="collectionContent.node"
             [optionItems]="
@@ -418,7 +418,7 @@
                   "
             (loadMore)="loadMoreReferences()"
             class="no-padding"
-          ></app-custom-node-list-wrapper>
+          ></es-custom-node-list-wrapper>
           -->
             <!-- NO CONTENT NOTICE -->
             <div
@@ -439,23 +439,23 @@
           </section>
         </div>
 
-        <modal-dialog
+        <es-modal-dialog
           [title]="dialogTitle"
           [isCancelable]="dialogCancelable"
           (onCancel)="closeDialog()"
           [message]="dialogMessage"
           [buttons]="dialogButtons"
-        ></modal-dialog>
+        ></es-modal-dialog>
 
-        <workspace-management
+        <es-workspace-management
           [(nodeReport)]="nodeReport"
           [(addToCollection)]="addToOther"
           [(nodeShare)]="collectionShare"
           (onCloseAddToCollection)="closeAddToOther()"
-        ></workspace-management>
+        ></es-workspace-management>
       </div>
     </div>
-    <app-footer [scope]="'collections'"></app-footer>
+    <es-footer [scope]="'collections'"></es-footer>
   </div>
 </div>
 <ng-template #sortTool let-columns="columns" let-sortInfo="sortInfo" let-callback="callback" let-toggleCallback="toggleCallback">
@@ -471,11 +471,11 @@
     <i *ngIf="sortInfo.name !== 'ccm:collection_ordered_position'"
        [icon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
   </button>
-  <sort-dropdown
+  <es-sort-dropdown
     #sortDropdown
     [columns]="columns"
     [sortBy]="sortInfo.name"
     [sortAscending]="sortInfo.ascending"
     (onSort)="callback.emit($event)"
-  ></sort-dropdown>
+  ></es-sort-dropdown>
 </ng-template>

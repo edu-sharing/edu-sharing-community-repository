@@ -24,7 +24,7 @@ import {GlobalContainerComponent} from '../../common/ui/global-container/global-
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 
 @Component({
-  selector: 'app-profiles',
+  selector: 'es-profiles',
   templateUrl: 'profiles.component.html',
   styleUrls: ['profiles.component.scss'],
   animations: [

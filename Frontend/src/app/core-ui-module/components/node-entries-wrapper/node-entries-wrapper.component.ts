@@ -39,14 +39,14 @@ import {
 import {NodeHelperService} from '../../node-helper.service';
 
 @Component({
-    selector: 'app-node-entries-wrapper',
+    selector: 'es-node-entries-wrapper',
     template: `
-        <app-node-entries
+        <es-node-entries
             *ngIf="!customNodeListComponent"
         >
             <ng-template #title><ng-container *ngTemplateOutlet="titleRef"></ng-container></ng-template>
             <ng-template #empty><ng-container *ngTemplateOutlet="emptyRef"></ng-container></ng-template>
-        </app-node-entries>`,
+        </es-node-entries>`,
     providers: [
         NodeEntriesService,
         OptionsHelperService,

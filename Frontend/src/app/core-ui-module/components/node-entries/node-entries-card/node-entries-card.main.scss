@@ -23,7 +23,7 @@ $optionBarHeight: 50px;
             // margin: 0 5px;
             // border-left: 1px solid #ccc;
         }
-        app-option-button, button {
+        es-option-button, button {
             transition: all $transitionNormal;
             margin: 0 2px;
             border-radius: 50%;
@@ -171,7 +171,7 @@ $optionBarHeight: 50px;
                     color: $textLight;
                     font-size: 85%;
                 }
-                > app-list-base {
+                > es-list-base {
                     color: #000;
                     flex-grow: 1;
                     margin: 5px 0;
@@ -184,7 +184,7 @@ $optionBarHeight: 50px;
                 }
             }
             &:first-child {
-                > app-list-base, > app-node-url {
+                > es-list-base, > es-node-url {
                     width: 100%;
                     color: $textMain;
                     font-size: 120%;
@@ -213,11 +213,11 @@ $optionBarHeight: 50px;
     .grid-card {
         .card-meta-row {
             &:first-child {
-                app-list-base, app-node-url a app-list-base {
+                es-list-base, es-node-url a es-list-base {
                     @include limitLineCount(2, 1.25);
                 }
             }
-            app-node-url {
+            es-node-url {
                 a {
                     color: $textMain;
                     &.cdk-keyboard-focused {
@@ -229,13 +229,13 @@ $optionBarHeight: 50px;
         }
     }
     .card-meta {
-        app-list-base {
-            app-list-node-license {
+        es-list-base {
+            es-list-node-license {
                 img {
                     height: 20px;
                 }
             }
-            app-list-collection-info {
+            es-list-collection-info {
                 display: flex;
                 align-items: center;
                 // justify-content: flex-end;
@@ -246,7 +246,7 @@ $optionBarHeight: 50px;
             }
         }
     }
-    .grid-card-collection app-node-url {
+    .grid-card-collection es-node-url {
         a.cdk-keyboard-focused .card-meta{
             // @TDOO: better focus visibility is required
             background-color: #fff;

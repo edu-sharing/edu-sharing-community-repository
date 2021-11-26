@@ -76,7 +76,7 @@ declare var jQuery:any;
 declare var window: any;
 
 @Component({
-  selector: 'node-render',
+  selector: 'es-node-render',
   templateUrl: 'node-render.component.html',
   styleUrls: ['node-render.component.scss'],
     providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {

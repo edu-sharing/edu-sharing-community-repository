@@ -1,4 +1,4 @@
-<card
+<es-card
         title="{{'WORKSPACE.SHARE.HISTORY.TITLE' | translate }}"
         height="xlarge"
         width="small"
@@ -8,7 +8,7 @@
         [buttons]="buttons"
 >
   <div class="card-content">
-    <spinner *ngIf="loading"></spinner>
+    <es-spinner *ngIf="loading"></es-spinner>
     <div *ngIf="(!history || !history.length) && !loading" class="empty">
       {{'WORKSPACE.SHARE.HISTORY.EMPTY' | translate }}
     </div>
@@ -39,4 +39,4 @@
       </div>
     </div>
   </div>
-</card>
+</es-card>

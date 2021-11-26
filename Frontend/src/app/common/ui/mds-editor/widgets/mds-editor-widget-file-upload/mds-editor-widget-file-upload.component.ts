@@ -5,7 +5,7 @@ import {InputStatus, Values} from '../../types';
 import { map } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-mds-editor-widget-file-upload',
+    selector: 'es-mds-editor-widget-file-upload',
     templateUrl: './mds-editor-widget-file-upload.component.html',
     styleUrls: ['./mds-editor-widget-file-upload.component.scss'],
 })

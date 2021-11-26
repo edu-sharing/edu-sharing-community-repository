@@ -3,7 +3,7 @@ import {ListItem} from "../../../core-module/ui/list-item";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
 
 @Component({
-    selector: 'info-message',
+    selector: 'es-info-message',
     templateUrl: 'info-message.component.html',
     styleUrls: ['info-message.component.scss']
 })

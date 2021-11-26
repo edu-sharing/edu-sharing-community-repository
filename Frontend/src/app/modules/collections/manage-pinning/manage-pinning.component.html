@@ -1,4 +1,4 @@
-<card *ngIf="!loading"
+<es-card *ngIf="!loading"
       title="{{'COLLECTIONS.PINNING.TITLE' | translate }}"
       subtitle="{{'CARD_SUBTITLE_MULTIPLE' | translate:{count:pinnedCollections.length} }}"
       [buttons]="buttons" (onCancel)="cancel()"
@@ -18,4 +18,4 @@
       <i icon="dehaze" class="drag" *ngIf="!isMobile"></i>
     </div>
   </div>
-</card>
+</es-card>

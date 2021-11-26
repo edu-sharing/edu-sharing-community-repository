@@ -15,7 +15,7 @@ import {trigger} from "@angular/animations";
 import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
 
 @Component({
-  selector: 'toolpermission-manager',
+  selector: 'es-toolpermission-manager',
   templateUrl: 'toolpermission-manager.component.html',
   styleUrls: ['toolpermission-manager.component.scss'],
   animations: [

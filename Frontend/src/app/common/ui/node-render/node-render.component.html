@@ -1,15 +1,15 @@
 <!-- dummy for banner and bindings -->
-<main-nav #mainNav [currentScope]="'render'"></main-nav>
+<es-main-nav #mainNav [currentScope]="'render'"></es-main-nav>
 <div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
     <button mat-button class="clickable" title="{{'BACK' | translate}}" (click)="close()"><i icon="keyboard_arrow_left"></i> <span class="render-back">{{'BACK' | translate}}</span></button>
     <button mat-button *ngIf="_node" class="clickable showDetails" (click)="showDetails()" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i icon="info_outline"></i> <span class="uppercase hidemobile">{{'INFO' | translate}}</span></button>
     <span>
-    <actionbar class="actionbarFrame" #actionbar
+    <es-actionbar class="actionbarFrame" #actionbar
                [backgroundType]="'dark'"
                [numberOfAlwaysVisibleOptions]="1"
                [numberOfAlwaysVisibleOptionsMobile]="0"
-    ></actionbar>
+    ></es-actionbar>
 
     </span>
   </div>
@@ -48,24 +48,24 @@
        (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition()+1) : null">
     </div>
     <div class="nodeRenderLoading" *ngIf="isLoading">
-      <spinner></spinner>
+      <es-spinner></es-spinner>
     </div>
 
     <div class="similarNodes" *ngIf="similarNodes && similarNodes.length > 0">
       <div class="caption">Ähnliche Objekte</div>
-      <listTable (clickRow)="switchNode($event)"
+      <es-listTable (clickRow)="switchNode($event)"
             [nodes]="similarNodes"
             [viewType]="1"
             [hasCheckbox]="false"
             [isClickable]="true"
             [columns]="similarNodeColumns"
-    ></listTable>
+    ></es-listTable>
     </div>
 
   </div>
 </div>
 
-<workspace-management
+<es-workspace-management
   [(nodeMetadata)]="nodeMetadata"
   [(addToCollection)]="addToCollection"
   [(nodeReport)]="nodeReport"
@@ -80,4 +80,4 @@
   (onCloseMetadata)="closeMetadata()"
   (onDelete)="onDelete($event)"
 >
-</workspace-management>
+</es-workspace-management>

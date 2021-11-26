@@ -12,7 +12,7 @@ import { map, catchError } from 'rxjs/operators';
 import * as rxjs from 'rxjs';
 
 @Component({
-  selector: 'workspace-file-upload-select',
+  selector: 'es-workspace-file-upload-select',
   templateUrl: 'file-upload-select.component.html',
   styleUrls: ['file-upload-select.component.scss'],
   animations: [

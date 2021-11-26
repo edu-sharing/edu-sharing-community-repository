@@ -21,7 +21,7 @@ import { NodeEntriesDisplayType } from '../../node-entries-wrapper/entries-model
 import { SortEvent } from '../../sort-dropdown/sort-dropdown.component';
 
 @Component({
-    selector: 'app-node-entries-card-grid',
+    selector: 'es-node-entries-card-grid',
     templateUrl: 'node-entries-card-grid.component.html',
     styleUrls: ['node-entries-card-grid.component.scss'],
 })

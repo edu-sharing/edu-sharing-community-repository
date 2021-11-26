@@ -132,7 +132,7 @@
                [disabled]="suggesting"
                (keyup.enter)="suggestValue(input.value, node); input.value = '';">
       </mat-form-field>
-      <spinner-small *ngIf="suggesting"></spinner-small>
+      <es-spinner-small *ngIf="suggesting"></es-spinner-small>
       <button *ngIf="!suggesting"
               mat-button
               color="primary"

@@ -24,7 +24,7 @@ mat-tab-group {
     min-height: calc(100vh - #{$mainnavHeight});
 
     .collections-right {
-        > spinner {
+        > es-spinner {
             text-align: center;
         }
     }
@@ -324,7 +324,7 @@ section {
             display: flex;
             align-items: center;
             padding:3px 0;
-            >user-avatar{
+            >es-user-avatar{
                 height: 24px;
                 margin-right: 9px;
             }

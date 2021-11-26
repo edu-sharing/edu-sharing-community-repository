@@ -15,7 +15,7 @@ import {FormControl} from '@angular/forms';
 import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 
 @Component({
-  selector: 'workspace-contributor',
+  selector: 'es-workspace-contributor',
   templateUrl: 'contributor.component.html',
   styleUrls: ['contributor.component.scss'],
   animations: [

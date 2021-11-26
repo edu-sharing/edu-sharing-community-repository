@@ -55,7 +55,7 @@
         height: calc(100% - 68px);
     }
 }
-user-profile {
+es-user-profile {
     display: inherit !important;
 }
 .imprint {
@@ -107,7 +107,7 @@ user-profile {
 .topBarSearch {
     flex: auto;
     margin: 0 20px;
-    app-search-field {
+    es-search-field {
         max-width: 550px;
     }
 }
@@ -248,7 +248,7 @@ user-profile {
     .iconPerson {
         display: none;
     }
-    user-avatar {
+    es-user-avatar {
         margin: 0 7px;
     }
 }
@@ -317,7 +317,7 @@ user-profile {
         display: flex;
         // disable events to "click-through" if menu is hidden
         pointer-events: none;
-        > app-main-menu-bottom {
+        > es-main-menu-bottom {
             // but re-enable them on the real menu again
             pointer-events: auto;
         }

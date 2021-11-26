@@ -10,7 +10,7 @@ import {TemporaryStorageService} from "../../../core-module/core.module";
 import {ActionbarComponent} from "../../../common/ui/actionbar/actionbar.component";
 
 @Component({
-  selector: 'recycle',
+  selector: 'es-recycle',
   templateUrl: 'recycle.component.html'
 })
 export class RecycleMainComponent {

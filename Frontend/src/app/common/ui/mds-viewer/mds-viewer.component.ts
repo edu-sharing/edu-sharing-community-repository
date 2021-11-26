@@ -18,7 +18,7 @@ import {Values} from '../mds-editor/types';
 import {ViewInstanceService} from '../mds-editor/mds-editor-view/view-instance.service';
 
 @Component({
-    selector: 'mds-viewer',
+    selector: 'es-mds-viewer',
     templateUrl: 'mds-viewer.component.html',
     styleUrls: ['mds-viewer.component.scss'],
     providers: [MdsEditorInstanceService, ViewInstanceService]

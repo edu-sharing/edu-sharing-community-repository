@@ -18,7 +18,7 @@
     }
     @include limitLineCount(3);
   }
-  actionbar{
+  es-actionbar{
     min-width: 170px;
     display: flex;
     justify-content: flex-end;
@@ -29,10 +29,10 @@
     display: flex;
     margin-bottom: 20px;
   }
-  mat-form-field, input-password{
+  mat-form-field, es-input-password{
     width: 100%;
   }
-  input-password {
+  es-input-password {
     display: flex;
     margin-top: 20px;
   }
@@ -52,7 +52,7 @@
   }
 }
 ::ng-deep {
-  .org-signup input-password{
+  .org-signup es-input-password{
     mat-form-field{
       width: 100%;
     }

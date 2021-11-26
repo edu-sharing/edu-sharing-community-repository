@@ -15,7 +15,7 @@ import { MdsWidgetValue, Values } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-license',
+    selector: 'es-mds-editor-widget-license',
     templateUrl: './mds-editor-widget-license.component.html',
     styleUrls: ['./mds-editor-widget-license.component.scss'],
 })

@@ -8,7 +8,7 @@ import {Helper} from '../../../core-module/rest/helper';
 import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
 
 @Component({
-  selector: 'permissions-delete',
+  selector: 'es-permissions-delete',
   templateUrl: 'delete.component.html',
   styleUrls: ['delete.component.scss'],
 

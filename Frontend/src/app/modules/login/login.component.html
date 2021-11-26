@@ -1,14 +1,14 @@
-<main-nav
+<es-main-nav
   *ngIf="mainnav"
   #mainNav
   [title]="'SIDEBAR.LOGIN'"
   [currentScope]="'login'"
   [searchEnabled]="false"
   xmlns="http://www.w3.org/1999/html"
-></main-nav>
-<global-progress *ngIf="isLoading"></global-progress>
+></es-main-nav>
+<es-global-progress *ngIf="isLoading"></es-global-progress>
 <div *ngIf="!isLoading">
-  <card
+  <es-card
     role="main" appSkipTarget="MAIN_CONTENT"
     title="{{ caption | translate }}"
     avatar="assets/images/app-icon.svg"
@@ -21,7 +21,7 @@
     [height]="showProviders ? '' : 'large'"
     [attr.showProviders]="showProviders"
   >
-    <spinner *ngIf="isLoading" class="center"></spinner>
+    <es-spinner *ngIf="isLoading" class="center"></es-spinner>
     <div class="login-content" *ngIf="!isLoading">
       <h1 appTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
       <div class="branding"><img src="assets/images/logo.svg" image-config alt="{{ 'LOGIN.APP_LOGO' | translate }}" /></div>
@@ -74,7 +74,7 @@
               />
             </mat-form-field>
             <div class="password-field">
-              <input-password
+              <es-input-password
                 #passwordInput
                 id="password"
                 label="{{ 'LOGIN.PASSWORD' | translate }}"
@@ -82,7 +82,7 @@
                 [required]="true"
                 (keydown.enter)="login()"
                 [(value)]="password"
-              ></input-password>
+              ></es-input-password>
               <div class="forgot-password" *ngIf="
                   (config.register.local && config.register.recoverPassword !== false || config.register.recoverPassword === true) ||
                   config.register.recoverUrl
@@ -106,9 +106,9 @@
           </form>
       <div class="useUrl" *ngIf="config.loginUrl && !showProviders && !isSafeLogin">
             <div>{{ 'LOGIN.USE_URL_TEXT' | translate }}</div>
-            <mat-link (click)="openLoginUrl()" class="goto">
+            <es-mat-link (click)="openLoginUrl()" class="goto">
               <span>{{ 'LOGIN.USE_URL_LINK' | translate }}</span> <i class="material-icons">arrow_forward</i>
-            </mat-link>
+            </es-mat-link>
           </div>
           <div class="group-actions" *ngIf="showProviders">
             <button mat-button color="primary" *ngIf="canRegister()" (click)="register()">{{ 'LOGIN.REGISTER_TEXT' | translate }}</button>
@@ -118,6 +118,6 @@
       </div>
     </div>
     <div class="login-help" *ngIf="showProviders"><div innerHTML="{{ 'LOGIN.ACTION_HELP' | translate }}"></div></div>
-  </card>
-  <powered-by mode="color" [ngClass]="{ 'powered-down': config.register.local || config.register.registerUrl }"></powered-by>
+  </es-card>
+  <es-powered-by mode="color" [ngClass]="{ 'powered-down': config.register.local || config.register.registerUrl }"></es-powered-by>
 </div>

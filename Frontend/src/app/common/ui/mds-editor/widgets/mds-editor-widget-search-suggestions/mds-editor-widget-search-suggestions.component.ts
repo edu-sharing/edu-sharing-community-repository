@@ -8,7 +8,7 @@ import { Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-search-suggestions',
+    selector: 'es-mds-editor-widget-search-suggestions',
     templateUrl: './mds-editor-widget-search-suggestions.component.html',
     styleUrls: ['./mds-editor-widget-search-suggestions.component.scss'],
 })

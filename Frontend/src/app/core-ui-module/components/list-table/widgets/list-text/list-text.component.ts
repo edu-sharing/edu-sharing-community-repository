@@ -6,7 +6,7 @@ import {Node, ProposalNode} from '../../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../../node-helper.service';
 
 @Component({
-    selector: 'app-list-text',
+    selector: 'es-list-text',
     templateUrl: './list-text.component.html',
 })
 export class ListTextComponent extends ListWidget {

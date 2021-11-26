@@ -1,7 +1,7 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
-  <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
-  ></tutorial>
-  <main-nav #mainNav
+  <es-tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
+  ></es-tutorial>
+  <es-main-nav #mainNav
     [hidden]="!mainnav"
     [title]="'SEARCH.TITLE'"
     [currentScope]="'search'"
@@ -14,7 +14,7 @@
     [(searchQuery)]="searchService.searchTerm"
     (onSearch)="applyParameters('mainnav')"
     (onCreate)="list.addVirtualNodes($event)"
-  ></main-nav>
+  ></es-main-nav>
 
   <div class="rowRepositories scrollWithBanner"
        [class.no-mainnav]="!mainnav"
@@ -87,17 +87,17 @@
                   {{'SEARCH.TO_COLLECTIONS' | translate}} <i icon="arrow_forward"></i>
                 </button>
             </div>
-            <small-collection *ngIf="addToCollection"
+            <es-small-collection *ngIf="addToCollection"
                               [collection]="addToCollection"
                               [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
                               [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
-            ></small-collection>
-            <actionbar class="actionbarFrame" #actionbarComponent
+            ></es-small-collection>
+            <es-actionbar class="actionbarFrame" #actionbarComponent
                        [backgroundType]="addToCollection ? 'primary' : 'bright'"
-            ></actionbar>
+            ></es-actionbar>
         </div>
   </div>
-  <card
+  <es-card
       *ngIf="(searchService.sidenavOpened && isMobileHeight() && isMobileWidth())"
       title="{{'SEARCH.EXPANDED_SEARCH' | translate }}"
       [buttons]="mdsButtons"
@@ -105,7 +105,7 @@
       height="xxlarge"
       [isCancelable]="true"
       (onCancel)="toggleSidenav()">
-      <app-mds-editor-wrapper #mdsMobile
+      <es-mds-editor-wrapper #mdsMobile
             [class.display-none]="currentRepository=='-all-'"
             [groupId]="queryId"
             [repository]="currentRepository"
@@ -116,8 +116,8 @@
             [(extended)]="mdsExtended"
             (onMdsLoaded)="onMdsReady($event)"
             (onDone)="applyParameters('mds', $any($event))">
-      </app-mds-editor-wrapper>
-  </card>
+      </es-mds-editor-wrapper>
+  </es-card>
   <div class="sidenav-container">
     <div
       #sidenav
@@ -148,7 +148,7 @@
               <mat-checkbox [(ngModel)]="repo.enabled">{{ repo.title }}</mat-checkbox>
             </div>
           </div>
-          <app-mds-editor-wrapper
+          <es-mds-editor-wrapper
             #mdsDesktop
             [class.display-none]="currentRepository == '-all-'"
             [groupId]="queryId"
@@ -161,7 +161,7 @@
             (onMdsLoaded)="onMdsReady($event)"
             (onDone)="applyParameters('mds', $any($event))"
           >
-          </app-mds-editor-wrapper>
+          </es-mds-editor-wrapper>
           <div class="mdsSelect" *ngIf="initalized">
             <div *ngIf="mdsSets && mdsSets.length > 1">
               <label for="mds">{{ 'SEARCH.METADATASET' | translate }}</label>
@@ -207,7 +207,7 @@
             {{ 'SEARCH.NO_SAVED_SEARCH_FOUND' | translate }}
           </div>
           <div class="savedSearch">
-            <listTable
+            <es-listTable
               [hasHeading]="false"
               [selectOnClick]="false"
               [isClickable]="true"
@@ -219,7 +219,7 @@
               [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
               [columns]="savedSearchColumns"
               (clickRow)="loadSavedSearchNode($event.node)"
-            ></listTable>
+            ></es-listTable>
             <div
               class="manageSavedSearch"
               *ngIf="savedSearch.length && savedSearchOwn && isWorkspaceEnabled()"
@@ -235,11 +235,11 @@
         class="apply"
         *ngIf="searchService.sidenavOpened && !isMdsLoading() && mdsActions?.length > 0"
       >
-        <actionbar
+        <es-actionbar
           [options]="mdsActions"
           [numberOfAlwaysVisibleOptions]="2"
           highlight="manual"
-        ></actionbar>
+        ></es-actionbar>
       </div>
     </div>
     <div class="content-with-footer">
@@ -270,7 +270,7 @@
               <div *ngIf="!searchService.dataSourceCollections.isEmpty() && !addToCollection">
 
                     <div #collections class="collections">
-                        <app-node-entries-wrapper
+                        <es-node-entries-wrapper
                                 class="collections"
                                 [dataSource]="searchService.dataSourceCollections"
                                 [columns]="searchService.collectionsColumns"
@@ -293,7 +293,7 @@
                                 (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</button>
                             </div>
                           </ng-template>
-                        </app-node-entries-wrapper>
+                        </es-node-entries-wrapper>
                     </div>
                 </div>
                 <div *ngIf="!(currentRepository=='-all-' && groupResults && !searchService.dataSourceSearchResult[0]?.isLoading)" class="searchUngrouped">
@@ -301,7 +301,7 @@
                         <i class="material-icons">search</i>
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
-                  <app-node-entries-wrapper
+                  <es-node-entries-wrapper
                     #nodeEntriesResults
                     *ngIf="searchService.dataSourceSearchResult[0]"
                     [dataSource]="searchService.dataSourceSearchResult[0]"
@@ -337,9 +337,9 @@
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                       </div>
                     </ng-template>
-                  </app-node-entries-wrapper>
+                  </es-node-entries-wrapper>
                     <!--
-                    <listTable
+                    <es-listTable
                             #list
                             [nodes]="searchService.searchResult"
                             [columns]="searchService.columns"
@@ -367,7 +367,7 @@
                             [mainNav]="mainNav"
                             (loadMore)="getMoreResults()"
                             (selectionChanged)="updateSelection($event)"
-                            [isLoading]="searchService.showspinner"></listTable>
+                            [isLoading]="searchService.showspinner"></es-listTable>
 -->
 
                 </div>
@@ -379,7 +379,7 @@
                         <a tabindex="0" class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)" (keyup.enter)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
                         <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
 
-                        <listTable *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
+                        <es-listTable *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
                                    [nodes]="searchService.searchResultRepositories[i]"
                                    [columns]="searchService.columns"
                                    [hasIcon]="true"
@@ -397,13 +397,13 @@
                                    [actionbar]="actionbarComponent"
                                    [mainNav]="mainNavRef"
                                    (selectionChanged)="updateSelection($event)"
-                                   [isLoading]="searchService.dataSourceSearchResult[0]?.isLoading"></listTable>
+                                   [isLoading]="searchService.dataSourceSearchResult[0]?.isLoading"></es-listTable>
                     </div>
                 </div>
                 -->
             </div>
         </div>
-        <app-footer [scope]="'search'" class="alignWithBanner"></app-footer>
+        <es-footer [scope]="'search'" class="alignWithBanner"></es-footer>
     </div>
 </div>
 </div>
@@ -419,10 +419,10 @@
     </a>
   </div>
 </div>
-<search-save-search *ngIf="saveSearchDialog"
+<es-search-save-search *ngIf="saveSearchDialog"
   [searchQuery]="searchService.searchTerm"
   [name]="currentSavedSearch ? currentSavedSearch.title : null"
   (onClose)="closeSaveSearchDialog()"
   (onSave)="saveSearch($event)"
-></search-save-search>
-<global-progress *ngIf="globalProgress"></global-progress>
+></es-search-save-search>
+<es-global-progress *ngIf="globalProgress"></es-global-progress>

@@ -21,7 +21,7 @@
         </div>
       </div>
     </div>
-    <spinner *ngIf="groupedLoading"></spinner>
+    <es-spinner *ngIf="groupedLoading"></es-spinner>
     <h5 class="mat-heading-5" *ngIf="groupedNoData">{{'ADMIN.STATISTICS.NO_DATA' | translate}}</h5>
     <canvas #groupedChart [class.display-none]="groupedLoading || groupedNoData"></canvas>
   </mat-tab>
@@ -77,7 +77,7 @@
         <mat-calendar [(selected)]="customGroupEnd" [minDate]="customGroupStart" [maxDate]="today"></mat-calendar>
       </div>
     </div>
-    <spinner *ngIf="customGroupLoading"></spinner>
+    <es-spinner *ngIf="customGroupLoading"></es-spinner>
     <div class="custom-group-data-table">
       <mat-table [dataSource]="customGroupData" [class.mat-table-clickable]="singleMode=='NODES'" *ngIf="customGroupData && !customGroupLoading">
 
@@ -113,7 +113,7 @@
       </div>
     </div>
     <h5 class="mat-heading-5" *ngIf="nodesNoData">{{'ADMIN.STATISTICS.NO_DATA' | translate}}</h5>
-    <listTable *ngIf="!nodesNoData"
+    <es-listTable *ngIf="!nodesNoData"
                [hasIcon]="true"
                [hasHeading]="true"
                [isClickable]="true"
@@ -122,7 +122,7 @@
                [columns]="columns"
                [isLoading]="nodesLoading"
                [nodes]="nodes"
-    ></listTable>
+    ></es-listTable>
   </mat-tab>
   <mat-tab label="{{'ADMIN.STATISTICS.SINGLE' | translate}}" class="stats-single">
     <h4 class="mat-heading-4 mat-heading-underline"><i icon="view_headline"></i> {{'ADMIN.STATISTICS.SINGLE' | translate}}</h4>
@@ -145,7 +145,7 @@
         </div>
       </div>
     </div>
-    <spinner *ngIf="singleLoading"></spinner>
+    <es-spinner *ngIf="singleLoading"></es-spinner>
     <div class="single-data-table ">
       <mat-table [dataSource]="singleData" [class.mat-table-clickable]="singleMode=='NODES'" *ngIf="singleData && !singleLoading">
 

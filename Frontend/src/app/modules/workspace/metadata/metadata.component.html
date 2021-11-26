@@ -20,12 +20,12 @@
     </div>
   </div>
 
-  <app-workspace-metadata-block *ngIf="tab==INFO"
+  <es-workspace-metadata-block *ngIf="tab==INFO"
                                 class="content"
                                 [node]="nodeObject"
                                 (onDisplay)="display()"
                                 (onEditMetadata)="edit()"
-  ></app-workspace-metadata-block>
+  ></es-workspace-metadata-block>
   <!--Usages Info -->
   <div [class.hiddendiv]="tab!=PROPERTIES" class="content">
     <div class="description">{{'WORKSPACE.METADATA.USAGE_COUNT_TITLE' | translate}}</div>
@@ -38,7 +38,7 @@
     </ul>
     <div class="description usage-count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <span class="usage-counter">{{ statsTotalPoints }}</span></div>
     <div class="description collections" *ngIf="usagesCollection && usagesCollection.length">{{'WORKSPACE.METADATA.COLLECTIONS' | translate:{count:usagesCollection.length} }}</div>
-    <listTable *ngIf="usagesCollection && usagesCollection.length"
+    <es-listTable *ngIf="usagesCollection && usagesCollection.length"
                [nodes]="usagesCollection"
                [columns]="columnsCollections"
                [viewType]="0"
@@ -46,9 +46,9 @@
                [hasIcon]="true"
                [isClickable]="true"
                (clickRow)="displayCollection($event.node)"
-    ></listTable>
+    ></es-listTable>
     <div class="description forkedParend" *ngIf="forkedParent">{{'WORKSPACE.METADATA.FORKED_PARENT' | translate}}</div>
-    <listTable *ngIf="forkedParent"
+    <es-listTable *ngIf="forkedParent"
                [nodes]="[forkedParent]"
                [columns]="columns"
                [viewType]="0"
@@ -56,9 +56,9 @@
                [hasIcon]="true"
                [isClickable]="true"
                (clickRow)="displayNode($event.node)"
-    ></listTable>
+    ></es-listTable>
     <div class="description forkedParend" *ngIf="forkedChilds && forkedChilds.length">{{'WORKSPACE.METADATA.FORKED_CHILDS' | translate:{count:forkedChilds.length} }}</div>
-    <listTable *ngIf="forkedChilds && forkedChilds.length"
+    <es-listTable *ngIf="forkedChilds && forkedChilds.length"
                [nodes]="forkedChilds"
                [columns]="columns"
                [viewType]="0"
@@ -66,7 +66,7 @@
                [hasIcon]="true"
                [isClickable]="true"
                (clickRow)="displayNode($event.node)"
-    ></listTable>
+    ></es-listTable>
 
 
     <!--<div class="value">{{usageCount}}</div>-->
@@ -74,7 +74,7 @@
   </div>
 
   <div *ngIf="tab==VERSIONS" class="content">
-    <div *ngIf="versionsLoading" class="center"><spinner></spinner></div>
+    <div *ngIf="versionsLoading" class="center"><es-spinner></es-spinner></div>
     <div *ngFor="let version of versions" class="version" [class.versionMain]="isCurrentVersion(version)">
       <div class="versionTitle">
         <span *ngIf="isCurrentVersion(version)">{{'WORKSPACE.METADATA.CURRENT_VERSION' | translate}}</span>

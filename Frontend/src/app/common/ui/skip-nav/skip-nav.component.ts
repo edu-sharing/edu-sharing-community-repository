@@ -10,7 +10,7 @@ import { SkipNavService, SkipTarget } from './skip-nav.service';
  * around the page, skipping reoccurring elements such as navigation and banners.
  */
 @Component({
-    selector: 'app-skip-nav',
+    selector: 'es-skip-nav',
     templateUrl: './skip-nav.component.html',
     styleUrls: ['./skip-nav.component.scss'],
 })

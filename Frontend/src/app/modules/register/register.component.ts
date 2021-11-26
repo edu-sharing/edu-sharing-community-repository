@@ -14,7 +14,7 @@ import { RegisterRequestComponent } from './register-request/register-request.co
 import { RegisterResetPasswordComponent } from './register-reset-password/register-reset-password.component';
 
 @Component({
-    selector: 'app-register',
+    selector: 'es-register',
     templateUrl: 'register.component.html',
     styleUrls: ['register.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

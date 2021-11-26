@@ -22,7 +22,7 @@ import {HttpClient} from '@angular/common/http';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
-  selector: 'search-node-store',
+  selector: 'es-search-node-store',
   templateUrl: 'node-store.component.html',
   styleUrls: ['node-store.component.scss'],
   animations: [

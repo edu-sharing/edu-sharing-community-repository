@@ -36,7 +36,7 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import {MdsValueList} from '../../../../../core-module/rest/data-object';
 
 @Component({
-    selector: 'app-mds-editor-widget-chips',
+    selector: 'es-mds-editor-widget-chips',
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
 })

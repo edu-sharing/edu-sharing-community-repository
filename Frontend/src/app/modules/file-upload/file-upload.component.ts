@@ -15,7 +15,7 @@ import {TemporaryStorageService} from '../../core-module/core.module';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 @Component({
-  selector: 'app-file-upload',
+  selector: 'es-file-upload',
   templateUrl: 'file-upload.component.html',
   styleUrls: ['file-upload.component.scss']
 })

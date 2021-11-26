@@ -80,7 +80,7 @@ import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'app-search',
+    selector: 'es-search',
     templateUrl: 'search.component.html',
     styleUrls: ['search.component.scss'],
     providers: [WindowRefService],

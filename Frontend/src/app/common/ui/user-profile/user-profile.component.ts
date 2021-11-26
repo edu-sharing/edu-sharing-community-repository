@@ -9,7 +9,7 @@ import {Toast} from "../../../core-ui-module/toast";
 import {IamUser, RestConstants, RestHelper, RestIamService, User} from "../../../core-module/core.module";
 
 @Component({
-  selector: 'user-profile',
+  selector: 'es-user-profile',
   templateUrl: 'user-profile.component.html',
   styleUrls: ['user-profile.component.scss'],
   animations: [

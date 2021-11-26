@@ -1,4 +1,4 @@
-<card *ngIf="deleteResult"
+<es-card *ngIf="deleteResult"
       title="{{'PERMISSIONS.DELETE.RESULTS' | translate}}"
       icon="delete"
       width="large"
@@ -10,14 +10,14 @@
     <textarea matInput [ngModel]="deleteResult" readonly></textarea>
     <mat-hint>{{'PERMISSIONS.DELETE.RESULTS_HINT' | translate}}</mat-hint>
   </div>
-</card>
+</es-card>
 <div class="wrapper">
   <h2 class="mat-heading-2 mat-heading-underline">{{'PERMISSIONS.DELETE.MAIN_HEADING' | translate}}</h2>
   <div class="group">
-    <spinner *ngIf="loading"></spinner>
+    <es-spinner *ngIf="loading"></es-spinner>
     <h3 class="mat-heading-3 mat-heading-underline" *ngIf="!loading" ><span>{{'PERMISSIONS.DELETE.USER_LIST' | translate}}</span><button mat-icon-button (click)="refresh()"><i icon="refresh" ></i></button></h3>
     <div class="user-list" *ngIf="users && users.length">
-      <listTable
+      <es-listTable
               [nodes]="$any(users)"
               [hasIcon]="true"
               [hasCheckbox]="true"
@@ -28,10 +28,10 @@
               [columns]="columns"
               [totalCount]="users.length"
               (selectionChanged)="selectedUsers=$event"
-      ></listTable>
+      ></es-listTable>
     </div>
   </div>
-  <info-message mode="info" *ngIf="!loading && !(users && users.length)" message="{{'PERMISSIONS.DELETE.STATE.NO_USERS' | translate}}"></info-message>
+  <es-info-message mode="info" *ngIf="!loading && !(users && users.length)" message="{{'PERMISSIONS.DELETE.STATE.NO_USERS' | translate}}"></es-info-message>
   <div *ngIf="!loading && users && users.length && options">
     <div class="group">
       <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.HOME_FOLDER.CAPTION' | translate}}</h3>
@@ -41,8 +41,8 @@
           <mat-radio-group [(ngModel)]="options.homeFolder.folders" (ngModelChange)="updateForm()">
             <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
           </mat-radio-group>
-          <info-message *ngIf="options.homeFolder.folders === 'none'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_NONE' | translate}}"></info-message>
-          <info-message *ngIf="options.homeFolder.folders === 'delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_DELETE' | translate}}"></info-message>
+          <es-info-message *ngIf="options.homeFolder.folders === 'none'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_NONE' | translate}}"></es-info-message>
+          <es-info-message *ngIf="options.homeFolder.folders === 'delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_DELETE' | translate}}"></es-info-message>
         </div>
         <div>
           <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.PRIVATE_FILES_CAPTION' | translate}}</h4>
@@ -112,12 +112,12 @@
       <div *ngIf="hasAssigning()" class="assigning">
         <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.RECEIVER_CAPTION' | translate}}</h4>
         <!-- @TODO: The component does currently not support searching ONLY for users -->
-        <authority-search-input
+        <es-authority-search-input
                 (onChooseAuthority)="receiver=$event"
                 [globalSearchAllowed]="true"
                 [showRecent]="false"
                 placeholder="{{'PERMISSIONS.DELETE.RECEIVER' | translate}}"
-        ></authority-search-input>
+        ></es-authority-search-input>
         <mat-chip-list>
           <mat-chip *ngIf="receiver" (removed)="receiver=null">
             <span>{{receiver | authorityName}}</span>
@@ -125,13 +125,13 @@
           </mat-chip>
         </mat-chip-list>
         <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.RECEIVER_GROUP_CAPTION' | translate}}</h4>
-        <authority-search-input
+        <es-authority-search-input
                 [mode]="AuthoritySearchMode.Organizations"
                 hint="{{'PERMISSIONS.DELETE.RECEIVER_GROUP_HINT' | translate}}"
                 [showRecent]="false"
                 (onChooseAuthority)="receiverGroup=$event"
                 placeholder="{{'PERMISSIONS.DELETE.RECEIVER_GROUP' | translate}}"
-        ></authority-search-input>
+        ></es-authority-search-input>
         <mat-chip-list>
           <mat-chip *ngIf="receiverGroup" (removed)="receiverGroup=null">
             <span>{{receiverGroup | authorityName}}</span>
@@ -141,9 +141,9 @@
       </div>
     </div>
     <div class="info-wrapper">
-      <info-message *ngIf="missingAssigning()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NO_RECEIVER' | translate}}"></info-message>
-      <info-message *ngIf="options.collections.privateCollections=='delete' || options.collections.publicCollections=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.DELETE_COLLECTIONS' | translate}}"></info-message>
-      <info-message *ngIf="!isValid()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate}}"></info-message>
+      <es-info-message *ngIf="missingAssigning()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NO_RECEIVER' | translate}}"></es-info-message>
+      <es-info-message *ngIf="options.collections.privateCollections=='delete' || options.collections.publicCollections=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.DELETE_COLLECTIONS' | translate}}"></es-info-message>
+      <es-info-message *ngIf="!isValid()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate}}"></es-info-message>
     </div>
     <div class="group group-metadata" *ngIf="hasAssigning()">
       <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.METADATA.CAPTION' | translate}}</h3>
@@ -162,7 +162,7 @@
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COLLECTION_FEEDBACK_HINT' | translate}}</mat-hint>
       <mat-checkbox [(ngModel)]="options.statistics.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS' | translate}}</mat-checkbox>
       <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS_HINT' | translate}}</mat-hint>
-      <info-message mode="info" message="{{'PERMISSIONS.DELETE.STATE.ASSIGNING_DELETED_USER' | translate}}"></info-message>
+      <es-info-message mode="info" message="{{'PERMISSIONS.DELETE.STATE.ASSIGNING_DELETED_USER' | translate}}"></es-info-message>
     </div>
   </div>
   <div class="group group-buttons" *ngIf="!loading">

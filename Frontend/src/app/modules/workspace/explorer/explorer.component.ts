@@ -40,7 +40,7 @@ import {
 } from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'workspace-explorer',
+    selector: 'es-workspace-explorer',
     templateUrl: 'explorer.component.html',
     styleUrls: ['explorer.component.scss']
 })

@@ -23,7 +23,7 @@ enum Step {
   confirmGroup
 }
 @Component({
-  selector: 'app-signup-group',
+  selector: 'es-signup-group',
   templateUrl: 'signup-group.component.html',
   styleUrls: ['signup-group.component.scss'],
 })

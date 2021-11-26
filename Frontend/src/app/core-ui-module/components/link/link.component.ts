@@ -8,7 +8,7 @@ import {UIService} from "../../../core-module/core.module";
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
-  selector: 'mat-link',
+  selector: 'es-mat-link',
   templateUrl: 'link.component.html',
   styleUrls: ['link.component.scss']
 })
