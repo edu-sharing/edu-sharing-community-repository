@@ -60,14 +60,6 @@ repository_proxy_proxyuser="${REPOSITORY_PROXY_PROXYUSER:-}"
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-repository-search-solr4}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
 
-repository_smtp_auth="${REPOSITORY_SMTP_AUTH:-}"
-repository_smtp_from="${REPOSITORY_SMTP_FROM:-noreply@repository.127.0.0.1.nip.io}"
-repository_smtp_host="${REPOSITORY_SMTP_HOST:-}"
-repository_smtp_pass="${REPOSITORY_SMTP_PASS:-}"
-repository_smtp_port="${REPOSITORY_SMTP_PORT:-25}"
-repository_smtp_repl="${REPOSITORY_SMTP_REPL:-true}"
-repository_smtp_user="${REPOSITORY_SMTP_USER:-}"
-
 repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-repository-transform}"
 repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
 
@@ -153,7 +145,7 @@ tar -x -v --skip-old-files -f tomcat/shared.tar
 
 ### Alfresco platform ##################################################################################################
 
-global="tomcat/shared/classes/alfresco-global.properties"
+global="tomcat/shared/classes/alfresco-global.deployment.properties"
 
 sed -i -r 's|^[#]*\s*alfresco_user_store\.adminpassword=.*|alfresco_user_store.adminpassword='"${my_admin_pass_md4}"'|' "${global}"
 grep -q '^[#]*\s*alfresco_user_store\.adminpassword=' "${global}" || echo "alfresco_user_store.adminpassword=${my_admin_pass_md4}" >>"${global}"
@@ -259,16 +251,6 @@ xmlstarlet ed -L \
 		-i '$entry' -t attr -n "key" -v "guest_password" \
 		tomcat/shared/classes/homeApplication.properties.xml
 }
-
-xmlstarlet ed -L \
-	-u '//entry[@key="mail.addReplyTo"]' -v "${repository_smtp_repl}" \
-	-u '//entry[@key="mail.authtype"]' -v "${repository_smtp_auth}" \
-	-u '//entry[@key="mail.smtp.from"]' -v "${repository_smtp_from}" \
-	-u '//entry[@key="mail.smtp.passwd"]' -v "${repository_smtp_pass}" \
-	-u '//entry[@key="mail.smtp.port"]' -v "${repository_smtp_port}" \
-	-u '//entry[@key="mail.smtp.server"]' -v "${repository_smtp_host}" \
-	-u '//entry[@key="mail.smtp.username"]' -v "${repository_smtp_user}" \
-	tomcat/shared/classes/ccmail.properties.xml
 
 [[ -n "${my_home_auth}" ]] && {
 	xmlstarlet ed -L \

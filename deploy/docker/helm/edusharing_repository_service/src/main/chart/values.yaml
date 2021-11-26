@@ -129,6 +129,10 @@ config:
       threads: 200
       timeout: -1
 
+  custom:
+    alfresco: ""
+    services: ""
+
   database:
     driver: org.postgresql.Driver
     host: edusharing-repository-postgresql
@@ -169,15 +173,6 @@ config:
     enabled: false
 #    config: ""
 #    files: {}
-
-  smtp:
-    addReplyTo: false
-    from: noreply@repository.127.0.0.1.nip.io
-    host: localhost
-    port: 25
-    auth: ""
-    username: ""
-    password: ""
 
   search:
 

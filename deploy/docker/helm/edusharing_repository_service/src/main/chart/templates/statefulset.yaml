@@ -81,6 +81,12 @@ spec:
           mountPath: /usr/local/tomcat/shared
           subPath: config/
         - name: file
+          mountPath: /usr/local/tomcat/shared/classes/alfresco-global.properties
+          subPath: alfresco-global.properties
+        - name: file
+          mountPath: /usr/local/tomcat/shared/classes/config/edu-sharing.conf
+          subPath: edu-sharing.conf
+        - name: file
           mountPath: /usr/local/tomcat/conf/redisson.yaml
           subPath: redisson.yaml
         {{- if .Values.config.saml.enabled }}

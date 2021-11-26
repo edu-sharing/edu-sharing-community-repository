@@ -123,8 +123,9 @@ RUN set -eux \
         --var resources '$prev' \
         -i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
         tomcat/conf/Catalina/localhost/share.xml \
-    && echo 'solr.port=8080' >> tomcat/shared/classes/alfresco-global.properties \
-    && echo 'solr.secureComms=none' >> tomcat/shared/classes/alfresco-global.properties \
+    && touch tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'solr.port=8080' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'solr.secureComms=none' >> tomcat/shared/classes/alfresco-global.deployment.properties \
     && sed -i -r \
         's|^[#]*\s*alfresco\.secureComms=.*|alfresco.secureComms=none|' \
         solr4/workspace-SpacesStore/conf/solrcore.properties \
@@ -159,15 +160,9 @@ RUN set -eux \
 
 RUN set -eux \
     && rm -rf common/lib \
-    && sed -i -r \
-        's|^[#]*\s*img\.root=.*|img.root=/usr|' \
-        tomcat/shared/classes/alfresco-global.properties \
-    && sed -i -r \
-        's|^[#]*\s*img\.root=.*|img.root=/usr|' \
-        tomcat/shared/classes/alfresco-global.properties \
-    && sed -i -r \
-        's|^[#]*\s*ooo\.exe=.*|ooo.host=127.0.0.1|' \
-        tomcat/shared/classes/alfresco-global.properties
+    && echo 'img.root=/usr' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'ooo.exe=' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'ooo.host=127.0.0.1' >> tomcat/shared/classes/alfresco-global.deployment.properties
 
 RUN set -eux \
     && apt-get update -y \
