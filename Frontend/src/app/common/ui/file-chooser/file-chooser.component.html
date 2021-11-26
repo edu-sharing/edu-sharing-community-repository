@@ -24,7 +24,7 @@
   >
     <mat-tab *ngFor="let tab of tabs">
       <ng-template mat-tab-label>
-        <i [icon]="tab.homeIcon" class="tab-icon"></i>
+        <i [esIcon]="tab.homeIcon" class="tab-icon"></i>
         <span class="tab-label">{{tab.label | translate}}</span>
       </ng-template>
       <ng-container *ngTemplateOutlet="tabContent; context: tab"></ng-container>

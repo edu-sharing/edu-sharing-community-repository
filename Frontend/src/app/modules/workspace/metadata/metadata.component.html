@@ -7,14 +7,14 @@
       <div class="col s12">
         <ul class="tabs">
           <li class="clickable tab col s4" (click)="setTab(INFO)" title="Info">
-            <a [class.active]="tab==INFO"><i icon="info_outline" [aria]="true"></i></a>
+            <a [class.active]="tab==INFO"><i esIcon="info_outline" [aria]="true"></i></a>
           </li>
           <!--Icon for Usages-->
           <li class="clickable tab col s4" (click)="setTab(PROPERTIES)">
-            <a [class.active]="tab==PROPERTIES"><i icon="equalizer"></i><div class="value-properties">{{statsTotalPoints}}</div></a>
+            <a [class.active]="tab==PROPERTIES"><i esIcon="equalizer"></i><div class="value-properties">{{statsTotalPoints}}</div></a>
           </li>
           <li class="clickable tab col s4" (click)="setTab(VERSIONS)">
-            <a [class.active]="tab==VERSIONS"><i icon="restore"></i></a>
+            <a [class.active]="tab==VERSIONS"><i esIcon="restore"></i></a>
           </li>
         </ul>
     </div>

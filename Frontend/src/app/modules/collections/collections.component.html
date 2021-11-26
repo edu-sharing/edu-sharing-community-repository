@@ -35,32 +35,32 @@
 >
   <mat-tab *ngIf="!isGuest">
     <ng-template mat-tab-label>
-      <i icon="person" class="tab-icon"></i>
+      <i esIcon="person" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
     </ng-template>
   </mat-tab>
   <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}">
     <ng-template mat-tab-label>
-      <i icon="group" class="tab-icon"></i>
+      <i esIcon="group" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
     </ng-template>
   </mat-tab>
   <mat-tab
     *ngIf="hasEditorial">
     <ng-template mat-tab-label>
-      <i icon="star" class="tab-icon"></i>
+      <i esIcon="star" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
     </ng-template>
   </mat-tab>
   <mat-tab *ngIf="hasMediacenter">
     <ng-template mat-tab-label>
-      <i icon="business" class="tab-icon"></i>
+      <i esIcon="business" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
     </ng-template>
   </mat-tab>
   <mat-tab>
     <ng-template mat-tab-label>
-      <i icon="language" class="tab-icon"></i>
+      <i esIcon="language" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
     </ng-template>
   </mat-tab>
@@ -110,7 +110,7 @@
                 [style.cursor]="isAllowedToEditCollection() ? 'pointer' : 'auto'"
                 (click)="collectionEdit()"
               >
-                <i icon="layers"></i>
+                <i esIcon="layers"></i>
               </div>
             </div>
           </div>
@@ -171,7 +171,7 @@
           </div>
 
           <div class="collection-new-preview-infoline">
-            <i icon="person" class="icon-bottom"></i>
+            <i esIcon="person" class="icon-bottom"></i>
             &nbsp;
             <span *ngIf="!collectionContent?.node?.collection?.authorFreetext">{{
               collectionContent.node.owner | authorityName
@@ -182,7 +182,7 @@
           </div>
 
           <div class="collection-new-preview-infoline">
-            <i [icon]="getScopeInfo().icon" class="icon-bottom"></i>
+            <i [esIcon]="getScopeInfo().icon" class="icon-bottom"></i>
             &nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
           </div>
           <div class="collection-permissions collection-label"></div>
@@ -252,7 +252,7 @@
             (click)="navigateToSearch()"
           >
             {{ 'COLLECTIONS.TO_SEARCH' | translate }}
-            <i icon="arrow_forward"></i>
+            <i esIcon="arrow_forward"></i>
           </button>
 
           <!-- content (collection cards) if not error -->
@@ -469,7 +469,7 @@
   >
     {{ ('NODE.' + sortInfo.name) | translate}}
     <i *ngIf="sortInfo.name !== 'ccm:collection_ordered_position'"
-       [icon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
+       [esIcon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
   </button>
   <es-sort-dropdown
     #sortDropdown

@@ -24,7 +24,7 @@
       <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
         <i
           matTooltip="{{'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate}}"
-          [icon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"></i>
+          [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"></i>
       </ng-container>
       <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
         <img
@@ -38,7 +38,7 @@
       *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned"
       class="card-top-bar-flag"
     >
-      <i icon="edu-pin"></i>
+      <i esIcon="edu-pin"></i>
     </div>
     <div class="card-top-bar-empty"></div>
     <div class="card-top-bar-comments"
@@ -52,7 +52,7 @@
        })"
         [matTooltip]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
       >
-        <i icon="comment"></i>
+        <i esIcon="comment"></i>
         <span>{{node.commentCount}}</span>
       </div>
     </div>
@@ -62,7 +62,7 @@
       <div class="childobject-count"
            matTooltip="{{'CHILDOBJECT_COUNT' | translate:{count: node.properties['virtual:childobjectcount'] * 1 + 1} }}"
       >
-        <span>{{node.properties['virtual:childobjectcount'] * 1 + 1}}</span><i icon="filter_none"></i>
+        <span>{{node.properties['virtual:childobjectcount'] * 1 + 1}}</span><i esIcon="filter_none"></i>
       </div>
     </div>
     <div class="card-top-bar-checkbox">
@@ -106,7 +106,7 @@
             (click)="openMenu(node)"
             [matMenuTriggerFor]="dropdown.menu"
     >
-      <i icon="more_vert" [aria]="true"></i>
+      <i esIcon="more_vert" [aria]="true"></i>
     </button>
   </div>
 </div>
@@ -127,7 +127,7 @@
     <div *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
          class="card-collection-image"
     >
-      <i icon="layers"></i>
+      <i esIcon="layers"></i>
     </div>
   </div>
 </ng-template>

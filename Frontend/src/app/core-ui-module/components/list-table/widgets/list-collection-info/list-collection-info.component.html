@@ -1,13 +1,13 @@
 <ng-container [ngSwitch]="item.name">
   <ng-container *ngSwitchCase="'info'">
     <i
-      icon="layers"
+      esIcon="layers"
       [altText]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
       [matTooltip]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
     ></i>
     {{ $any(node).collection?.childCollectionsCount }}
     <i
-      icon="insert_drive_file"
+      esIcon="insert_drive_file"
       [altText]="'collections_content' | translate"
       [matTooltip]="'collections_content' | translate"
     ></i>
@@ -16,7 +16,7 @@
   <ng-container *ngSwitchCase="'scope'">
     <i
       class="collectionScope"
-      [icon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
+      [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
       matTooltip="{{ 'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate }}"
     ></i>
     <!--<span>{{

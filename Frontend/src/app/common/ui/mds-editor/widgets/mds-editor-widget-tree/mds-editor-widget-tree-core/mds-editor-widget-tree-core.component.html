@@ -14,7 +14,7 @@
       />
     </mat-form-field>
     <button mat-button (click)="close.emit()" [attr.aria-label]="'CLOSE' | translate">
-      <i icon="close"></i>
+      <i esIcon="close"></i>
     </button>
   </div>
   <mat-tree id="{{ uid }}-mat-tree" [dataSource]="dataSource" [treeControl]="treeControl">
@@ -125,7 +125,7 @@
     <div class="suggest-input">
       <mat-form-field>
         <mat-label>{{'MDS.SUGGEST_VALUE_LABEL' | translate}}</mat-label>
-        <i icon="add" matPrefix class="prefix"></i>
+        <i esIcon="add" matPrefix class="prefix"></i>
         <input matInput
                type="text"
                #input

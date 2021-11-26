@@ -1,5 +1,5 @@
 <a href="javascript:" id="reference-info-expander" class="clickable" (click)="showCcAuthor=!showCcAuthor;">
-  <i icon="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
+  <i esIcon="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
   {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
 </a>
 <div *ngIf="showCcAuthor" [@cardAnimation]="showCcAuthor">

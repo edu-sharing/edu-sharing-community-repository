@@ -1,5 +1,5 @@
 <div class="mediacenters">
-    <h4 class="mat-heading-4 mat-heading-underline"><i icon="list"></i>{{'ADMIN.MEDIACENTER.MANAGE' | translate}}</h4>
+    <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="list"></i>{{'ADMIN.MEDIACENTER.MANAGE' | translate}}</h4>
     <es-spinner *ngIf="!mediacenters"></es-spinner>
     <div class="select-mediacenter" *ngIf="mediacenters">
         <mat-form-field class="mediacenter">
@@ -8,10 +8,10 @@
                 <mat-option *ngFor="let mediacenter of mediacenters" [value]="mediacenter">{{mediacenter.profile.displayName}}</mat-option>
             </mat-select>
         </mat-form-field>
-        <button mat-raised-button color="primary" (click)="addMediacenter()" *ngIf="isAdmin"><i icon="add"></i>{{'ADMIN.MEDIACENTER.ADD_MEDIACENTER' | translate}}</button>
+        <button mat-raised-button color="primary" (click)="addMediacenter()" *ngIf="isAdmin"><i esIcon="add"></i>{{'ADMIN.MEDIACENTER.ADD_MEDIACENTER' | translate}}</button>
     </div>
     <div class="mediacenter-actions" *ngIf="mediacenters && currentMediacenterCopy">
-        <h4 class="mat-heading-4 mat-heading-underline"><i icon="business"></i>{{currentMediacenterCopy.profile.displayName | translate}}</h4>
+        <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="business"></i>{{currentMediacenterCopy.profile.displayName | translate}}</h4>
         <mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab">
             <mat-tab label="{{'ADMIN.MEDIACENTER.DATA.TITLE' | translate}}">
                 <div class="base-data">
@@ -64,7 +64,7 @@
                         <div *ngFor="let catalog of currentMediacenterCopy.profile.mediacenter.catalogs;let i=index;">
                             <h5 class="mat-heading-5 mat-heading-underline">
                                 <span>{{'ADMIN.MEDIACENTER.DATA.CATALOGS' | translate:{id:(i+1)} }}</span>
-                                <button mat-icon-button color="primary" (click)="removeCatalog(catalog)"><i icon="delete"></i></button>
+                                <button mat-icon-button color="primary" (click)="removeCatalog(catalog)"><i esIcon="delete"></i></button>
                             </h5>
                             <div class="catalog-fields">
                                 <mat-form-field>
@@ -77,7 +77,7 @@
                                 </mat-form-field>
                             </div>
                         </div>
-                        <button mat-button color="primary" (click)="addCatalog()" [disabled]="!hasManagePermissions"><i icon="add"></i>{{'ADMIN.MEDIACENTER.DATA.ADD_CATALOG' | translate}}</button>
+                        <button mat-button color="primary" (click)="addCatalog()" [disabled]="!hasManagePermissions"><i esIcon="add"></i>{{'ADMIN.MEDIACENTER.DATA.ADD_CATALOG' | translate}}</button>
                     </div>
                     <h6 class="mat-heading-6 edit-not-allowed" *ngIf="!hasManagePermissions">{{'ADMIN.MEDIACENTER.DATA.EDIT_NOT_ALLOWED' | translate}}</h6>
                     <div class="actions">
@@ -91,7 +91,7 @@
                     <h6 class="mat-heading-6">{{'ADMIN.MEDIACENTER.GROUPS.DESCRIPTION' | translate}}</h6>
                     <ng-container *ngIf="hasManagePermissions">
                         <es-authority-search-input placeholder="ADMIN.MEDIACENTER.GROUPS.ADD_LABEL" [mode]="AuthoritySearchMode.Organizations" [showRecent]="false" (onChooseAuthority)="addGroup=$event"></es-authority-search-input>
-                        <button *ngIf="addGroup" mat-raised-button color="primary" (click)="addCurrentGroup()"><i icon="add"></i>{{'ADMIN.MEDIACENTER.GROUPS.ADD' | translate:{name:addGroup.profile.displayName} }}</button>
+                        <button *ngIf="addGroup" mat-raised-button color="primary" (click)="addCurrentGroup()"><i esIcon="add"></i>{{'ADMIN.MEDIACENTER.GROUPS.ADD' | translate:{name:addGroup.profile.displayName} }}</button>
                     </ng-container>
                     <es-listTable *ngIf="mediacenterGroups"
                         [nodes]="$any(mediacenterGroups)"
@@ -120,7 +120,7 @@
                     </mat-form-field>
                     <button mat-raised-button color="primary"
                             (click)="searchMediaCenterNodes()">
-                        <i icon="search"></i>{{'ADMIN.MEDIACENTER.NODES.FILTER' | translate}}
+                        <i esIcon="search"></i>{{'ADMIN.MEDIACENTER.NODES.FILTER' | translate}}
                     </button>
                     <es-listTable *ngIf="mediacenterNodes"
                                [nodes]="mediacenterNodes"
@@ -148,7 +148,7 @@
         </mat-tab-group>
     </div>
     <div *ngIf="!currentMediacenter && isAdmin">
-        <h4 class="mat-heading-4 mat-heading-underline"><i icon="business"></i>{{'ADMIN.MEDIACENTER.IMPORT.TITLE' | translate}}</h4>
+        <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="business"></i>{{'ADMIN.MEDIACENTER.IMPORT.TITLE' | translate}}</h4>
         <div class="import">
             <input #importMediacentersSelect type="file" style="display:none" id="importMediacentersSelect" accept=".csv" (change)="updateMediacentersFile($event)">
             <div class="inputGroup">
@@ -157,7 +157,7 @@
             </div>
             <button mat-raised-button color="primary" (click)="importMediacenters()">{{'ADMIN.MEDIACENTER.IMPORT.MEDIACENTERS_START' | translate}}</button>
         </div>
-        <h4 class="mat-heading-4 mat-heading-underline"><i icon="business"></i>{{'ADMIN.MEDIACENTER.ORGIMPORT.TITLE' | translate}}</h4>
+        <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="business"></i>{{'ADMIN.MEDIACENTER.ORGIMPORT.TITLE' | translate}}</h4>
         <div class="import">
             <input #importOrganisationsSelect type="file" style="display:none" id="importOrganisationsSelect" accept=".csv" (change)="updateOrganisationsFile($event)">
             <div class="inputGroup">
@@ -167,7 +167,7 @@
             <button mat-raised-button color="primary" (click)="importOrganisations()">{{'ADMIN.MEDIACENTER.ORGIMPORT.ORGANISATIONS_START' | translate}}</button>
         </div>
 
-        <h4 class="mat-heading-4 mat-heading-underline"><i icon="business"></i>{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.TITLE' | translate}}</h4>
+        <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="business"></i>{{'ADMIN.MEDIACENTER.ORG_MC_CONNECT.TITLE' | translate}}</h4>
         <div class="import">
 
                 <input #importOrgMcSelect type="file" style="display:none" id="importOrgMcSelect" accept=".csv" (change)="updateOrgMcFile($event)">

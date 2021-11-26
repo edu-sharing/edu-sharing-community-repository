@@ -5,11 +5,11 @@
   >
     <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
     <ng-container *ngIf="nodes.length === 0">
-      <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+      <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
       <span class="home-notice">{{ 'BREADCRUMBS.YOU_ARE_HOME' | translate }}</span>
     </ng-container>
     <ng-container *ngFor="let node of nodes; let index = index; let last = last">
-      <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+      <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
       <ng-container
         *ngTemplateOutlet="
           nodeBreadcrumbElement;
@@ -30,7 +30,7 @@
       <i
         *ngIf="nodes.length === 1"
         aria-hidden="true"
-        icon="keyboard_arrow_right"
+        esIcon="keyboard_arrow_right"
         class="breadcrumb-arrow"
       ></i>
     </ng-container>
@@ -64,16 +64,16 @@ Short version works only with `short="always"`.
 -->
 <div *ngIf="!clickable" class="breadcrumb breadcrumb-readonly">
   <span class="breadcrumb-element" [class.breadcrumb-element-active]="nodes.length === 0">
-    <ng-container *ngIf="homeIcon"><i class="home-icon" [icon]="homeIcon"></i></ng-container>
+    <ng-container *ngIf="homeIcon"><i class="home-icon" [esIcon]="homeIcon"></i></ng-container>
     <ng-container *ngIf="home">{{ home | translate }}</ng-container>
-    <ng-container *ngIf="!home && !homeIcon"><i class="home-icon" icon="home"></i></ng-container>
+    <ng-container *ngIf="!home && !homeIcon"><i class="home-icon" esIcon="home"></i></ng-container>
   </span>
   <ng-container *ngIf="nodes.length === 0">
-    <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="home-notice">{{ 'BREADCRUMBS.IN_HOME' | translate }}</span>
   </ng-container>
   <ng-container *ngIf="short === 'always' && nodes.length > 1">
-    <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="folder">...</span>
   </ng-container>
   <ng-container
@@ -82,7 +82,7 @@ Short version works only with `short="always"`.
       let last = last
     "
   >
-    <i aria-hidden="true" icon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="breadcrumb-element" [class.breadcrumb-element-active]="last">{{
       node ? node.name : ''
       }}</span>
@@ -92,20 +92,20 @@ Short version works only with `short="always"`.
 <ng-template #homeInner>
   <div class="breadcrumb-inner">
     <ng-container *ngIf="homeIcon">
-      <i [icon]="homeIcon" class="home-icon"></i>
+      <i [esIcon]="homeIcon" class="home-icon"></i>
     </ng-container>
     <ng-container *ngIf="home">
       {{ home | translate }}
     </ng-container>
     <ng-container *ngIf="!home && !homeIcon">
-      <i icon="home" class="home-icon"></i>
+      <i esIcon="home" class="home-icon"></i>
     </ng-container>
-    <i *ngIf="nodes.length < 1" icon="keyboard_arrow_down" class="dropdown-icon mobile-only"></i>
+    <i *ngIf="nodes.length < 1" esIcon="keyboard_arrow_down" class="dropdown-icon mobile-only"></i>
   </div>
 </ng-template>
 
 <ng-template #backInner>
-  <i icon="keyboard_arrow_left" class="breadcrumb-arrow"></i>
+  <i esIcon="keyboard_arrow_left" class="breadcrumb-arrow"></i>
 </ng-template>
 
 <ng-template #homeBreadcrumbElement>

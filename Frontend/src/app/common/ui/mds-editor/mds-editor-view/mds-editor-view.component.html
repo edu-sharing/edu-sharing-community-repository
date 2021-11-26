@@ -1,5 +1,5 @@
 <h3 *ngIf="view.caption" id="{{ view.id }}_header" class="heading">
-  <i [icon]="view.icon"></i>
+  <i [esIcon]="view.icon"></i>
   <span>{{ view.caption }}</span>
   <button
     *ngIf="view.isExtended"
@@ -7,7 +7,7 @@
     (click)="toggleShow()"
     [attr.aria-label]="'MDS.OPEN_CLOSE_EXTENDED' | translate"
   >
-    <i [aria]="false" [icon]="'keyboard_arrow_' + (isExpanded ? 'up' : 'down')"></i>
+    <i [aria]="false" [esIcon]="'keyboard_arrow_' + (isExpanded ? 'up' : 'down')"></i>
   </button>
 </h3>
 <div

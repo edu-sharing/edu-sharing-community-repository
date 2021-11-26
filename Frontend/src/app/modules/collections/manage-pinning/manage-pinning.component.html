@@ -13,9 +13,9 @@
     >
       <mat-checkbox [checked]="isChecked(collection)" (change)="setChecked(collection,$event)"></mat-checkbox>
       <div class="name">{{getName(collection)}}</div>
-      <i icon="keyboard_arrow_down" class="moveDown clickable" *ngIf="isMobile && i<pinnedCollections.length-1" (click)="moveDown(i)"></i>
-      <i icon="keyboard_arrow_up" class="moveUp clickable" *ngIf="isMobile && i>0" (click)="moveUp(i)"></i>
-      <i icon="dehaze" class="drag" *ngIf="!isMobile"></i>
+      <i esIcon="keyboard_arrow_down" class="moveDown clickable" *ngIf="isMobile && i<pinnedCollections.length-1" (click)="moveDown(i)"></i>
+      <i esIcon="keyboard_arrow_up" class="moveUp clickable" *ngIf="isMobile && i>0" (click)="moveUp(i)"></i>
+      <i esIcon="dehaze" class="drag" *ngIf="!isMobile"></i>
     </div>
   </div>
 </es-card>

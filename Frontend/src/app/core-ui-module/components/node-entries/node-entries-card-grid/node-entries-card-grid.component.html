@@ -16,7 +16,7 @@
     >
       {{ ('NODE.' + entriesService.sort.active) | translate}}
       <i *ngIf="entriesService.sort.active !== 'ccm:collection_ordered_position'"
-         [icon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"></i>
+         [esIcon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"></i>
     </button>
     <es-sort-dropdown
       #sortDropdown
@@ -112,11 +112,11 @@
         ></es-node-entries-card-small>
         <div *ngIf="getDragState()?.element === node && !getDragState().dropAllowed"
              class="card-grid-drop-blocked-container">
-          <i icon="cancel"></i>
+          <i esIcon="cancel"></i>
         </div>
         <div *ngIf="getDragState()?.element === node && getDragState().dropAllowed"
              class="card-grid-drop-allowed-container">
-          <i [icon]="getDragState().mode === 'copy' ? 'add_circle_outline' : 'archive'"></i>
+          <i [esIcon]="getDragState().mode === 'copy' ? 'add_circle_outline' : 'archive'"></i>
         </div>
       </div>
     </ng-container>
@@ -125,7 +125,7 @@
 <ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.getCanLoadMore() && entriesService.dataSource.hasMore()">
   <div class="load-more">
     <button mat-button color="primary" (click)="loadData(true)">
-      <i icon="refresh"></i>
+      <i esIcon="refresh"></i>
       <span>{{'LOAD_MORE' | translate}}</span>
     </button>
   </div>
@@ -189,7 +189,7 @@
 </ng-template>
 <ng-template #globalOption let-option="option">
   <div class="global-option">
-    <i [icon]="option.icon"></i>
+    <i [esIcon]="option.icon"></i>
     <label>{{option.name | translate}}</label>
   </div>
 </ng-template>

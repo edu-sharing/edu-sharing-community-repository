@@ -34,7 +34,7 @@
           <div class="creator">
             <div class="name">{{comment.creator | authorityName}}</div>
             <button mat-icon-button #menuTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [matMenuTriggerFor]="dropdown.menu" (click)="options=getOptions(comment)">
-              <i icon="more_vert" class="dropdown" *ngIf="getOptions(comment) && getOptions(comment).length"></i>
+              <i esIcon="more_vert" class="dropdown" *ngIf="getOptions(comment) && getOptions(comment).length"></i>
             </button>
           </div>
           <div class="commentText" *ngIf="comment!=editComment">{{comment.comment}}</div>
@@ -46,8 +46,8 @@
         </div>
       </div>
       <div class="icons" *ngIf="comment==editComment">
-        <div class="btn-negative" tabindex="0" (click)="editComment=null" (keyup.enter)="editComment=null"><i icon="close"></i></div>
-        <div class="btn-positive" tabindex="0" (click)="saveEditComment()" (keyup.enter)="saveEditComment()"><i icon="check"></i></div>
+        <div class="btn-negative" tabindex="0" (click)="editComment=null" (keyup.enter)="editComment=null"><i esIcon="close"></i></div>
+        <div class="btn-positive" tabindex="0" (click)="saveEditComment()" (keyup.enter)="saveEditComment()"><i esIcon="check"></i></div>
       </div>
       <div class="date" *ngIf="comment!=editComment">{{comment.created | formatDate}}</div>
     </div>

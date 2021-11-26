@@ -75,15 +75,15 @@
             <ng-container *ngIf="item.label">{{item.label}}</ng-container>
           </a>
           <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,j==0, $any($event.target))" aria-hidden="true">
-            <a class="" *ngIf="sortBy==item.name && sortAscending"><i icon="arrow_drop_up"></i></a>
-            <a class="" *ngIf="sortBy==item.name && !sortAscending"><i icon="arrow_drop_down"></i></a>
+            <a class="" *ngIf="sortBy==item.name && sortAscending"><i esIcon="arrow_drop_up"></i></a>
+            <a class="" *ngIf="sortBy==item.name && !sortAscending"><i esIcon="arrow_drop_down"></i></a>
           </div>
         </div>
         <!--<div *ngFor="let option of getOptionsAlways()"  class="more moreAlways" > </div>-->
         <div class="more-header" *ngIf="_options && _options.length">&nbsp;</div>
         <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
              (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
-        ><i icon="delete"></i></div>
+        ><i esIcon="delete"></i></div>
       </div>
     </div>
     <div
@@ -154,7 +154,7 @@
             </ng-container>
             <ng-container *ngTemplateOutlet="itemContentRef; context: { $implicit: node }"></ng-container>
             <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
-              <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
+              <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i esIcon="filter_none"></i>
             </div>
             <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
               <img
@@ -171,30 +171,30 @@
                 (esDistinctClick)="onDistinctClick($event, node, 'comments')"
                 [matTooltip]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
               >
-                <i icon="comment" [altText]="'COMMENTS_MULTIPLE' | translate"></i>
+                <i esIcon="comment" [altText]="'COMMENTS_MULTIPLE' | translate"></i>
                 <div>{{node.commentCount}}</div>
               </div>
             </div>
             <div *ngIf="isCollection(node) && node.collection.type=='EDITORIAL'"
                  class="collectionEditorial"
                  aria-hidden="true"><i class="material-icons">star</i></div>
-            <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i icon="edu-pin"></i></div>
+            <div *ngIf="isCollection(node) && node.collection.pinned" class="collectionPinned"><i esIcon="edu-pin"></i></div>
             <div class="checkbox column" *ngIf="hasCheckbox">
               <!-- dummy placeholder for the checkbox, will be placed outside for code validation -->
             </div>
             <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
             <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
               <div>
-                <i icon="security"></i>
+                <i esIcon="security"></i>
                 <div>{{'NO_CC_PUBLISH' | translate }}</div>
                 <a *ngIf="node.properties['ccm:questionsallowed'] && node.properties['ccm:questionsallowed'][0]=='true'"
                    (click)="askCCPublish($event,node)"
-                ><i icon="message"></i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
+                ><i esIcon="message"></i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
               </div>
             </div>
             <div class="permissionsMissing" *ngIf="noPermissions(node)">
               <div>
-                <i icon="security"></i>
+                <i esIcon="security"></i>
                 <div>{{validatePermissions(node).message | translate }}</div>
                 <button mat-button color="primary"
                         *ngIf="validatePermissions(node).button"
@@ -217,14 +217,14 @@
               />
               <div class="previewCollectionContainer" *ngIf="isCollection(node) && (!node.preview || node.preview.isIcon) && viewType != 2">
                 <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
-                  <i icon="layers"></i>
+                  <i esIcon="layers"></i>
                 </div>
               </div>
             </div>
 
             <div class="nodeDeleted clickable" *ngIf="isDeleted(node)">
               <div>
-                <i icon="delete"></i>
+                <i esIcon="delete"></i>
                 <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
                 <div class="subline">{{'ORIGINAL_DELETED_INFO' | translate }}</div>
                 <button mat-button color="primary"
@@ -244,7 +244,7 @@
                   [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
                   [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
                 />
-                <i *ngIf="!isCollection(node) && icon" icon="{{icon}}"></i>
+                <i *ngIf="!isCollection(node) && icon" esIcon="{{icon}}"></i>
                 <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
               </div>
             </div>
@@ -262,7 +262,7 @@
                   <es-list-base [node]="node" [item]="item" [showFieldTooltip]="viewType !== 0"></es-list-base>
                 </div>
                 <div *ngIf="j==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
-                  <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i icon="filter_none"></i>
+                  <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i esIcon="filter_none"></i>
                 </div>
               </div>
             </div>
@@ -285,7 +285,7 @@
                       [class.display-none]="!optionIsShown(option, node)"
                       [disabled]="!optionIsValid(option, node)"
                       (click)="optionIsShown(option, node) ? callOption(option,node) : null">
-                <i icon="{{option.icon}}" [aria]="false"></i>
+                <i esIcon="{{option.icon}}" [aria]="false"></i>
               </button>
             </div>
           </ng-container>
@@ -295,7 +295,7 @@
                       color="primary"
                       (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
               >
-                <i icon="more_vert" [aria]="true"></i>
+                <i esIcon="more_vert" [aria]="true"></i>
               </button>
             </div>
             <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
@@ -305,14 +305,14 @@
                       matTooltip="{{_options[0].name | translate}}"
                       (click)="callOption(_options[0],node);$event.stopPropagation();"
               >
-                <i icon="{{_options[0].icon}}"></i>
+                <i esIcon="{{_options[0].icon}}"></i>
               </button></div>
           </ng-container>
         </div>
       </div>
       <div class="loadMore">
         <button mat-button *ngIf="_nodes && _nodes.length && hasMore && !isLoading" (click)="scroll(true)">
-          <i icon="refresh"></i>
+          <i esIcon="refresh"></i>
           <div>{{'LOAD_MORE' | translate}}</div>
         </button>
       </div>
@@ -320,6 +320,6 @@
     </div>
 <ng-template #itemOrderHint>
   <div class="item-order-overlay">
-    <i icon="drag_handle"></i>
+    <i esIcon="drag_handle"></i>
   </div>
 </ng-template>

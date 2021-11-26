@@ -12,13 +12,13 @@
       <es-mat-link (click)="selectedFiles.next(null)">{{ 'WORKSPACE.ADD_OBJECT_RESET' | translate}}</es-mat-link>
     </div>
     <div *ngIf="!selectedFiles.value && !link">
-      <div><i icon="cloud_upload"></i></div>
+      <div><i esIcon="cloud_upload"></i></div>
       <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}
         <es-mat-link (click)="fileSelect.click()">{{ 'WORKSPACE.ADD_OBJECT_BROWSE' | translate}}</es-mat-link>
       </div>
     </div>
     <div *ngIf="link">
-      <div><i icon="cloud_off"></i></div>
+      <div><i esIcon="cloud_off"></i></div>
       <div>{{ 'WORKSPACE.ADD_OBJECT_LINK_SELECTED' | translate}}
       </div>
     </div>

@@ -49,7 +49,7 @@
           ></es-breadcrumbs>
         </span>
       </div>
-      <div *ngIf="canEdit()" class="edit"><i icon="edit" (click)="editMode=true"></i></div>
+      <div *ngIf="canEdit()" class="edit"><i esIcon="edit" (click)="editMode=true"></i></div>
       <div><span>{{'NODE_INFO.NODE_PROPERTIES' | translate}}</span>
         <div class="property" *ngFor="let property of _properties">
           <span *ngIf="!editMode">{{property[0]}}</span>
@@ -60,7 +60,7 @@
               <input matInput type="text" *ngIf="editMode" [(ngModel)]="property[1]">
             </mat-form-field>
             <div *ngIf="!saving">
-            <button mat-raised-button color="primary" [disabled]="saving" (click)="saveProperty(property)"><i icon="save"></i></button>
+            <button mat-raised-button color="primary" [disabled]="saving" (click)="saveProperty(property)"><i esIcon="save"></i></button>
             </div>
             <div *ngIf="saving"><es-spinner-small></es-spinner-small></div>
           </div>
@@ -77,7 +77,7 @@
           <div *ngIf="editMode" class="edit-save">
             <es-spinner-small *ngIf="saving"></es-spinner-small>
             <div>
-              <button mat-raised-button color="primary" [disabled]="saving || !customProperty[0]" (click)="addProperty()"><i icon="save"></i> {{'ADD' | translate}}</button>
+              <button mat-raised-button color="primary" [disabled]="saving || !customProperty[0]" (click)="addProperty()"><i esIcon="save"></i> {{'ADD' | translate}}</button>
             </div>
           </div>
         </div>

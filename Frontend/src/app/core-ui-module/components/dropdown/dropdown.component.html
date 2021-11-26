@@ -21,7 +21,7 @@
         [class.display-none]="!option.isEnabled && !showDisabled"
         (click)="click(option)"
       >
-        <i [icon]="option.icon"></i> {{ option.name | translate }}
+        <i [esIcon]="option.icon"></i> {{ option.name | translate }}
       </button>
     </li>
   </ul>

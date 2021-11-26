@@ -15,11 +15,11 @@
       [@cardAnimation]="this">
     <mat-card-header *ngIf="header">
       <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt="" esImage-config></div>
-      <div *ngIf="icon" class="avatar" mat-card-avatar><i [icon]="icon"></i></div>
+      <div *ngIf="icon" class="avatar" mat-card-avatar><i [esIcon]="icon"></i></div>
       <mat-card-title [class.no-subtitle]="!subtitle">{{title}}</mat-card-title>
       <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
       <div class="cancel">
-        <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon="close" [aria]="true"></i></button>
+        <button mat-button *ngIf="isCancelable" (click)="cancel()"><i esIcon="close" [aria]="true"></i></button>
       </div>
     </mat-card-header>
     <div #jumpmarksRef class="jumpmarks" *ngIf="jumpmarks && jumpmarks.length>1">
@@ -27,7 +27,7 @@
               *ngFor="let jumpmark of jumpmarks"
               [class.active]="jumpmark==jumpmarkActive"
               (click)="scrollSmooth(jumpmark)"
-      ><i [icon]="jumpmark.icon"></i> {{jumpmark.label}}</button>
+      ><i [esIcon]="jumpmark.icon"></i> {{jumpmark.label}}</button>
     </div>
     <mat-card-content
       #cardContainer

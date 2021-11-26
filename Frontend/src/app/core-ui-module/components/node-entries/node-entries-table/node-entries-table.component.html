@@ -68,7 +68,7 @@
         [matTooltip]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
         [attr.aria-label]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
       >
-        <i icon="settings"></i>
+        <i esIcon="settings"></i>
       </button>
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
@@ -77,7 +77,7 @@
               (click)="openMenu(node)"
               [matMenuTriggerFor]="dropdown.menu"
       >
-        <i icon="more_vert" [aria]="true"></i>
+        <i esIcon="more_vert" [aria]="true"></i>
       </button>
     </mat-cell>
   </ng-container>

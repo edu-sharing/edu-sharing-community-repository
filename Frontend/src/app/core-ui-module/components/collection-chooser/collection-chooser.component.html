@@ -1,6 +1,6 @@
 <div class="title">
     <div class="label">{{ title | translate}}</div>
-    <button mat-button (click)="cancel()"><i icon="close"></i></button>
+    <button mat-button (click)="cancel()"><i esIcon="close"></i></button>
 </div>
 <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadLatest()">
   <ng-container *ngTemplateOutlet="beforeRecentRef; context: { $implicit: currentRoot }"></ng-container>
@@ -10,7 +10,7 @@
             <form (ngSubmit)="loadLatest(true)" autocomplete="off">
                 <mat-form-field floatLabel="always">
                     <mat-label>{{ 'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate}}</mat-label>
-                    <i icon="search" matPrefix></i>
+                    <i esIcon="search" matPrefix></i>
                     <input matInput type="search" name="search" [(ngModel)]="searchQuery"
                            placeholder="{{'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate}}" />
                 </mat-form-field>
@@ -39,7 +39,7 @@
     </div>
     <h5 class="mat-heading-5">{{'COLLECTION_CHOOSER.ADD_TO_MY_COLLECTION' | translate}}</h5>
     <div class="breadcrumbs" *ngIf="currentRoot">
-        <button mat-button color="primary" (click)="navigateBack()"><i icon="arrow_back"></i></button>
+        <button mat-button color="primary" (click)="navigateBack()"><i esIcon="arrow_back"></i></button>
         <h5 class="mat-heading-5">{{currentRoot.title ? currentRoot.title : currentRoot.name}}</h5>
     </div>
     <es-custom-node-list-wrapper
@@ -65,7 +65,7 @@
                    (clickRow)="goIntoCollection($event.node)"
                    (doubleClickRow)="goIntoCollection($event)">
             <ng-template #itemContent>
-                <div class="go-into"><button mat-mini-fab [color]="$any('white')"><i icon="arrow_forward"></i></button></div>
+                <div class="go-into"><button mat-mini-fab [color]="$any('white')"><i esIcon="arrow_forward"></i></button></div>
             </ng-template>
         </es-custom-node-list-wrapper>
         <h5 class="noElements" *ngIf="!isLoadingMy && !listMy.length && !currentRoot">{{'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}</h5>
