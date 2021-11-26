@@ -46,13 +46,13 @@ install_edu_sharing() {
 	sed -i -r 's|javax\.xml\.parsers\.SAXParserFactory=.*\"|javax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
 	grep -q 'javax\.xml\.parsers\.SAXParserFactory' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
 
-	echo "- download edu-sharing distribution"
+	echo "- download edu-sharing repository distribution"
 	mvn -q dependency:get \
 		-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
 		-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
 		-Dtransitive=false
 
-	echo "- unpack edu-sharing distribution"
+	echo "- unpack edu-sharing repository distribution"
 	mvn -q dependency:copy \
 		-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
 		-DoutputDirectory=.
@@ -103,7 +103,7 @@ if [[ -f ../$alfresco_base_snapshot ]] ; then
 
   echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
   pushd ..
-  ls -pt ../ | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
+  ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
 	popd
 
 else
