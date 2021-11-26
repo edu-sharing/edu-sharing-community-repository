@@ -15,7 +15,7 @@ import { FloatLabelType } from '@angular/material/form-field';
     styleUrls: ['input-password.component.scss'],
 })
 export class InputPasswordComponent {
-    @Input() id = 'passwordInput';
+    @Input() inputId = 'passwordInput';
     @Input() required = false;
     @Input() autocomplete: string;
     @Input() inputClass = '';

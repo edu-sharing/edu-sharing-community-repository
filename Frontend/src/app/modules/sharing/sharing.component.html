@@ -19,7 +19,7 @@
         </div>
         <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
             <form (ngsubmit)="validatePassword()">
-                <es-input-password label="{{'SHARING.PASSWORD' | translate}}" [required]="true" id="password" (keydown.enter)="validatePassword()" [(value)]="passwordInput" placeholder="{{'SHARING.PASSWORD_PLACEHOLDER' | translate}}"></es-input-password>
+                <es-input-password label="{{'SHARING.PASSWORD' | translate}}" [required]="true" inputId="password" (keydown.enter)="validatePassword()" [(value)]="passwordInput" placeholder="{{'SHARING.PASSWORD_PLACEHOLDER' | translate}}"></es-input-password>
                 <button mat-raised-button color="primary" (click)="validatePassword()">{{'SHARING.ENTER_PASSWORD' | translate}}</button>
             </form>
         </div>

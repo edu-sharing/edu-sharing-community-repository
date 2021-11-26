@@ -182,9 +182,9 @@
           </button>
         </div>
         <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
-          <es-input-password label="{{'OLD_PASSWORD' | translate }}" [displayStrength]="false" [(value)]="oldPassword" [required]="true" id="oldPassword"></es-input-password>
+          <es-input-password label="{{'OLD_PASSWORD' | translate }}" [displayStrength]="false" [(value)]="oldPassword" [required]="true" inputId="oldPassword"></es-input-password>
           <!--<input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="" required="true">-->
-          <es-input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" [(value)]="password" [required]="true" id="password"></es-input-password>
+          <es-input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" [(value)]="password" [required]="true" inputId="password"></es-input-password>
           <div class="change-buttons">
             <button mat-raised-button color="primary" [disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (click)="savePassword()">{{'SAVE' | translate}}</button>
           </div>
