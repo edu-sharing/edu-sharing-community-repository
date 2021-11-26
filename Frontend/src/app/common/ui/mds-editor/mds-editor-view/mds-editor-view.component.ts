@@ -214,8 +214,11 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
 
     private injectWidgets(): void {
         const elements = this.container.nativeElement.getElementsByTagName('*');
-        for (const element of Array.from(elements)) {
+        for (let element of Array.from(elements)) {
             const tagName = element.localName;
+            // Property names are no valid names for autonomous custom elements as by the W3C
+            // specification.
+            element = this.replaceElementWithDiv(element);
             const widgets = this.mdsEditorInstance.getWidgetsByTagName(tagName, this.view.id);
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
@@ -236,6 +239,13 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 }
             }
         }
+    }
+
+    private replaceElementWithDiv(element: Element): HTMLDivElement {
+        const div = document.createElement('div');
+        div.setAttribute('data-property', element.localName);
+        element.parentNode.replaceChild(div, element);
+        return div;
     }
 
     private injectMissingWidgetWarning(widgetName: string, element: Element): void {
