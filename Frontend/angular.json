@@ -175,11 +175,11 @@
   "defaultProject": "angular-edusharing",
   "schematics": {
     "@schematics/angular:component": {
-      "prefix": "app",
+      "prefix": "es",
       "style": "scss"
     },
     "@schematics/angular:directive": {
-      "prefix": "app"
+      "prefix": "es"
     }
   }
 }
