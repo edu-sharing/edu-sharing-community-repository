@@ -9,8 +9,8 @@
 <es-workspace-management
   [(addToCollection)]="collectionNodes"
 ></es-workspace-management>
-<h1 appTitle class="cdk-visually-hidden">{{ 'STREAM.TITLE' | translate }}</h1>
-<div class="stream-container" infiniteScroll
+<h1 esTitle class="cdk-visually-hidden">{{ 'STREAM.TITLE' | translate }}</h1>
+<div class="stream-container" esInfiniteScroll
      [scrollWindow]="true"
      (scrolled)="onScroll()"
      (click)="closeMenuOptions()">

@@ -17,7 +17,7 @@ export interface DistinctClickEvent {
  * from the pointerup event and sets the respective property on the click event.
  */
 @Directive({
-    selector: '[appDistinctClick]',
+    selector: '[esDistinctClick]',
 })
 export class DistinctClickDirective {
     /**

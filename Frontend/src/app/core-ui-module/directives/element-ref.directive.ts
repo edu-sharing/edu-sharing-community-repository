@@ -8,7 +8,7 @@ import { Directive, ElementRef } from '@angular/core';
  * <button mat-button #button="appElementRef" appElementRef></button>
  */
 @Directive({
-    selector: '[appElementRef]',
+    selector: '[esElementRef]',
     exportAs: 'appElementRef',
 })
 export class ElementRefDirective<T> extends ElementRef<T> {

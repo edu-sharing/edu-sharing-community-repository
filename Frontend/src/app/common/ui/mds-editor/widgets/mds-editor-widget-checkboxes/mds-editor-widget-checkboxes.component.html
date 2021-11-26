@@ -12,7 +12,7 @@
       [formControlName]="i"
       [indeterminate]="indeterminateValues[i]"
       (indeterminateChange)="onIndeterminateChange($event, i)"
-      appCheckTextOverflow=".mat-checkbox-label"
+      esCheckTextOverflow=".mat-checkbox-label"
       #text="appCheckTextOverflow"
       [matTooltip]="text.hasTextOverflow() ? values.values[i].label : null"
     >

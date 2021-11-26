@@ -245,12 +245,12 @@
     <div class="content-with-footer">
         <div
             role="main"
-            appSkipTarget="MAIN_CONTENT"
+            esSkipTarget="MAIN_CONTENT"
             class="content_wrapper"
             [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
             [class.contentSidenav]="searchService.sidenavOpened"
         >
-            <h1 appTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
+            <h1 esTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
               <ng-container *ngIf="!searchService.dataSourceSearchResult[0]?.isLoading">
                 <p

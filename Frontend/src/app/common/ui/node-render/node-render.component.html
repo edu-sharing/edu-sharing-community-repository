@@ -42,7 +42,7 @@
     <div class="scroller right clickable" *ngIf="canScrollRight" (click)="scroll('right')" id="right"><i icon="keyboard_arrow_right" [aria]="true"></i></div>
     <!-- Ideally, we would be be using the actual h1 headings for [appTitle], but since these are
     injected by the rendering service, we use a completely hidden element here. -->
-    <h1 appTitle hidden class="display-none">{{ getNodeTitle(_node) }}</h1>
+    <h1 esTitle hidden class="display-none">{{ getNodeTitle(_node) }}</h1>
     <div id="nodeRenderContent" [class.hide]="isLoading" ng-touchevent
        (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition()-1) : null"
        (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition()+1) : null">

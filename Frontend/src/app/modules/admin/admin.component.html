@@ -76,10 +76,10 @@
   </div>
   <div
     role="main"
-    appSkipTarget="MAIN_CONTENT"
+    esSkipTarget="MAIN_CONTENT"
     class="main-content main-content-{{mode ? mode.toLowerCase() : 'default'}}"
   >
-    <h1 appTitle class="cdk-visually-hidden">{{ 'ADMIN.TITLE' | translate }}</h1>
+    <h1 esTitle class="cdk-visually-hidden">{{ 'ADMIN.TITLE' | translate }}</h1>
     <!-- for dynamically added components from extensions -->
     <ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
     <div *ngIf="modeIsActive('INFO')" class="content info">

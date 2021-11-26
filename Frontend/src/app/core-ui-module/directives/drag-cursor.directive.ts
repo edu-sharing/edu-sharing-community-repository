@@ -12,7 +12,7 @@ export type DragDropState<T extends Node> = {
     mode?: DropAction,
 };
 @Directive({
-    selector: '[appDragCursor]',
+    selector: '[esDragCursor]',
 })
 /**
  * directive to control the drag/drop behaviour based on the current state

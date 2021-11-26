@@ -10,7 +10,7 @@
     <li *ngFor="let control of formArray.controls; let i = index">
       <mat-checkbox
         [formControlName]="i"
-        appCheckTextOverflow=".caption"
+        esCheckTextOverflow=".caption"
         #text="appCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? getFacet(i).label : null"
       >

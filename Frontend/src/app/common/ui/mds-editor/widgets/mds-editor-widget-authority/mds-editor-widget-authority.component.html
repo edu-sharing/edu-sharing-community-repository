@@ -30,7 +30,7 @@
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
-      appCheckTextOverflow=".mat-chip-label"
+      esCheckTextOverflow=".mat-chip-label"
       #text="appCheckTextOverflow"
       [matTooltip]="getTooltip(value, text.hasTextOverflow())"
     >

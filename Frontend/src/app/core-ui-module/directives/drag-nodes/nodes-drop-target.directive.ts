@@ -25,7 +25,7 @@ import { UIService } from '../../../core-module/core.module';
  * events are filtered to not trigger unnecessarily.
  */
 @Directive({
-    selector: '[appNodesDropTarget]',
+    selector: '[esNodesDropTarget]',
 })
 export class NodesDropTargetDirective {
     /**

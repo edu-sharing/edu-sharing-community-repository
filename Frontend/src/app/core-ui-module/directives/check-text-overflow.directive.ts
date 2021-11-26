@@ -7,7 +7,7 @@ import { Directive, ElementRef, Input, OnInit } from '@angular/core';
  * Call `hasTextOverflow()` for the result.
  */
 @Directive({
-    selector: '[appCheckTextOverflow]',
+    selector: '[esCheckTextOverflow]',
     exportAs: 'appCheckTextOverflow',
 })
 export class CheckTextOverflowDirective implements OnInit {

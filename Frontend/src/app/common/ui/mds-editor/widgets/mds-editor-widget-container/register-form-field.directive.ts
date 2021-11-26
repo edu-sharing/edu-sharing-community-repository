@@ -3,7 +3,7 @@ import { MatFormField } from '@angular/material/form-field';
 import { FormFieldRegistrationService } from './form-field-registration.service';
 
 @Directive({
-    selector: '[appRegisterFormField]',
+    selector: '[esRegisterFormField]',
 })
 export class RegisterFormFieldDirective {
     constructor(formField: MatFormField, formFieldRegistration: FormFieldRegistrationService) {

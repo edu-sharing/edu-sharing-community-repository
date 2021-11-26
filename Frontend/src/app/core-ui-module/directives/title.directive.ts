@@ -22,7 +22,7 @@ import { Translation } from '../translation';
  * @example <h1 appTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
  */
 @Directive({
-    selector: '[appTitle]',
+    selector: '[esTitle]',
 })
 export class TitleDirective implements OnInit, OnChanges, OnDestroy {
     /**

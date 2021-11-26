@@ -24,7 +24,7 @@ import {
  * these nodes that can be used by `NodesDropTargetDirective`.
  */
 @Directive({
-    selector: '[appNodesDragSource]',
+    selector: '[esNodesDragSource]',
 })
 export class NodesDragSourceDirective implements OnChanges {
     /**

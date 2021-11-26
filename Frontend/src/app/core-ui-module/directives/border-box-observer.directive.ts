@@ -14,7 +14,7 @@ interface BorderBox {
  * causing changed-after-checked errors.
  */
 @Directive({
-    selector: '[appBorderBoxObserver]',
+    selector: '[esBorderBoxObserver]',
     exportAs: 'borderBoxObserver',
 })
 export class BorderBoxObserverDirective implements OnInit, OnDestroy {

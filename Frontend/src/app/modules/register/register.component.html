@@ -1,6 +1,6 @@
 <es-global-progress *ngIf="isLoading"></es-global-progress>
 <es-card *ngIf="!isLoading"
-      role="main" appSkipTarget="MAIN_CONTENT"
+      role="main" esSkipTarget="MAIN_CONTENT"
       avatar="assets/images/app-icon.svg"
       [buttons]="updateButtons()"
       title="{{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}"
@@ -11,7 +11,7 @@
       [isCancelable]="false"
 >
     <div class="register-content card-content-padding">
-        <h1 appTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
+        <h1 esTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
         <es-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></es-register-form>
         <es-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></es-register-done>
         <es-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" #request></es-register-request>

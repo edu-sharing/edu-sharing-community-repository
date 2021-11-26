@@ -148,7 +148,7 @@
             ></es-actionbar>
           </div>
           <h1
-            appTitle
+            esTitle
             class="collection-new-preview-headline collections-header-texttop"
             style="overflow:hidden;"
           >
@@ -232,13 +232,13 @@
         </div>
         <div
           role="main"
-          appSkipTarget="MAIN_CONTENT"
+          esSkipTarget="MAIN_CONTENT"
           class="collections-master-div"
           [class.collections-master-div-notabs]="!showTabs()"
         >
           <h1
             *ngIf="isRootLevelCollection()"
-            appTitle
+            esTitle
             class="cdk-visually-hidden"
           >{{ 'COLLECTIONS.TITLE' | translate }}</h1>
           <!-- breadcrumbs -->

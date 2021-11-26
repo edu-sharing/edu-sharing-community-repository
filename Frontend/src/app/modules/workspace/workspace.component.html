@@ -68,11 +68,11 @@
   <es-actionbar #actionbar
 ></es-actionbar>
 </div></div>
-<h1 appTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
+<h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
   <es-workspace-explorer class="explorer"
                       #explorer
                       role="main"
-                      appSkipTarget="MAIN_CONTENT"
+                      esSkipTarget="MAIN_CONTENT"
                       appCreateContextMenu
                       *ngIf="root!='RECYCLE'"
                       [current]="currentFolder"

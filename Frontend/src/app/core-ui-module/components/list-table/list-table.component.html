@@ -121,14 +121,14 @@
              [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
              [class.dark-color]="getIsDarkColor(node)"
              [class.import-blocked]="node.properties && node.properties['ccm:importblocked'] ? node.properties['ccm:importblocked'][0] == 'true' : false"
-             (appDistinctClick)="onDistinctClick($event, node)"
+             (esDistinctClick)="onDistinctClick($event, node)"
              (dblclick)="doubleClick(node)"
              (contextmenu)="contextMenu($event,node)"
              (keydown)="handleKeyboard($event)"
-             [appNodesDragSource]="dragDrop ? selectedNodes : null"
+             [esNodesDragSource]="dragDrop ? selectedNodes : null"
              (nodesDragStart)="onNodesDragStart($event, node)"
              (nodesDragEnd)="onNodesDragEnd()"
-             [appNodesDropTarget]="canDropNodes.bind(this, node)"
+             [esNodesDropTarget]="canDropNodes.bind(this, node)"
              [nodesDragAllowedActions]="['move', 'copy']"
              (nodesDragEnter)="onNodesDragEnter(node)"
              (nodesHoveringChange)="onNodesHoveringChange($event, node)"
@@ -168,7 +168,7 @@
               <div
                 class="nodeComments"
                 *ngIf="!isSavedSearch(node)"
-                (appDistinctClick)="onDistinctClick($event, node, 'comments')"
+                (esDistinctClick)="onDistinctClick($event, node, 'comments')"
                 [matTooltip]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
               >
                 <i icon="comment" [altText]="'COMMENTS_MULTIPLE' | translate"></i>
@@ -206,7 +206,7 @@
               class="preview column"
               *ngIf="viewType==1 || viewType==2"
               [class.clickable]="isClickable"
-              (appDistinctClick)="onDistinctClick($event, node, 'preview')"
+              (esDistinctClick)="onDistinctClick($event, node, 'preview')"
             >
               <img *ngIf="node.preview?.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && node.preview && !node.preview.isIcon)"
                    [src]="getPreviewSrc(node)"

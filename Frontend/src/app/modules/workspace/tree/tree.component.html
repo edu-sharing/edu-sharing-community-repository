@@ -94,7 +94,7 @@
      [class.rootNodeSelected]="root==RECYCLE"
      [class.hover]="dragHover==RECYCLE"
      (click)="setRoot(RECYCLE)"
-     [appNodesDropTarget]="true"
+     [esNodesDropTarget]="true"
      [nodesDragAllowedActions]="['move']"
      (nodesHoveringChange)="onNodesHoveringChange($event, RECYCLE)"
      (nodesDrop)="onNodesDrop($event, RECYCLE)"

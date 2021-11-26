@@ -13,7 +13,7 @@
            matSort
            cdkDropList
            [cdkDropListSortPredicate]="dragEnter"
-           infiniteScroll
+           esInfiniteScroll
            (scrolled)="loadData()"
 >
   <!-- Checkbox Column -->
@@ -100,7 +100,7 @@
           <es-list-text
             [node]="node"
             [item]="column"
-            appCheckTextOverflow
+            esCheckTextOverflow
             #text="appCheckTextOverflow"
             [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
           ></es-list-text>
@@ -112,7 +112,7 @@
         [item]="column"
         (click)="entriesService.clickItem.emit({element: node, source: ClickSource.Metadata, attribute: column})"
         (dblclick)="entriesService.dblClickItem.emit({element: node, source: ClickSource.Metadata, attribute: column})"
-        appCheckTextOverflow
+        esCheckTextOverflow
         #text="appCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
       ></es-list-text>
@@ -124,7 +124,7 @@
       mat-row
       matRipple
       cdkDrag
-      appDragCursor
+      esDragCursor
       [cdkDragData]="node"
       (cdkDragStarted)="dragSource = node"
       (cdkDragExited)="dragExit($event)"

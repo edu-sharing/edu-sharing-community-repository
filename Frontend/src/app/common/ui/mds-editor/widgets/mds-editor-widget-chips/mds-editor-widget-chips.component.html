@@ -19,7 +19,7 @@
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
-      appCheckTextOverflow=".mat-chip-label"
+      esCheckTextOverflow=".mat-chip-label"
       #text="appCheckTextOverflow"
       [matTooltip]="getTooltip(value, text.hasTextOverflow())"
     >
@@ -60,12 +60,12 @@
     <mat-option
       *ngFor="let value of autocompleteValues | async"
       [value]="value"
-      appCheckTextOverflow=".mat-option-text"
+      esCheckTextOverflow=".mat-option-text"
       #text="appCheckTextOverflow"
       #tooltip="matTooltip"
       #option="matOption"
       [matTooltip]="text.hasTextOverflow() ? value.label : null"
-      [appRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
+      [esRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
     >
       <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
     </mat-option>

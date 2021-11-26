@@ -122,7 +122,7 @@ Short version works only with `short="always"`.
     <a
       #trigger
       cdkDrag
-      appDragCursor
+      esDragCursor
       [cdkDragDisabled]="true"
       (cdkDragEntered)="dragEnter($event)"
       (cdkDragExited)="dragExit($event)"
@@ -152,7 +152,7 @@ Short version works only with `short="always"`.
     <button
       #trigger
       cdkDrag
-      appDragCursor
+      esDragCursor
       [cdkDragDisabled]="true"
       [cdkDragData]="'MY_FILES'"
       (cdkDragEntered)="dragEnter($event)"
@@ -177,7 +177,7 @@ Short version works only with `short="always"`.
 >
   <es-node-url
     #trigger="appElementRef"
-    appElementRef
+    esElementRef
     cdkMonitorSubtreeFocus
     [aria-label]="false"
     [node]="node"
@@ -196,7 +196,7 @@ Short version works only with `short="always"`.
     >
       <div
         cdkDrag
-        appDragCursor
+        esDragCursor
         [cdkDragDisabled]="true"
         class="breadcrumb-inner"
         [class.breadcrumb-inner-active]="currentPos"

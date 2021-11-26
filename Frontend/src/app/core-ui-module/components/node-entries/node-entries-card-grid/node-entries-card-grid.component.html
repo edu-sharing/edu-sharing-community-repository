@@ -61,8 +61,8 @@
   <ul *ngIf="!entriesService.dragDrop?.dragAllowed"
       class="card-grid"
       #grid
-      (appBorderBoxObserver)="onGridSizeChanges()"
-      infiniteScroll
+      (esBorderBoxObserver)="onGridSizeChanges()"
+      esInfiniteScroll
       (scrolled)="loadData()"
   >
     <ng-container *ngTemplateOutlet="list"></ng-container>
@@ -70,8 +70,8 @@
   <ul *ngIf="entriesService.dragDrop?.dragAllowed"
       class="card-grid"
       #grid
-      (appBorderBoxObserver)="onGridSizeChanges()"
-      infiniteScroll
+      (esBorderBoxObserver)="onGridSizeChanges()"
+      esInfiniteScroll
       (dragleave)="dragExit($event)"
       (scrolled)="loadData()"
   >
@@ -100,7 +100,7 @@
           role="listitem"
           cdkDrag
           [cdkDragData]="node"
-          appDragCursor
+          esDragCursor
         ></es-node-entries-card>
         <es-node-entries-card-small
           *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
@@ -108,7 +108,7 @@
           role="listitem"
           cdkDrag
           [cdkDragData]="node"
-          appDragCursor
+          esDragCursor
         ></es-node-entries-card-small>
         <div *ngIf="getDragState()?.element === node && !getDragState().dropAllowed"
              class="card-grid-drop-blocked-container">
