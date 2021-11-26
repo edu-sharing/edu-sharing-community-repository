@@ -172,7 +172,6 @@ RUN set -eux \
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        git \
 	    maven=3.6.3-* \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
@@ -196,6 +195,7 @@ COPY install.sh .
 RUN set -eux \
     && ./install.sh \
     && ./install.sh
+    #&& rm -rf alf_data/solr4/index alf_data/solr4/model alf_data/solr4/content
 
 
 ENTRYPOINT ["./entrypoint.sh"]
