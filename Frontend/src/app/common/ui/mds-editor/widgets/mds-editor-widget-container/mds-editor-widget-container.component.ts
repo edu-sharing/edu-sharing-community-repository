@@ -4,10 +4,8 @@ import {
     ChangeDetectorRef,
     Component,
     ContentChild,
-    Directive,
     ElementRef,
     HostBinding,
-    Injectable,
     Input,
     OnChanges,
     OnDestroy,
@@ -17,50 +15,19 @@ import {
 } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { MatRipple } from '@angular/material/core';
-import { MatFormField, MatFormFieldControl } from '@angular/material/form-field';
+import { MatFormFieldControl } from '@angular/material/form-field';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { MdsWidget } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { BulkBehavior } from '../../../mds/mds.component';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { BulkMode, EditorBulkMode, InputStatus } from '../../types';
 import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
+import { BulkMode, EditorBulkMode, InputStatus } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { MdsWidget } from 'ngx-edu-sharing-api';
-
-// This is a Service-Directive combination to get hold of the `MatFormField` before it initializes
-// its `FormFieldControl`.
-//
-// This is needed so we can pass inputs (representing a `FormFieldControl`) through `<ng-content>`
-// into a `MatFormField` (see https://github.com/angular/components/issues/9411).
-//
-// Initialization of the `FormFieldControl` happens on `ngAfterContentInit` in `MatFormField`, so we
-// will be too late if we were to do this on `ngAfterViewInit`. Therefore, we hook into
-// `MatFormField` with a Directive and register our `FormFieldControl` in the constructor, which is
-// early enough to be picked up.
-@Injectable()
-export class FormFieldRegistrationService {
-    private callback: (formField: MatFormField) => void;
-
-    register(formField: MatFormField): void {
-        this.callback(formField);
-    }
-
-    onRegister(callback: (formField: MatFormField) => void): void {
-        this.callback = callback;
-    }
-}
-
-@Directive({
-    selector: '[appRegisterFormField]',
-})
-export class RegisterFormFieldDirective {
-    constructor(formField: MatFormField, formFieldRegistration: FormFieldRegistrationService) {
-        formFieldRegistration.register(formField);
-    }
-}
+import { FormFieldRegistrationService } from './form-field-registration.service';
 
 @Component({
     selector: 'app-mds-editor-widget-container',

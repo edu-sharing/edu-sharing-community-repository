@@ -39,7 +39,7 @@
   import {ToolpermissionCheckDirective} from './common/directives/toolpermission-check.directive';
   import {InputFillProgressComponent} from './common/ui/input-fill-progress/input-fill-progress.component';
   import {NodeAuthorNamePipe} from './common/ui/node-author-name.pipe';
-import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-editor-widget-container/mds-editor-widget-container.component';
+  import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-editor-widget-container/register-form-field.directive';
   import {AuthorityRowComponent} from './common/ui/authority-search-input/authority-row/authority-row.component';
   import {SanitizeHTMLPipe} from './common/ui/sanitizeHTML.pipe';
   import {ColorTransformPipe} from "./common/ui/color-transform.pipe";
