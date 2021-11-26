@@ -7,7 +7,7 @@ import { Directive, Input } from '@angular/core';
     selector: '[esRegisterCustomProperty]',
 })
 export class RegisterCustomPropertyDirective {
-    @Input('appRegisterCustomProperty') set property(p: { key: string; value: any; object: any }) {
+    @Input('esRegisterCustomProperty') set property(p: { key: string; value: any; object: any }) {
         p.object[p.key] = p.value;
     }
 

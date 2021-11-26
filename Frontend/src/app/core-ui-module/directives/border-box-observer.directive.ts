@@ -18,7 +18,7 @@ interface BorderBox {
     exportAs: 'borderBoxObserver',
 })
 export class BorderBoxObserverDirective implements OnInit, OnDestroy {
-    @Output('appBorderBoxObserver') borderBoxEmitter = new EventEmitter<BorderBox>();
+    @Output('esBorderBoxObserver') borderBoxEmitter = new EventEmitter<BorderBox>();
 
     private observer: ResizeObserver;
     private readonly borderBoxSubject = new ReplaySubject<BorderBox>(1);

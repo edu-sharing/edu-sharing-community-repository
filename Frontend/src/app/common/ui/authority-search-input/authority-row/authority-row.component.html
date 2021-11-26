@@ -5,7 +5,7 @@
       <div
         class="primary"
         esCheckTextOverflow
-        #name="appCheckTextOverflow"
+        #name="esCheckTextOverflow"
         [matTooltip]="name.hasTextOverflow() ? (authority | authorityName) : null"
       >
         {{ authority | authorityName }}
@@ -17,7 +17,7 @@
         <span
           *ngIf="authority.organizations"
           esCheckTextOverflow
-          #orgs="appCheckTextOverflow"
+          #orgs="esCheckTextOverflow"
           #div
           [matTooltip]="orgs.hasTextOverflow() ? div.innerText : null"
         >

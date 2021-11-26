@@ -5,11 +5,11 @@ import { Directive, ElementRef } from '@angular/core';
  * Export the ElementRef of the selected element for use with template references.
  *
  * @example
- * <button mat-button #button="appElementRef" appElementRef></button>
+ * <button mat-button #button="esElementRef" esElementRef></button>
  */
 @Directive({
     selector: '[esElementRef]',
-    exportAs: 'appElementRef',
+    exportAs: 'esElementRef',
 })
 export class ElementRefDirective<T> extends ElementRef<T> {
     constructor(elementRef: ElementRef<T>) {

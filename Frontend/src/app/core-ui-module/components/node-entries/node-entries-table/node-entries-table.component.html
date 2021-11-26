@@ -101,7 +101,7 @@
             [node]="node"
             [item]="column"
             esCheckTextOverflow
-            #text="appCheckTextOverflow"
+            #text="esCheckTextOverflow"
             [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
           ></es-list-text>
         </es-node-url>
@@ -113,7 +113,7 @@
         (click)="entriesService.clickItem.emit({element: node, source: ClickSource.Metadata, attribute: column})"
         (dblclick)="entriesService.dblClickItem.emit({element: node, source: ClickSource.Metadata, attribute: column})"
         esCheckTextOverflow
-        #text="appCheckTextOverflow"
+        #text="esCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
       ></es-list-text>
     </mat-cell>

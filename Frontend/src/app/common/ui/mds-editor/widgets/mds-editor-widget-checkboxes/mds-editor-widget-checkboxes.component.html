@@ -13,7 +13,7 @@
       [indeterminate]="indeterminateValues[i]"
       (indeterminateChange)="onIndeterminateChange($event, i)"
       esCheckTextOverflow=".mat-checkbox-label"
-      #text="appCheckTextOverflow"
+      #text="esCheckTextOverflow"
       [matTooltip]="text.hasTextOverflow() ? values.values[i].label : null"
     >
       {{ values.values[i].label }}

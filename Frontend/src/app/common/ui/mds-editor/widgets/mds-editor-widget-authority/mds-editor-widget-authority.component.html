@@ -31,7 +31,7 @@
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
       esCheckTextOverflow=".mat-chip-label"
-      #text="appCheckTextOverflow"
+      #text="esCheckTextOverflow"
       [matTooltip]="getTooltip(value, text.hasTextOverflow())"
     >
       <span class="mat-chip-label">{{ value.label }}</span>

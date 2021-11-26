@@ -15,10 +15,10 @@
       *ngFor="let value of values | async"
       [value]="value"
       esCheckTextOverflow=".mat-option-text"
-      #text="appCheckTextOverflow"
+      #text="esCheckTextOverflow"
       #tooltip="matTooltip"
       esElementRef
-      #ref="appElementRef"
+      #ref="esElementRef"
       [matTooltip]="text.hasTextOverflow() ? value.caption : null"
       [esRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: ref.nativeElement }"
     >

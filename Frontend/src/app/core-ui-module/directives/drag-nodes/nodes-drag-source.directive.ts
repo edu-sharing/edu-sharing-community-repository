@@ -32,7 +32,7 @@ export class NodesDragSourceDirective implements OnChanges {
      *
      * When not set, this directive is effectively disabled.
      */
-    @Input('appNodesDragSource') nodes?: Node[];
+    @Input('esNodesDragSource') nodes?: Node[];
 
     /**
      * Triggered when processing the dragstart event.
