@@ -58,6 +58,16 @@ usage() {
   echo "-R"
   echo "--repository"
   echo "url of the repository to fetch properties and content from"
+  echo ""
+
+  echo "--repoUser"
+  echo "The user that will be used to automatically register the rendering service with the repository"
+  echo ""
+
+  echo "--repoPassword"
+  echo "The user password that is used to automatically register the rendering service with the repository"
+  echo ""
+
 }
 
 internalURL=http://127.0.0.1:8080/esrender
@@ -68,6 +78,8 @@ db_name=rendering
 db_user=rendering
 db_password=rendering
 repository_service_base=
+repoUser=admin
+repoPassword=
 
 while true; do
 	flag="$1"
@@ -84,6 +96,8 @@ while true; do
 			--repository|-R) repository_service_base="$1" && shift ;;
 			--internalURL) internalURL="$1" && shift ;;
 			--externalURL) externalURL="$1" && shift ;;
+			--repoUser) repoUser="$1" && shift ;;
+			--repoPassword) repoPassword="$1" && shift ;;
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -172,6 +186,42 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 
   rm -f /tmp/config.ini
 	mv esrender/install/ esrender/install.bak
+
+	if [[ -n $repository_service_base ]] && [[ -n $repository_service_base ]] && [[ -n $repository_service_base ]] ; then
+		echo "- register rendering service with the repository"
+
+		until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null "${internalURL}/admin/" ) -eq 200 ]]
+    do
+    	echo >&2 "Waiting for ${internalURL} ..."
+    	sleep 3
+    done
+
+		my_meta_internal="${internalURL}/application/esmain/metadata.php"
+		my_appid=$( \
+			curl -sS "${my_meta_internal}" | xmlstarlet sel -t -v '/properties/entry[@key="appid"]' - | xargs echo \
+		)
+
+		access_token=$( \
+  	curl -sS \
+  		-XPOST \
+  		-d "grant_type=password&client_id=eduApp&client_secret=secret&username=${repoUser}&password=${repoPassword}" \
+  		"${repository_service_base}/oauth2/token" | jq -r '.access_token' \
+  	)
+
+  	if [ -n "${has_my_appid}" ] ; then
+  		curl -sS \
+  			-H "Authorization: Bearer ${access_token}" \
+      	-H "Accept: application/json" \
+      	-XDELETE \
+      	"${repository_service_base}/rest/admin/v1/applications/${my_appid}"
+    fi
+
+    curl -sS \
+    	-H "Authorization: Bearer ${access_token}" \
+    	-H "Accept: application/json" \
+    	-XPUT \
+    	"${repository_service_base}/rest/admin/v1/applications?url=$( jq -nr --arg v "${my_meta_internal}" '$v|@uri' )"
+	fi
 
 else
 
