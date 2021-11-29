@@ -71,6 +71,7 @@ import {CardService} from '../../../core-ui-module/card.service';
 import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
 import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import { Subject } from 'rxjs';
 
 
 @Component({
@@ -217,6 +218,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   public similarNodes: Node[];
   mds: Mds;
   isDestroyed = false;
+  private readonly destroyed$ = new Subject<void>();
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -319,6 +321,8 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         (window as any).ngRender = null;
         this.optionsHelper.setListener(null);
         this.isDestroyed = true;
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
   public switchPosition(pos:number) {
@@ -415,7 +419,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 const finish = (set:Mds = null) => {
                     this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
                     this.mds = set;
-                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                    const nodeRenderContent = jQuery('#nodeRenderContent')
+                    nodeRenderContent.html(data.detailsSnippet);
+                    this.moveInnerStyleToHead(nodeRenderContent);
                     this.postprocessHtml();
                     this.handleProposal();
                     this.addCollections();
@@ -750,5 +756,22 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         if(this.queryParams.action) {
             window.close();
         }
+    }
+
+    /**
+     * Moves a style element that is a child of `element` to the document head.
+     *
+     * Existing style elements that were previously moved to the document head like this will be
+     * removed.
+     *
+     * The style element will be removed from document head on `ngDestroy`.
+     */
+    private moveInnerStyleToHead(element: JQuery<HTMLElement>): void {
+        const styleAttr = 'data-render-content-style';
+        jQuery('[' + styleAttr + ']').remove();
+        const style = element.find('style');
+        style.attr(styleAttr, '');
+        jQuery(document.head).append(style);
+        this.destroyed$.subscribe(() => style.remove());
     }
 }
