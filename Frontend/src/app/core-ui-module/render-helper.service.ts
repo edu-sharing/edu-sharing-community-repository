@@ -39,6 +39,7 @@ import {SpinnerComponent} from './components/spinner/spinner.component';
 import {ListTableComponent} from './components/list-table/list-table.component';
 import {RestUsageService} from '../core-module/rest/services/rest-usage.service';
 import {CommentsListComponent} from '../modules/management-dialogs/node-comments/comments-list/comments-list.component';
+import { replaceElementWithDiv } from '../common/ui/mds-editor/util/replace-element-with-div';
 
 @Injectable()
 export class RenderHelperService {
@@ -84,6 +85,7 @@ export class RenderHelperService {
         } catch(e) {
             return;
         }
+        domCollections = replaceElementWithDiv(domCollections);
         UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
         this.usageApi.getNodeUsagesCollection(
             RenderHelperService.isCollectionRef(node) ? node.properties[RestConstants.CCM_PROP_IO_ORIGINAL] : node.ref.id,node.ref.repo
@@ -108,7 +110,8 @@ export class RenderHelperService {
             };
             UIHelper.injectAngularComponent(this.componentFactoryResolver,
                 this.viewContainerRef,
-                ListTableComponent,document.getElementsByTagName('collections')[0],
+                ListTableComponent,
+                domCollections,
                 data,
                 { delay: 250 }
             );
