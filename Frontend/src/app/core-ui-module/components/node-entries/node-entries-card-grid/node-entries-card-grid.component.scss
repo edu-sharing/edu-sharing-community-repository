@@ -112,7 +112,7 @@
             }
         }
     }
-    > li.global-options {
+    > .global-options {
         display: grid;
         grid-template-columns: auto;
         grid-template-rows: repeat(auto-fit, minmax(70px, 1fr));
@@ -154,7 +154,7 @@
 }
 :host ::ng-deep {
     .card-grid {
-        > li.global-options {
+        > .global-options {
             .global-option-btn {
                 .mat-button-wrapper {
                     width: 100%;
