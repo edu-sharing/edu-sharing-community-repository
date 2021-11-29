@@ -72,8 +72,6 @@ import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
 import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 
-declare var jQuery:any;
-declare var window: any;
 
 @Component({
   selector: 'es-node-render',
