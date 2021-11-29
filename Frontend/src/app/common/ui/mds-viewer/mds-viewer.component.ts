@@ -21,6 +21,7 @@ import { MdsEditorViewComponent } from '../mds-editor/mds-editor-view/mds-editor
 import { MdsEditorInstanceService, Widget } from '../mds-editor/mds-editor-instance.service';
 import { Values } from '../mds-editor/types';
 import { ViewInstanceService } from '../mds-editor/mds-editor-view/view-instance.service';
+import { replaceElementWithDiv } from '../mds-editor/util/replace-element-with-div';
 
 @Component({
     selector: 'es-mds-viewer',
@@ -103,15 +104,18 @@ export class MdsViewerComponent {
             for (const widget of this.mdsEditorInstanceService.widgets.value) {
                 // @TODO: it would be better to filter by widgets based on template and condition, should be implemented in 5.1
                 this.container.toArray().forEach((c) => {
-                    const element = c.nativeElement.getElementsByTagName(widget.definition.id);
-                    if (element && element[0]) {
-                        // MdsEditorViewComponent.updateWidgetWithHTMLAttributes(element[0], w);
+                    let element: HTMLElement = c.nativeElement.getElementsByTagName(
+                        widget.definition.id,
+                    )?.[0];
+                    if (element) {
+                        // MdsEditorViewComponent.updateWidgetWithHTMLAttributes(element, w);
+                        element = replaceElementWithDiv(element);
 
                         UIHelper.injectAngularComponent(
                             this.factoryResolver,
                             this.containerRef,
                             MdsWidgetComponent,
-                            element[0],
+                            element,
                             {
                                 widget,
                             },

@@ -37,6 +37,7 @@ import {
     NativeWidgetType,
     Values,
 } from '../types';
+import { replaceElementWithDiv } from '../util/replace-element-with-div';
 import { MdsEditorWidgetAuthorComponent } from '../widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { MdsEditorWidgetAuthorityComponent } from '../widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
 import { MdsEditorWidgetCheckboxComponent } from '../widgets/mds-editor-widget-checkbox/mds-editor-widget-checkbox.component';
@@ -218,7 +219,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             const tagName = element.localName;
             // Property names are no valid names for autonomous custom elements as by the W3C
             // specification.
-            element = this.replaceElementWithDiv(element);
+            element = replaceElementWithDiv(element);
             const widgets = this.mdsEditorInstance.getWidgetsByTagName(tagName, this.view.id);
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
@@ -239,13 +240,6 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 }
             }
         }
-    }
-
-    private replaceElementWithDiv(element: Element): HTMLDivElement {
-        const div = document.createElement('div');
-        div.setAttribute('data-property', element.localName);
-        element.parentNode.replaceChild(div, element);
-        return div;
     }
 
     private injectMissingWidgetWarning(widgetName: string, element: Element): void {
