@@ -185,7 +185,7 @@ Short version works only with `short="always"`.
     (buttonClick)="openBreadcrumb(index + 1)"
     [disabled]="currentPos"
   >
-    <div
+    <span
       cdkDropList
       cdkDropListOrientation="vertical"
       [cdkDropListData]="node"
@@ -194,7 +194,7 @@ Short version works only with `short="always"`.
       (cdkDropListDropped)="drop($event)"
       class="breadcrumb-element"
     >
-      <div
+      <span
         cdkDrag
         esDragCursor
         [cdkDragDisabled]="true"
@@ -208,8 +208,8 @@ Short version works only with `short="always"`.
         <ng-container *ngIf="!inner; else inner">
           {{ node ? node.name : '' }}
         </ng-container>
-      </div>
-    </div>
+      </span>
+    </span>
     <!-- <div mat-ripple [matRippleTrigger]="$any(trigger)" matRippleColor="primary"></div> -->
   </es-node-url>
 </ng-template>
