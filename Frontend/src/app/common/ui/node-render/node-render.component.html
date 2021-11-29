@@ -4,14 +4,14 @@
   <div class="displayBar">
     <button mat-button class="clickable" title="{{'BACK' | translate}}" (click)="close()"><i esIcon="keyboard_arrow_left"></i> <span class="render-back">{{'BACK' | translate}}</span></button>
     <button mat-button *ngIf="_node" class="clickable showDetails" (click)="showDetails()" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i esIcon="info_outline"></i> <span class="uppercase hidemobile">{{'INFO' | translate}}</span></button>
-    <span>
+    <div class="actionbar-container">
     <es-actionbar class="actionbarFrame" #actionbar
                [backgroundType]="'dark'"
                [numberOfAlwaysVisibleOptions]="1"
                [numberOfAlwaysVisibleOptionsMobile]="0"
     ></es-actionbar>
 
-    </span>
+    </div>
   </div>
 </div>
 <div *ngIf="getPosition()!=-1">

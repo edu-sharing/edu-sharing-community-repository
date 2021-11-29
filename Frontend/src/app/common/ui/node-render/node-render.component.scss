@@ -85,7 +85,7 @@ a, a:hover, a:visited, a:active {
 .displayBar {
   display: flex;
   height: 100%;
-  > button, > span {
+  > button, > .actionbar-container {
     flex-grow: 2;
     flex-basis: 0;
     text-align: center;
@@ -99,7 +99,7 @@ a, a:hover, a:visited, a:active {
   justify-content: flex-start !important;
 }
 
-.displayBar > span:last-child {
+.displayBar > .actionbar-container:last-child {
   position: relative;
   top: -5px;
   text-align: right;
