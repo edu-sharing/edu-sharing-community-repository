@@ -60,7 +60,7 @@ usage() {
   echo "url of the repository to fetch properties and content from"
 }
 
-interalURL=http://127.0.0.1:8080/esrender
+internalURL=http://127.0.0.1:8080/esrender
 externalURL=http://127.0.0.1:8080/esrender
 db_host=127.0.0.1
 db_port=5432
@@ -82,7 +82,7 @@ while true; do
 			--username|-U) db_user="$1" && shift	;;
 			--password|-W) db_password="$1" && shift	;;
 			--repository|-R) repository_service_base="$1" && shift ;;
-			--interalURL) interalURL="$1" && shift ;;
+			--internalURL) internalURL="$1" && shift ;;
 			--externalURL) externalURL="$1" && shift ;;
 			*) {
 				echo "error: unknown flag: $flag"
@@ -161,9 +161,17 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 		repository_url=${repository_service_base}
 	EOF
 
-  php esrender/admin/cli/install.php -c /tmp/config.ini
+  if [ ! $(php esrender/admin/cli/install.php -c /tmp/config.ini) ] ; then
+  	result=$?;
+  	rm -rf "${RS_CACHE}" 2> /dev/null
+  	rm -rf esrender 2> /dev/null
+  	rm -f /tmp/config.ini 2> /dev/null
+  	exit $result
+  fi
+
   rm -f /tmp/config.ini
 	mv esrender/install/ esrender/install.bak
+
 else
 
 	echo ""

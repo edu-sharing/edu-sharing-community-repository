@@ -98,7 +98,6 @@ ENV WWW_ROOT /var/www/html/
 ENV RS_ROOT /var/www/html/esrender
 ENV RS_CACHE /var/cache/esrender
 ENV PHP_VERSION 7.4
-ENV PG_VERSION 13
 
 WORKDIR $WWW_ROOT
 
@@ -110,7 +109,6 @@ RUN set -eux \
       jq \
       imagemagick \
       ghostscript \
-      postgresql-${PG_VERSION} \
       php${PHP_VERSION} \
       php${PHP_VERSION}-dom \
       php${PHP_VERSION}-soap \
