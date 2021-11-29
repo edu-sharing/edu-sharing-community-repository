@@ -2,26 +2,31 @@ import {
     Component,
     Input,
     ElementRef,
-    Sanitizer, ViewContainerRef, ComponentFactoryResolver, QueryList, ViewChildren, Injector
+    Sanitizer,
+    ViewContainerRef,
+    ComponentFactoryResolver,
+    QueryList,
+    ViewChildren,
+    Injector,
 } from '@angular/core';
-import {MdsWidgetComponent} from './widget/mds-widget.component';
+import { MdsWidgetComponent } from './widget/mds-widget.component';
 import {
     RestConnectorService,
     RestConstants,
-    RestMdsService
+    RestMdsService,
 } from '../../../core-module/core.module';
-import {DomSanitizer} from '@angular/platform-browser';
-import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {MdsEditorViewComponent} from '../mds-editor/mds-editor-view/mds-editor-view.component';
-import {MdsEditorInstanceService, Widget} from '../mds-editor/mds-editor-instance.service';
-import {Values} from '../mds-editor/types';
-import {ViewInstanceService} from '../mds-editor/mds-editor-view/view-instance.service';
+import { DomSanitizer } from '@angular/platform-browser';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { MdsEditorViewComponent } from '../mds-editor/mds-editor-view/mds-editor-view.component';
+import { MdsEditorInstanceService, Widget } from '../mds-editor/mds-editor-instance.service';
+import { Values } from '../mds-editor/types';
+import { ViewInstanceService } from '../mds-editor/mds-editor-view/view-instance.service';
 
 @Component({
     selector: 'es-mds-viewer',
     templateUrl: 'mds-viewer.component.html',
     styleUrls: ['mds-viewer.component.scss'],
-    providers: [MdsEditorInstanceService, ViewInstanceService]
+    providers: [MdsEditorInstanceService, ViewInstanceService],
 })
 export class MdsViewerComponent {
     @ViewChildren('container') container: QueryList<ElementRef>;
@@ -44,10 +49,12 @@ export class MdsViewerComponent {
     @Input() set data(data: Values) {
         this._data = data;
         if (this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] != null) {
-            this.mdsService.getSet(this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0]).subscribe(async (mds) => {
-                this.mds = mds;
-                await this.inflate();
-            });
+            this.mdsService
+                .getSet(this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0])
+                .subscribe(async (mds) => {
+                    this.mds = mds;
+                    await this.inflate();
+                });
         } else {
             this.mdsService.getSet().subscribe(async (mds) => {
                 this.mds = mds;
@@ -70,20 +77,26 @@ export class MdsViewerComponent {
             setTimeout(() => this.inflate(), 1000 / 60);
             return;
         }
-        const editor = await this.mdsEditorInstanceService.initWithoutNodes(this._groupId,
+        const editor = await this.mdsEditorInstanceService.initWithoutNodes(
+            this._groupId,
             this._setId,
             RestConstants.HOME_REPOSITORY,
             'nodes',
-            this._data
+            this._data,
         );
-        if(editor === 'legacy') {
-            console.error('mds viewer component is only supported for groups with angular rendering');
+        if (editor === 'legacy') {
+            console.error(
+                'mds viewer component is only supported for groups with angular rendering',
+            );
             return;
         }
         this.templates = [];
         for (const view of this.getGroup().views) {
             const v = this.getView(view);
-            this.templates.push({view: v, html: this.sanitizer.bypassSecurityTrustHtml(this.prepareHTML(v.html))});
+            this.templates.push({
+                view: v,
+                html: this.sanitizer.bypassSecurityTrustHtml(this.prepareHTML(v.html)),
+            });
         }
         // wait for angular to inflate the new binding
         setTimeout(() => {
@@ -94,24 +107,30 @@ export class MdsViewerComponent {
                     if (element && element[0]) {
                         // MdsEditorViewComponent.updateWidgetWithHTMLAttributes(element[0], w);
 
-                        UIHelper.injectAngularComponent(this.factoryResolver, this.containerRef, MdsWidgetComponent, element[0], {
-                            widget
-                        },
+                        UIHelper.injectAngularComponent(
+                            this.factoryResolver,
+                            this.containerRef,
+                            MdsWidgetComponent,
+                            element[0],
+                            {
+                                widget,
+                            },
                             {},
-                            this.injector
+                            this.injector,
                         );
                     }
                 });
             }
         });
     }
-    constructor(private mdsService: RestMdsService,
-                private mdsEditorInstanceService: MdsEditorInstanceService,
-                private factoryResolver: ComponentFactoryResolver,
-                private injector: Injector,
-                private containerRef: ViewContainerRef,
-                private sanitizer: DomSanitizer) {
-    }
+    constructor(
+        private mdsService: RestMdsService,
+        private mdsEditorInstanceService: MdsEditorInstanceService,
+        private factoryResolver: ComponentFactoryResolver,
+        private injector: Injector,
+        private containerRef: ViewContainerRef,
+        private sanitizer: DomSanitizer,
+    ) {}
 
     /**
      * close all custom tags inside the html which are not closed
@@ -122,7 +141,9 @@ export class MdsViewerComponent {
     private prepareHTML(html: string) {
         for (const w of this.mds.widgets) {
             const start = html.indexOf('<' + w.id);
-            if (start == -1) { continue; }
+            if (start == -1) {
+                continue;
+            }
             const end = html.indexOf('>', start) + 1;
             html = html.substring(0, end) + '</' + w.id + '>' + html.substring(end);
         }
