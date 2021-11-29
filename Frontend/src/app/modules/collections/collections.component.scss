@@ -269,6 +269,7 @@ section {
         align-items: center;
         > h2 {
             flex-grow: 1;
+            margin: 5px 10px 0 0;
         }
         mat-slide-toggle {
             margin-right: 20px;
@@ -283,10 +284,6 @@ section {
 .content-header {
     display: flex;
     width: 100%;
-    > h2.mat-heading-3 {
-        flex-grow: 1;
-        margin: 5px 10px 0 0;
-    }
     > .actionbarMaterials {
         margin-right: 20px;
     }
