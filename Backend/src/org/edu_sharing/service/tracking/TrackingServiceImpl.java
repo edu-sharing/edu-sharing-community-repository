@@ -5,6 +5,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
@@ -37,8 +38,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     private static final List<String> EXISTING_FIELDS = Arrays.asList("authority","authority_organization","authority_mediacenter");
     public static Logger logger = Logger.getLogger(TrackingServiceImpl.class);
 
-    public static String TRACKING_NODE_TABLE_ID = "edu_tracking_node";
-    public static String TRACKING_USER_TABLE_ID = "edu_tracking_user";
+    public static String TRACKING_NODE_TABLE_ID = "v_edu_tracking_node";
+    public static String TRACKING_USER_TABLE_ID = "v_edu_tracking_user";
 
     public static String TRACKING_DELETE_NODE = "DELETE FROM " + TRACKING_NODE_TABLE_ID +" WHERE authority = ?";
     public static String TRACKING_DELETE_USER = "DELETE FROM " + TRACKING_USER_TABLE_ID +" WHERE authority = ?";
@@ -52,35 +53,44 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type :grouping" +
             " ORDER BY count DESC";
-    public static String TRACKING_STATISTICS_USER = "SELECT authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from edu_tracking_user as tracking" +
+    public static String TRACKING_STATISTICS_USER = "SELECT authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from v_edu_tracking_user as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY authority,authority_organization,authority_mediacenter,time,type :grouping" +
-            " ORDER BY date" +
-            " LIMIT 100";
-    public static String TRACKING_STATISTICS_NODE = "SELECT node_uuid as node,authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from edu_tracking_node as tracking" +
+            " ORDER BY date DESC" +
+            " LIMIT 200";
+    public static String TRACKING_STATISTICS_NODE = "SELECT node_uuid as node,authority,authority_organization,authority_mediacenter,time as date,type,COUNT(*) :fields from v_edu_tracking_node as tracking" +
             //" LEFT JOIN alf_node_properties as props ON (tracking.node_id=props.node_id and props.qname_id=28)" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,authority,authority_organization,authority_mediacenter,time,type :grouping" +
-            " ORDER BY date" +
-            " LIMIT 100";
-    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT node_uuid as node,type,COUNT(*) :fields from edu_tracking_node as tracking" +
+            " ORDER BY date DESC" +
+            " LIMIT 200";
+    public static String TRACKING_STATISTICS_NODE_GROUPED = "SELECT node_uuid as node,type,COUNT(*) :fields from v_edu_tracking_node as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY node,type :grouping" +
             " ORDER BY count DESC" +
-            " LIMIT 300";
-    public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from edu_tracking_node as tracking" +
+            " LIMIT 100";
+    public static String TRACKING_STATISTICS_NODE_GROUPED_ALL = "SELECT node_uuid as node,type,COUNT(*) from v_edu_tracking_node as tracking" +
+            // " JOIN public.alf_node_properties anp ON (" +
+            // " anp.qname_id=(" +
+            // " SELECT id FROM alf_qname WHERE local_name = 'name' AND ns_id = (" +
+            // " SELECT id FROM alf_namespace WHERE uri = 'http://www.alfresco.org/model/content/1.0'" +
+            // " )) AND anp.node_id = tracking.node_id)" +
+            " WHERE time BETWEEN ? AND ? AND (:filter)" +
+            " GROUP BY node,type :grouping" +
+            " ORDER BY count DESC";
+    public static String TRACKING_STATISTICS_NODE_SINGLE = "SELECT type,COUNT(*) from v_edu_tracking_node as tracking" +
             " WHERE node_uuid = ? AND time BETWEEN ? AND ?" +
             " GROUP BY type" +
             " ORDER BY count DESC";
-    public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm-dd') as date :fields from :table as tracking" +
+    public static String TRACKING_STATISTICS_DAILY = "SELECT type,COUNT(*),year_month_day as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
-    public static String TRACKING_STATISTICS_MONTHLY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy-mm') as date :fields from :table as tracking" +
+    public static String TRACKING_STATISTICS_MONTHLY = "SELECT type,COUNT(*),year_month as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
-    public static String TRACKING_STATISTICS_YEARLY = "SELECT type,COUNT(*),TO_CHAR(time,'yyyy') as date :fields from :table as tracking" +
+    public static String TRACKING_STATISTICS_YEARLY = "SELECT type,COUNT(*),year as date :fields from :table as tracking" +
             " WHERE time BETWEEN ? AND ? AND (:filter)" +
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
@@ -232,14 +242,14 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         return null;
     }
     @Override
-    public List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable {
+    public List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, StatisticsFetchConfig fetchConfig) throws Throwable {
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
         PreparedStatement statement = null;
         try {
             con = dbAlf.getConnection();
             List<StatisticEntry> result = initList(StatisticEntry.class,type,dateFrom,dateTo);
-            String query = getQuery(type, "edu_tracking_user", mediacenter, additionalFields, groupFields, filters);
+            String query = getQuery(type, TRACKING_USER_TABLE_ID, mediacenter, fetchConfig);
             statement = con.prepareStatement(query);
             int index=1;
             statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
@@ -247,8 +257,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             if(mediacenter!=null && !mediacenter.isEmpty()){
                 statement.setString(index++,mediacenter);
             }
-            if (filters != null && !filters.isEmpty()) {
-                for (String value : filters.values()) {
+            if (fetchConfig.getFilters() != null && !fetchConfig.getFilters().isEmpty()) {
+                for (String value : fetchConfig.getFilters().values()) {
                     statement.setString(index++, value);
                 }
             }
@@ -256,7 +266,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             while (resultSet.next()) {
                 StatisticEntry entry = new StatisticEntry();
                 boolean grouping=!type.equals(GroupingType.None);
-                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
+                mapResult(EventType.valueOf(resultSet.getString("type")), fetchConfig.getAdditionalFields(), fetchConfig.getGroupFields(), resultSet, entry);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
@@ -294,7 +304,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             }
         }
         try{
-            entry.setDate(resultSet.getString("date"));
+            entry.setDate(mapDBDate(resultSet.getString("date")));
         }catch(PSQLException e){
             // ignore, some queries don't have a date field
         }
@@ -305,15 +315,25 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }
     }
 
+    private String mapDBDate(String date) {
+        String[] parts = date.split("-");
+        for(int i = 1; i < parts.length; i++) {
+            if(parts[i].length() == 1) {
+                parts[i] = "0" + parts[i];
+            }
+        }
+        return StringUtils.join(parts, "-");
+    }
+
     @Override
-    public List<StatisticEntryNode> getNodeStatisics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable {
+    public List<StatisticEntryNode> getNodeStatisics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, StatisticsFetchConfig fetchConfig) throws Throwable {
         ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
         Connection con = null;
         PreparedStatement statement = null;
         try {
             con = dbAlf.getConnection();
             List<StatisticEntryNode> result = initList(StatisticEntryNode.class,type,dateFrom,dateTo);
-            String query = getQuery(type, "edu_tracking_node", mediacenter, additionalFields, groupFields, filters);
+            String query = getQuery(type, TRACKING_NODE_TABLE_ID, mediacenter, fetchConfig);
             statement=con.prepareStatement(query);
             int index=1;
             statement.setTimestamp(index++, Timestamp.valueOf(dateFrom.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
@@ -321,15 +341,15 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             if(mediacenter!=null && !mediacenter.isEmpty()){
                 statement.setString(index++,mediacenter);
             }
-            if (filters != null && !filters.isEmpty()) {
-                for (String value : filters.values()) {
+            if (fetchConfig.getFilters() != null && !fetchConfig.getFilters().isEmpty()) {
+                for (String value : fetchConfig.getFilters().values()) {
                     statement.setString(index++, value);
                 }
             }
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 StatisticEntryNode entry = new StatisticEntryNode();
-                boolean grouping=!type.equals(GroupingType.None) || groupFields!=null && !groupFields.isEmpty();
+                boolean grouping=!type.equals(GroupingType.None) || fetchConfig.getGroupFields()!=null && !fetchConfig.getGroupFields().isEmpty();
                 if(type.equals(GroupingType.Node)){
                     entry.setNode(resultSet.getString("node"));
                 }
@@ -339,7 +359,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                     }
                 }
 
-                mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
+                mapResult(EventType.valueOf(resultSet.getString("type")), fetchConfig.getAdditionalFields(), fetchConfig.getGroupFields(), resultSet, entry);
 
                 if (result.contains(entry) && grouping) {
                     entry = result.get(result.indexOf(entry));
@@ -475,7 +495,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         return list;
     }
 
-    private String getQuery(GroupingType type, String table, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws SQLException {
+    private String getQuery(GroupingType type, String table, String mediacenter, StatisticsFetchConfig fetchConfig) throws SQLException {
         try {
             String prepared=null;
             if (type.equals(GroupingType.Daily))
@@ -485,15 +505,19 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             else if (type.equals(GroupingType.Yearly))
                 prepared = TRACKING_STATISTICS_YEARLY;
             else if(type.equals(GroupingType.Node)){
-                prepared = TRACKING_STATISTICS_NODE_GROUPED;
+                if(fetchConfig.isFetchAll()) {
+                    prepared = TRACKING_STATISTICS_NODE_GROUPED_ALL;
+                } else {
+                    prepared = TRACKING_STATISTICS_NODE_GROUPED;
+                }
             }
             else if (type.equals(GroupingType.None)) {
-                if(groupFields!=null && !groupFields.isEmpty()){
+                if(fetchConfig.getGroupFields()!=null && !fetchConfig.getGroupFields().isEmpty()){
                     prepared = TRACKING_STATISTICS_CUSTOM_GROUPING;
                 }
-                else if (table.equals("edu_tracking_node")) {
+                else if (table.equals(TRACKING_NODE_TABLE_ID)) {
                     prepared = TRACKING_STATISTICS_NODE;
-                } else if (table.equals("edu_tracking_user")) {
+                } else if (table.equals(TRACKING_USER_TABLE_ID)) {
                     prepared = TRACKING_STATISTICS_USER;
                 }
             }
@@ -506,24 +530,24 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             StringBuilder grouping = new StringBuilder();
             StringBuilder fields = new StringBuilder();
             if(mediacenter !=null && !mediacenter.isEmpty()){
-                filter.append(" AND (ARRAY[?] <@ authority_mediacenter)");
+                filter.append(" AND (? = ANY(authority_mediacenter))");
             }
-            if (filters != null && !filters.isEmpty()) {
+            if (fetchConfig.getFilters() != null && !fetchConfig.getFilters().isEmpty()) {
                 filter.append(" AND (");
-                for (Map.Entry<String, String> entry : filters.entrySet()) {
+                for (Map.Entry<String, String> entry : fetchConfig.getFilters().entrySet()) {
                     filter.append(" AND ");
                     filter.append(makeDbField(entry.getKey(),false)).append(" = ?");
                 }
                 filter.append(")");
             }
-            if (groupFields != null && !groupFields.isEmpty()) {
-                for (String field : groupFields) {
+            if (fetchConfig.getGroupFields() != null && !fetchConfig.getGroupFields().isEmpty()) {
+                for (String field : fetchConfig.getGroupFields()) {
                     grouping.append(",").append(makeDbField(field,false));
                     fields.append(",").append(makeDbField(field,false) + " as " + field);
                 }
             }
-            if (additionalFields != null && additionalFields.size() > 0) {
-                for (String field : additionalFields) {
+            if (fetchConfig.getAdditionalFields() != null && fetchConfig.getAdditionalFields().size() > 0) {
+                for (String field : fetchConfig.getAdditionalFields()) {
                     fields.append(",ARRAY_AGG(").append(makeDbField(field,true) + ") as " + field);
                     // if additional fields and no grouping is provided, add them to grouping otherwise there will be a postgres exception when fetching
                     // nope: it is now using ARRAY_AGG

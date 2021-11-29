@@ -16,7 +16,6 @@ public class StatisticEntryNode extends StatisticEntry{
         this.node = node;
     }
 
-
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof StatisticEntryNode){

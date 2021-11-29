@@ -398,6 +398,8 @@
             "MODE_USERS": "User interactions (logins & logouts)",
             "EXPORT": "Download",
             "EXPORT_LABEL": "Export displayed data",
+            "EXPORT_LABEL_ALL": "Export all data",
+            "EXPORT_NODES_ALL": "Export all objects of this time span (may take some time)",
             "EXPORT_PROPERTIES": "Properties to be exported",
             "EXPORT_PROPERTIES_HINT": "eg cm:name, cclom:title, cclom:general_keyword",
             "GROUP_TEMPLATE_LABEL": "Select template",

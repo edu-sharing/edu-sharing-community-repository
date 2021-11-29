@@ -1,4 +1,4 @@
-<mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab">
+<mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab" matta>
   <mat-tab label="{{'ADMIN.STATISTICS.GROUPED' | translate}}" class="stats-grouped">
     <h4 class="mat-heading-4 mat-heading-underline"><i icon="history"></i> {{'ADMIN.STATISTICS.GROUPED' | translate}}</h4>
     <div class="modes">
@@ -117,7 +117,9 @@
                [hasIcon]="true"
                [hasHeading]="true"
                [isClickable]="true"
+               [selectOnClick]="false"
                (clickRow)="openNode($event)"
+               (dblclick)="openNode($event)"
                [viewType]="0"
                [columns]="columns"
                [isLoading]="nodesLoading"
@@ -179,18 +181,27 @@
     </div>
   </mat-tab>
 </mat-tab-group>
-<div class="export" *ngIf="!groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading">
-  <h4 class="mat-heading-4 mat-heading-underline"><i icon="cloud_download"></i>{{'ADMIN.STATISTICS.EXPORT_LABEL' | translate}}</h4>
+<div class="export" *ngIf="
+  (!groupedLoading && currentTab === 0 || !customGroupLoading && currentTab ===1) || (!nodesLoading && currentTab ===2) || (!singleLoading && currentTab === 3)
+">
+  <h4 class="mat-heading-4 mat-heading-underline"><i icon="cloud_download"></i>
+    {{'ADMIN.STATISTICS.' + (exportAll && currentTab === 2 ? 'EXPORT_LABEL_ALL' : 'EXPORT_LABEL') | translate}}
+  </h4>
   <div>
-    <mat-form-field *ngIf="currentTab==2">
-      <mat-label>{{'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate}}</mat-label>
-      <textarea matInput
-                cdkTextareaAutosize
-                cdkAutosizeMinRows="4"
-                cdkAutosizeMaxRows="6"
-                [(ngModel)]="exportProperties"></textarea>
-      <mat-hint>{{'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate}}</mat-hint>
-    </mat-form-field>
+    <ng-container *ngIf="currentTab === 2">
+      <mat-checkbox [(ngModel)]="exportAll">
+        {{'ADMIN.STATISTICS.EXPORT_NODES_ALL' | translate}}
+      </mat-checkbox>
+      <mat-form-field>
+          <mat-label>{{'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate}}</mat-label>
+          <textarea matInput
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="4"
+                    cdkAutosizeMaxRows="6"
+                    [(ngModel)]="exportProperties"></textarea>
+          <mat-hint>{{'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate}}</mat-hint>
+      </mat-form-field>
+    </ng-container>
     <div><button mat-raised-button color="primary" (click)="export()">{{'ADMIN.STATISTICS.EXPORT' | translate}}</button></div>
   </div>
 </div>

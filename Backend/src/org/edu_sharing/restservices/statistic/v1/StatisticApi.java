@@ -16,13 +16,11 @@ import javax.ws.rs.core.Response;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.about.v1.model.About;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.statistic.v1.model.Filter;
 import org.edu_sharing.restservices.statistic.v1.model.Statistics;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
-import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.statistic.StatisticsGlobal;
@@ -90,7 +88,38 @@ public class StatisticApi {
 			}
 	
 		}
+	@POST
+	@Path("/statistics/nodes/all")
 
+	@ApiOperation(value = "get statistics for all nodes in a particular time range",
+			notes = "requires either toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES+" for global stats or to be admin of the requested mediacenter"
+	)
+
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = TrackingNode[].class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getStatisticsNodeAll(@Context HttpServletRequest req,
+									  @ApiParam(value = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
+									  @ApiParam(value = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
+									  @ApiParam(value = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
+									  @ApiParam(value = "additionals fields of the custom json object stored in each query that should be returned", required = false) @QueryParam("additionalFields") List<String> additionalFields,
+									  @ApiParam(value = "grouping fields of the custom json object stored in each query (currently only meant to be combined with no grouping by date)", required = false) @QueryParam("groupField") List<String> groupField,
+									  @ApiParam(value = "filters for the custom json object stored in each entry", required = false) Map<String,String> filters
+	) {
+		try {
+			validatePermissions(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES, mediacenter);
+			List<TrackingNode> tracks=AuthenticationUtil.runAsSystem(()->
+					TrackingDAO.getNodeStatisticsAll(new Date(dateFrom),new Date(dateTo),mediacenter,additionalFields,groupField,filters)
+			);
+			return Response.ok().entity(tracks).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 	@POST
 	@Path("/statistics/nodes")
 

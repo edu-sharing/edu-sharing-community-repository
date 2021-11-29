@@ -202,7 +202,6 @@ export class AdminComponent {
   ]
   searchResponse: NodeList | NodeListElastic;
   searchColumns: ListItem[]=[];
-  nodeInfo: Node;
   public selectedTemplate = '';
   public templates:string[];
   public eduGroupSuggestions:SuggestItem[];
@@ -234,7 +233,7 @@ export class AdminComponent {
     }
   }
   public debugNode(node:Node) {
-    this.nodeInfo=node;
+    this.mainNavRef.management.nodeDebug = node;
   }
   public getModeButton(mode=this.mode) : any {
       return this.buttons[Helper.indexOfObjectArray(this.buttons,'id',mode)];
