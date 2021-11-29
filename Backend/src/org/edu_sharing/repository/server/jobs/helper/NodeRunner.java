@@ -277,8 +277,9 @@ public class NodeRunner {
 
     private void runTask(NodeRef ref) {
         try {
-            if (keepModifiedDate)
+            if (keepModifiedDate) {
                 policyBehaviourFilter.disableBehaviour(ref);
+            }
             if (runAsSystem) {
                 AuthenticationUtil.runAsSystem(() -> {
                     task.accept(ref);
@@ -290,7 +291,9 @@ public class NodeRunner {
                 new RepositoryCache().remove(ref.getId());
             }
         }finally {
-            policyBehaviourFilter.enableBehaviour(ref);
+            if(keepModifiedDate) {
+                policyBehaviourFilter.enableBehaviour(ref);
+            }
         }
     }
 

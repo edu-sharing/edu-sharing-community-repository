@@ -1255,7 +1255,7 @@ public class AdminApi {
 
 			List<Node> data = new ArrayList<Node>();
 			for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
-				data.add(NodeDao.getNode(repoDao, storeRef.getProtocol(), storeRef.getIdentifier(), ref.getId(), filter).asNode());
+				data.add(NodeDao.getNode(repoDao, storeRef.getProtocol(), storeRef.getIdentifier(), ref.getId(), filter, new NodeDao.FetchConfig()).asNode());
 			}
 
 			Pagination pagination = new Pagination();

@@ -95,6 +95,10 @@ listTable{
     flex-direction: column;
     padding: 10px 5%;
     width: 100%;
+    >mat-checkbox {
+        display: flex;
+        padding-bottom: 20px;
+    }
     >mat-form-field{
       margin-bottom: 20px;
     }

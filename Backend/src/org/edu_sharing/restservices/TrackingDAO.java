@@ -13,36 +13,62 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TrackingDAO {
-    public static List<TrackingNode> getNodeStatistics(TrackingService.GroupingType grouping, Date fromDate, Date toDate,String mediacenter,List<String> additionalFields,List<String> groupFields, Map<String,String> filters) throws DAOException {
+    public static List<TrackingNode> getNodeStatistics(TrackingService.GroupingType grouping, Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws DAOException {
 
         try {
-            List<StatisticEntryNode> tracks = TrackingServiceFactory.getTrackingService().getNodeStatisics(grouping,fromDate,toDate,mediacenter,additionalFields,groupFields,filters);
+            List<StatisticEntryNode> tracks = TrackingServiceFactory.getTrackingService().getNodeStatisics(grouping,fromDate,toDate,mediacenter,new TrackingService.StatisticsFetchConfig(additionalFields,groupFields,filters));
             List<TrackingNode> result = new ArrayList<>();
             if(tracks!=null) {
-                for (StatisticEntryNode track : tracks) {
-                    Node node=null;
-                    if(track.getNode()!=null) {
-                        try {
-                            node = NodeDao.getNode(RepositoryDao.getHomeRepository(), track.getNode(), Filter.createShowAllFilter()).asNode();
-                        }catch(DAOMissingException e){
-                            // node is propably deleted, only set the ref
-                            node = new Node();
-                            node.setRef(new NodeRef(RepositoryDao.getHomeRepository(),track.getNode()));
-                        }
-                    }
-                    TrackingNode tracking = new TrackingNode(node, convertAuthority(track.getAuthorityInfo()), track.getDate(), track.getCounts(),track.getFields(),track.getGroups());
-                    result.add(tracking);
-                }
+                addNodeData(tracks, result);
             }
             return result;
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
     }
+
+    private static void addNodeData(List<StatisticEntryNode> tracks, List<TrackingNode> result) throws DAOException {
+        NodeDao.FetchConfig fetchConfig = new NodeDao.FetchConfig();
+        fetchConfig.setFetchPermissions(false);
+        fetchConfig.setFetchPersons(false);
+        fetchConfig.setFetchReference(false);
+        fetchConfig.setFetchRemote(false);
+        for (StatisticEntryNode track : tracks) {
+            Node node=null;
+            if(track.getNode()!=null) {
+                try {
+
+                    NodeDao dao = NodeDao.getNode(RepositoryDao.getHomeRepository(), track.getNode(), Filter.createShowAllFilter(), fetchConfig);
+                    dao.fetchCounts = false;
+                    node = dao.asNode();
+                }catch(DAOMissingException e){
+                    // node is propably deleted, only set the ref
+                    node = new Node();
+                    node.setRef(new NodeRef(RepositoryDao.getHomeRepository(),track.getNode()));
+                }
+            }
+            TrackingNode tracking = new TrackingNode(node, convertAuthority(track.getAuthorityInfo()), track.getDate(), track.getCounts(),track.getFields(),track.getGroups());
+            result.add(tracking);
+        }
+    }
+
+    public static List<TrackingNode> getNodeStatisticsAll(Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws DAOException {
+        try {
+            List<StatisticEntryNode> tracks = TrackingServiceFactory.getTrackingService().getNodeStatisics(TrackingService.GroupingType.Node,fromDate,toDate,mediacenter,new TrackingService.StatisticsFetchConfig(additionalFields,groupFields,filters,true));
+            List<TrackingNode> result = new ArrayList<>();
+            if(tracks!=null) {
+                addNodeData(tracks, result);
+            }
+            return result;
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+
+    }
     public static List<Tracking> getUserStatistics(TrackingService.GroupingType grouping, Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String,String> filters) throws DAOException {
 
         try {
-            List<StatisticEntry> tracks = TrackingServiceFactory.getTrackingService().getUserStatistics(grouping,fromDate,toDate,mediacenter,additionalFields,groupFields,filters);
+            List<StatisticEntry> tracks = TrackingServiceFactory.getTrackingService().getUserStatistics(grouping,fromDate,toDate,mediacenter,new TrackingService.StatisticsFetchConfig(additionalFields,groupFields,filters,false));
             List<Tracking> result = new ArrayList<>();
             if(tracks!=null) {
                 for (StatisticEntry track : tracks) {

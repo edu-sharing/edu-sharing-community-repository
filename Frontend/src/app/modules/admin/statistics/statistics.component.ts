@@ -1,24 +1,23 @@
 import {RestAdminService} from '../../../core-module/rest/services/rest-admin.service';
 import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {NodeStatistics, Node, Statistics} from '../../../core-module/rest/data-object';
+import {Node, NodeStatistics, Statistics} from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
 import {RestConstants} from '../../../core-module/rest/rest-constants';
 import {RestHelper} from '../../../core-module/rest/rest-helper';
 import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
-import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {RestStatisticsService} from '../../../core-module/rest/services/rest-statistics.service';
 import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
 import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {SessionStorageService} from '../../../core-module/rest/services/session-storage.service';
-import {RestConnectorService} from "../../../core-module/rest/services/rest-connector.service";
+import {RestConnectorService} from '../../../core-module/rest/services/rest-connector.service';
 import {UIService} from '../../../core-module/rest/services/ui.service';
-import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {ListCountsComponent} from "../../../core-ui-module/components/list-table/widgets/list-counts/list-counts.component";
+import {ListCountsComponent} from '../../../core-ui-module/components/list-table/widgets/list-counts/list-counts.component';
+import {ProgressType} from '../../../common/ui/modal-dialog/modal-dialog.component';
 
 // Charts.js
 declare var Chart: any;
@@ -49,7 +48,7 @@ export class AdminStatisticsComponent implements OnInit{
         this._mediacenter = mediacenter;
         this.refresh();
     }
-    @Output() onOpenNode = new EventEmitter();
+    @Output() onOpenNode = new EventEmitter<Node>();
     static DAY_OFFSET= 1000 * 60 * 60 * 24;
     static DEFAULT_OFFSET= AdminStatisticsComponent.DAY_OFFSET * 7; // 7 days
     static DEFAULT_OFFSET_SINGLE= AdminStatisticsComponent.DAY_OFFSET * 3; // 3 days
@@ -89,6 +88,7 @@ export class AdminStatisticsComponent implements OnInit{
     showModes = false;
     groupModeTemplates: GroupTemplate[];
     currentTemplate: GroupTemplate;
+    exportAll: boolean;
 
     set groupedStart(groupedStart: Date) {
         this._groupedStart = groupedStart;
@@ -418,6 +418,7 @@ export class AdminStatisticsComponent implements OnInit{
         });
     }
     openNode(entry: any){
+        console.log(entry);
         this.onOpenNode.emit(entry.node);
     }
     getValidMode(mode: 'NODES' | 'USERS'){
@@ -544,7 +545,7 @@ export class AdminStatisticsComponent implements OnInit{
         return data ? Object.keys(data)[0] : null;
     }
 
-    export() {
+    async export() {
         let csvHeaders: string[];
         let csvData: any;
         // node export
@@ -578,7 +579,6 @@ export class AdminStatisticsComponent implements OnInit{
                 });
                 csvData = this.customGroupData.map((c: any) => {
                     c[this.customGroup] = c.displayValue;
-                    console.log(c);
                     for (const key of this.customGroupRows) {
                         if (key === 'action' || key === 'count' || key === this.customGroup) {
                             continue;
@@ -587,22 +587,42 @@ export class AdminStatisticsComponent implements OnInit{
                     }
                     return c;
                 });
-                console.log(csvHeaders, csvData);
                 break;
             }
             case 2: {
                 // counts by node including custom properties
                 const properties = this.exportProperties.split('\n').map((e) => e.trim());
-                this.storage.set('admin_statistics_properties', this.exportProperties);
+                let nodes = this.nodes;
+                if (this.exportAll) {
+                    this.toast.showConfigurableDialog({
+                        title: '',
+                        message: '',
+                        isCancelable: false,
+                        progressType: ProgressType.Indeterminate
+                    });
+                    try {
+                        nodes = await this.statistics.getStatisticsNodeAll(this._nodesStart, new Date(this._nodesEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET), this.getMediacenter()).toPromise();
+                        nodes = nodes.map((stat) => {
+                            (stat.node as any).counts = stat;
+                            return stat.node;
+                        });
+                        // properties = ['id', 'name'];
+                    }catch(e) {
+                        this.toast.error(e);
+                    }
+                    this.toast.closeModalDialog();
+                } else {
+                    this.storage.set('admin_statistics_properties', this.exportProperties);
+                }
                 //csvHeaders = properties.concat(Helper.uniqueArray(this.nodes.map((n) => Object.keys(n.counts)).reduce((a: any, b: any) => a.concat(b))));
                 const countHeaders = ['OVERALL', 'VIEW_MATERIAL', 'VIEW_MATERIAL_EMBEDDED', 'DOWNLOAD_MATERIAL'];
                 csvHeaders = properties.concat(countHeaders);
-                csvData = this.nodes.map((n) => {
+                csvData = nodes.map((n) => {
                     const c: any = {};
-                    console.log(Object.keys(n.counts));
                     for (const prop of properties) {
-                        c[prop] = n.properties ? n.properties[prop] : n.ref.id;
-                        for(const idx of countHeaders) {
+                        c[prop] = prop === 'name' || prop === 'id' ? n[prop] :
+                            n.properties ? n.properties[prop] : n.ref?.id || n.id;
+                        for (const idx of countHeaders) {
                             c[idx] = ListCountsComponent.getCount(n, idx);
                         }
                     }
@@ -612,7 +632,6 @@ export class AdminStatisticsComponent implements OnInit{
             }
             case 3: {
                 csvHeaders = this.singleDataRows; // .map((s) => this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s));
-                console.log(this.singleData);
                 csvData = this.singleData.map((data: any) => {
                     const c: any = Helper.deepCopy(data);
                     // c.action = this.translate.instant('ADMIN.STATISTICS.ACTIONS.' + data.action);
@@ -620,7 +639,7 @@ export class AdminStatisticsComponent implements OnInit{
                     c.authority_organization = data.authority.organization.map((m: any) => new AuthorityNamePipe(this.translate).transform((m)));
                     c.authority_mediacenter = data.authority.mediacenter.map((m: any) => new AuthorityNamePipe(this.translate).transform((m)));
                     const mainGroup = data.entry.groups[Object.keys(data.entry.groups)[0]];
-                    for(const additional of Object.keys(mainGroup)) {
+                    for (const additional of Object.keys(mainGroup)) {
                         c[additional] = Object.keys(mainGroup[additional])[0];
                     }
                     return c;

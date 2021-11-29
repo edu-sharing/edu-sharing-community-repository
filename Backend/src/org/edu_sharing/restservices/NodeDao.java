@@ -95,6 +95,7 @@ public class NodeDao {
 	final List<String> access;
 	private final org.edu_sharing.service.model.NodeRef.Preview previewData;
 	private final String ownerUsername;
+	private final FetchConfig fetchConfig;
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
 	 */
@@ -162,17 +163,27 @@ public class NodeDao {
 
 		try {
 			if(filter == null) filter = new Filter();
-			return NodeDao.getNode(repoDao, null, null, nodeId, filter);
+			return NodeDao.getNode(repoDao, null, null, nodeId, filter, new FetchConfig());
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
+	public static NodeDao getNode(RepositoryDao repoDao, String nodeId, Filter filter, FetchConfig fetchConfig)
+			throws DAOException {
+
+		try {
+			if(filter == null) filter = new Filter();
+			return NodeDao.getNode(repoDao, null, null, nodeId, filter, fetchConfig);
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
 	}
 	
-	public static NodeDao getNode(RepositoryDao repoDao, String storeProtocol, String storeId,  String nodeId, Filter filter)
+	public static NodeDao getNode(RepositoryDao repoDao, String storeProtocol, String storeId,  String nodeId, Filter filter, FetchConfig fetchConfig)
 			throws DAOException {
 		try {
 			
-			return new NodeDao(repoDao,storeProtocol,storeId, nodeId, filter);
+			return new NodeDao(repoDao,storeProtocol,storeId, nodeId, filter, fetchConfig);
 			
 		} catch (Throwable t) {
 			
@@ -390,7 +401,17 @@ public class NodeDao {
 				storeProtocol!=null ? storeProtocol : defaultStoreProtocol,
 				storeId!=null ? storeId : defaultStoreId,
 				nodeId),
-				filter);
+				filter,
+				new FetchConfig());
+	}
+	private NodeDao(RepositoryDao repoDao, String storeProtocol, String storeId, String nodeId, Filter filter,FetchConfig fetchConfig) throws DAOException {
+		this(repoDao,new org.edu_sharing.service.model.NodeRefImpl(repoDao.getId(),
+						storeProtocol!=null ? storeProtocol : defaultStoreProtocol,
+						storeId!=null ? storeId : defaultStoreId,
+						nodeId
+						),
+				filter,
+				fetchConfig);
 	}
 
 	public static String mapNodeConstants(RepositoryDao repoDao,String node) throws DAOException {
@@ -475,10 +496,13 @@ public class NodeDao {
 		}
 		return 0;
 	}
-
 	private NodeDao(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef, Filter filter) throws DAOException {
+		this(repoDao, nodeRef, filter, new FetchConfig());
+	}
+
+	private NodeDao(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef, Filter filter, FetchConfig fetchConfig) throws DAOException {
 		try{
-	
+			this.fetchConfig = fetchConfig;
 			this.repoDao = repoDao;
 			this.nodeId = nodeRef.getNodeId();
 			
@@ -513,6 +537,7 @@ public class NodeDao {
 				this.aspects = nodeRef.getAspects();
 			}
 			this.access = PermissionServiceHelper.getPermissionsAsString(hasPermissions);
+
 			// replace all data if its an remote object
 			if(this.type.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)){
 				this.remoteId=(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
@@ -520,7 +545,7 @@ public class NodeDao {
 				this.nodeService=NodeServiceFactory.getNodeService(this.remoteRepository.getId());
 				this.permissionService=PermissionServiceFactory.getPermissionService(this.remoteRepository.getId());
 				this.nodeProps = this.nodeService.getProperties(null,null, this.remoteId);
-			} else if (this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)){
+			} else if (this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY) && this.fetchConfig.isFetchRemote()){
 				// just fetch dynamic data which needs to be fetched, because the local io already has metadata
 				try {
 					NodeService nodeServiceRemote=NodeServiceFactory.getNodeService((String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
@@ -538,7 +563,7 @@ public class NodeDao {
 			this.filter = filter;
 
 			for(org.edu_sharing.service.model.NodeRef usedInCollection : nodeRef.getUsedInCollections()){
-				usedInCollections.add(new NodeDao(repoDao, usedInCollection, filter));
+				usedInCollections.add(new NodeDao(repoDao, usedInCollection, filter, new FetchConfig()));
 			}
 
 			this.ownerUsername = nodeRef.getOwner();
@@ -553,8 +578,10 @@ public class NodeDao {
 	public void refreshPermissions(org.edu_sharing.service.model.NodeRef nodeRef) {
 		if(nodeRef!=null && nodeRef.getPermissions()!=null && nodeRef.getPermissions().size() > 0){
 			this.hasPermissions = nodeRef.getPermissions();
-		} else {
+		} else if(fetchConfig.isFetchPermissions()) {
 			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
+		} else {
+			this.hasPermissions = new HashMap<>();
 		}
 	}
 	public static NodeEntries convertToRest(RepositoryDao repoDao,
@@ -949,7 +976,7 @@ public class NodeDao {
 			return node;
 		}
 		Node data = new Node();
-		if (isCollectionReference() && fetchReference) {
+		if (isCollectionReference() && fetchReference && this.fetchConfig.isFetchReference()) {
 			data = new CollectionReference();
 			fillNodeReference((CollectionReference) data);
 		}
@@ -1062,7 +1089,7 @@ public class NodeDao {
 		return remoteRepository!=null ? remoteRepository : repoDao;
 	}
 	private Remote getRemote() throws DAOException {
-		if(!isFromRemoteRepository())
+		if(!fetchConfig.isFetchRemote() || !isFromRemoteRepository())
 			return null;
 		Remote remote=new Remote();
 		String remoteObjectRepositoryId = (String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
@@ -1926,7 +1953,7 @@ public class NodeDao {
 		converted.setPagination(pagination);
 		converted.setNodes(result.getData().stream().map((ref)-> {
 			try {
-				return new NodeDao(repoDao,ref,propFilter);
+				return new NodeDao(repoDao,ref,propFilter,new FetchConfig());
 			} catch (DAOException e) {
 				logger.warn(e.getMessage(),e);
 			}
@@ -2234,5 +2261,44 @@ public class NodeDao {
 
 	public static void setIsGlobalAdmin(Boolean isGlobalAdmin){
 		NodeDao.isGlobalAdmin.set(isGlobalAdmin);
+	}
+
+	public static class FetchConfig {
+		private boolean fetchPermissions = true;
+		private boolean fetchPersons = true;
+		private boolean fetchReference = true;
+		private boolean fetchRemote = true;
+
+		public boolean isFetchPermissions() {
+			return fetchPermissions;
+		}
+
+		public void setFetchPermissions(boolean fetchPermissions) {
+			this.fetchPermissions = fetchPermissions;
+		}
+
+		public boolean isFetchPersons() {
+			return fetchPersons;
+		}
+
+		public void setFetchPersons(boolean fetchPersons) {
+			this.fetchPersons = fetchPersons;
+		}
+
+		public boolean isFetchReference() {
+			return fetchReference;
+		}
+
+		public void setFetchReference(boolean fetchReference) {
+			this.fetchReference = fetchReference;
+		}
+
+		public boolean isFetchRemote() {
+			return fetchRemote;
+		}
+
+		public void setFetchRemote(boolean fetchRemote) {
+			this.fetchRemote = fetchRemote;
+		}
 	}
 }

@@ -36,8 +36,8 @@ public interface TrackingService {
     List<NodeData> getNodeData(String nodeId, java.util.Date from);
     boolean trackActivityOnUser(String authorityName,EventType type);
     boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details,EventType type);
-    List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
-    List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
+    List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, StatisticsFetchConfig fetchConfig) throws Throwable;
+    List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, StatisticsFetchConfig fetchConfig) throws Throwable;
     StatisticEntry getSingleNodeData(NodeRef nodeRef,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable;
 
     /**
@@ -58,5 +58,57 @@ public interface TrackingService {
         obfuscate,
         session,
         full
+    }
+
+
+    public static class StatisticsFetchConfig {
+        private List<String> additionalFields,groupFields;
+        private Map<String, String> filters;
+        private boolean fetchAll;
+
+        public StatisticsFetchConfig(List<String> additionalFields, List<String> groupFields, Map<String, String> filters) {
+            this.additionalFields = additionalFields;
+            this.groupFields = groupFields;
+            this.filters = filters;
+        }
+
+        public StatisticsFetchConfig(List<String> additionalFields, List<String> groupFields, Map<String, String> filters, boolean fetchAll) {
+            this.additionalFields = additionalFields;
+            this.groupFields = groupFields;
+            this.filters = filters;
+            this.fetchAll = fetchAll;
+        }
+
+        public List<String> getAdditionalFields() {
+            return additionalFields;
+        }
+
+        public void setAdditionalFields(List<String> additionalFields) {
+            this.additionalFields = additionalFields;
+        }
+
+        public List<String> getGroupFields() {
+            return groupFields;
+        }
+
+        public void setGroupFields(List<String> groupFields) {
+            this.groupFields = groupFields;
+        }
+
+        public Map<String, String> getFilters() {
+            return filters;
+        }
+
+        public void setFilters(Map<String, String> filters) {
+            this.filters = filters;
+        }
+
+        public boolean isFetchAll() {
+            return fetchAll;
+        }
+
+        public void setFetchAll(boolean fetchAll) {
+            this.fetchAll = fetchAll;
+        }
     }
 }

@@ -143,7 +143,7 @@ public class ArchiveApi {
 	    	for (NodeRef ref : search.getResult()) {
 	    		
 	    		if(ref.isArchived()){
-	    			data.add(NodeDao.getNode(repoDao, NodeDao.archiveStoreProtocol,NodeDao.archiveStoreId, ref.getId(), filter).asNode());
+	    			data.add(NodeDao.getNode(repoDao, NodeDao.archiveStoreProtocol,NodeDao.archiveStoreId, ref.getId(), filter, new NodeDao.FetchConfig()).asNode());
 	    		}else{
 	    			data.add(NodeDao.getNode(repoDao, ref.getId(),filter).asNode());
 	    		}

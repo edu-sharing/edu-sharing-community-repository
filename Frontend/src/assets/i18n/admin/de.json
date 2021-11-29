@@ -403,6 +403,8 @@
             "MODE_USERS": "Nutzer-Interaktionen (Logins & Logouts)",
             "EXPORT": "Herunterladen",
             "EXPORT_LABEL": "Angezeigte Daten exportieren",
+            "EXPORT_LABEL_ALL": "Alle Daten exportieren",
+            "EXPORT_NODES_ALL": "Alle Objekte des Zeitraums exportieren (kann einige Zeit dauern)",
             "EXPORT_PROPERTIES": "Zu exportierende Properties",
             "EXPORT_PROPERTIES_HINT": "z.B.: cm:name, cclom:title, cclom:general_keyword",
             "GROUP_TEMPLATE_LABEL": "Vorlage auswählen",
