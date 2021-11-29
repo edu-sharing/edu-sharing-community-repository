@@ -161,13 +161,14 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 		repository_url=${repository_service_base}
 	EOF
 
-  if [ ! $(php esrender/admin/cli/install.php -c /tmp/config.ini) ] ; then
+  php esrender/admin/cli/install.php -c /tmp/config.ini || {
   	result=$?;
   	rm -rf "${RS_CACHE}" 2> /dev/null
   	rm -rf esrender 2> /dev/null
   	rm -f /tmp/config.ini 2> /dev/null
   	exit $result
-  fi
+  }
+
 
   rm -f /tmp/config.ini
 	mv esrender/install/ esrender/install.bak
