@@ -17,6 +17,7 @@ RUN set -eux \
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
+        apt-utils \
         apt-transport-https \
         ca-certificates \
         gnupg \
@@ -25,9 +26,146 @@ RUN set -eux \
         unzip \
         wget \
         xmlstarlet \
+        curl \
+        dirmngr \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
+########################################################################################################################
+
+ENV ALF_HOME /opt/alfresco
+WORKDIR $ALF_HOME
+
+COPY assets/postgresql/ postgresql/
+
+RUN set -eux \
+    && wget -q -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        postgresql-13 \
+    && pg_dropcluster 13 main \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+RUN set -eux \
+    && mkdir -p alf_data/postgresql postgresql \
+    && pg_createcluster \
+      --datadir=$ALF_HOME/alf_data/postgresql \
+      --logfile=$ALF_HOME/postgresql/postgresql.log \
+      --encoding UTF8 \
+      --port=5432 \
+      --start \
+      --start-conf=manual \
+      13 rendering \
+    && su -c 'psql -f postgresql/conf/init_db.sql' postgres \
+    && sed -i -r \
+        "s|^[#]*\s*listen_addresses\s*=\s*.*|listen_addresses = '\*'                 # what IP address(es) to listen on;|" \
+        /etc/postgresql/13/rendering/postgresql.conf \
+    && sed -i -r \
+        's|host    all             all             127.0.0.1/32            md5|host    all             all             0.0.0.0/0            md5|' \
+        /etc/postgresql/13/rendering/pg_hba.conf \
+    && sed -i -r \
+        's|host    all             all             ::1/128                 md5|host    all             all             ::0/0                 md5|' \
+        /etc/postgresql/13/rendering/pg_hba.conf
+
+########################################################################################################################
+
+RUN set -eux \
+    && wget -q https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public \
+    && gpg --no-default-keyring --keyring ./adoptopenjdk-keyring.gpg --import public \
+    && gpg --no-default-keyring --keyring ./adoptopenjdk-keyring.gpg --export --output adoptopenjdk-archive-keyring.gpg \
+    && mv adoptopenjdk-archive-keyring.gpg /usr/share/keyrings \
+    && rm adoptopenjdk-keyring.gpg public \
+    && echo "deb [signed-by=/usr/share/keyrings/adoptopenjdk-archive-keyring.gpg] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb `lsb_release -cs` main" | tee /etc/apt/sources.list.d/adoptopenjdk.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        adoptopenjdk-8-hotspot \
+    && update-java-alternatives -s adoptopenjdk-8-hotspot-amd64 \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+RUN set -eux \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+	    maven=3.6.3-* \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+########################################################################################################################
+
+ENV WWW_ROOT /var/www/html/
+ENV RS_ROOT /var/www/html/esrender
+ENV RS_CACHE /var/cache/esrender
+ENV PHP_VERSION 7.4
+
+WORKDIR $WWW_ROOT
+
+RUN set -eux \
+    && curl -sL https://packages.sury.org/php/apt.gpg -o /etc/apt/trusted.gpg.d/php.gpg \
+    && echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+      jq \
+      imagemagick \
+      ghostscript \
+      php${PHP_VERSION} \
+      php${PHP_VERSION}-dom \
+      php${PHP_VERSION}-soap \
+      php${PHP_VERSION}-common \
+      php${PHP_VERSION}-gd \
+      php${PHP_VERSION}-mbstring \
+      php${PHP_VERSION}-zip \
+      php${PHP_VERSION}-curl \
+      php${PHP_VERSION}-exif \
+      php${PHP_VERSION}-pgsql \
+	  php-xdebug \
+      apache2 \
+      ffmpeg \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+#      php${PHP_VERSION}-session \
+#      php${PHP_VERSION}-openssl \
+#      php${PHP_VERSION}-zlib \
+
+#        php${PHP_VERSION}-common -> instead of:
+#        php${PHP_VERSION}-sockets \
+#        php${PHP_VERSION}-fileinfo \
+#        php${PHP_VERSION}-iconv \
+#
+#        extension not available!!!
+#        php${PHP_VERSION}-wddx \
+#      ncdu \
+#      tzdata \
+
+COPY install.sh ./
+COPY assets/apache2/ports.conf /etc/apache2/ports.conf
+COPY assets/apache2/sites/* /etc/apache2/sites-available/
+COPY assets/rendering/de.metaventis.esrender.log4php.properties conf/
+COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties install/_tmpl/conf/
+
+
+
+RUN set -eux \
+    && pg_ctlcluster 13 rendering start \
+    && ./install.sh
+    #&& ./install.sh -R http://192.168.178.60/edu-sharing
+
+########################################################################################################################
+
+# https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop
+STOPSIGNAL SIGWINCH
+
+EXPOSE 8080
+COPY assets/entrypoint.sh /usr/local/bin/
+COPY assets/apache2-foreground /usr/local/bin/
+
+ENTRYPOINT ["entrypoint.sh"]
+#CMD ["bash"]
+CMD ["/usr/local/bin/apache2-foreground"]
+
+########################################################################################################################
 
 LABEL git.branch=${git.branch}
 LABEL git.closest.tag.name=${git.closest.tag.fixed}
