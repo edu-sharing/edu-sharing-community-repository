@@ -199,10 +199,11 @@ public class MetadataTemplateRenderer {
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY))[0] : null;
 							String licenseVersion = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)) ?
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION))[0] : null;
-
+							String licenseLocale = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE)) ?
+									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE))[0] : null;
 
 							LicenseService license = new LicenseService();
-							String link = license.getLicenseUrl(licenseName, mds.getI18n(), licenseVersion);
+							String link = license.getLicenseUrl(licenseName,mds.getI18n(), licenseVersion, licenseLocale);
 							value = "";
 							if (renderingMode.equals(RenderingMode.HTML)) {
 								if (link != null)
