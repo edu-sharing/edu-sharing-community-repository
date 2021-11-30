@@ -229,6 +229,9 @@ section {
     display: flex;
     justify-content: center;
     z-index: 1;
+    & ::ng-deep .actionbar > button.mat-button.cdk-keyboard-focused {
+        outline-color: white;
+    }
 }
 
 .collections-header {
