@@ -493,7 +493,7 @@ export class WorkspaceLicenseComponent  {
             prop[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
             prop[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
             prop[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = null;
-            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = null;
+            prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [null];
             if (this.ccTitleOfWork) {
                 prop[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
             }
