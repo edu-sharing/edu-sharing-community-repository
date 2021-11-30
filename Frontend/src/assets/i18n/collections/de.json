@@ -16,6 +16,8 @@
         "DETAILS": "Sammlungsdetails",
         "EDITORIAL_PUBLIC": "Öffentlich sichtbar",
         "EDITORIAL_PUBLIC_INFO": "Die redaktionelle Sammlung ist für alle Nutzer und ggf. Gäste sichtbar",
+        "CREATOR": "Ersteller",
+        "SHARING_STATE": "Freigabezustand",
         "STEP": {
             "GENERAL": "Titel, Bild, Beschreibung und Farbe",
             "METADATA": "Weitere Informationen",

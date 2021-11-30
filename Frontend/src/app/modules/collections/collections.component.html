@@ -171,7 +171,7 @@
           </div>
 
           <div class="collection-new-preview-infoline">
-            <i esIcon="person" class="icon-bottom"></i>
+            <i esIcon="person" class="icon-bottom" [altText]="'COLLECTIONS.CREATOR' | translate"></i>
             &nbsp;
             <span *ngIf="!collectionContent?.node?.collection?.authorFreetext">{{
               collectionContent.node.owner | authorityName
@@ -182,7 +182,7 @@
           </div>
 
           <div class="collection-new-preview-infoline">
-            <i [esIcon]="getScopeInfo().icon" class="icon-bottom"></i>
+            <i [esIcon]="getScopeInfo().icon" class="icon-bottom" [altText]="'COLLECTIONS.SHARING_STATE' | translate"></i>
             &nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
           </div>
           <div class="collection-permissions collection-label"></div>

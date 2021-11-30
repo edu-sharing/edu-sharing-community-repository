@@ -16,6 +16,8 @@
         "DETAILS": "Collection details",
         "EDITORIAL_PUBLIC": "Publicly visible",
         "EDITORIAL_PUBLIC_INFO": "The editorial collection is for all users and guests visible",
+        "CREATOR": "Creator",
+        "SHARING_STATE": "Sharing state",
         "STEP": {
             "GENERAL": "Title, Image, Description and Color",
             "METADATA": "Additional information",
