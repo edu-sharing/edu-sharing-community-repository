@@ -96,37 +96,18 @@ RUN set -eux \
     && mkdir -p tomcat/webapps/alfresco \
     && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco -x "WEB-INF/lib/hazelcast-*" -x "WEB-INF/lib/jackson-*" -x "WEB-INF/lib/commons-lang3-*" \
     && rm -f tomcat/webapps/alfresco.war \
-    && mv tomcat/shared/classes/alfresco-global.properties.sample tomcat/shared/classes/alfresco-global.properties \
-    && sed -i 's/$/\n/' tomcat/shared/classes/alfresco-global.properties \
-    && sed -i -r \
-        's|^[#]*\s*dir\.root=.*|dir.root='"$ALF_HOME/alf_data"'|' \
-        tomcat/shared/classes/alfresco-global.properties \
     && mv alf_data/keystore . \
-    && sed -i -r \
-        's|^[#]*\s*dir\.keystore=.*|dir.keystore='"$ALF_HOME/keystore"'|' \
-        tomcat/shared/classes/alfresco-global.properties \
-    && sed -i -r \
-        's|^[#]*\s*img\.root=.*|img.root=/usr|' \
-        tomcat/shared/classes/alfresco-global.properties \
-    && sed -i -r \
-        's|^[#]*\s*img\.gslib=.*|img.gslib=/usr/bin|' \
-        tomcat/shared/classes/alfresco-global.properties \
-    && echo 'exiftool.dyn=/usr/bin' >> \
-        tomcat/shared/classes/alfresco-global.properties \
-    && echo 'exiftool.exe=${exiftool.dyn}/exiftool' >> \
-        tomcat/shared/classes/alfresco-global.properties \
-    && echo 'ffmpeg.dyn=/usr/bin' >> \
-        tomcat/shared/classes/alfresco-global.properties \
-    && echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> \
-        tomcat/shared/classes/alfresco-global.properties \
-    && echo 'img.dyn=/usr/bin' >> \
-        tomcat/shared/classes/alfresco-global.properties \
-    && echo 'img.exe=${img.dyn}/convert' >> \
-        tomcat/shared/classes/alfresco-global.properties \
-    && echo 'cifs.enabled=false' >> \
-        tomcat/shared/classes/alfresco-global.properties \
-    && echo 'ftp.enabled=false' >> \
-        tomcat/shared/classes/alfresco-global.properties
+    && touch tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo "dir.root=$ALF_HOME/alf_data" >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo "dir.keystore=$ALF_HOME/keystore" >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'img.root=/usr' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'img.gslib=/usr/bin' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'exiftool.dyn=/usr/bin' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'exiftool.exe=${exiftool.dyn}/exiftool' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo "ffmpeg.dyn=/usr/bin" >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'img.dyn=/usr/bin' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && echo 'img.exe=${img.dyn}/convert' >> tomcat/shared/classes/alfresco-global.deployment.properties \
 
 COPY --chown=worker:worker assets/alfresco/log4j.properties tomcat/webapps/alfresco/WEB-INF/classes/log4j.properties
 COPY --chown=worker:worker assets/alfresco/web-scripts-config-custom.xml tomcat/shared/classes/alfresco/extension/web-scripts-config-custom.xml
@@ -162,10 +143,10 @@ RUN set -eux \
     && rm -f /tmp/alfresco-pdf-renderer.tgz \
     && mkdir -p common \
     && mv /tmp/install/alfresco-pdf-renderer common/alfresco-pdf-renderer \
-    && echo 'alfresco-pdf-renderer.root='"$ALF_HOME/common/alfresco-pdf-renderer" >> \
-        tomcat/shared/classes/alfresco-global.properties \
+    && echo "alfresco-pdf-renderer.root=$ALF_HOME/common/alfresco-pdf-renderer" >> \
+        tomcat/shared/classes/alfresco-global.deployment.properties \
     && echo 'alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer' >> \
-        tomcat/shared/classes/alfresco-global.properties
+        tomcat/shared/classes/alfresco-global.deployment.properties
 
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
@@ -197,7 +178,6 @@ RUN set -eux \
 	&& rm -f tomcat/shared/lib/edu_sharing-community-repository-config-${org.edu_sharing:edu_sharing-community-repository-config:jar.version}.jar \
 	&& touch tomcat/shared/classes/config/edu-sharing.conf \
 	&& touch tomcat/shared/classes/config/edu-sharing.deployment.conf \
-	&& touch tomcat/shared/classes/config/edu-sharing.server.conf \
     && tar cvf tomcat/shared.tar tomcat/shared
 
 

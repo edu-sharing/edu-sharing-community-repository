@@ -55,13 +55,6 @@ data:
   REPOSITORY_SERVICE_SESSION_TIMEOUT: {{ .Values.config.session.timeout | quote }}
   REPOSITORY_SERVICE_WAIT_EXTERNAL: {{ .Values.config.connector.external.timeout | quote }}
   REPOSITORY_SERVICE_WAIT_INTERNAL: {{ .Values.config.connector.internal.timeout | quote }}
-  REPOSITORY_SMTP_AUTH: {{ .Values.config.smtp.auth | quote }}
-  REPOSITORY_SMTP_FROM: {{ .Values.config.smtp.from | quote }}
-  REPOSITORY_SMTP_HOST: {{ .Values.config.smtp.host | quote }}
-  REPOSITORY_SMTP_PASS: {{ .Values.config.smtp.password | quote }}
-  REPOSITORY_SMTP_PORT: {{ .Values.config.smtp.port | quote }}
-  REPOSITORY_SMTP_REPL: {{ .Values.config.smtp.addReplyTo | quote }}
-  REPOSITORY_SMTP_USER: {{ .Values.config.smtp.username | quote }}
   REPOSITORY_TRANSFORM_BIND: "127.0.0.1"
   REPOSITORY_TRANSFORM_HOST: "127.0.0.1"
   REPOSITORY_TRANSFORM_PORT: "8100"

@@ -4,6 +4,8 @@ metadata:
   name: {{ include "edusharing_repository_service.name" . }}-file
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
 data:
+  alfresco-global.properties: {{ .Values.config.custom.alfresco | nindent 4 }}
+  edu-sharing.conf: {{ .Values.config.custom.services | nindent 4 }}
   redisson.yaml: |
     {{- if eq .Values.config.cache.type "rediscluster" }}
     clusterServersConfig:
