@@ -242,7 +242,7 @@
             class="cdk-visually-hidden"
           >{{ 'COLLECTIONS.TITLE' | translate }}</h1>
           <!-- breadcrumbs -->
-          <button
+          <a
             *ngIf="!isLoading && isGuest"
             mat-button
             color="primary"
@@ -250,10 +250,11 @@
             title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
             tabindex="0"
             (click)="navigateToSearch()"
+            [routerLink]="['/' + ROUTER_PREFIX + 'search']"
           >
             {{ 'COLLECTIONS.TO_SEARCH' | translate }}
             <i esIcon="arrow_forward"></i>
-          </button>
+        </a>
 
           <!-- content (collection cards) if not error -->
 

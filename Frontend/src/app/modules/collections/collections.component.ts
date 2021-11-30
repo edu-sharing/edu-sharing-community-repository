@@ -117,6 +117,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     };
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
 
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
