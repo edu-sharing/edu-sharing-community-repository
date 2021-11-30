@@ -88,7 +88,8 @@
 			<caption>lom_prop_educationallearningresourcetype</caption>
 			<placeholder>lom_prop_educationallearningresourcetype_placeholder</placeholder>
 			<hideIfEmpty>true</hideIfEmpty>
-			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oeh-topics/5e40e372-735c-4b17-bbf7-e827a5702b57.json</valuespace>
+			<valuespace>valuespaces.xml</valuespace>
+			<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
 			<searchable>true</searchable>
 		</widget>
 		<widget>
@@ -344,7 +345,7 @@
 			<id>ccm:taxonid</id>
 			<caption>input_taxonentry</caption>
 			<type>multivalueTree</type>
-			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/oeh-topics/5e40e372-735c-4b17-bbf7-e827a5702b57.json</valuespace>
+			<valuespace>eaf_discipline.xml</valuespace>
 		</widget>
 		<widget>
 			<id>ccm:educationalcontext</id>
