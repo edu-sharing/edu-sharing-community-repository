@@ -32,7 +32,7 @@ import {
 } from '../core-module/rest/services/temporary-storage.service';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
-import {Inject, Injectable, InjectionToken, OnDestroy, Optional} from '@angular/core';
+import {Inject, Injectable, InjectionToken, Injector, OnDestroy, Optional} from '@angular/core';
 import {CardComponent} from './components/card/card.component';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
@@ -55,6 +55,7 @@ import {
     ListEventInterface,
     NodeEntriesDisplayType
 } from './components/node-entries-wrapper/entries-model';
+import {MainNavService} from '../common/services/main-nav.service';
 
 
 export class OptionsHelperConfig {
@@ -149,6 +150,7 @@ export class OptionsHelperService implements OnDestroy {
         private nodeService: RestNodeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
+        private injector: Injector,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
         @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
@@ -238,6 +240,10 @@ export class OptionsHelperService implements OnDestroy {
                          list: ListEventInterface<Node> = null,
                          dropdown: DropdownComponent = null) {
         this.mainNav = mainNav;
+        if(!this.mainNav) {
+            console.info('no mainnav provided to options helper, will use singleton from service');
+            this.mainNav = this.injector.get(MainNavService).getMainNav();
+        }
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
