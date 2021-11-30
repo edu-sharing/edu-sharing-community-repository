@@ -21,10 +21,23 @@ public class LicenseService {
 	public String getLicenseUrl(String license, String locale){
 		return getLicenseUrl(license, locale, null);
 	}
-	
+
 	public String getLicenseUrl(String license, String locale, String version){
+		return this.getLicenseUrl(license, locale, version, null);
+	}
+
+	public String getLicenseUrl(String license, String locale, String version, String jurisdiction){
 		if(license==null || license.isEmpty())
 			return null;
+
+		version = (version == null) ? "3.0" : version;
+		locale = (locale == null) ? "en" : locale.split("_")[0];
+
+		// If no jurisdiction is given we use the empty string
+		// if version is 4.0 (international) we dont need a jurisdiction
+		if (jurisdiction == null || jurisdiction.isEmpty() || version.equals("4.0"))
+			jurisdiction = "";
+
 		String result = null;
 		if (license.equals(CCConstants.COMMON_LICENSE_CC_BY)) {
 			result = CCConstants.COMMON_LICENSE_CC_BY_LINK;
@@ -50,24 +63,25 @@ public class LicenseService {
 		if (license.equals(CCConstants.COMMON_LICENSE_EDU_NC)) {
 			result = CCConstants.COMMON_LICENSE_EDU_LINK;
 		}
-		
+
 		if (license.equals(CCConstants.COMMON_LICENSE_EDU_NC_ND)) {
 			result = CCConstants.COMMON_LICENSE_EDU_LINK;
 		}
-		
+
 		if(result != null){
-			version = (version == null) ? "3.0" : version;
+
 			if(result.contains("${version}")){
 				result = result.replace("${version}", version);
 			}
-			
-			String country = (locale == null) ? "en" : locale.split("_")[0];
+
+			if (result.contains("${jurisdiction}")) {
+				result = result.replace("${jurisdiction}", jurisdiction.toLowerCase());
+			}
+
 			if(result.contains("${locale}")){
-				result = result.replace("${locale}", country);
+				result = result.replace("${locale}", locale.toLowerCase());
 			}
 		}
-		
 		return result;
 	}
-		
 }
