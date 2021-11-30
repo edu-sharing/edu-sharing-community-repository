@@ -215,11 +215,9 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
 
     private injectWidgets(): void {
         const elements = this.container.nativeElement.getElementsByTagName('*');
-        for (let element of Array.from(elements)) {
+        for (const element of Array.from(elements)) {
             const tagName = element.localName;
-            // Property names are no valid names for autonomous custom elements as by the W3C
-            // specification.
-            element = replaceElementWithDiv(element);
+
             const widgets = this.mdsEditorInstance.getWidgetsByTagName(tagName, this.view.id);
             if (Object.values(NativeWidgetType).includes(tagName as NativeWidgetType)) {
                 const widgetName = tagName as NativeWidgetType;
@@ -243,6 +241,9 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     private injectMissingWidgetWarning(widgetName: string, element: Element): void {
+        // Property names are no valid names for autonomous custom elements as by the W3C
+        // specification.
+        element = replaceElementWithDiv(element);
         UIHelper.injectAngularComponent(
             this.factoryResolver,
             this.containerRef,
@@ -262,6 +263,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         widgetName: NativeWidgetType,
         element: Element,
     ): void {
+        element = replaceElementWithDiv(element);
         const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
         if (!WidgetComponent) {
             UIHelper.injectAngularComponent(
@@ -313,6 +315,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
 
     private injectWidget(widget: Widget, element: Element): void {
         this.ngZone.runOutsideAngular(() => {
+            element = replaceElementWithDiv(element);
             const htmlRef = this.container.nativeElement.querySelector(
                 widget.definition.id.replace(':', '\\:'),
             );
