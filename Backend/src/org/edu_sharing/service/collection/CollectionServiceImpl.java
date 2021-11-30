@@ -1005,10 +1005,10 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 
 	@Override
-	public List<NodeRef> getCollectionProposals(String nodeId) {
+	public List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status) {
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId).toString());
-		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, CCConstants.PROPOSAL_STATUS.PENDING.toString());
+		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, status.toString());
 		List<NodeRef> collections = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, filters);
 		return collections.stream().map(
 				(ref) -> serviceRegistry.getNodeService().getPrimaryParent(ref).getParentRef()

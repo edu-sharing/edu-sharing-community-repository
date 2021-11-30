@@ -17,6 +17,7 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -631,6 +632,18 @@ public class SearchServiceElastic extends SearchServiceImpl {
                     if(displayNames != null){
                         props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
                     }
+                }
+            } else {
+                try {
+                    MetadataSet mds = MetadataHelper.getMetadataset(
+                            ApplicationInfoList.getHomeRepository(),
+                            (String) properties.getOrDefault(
+                                    CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
+                                    CCConstants.metadatasetdefault_id)
+                    );
+                    MetadataHelper.addVirtualDisplaynameProperties(mds, props);
+                } catch (Throwable t) {
+                    logger.info("Could not resolve displaynames: " + t.getMessage());
                 }
             }
         }
