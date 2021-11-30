@@ -187,7 +187,7 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
   rm -f /tmp/config.ini
 	mv esrender/install/ esrender/install.bak
 
-	if [[ -n $repository_service_base ]] && [[ -n $repository_service_base ]] && [[ -n $repository_service_base ]] ; then
+	if [[ -n $repository_service_base ]] && [[ -n $repoUser ]] && [[ -n $repoPassword ]] ; then
 		echo "- register rendering service with the repository"
 
 		until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null "${internalURL}/admin/" ) -eq 200 ]]
