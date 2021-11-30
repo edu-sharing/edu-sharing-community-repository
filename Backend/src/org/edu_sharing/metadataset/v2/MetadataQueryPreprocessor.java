@@ -6,6 +6,8 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,11 +24,22 @@ public class MetadataQueryPreprocessor {
     public static String run(MetadataQueryParameter parameter,String valueIn) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         if(parameter.getPreprocessor()==null)
             return valueIn;
-        Method method=MetadataQueryPreprocessor.class.getDeclaredMethod(parameter.getPreprocessor(),String.class);
-        return (String) method.invoke(null,valueIn);
+        Method method=MetadataQueryPreprocessor.class.getDeclaredMethod(parameter.getPreprocessor(), MetadataQueryParameter.class,String.class);
+        return (String) method.invoke(null, parameter, valueIn);
     }
 
-    private static String node_path(String value){
+    /**
+     * map the input value to the 1st alternative id of the widgets valuespace
+     */
+    private static String alternative_id(MetadataQueryParameter parameter,String value){
+        try {
+            return parameter.getMds().findWidget(parameter.getName()).getValuesAsMap().get(value).getAlternativeKeys().get(0);
+        }catch (Throwable t){
+            logger.info("Could not resolve alternative_id at " + parameter.getName() + ": " + t.getMessage());
+            return value;
+        }
+    }
+    private static String node_path(MetadataQueryParameter parameter,String value){
         return AuthenticationUtil.runAsSystem(()-> {
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -38,7 +51,7 @@ public class MetadataQueryPreprocessor {
         });
     }
     // convert values like YYYY-MM-DD to a unix millis string (e.g. for elastic)
-    private static String date_millis(String value){
+    private static String date_millis(MetadataQueryParameter parameter,String value){
         try {
             return String.valueOf(new SimpleDateFormat("YYYY-MM-dd").parse(value).getTime());
         } catch (ParseException e) {

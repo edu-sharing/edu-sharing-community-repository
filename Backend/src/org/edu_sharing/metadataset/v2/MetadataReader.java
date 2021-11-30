@@ -175,7 +175,7 @@ public class MetadataReader {
 		}
 		query.addCondition(result);
 	}
-	private Map<String,MetadataQueries> getQueries() throws Exception {
+	private Map<String,MetadataQueries> getQueries(MetadataSet mds) throws Exception {
 		Map<String,MetadataQueries> result=new HashMap<>();
 		NodeList queryNodes = (NodeList) xpath.evaluate("/metadataset/queries", doc, XPathConstants.NODESET);
 		for(int a=0;a<queryNodes.getLength(); a++) {
@@ -244,7 +244,7 @@ public class MetadataReader {
 					if (parameterNode.getNodeName().equals("condition")) {
 						handleQueryCondition(parameterNode, query);
 					}
-					MetadataQueryParameter parameter = new MetadataQueryParameter(syntaxName);
+					MetadataQueryParameter parameter = new MetadataQueryParameter(syntaxName, mds);
 					NodeList list3 = parameterNode.getChildNodes();
 					NamedNodeMap attributes = parameterNode.getAttributes();
 					if (attributes == null || attributes.getNamedItem("name") == null)
@@ -368,7 +368,7 @@ public class MetadataReader {
 		mds.setGroups(getGroups());
 		mds.setLists(getLists());
 		mds.setSorts(getSorts());
-		mds.setQueries(getQueries());
+		mds.setQueries(getQueries(mds));
 		
 		return mds;
 	}
