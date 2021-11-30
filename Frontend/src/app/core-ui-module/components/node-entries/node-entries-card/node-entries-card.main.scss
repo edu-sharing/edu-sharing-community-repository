@@ -103,7 +103,20 @@ $optionBarHeight: 50px;
             mat-checkbox {
                 margin-right: -20px;
                 position: relative;
-                top: -1px;
+                top: -1.3px;
+                &.cdk-keyboard-focused ::ng-deep .mat-focus-indicator {
+                    @include removeDefaultFocus();
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        left: 2px;
+                        right: 2px;
+                        top: 2px;
+                        bottom: 2px;
+                        @include setGlobalKeyboardFocus('border');
+                        border-color: white;
+                    }
+                }
             }
         }
         .card-top-bar-empty {

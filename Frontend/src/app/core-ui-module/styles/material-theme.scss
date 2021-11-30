@@ -339,6 +339,9 @@ input.mat-input-element::placeholder {
       }
     }
 }
+.mat-checkbox.cdk-keyboard-focused .mat-focus-indicator {
+    @include setGlobalKeyboardFocus();
+}
 .mat-flat-button,.mat-raised-button{
     min-height: 36px;
 }

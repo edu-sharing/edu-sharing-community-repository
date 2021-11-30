@@ -4,6 +4,9 @@
     display: flex;
     flex-direction: row-reverse; // Automatically scroll to the end
     align-items: center;
+    // Make room for keyboard focus styles.
+    padding: 5px;
+    margin: -5px;
     overflow-y: hidden;
     overflow-x: auto;
     // Firefox
@@ -75,9 +78,6 @@
         max-height: 1.5em;
         display: inline-flex;
         align-items: center;
-        &.cdk-keyboard-focused {
-            @include setGlobalKeyboardFocus();
-        }
         &.cdk-drop-list-dragging {
             > *:first-child {
                 display: none;
@@ -112,6 +112,11 @@ button {
 
 .breadcrumb-readonly .breadcrumb-element:not(.breadcrumb-element-active) {
     color: $textLight;
+}
+
+.breadcrumb-element-home.cdk-keyboard-focused {
+    @include setGlobalKeyboardFocus();
+    // Other focus styles are handled by node-url.
 }
 
 .breadcrumb-element-active,

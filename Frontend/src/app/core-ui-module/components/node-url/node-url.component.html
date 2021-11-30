@@ -45,6 +45,7 @@
     matRippleColor="primary"
     [matRippleDisabled]="disabled && !alwaysRipple"
     (click)="buttonClick.emit($event)"
+    cdkMonitorElementFocus
   >
     <ng-container *ngTemplateOutlet="content"></ng-container>
   </button>
