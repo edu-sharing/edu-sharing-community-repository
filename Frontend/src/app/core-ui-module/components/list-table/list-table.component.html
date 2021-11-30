@@ -289,7 +289,7 @@
               </button>
             </div>
           </ng-container>
-          <ng-container *ngIf="!orderElementsActive">
+          <ng-container *ngIf="!orderElementsActive && viewType !== 2">
             <div class="more column" *ngIf="_options && _options.length>1" >
               <button mat-icon-button
                       color="primary"
