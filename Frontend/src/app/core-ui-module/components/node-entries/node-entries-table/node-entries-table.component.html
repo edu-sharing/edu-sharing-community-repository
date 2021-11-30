@@ -39,8 +39,9 @@
 
       ({{entriesService.selection.selected.length}}
       <ng-container *ngIf="entriesService.dataSource?.getTotal() !== undefined">
-        / {{entriesService.dataSource?.getTotal()}})
+        / {{entriesService.dataSource?.getTotal()}}
       </ng-container>
+      )
     </mat-header-cell>
     <mat-cell *matCellDef="let node" class="cell-icon">
       <ng-container *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink">

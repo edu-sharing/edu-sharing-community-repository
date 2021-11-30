@@ -66,7 +66,7 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
     }
 
     getTotal() {
-        return this.pagination.total ?? this.getData()?.length ?? 0;
+        return this.pagination?.total ?? this.getData()?.length ?? 0;
     }
 
     /**
