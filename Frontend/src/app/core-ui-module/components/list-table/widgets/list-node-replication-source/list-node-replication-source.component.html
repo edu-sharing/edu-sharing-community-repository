@@ -1,29 +1,7 @@
-<span
-  [matTooltip]="
-    ('NODE.ccm:replicationsource' | translate) +
-    ': ' +
-    ('REPOSITORIES.' +
-      ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-      | translate
-        : {
-            fallback:
-              ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-          })
-  "
->
+<span [matTooltip]="tooltip$ | async">
   <img
-    src="{{ $any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'url' } }}"
+    [src]="replicationSource$ | async | appNodeSource: { mode: 'url' }"
     (error)="$any($event.target).style.display = 'none'"
-    [alt]="
-      ('NODE.ccm:replicationsource' | translate) +
-      ': ' +
-      ('REPOSITORIES.' +
-        ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'escaped' })
-        | translate
-          : {
-              fallback:
-                ($any(node).properties['ccm:replicationsource'] | appNodeSource: { mode: 'text' })
-            })
-    "
+    [alt]="tooltip$ | async"
   />
 </span>

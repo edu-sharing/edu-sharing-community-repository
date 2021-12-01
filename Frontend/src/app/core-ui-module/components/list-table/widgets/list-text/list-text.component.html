@@ -34,66 +34,66 @@
   </span>
   <span
     *ngSwitchCase="'title'"
-    [matTooltip]="showFieldTooltip ? $any(getNode()).title || $any(getNode()).name : null"
+    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
   >
     {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
   <span
     *ngSwitchCase="'cm:title'"
-    [matTooltip]="showFieldTooltip ? $any(getNode()).title || $any(getNode()).name : null"
+    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
   >
     {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
   <span
     *ngSwitchCase="'cclom:title'"
-    [matTooltip]="showFieldTooltip ? $any(getNode()).title || $any(getNode()).name : null"
+    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
   >
     {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
   <span
     *ngSwitchCase="'mediatype'"
-    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     {{ 'MEDIATYPE.' + $any(getNode()).mediatype | translate }}
   </span>
-  <span *ngSwitchCase="'size'" [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null">
-    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  <span *ngSwitchCase="'size'" [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     {{ $any(getNode()).size | formatSize }}
   </span>
   <span
     *ngSwitchCase="'dimensions'"
-    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     {{ $any(getNode()) | NodeImageSize }}
   </span>
   <span
     *ngSwitchCase="'ccm:wf_status'"
-    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     {{ 'WORKFLOW.' + getWorkflowStatus().id | translate }}
   </span>
   <span
     *ngSwitchCase="'cm:creator'"
-    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     {{ $any(getNode()).createdBy | nodePersonName }}
   </span>
   <span
     *ngSwitchCase="'cm:modifier'"
-    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
     {{ $any(getNode()).modifiedBy | nodePersonName }}
   </span>
   <span
     *ngSwitchCase="'ccm:commonlicense_key'"
-    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ 'NODE.ccm:commonlicense_key' | translate }}:</span>
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ 'NODE.ccm:commonlicense_key' | translate }}:</span>
     <ng-container *ngIf="$any(getNode()).properties['ccm:commonlicense_key'] as license">
       {{
       license[0] === 'CUSTOM'
@@ -105,9 +105,9 @@
   </span>
   <span
     *ngSwitchCase="'ccm:educationaltypicalagerange'"
-    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden"
+    <span *ngIf="provideLabel" class="cdk-visually-hidden"
     >{{ 'NODE.ccm:educationaltypicalagerange' | translate }}:</span
     >
     <ng-container
@@ -122,13 +122,13 @@
   </span>
   <span
     *ngSwitchCase="'cclom:duration'"
-    [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ 'NODE.cclom:duration' | translate }}:</span>
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ 'NODE.cclom:duration' | translate }}:</span>
     {{ $any(getNode()) | formatDuration }}
   </span>
-  <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? (getI18n(item) | translate) : null">
-    <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  <span *ngSwitchDefault [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     <ng-container
       *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
     >
