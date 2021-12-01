@@ -17,10 +17,12 @@
     <i
       class="collectionScope"
       [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
-      matTooltip="{{ 'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate }}"
+      [matTooltip]="
+        'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+      "
+      [altText]="
+        'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+      "
     ></i>
-    <!--<span>{{
-      'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
-    }}</span> -->
   </ng-container>
 </ng-container>
