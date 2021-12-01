@@ -70,6 +70,7 @@ export enum MdsType {
     Map = 'map',
     MapRef = 'map_ref',
     IoChildObject = 'io_childobject',
+    Collection = 'collection',
     ToolDefinition = 'tool_definition',
     ToolInstance = 'tool_instance',
     SavedSearch = 'saved_search',

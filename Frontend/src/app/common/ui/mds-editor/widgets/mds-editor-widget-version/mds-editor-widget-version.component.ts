@@ -28,7 +28,7 @@ export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComp
         this.mdsEditorValues.nodes$.subscribe((nodes) =>
             this.show = nodes.some((n) =>
                 !n?.properties[RestConstants.CCM_PROP_IO_WWWURL]?.[0]
-            )
+            ) && nodes.every((n) => n.type === RestConstants.CCM_TYPE_IO)
         );
     }
 

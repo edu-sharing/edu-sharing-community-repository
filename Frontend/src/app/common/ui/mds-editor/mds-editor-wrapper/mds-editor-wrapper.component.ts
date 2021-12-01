@@ -220,6 +220,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                     this.onDone.emit(this.nodes);
                     return;
                 } else {
+                    console.warn('The following widgets are required but don\'t have a value: ',
+                        this.mdsEditorInstance.getCompletitonStatus().mandatory.fields.filter((
+                            (f) => !f.isCompleted
+                        )).map((f) => f.widget.definition.id));
                     this.mdsEditorInstance.showMissingRequiredWidgets();
                 }
                 return;

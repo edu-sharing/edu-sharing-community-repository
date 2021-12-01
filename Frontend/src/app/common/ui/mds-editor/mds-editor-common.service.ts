@@ -107,6 +107,9 @@ export class MdsEditorCommonService {
         if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
             nodeGroup = MdsType.IoChildObject;
         }
+        if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1) {
+            nodeGroup = MdsType.Collection;
+        }
         if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
             nodeGroup = MdsType.ToolDefinition;
         }

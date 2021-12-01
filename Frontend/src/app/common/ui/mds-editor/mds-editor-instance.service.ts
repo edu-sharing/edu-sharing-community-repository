@@ -563,7 +563,7 @@ export class MdsEditorInstanceService implements OnDestroy {
     private nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
 
     // Mutable state
-    private readonly completionStatus$ = new ReplaySubject<CompletionStatus>(1);
+    private readonly completionStatus$ = new BehaviorSubject<CompletionStatus>(null);
     /** Whether the value would be updated on save due to changes by the user. */
     private hasUserChanges$ = new BehaviorSubject(false);
     /**
@@ -653,16 +653,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         );
         activeWidgets
             .pipe(
-                switchMap((widgets) =>
-                    combineLatest(
-                        widgets.filter((widget) => widget.status).map((widget) => widget.status),
-                    ),
-                ),
-                map((statuses) => statuses.every((status) => status !== 'INVALID')),
-            )
-            .subscribe(this.isValid$);
-        activeWidgets
-            .pipe(
                 switchMap((widgets) => {
                     const filteredWidgets: Widget[] = widgets
                         // Filter out native widgets since we cannot tell whether they set a value
@@ -679,6 +669,11 @@ export class MdsEditorInstanceService implements OnDestroy {
                             (widget) =>
                                 widget.definition.type !== MdsWidgetType.DefaultValue &&
                                 widget.definition.interactionType !== 'None',
+                        )
+                        // only require widgets that meet conditions and are currently displayed
+                        .filter(
+                            (widget) =>
+                                this.meetsCondition(widget.definition, this.nodes$.value, this.values$.value, true)
                         );
                     return combineLatest(
                         filteredWidgets.map((widget) =>
@@ -687,7 +682,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                     ).pipe(map((ws) => this.calculateCompletionStatus(ws)));
                 }),
             )
-            .subscribe(this.completionStatus$);
+            .subscribe((c) => {
+                this.completionStatus$.next(c);
+                this.isValid$.next(c.mandatory.total === c.mandatory.completed);
+            });
         activeWidgets
             .pipe(
                 map((widgets) =>
@@ -797,6 +795,9 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
             }
         }
+        setTimeout(() =>
+                this.widgets.next(this.widgets.value.slice())
+            , 5000);
         // to lower case because of remote repos wrong mapping
         return this.getGroup(
             this.mdsDefinition$.value,
@@ -949,6 +950,9 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     getIsValid() {
         return this.isValid$.value;
+    }
+    getCompletitonStatus() {
+        return this.completionStatus$.value;
     }
 
     async getValues(node?: Node, validate = true): Promise<Values> {

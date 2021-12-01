@@ -26,7 +26,7 @@
         (onCancel)="_editLicense=null"
 ></es-workspace-license>
 
-<div class="childobject-wrapper">
+<div class="childobject-wrapper" *ngIf="isSupported">
   <es-mds-editor-widget-container [label]="'MDS.ADD_CHILD_OBJECT' | translate">
     <div class="group">
       <label>{{'MDS.ADD_CHILD_OBJECT_DESCRIPTION' | translate}}</label>
