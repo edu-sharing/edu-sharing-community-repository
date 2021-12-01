@@ -140,17 +140,22 @@ RUN set -eux \
 #      tzdata \
 
 COPY install.sh ./
+COPY .env.base ./
+COPY assets/.env ./
+
 COPY assets/apache2/ports.conf /etc/apache2/ports.conf
 COPY assets/apache2/sites/* /etc/apache2/sites-available/
-COPY assets/rendering/de.metaventis.esrender.log4php.properties conf/
-COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties install/_tmpl/conf/
 
+COPY assets/rendering/de.metaventis.esrender.log4php.properties $RS_ROOT/conf/
+COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties $RS_ROOT/install/_tmpl/conf/
 
+COPY assets/entrypoint.sh /usr/local/bin/
+COPY assets/apache2-foreground /usr/local/bin/
 
 RUN set -eux \
     && pg_ctlcluster 13 rendering start \
-    && ./install.sh
-    #&& ./install.sh -R http://192.168.178.60/edu-sharing
+    && ./install.sh -f .env
+    #&& ./install.sh
 
 ########################################################################################################################
 
@@ -158,8 +163,6 @@ RUN set -eux \
 STOPSIGNAL SIGWINCH
 
 EXPOSE 8080
-COPY assets/entrypoint.sh /usr/local/bin/
-COPY assets/apache2-foreground /usr/local/bin/
 
 ENTRYPOINT ["entrypoint.sh"]
 #CMD ["bash"]
