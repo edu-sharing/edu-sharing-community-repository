@@ -100,7 +100,6 @@ RUN set -eux \
     && unzip tomcat/webapps/solr4.war -d tomcat/webapps/solr4 \
     && rm tomcat/webapps/solr4.war
 
-
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \

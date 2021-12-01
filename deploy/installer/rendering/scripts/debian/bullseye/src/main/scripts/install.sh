@@ -52,15 +52,15 @@ done
 
 my_home_appid="${RENDERING_SERVICE_HOME_APPID:-esrender}" # Kundenprojekt ?
 
-my_prot_external="${RENDERING_SERVICE_PUBLIC_PROTOCOL:-http}"
-my_host_external="${RENDERING_SERVICE_PUBLIC_HOST:-localhost}"
-my_port_external="${RENDERING_SERVICE_PUBLIC_PORT:-80}"
-my_path_external="${RENDERING_SERVICE_PUBLIC_PATH:-$(basename "${RS_ROOT}")}"
+my_prot_external="${RENDERING_SERVICE_PROT_EXTERNAL:-http}"
+my_host_external="${RENDERING_SERVICE_HOST_EXTERNAL:-localhost}"
+my_port_external="${RENDERING_SERVICE_PORT_EXTERNAL:-80}"
+my_path_external="${RENDERING_SERVICE_PATH_EXTERNAL:-$(basename "${RS_ROOT}")}"
 
-my_prot_internal="${RENDERING_SERVICE_PRIVATE_PROTOCOL:-http}"
-my_host_internal="${RENDERING_SERVICE_PRIVATE_HOST:-127.0.0.1}"
-my_port_internal="${RENDERING_SERVICE_PRIVATE_PORT:-80}"
-my_path_internal="${RENDERING_SERVICE_PRIVATE_PATH:-$(basename "${RS_ROOT}")}"
+my_prot_internal="${RENDERING_SERVICE_PROT_INTERNAL:-http}"
+my_host_internal="${RENDERING_SERVICE_HOST_INTERNAL:-127.0.0.1}"
+my_port_internal="${RENDERING_SERVICE_PORT_INTERNAL:-80}"
+my_path_internal="${RENDERING_SERVICE_PATH_INTERNAL:-$(basename "${RS_ROOT}")}"
 
 my_internal_url="${my_prot_internal}://${my_host_internal}:${my_port_internal}/${my_path_internal}"
 my_external_url="${my_prot_external}://${my_host_external}:${my_port_external}/${my_path_external}"
@@ -148,6 +148,7 @@ info() {
   echo "  Password:       ${repository_password}"
   echo ""
   fi
+
   echo "#########################################################################"
   echo ""
   echo ""
