@@ -1222,7 +1222,7 @@ export class OptionsHelperService implements OnDestroy {
             UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), node);
         }
     }
-    private async getObjectsAsync(object: Node | any, resolveOriginals = false) {
+    async getObjectsAsync(object: Node | any, resolveOriginals = false) {
         const nodes = NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
         if(resolveOriginals) {
             const originals = await observableForkJoin(
