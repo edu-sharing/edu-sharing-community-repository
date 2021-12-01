@@ -82,10 +82,10 @@ RUN set -eux \
       --enable-components alfrescosolr4 \
       --disable-components javaalfresco,postgres,libreofficecomponent,alfrescosolr,aosmodule,alfrescowcmqs,alfrescogoogledocs \
       --prefix $ALF_HOME \
-      --jdbc_url jdbc:postgresql://127.0.0.1/alfresco \
+      --jdbc_url jdbc:postgresql://127.0.0.1/repository \
       --postgres_port 5432 \
-      --jdbc_username alfresco \
-      --jdbc_password alfresco \
+      --jdbc_username repository \
+      --jdbc_password repository \
       --alfresco_admin_password admin \
       --baseunixservice_install_as_service 0 \
       --tomcat_installation_type existing \
@@ -100,15 +100,32 @@ RUN set -eux \
     && unzip tomcat/webapps/solr4.war -d tomcat/webapps/solr4 \
     && rm tomcat/webapps/solr4.war
 
-COPY assets ./
+
+RUN set -eux \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+      apache2 \
+    && a2enmod proxy \
+    && a2enmod proxy_ajp \
+    && a2enmod proxy_http \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+COPY assets/apache2/ports.conf /etc/apache2/ports.conf
+COPY assets/apache2/sites/* /etc/apache2/sites-available/
+
+COPY assets/postgresql/ ./postgresql/
+COPY assets/libreoffice/ ./libreoffice/
+COPY assets/tomcat/ ./tomcat/
 
 RUN set -eux \
     && sed -i -r \
         's|^[#]*\s*shared\.loader=.*|shared.loader=${catalina.base}/shared/classes,${catalina.base}/shared/lib/*.jar|' \
         tomcat/conf/catalina.properties \
     && xmlstarlet ed -L \
-        -u '/Server/Service[@name="Catalina"]/Connector[@port="8080"]/@protocol' -v 'org.apache.coyote.http11.Http11NioProtocol' \
-        -d '/Server/Service[@name="Catalina"]/Connector[@port="8009"]' \
+        -i '/Server/Service[@name="Catalina"]/Connector[@port="8009"]' -t attr -n 'secretRequired' -v 'false' \
+        #-d '/Server/Service[@name="Catalina"]/Connector[@port="8080"]' \
+        #-d '/Server/Service[@name="Catalina"]/Connector[@port="8009"]' \  apache Weiterleitung für: edu-sharing, share, alfresco
         -d '/Server/Service[@name="Catalina"]/Connector[@port="8443"]' \
         tomcat/conf/server.xml \
     && xmlstarlet ed -L \
@@ -123,15 +140,8 @@ RUN set -eux \
         --var resources '$prev' \
         -i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
         tomcat/conf/Catalina/localhost/share.xml \
-    && touch tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'solr.port=8080' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'solr.secureComms=none' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && sed -i -r \
-        's|^[#]*\s*alfresco\.secureComms=.*|alfresco.secureComms=none|' \
-        solr4/workspace-SpacesStore/conf/solrcore.properties \
-    && sed -i -r \
-        's|^[#]*\s*alfresco\.secureComms=.*|alfresco.secureComms=none|' \
-        solr4/archive-SpacesStore/conf/solrcore.properties
+    && touch tomcat/shared/classes/alfresco-global.deployment.properties
+
 
 RUN set -eux \
     && mkdir -p alf_data/postgresql postgresql \
@@ -142,21 +152,21 @@ RUN set -eux \
       --port=5432 \
       --start \
       --start-conf=manual \
-      13 alfresco \
+      13 repository \
     && su -c 'psql -f postgresql/conf/init_db.sql' postgres \
-    && pg_ctlcluster 13 alfresco stop \
+    && pg_ctlcluster 13 repository stop \
     && rm tomcat/lib/postgresql-* \
     && wget -q https://jdbc.postgresql.org/download/postgresql-42.3.1.jar \
     && mv postgresql-42.3.1.jar tomcat/lib \
     && sed -i -r \
         "s|^[#]*\s*listen_addresses\s*=\s*.*|listen_addresses = '\*'                 # what IP address(es) to listen on;|" \
-        /etc/postgresql/13/alfresco/postgresql.conf \
+        /etc/postgresql/13/repository/postgresql.conf \
     && sed -i -r \
         's|host    all             all             127.0.0.1/32            md5|host    all             all             0.0.0.0/0            md5|' \
-        /etc/postgresql/13/alfresco/pg_hba.conf \
+        /etc/postgresql/13/repository/pg_hba.conf \
     && sed -i -r \
         's|host    all             all             ::1/128                 md5|host    all             all             ::0/0                 md5|' \
-        /etc/postgresql/13/alfresco/pg_hba.conf
+        /etc/postgresql/13/repository/pg_hba.conf
 
 RUN set -eux \
     && rm -rf common/lib \
@@ -185,6 +195,7 @@ RUN set -eux \
     && rm -r /var/lib/apt/lists/*
 
 COPY install.sh .
+COPY assets/entrypoint.sh .
 
 #Test Install and Update
 RUN set -eux \
@@ -195,7 +206,7 @@ RUN set -eux \
 
 ENTRYPOINT ["./entrypoint.sh"]
 
-EXPOSE 8080
+EXPOSE 80 8080
 
 VOLUME alf_data
 

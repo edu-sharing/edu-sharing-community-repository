@@ -1,2 +1,2 @@
-CREATE ROLE alfresco LOGIN password 'alfresco';
-CREATE DATABASE alfresco ENCODING 'UTF8' OWNER 'alfresco';
+CREATE ROLE repository LOGIN password 'repository';
+CREATE DATABASE repository ENCODING 'UTF8' OWNER 'repository';
