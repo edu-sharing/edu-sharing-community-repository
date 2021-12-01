@@ -23,13 +23,14 @@
     >
       <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
         <i
-          matTooltip="{{'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate}}"
+          [matTooltip]="'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate"
+          [altText]="'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate"
           [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"></i>
       </ng-container>
       <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
         <img
-          alt=""
-          [src]="node.iconURL"
+        [src]="node.iconURL"
+          [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
           [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
         >
       </ng-container>
