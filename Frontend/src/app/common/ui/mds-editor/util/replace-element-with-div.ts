@@ -1,8 +1,8 @@
 /**
  * Replaces the given element with a div within the DOM.
- * 
+ *
  * The purpose is to comply with W3C specifications for element and attribute names.
- * 
+ *
  * Sets the attribute "data-element" to the old element tag name.
  */
 export function replaceElementWithDiv(element: Element): HTMLDivElement {
@@ -12,7 +12,11 @@ export function replaceElementWithDiv(element: Element): HTMLDivElement {
         const targetAttributeName = getTargetAttributeName(attribute);
         div.setAttribute(targetAttributeName, attribute.nodeValue);
     }
-    element.parentNode.replaceChild(div, element);
+    if(element.parentNode) {
+        element.parentNode.replaceChild(div, element);
+    } else {
+        console.warn('replace child failed for ' + element.localName);
+    }
     return div;
 }
 
