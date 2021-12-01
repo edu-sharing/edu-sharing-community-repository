@@ -79,6 +79,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	/* Some safe properties they're not necessary in the mds, but the client is allowed to define */
 	public static final String[] SAFE_PROPS = new String[]{
 			CCConstants.CM_NAME,
+			CCConstants.CM_PROP_TITLE,
+			CCConstants.CM_PROP_DESCRIPTION,
 			CCConstants.LOM_PROP_GENERAL_TITLE,
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
 			CCConstants.CCM_PROP_IO_WWWURL,
