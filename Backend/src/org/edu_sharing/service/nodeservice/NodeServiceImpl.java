@@ -243,7 +243,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
 		for (MetadataWidget widget : (templateName==null ?
-				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects))) :
+				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects)), false) :
 				mds.getWidgetsByTemplate(templateName))) {
 			String id=widget.getId();
 			if(!MetadataHelper.checkConditionTrue(widget.getCondition())) {

@@ -56,7 +56,7 @@ public class MetadataReader {
 		return "/org/edu_sharing/metadataset/v2/";
 	}
 
-	public static List<MetadataWidget> getWidgetsByNode(NodeRef node,String locale) throws Exception{
+	public static Collection<MetadataWidget> getWidgetsByNode(NodeRef node,String locale) throws Exception{
 		ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		String mdsSet = serviceRegistry.getNodeService().getProperty(node, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)).toString();
@@ -65,7 +65,8 @@ public class MetadataReader {
 		}
 		MetadataSet metadata = MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet, locale);
 		return metadata.getWidgetsByNode(serviceRegistry.getNodeService().getType(node).toString(),
-				serviceRegistry.getNodeService().getAspects(node).stream().map(QName::toString).collect(Collectors.toList()));
+				serviceRegistry.getNodeService().getAspects(node).stream().map(QName::toString).collect(Collectors.toList()),
+				true);
 	}
 	public static MetadataSet getMetadataset(ApplicationInfo appId, String mdsSet, String locale) throws Exception{
 		return getMetadataset(appId, mdsSet, locale, true);

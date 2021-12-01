@@ -154,7 +154,7 @@ public class BulkServiceImpl implements BulkService {
 		/*HashMap<String, Serializable> cleanProps = new HashMap<>();
 		propsToClean.forEach((k) -> cleanProps.put(k, null));
 		return cleanProps;*/
-		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
+		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef, false).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
 				filter(Objects::nonNull),
 				propsToClean.stream())
 				.collect(Collectors.toList());

@@ -39,9 +39,13 @@ public class MetadataHelper {
 			return MetadataReader.getMetadataset(ApplicationInfoList.getRepositoryInfoById(node.getRepo()), CCConstants.metadatasetdefault_id, getLocale());
 		}
 	}
-	public static List<MetadataWidget> getWidgetsByNode(NodeRef node) throws Exception{
+	public static Collection<MetadataWidget> getWidgetsByNode(NodeRef node, boolean onlyPrimaryWidgets) throws Exception{
 		MetadataSet metadata = getMetadataset(node);
-		return metadata.getWidgetsByNode(NodeServiceFactory.getLocalService().getType(node.getId()),Arrays.asList(NodeServiceHelper.getAspects(node)));
+		return metadata.getWidgetsByNode(
+				NodeServiceFactory.getLocalService().getType(node.getId()),
+				Arrays.asList(NodeServiceHelper.getAspects(node)),
+				onlyPrimaryWidgets
+		);
 	}
 
 		private static String getLocale() {

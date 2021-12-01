@@ -206,6 +206,7 @@ public class NodeDao {
 			NodeSearch result = transform(repoDao,searchService.search(mdsDao.getMds(),query,criteriasMap,token),filter);
 			if(result.getCount()==0) {
 				// try to search for ignorable properties to be null
+				// @TODO: needs to be adopted for elastic/dsl syntax
 				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_LUCENE));
 				result=transform(repoDao,searchService.search(mdsDao.getMds(),query,criteriasMap,token),filter);
 				result.setIgnored(removed);
