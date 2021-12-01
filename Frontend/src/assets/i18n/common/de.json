@@ -584,6 +584,7 @@
         "COLLECTION_PROPSE": "Vorschlag einreichen?",
         "COLLECTION_PROPSE_INFO": "Sie haben auf die Sammlung \"{{collection}}\" keine ausreichenden Rechte. Sie können das Material jedoch als Vorschlag einreichen. Möchten Sie fortfahren?"
     },
+    "OPTIONS_FOR": "Aktionen für {{element}}",
     "OPTIONS": {
         "SHOW_ALL_OPTIONS": "Weitere Aktionen",
         "APPLY": "Übernehmen",
