@@ -288,8 +288,11 @@ else
   tar -zxf $snapshot_name $(basename "${RS_ROOT}")/conf
   tar -zxf $snapshot_name --wildcards "*config.php" -C $(basename "${RS_ROOT}")
 
-	yes | php "${RS_ROOT}"/admin/cli/update.php
+	echo "- update rendering service"
+	yes | php "${RS_ROOT}"/admin/cli/update.php || true
+	mv "${RS_ROOT}"/install/ "${RS_ROOT}"/install.bak
 
+	echo ""
 	echo "- delete old rendering SNAPSHOTS (keep 3 backups)"
   ls -pt | grep -v / | grep "rendering-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
 

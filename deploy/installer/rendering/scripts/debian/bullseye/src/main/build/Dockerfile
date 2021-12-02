@@ -160,8 +160,8 @@ COPY assets/apache2-foreground /usr/local/bin/
 
 RUN set -eux \
     && pg_ctlcluster 13 rendering start \
+    && ./install.sh -f .env \
     && ./install.sh -f .env
-    #&& ./install.sh
 
 ########################################################################################################################
 
