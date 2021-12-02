@@ -2,7 +2,6 @@
 set -e
 set -o pipefail
 
-pushd $WWW_ROOT
 
 # TODO check if apache is stopped otherwise exit!
 #[[ "$(apache2 status )" != "tomcat not running" ]] && {
@@ -175,6 +174,8 @@ install_edu_sharing() {
 }
 
 ########################################################################################################################
+
+pushd $WWW_ROOT
 
 if [[ ! -d "${RS_CACHE}" ]] ; then
 
