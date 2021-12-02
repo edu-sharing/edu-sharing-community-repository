@@ -3,7 +3,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CardComponent } from '../../../../core-ui-module/components/card/card.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import { EditorMode, MdsView } from '../types';
+import { MdsView } from '../types';
+import {EditorMode} from '../../../../core-ui-module/mds-types';
 
 @Component({
     selector: 'es-mds-editor-core',

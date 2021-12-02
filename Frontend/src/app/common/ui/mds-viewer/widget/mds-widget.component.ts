@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {MdsEditorWidgetBase, ValueType} from '../../mds-editor/widgets/mds-editor-widget-base';
 import {Widget} from '../../mds-editor/mds-editor-instance.service';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
@@ -6,6 +6,9 @@ import {FormatSizePipe} from '../../../../core-ui-module/pipes/file-size.pipe';
 import {DatePipe} from '@angular/common';
 import {NodeDatePipe} from '../../../../core-ui-module/pipes/date.pipe';
 import {DateHelper} from '../../../../core-ui-module/DateHelper';
+import {MdsView} from 'ngx-edu-sharing-api';
+import {MdsEditorViewComponent} from '../../mds-editor/mds-editor-view/mds-editor-view.component';
+import {MdsWidgetType} from '../../mds-editor/types';
 
 @Component({
     selector: 'es-mds-widget',
@@ -13,8 +16,25 @@ import {DateHelper} from '../../../../core-ui-module/DateHelper';
     styleUrls: ['mds-widget.component.scss'],
 })
 export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
+
+    private static readonly inlineEditing: MdsWidgetType[] = [
+        MdsWidgetType.Text,
+        MdsWidgetType.Number,
+        MdsWidgetType.Email,
+        MdsWidgetType.Textarea,
+        MdsWidgetType.Singleoption,
+        MdsWidgetType.SingleValueTree,
+        MdsWidgetType.MultiValueBadges,
+        MdsWidgetType.MultiValueFixedBadges,
+        MdsWidgetType.MultiValueSuggestBadges,
+        MdsWidgetType.MultiValueTree,
+    ];
+
     readonly valueType = ValueType.String;
     @Input() widget: Widget;
+    @Input() view: MdsEditorViewComponent;
+    @ViewChild('editWrapper') editWrapper: ElementRef;
+    private temporaryValue: string[] = undefined;
 
     ngOnInit(): void {
     }
@@ -47,11 +67,21 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
         }
         return 'unknown';
     }
+
+    supportsInlineEditing() {
+        return MdsWidgetComponent.inlineEditing.includes(this.widget.definition.type as MdsWidgetType);
+    }
     getNodeValue() {
+        if(this.temporaryValue !== undefined) {
+            return this.getValue(this.temporaryValue);
+        }
         const id = this.widget.definition.id;
         if(this.widget.definition.type === 'range') {
             const values = this.mdsEditorInstance.values$.value;
-            return [values[id + '_from']?.[0], values[id + '_to']?.[0]];
+            if(values) {
+                return [values[id + '_from']?.[0], values[id + '_to']?.[0]];
+            }
+            return null;
         } else if (this.mdsEditorInstance.values$.value?.[id]) {
             // support on the fly changes+updates of the values
             return this.getValue(this.mdsEditorInstance.values$.value[id]);
@@ -64,15 +94,17 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
     }
     getValue(data: string[]) {
         let value = data;
-        if(!value || !value[0]) {
+        if(!value || (value.every((v) => !v))) {
             return null;
         }
+
         if(this.widget.definition.values) {
             const mapping=this.widget.definition.values.filter((v:any) => data.filter((d) => d === v.id).length > 0).map((v) => v.caption);
             if(mapping){
                 return mapping;
             }
         }
+
         return data;
     }
 
@@ -116,5 +148,17 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit{
             }
             return v;
         });
+    }
+
+    async finishEdit(instance: MdsEditorWidgetBase) {
+        await this.mdsEditorInstance.saveWidgetValue(instance.widget);
+        this.temporaryValue = instance.widget.getValue();
+        this.editWrapper.nativeElement.children[0].innerHTML = null;
+    }
+
+    isEditable() {
+        return this.mdsEditorInstance.editorMode === 'inline' &&
+            this.widget.definition.interactionType === 'Input' &&
+            this.supportsInlineEditing();
     }
 }

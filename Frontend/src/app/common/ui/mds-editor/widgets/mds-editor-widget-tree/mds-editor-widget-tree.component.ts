@@ -106,7 +106,9 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
             this.treeCoreComponent.revealInTree(this.tree.findById(value.key));
         });
     }
-
+    focus() {
+        this.openOverlay();
+    }
     openOverlay(): void {
         if (this.overlayIsVisible) {
             this.treeRef.input.nativeElement.focus();
@@ -127,6 +129,7 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
         this.preventOverlayOpen = true;
         setTimeout(() => {
             this.preventOverlayOpen = false;
+            this.onBlur.emit();
         });
     }
 

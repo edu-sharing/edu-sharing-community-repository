@@ -1,6 +1,7 @@
-import { Type } from '@angular/core';
-import { BulkBehavior } from '../mds/mds.component';
-import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
+import {Type} from '@angular/core';
+import {BulkBehavior} from '../mds/mds.component';
+import {MdsEditorWidgetBase} from './widgets/mds-editor-widget-base';
+
 export {
     MdsDefinition,
     MdsGroup,
@@ -20,21 +21,6 @@ export class UserPresentableError extends Error {
         this.name = 'UserPresentableError';
     }
 }
-
-/**
- * - `nodes`:
- *   - Supports bulk.
- *   - Returns only changed values.
- * - `search`:
- *   - No bulk.
- *   - All values returned.
- *   - Trees sub-children are auto-selected if root is selected.
- *   - Required errors and -warnings are disabled.
- * - `form`:
- *   - No bulk.
- *   - All values returned.
- */
-export type EditorMode = 'nodes' | 'search' | 'form';
 
 export interface Constraints {
     requiresNode?: boolean;

@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
-import { EditorMode, Values } from './types';
+import { Values } from './types';
+import {EditorMode} from '../../../core-ui-module/mds-types';
 
 /** Information that require a re-initialization once changed. */
 interface InitInfo {

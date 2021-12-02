@@ -15,13 +15,13 @@ import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import {
-    EditorMode,
     EditorType,
     MdsWidget,
     MdsWidgetValue,
     UserPresentableError,
     Values,
 } from '../types';
+import {EditorMode} from '../../../../core-ui-module/mds-types';
 
 /**
  * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
@@ -252,6 +252,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, {
                     groupId: this.groupId,
                     bulkBehavior: this.bulkBehaviour,
+                    editorMode: this.editorMode ?? 'nodes'
                 });
             } else {
                 this.editorType = await this.mdsEditorInstance.initWithoutNodes(

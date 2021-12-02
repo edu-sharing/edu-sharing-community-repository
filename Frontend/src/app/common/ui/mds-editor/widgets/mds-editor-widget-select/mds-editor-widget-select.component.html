@@ -5,10 +5,12 @@
   [control]="formControl"
 >
   <mat-select
+    #select
     [formControl]="formControl"
     [placeholder]="widget.definition.placeholder"
     esOnAttributeChange="aria-activedescendant"
     (attributeChange)="onActiveDescendantChanges($event)"
+    (blur)="onBlur.emit()"
   >
     <mat-option [value]="null" *ngIf="widget.definition.allowempty"></mat-option>
     <mat-option

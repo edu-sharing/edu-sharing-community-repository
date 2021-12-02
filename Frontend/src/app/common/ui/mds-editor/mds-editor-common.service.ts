@@ -75,6 +75,16 @@ export class MdsEditorCommonService {
             .toPromise();
     }
 
+    async saveNodeProperty(
+        node: Node,
+        property: string,
+        values: string[]
+        //versionComment?: string,
+    ): Promise<void> {
+        this.restNode.editNodeProperty(node.ref.id, property, values).toPromise();
+
+    }
+
     /**
      * Gets the relevant MDS ID for the given nodes.
      *
