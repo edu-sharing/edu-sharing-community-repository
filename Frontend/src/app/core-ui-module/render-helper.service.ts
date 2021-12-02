@@ -40,6 +40,10 @@ import {ListTableComponent} from './components/list-table/list-table.component';
 import {RestUsageService} from '../core-module/rest/services/rest-usage.service';
 import {CommentsListComponent} from '../modules/management-dialogs/node-comments/comments-list/comments-list.component';
 import { replaceElementWithDiv } from '../common/ui/mds-editor/util/replace-element-with-div';
+import {MdsEditorEmbeddedComponent} from '../common/ui/mds-editor/mds-editor-embedded/mds-editor-embedded.component';
+import {MdsEditorCoreComponent} from '../common/ui/mds-editor/mds-editor-core/mds-editor-core.component';
+import {MdsEditorWrapperComponent} from '../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import {EditorMode} from './mds-types';
 
 @Injectable()
 export class RenderHelperService {
@@ -120,4 +124,22 @@ export class RenderHelperService {
         });
     }
 
+    injectMetadataEditor(node: Node) {
+        const metadata = document.querySelector('.edusharing_rendering_metadata_body');
+        const parent = metadata.parentElement;
+        parent.removeChild(metadata);
+        UIHelper.injectAngularComponent(
+            this.componentFactoryResolver,
+            this.viewContainerRef,
+            MdsEditorWrapperComponent,
+            parent,
+            {
+                groupId: 'io_render',
+                nodes: [node],
+                editorMode: 'inline',
+                embedded: true,
+            }
+        );
+
+    }
 }
