@@ -1,3 +1,8 @@
+########################################################################################################################
+#                                                                                                                      #
+#         !!!         THIS DOCKER IS FOR TESTING ONLY PURPOSES AND NOT FOR PRODUCTIVE DEPLOYMENT         !!!           #
+#                                                                                                                      #
+########################################################################################################################
 
 FROM ${docker.from.tomcat}
 
@@ -180,11 +185,16 @@ RUN set -eux \
 	&& touch tomcat/shared/classes/config/edu-sharing.deployment.conf \
     && tar cvf tomcat/shared.tar tomcat/shared
 
+########################################################################################################################
 
-EXPOSE 8080 8081
+STOPSIGNAL SIGWINCH
+
+EXPOSE 80 8080 8081
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["catalina.sh", "run"]
+
+########################################################################################################################
 
 
 LABEL git.branch=${git.branch}
