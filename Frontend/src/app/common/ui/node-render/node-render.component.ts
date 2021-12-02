@@ -296,10 +296,15 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
 
     showDetails() {
-      const rect=document.getElementById('edusharing_rendering_metadata').getBoundingClientRect();
-      if(window.scrollY<rect.top) {
-          UIHelper.scrollSmooth(rect.top, 1.5);
-      }
+      const element = document.getElementById('edusharing_rendering_metadata');
+      element.setAttribute('tabindex', '-1');
+      element.addEventListener(
+          'blur',
+          (event) => (event.target as HTMLElement).removeAttribute('tabindex'),
+          { once: true },
+      );
+      element.focus({ preventScroll: true });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
     public getPosition() {
       if(!this._node || !this.list)
