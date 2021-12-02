@@ -1,8 +1,6 @@
 <ng-container *ngIf="clickable">
   <!-- Full (not short) breadcrumbs -->
-  <div
-    class="breadcrumb breadcrumb-full"
-  >
+  <div class="breadcrumb breadcrumb-full" [attr.role]="nodes.length > 0 ? 'list' : null">
     <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
     <ng-container *ngIf="nodes.length === 0">
       <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
@@ -23,7 +21,7 @@
 
   Show only the last breadcrumbs and either a back- or a home button.
   -->
-  <div class="breadcrumb breadcrumb-short">
+  <div class="breadcrumb breadcrumb-short" [attr.role]="nodes.length > 0 ? 'list' : null">
     <!-- root / home breadcrumb -->
     <ng-container *ngIf="nodes.length <= 1">
       <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
@@ -62,7 +60,11 @@
 
 Short version works only with `short="always"`.
 -->
-<div *ngIf="!clickable" class="breadcrumb breadcrumb-readonly">
+<div
+  *ngIf="!clickable"
+  class="breadcrumb breadcrumb-readonly"
+  [attr.role]="nodes.length > 0 ? 'list' : null"
+>
   <span class="breadcrumb-element" [class.breadcrumb-element-active]="nodes.length === 0">
     <ng-container *ngIf="homeIcon"><i class="home-icon" [esIcon]="homeIcon"></i></ng-container>
     <ng-container *ngIf="home">{{ home | translate }}</ng-container>
@@ -85,7 +87,7 @@ Short version works only with `short="always"`.
     <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="breadcrumb-element" [class.breadcrumb-element-active]="last">{{
       node ? node.name : ''
-      }}</span>
+    }}</span>
   </ng-container>
 </div>
 
@@ -111,6 +113,7 @@ Short version works only with `short="always"`.
 <ng-template #homeBreadcrumbElement>
   <div
     *ngIf="homeRouterLink"
+    role="listitem"
     cdkDropList
     cdkDropListOrientation="vertical"
     [cdkDropListData]="'HOME'"
@@ -140,6 +143,7 @@ Short version works only with `short="always"`.
   </div>
   <div
     *ngIf="!homeRouterLink"
+    role="listitem"
     cdkDropList
     cdkDropListOrientation="vertical"
     [cdkDropListData]="'MY_FILES'"
@@ -176,6 +180,7 @@ Short version works only with `short="always"`.
   let-currentPos="currentPos"
 >
   <es-node-url
+    role="listitem"
     #trigger="esElementRef"
     esElementRef
     cdkMonitorSubtreeFocus
@@ -202,9 +207,9 @@ Short version works only with `short="always"`.
         [class.breadcrumb-inner-active]="currentPos"
         [class.selected]="node && getDragState().element === node"
       >
-      <span *ngIf="currentPos && invisibleDescription" class="cdk-visually-hidden">
-        {{ 'BREADCRUMB_LOCATION_PREFIX' | translate }}
-      </span>
+        <span *ngIf="currentPos && invisibleDescription" class="cdk-visually-hidden">
+          {{ 'BREADCRUMB_LOCATION_PREFIX' | translate }}
+        </span>
         <ng-container *ngIf="!inner; else inner">
           {{ node ? node.name : '' }}
         </ng-container>
