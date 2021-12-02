@@ -30,6 +30,7 @@ pushd "$ALF_HOME"
 
 # load the default configuration
 if [[ -f ".env.base" ]] ; then
+	echo "Load .env.base"
 	source .env.base
 fi
 
@@ -64,16 +65,16 @@ done
 
 ################################################################################################################
 
-my_home_appid="${REPOSITORY_SERVICE_HOME_APPID:-local}" # Kundenprojekt ?
+my_home_appid="${REPOSITORY_SERVICE_HOME_APPID:-"local"}" # Kundenprojekt ?
 
-my_admin_pass="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+my_admin_pass="${REPOSITORY_SERVICE_ADMIN_PASS:-"admin"}"
 my_admin_pass_md4="$(printf '%s' "$my_admin_pass" | iconv -t utf16le | openssl md4 | awk '{ print $2 }')"
 
 my_prot_external="${REPOSITORY_SERVICE_PROT_EXTERNAL:-"http"}"
 my_host_external="${REPOSITORY_SERVICE_HOST_EXTERNAL:-"localhost"}"
 my_port_external="${REPOSITORY_SERVICE_PORT_EXTERNAL:-80}"
-my_path_external="${REPOSITORY_SERVICE_PATH_EXTERNAL:-/"edu-sharing"}"
-my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}${my_path_external}"
+my_path_external="${REPOSITORY_SERVICE_PATH_EXTERNAL:-"edu-sharing"}"
+my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}/${my_path_external}"
 my_auth_external="${my_base_external}/services/authentication"
 
 my_host_internal="${REPOSITORY_SERVICE_HOST_INTERNAL:-"localhost"}"
@@ -85,7 +86,7 @@ repository_database_name="${REPOSITORY_DATABASE_NAME:-"repository"}"
 repository_database_opts="${REPOSITORY_DATABASE_OPS:-}"
 repository_database_pass="${REPOSITORY_DATABASE_PASS:-"repository"}"
 repository_database_pool_max="${REPOSITORY_DATABASE_POOL_MAX:-80}"
-repository_database_pool_sql="${REPOSITORY_DATABASE_POOL_SQL:-SELECT 1}"
+repository_database_pool_sql="${REPOSITORY_DATABASE_POOL_SQL:-"SELECT 1"}"
 repository_database_port="${REPOSITORY_DATABASE_PORT:-5432}"
 repository_database_prot="${REPOSITORY_DATABASE_PROT:-"postgresql"}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-"repository"}"

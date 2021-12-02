@@ -193,6 +193,7 @@ RUN set -eux \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
+COPY .env.base .
 COPY install.sh .
 COPY assets/entrypoint.sh .
 
