@@ -62,15 +62,18 @@ $candy-app-warn:    mat.define-palette(mat.$red-palette);
 // Create the theme object (a Sass map containing all of the palettes).
 $candy-app-theme: mat.define-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
 
-// Uncomment the styles below to override the themes foreground colors.
+// Override the themes foreground colors.
 // WCAG minimums are
 //  - rgba(black, 0.54) for text on white
 //  - rgba(black, 0.42) for non-text on white
-//
+
+// For reference: default definition from
+// https://github.com/angular/components/blob/master/src/material/core/theming/_palette.scss:
+
 // $dark-dividers: rgba(black, 0.12);
 // $dark-disabled-text: rgba(black, 0.38);
 // $dark-secondary-text: rgba(black, 0.54);
-// $mat-light-theme-foreground: (
+// $light-theme-foreground-palette: (
 //   base:              black,
 //   divider:           $dark-dividers,
 //   dividers:          $dark-dividers,
@@ -87,13 +90,33 @@ $candy-app-theme: mat.define-light-theme($candy-app-primary, $candy-app-accent, 
 //   slider-off:        rgba(black, 0.26),
 //   slider-off-active: rgba(black, 0.38),
 // );
-// $my-app-theme-custom: map-merge($candy-app-theme, (foreground: $mat-light-theme-foreground));
-// @include angular-material-theme($my-app-theme-custom);
 
+$dark-dividers: rgba(black, 0.42);
+$dark-disabled-text: rgba(black, 0.54);  // increased contrast
+$dark-secondary-text: rgba(black, 0.54);
+$light-theme-foreground-palette: (
+  base:              black,
+  divider:           $dark-dividers,
+  dividers:          $dark-dividers,
+  disabled:          $dark-disabled-text,
+  disabled-button:   rgba(black, 0.26),
+  disabled-text:     $dark-disabled-text,
+  elevation:         black,
+  hint-text:         $dark-disabled-text,
+  secondary-text:    $dark-secondary-text,
+  icon:              rgba(black, 0.54),
+  icons:             rgba(black, 0.54),
+  text:              rgba(black, 0.87),
+  slider-min:        rgba(black, 0.87),
+  slider-off:        rgba(black, 0.26),
+  slider-off-active: rgba(black, 0.38),
+);
+
+$my-app-theme-custom: map-merge($candy-app-theme, (foreground: $light-theme-foreground-palette));
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include mat.all-component-themes($candy-app-theme);
+@include mat.all-component-themes($my-app-theme-custom);
 
 /** custom project specifics */
 [matripplecolor=primary] {
