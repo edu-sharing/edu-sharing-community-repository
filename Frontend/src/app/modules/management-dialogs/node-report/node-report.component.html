@@ -7,7 +7,7 @@
 >
   <div *ngIf="_node" class="card-content-padding">
     <form (ngSubmit)="report()">
-      <h4>{{ 'NODE_REPORT.REPORT_INFO' | translate: { name: (_node | nodeTitle) } }}</h4>
+      <h2>{{ 'NODE_REPORT.REPORT_INFO' | translate: { name: (_node | nodeTitle) } }}</h2>
       <div class="report">
         <mat-radio-group [(ngModel)]="selectedReason" name="reason">
           <mat-radio-button *ngFor="let reason of reasons" [value]="reason">{{
