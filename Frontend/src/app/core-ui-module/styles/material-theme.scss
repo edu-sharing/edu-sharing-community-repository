@@ -281,7 +281,7 @@ mat-slide-toggle.mat-primary-bright{
 input.mat-input-element, mat-label, .mat-select-value{
     line-height: normal;
 }
-input.mat-input-element::placeholder {
+.mat-input-element::placeholder {
     color: $placeholderColor;
 }
 // will better align the border label for the outlined input
