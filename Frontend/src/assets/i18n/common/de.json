@@ -396,6 +396,7 @@
         "EMAIL": "Ihre E-Mail-Adresse",
         "EMAIL_PLACEHOLDER": "jemand@beispiel.de",
         "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben",
+        "REASON": "Art des Problems",
         "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",
         "DONE": "Vielen Dank für Ihre Meldung.",
         "REASONS": {

@@ -1,5 +1,14 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+} from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton,
@@ -11,7 +20,6 @@ import {
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { Toast } from '../../../core-ui-module/toast';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 @Component({
     selector: 'es-node-report',
@@ -21,21 +29,32 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NodeReportComponent {
-    reasons = ['UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'];
-    selectedReason: string;
-    comment: string;
-    email: string;
-    _node: Node;
-    isGuest: boolean;
+    readonly reasons = ['UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'];
+
+    private _node: Node;
     @Input() set node(node: Node) {
         this._node = node;
     }
+    get node() {
+        return this._node;
+    }
+
     @Output() onCancel = new EventEmitter();
     @Output() onLoading = new EventEmitter();
     @Output() onDone = new EventEmitter();
+
+    @ViewChild('formElement') formRef: ElementRef<HTMLFormElement>;
+
     buttons: DialogButton[];
+
+    readonly form = new FormGroup({
+        reason: new FormControl('', Validators.required),
+        comment: new FormControl(''),
+        email: new FormControl('', [Validators.email, Validators.required]),
+    });
 
     constructor(
         private connector: RestConnectorService,
@@ -49,10 +68,10 @@ export class NodeReportComponent {
             new DialogButton('NODE_REPORT.REPORT', DialogButton.TYPE_PRIMARY, () => this.report()),
         ];
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
-            this.isGuest = data.isGuest;
             if (!data.isGuest) {
+                this.form.get('email').disable();
                 this.iam.getUser().subscribe((user) => {
-                    this.email = user.person.profile.email;
+                    this.form.patchValue({ email: user.person.profile.email });
                 });
             }
         });
@@ -66,43 +85,58 @@ export class NodeReportComponent {
         this.onDone.emit();
     }
 
-    report() {
-        if (!this.selectedReason) {
-            this.toast.error(null, 'NODE_REPORT.REASON_REQUIRED');
-            return;
-        }
-        if (!UIHelper.isEmail(this.email)) {
-            this.toast.error(null, 'NODE_REPORT.EMAIL_REQUIRED');
-            return;
-        }
-        this.onLoading.emit(true);
-        this.nodeApi
-            .reportNode(
-                this._node.ref.id,
-                this.getReasonAsString(),
-                this.email,
-                this.comment,
-                this._node.ref.repo,
-            )
-            .subscribe(
-                () => {
-                    this.toast.toast('NODE_REPORT.DONE');
-                    this.onLoading.emit(false);
-                    this.onDone.emit();
-                },
-                (error: any) => {
-                    this.onLoading.emit(false);
-                    this.toast.error(error);
-                },
-            );
+    shouldShowError(field: string) {
+        const fieldControl = this.form.get(field);
+        return fieldControl.touched && !fieldControl.valid;
     }
 
-    private getReasonAsString() {
-        return (
-            this.translate.instant('NODE_REPORT.REASONS.' + this.selectedReason) +
-            ' (' +
-            this.selectedReason +
-            ')'
-        );
+    report() {
+        if (this.form.valid) {
+            // Include value for possibly disabled email field.
+            const value = this.form.getRawValue();
+            this.onLoading.emit(true);
+            this.nodeApi
+                .reportNode(
+                    this.node.ref.id,
+                    this.getReasonAsString(value.reason),
+                    value.email,
+                    value.comment,
+                    this.node.ref.repo,
+                )
+                .subscribe(
+                    () => {
+                        this.toast.toast('NODE_REPORT.DONE');
+                        this.onLoading.emit(false);
+                        this.onDone.emit();
+                    },
+                    (error: any) => {
+                        this.onLoading.emit(false);
+                        this.toast.error(error);
+                    },
+                );
+        } else {
+            for (const field of ['reason', 'email']) {
+                const control = this.form.get(field);
+                if (!control.valid) {
+                    control.markAsTouched();
+                    this.focusField(field);
+                    break;
+                }
+            }
+        }
+    }
+
+    private getReasonAsString(reason: string) {
+        return `${this.translate.instant('NODE_REPORT.REASONS.' + reason)} (${reason})`;
+    }
+
+    private focusField(field: string) {
+        const form = this.formRef.nativeElement;
+        const element = form.elements.namedItem(field);
+        if (element instanceof HTMLElement) {
+            element.focus();
+        } else if (element instanceof RadioNodeList) {
+            (element[0] as HTMLElement).focus();
+        }
     }
 }

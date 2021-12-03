@@ -326,6 +326,7 @@
         "EMAIL": "your e-mail-address",
         "EMAIL_PLACEHOLDER": "somebody@example.net",
         "EMAIL_REQUIRED": "Please provide a valind e-mail address.",
+        "REASON": "Problem kind",
         "REASON_REQUIRED": "Please select what kind of problem you are experiencing.",
         "DONE": "Thanks for your message.",
         "REASONS": {
