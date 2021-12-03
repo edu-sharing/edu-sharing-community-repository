@@ -1250,8 +1250,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                 const condition = widget.condition;
                 const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
                 return (
-                    nodes.some((n) => pattern.test(n.properties[condition.value])) !==
-                    condition.negate
+                    nodes ? nodes.some((n) => pattern.test(n.properties[condition.value])) !==
+                    condition.negate :
+                        values ? widget.condition.negate === !values[widget.condition.value]
+                            : true
                 );
             }
             if (nodes) {

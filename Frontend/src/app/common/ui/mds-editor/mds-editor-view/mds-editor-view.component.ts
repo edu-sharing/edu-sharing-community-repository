@@ -237,6 +237,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                     for (const widget of widgets) {
                         this.injectWidget(widget, element);
                     }
+                    if(element.parentNode) {
+                        // remove the dummy element because it is now replaced with div containers
+                        element.parentNode.removeChild(element);
+                    }
                 } else if (this.knownWidgetTags.includes(tagName)) {
                     // The widget is defined, but was disabled due to unmet conditions.
                     continue;
@@ -322,7 +326,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
 
     private injectWidget(widget: Widget, element: Element, editorMode = this.mdsEditorInstance.editorMode): MdsEditorWidgetBase {
         return this.ngZone.runOutsideAngular<any>(() => {
-            element = replaceElementWithDiv(element);
+            element = replaceElementWithDiv(element, 'append');
             const htmlRef = this.container.nativeElement.querySelector(
                 widget.definition.id.replace(':', '\\:'),
             );
@@ -412,6 +416,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             targetElement,
             'nodes'
         ) as MdsEditorWidgetBase;
+        targetElement.parentNode.removeChild(targetElement);
         widget.initWithNodes(this.mdsEditorInstance.nodes$.value);
         // timeout to wait for view inflation and set the focus
         await this.applicationRef.tick();

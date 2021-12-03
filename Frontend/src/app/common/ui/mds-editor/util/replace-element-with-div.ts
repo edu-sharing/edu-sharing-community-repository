@@ -5,7 +5,7 @@
  *
  * Sets the attribute "data-element" to the old element tag name.
  */
-export function replaceElementWithDiv(element: Element): HTMLDivElement {
+export function replaceElementWithDiv(element: Element, mode: 'append' | 'replace' = 'replace'): HTMLDivElement {
     const div = document.createElement('div');
     div.setAttribute('data-element', element.localName);
     for (const attribute of element.attributes) {
@@ -13,7 +13,11 @@ export function replaceElementWithDiv(element: Element): HTMLDivElement {
         div.setAttribute(targetAttributeName, attribute.nodeValue);
     }
     if(element.parentNode) {
-        element.parentNode.replaceChild(div, element);
+        if(mode === 'append') {
+            element.parentNode.append(div);
+        } else if(mode === 'replace') {
+            element.parentNode.replaceChild(div, element);
+        }
     } else {
         console.warn('replace child failed for ' + element.localName);
     }

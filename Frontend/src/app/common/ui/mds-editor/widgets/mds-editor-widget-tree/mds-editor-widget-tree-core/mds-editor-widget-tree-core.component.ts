@@ -75,7 +75,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         this.clearFilter();
         // deep copy for modifications
         this.dataSource.data = this.tree.rootNodes;
-        if(this.widget.definition.allowValuespaceSuggestions) {
+        if(this.widget.definition.allowValuespaceSuggestions && this.mdsEditorInstanceService.editorMode === 'nodes') {
             this.dataSource.data = this.addSuggestionInput(Helper.deepCopyArray(this.dataSource.data));
         }
         this.filterString$
