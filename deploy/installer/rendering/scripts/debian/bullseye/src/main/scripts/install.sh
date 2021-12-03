@@ -35,7 +35,6 @@ usage() {
 
 while true; do
 	flag="$1"
-	echo "flage: $1"
 	shift || break
 
 	case "$flag" in
@@ -63,6 +62,8 @@ my_path_internal="${RENDERING_SERVICE_PATH_INTERNAL:-$(basename "${RS_ROOT}")}"
 
 my_internal_url="${my_prot_internal}://${my_host_internal}:${my_port_internal}/${my_path_internal}"
 my_external_url="${my_prot_external}://${my_host_external}:${my_port_external}/${my_path_external}"
+
+my_cache_cleaner_interval="${RENDERING_SERVICE_CACHE_CLEANER_INTERVAL:-"10 * * * *"}"
 
 db_driver=pgsql
 db_host="${RENDERING_DATABASE_HOST:-127.0.0.1}"
@@ -299,6 +300,7 @@ else
 
 fi
 
+echo "- update configuration"
 if [[ -n $rendering_proxy_host ]] ; then
 	proxyConf="${RS_ROOT}"/conf/proxy.conf.php
 	cp -rf "${RS_ROOT}"/conf/proxy.conf.php.example "${proxyConf}"
@@ -324,6 +326,16 @@ xmlstarlet ed -L \
 	-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
 	-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
 	"${RS_ROOT}"/conf/esmain/homeApplication.properties.xml
+
+echo "- set cache cleaner CronJob"
+croneJob=/tmp/mycron
+crontab -l > "${croneJob}" 2> /dev/null || touch "${croneJob}"
+
+sed -i -r 's|^[#]*.*Rendering-Service cache cleaner|'"${my_cache_cleaner_interval} ${RS_CACHE} www-data php /func/classes.new/Helper/cacheCleaner.php # Rendering-Service cache cleaner"'|' "${croneJob}"
+grep -q '^[#]*.*Rendering-Service cache cleaner' "${croneJob}" || echo "${my_cache_cleaner_interval} ${RS_CACHE} www-data php /func/classes.new/Helper/cacheCleaner.php # Rendering-Service cache cleaner" >>"${croneJob}"
+
+crontab "${croneJob}"
+rm -f  "${croneJob}"
 
 chown -R www-data:www-data "${RS_ROOT}"
 popd

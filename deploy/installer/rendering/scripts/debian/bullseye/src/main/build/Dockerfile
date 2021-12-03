@@ -128,6 +128,7 @@ RUN set -eux \
 	  php-xdebug \
       apache2 \
       ffmpeg \
+      cron \
     && a2enmod rewrite \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
