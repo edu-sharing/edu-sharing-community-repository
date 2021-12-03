@@ -2,31 +2,6 @@
 set -e
 set -o pipefail
 
-[[ ! -f "${ALF_HOME}/alfresco.sh" ]] && {
-	echo ""
-	echo "Env ALF_HOME must point to the home directory of your Alfresco Platform!"
-	exit
-}
-
-pushd "$ALF_HOME"
-
-[[ ! -d tomcat/webapps/alfresco || ! -d tomcat/webapps/solr4 ]] && {
-	echo ""
-	echo "You must have started the Alfresco Platform at least once before you can run the installation."
-	exit
-}
-
-[[ "$(./alfresco.sh status tomcat)" != "tomcat not running" ]] && {
-	echo ""
-	echo "Please stop Tomcat before you can run the installation!"
-	exit
-}
-
-[[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] && {
-	echo ""
-	echo "Please stop Postgresql before you can run the installation!"
-	exit
-}
 
 # load the default configuration
 if [[ -f ".env.base" ]] ; then
@@ -137,15 +112,15 @@ info() {
 	echo ""
 	echo "  Common:"
 	echo ""
-	echo "    AppId:               ${my_home_appid}"
-	echo "    Admin password:      ${my_admin_pass}"
+	echo "    AppId:             ${my_home_appid}"
+	echo "    Admin password:    ${my_admin_pass}"
 	echo ""
 	echo "  Public:"
 	echo ""
-	echo "    Protocol:            ${my_prot_external}"
-	echo "    Host:                ${my_host_external}"
-	echo "    Port:                ${my_port_external}"
-	echo "    Path:                ${my_path_external}"
+	echo "    Protocol:          ${my_prot_external}"
+	echo "    Host:              ${my_host_external}"
+	echo "    Port:              ${my_port_external}"
+	echo "    Path:              ${my_path_external}"
 	echo ""
   echo "  Private:"
   echo ""
@@ -201,6 +176,36 @@ info() {
   fi
 
   echo ""
+}
+
+
+########################################################################################################################
+
+
+[[ ! -f "${ALF_HOME}/alfresco.sh" ]] && {
+	echo ""
+	echo "Env ALF_HOME must point to the home directory of your Alfresco Platform!"
+	exit
+}
+
+pushd "$ALF_HOME"
+
+[[ ! -d tomcat/webapps/alfresco || ! -d tomcat/webapps/solr4 ]] && {
+	echo ""
+	echo "You must have started the Alfresco Platform at least once before you can run the installation."
+	exit
+}
+
+[[ "$(./alfresco.sh status tomcat)" != "tomcat not running" ]] && {
+	echo ""
+	echo "Please stop Tomcat before you can run the installation!"
+	exit
+}
+
+[[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] && {
+	echo ""
+	echo "Please stop Postgresql before you can run the installation!"
+	exit
 }
 
 
