@@ -147,6 +147,38 @@ tar -x -v --skip-old-files -f tomcat/shared.tar
 
 global="tomcat/shared/classes/alfresco-global.deployment.properties"
 
+touch ${global}
+
+sed -i -r 's|^[#]*\s*dir\.root=.*|dir.root='"$ALF_HOME/alf_data"'|' "${global}"
+grep -q '^[#]*\s*dir\.root=' "${global}" || echo "dir.root=$ALF_HOME/alf_data" >>"${global}"
+
+sed -i -r 's|^[#]*\s*dir\.keystore=.*|dir.keystore='"$ALF_HOME/keystore"'|' "${global}"
+grep -q '^[#]*\s*dir\.keystore=' "${global}" || echo "dir.keystore=$ALF_HOME/keystore" >>"${global}"
+
+sed -i -r 's|^[#]*\s*img\.root=.*|img.root=/usr|' "${global}"
+grep -q '^[#]*\s*img\.root=' "${global}" || echo 'img.root=/usr' >>"${global}"
+
+sed -i -r 's|^[#]*\s*img\.gslib=.*|img.gslib=/usr/bin|' "${global}"
+grep -q '^[#]*\s*img\.gslib=' "${global}" || echo 'img.gslib=/usr/bin' >>"${global}"
+
+sed -i -r 's|^[#]*\s*exiftool\.dyn=.*|exiftool.dyn=/usr/bin|' "${global}"
+grep -q '^[#]*\s*exiftool\.dyn=' "${global}" || echo 'exiftool.dyn=/usr/bin' >>"${global}"
+
+sed -i -r 's|^[#]*\s*exiftool\.exe=.*|exiftool.exe=${exiftool.dyn}/exiftool|' "${global}"
+grep -q '^[#]*\s*exiftool\.exe=' "${global}" || echo 'exiftool.exe=${exiftool.dyn}/exiftool' >>"${global}"
+
+sed -i -r 's|^[#]*\s*ffmpeg\.dyn=.*|ffmpeg.dyn=/usr/bin|' "${global}"
+grep -q '^[#]*\s*ffmpeg\.dyn=' "${global}" || echo 'ffmpeg.dyn=/usr/bin' >>"${global}"
+
+sed -i -r 's|^[#]*\s*ffmpeg\.exe=.*|ffmpeg.exe=${ffmpeg.dyn}/ffmpeg|' "${global}"
+grep -q '^[#]*\s*ffmpeg\.exe=' "${global}" || echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >>"${global}"
+
+sed -i -r 's|^[#]*\s*img\.dyn=.*|img.dyn=/usr/bin|' "${global}"
+grep -q '^[#]*\s*img\.dyn=' "${global}" || echo 'img.dyn=/usr/bin' >>"${global}"
+
+sed -i -r 's|^[#]*\s*img\.exe=.*|img.exe=${img.dyn}/convert|' "${global}"
+grep -q '^[#]*\s*img\.exe=' "${global}" || echo 'img.exe=${img.dyn}/convert' >>"${global}"
+
 sed -i -r 's|^[#]*\s*alfresco_user_store\.adminpassword=.*|alfresco_user_store.adminpassword='"${my_admin_pass_md4}"'|' "${global}"
 grep -q '^[#]*\s*alfresco_user_store\.adminpassword=' "${global}" || echo "alfresco_user_store.adminpassword=${my_admin_pass_md4}" >>"${global}"
 
@@ -179,6 +211,9 @@ grep -q '^[#]*\s*alfresco\.port=' "${global}" || echo "alfresco.port=${my_port_e
 
 sed -i -r 's|^[#]*\s*ooo\.enabled=.*|ooo.enabled=true|' "${global}"
 grep -q '^[#]*\s*ooo\.enabled=' "${global}" || echo "ooo.enabled=true" >>"${global}"
+
+sed -i -r 's|^[#]*\s*ooo\.exe=.*|ooo.exe=|' "${global}"
+grep -q '^[#]*\s*ooo\.exe=' "${global}" || echo "ooo.exe=" >>"${global}"
 
 sed -i -r 's|^[#]*\s*ooo\.host=.*|ooo.host='"${repository_transform_host}"'|' "${global}"
 grep -q '^[#]*\s*ooo\.host=' "${global}" || echo "ooo.host=${repository_transform_host}" >>"${global}"

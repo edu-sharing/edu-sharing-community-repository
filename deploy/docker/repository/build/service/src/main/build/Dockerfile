@@ -8,18 +8,16 @@ FROM ${docker.from.tomcat}
 
 
 RUN set -eux \
-    && echo 'deb http://deb.debian.org/debian stretch-backports main' >> /etc/apt/sources.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-	    ffmpeg \
-	    redis-tools \
-    && apt-get install -y --no-install-recommends -t stretch-backports \
         exiftool \
+	    ffmpeg \
 	    ghostscript \
 	    gsfonts \
 	    imagemagick \
 	    jq \
         postgresql-client \
+	    redis-tools \
         ruby-hocon \
         wait-for-it \
         xmlstarlet \
@@ -101,18 +99,7 @@ RUN set -eux \
     && mkdir -p tomcat/webapps/alfresco \
     && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco -x "WEB-INF/lib/hazelcast-*" -x "WEB-INF/lib/jackson-*" -x "WEB-INF/lib/commons-lang3-*" \
     && rm -f tomcat/webapps/alfresco.war \
-    && mv alf_data/keystore . \
-    && touch tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo "dir.root=$ALF_HOME/alf_data" >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo "dir.keystore=$ALF_HOME/keystore" >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'img.root=/usr' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'img.gslib=/usr/bin' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'exiftool.dyn=/usr/bin' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'exiftool.exe=${exiftool.dyn}/exiftool' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo "ffmpeg.dyn=/usr/bin" >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'img.dyn=/usr/bin' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'img.exe=${img.dyn}/convert' >> tomcat/shared/classes/alfresco-global.deployment.properties \
+    && mv alf_data/keystore .
 
 COPY --chown=worker:worker assets/alfresco/log4j.properties tomcat/webapps/alfresco/WEB-INF/classes/log4j.properties
 COPY --chown=worker:worker assets/alfresco/web-scripts-config-custom.xml tomcat/shared/classes/alfresco/extension/web-scripts-config-custom.xml

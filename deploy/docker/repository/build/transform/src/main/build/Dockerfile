@@ -3,9 +3,8 @@ FROM ${docker.from.openjdk}
 ########################################################################################################################
 
 RUN set -eux \
-    && echo 'deb http://deb.debian.org/debian buster-backports main' >> /etc/apt/sources.list \
 	&& apt-get update -y \
-	&& apt-get install -y --no-install-recommends -t buster-backports \
+	&& apt-get install -y --no-install-recommends \
 		fonts-dejavu \
 		fonts-liberation \
 		hyphen-* \

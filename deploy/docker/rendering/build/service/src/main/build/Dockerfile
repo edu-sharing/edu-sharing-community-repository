@@ -3,15 +3,12 @@ FROM ${docker.from.apache.server}
 ########################################################################################################################
 
 RUN set -eux \
-    && echo 'deb http://deb.debian.org/debian buster-backports main' >> /etc/apt/sources.list \
 	&& apt-get update -y \
 	&& apt-get install -y --no-install-recommends \
-        ffmpeg \
-        redis-tools \
-	&& apt-get install -y --no-install-recommends -t buster-backports \
         ca-certificates \
         curl \
         exiftool \
+        ffmpeg \
         jq \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
@@ -21,15 +18,16 @@ RUN set -eux \
         libzip-dev \
         mariadb-client \
         postgresql-client \
+        redis-tools \
         wait-for-it \
         xmlstarlet \
-    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+        zip \
+    && docker-php-ext-install -j$(nproc) soap \
+    && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-configure exif \
     && docker-php-ext-install -j$(nproc) exif \
-    && docker-php-ext-install -j$(nproc) soap \
-    && docker-php-ext-install -j$(nproc) wddx \
-    && docker-php-ext-configure zip --with-libzip \
+    && docker-php-ext-configure zip \
     && docker-php-ext-install -j$(nproc) zip \
     && docker-php-ext-install -j$(nproc) sockets \
     && docker-php-ext-install -j$(nproc) mysqli \
@@ -72,7 +70,7 @@ RUN set -eux \
 	&& a2ensite internal
 
 COPY assets/rendering/de.metaventis.esrender.log4php.properties conf/
-COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties install/_tmpl/conf/
+COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties conf/
 
 ########################################################################################################################
 

@@ -3,9 +3,8 @@ FROM ${docker.from.openjdk}
 ########################################################################################################################
 
 RUN set -eux \
-    && echo 'deb http://deb.debian.org/debian stretch-backports main' >> /etc/apt/sources.list \
     && apt-get update -y \
-    && apt-get install -y --no-install-recommends -t stretch-backports \
+    && apt-get install -y --no-install-recommends \
         jq \
         wait-for-it \
         xmlstarlet \
