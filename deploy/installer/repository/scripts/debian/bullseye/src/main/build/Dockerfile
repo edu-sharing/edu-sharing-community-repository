@@ -48,8 +48,8 @@ RUN set -eux \
     && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        postgresql-13 \
-    && pg_dropcluster 13 main \
+        postgresql-${postgresql.version.major} \
+    && pg_dropcluster ${postgresql.version.major} main \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
@@ -68,10 +68,10 @@ RUN set -eux \
     && rm -r /var/lib/apt/lists/*
 
 RUN set -eux \
-    && wget -q https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.73/bin/apache-tomcat-8.5.73.tar.gz \
+    && wget -q https://dlcdn.apache.org/tomcat/tomcat-${tomcat.version.major}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.tar.gz \
     && mkdir -p tomcat \
-    && tar -xzvf apache-tomcat-8.5.73.tar.gz -C tomcat --strip 1 \
-    && rm apache-tomcat-8.5.73.tar.gz
+    && tar -xzvf apache-tomcat-${tomcat.version}.tar.gz -C tomcat --strip 1 \
+    && rm apache-tomcat-${tomcat.version}.tar.gz
 
 RUN set -eux \
     && wget -q https://download.alfresco.com/release/community/201707-build-00028/alfresco-community-installer-201707-linux-x64.bin \
@@ -151,21 +151,21 @@ RUN set -eux \
       --port=5432 \
       --start \
       --start-conf=manual \
-      13 repository \
+      ${postgresql.version.major} repository \
     && su -c 'psql -f postgresql/conf/init_db.sql' postgres \
-    && pg_ctlcluster 13 repository stop \
+    && pg_ctlcluster ${postgresql.version.major} repository stop \
     && rm tomcat/lib/postgresql-* \
     && wget -q https://jdbc.postgresql.org/download/postgresql-42.3.1.jar \
     && mv postgresql-42.3.1.jar tomcat/lib \
     && sed -i -r \
         "s|^[#]*\s*listen_addresses\s*=\s*.*|listen_addresses = '\*'                 # what IP address(es) to listen on;|" \
-        /etc/postgresql/13/repository/postgresql.conf \
+        /etc/postgresql/${postgresql.version.major}/repository/postgresql.conf \
     && sed -i -r \
         's|host    all             all             127.0.0.1/32            md5|host    all             all             0.0.0.0/0            md5|' \
-        /etc/postgresql/13/repository/pg_hba.conf \
+        /etc/postgresql/${postgresql.version.major}/repository/pg_hba.conf \
     && sed -i -r \
         's|host    all             all             ::1/128                 md5|host    all             all             ::0/0                 md5|' \
-        /etc/postgresql/13/repository/pg_hba.conf
+        /etc/postgresql/${postgresql.version.major}/repository/pg_hba.conf
 
 RUN set -eux \
     && rm -rf common/lib \

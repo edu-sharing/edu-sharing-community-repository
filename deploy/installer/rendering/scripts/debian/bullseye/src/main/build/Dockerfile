@@ -49,8 +49,8 @@ RUN set -eux \
     && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        postgresql-13 \
-    && pg_dropcluster 13 main \
+        postgresql-${postgresql.version.major} \
+    && pg_dropcluster ${postgresql.version.major} main \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
@@ -63,17 +63,17 @@ RUN set -eux \
       --port=5432 \
       --start \
       --start-conf=manual \
-      13 rendering \
+      ${postgresql.version.major} rendering \
     && su -c 'psql -f postgresql/conf/init_db.sql' postgres \
     && sed -i -r \
         "s|^[#]*\s*listen_addresses\s*=\s*.*|listen_addresses = '\*'                 # what IP address(es) to listen on;|" \
-        /etc/postgresql/13/rendering/postgresql.conf \
+        /etc/postgresql/${postgresql.version.major}/rendering/postgresql.conf \
     && sed -i -r \
         's|host    all             all             127.0.0.1/32            md5|host    all             all             0.0.0.0/0            md5|' \
-        /etc/postgresql/13/rendering/pg_hba.conf \
+        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf \
     && sed -i -r \
         's|host    all             all             ::1/128                 md5|host    all             all             ::0/0                 md5|' \
-        /etc/postgresql/13/rendering/pg_hba.conf
+        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf
 
 ########################################################################################################################
 
@@ -103,7 +103,7 @@ RUN set -eux \
 ENV WWW_ROOT /var/www/html/
 ENV RS_ROOT /var/www/html/esrender
 ENV RS_CACHE /var/cache/esrender
-ENV PHP_VERSION 7.4
+ENV PHP_VERSION ${php.version.major}.${php.version.minor}
 
 WORKDIR $WWW_ROOT
 
@@ -161,7 +161,7 @@ COPY assets/entrypoint.sh /usr/local/bin/
 COPY assets/apache2-foreground /usr/local/bin/
 
 RUN set -eux \
-    && pg_ctlcluster 13 rendering start \
+    && pg_ctlcluster ${postgresql.version.major} rendering start \
     && ./install.sh -f .env \
     && ./install.sh -f .env
 
