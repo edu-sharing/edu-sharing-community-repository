@@ -11,17 +11,12 @@ import { SearchService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { first, map, switchMap, takeUntil } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';
+import { EditorMode } from '../../../../core-ui-module/mds-types';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import {
-    EditorType,
-    MdsWidget,
-    MdsWidgetValue,
-    UserPresentableError,
-    Values,
-} from '../types';
-import {EditorMode} from '../../../../core-ui-module/mds-types';
+import { EditorType, MdsWidget, MdsWidgetValue, UserPresentableError, Values } from '../types';
+import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
 
 /**
  * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
@@ -96,7 +91,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         if (this.nodes || this.currentValues) {
             this.init();
         }
-        this.mdsEditorInstance.values.subscribe((values) => this.values = values);
+        this.mdsEditorInstance.values.subscribe((values) => (this.values = values));
     }
 
     ngOnDestroy(): void {
@@ -178,10 +173,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 this.groupId === this.mdsEditorInstance.groupId &&
                 this.setId === this.mdsEditorInstance.mdsId &&
                 this.repository === this.mdsEditorInstance.repository &&
-                this.valuesDictIsEquivalent(
-                    this.currentValues,
-                    this.values,
-                )
+                valuesDictIsEquivalent(this.currentValues, this.values)
             ) {
                 // Don't need to re-init
                 this.loadMdsAfterInit(onlyLegacy);
@@ -220,10 +212,13 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                     this.onDone.emit(this.nodes);
                     return;
                 } else {
-                    console.warn('The following widgets are required but don\'t have a value: ',
-                        this.mdsEditorInstance.getCompletitonStatus().mandatory.fields.filter((
-                            (f) => !f.isCompleted
-                        )).map((f) => f.widget.definition.id));
+                    console.warn(
+                        "The following widgets are required but don't have a value: ",
+                        this.mdsEditorInstance
+                            .getCompletitonStatus()
+                            .mandatory.fields.filter((f) => !f.isCompleted)
+                            .map((f) => f.widget.definition.id),
+                    );
                     this.mdsEditorInstance.showMissingRequiredWidgets();
                 }
                 return;
@@ -252,7 +247,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, {
                     groupId: this.groupId,
                     bulkBehavior: this.bulkBehaviour,
-                    editorMode: this.editorMode ?? 'nodes'
+                    editorMode: this.editorMode ?? 'nodes',
                 });
             } else {
                 this.editorType = await this.mdsEditorInstance.initWithoutNodes(
@@ -318,24 +313,5 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             this.toast.error(error);
         }
         this.onCancel.emit();
-    }
-
-    private valuesDictIsEquivalent(lhs: Values, rhs: Values): boolean {
-        if (!lhs || Object.keys(lhs).length === 0 || !rhs || Object.keys(rhs).length === 0) {
-            return (
-                (!lhs || Object.keys(lhs).length === 0) === (!rhs || Object.keys(rhs).length === 0)
-            );
-        }
-        const keys = Array.from(new Set([...Object.keys(lhs), ...Object.keys(rhs)]));
-        return keys.every((key) => this.valuesArrayIsEquivalent(lhs[key], rhs[key]));
-    }
-
-    private valuesArrayIsEquivalent(lhs: string[], rhs: string[]): boolean {
-        if (!lhs || lhs.length === 0 || !rhs || rhs.length === 0) {
-            return (!lhs || lhs.length === 0) === (!rhs || rhs.length === 0);
-        }
-        return (
-            lhs.every((value) => rhs.includes(value)) && rhs.every((value) => lhs.includes(value))
-        );
     }
 }
