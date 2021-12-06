@@ -4,6 +4,22 @@
   font-size: 90%;
   opacity: 0.8;
 }
+.edit-wrapper {
+    display: flex;
+    align-items: center;
+    > div:first-child {
+        flex-grow: 1;
+    }
+    > button {
+        margin-left: 10px;
+    }
+    .value-wrapper {
+        padding: 2px 5px;
+    }
+    .value-wrapper-edit:hover {
+        outline: 1px solid $cardSeperatorLineColor;
+    }
+}
 .widget-data{
   padding:4px 0 10px 0;
   word-break: break-word;

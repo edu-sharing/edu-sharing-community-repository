@@ -54,8 +54,9 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         this.textAreaElement?.nativeElement?.focus();
     }
 
-    onBlur(): void {
+    blur(): void {
         this.fileNameChecker?.check();
+        this.onBlur.emit();
     }
 
     private getValidators(): ValidatorFn[] {

@@ -15,6 +15,8 @@
     "build-dev": "ng build --delete-output-path false --base-href /edu-sharing/",
     "lint": "ng lint",
     "test": "ng test",
+    "test:edu-sharing-frontend": "ng test angular-edusharing",
+    "test:edu-sharing-api": "ng test edu-sharing-api",
     "pree2e": "webdriver-manager update",
     "e2e": "protractor",
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",

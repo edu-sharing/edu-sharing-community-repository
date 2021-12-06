@@ -27,6 +27,7 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -739,11 +740,20 @@ public class MetadataTemplateRenderer {
 	    		field.setAccessible(true);
 	    		if(field.getType().getSimpleName().equalsIgnoreCase("boolean")) {
 	    			field.set(widget, Boolean.parseBoolean(value));
+				} else if(field.getType().isEnum()) {
+					try {
+						field.set(widget, field.getType().getDeclaredMethod("valueOf", String.class).invoke(null, value));
+					} catch(InvocationTargetException e) {
+						if(e.getTargetException() instanceof IllegalArgumentException) {
+							logger.info("enum constant for widget " + widget.getId() +" " + name + "=" + value + " could not be resolved and will be ignored");
+						}
+					}
 				} else {
 					field.set(widget, value);
 				}
 	    	}catch(Throwable t){
-	    		throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
+	    		logger.warn("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown: " + t.getMessage());
+	    		//throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
 	    	}
 	      }
 	    return widget;

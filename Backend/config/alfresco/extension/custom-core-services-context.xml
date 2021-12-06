@@ -721,7 +721,7 @@
             <ref bean="versionService" />
         </property>
     </bean>
-     <bean id="beforeDeleteIOPolicy" class="org.edu_sharing.alfresco.policy.BeforeDeleteIOPolicy" init-method="init" lazy-init="true">
+     <bean id="beforeDeleteIOPolicy" class="org.edu_sharing.alfresco.policy.BeforeDeleteIOPolicy" init-method="init" depends-on="eduSharingLightBendConfigCache">
    	  <property name="policyComponent">
             <ref bean="policyComponent"/>
         </property>

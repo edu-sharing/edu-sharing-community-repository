@@ -1,7 +1,7 @@
 import { ValidatorFn, Validators } from '@angular/forms';
 import { MdsEditorWidgetCore } from '../mds-editor-instance.service';
 import { assertUnreachable, InputStatus, RequiredMode } from '../types';
-import { Directive } from "@angular/core";
+import {Directive, EventEmitter} from '@angular/core';
 
 export enum ValueType {
     String,
@@ -12,6 +12,11 @@ export enum ValueType {
 @Directive()
 export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     abstract readonly valueType: ValueType;
+
+    /**
+     * triggered when the input focus is lost
+     */
+    onBlur = new EventEmitter<void>();
 
     /**
      * @deprecated use `widget.initialValues` directly

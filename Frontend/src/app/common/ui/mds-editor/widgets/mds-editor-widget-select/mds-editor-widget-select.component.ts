@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { skip } from 'rxjs/operators';
 import { MdsWidgetValue } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import {MatSelect} from '@angular/material/select';
 
 @Component({
     selector: 'es-mds-editor-widget-select',
@@ -12,6 +13,7 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 })
 export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implements OnInit {
     readonly valueType: ValueType = ValueType.String;
+    @ViewChild(MatSelect) matSelect: MatSelect;
 
     values: Promise<MdsWidgetValue[]>;
     formControl: FormControl;
@@ -24,6 +26,10 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
             previousTooltip = tooltip;
         };
     })();
+
+    focus() {
+        this.matSelect.open();
+    }
 
     ngOnInit() {
         this.formControl = new FormControl(null, this.getStandardValidators());

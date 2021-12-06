@@ -1,6 +1,6 @@
 
 import {
-    throttleTime, 
+    throttleTime,
     debounce,
     delay,
     distinctUntilChanged,
@@ -154,6 +154,7 @@ export class MdsEditorWidgetChipsComponent
         if (this.trigger.panelOpen) {
             this.autoCompleteToggleTrigger.next('close');
         }
+        this.onBlur.emit();
     }
 
     toggleAutoCompletePanel(): void {

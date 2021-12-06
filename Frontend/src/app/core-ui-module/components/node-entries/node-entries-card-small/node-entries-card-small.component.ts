@@ -1,10 +1,11 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, ContentChild, Input, OnChanges, SimpleChanges, TemplateRef} from '@angular/core';
 import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../node-helper.service';
 import {ColorHelper, PreferredColor} from '../../../../core-module/ui/color-helper';
 import {OptionItem, Target} from '../../../option-item';
-import {InteractionType} from '../../node-entries-wrapper/entries-model';
+import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
+import {NodeEntriesTemplatesService} from '../node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries-card-small',
@@ -12,12 +13,14 @@ import {InteractionType} from '../../node-entries-wrapper/entries-model';
     styleUrls: ['node-entries-card-small.component.scss']
 })
 export class NodeEntriesCardSmallComponent<T extends Node> implements OnChanges {
+    readonly ClickSource = ClickSource;
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     @Input() node: T;
     constructor(
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
+        public templatesService: NodeEntriesTemplatesService,
     ) {
     }
 

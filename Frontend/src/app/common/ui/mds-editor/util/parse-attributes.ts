@@ -99,11 +99,12 @@ function guessPropertyInfo(attribute: Attr, widgetDefinition: MdsWidget): Proper
         ) {
             return { property, type };
         }
+    } else if(!['style', 'class'].includes(attribute.name)) {
+        console.warn(
+            `Encountered unknown attribute in widget definition for ${widgetDefinition.id}:`,
+            attribute,
+        );
     }
-    console.warn(
-        `Encountered unknown attribute in widget definition for ${widgetDefinition.id}:`,
-        attribute,
-    );
     return {
         property: property ?? attribute.name,
         type: 'string',
@@ -118,7 +119,6 @@ function parseValue(value: string, type: Type): boolean | string | number | any;
 function parseValue(value: string, type: Type): boolean | string | number | any {
     switch (type) {
         case 'boolean':
-            console.log(value, type);
             return value?.toLowerCase() === 'true';
         case 'number':
             return parseInt(value, 10);

@@ -98,6 +98,9 @@ mat-form-field {
     width: unset;
     min-width: 0;
     flex: 1 0 0;
+    &::placeholder {
+        color: mix($workspaceTopBarInputText, $workspaceTopBarInputBackground, 75%);
+    }
 }
 
 .submit-button {

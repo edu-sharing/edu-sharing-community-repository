@@ -1,6 +1,6 @@
 <div class="grid-top">
   <div class="title">
-    <ng-container *ngTemplateOutlet="titleRef"></ng-container>
+    <ng-container *ngTemplateOutlet="templatesService.title"></ng-container>
   </div>
   <div *ngIf="entriesService.sort?.allowed" class="order-panel">
     <mat-slide-toggle *ngIf="entriesService.sort.active === 'ccm:collection_ordered_position'"
@@ -153,7 +153,8 @@ elements at all places without any elements between `ul` and `li`. -->
         *ngFor="let node of nodes; let i = index"
         [node]="node"
         role="listitem"
-      ></es-node-entries-card-small>
+      >
+      </es-node-entries-card-small>
     </ng-container>
     <ng-container *ngIf="displayType === NodeEntriesDisplayType.Grid">
       <es-node-entries-card

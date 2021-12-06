@@ -27,7 +27,6 @@ import { NativeWidgetComponent } from './mds-editor-view/mds-editor-view.compone
 import {
     BulkMode,
     EditorBulkMode,
-    EditorMode,
     EditorType,
     InputStatus,
     MdsDefinition,
@@ -43,6 +42,10 @@ import {
 } from './types';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {EditorMode} from '../../../core-ui-module/mds-types';
+import {MdsWidgetComponent} from '../mds-viewer/widget/mds-widget.component';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {MdsEditorWidgetBase} from './widgets/mds-editor-widget-base';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -762,9 +765,10 @@ export class MdsEditorInstanceService implements OnDestroy {
             groupId = null,
             refetch = true,
             bulkBehavior = BulkBehavior.Default,
-        }: { groupId?: string; refetch?: boolean; bulkBehavior?: BulkBehavior } = {},
+            editorMode = 'nodes'
+        }: { groupId?: string; refetch?: boolean; bulkBehavior?: BulkBehavior, editorMode?: EditorMode } = {},
     ): Promise<EditorType> {
-        this.editorMode = 'nodes';
+        this.editorMode = editorMode;
         if (refetch) {
             this.nodes$.next(await this.mdsEditorCommonService.fetchNodesMetadata(nodes));
         } else {
@@ -1246,8 +1250,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                 const condition = widget.condition;
                 const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
                 return (
-                    nodes.some((n) => pattern.test(n.properties[condition.value])) !==
-                    condition.negate
+                    nodes ? nodes.some((n) => pattern.test(n.properties[condition.value])) !==
+                    condition.negate :
+                        values ? widget.condition.negate === !values[widget.condition.value]
+                            : true
                 );
             }
             if (nodes) {
@@ -1445,6 +1451,20 @@ export class MdsEditorInstanceService implements OnDestroy {
                 break;
             }
         }
+    }
+
+    async saveWidgetValue(widget: Widget) {
+        const nodes = this.nodes$.value;
+        if(nodes?.length !== 1) {
+            throw new Error('saveWidgetValue can not be called without exactly one node present!');
+        }
+        await this.mdsEditorCommonService.saveNodeProperty(
+            nodes[0],
+            widget.definition.id,
+            widget.getValue()
+        );
+        nodes[0].properties[widget.definition.id] = widget.getValue();
+        this.nodes$.next(nodes);
     }
 }
 

@@ -1,27 +1,21 @@
 import {
     Component,
-    Input,
-    ElementRef,
-    Sanitizer,
-    ViewContainerRef,
     ComponentFactoryResolver,
+    ElementRef,
+    Injector,
+    Input,
     QueryList,
     ViewChildren,
-    Injector,
+    ViewContainerRef,
 } from '@angular/core';
-import { MdsWidgetComponent } from './widget/mds-widget.component';
-import {
-    RestConnectorService,
-    RestConstants,
-    RestMdsService,
-} from '../../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
+import { RestConstants, RestMdsService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { MdsEditorViewComponent } from '../mds-editor/mds-editor-view/mds-editor-view.component';
-import { MdsEditorInstanceService, Widget } from '../mds-editor/mds-editor-instance.service';
-import { Values } from '../mds-editor/types';
+import { MdsEditorInstanceService } from '../mds-editor/mds-editor-instance.service';
 import { ViewInstanceService } from '../mds-editor/mds-editor-view/view-instance.service';
+import { Values } from '../mds-editor/types';
 import { replaceElementWithDiv } from '../mds-editor/util/replace-element-with-div';
+import { MdsWidgetComponent } from './widget/mds-widget.component';
 
 @Component({
     selector: 'es-mds-viewer',
@@ -31,15 +25,18 @@ import { replaceElementWithDiv } from '../mds-editor/util/replace-element-with-d
 })
 export class MdsViewerComponent {
     @ViewChildren('container') container: QueryList<ElementRef>;
+
     _groupId: string;
     _setId: string;
     _data: Values;
     mds: any;
     templates: any[];
+
     @Input() set groupId(groupId: string) {
         this._groupId = groupId;
         this.inflate();
     }
+
     @Input() set setId(setId: string) {
         this._setId = setId;
         this.mdsService.getSet(setId).subscribe((mds) => {
@@ -47,6 +44,7 @@ export class MdsViewerComponent {
             this.inflate();
         });
     }
+
     @Input() set data(data: Values) {
         this._data = data;
         if (this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] != null) {
@@ -63,16 +61,28 @@ export class MdsViewerComponent {
             });
         }
     }
+
     /**
      * show group headings (+ icons) for the individual templates
      */
     @Input() showGroupHeadings = true;
+
+    constructor(
+        private mdsService: RestMdsService,
+        private mdsEditorInstanceService: MdsEditorInstanceService,
+        private factoryResolver: ComponentFactoryResolver,
+        private injector: Injector,
+        private containerRef: ViewContainerRef,
+        private sanitizer: DomSanitizer,
+    ) {}
+
     getGroup() {
         return this.mds.groups.find((g: any) => g.id == this._groupId);
     }
     getView(id: string) {
         return this.mds.views.find((v: any) => v.id == id);
     }
+
     private async inflate() {
         if (!this.mds) {
             setTimeout(() => this.inflate(), 1000 / 60);
@@ -127,14 +137,6 @@ export class MdsViewerComponent {
             }
         });
     }
-    constructor(
-        private mdsService: RestMdsService,
-        private mdsEditorInstanceService: MdsEditorInstanceService,
-        private factoryResolver: ComponentFactoryResolver,
-        private injector: Injector,
-        private containerRef: ViewContainerRef,
-        private sanitizer: DomSanitizer,
-    ) {}
 
     /**
      * close all custom tags inside the html which are not closed
