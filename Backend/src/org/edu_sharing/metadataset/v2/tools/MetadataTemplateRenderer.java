@@ -165,7 +165,7 @@ public class MetadataTemplateRenderer {
 					if (widget.getCaption() != null) {
 						widgetHtml.append("<h3 class='mdsWidgetCaption'>").append(widget.getCaption()).append("</h3>");
 					}
-					String innerContainerTag = widget.isMultiple() ? "ul" : "div";
+					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
 					widgetHtml
 						.append("<")
 						.append(innerContainerTag)
@@ -356,8 +356,8 @@ public class MetadataTemplateRenderer {
 					}
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					String innerContainerTag = widget.isMultiple() ? "ul" : "div";
-					widgetHtml.append("</").append(innerContainerTag).append"></div>");
+					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
+					widgetHtml.append("</").append(innerContainerTag).append("></div>");
 				}
 				if ((empty || wasEmpty) && widget.isHideIfEmpty()) {
 					widgetHtml = new StringBuffer();
