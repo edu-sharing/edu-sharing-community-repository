@@ -17,7 +17,11 @@
   </ng-container>
 </div>
 <ng-template #image>
-  <div class="card-image-area">
+  <div class="card-image-area"
+       (esDistinctClick)="entriesService.clickItem.emit({
+          element: node,
+          source: ClickSource.Preview
+       })">
     <div class="card-image-backdrop">
       <img
         *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
@@ -38,7 +42,11 @@
   </div>
 </ng-template>
 <ng-template #meta>
-  <div class="card-meta">
+  <div class="card-meta"
+       (esDistinctClick)="entriesService.clickItem.emit({
+          element: node,
+          source: ClickSource.Metadata
+       })">
     <div
       *ngFor="let displayPart of entriesService.columns; let first = first;"
       class="card-meta-row"
@@ -75,4 +83,5 @@
       </ng-container>
     </div>
   </div>
+  <ng-container *ngTemplateOutlet="templatesService.actionArea; context: {element: node}"></ng-container>
 </ng-template>

@@ -19,6 +19,7 @@ import { NodeEntriesService } from '../../../node-entries.service';
 import { Target } from '../../../option-item';
 import { NodeEntriesDisplayType } from '../../node-entries-wrapper/entries-model';
 import { SortEvent } from '../../sort-dropdown/sort-dropdown.component';
+import {NodeEntriesTemplatesService} from '../node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries-card-grid',
@@ -28,7 +29,6 @@ import { SortEvent } from '../../sort-dropdown/sort-dropdown.component';
 export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
-    @ContentChild('title') titleRef: TemplateRef<any>;
     @ViewChild('grid') gridRef: ElementRef;
     @Input() displayType: NodeEntriesDisplayType;
 
@@ -52,7 +52,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
             ),
         );
 
-    constructor(public entriesService: NodeEntriesService<T>) {}
+    constructor(
+        public entriesService: NodeEntriesService<T>,
+        public templatesService: NodeEntriesTemplatesService
+    ) {}
 
     ngOnChanges(changes: SimpleChanges): void {}
 

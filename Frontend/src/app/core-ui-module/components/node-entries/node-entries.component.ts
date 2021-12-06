@@ -12,17 +12,16 @@ import {Node} from '../../../core-module/rest/data-object';
 import {KeyEvents} from '../../../core-module/ui/key-events';
 import {UIService} from '../../../core-module/rest/services/ui.service';
 import {NodeEntriesDisplayType} from '../node-entries-wrapper/entries-model';
+import {NodeEntriesTemplatesService} from './node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries',
     templateUrl: 'node-entries.component.html',
     styleUrls: ['node-entries.component.scss'],
+
 })
 export class NodeEntriesComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
-    @ContentChild('title') titleRef: TemplateRef<any>;
-    @ContentChild('empty') emptyRef: TemplateRef<any>;
-
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent): void {
@@ -45,6 +44,7 @@ export class NodeEntriesComponent<T extends Node> implements OnChanges {
     constructor(
         private uiService: UIService,
         public entriesService: NodeEntriesService<T>,
+        public templatesService: NodeEntriesTemplatesService,
     ) {
 
     }

@@ -1,5 +1,6 @@
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper.service';
 import {
+    AfterViewInit,
     Component,
     ComponentFactoryResolver,
     ComponentRef,
@@ -10,7 +11,7 @@ import {
     NgZone,
     OnChanges,
     Output,
-    SimpleChange,
+    SimpleChange, SimpleChanges,
     TemplateRef,
     Type,
     ViewContainerRef
@@ -37,6 +38,7 @@ import {
     NodeEntriesDisplayType
 } from './entries-model';
 import {NodeHelperService} from '../../node-helper.service';
+import {NodeEntriesTemplatesService} from '../node-entries/node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -44,20 +46,20 @@ import {NodeHelperService} from '../../node-helper.service';
         <es-node-entries
             *ngIf="!customNodeListComponent"
         >
-            <ng-template #title><ng-container *ngTemplateOutlet="titleRef"></ng-container></ng-template>
-            <ng-template #empty><ng-container *ngTemplateOutlet="emptyRef"></ng-container></ng-template>
         </es-node-entries>`,
     providers: [
         NodeEntriesService,
         OptionsHelperService,
+        NodeEntriesTemplatesService,
         {provide: OPTIONS_HELPER_CONFIG, useValue: {
                 subscribeEvents: false
         }}
     ]
 })
-export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, ListEventInterface<T> {
+export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewInit, OnChanges, ListEventInterface<T> {
     @ContentChild('title') titleRef: TemplateRef<any>;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
+    @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
@@ -86,6 +88,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         private optionsHelper: OptionsHelperService,
         private nodeHelperService: NodeHelperService,
         private mainNav: MainNavService,
+        private templatesService: NodeEntriesTemplatesService,
         private elementRef: ElementRef,
     ) {
         // regulary re-bind template since it might have updated without ngChanges trigger
@@ -127,6 +130,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();
         }
+        this.ngAfterViewInit();
     }
     /**
      * Replaces this wrapper with the configured custom-node-list component.
@@ -231,6 +235,12 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
             customOptions: config.customOptions,
         });
         this.optionsHelper.refreshComponents();
+    }
+
+    ngAfterViewInit(): void {
+        this.templatesService.title = this.titleRef;
+        this.templatesService.empty = this.emptyRef;
+        this.templatesService.actionArea = this.actionAreaRef;
     }
 }
 
