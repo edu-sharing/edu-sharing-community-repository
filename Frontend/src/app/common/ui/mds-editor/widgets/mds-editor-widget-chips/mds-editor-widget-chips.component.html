@@ -6,11 +6,15 @@
   [valueType]="valueType"
   [control]="chipsControl"
 >
+  <!-- The aria-describedby attribute is set automatically by MatFormField to the ChipList. We pass
+  it on to the input element. -->
   <mat-chip-list
     #chipList
     [formControl]="chipsControl"
     *ngIf="chipsControl"
-    [attr.aria-labelledby]="container.labelId"
+    [attr.aria-labelledby]="chipsControl.value.length > 0 ? container.labelId : null"
+    esOnAttributeChange="aria-describedby"
+    (attributeChange)="input.setAttribute('aria-describedby', $event)"
   >
     <mat-chip
       *ngFor="let value of chipsControl.value"

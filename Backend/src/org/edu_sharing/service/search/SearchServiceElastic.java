@@ -577,6 +577,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
     }
     private <T extends NodeRefImpl> T transform(Class<T> clazz, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
+        HashMap<String,MetadataSet> mdsCache = new HashMap<>();
+
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
@@ -635,12 +637,18 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 }
             } else {
                 try {
-                    MetadataSet mds = MetadataHelper.getMetadataset(
-                            ApplicationInfoList.getHomeRepository(),
-                            (String) properties.getOrDefault(
-                                    CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
-                                    CCConstants.metadatasetdefault_id)
-                    );
+                    String mdsId= (String) properties.getOrDefault(
+                            CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
+                            CCConstants.metadatasetdefault_id);
+                    MetadataSet mds = mdsCache.get(mdsId);
+                    if(mds == null){
+                        mds = MetadataHelper.getMetadataset(
+                                ApplicationInfoList.getHomeRepository(),
+                                mdsId
+                        );
+                        mdsCache.put(mdsId,mds);
+                    }
+
                     MetadataHelper.addVirtualDisplaynameProperties(mds, props);
                 } catch (Throwable t) {
                     logger.info("Could not resolve displaynames: " + t.getMessage());

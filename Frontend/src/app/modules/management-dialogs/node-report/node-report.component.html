@@ -17,7 +17,7 @@
           <mat-radio-button
             *ngFor="let reason of reasons"
             [value]="reason"
-            aria-describedby="node-report-reason-error"
+            [aria-describedby]="shouldShowError('reason') ? 'node-report-reason-error' : null"
             >{{ 'NODE_REPORT.REASONS.' + reason | translate }}</mat-radio-button
           >
         </mat-radio-group>

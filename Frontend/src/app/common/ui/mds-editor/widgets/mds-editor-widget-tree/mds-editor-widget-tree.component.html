@@ -12,7 +12,7 @@
   <mat-chip-list
     #chipList
     [formControl]="chipsControl"
-    [attr.aria-labelledby]="container.labelId"
+    [attr.aria-labelledby]="chipsControl?.value.length > 0 ? container.labelId : null"
     (click)="$event.stopPropagation(); $event.preventDefault()"
   >
     <mat-chip
