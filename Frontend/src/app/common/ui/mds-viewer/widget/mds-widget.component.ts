@@ -1,11 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { DateHelper } from '../../../../core-ui-module/DateHelper';
 import { FormatSizePipe } from '../../../../core-ui-module/pipes/file-size.pipe';
-import { Widget } from '../../mds-editor/mds-editor-instance.service';
+import { MdsEditorInstanceService, Widget } from '../../mds-editor/mds-editor-instance.service';
 import { MdsEditorViewComponent } from '../../mds-editor/mds-editor-view/mds-editor-view.component';
 import { MdsWidgetType } from '../../mds-editor/types';
 import { MdsEditorWidgetBase, ValueType } from '../../mds-editor/widgets/mds-editor-widget-base';
+import { MdsViewerInstanceService } from '../mds-viewer-instance.service';
 
 @Component({
     selector: 'es-mds-widget',
@@ -33,7 +35,19 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
 
     @ViewChild('editWrapper') editWrapper: ElementRef;
 
+    get headingLevel() {
+        return this.viewerInstance.headingLevel;
+    }
+
     private temporaryValue: string[] = undefined;
+
+    constructor(
+        mdsEditorInstance: MdsEditorInstanceService,
+        translate: TranslateService,
+        private viewerInstance: MdsViewerInstanceService,
+    ) {
+        super(mdsEditorInstance, translate);
+    }
 
     ngOnInit(): void {}
 

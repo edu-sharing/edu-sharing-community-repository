@@ -9,7 +9,9 @@
 >
   <div class="edit-wrapper">
     <div *ngIf="!isEmpty() || !widget.definition.hideIfEmpty" class="widget-wrapper">
-      <div class="widget-label">{{ widget.definition.caption }}</div>
+      <div class="widget-label" role="heading" [attr.aria-level]="headingLevel">
+        {{ widget.definition.caption }}
+      </div>
       <div
         class="value-wrapper"
         [class.value-wrapper-edit]="isEditable()"

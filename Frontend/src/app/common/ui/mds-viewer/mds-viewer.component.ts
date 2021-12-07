@@ -15,13 +15,14 @@ import { MdsEditorInstanceService } from '../mds-editor/mds-editor-instance.serv
 import { ViewInstanceService } from '../mds-editor/mds-editor-view/view-instance.service';
 import { Values } from '../mds-editor/types';
 import { replaceElementWithDiv } from '../mds-editor/util/replace-element-with-div';
+import { MdsViewerInstanceService } from './mds-viewer-instance.service';
 import { MdsWidgetComponent } from './widget/mds-widget.component';
 
 @Component({
     selector: 'es-mds-viewer',
     templateUrl: 'mds-viewer.component.html',
     styleUrls: ['mds-viewer.component.scss'],
-    providers: [MdsEditorInstanceService, ViewInstanceService],
+    providers: [MdsEditorInstanceService, ViewInstanceService, MdsViewerInstanceService],
 })
 export class MdsViewerComponent {
     @ViewChildren('container') container: QueryList<ElementRef>;
@@ -67,6 +68,19 @@ export class MdsViewerComponent {
      */
     @Input() showGroupHeadings = true;
 
+    /**
+     * The heading level from 1 to 6 to use for widget labels, equivalent to `h1` to `h6`.
+     *
+     * Default is 2.
+     */
+    @Input()
+    set headingLevel(value: number) {
+        this.viewerInstance.headingLevel = value;
+    }
+    get headingLevel() {
+        return this.viewerInstance.headingLevel;
+    }
+
     constructor(
         private mdsService: RestMdsService,
         private mdsEditorInstanceService: MdsEditorInstanceService,
@@ -74,6 +88,7 @@ export class MdsViewerComponent {
         private injector: Injector,
         private containerRef: ViewContainerRef,
         private sanitizer: DomSanitizer,
+        private viewerInstance: MdsViewerInstanceService,
     ) {}
 
     getGroup() {

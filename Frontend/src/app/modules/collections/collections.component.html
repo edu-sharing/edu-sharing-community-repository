@@ -190,13 +190,14 @@
             <es-mds-viewer *ngIf="collectionContent?.node?.properties"
                         [data]="collectionContent.node.properties"
                         groupId="collection_sidebar"
+                        [headingLevel]="2"
             ></es-mds-viewer>
           </div>
 
           <ng-container *ngIf="collectionContent?.node?.access?.indexOf('ChangePermissions') !== -1">
-            <div class="collection-permissions collection-label">
+            <h2 class="collection-permissions collection-label">
               {{ 'COLLECTIONS.PERMISSIONS' | translate }}
-            </div>
+            </h2>
             <div class="collection-permissions collection-content">
               <div *ngFor="let permission of permissions">
                 <ng-container *ngIf="permission.authority.authorityType !== 'EVERYONE'">

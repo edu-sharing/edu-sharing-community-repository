@@ -309,10 +309,11 @@ section {
         background-color: rgba(255, 255, 255, 0.15);
     }
     .collection-label,.collection-metadata{
-        margin-top:18px;
+        margin: 18px 0 0;
         padding-top: 18px;
         border-top: 1px solid rgba(0,0,0,.25);
         opacity:0.85;
+        font-size: unset;
     }
     .collection-content{
         margin-top:5px;
