@@ -1,17 +1,17 @@
 import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
     Component,
-    ContentChild,
     ElementRef,
     Input,
     OnChanges,
+    QueryList,
     SimpleChanges,
-    TemplateRef,
     ViewChild,
+    ViewChildren,
 } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap, take } from 'rxjs/operators';
 import { ListItemSort, Node } from '../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { DragCursorDirective } from '../../../directives/drag-cursor.directive';
@@ -19,7 +19,7 @@ import { NodeEntriesService } from '../../../node-entries.service';
 import { Target } from '../../../option-item';
 import { NodeEntriesDisplayType } from '../../node-entries-wrapper/entries-model';
 import { SortEvent } from '../../sort-dropdown/sort-dropdown.component';
-import {NodeEntriesTemplatesService} from '../node-entries-templates.service';
+import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries-card-grid',
@@ -30,6 +30,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
     @ViewChild('grid') gridRef: ElementRef;
+    @ViewChildren('item', { read: ElementRef }) itemRefs: QueryList<ElementRef<HTMLElement>>;
     @Input() displayType: NodeEntriesDisplayType;
 
     private readonly nodes$ = this.entriesService.dataSource$.pipe(
@@ -54,7 +55,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
 
     constructor(
         public entriesService: NodeEntriesService<T>,
-        public templatesService: NodeEntriesTemplatesService
+        public templatesService: NodeEntriesTemplatesService,
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {}
@@ -73,9 +74,9 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         );
     }
 
-    loadData(force = false) {
+    loadData(byButtonClick = false) {
         // @TODO: Maybe this is better handled in a more centraled service
-        if (!force) {
+        if (!byButtonClick) {
             // check if there is a footer
             const elements = document.getElementsByTagName('footer');
             if (elements.length && elements.item(0).innerHTML.trim()) {
@@ -87,6 +88,26 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
                 offset: this.entriesService.dataSource.getData().length,
             });
         }
+        if (byButtonClick) {
+            this.focusFirstNewItemWhenLoaded();
+        }
+    }
+
+    private focusFirstNewItemWhenLoaded() {
+        const oldLength = this.itemRefs.length;
+        this.itemRefs.changes
+            .pipe(take(1))
+            .subscribe((items: NodeEntriesCardGridComponent<T>['itemRefs']) => {
+                if (items.length > oldLength) {
+                    this.focusOnce(items.get(oldLength).nativeElement);
+                }
+            });
+    }
+
+    private focusOnce(element: HTMLElement): void {
+        element.setAttribute('tabindex', '-1');
+        element.focus();
+        element.addEventListener('blur', () => element.removeAttribute('tabindex'), { once: true });
     }
 
     onGridSizeChanges(): void {

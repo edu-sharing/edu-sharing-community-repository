@@ -47,6 +47,7 @@ elements at all places without any elements between `ul` and `li`. -->
     >
       <es-node-entries-card
         *ngIf="displayType === NodeEntriesDisplayType.Grid"
+        #item
         [node]="node"
         [dropdown]="dropdown"
         role="listitem"
@@ -54,6 +55,7 @@ elements at all places without any elements between `ul` and `li`. -->
       ></es-node-entries-card>
       <es-node-entries-card-small
         *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+        #item
         [node]="node"
         role="listitem"
         cdkDrag
@@ -101,6 +103,7 @@ elements at all places without any elements between `ul` and `li`. -->
       >
         <es-node-entries-card
           *ngIf="displayType === NodeEntriesDisplayType.Grid"
+          #item
           [node]="node"
           [dropdown]="dropdown"
           role="listitem"
@@ -110,6 +113,7 @@ elements at all places without any elements between `ul` and `li`. -->
         ></es-node-entries-card>
         <es-node-entries-card-small
           *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+          #item
           [node]="node"
           role="listitem"
           cdkDrag
@@ -151,6 +155,7 @@ elements at all places without any elements between `ul` and `li`. -->
     <ng-container *ngIf="displayType === NodeEntriesDisplayType.SmallGrid">
       <es-node-entries-card-small
         *ngFor="let node of nodes; let i = index"
+        #item
         [node]="node"
         role="listitem"
       >
@@ -159,6 +164,7 @@ elements at all places without any elements between `ul` and `li`. -->
     <ng-container *ngIf="displayType === NodeEntriesDisplayType.Grid">
       <es-node-entries-card
         *ngFor="let node of nodes; let i = index"
+        #item
         [node]="node"
         [dropdown]="dropdown"
         role="listitem"
