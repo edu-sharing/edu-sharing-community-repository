@@ -23,6 +23,8 @@ start() {
 
 	./postgresql/scripts/ctl.sh start
 	./libreoffice/scripts/ctl.sh start
+	systemctl start elasticsearch
+	#systemctl start elastictracker
 	#./tomcat/scripts/ctl.sh daemon
 
 	local catalinaPid
@@ -37,6 +39,35 @@ start() {
 	echo $"$catalinaPid" >"${CATALINA_PID}"
 
 	apache2ctl start
+
+
+	source .env.base
+  repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-"127.0.0.1"}"
+  repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
+  repository_search_elastic_sharts="${REPOSITORY_SEARCH_ELASTIC_SHARTS:-1}"
+  repository_search_elastic_replicas="${REPOSITORY_SEARCH_ELASTIC_REPLICAS:-1}"
+  repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
+
+	until wait-for-it "localhost:9200" -t 3; do sleep 1; done
+
+	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s") -eq 200 ]]; do
+		echo >&2 "Waiting for elasticsearch ..."
+		sleep 3
+	done
+
+	until wait-for-it "localhost:80" -t 3; do sleep 1; done
+
+	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "http://localhost:8080/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
+		echo >&2 "Waiting for edu-sharing ..."
+		sleep 3
+	done
+
+	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "http://localhost:8080/edu-sharing/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
+		echo >&2 "Waiting for edu-sharing ..."
+		sleep 3
+	done
+
+	systemctl start elastictracker
 
 	echo "CATALINA_PID: $CATALINA_PID"
 	wait "$catalinaPid"

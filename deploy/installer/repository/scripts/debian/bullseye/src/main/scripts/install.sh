@@ -2,6 +2,7 @@
 set -e
 set -o pipefail
 
+########################################################################################################################
 
 # load the default configuration
 if [[ -f ".env.base" ]] ; then
@@ -9,19 +10,42 @@ if [[ -f ".env.base" ]] ; then
 	source .env.base
 fi
 
+########################################################################################################################
+
 usage() {
 	echo "Options:"
 	echo ""
 
-	echo"-?"
-	echo"--help"
-	echo "Display available options"
+	echo "-?"
+	echo "--help"
+	echo "  Display available options"
 	echo ""
 
 	echo "-f = environment file"
 	echo "--file"
-	echo "Loads the configuration from the specified environment file"
+	echo "  Loads the configuration from the specified environment file"
+	echo ""
+
+	echo "--all"
+  echo "  Setup all products"
+	echo ""
+
+  echo "--repository"
+  echo "  Setup edu-sharing repository"
+	echo ""
+
+  echo "--elastictracker"
+  echo "  Setup elastic tracker"
+  echo ""
+
 }
+
+########################################################################################################################
+
+REPOSITORY=$((1<<0));
+ELASTIC_TRACKER=$((1<<1));
+
+install_options=0
 
 while true; do
 	flag="$1"
@@ -30,6 +54,9 @@ while true; do
 	case "$flag" in
 			--help|'-?') usage && exit 0 ;;
 			--file|-f) source "$1" && shift	;;
+			--all) install_options=$((REPOSITORY | ELASTIC_TRACKER)) ;;
+			--repository) install_options=$((install_options | REPOSITORY)) ;;
+			--elastictracker) install_options=$((install_options | ELASTIC_TRACKER)) ;;
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -38,9 +65,10 @@ while true; do
 	esac
 done
 
-################################################################################################################
+########################################################################################################################
 
 my_home_appid="${REPOSITORY_SERVICE_HOME_APPID:-"local"}" # Kundenprojekt ?
+my_home_provider="${REPOSITORY_SERVICE_HOME_PROVIDER:-}"
 
 my_admin_pass="${REPOSITORY_SERVICE_ADMIN_PASS:-"admin"}"
 my_admin_pass_md4="$(printf '%s' "$my_admin_pass" | iconv -t utf16le | openssl md4 | awk '{ print $2 }')"
@@ -83,6 +111,18 @@ repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
 repository_contentstore="${REPOSITORY_SERVICE_CONTENTSTORE:-}"
 repository_contentstore_deleted="${REPOSITORY_SERVICE_CONTENTSTORE_DELETED:-}"
 
+repository_elastic_tracker_server_address="${REPOSITORY_ELASTIC_TRACKER_SERVER_HOST:-"127.0.0.1"}"
+repository_elastic_tracker_server_port="${REPOSITORY_ELASTIC_TRACKER_SERVER_PORT:-8081}"
+repository_elastic_tracker_management_server_address="${REPOSITORY_ELASTIC_TRACKER_MANAGEMENT_SERVER_HOST:-"127.0.0.1"}"
+repository_elastic_tracker_management_server_port="${REPOSITORY_ELASTIC_TRACKER_MANAGEMENT_SERVER_PORT:-8082}"
+
+repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-"127.0.0.1"}"
+repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
+repository_search_elastic_sharts="${REPOSITORY_SEARCH_ELASTIC_SHARTS:-1}"
+repository_search_elastic_replicas="${REPOSITORY_SEARCH_ELASTIC_REPLICAS:-1}"
+repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
+
+########################################################################################################################
 
 info() {
 	echo ""
@@ -130,6 +170,7 @@ info() {
   echo "  Services:"
   echo ""
   echo "    Public:            ${my_base_external}"
+  echo "    Home provider:     ${REPOSITORY_SERVICE_HOME_PROVIDER}"
   echo ""
 
 	if [[ -n $rendering_proxy_host ]] ; then
@@ -153,6 +194,27 @@ info() {
   echo "  Host:                ${repository_search_solr4_host}"
   echo "  Port:                ${repository_search_solr4_port}"
   echo ""
+  echo "#########################################################################"
+  echo ""
+  echo "elastic tracker:"
+  echo ""
+  echo "  elastic search"
+  echo ""
+  echo "    Host:              ${repository_search_elastic_host}"
+  echo "    Port:              ${repository_search_elastic_port}"
+  echo "    Sharts:            ${repository_search_elastic_sharts}"
+  echo "    Replicas:          ${repository_search_elastic_replicas}"
+  echo ""
+  echo "  tracker server:"
+  echo ""
+  echo "    Host:              ${repository_elastic_tracker_server_address}"
+  echo "    Port:              ${repository_elastic_tracker_server_port}"
+  echo ""
+  echo "  tracker management server:"
+  echo ""
+  echo "    Host:              ${repository_elastic_tracker_management_server_address}"
+  echo "    Port:              ${repository_elastic_tracker_management_server_port}"
+  echo ""
  	echo "#########################################################################"
   echo ""
   echo "transformer:"
@@ -162,6 +224,7 @@ info() {
   echo ""
   echo "#########################################################################"
   echo ""
+
 
   if [[ -n $repository_contentstore || -n $repository_contentstore_deleted ]] ; then
   echo "#########################################################################"
@@ -178,38 +241,10 @@ info() {
   echo ""
 }
 
-
 ########################################################################################################################
 
-
-[[ ! -f "${ALF_HOME}/alfresco.sh" ]] && {
-	echo ""
-	echo "Env ALF_HOME must point to the home directory of your Alfresco Platform!"
-	exit
-}
-
-pushd "$ALF_HOME"
-
-[[ ! -d tomcat/webapps/alfresco || ! -d tomcat/webapps/solr4 ]] && {
-	echo ""
-	echo "You must have started the Alfresco Platform at least once before you can run the installation."
-	exit
-}
-
-[[ "$(./alfresco.sh status tomcat)" != "tomcat not running" ]] && {
-	echo ""
-	echo "Please stop Tomcat before you can run the installation!"
-	exit
-}
-
-[[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] && {
-	echo ""
-	echo "Please stop Postgresql before you can run the installation!"
-	exit
-}
-
-
 install_edu_sharing() {
+	pushd "$ALF_HOME"
 
 	echo "- clean up outdated libraries"
 	rm -f tomcat/lib/postgresql-*
@@ -217,22 +252,11 @@ install_edu_sharing() {
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/hazelcast-*
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/jackson-*
 
+	######################################################################################################################
 
-	########################################################################################################################
-
-	echo "- download edu-sharing repository distribution"
-	mvn -q dependency:get \
-		-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
-		-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
-		-Dtransitive=false
-
-	echo "- unpack edu-sharing repository distribution"
-	mvn -q dependency:copy \
-		-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
-		-DoutputDirectory=.
-
-	tar xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
-	rm edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
+	echo "- unpack edu-sharing repository"
+	tar xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz \
+		--exclude='./elastictracker'
 
 	echo "- install Alfresco Module Packages"
 	if [[ -d amps/alfresco/0 ]]; then
@@ -248,7 +272,7 @@ install_edu_sharing() {
   fi
 
 
-	### Tomcat #############################################################################################################
+	### Tomcat ###########################################################################################################
 
 	echo "- update tomcat env"
 	sed -i -r 's|file\.encoding=.*\"|file.encoding=UTF-8 $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
@@ -263,7 +287,48 @@ install_edu_sharing() {
 	sed -i -r 's|javax\.xml\.parsers\.SAXParserFactory=.*\"|javax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
 	grep -q 'javax\.xml\.parsers\.SAXParserFactory' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
 
-	### Alfresco platform ##################################################################################################
+	if [[ -n "${repository_proxy_nonproxyhosts}" ]]  ; then
+		sed -i -r "s|http\.nonProxyHosts=.*\"|http.nonProxyHosts=${repository_proxy_nonproxyhosts}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.nonProxyHosts' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.nonProxyHosts ${repository_proxy_nonproxyhosts}\"" >> tomcat/bin/setenv.sh
+
+		sed -i -r "s|https\.nonProxyHosts=.*\"|https.nonProxyHosts=${repository_proxy_nonproxyhosts}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.nonProxyHosts' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.nonProxyHosts ${repository_proxy_nonproxyhosts}\"" >> tomcat/bin/setenv.sh
+	fi
+
+	if [[ -n "${repository_proxy_proxyhost}" ]] ; then
+		sed -i -r "s|http\.proxyHost=.*\"|http.proxyHost=${repository_proxy_proxyhost}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.proxyHost' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyHost ${repository_proxy_proxyhost}\"" >> tomcat/bin/setenv.sh
+
+		sed -i -r "s|https\.proxyHost=.*\"|https.proxyHost=${repository_proxy_proxyhost}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.proxyHost' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyHost ${repository_proxy_proxyhost}\"" >> tomcat/bin/setenv.sh
+	fi
+
+	if [[ -n "${repository_proxy_proxypass}" ]] ; then
+		sed -i -r "s|http\.proxyPass=.*\"|http.proxyPass=${repository_proxy_proxypass}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.proxyPass' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyPass ${repository_proxy_proxypass}\"" >> tomcat/bin/setenv.sh
+
+		sed -i -r "s|https\.proxyPass=.*\"|https.proxyPass=${repository_proxy_proxypass}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.proxyPass' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyPass ${repository_proxy_proxypass}\"" >> tomcat/bin/setenv.sh
+	fi
+
+	if [[ -n "${repository_proxy_proxyport}" ]] ; then
+		sed -i -r "s|http\.proxyPort=.*\"|http.proxyPort=${repository_proxy_proxyport}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.proxyPort' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyPort ${repository_proxy_proxyport}\"" >> tomcat/bin/setenv.sh
+
+		sed -i -r "s|https\.proxyPort=.*\"|https.proxyPort=${repository_proxy_proxyport}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.proxyPort' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyPort ${repository_proxy_proxyport}\"" >> tomcat/bin/setenv.sh
+	fi
+
+	if [[ -n "${repository_proxy_proxyuser}" ]] ; then
+		sed -i -r "s|http\.proxyUser=.*\"|http.proxyUser=${repository_proxy_proxyuser}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.proxyUser' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyUser ${repository_proxy_proxyuser}\"" >> tomcat/bin/setenv.sh
+
+		sed -i -r "s|https\.proxyUser=.*\"|https.proxyUser=${repository_proxy_proxyuser}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.proxyUser' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyUser ${repository_proxy_proxyuser}\"" >> tomcat/bin/setenv.sh
+	fi
+
+
+	### Alfresco platform ################################################################################################
 
 	alfGlobalProps="tomcat/shared/classes/alfresco-global.deployment.properties"
 	solr4WorkspaceProps="solr4/workspace-SpacesStore/conf/solrcore.properties"
@@ -308,7 +373,7 @@ install_edu_sharing() {
   echo "alfresco.secureComms=none" >> "${solr4WorkspaceProps}"
   echo "alfresco.secureComms=none" >> "${solr4ArchiveProps}"
 
-	### edu-sharing ########################################################################################################
+	### edu-sharing ######################################################################################################
 
 	echo "- update edu-sharing env"
 	xmlstarlet ed -L \
@@ -322,97 +387,296 @@ install_edu_sharing() {
 		-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
 		tomcat/shared/classes/homeApplication.properties.xml
 
+	if [[ -n "${my_home_provider}" ]] ; then
+		xmlstarlet ed -L \
+    		-d '/properties/entry[@key="remote_provider"]' \
+    		-s '/properties' -t elem -n "entry" -v "${my_home_provider}" \
+    		--var entry '$prev' \
+    		-i '$entry' -t attr -n "key" -v "remote_provider" \
+    		tomcat/shared/classes/homeApplication.properties.xml
+	fi
+
+	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		set "elasticsearch.servers" '["'"${repository_search_elastic_host}:${repository_search_elastic_port}"'"]'
+
 	if [[ -n "${repository_proxy_host}" ]] ; then
 		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
 			set "repository.proxy.host" "${repository_proxy_host}"
 	fi
 
-	if [[ -n "${repository_proxy_nonproxyhosts}" ]]  ; then
-		export CATALINA_OPTS="-Dhttp.nonProxyHosts=${repository_proxy_nonproxyhosts} $CATALINA_OPTS"
-		export CATALINA_OPTS="-Dhttps.nonProxyHosts=${repository_proxy_nonproxyhosts} $CATALINA_OPTS"
-		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-			set "repository.proxy.nonproxyhosts" "${repository_proxy_nonproxyhosts}"
-	fi
+  if [[ -n "${repository_proxy_nonproxyhosts}" ]]  ; then
+  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  		set "repository.proxy.nonproxyhosts" "${repository_proxy_nonproxyhosts}"
+  fi
 
-	if [[ -n "${repository_proxy_proxyhost}" ]] ; then
-		export CATALINA_OPTS="-Dhttp.proxyHost=${repository_proxy_proxyhost} $CATALINA_OPTS"
-		export CATALINA_OPTS="-Dhttps.proxyHost=${repository_proxy_proxyhost} $CATALINA_OPTS"
-		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-			set "repository.proxy.proxyhost" "${repository_proxy_proxyhost}"
-	fi
+  if [[ -n "${repository_proxy_proxyhost}" ]] ; then
+  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  		set "repository.proxy.proxyhost" "${repository_proxy_proxyhost}"
+  fi
 
-	if [[ -n "${repository_proxy_proxypass}" ]] ; then
-		export CATALINA_OPTS="-Dhttp.proxyPass=${repository_proxy_proxypass} $CATALINA_OPTS"
-		export CATALINA_OPTS="-Dhttps.proxyPass=${repository_proxy_proxypass} $CATALINA_OPTS"
-		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-			set "repository.proxy.proxypass" "${repository_proxy_proxypass}"
-	fi
+  if [[ -n "${repository_proxy_proxypass}" ]] ; then
+  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  		set "repository.proxy.proxypass" "${repository_proxy_proxypass}"
+  fi
 
-	if [[ -n "${repository_proxy_proxyport}" ]] ; then
-		export CATALINA_OPTS="-Dhttp.proxyPort=${repository_proxy_proxyport} $CATALINA_OPTS"
-		export CATALINA_OPTS="-Dhttps.proxyPort=${repository_proxy_proxyport} $CATALINA_OPTS"
-		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-			set "repository.proxy.proxyport" "${repository_proxy_proxyport}"
-	fi
+  if [[ -n "${repository_proxy_proxyport}" ]] ; then
+  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  		set "repository.proxy.proxyport" "${repository_proxy_proxyport}"
+  fi
 
-	if [[ -n "${repository_proxy_proxyuser}" ]] ; then
-		export CATALINA_OPTS="-Dhttp.proxyUser=${repository_proxy_proxyuser} $CATALINA_OPTS"
-		export CATALINA_OPTS="-Dhttps.proxyUser=${repository_proxy_proxyuser} $CATALINA_OPTS"
-		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-			set "repository.proxy.proxyuser" "${repository_proxy_proxyuser}"
-	fi
+  if [[ -n "${repository_proxy_proxyuser}" ]] ; then
+  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  		set "repository.proxy.proxyuser" "${repository_proxy_proxyuser}"
+  fi
+
+	popd
 }
 
 ########################################################################################################################
 
-alfresco_base_snapshot="alfresco-base-SNAPSHOT-DO-NOT-DELETE-ME.tar.gz"
-if [[ -f ../$alfresco_base_snapshot ]] ; then
+can_install_elastic_tracker() {
+	pushd "$ALF_HOME"
 
-	echo ""
-	echo "Update ... "
+		#if [[ -f "/etc/systemd/system/elastictracker" && "$(systemctl status elastictracker)" == "elastictracker is running"  ]] ; then
+		if [[ -f "/etc/systemd/system/elastictracker" && $(systemctl is-active --quiet elastictracker) ]] ; then
+  		echo ""
+  		echo "You must stop the elastic tracker before you can run the installation."
+  		exit 1
+  	fi
 
-	echo "- make a snapshot of edu-sharing platform"
-  snapshot_name=edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
-	tar -czf ../$snapshot_name amps tomcat solr4
-
-	echo "- cleanup amps and tomcat"
-  rm -rf amps
-  rm -rf tomcat
-  rm -rf solr4
-
-  echo "- restore amps and tomcat"
-  tar -zxf ../$alfresco_base_snapshot
-
-	install_edu_sharing
-
-  echo "- restore persistent data of Alfresco platform"
-  if [[ $(tar -tf  ../$snapshot_name | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
-    tar -zxf ../$snapshot_name tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
-  else
-    echo "nothing to restore"
-  fi  
-
-  echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
-  pushd ..
-  ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
 	popd
+}
 
-else
+########################################################################################################################
 
-	echo ""
-	echo "Install ... "
+install_elastic_tracker() {
+	pushd "$ALF_HOME"
 
-	echo "- make a snapshot of Alfresco platform"
- 	tar -czf ../$alfresco_base_snapshot amps tomcat solr4
+	echo "- remove elastictracker"
+	rm -rf elastictracker
 
-  install_edu_sharing
+	echo "- unpack edu-sharing elastic tracker"
+	tar -zxf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz \
+			elastictracker
 
+	###  elastic tracker #################################################################################################
+
+	echo "- update elastic tracker env"
+	elasticApplicationProps="elastictracker/application.properties"
+	touch "${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*server\.address=.*|alfresco.address='"${repository_elastic_tracker_server_address}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*server\.address=' "${elasticApplicationProps}" || echo "server.address=${repository_elastic_tracker_server_address}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*server\.port=.*|alfresco.host='"${repository_elastic_tracker_server_port}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*server\.port=' "${elasticApplicationProps}" || echo "server.port=${repository_elastic_tracker_server_port}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*management\.server.\address=.*|alfresco.host='"${repository_elastic_tracker_management_server_address}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*management\.server.\address=' "${elasticApplicationProps}" || echo "management.server.address=${repository_elastic_tracker_management_server_address}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*management\.server.\port=.*|alfresco.host='"${repository_elastic_tracker_management_server_port}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*management\.server.\port=' "${elasticApplicationProps}" || echo "management.server.port=${repository_elastic_tracker_management_server_port}" >>"${elasticApplicationProps}"
+
+
+
+
+
+	sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${my_host_internal}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*alfresco\.host=' "${elasticApplicationProps}" || echo "alfresco.host=${my_host_internal}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${my_port_internal}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*alfresco\.port=' "${elasticApplicationProps}"|| echo "alfresco.port=${my_port_internal}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*alfresco\.password=.*|alfresco.password='"${my_admin_pass}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*alfresco\.password=' "${elasticApplicationProps}" || echo "alfresco.password=${my_admin_pass}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*elastic\.host=.*|elastic.host='"${repository_search_elastic_host}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*elastic\.host=' "${elasticApplicationProps}" || echo "elastic.host=${repository_search_elastic_host}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*elastic\.port=.*|elastic.port='"${repository_search_elastic_port}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*elastic\.port=' "${elasticApplicationProps}" || echo "elastic.port=${repository_search_elastic_port}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*elastic\.index.\number_of_shards=.*|elastic.index.number_of_shards='"${repository_search_elastic_sharts}"'|' "${elasticApplicationProps}"
+ 	grep -q '^[#]*\s*elastic\.index.\number_of_shards=' "${elasticApplicationProps}" || echo "elastic.index.number_of_shards=${repository_search_elastic_sharts}" >>"${elasticApplicationProps}"
+
+	sed -i -r 's|^[#]*\s*elastic.\index\.number_of_replicas=.*|elastic.index.number_of_replicas='"${repository_search_elastic_replicas}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*elastic.\index\.number_of_replicas=' "${elasticApplicationProps}" || echo "elastic.index.number_of_replicas=${repository_search_elastic_replicas}" >>"${elasticApplicationProps}"
+
+	### elastic tracker - fix security issues ############################################################################
+
+	echo "- create worker user"
+	id -u elastictracker &>/dev/null || adduser --uid=1000 --home=$ALF_HOME/elastictracker --disabled-password --gecos "" --shell=/bin/bash elastictracker
+	chown -RL elastictracker:elastictracker ./elastictracker
+	chown -RL elastictracker:elastictracker /tmp
+
+	### elastic tracker - register systemd service #######################################################################
+
+	#ln -s "${ALF_HOME}/elastictracker/tracker.jar" /etc/init.d/elastictracker
+
+	pushd /etc/systemd/system
+
+	elastic_tracker_jar=edu_sharing-community-repository-backend-search-elastic-tracker-${org.edu_sharing:edu_sharing-community-repository-backend-search-elastic-tracker:jar.version}.jar
+
+	# TODO Logfile
+	if [[ ! -f elastictracker ]]; then
+		echo "- create systemd service"
+		touch elastictracker
+		{
+			echo "[Unit]"
+			echo "Description=edu-sharing elastic tracker"
+			echo "After=syslog.target network.target postgresql.service"
+			echo ""
+			echo "[Service]"
+			echo "WorkingDirectory=${ALF_HOME}/elastictracker"
+			echo "User=elastictracker"
+			echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}"
+			echo "SuccessExitStatus=143"
+			echo ""
+			echo "[Install]"
+			echo "WantedBy=multi-user.target"
+		 } >> elastictracker
+	else
+		echo "- update systemd service"
+
+		sed -i -r 's|^WorkingDirectory=.*|WorkingDirectory='"${ALF_HOME}/elastictracker"'|' elastictracker
+    grep -q '^WorkingDirectory=' elastictracker || echo "WorkingDirectory=${ALF_HOME}/elastictracker" >> elastictracker
+
+		sed -i -r 's|^ExecStart=.*|ExecStart='"${ALF_HOME}/elastictracker/${elastic_tracker_jar}"'|' elastictracker
+    grep -q '^ExecStart=' elastictracker || echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}" >> elastictracker
+	fi
+
+	popd
+	popd
+}
+
+########################################################################################################################
+
+can_install_repository(){
+	pushd "$ALF_HOME"
+	if [[ ! -f alfresco.sh ]] ; then
+		echo ""
+		echo "Env ALF_HOME must point to the home directory of your Alfresco Platform!"
+		exit 1
+	fi
+
+	if [[ ! -d tomcat/webapps/alfresco || ! -d tomcat/webapps/solr4 ]] ; then
+		echo ""
+		echo "You must have started the Alfresco Platform at least once before you can run the installation."
+		exit 1
+	fi
+
+	if [[ "$(./alfresco.sh status tomcat)" != "tomcat not running" ]] ; then
+		echo ""
+		echo "Please stop Tomcat before you can run the installation!"
+		exit 1
+	fi
+
+	if [[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] ; then
+		echo ""
+		echo "Please stop Postgresql before you can run the installation!"
+		exit 1
+	fi
+	popd
+}
+
+########################################################################################################################
+
+install_repository() {
+
+	pushd "$ALF_HOME"
+
+	alfresco_base_snapshot="alfresco-base-SNAPSHOT-DO-NOT-DELETE-ME.tar.gz"
+	if [[ -f ../$alfresco_base_snapshot ]] ; then
+
+		echo ""
+		echo "Update ... "
+
+		echo "- make a snapshot of edu-sharing platform"
+		snapshot_name=edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
+		tar -czf ../$snapshot_name amps tomcat solr4
+
+		echo "- cleanup amps and tomcat"
+		rm -rf amps
+		rm -rf tomcat
+		rm -rf solr4
+
+		echo "- restore amps and tomcat"
+		tar -zxf ../$alfresco_base_snapshot
+
+		install_edu_sharing
+
+		echo "- restore persistent data of Alfresco platform"
+		if [[ $(tar -tf  ../$snapshot_name | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
+			tar -zxf ../$snapshot_name tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
+		else
+			echo "nothing to restore"
+		fi
+
+		echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
+		pushd ..
+		ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
+		popd
+
+	else
+
+		echo ""
+		echo "Install ... "
+
+		echo "- make a snapshot of Alfresco platform"
+		tar -czf ../$alfresco_base_snapshot amps tomcat solr4
+
+		install_edu_sharing
+
+	fi
+
+	echo "- you may need to delete the solr4 index, model and content folders!"
+	popd
+}
+
+########################################################################################################################
+
+if [[ $install_options == 0 ]]  ; then
+	usage
+	exit 1
 fi
 
-popd
+
+if [[ $((install_options & REPOSITORY)) != 0 ]]; then
+	can_install_repository
+fi
+
+if [[ $((install_options & ELASTIC_TRACKER)) != 0 ]]; then
+	can_install_elastic_tracker
+fi
+
+########################################################################################################################
+
+
+echo "- download edu-sharing repository distribution"
+mvn -q dependency:get \
+	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
+	-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
+	-Dtransitive=false
+
+echo "- unpack edu-sharing repository distribution"
+mvn -q dependency:copy \
+	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
+	-DoutputDirectory=.
+
+if [[ $((install_options & REPOSITORY)) != 0 ]]; then
+	install_repository
+fi
+
+if [[ $((install_options & ELASTIC_TRACKER)) != 0 ]]; then
+	install_elastic_tracker
+fi
+
+rm edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
 
 info >> "install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
 info
 
 echo "- done."
-echo "- you may need to delete the solr4 index, model and content folders!"
+exit
+
+########################################################################################################################

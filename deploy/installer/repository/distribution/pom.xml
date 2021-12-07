@@ -114,9 +114,7 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <includeArtifactIds>
-                edu_sharing-community-repository-backend-search-elastic-tracker
-              </includeArtifactIds>
+              <includeArtifactIds>edu_sharing-community-repository-backend-search-elastic-tracker</includeArtifactIds>
               <outputDirectory>${project.build.directory}/dist/elastictracker</outputDirectory>
             </configuration>
           </execution>

@@ -1,6 +1,7 @@
 FROM docker.io/${os.distribution}:${os.codename}
 
 ENV ALF_HOME /opt/alfresco
+#ENV PATH $ALF_HOME/bin:$PATH
 WORKDIR $ALF_HOME
 
 RUN set -eux \
@@ -27,7 +28,10 @@ RUN set -eux \
         procps \
         unzip \
         wget \
+        ruby-hocon \
         xmlstarlet \
+        systemctl \
+        wait-for-it \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
@@ -193,18 +197,42 @@ RUN set -eux \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
+
+########################################################################################################################
+
+
+RUN set -eux \
+    && wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add - \
+    && echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-7.x.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        elasticsearch \
+    && mkdir /var/run/elasticsearch \
+    && chown elasticsearch:elasticsearch -R /var/run/elasticsearch \
+    && chown elasticsearch:elasticsearch -R /usr/share/elasticsearch \
+    && chown elasticsearch:elasticsearch -R /var/log/elasticsearch \
+    && chown elasticsearch:elasticsearch -R /var/lib/elasticsearch \
+    && chown elasticsearch:elasticsearch -R /etc/default/elasticsearch \
+    && chown elasticsearch:elasticsearch -R /etc/elasticsearch \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+
+########################################################################################################################
+
 COPY .env.base .
 COPY install.sh .
 COPY assets/entrypoint.sh .
 
 #Test Install and Update
 RUN set -eux \
-    && ./install.sh \
-    && ./install.sh
-    #&& rm -rf alf_data/solr4/index alf_data/solr4/model alf_data/solr4/content
+    && ./install.sh --all \
+    && ./install.sh --all
 
+########################################################################################################################
 
 ENTRYPOINT ["./entrypoint.sh"]
+CMD [ "/sbin/init" ]
 
 EXPOSE 80 8080
 
