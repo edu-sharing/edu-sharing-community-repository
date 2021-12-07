@@ -9,8 +9,13 @@
 >
   <div class="edit-wrapper">
     <div *ngIf="!isEmpty() || !widget.definition.hideIfEmpty" class="widget-wrapper">
-      <div class="widget-label" role="heading" [attr.aria-level]="headingLevel">
-        {{ widget.definition.caption }}
+      <div
+        class="widget-label"
+        [attr.role]="headingLevel ? 'heading' : null"
+        [attr.aria-level]="headingLevel"
+      >
+        {{ widget.definition.caption
+        }}<span *ngIf="!headingLevel" class="cdk-visually-hidden">: </span>
       </div>
       <div
         class="value-wrapper"

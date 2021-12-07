@@ -15,14 +15,13 @@ import { MdsEditorInstanceService } from '../mds-editor/mds-editor-instance.serv
 import { ViewInstanceService } from '../mds-editor/mds-editor-view/view-instance.service';
 import { Values } from '../mds-editor/types';
 import { replaceElementWithDiv } from '../mds-editor/util/replace-element-with-div';
-import { MdsViewerInstanceService } from './mds-viewer-instance.service';
 import { MdsWidgetComponent } from './widget/mds-widget.component';
 
 @Component({
     selector: 'es-mds-viewer',
     templateUrl: 'mds-viewer.component.html',
     styleUrls: ['mds-viewer.component.scss'],
-    providers: [MdsEditorInstanceService, ViewInstanceService, MdsViewerInstanceService],
+    providers: [MdsEditorInstanceService, ViewInstanceService],
 })
 export class MdsViewerComponent {
     @ViewChildren('container') container: QueryList<ElementRef>;
@@ -71,14 +70,15 @@ export class MdsViewerComponent {
     /**
      * The heading level from 1 to 6 to use for widget labels, equivalent to `h1` to `h6`.
      *
-     * Default is 2.
+     * If not set, widget labels are not marked as headings and an invisible colon is added between
+     * labels and values, that will be read out by screen readers.
      */
     @Input()
-    set headingLevel(value: number) {
-        this.viewerInstance.headingLevel = value;
+    set headingLevel(value: number | null) {
+        this.viewInstance.headingLevel = value;
     }
     get headingLevel() {
-        return this.viewerInstance.headingLevel;
+        return this.viewInstance.headingLevel;
     }
 
     constructor(
@@ -88,7 +88,7 @@ export class MdsViewerComponent {
         private injector: Injector,
         private containerRef: ViewContainerRef,
         private sanitizer: DomSanitizer,
-        private viewerInstance: MdsViewerInstanceService,
+        private viewInstance: ViewInstanceService,
     ) {}
 
     getGroup() {
