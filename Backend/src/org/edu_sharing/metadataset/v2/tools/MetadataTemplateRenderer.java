@@ -166,7 +166,12 @@ public class MetadataTemplateRenderer {
 					if (widget.getCaption() != null) {
 						widgetHtml.append("<h3 class='mdsWidgetCaption'>").append(widget.getCaption()).append("</h3>");
 					}
-					widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
+					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
+					widgetHtml
+						.append("<")
+						.append(innerContainerTag)
+						.append(" class='mdsWidgetContent mds_")
+						.append(widget.getId().replace(":", "_"));
 					if (widget.isMultivalue()) {
 						widgetHtml.append(" mdsWidgetMultivalue");
 					}
@@ -282,7 +287,7 @@ public class MetadataTemplateRenderer {
 							value = VCardConverter.getNameForVCard("", vcardData);
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("<div class='mdsValue' data-value-key='" + rawValue + "'>");
+							widgetHtml.append("<li class='mdsValue' data-value-key='" + rawValue + "'>");
 							if (widget.getIcon() != null) {
 								widgetHtml.append(insertIcon(widget.getIcon()));
 							}
@@ -344,7 +349,7 @@ public class MetadataTemplateRenderer {
 							widgetHtml.append("</div>");
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("</div>");
+							widgetHtml.append("</li>");
 							if (isLink) {
 								widgetHtml.append("</a>");
 							}
@@ -352,7 +357,8 @@ public class MetadataTemplateRenderer {
 					}
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("</div></div>");
+					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
+					widgetHtml.append("</").append(innerContainerTag).append("></div>");
 				}
 				if ((empty || wasEmpty) && widget.isHideIfEmpty()) {
 					widgetHtml = new StringBuffer();
@@ -477,7 +483,7 @@ public class MetadataTemplateRenderer {
 				path = Lists.reverse(path);
 				int j = 0;
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("<div class='mdsValue'>");
+					widgetHtml.append("<li class='mdsValue'>");
 				} else if (renderingMode.equals(RenderingMode.TEXT)) {
 					if(i > 0) {
 						widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
@@ -497,7 +503,7 @@ public class MetadataTemplateRenderer {
 					j++;
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("</div>");
+					widgetHtml.append("</li>");
 				}
 				i++;
 			}
