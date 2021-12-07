@@ -107,6 +107,19 @@
               <outputDirectory>${project.build.directory}/dist/tomcat/webapps/edu-sharing</outputDirectory>
             </configuration>
           </execution>
+          <execution>
+            <id>elastic-tracker</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-search-elastic-tracker
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/elastictracker</outputDirectory>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -161,6 +174,10 @@
       <artifactId>postgresql</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-search-elastic-tracker</artifactId>
+    </dependency>
   </dependencies>
 
   <profiles>
