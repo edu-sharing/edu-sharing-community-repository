@@ -774,7 +774,7 @@ export class UIHelper {
         targetElement: Element,
         bindings: { [key: string]: any } = null,
         { delay = 0, replace = true } = {},
-        injector?: Injector, 
+        injector?: Injector,
     ): ComponentRef<T> {
         if (targetElement == null) {
             return null;
@@ -944,5 +944,16 @@ export class UIHelper {
             RestConstants.BASIC_PERMISSIONS.indexOf(p1) >
             RestConstants.BASIC_PERMISSIONS.indexOf(p2)
         );
+    }
+
+    static isParentElementOfElement(target: HTMLElement, possibleParent: HTMLElement) {
+        let e = target;
+        while(e != null) {
+            if(e === possibleParent) {
+                return true;
+            }
+            e = e.parentElement;
+        }
+        return false;
     }
 }
