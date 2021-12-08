@@ -8,6 +8,9 @@ import { MdsEditorViewComponent } from '../../mds-editor/mds-editor-view/mds-edi
 import { ViewInstanceService } from '../../mds-editor/mds-editor-view/view-instance.service';
 import { MdsWidgetType } from '../../mds-editor/types';
 import { MdsEditorWidgetBase, ValueType } from '../../mds-editor/widgets/mds-editor-widget-base';
+import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
+import {RestHelper} from '../../../../core-module/rest/rest-helper';
+import {RestConstants} from '../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'es-mds-widget',
@@ -181,9 +184,11 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
     }
 
     isEditable() {
+        const nodes = this.mdsEditorInstance.nodes$.value;
         return (
             this.mdsEditorInstance.editorMode === 'inline' &&
             this.widget.definition.interactionType === 'Input' &&
+            nodes?.length === 1 && RestHelper.hasAccessPermission(nodes[0], RestConstants.ACCESS_WRITE) &&
             this.supportsInlineEditing()
         );
     }

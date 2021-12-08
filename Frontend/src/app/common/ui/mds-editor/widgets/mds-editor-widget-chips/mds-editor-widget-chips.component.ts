@@ -34,6 +34,8 @@ import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import {MdsValueList} from '../../../../../core-module/rest/data-object';
+import {UIHelper} from '../../../../../core-ui-module/ui-helper';
+import {MdsEditorWidgetContainerComponent} from '../mds-editor-widget-container/mds-editor-widget-container.component';
 
 @Component({
     selector: 'es-mds-editor-widget-chips',
@@ -45,6 +47,7 @@ export class MdsEditorWidgetChipsComponent
     implements OnInit, AfterViewInit
 {
     @ViewChild('input') input: ElementRef<HTMLInputElement>;
+    @ViewChild('container') container: MdsEditorWidgetContainerComponent;
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
     trigger: MatAutocompleteTrigger;
     @ViewChild('auto') matAutocomplete: MatAutocomplete;
@@ -154,7 +157,9 @@ export class MdsEditorWidgetChipsComponent
         if (this.trigger.panelOpen) {
             this.autoCompleteToggleTrigger.next('close');
         }
-        this.onBlur.emit();
+        if(!UIHelper.isParentElementOfElement(event.relatedTarget as HTMLElement, this.container.nativeElement.nativeElement)) {
+            this.onBlur.emit();
+        }
     }
 
     toggleAutoCompletePanel(): void {

@@ -68,6 +68,7 @@ export class MdsEditorWidgetContainerComponent
 {
     readonly ValueType = ValueType;
     @ViewChild(MatRipple) ripple: MatRipple;
+    @ViewChild('nativeElement') nativeElement: ElementRef;
 
     @Input() widget: Widget;
     @Input() injectedView: MdsEditorWidgetBase | NativeWidgetComponent;
