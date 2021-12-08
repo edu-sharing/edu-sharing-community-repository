@@ -794,6 +794,9 @@ export class UIHelper {
                     instance[key].subscribe((value: any) => binding(value));
                 } else {
                     instance[key] = binding;
+                    // `ngOnChanges` won't be called on the component like this. Consider doing
+                    // something like this:
+                    // https://scm.edu-sharing.com/edu-sharing/projects/oeh-redaktion/ng-meta-widgets/-/blob/1603fb2dedadd3952401385bcbd91a4bd8407643/src/app/app.module.ts#L66-79
                 }
             }
         }
