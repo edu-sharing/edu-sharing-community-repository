@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Path("/lti/v13")
-@Consumes({ "application/json" })
-@Produces({"application/json"})
+@Consumes({ "text/html" })
+@Produces({"text/html"})
 @Tag(name="LTI v13")
 public class LTIApi {
 
