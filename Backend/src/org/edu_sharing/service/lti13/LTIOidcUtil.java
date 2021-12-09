@@ -43,7 +43,7 @@ public class LTIOidcUtil {
         authRequestMap.put("nonce", nonce);  //The nonce
         authRequestMap.put("nonce_hash", nonceHash);  //The hash value of the nonce
         authRequestMap.put("prompt", LTIConstants.NONE);  //Always this value, as specified in the standard.
-        authRequestMap.put("redirect_uri", platformDeployment.getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);  // One of the valids reditect uris.
+        authRequestMap.put("redirect_uri", ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);  // One of the valids reditect uris.
         authRequestMap.put("response_mode", LTIConstants.FORM_POST); //Always this value, as specified in the standard.
         authRequestMap.put("response_type", LTIConstants.ID_TOKEN); //Always this value, as specified in the standard.
         authRequestMap.put("scope", LTIConstants.OPEN_ID);  //Always this value, as specified in the standard.
