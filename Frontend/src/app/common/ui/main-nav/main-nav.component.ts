@@ -56,6 +56,7 @@ import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdow
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
 import {About, AboutService} from 'ngx-edu-sharing-api';
+import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 
 /**
  * The main nav (top bar + menus)
@@ -243,6 +244,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         private router: Router,
         private route: ActivatedRoute,
         private toast: Toast,
+        private nodeHelper: NodeHelperService,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -829,6 +831,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 new OptionItem('LOGOUT', 'undo', () => this.logout()),
             );
         }
+        this.applyUserMenuOverrides(this.userMenuOptions);
+    }
+
+    private applyUserMenuOverrides(options: OptionItem[]): void {
+        this.configService.get('userMenuOverrides').subscribe((overrides) => 
+            this.nodeHelper.applyCustomNodeOptions(overrides, null, null, options)
+        );
     }
 
     private getConfigMenuHelpOptions() {
