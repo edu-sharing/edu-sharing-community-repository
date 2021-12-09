@@ -1,10 +1,3 @@
-image: maven:3.6.3-jdk-8
-
-services:
-  - name: "$DIND_IMAGE"
-    entrypoint: [ "env", "-u", "DOCKER_HOST" ]
-    command: [ "dockerd-entrypoint.sh" ]
-
 variables:
   DOCKER_DRIVER: "$DIND_DRIVER"
   DOCKER_HOST: "$DIND_HOST"
@@ -16,11 +9,57 @@ variables:
   PLUGIN_REMOTE_ENABLED: "false"
   PLUGIN_TRANSFORM_ENABLED: "false"
 
-cache:
-  paths:
-    - .m2/repository/
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  image: maven:3.6.3-jdk-8
+  services:
+    - name: "$DIND_IMAGE"
+      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
+      command: [ "dockerd-entrypoint.sh" ]
+  cache:
+    paths:
+      - .m2/repository/
+  artifacts:
+    paths:
+      - deploy/installer/repository/distribution/target/dist/api/openapi.json
+  script:
+    - mvn $MAVEN_CLI_OPTS install
+
+test:
+  stage: test
+  services:
+    - name: "$DIND_IMAGE"
+      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
+      command: [ "dockerd-entrypoint.sh" ]
+  artifacts:
+    paths:
+      - openapi.json
+    when: always
+  dependencies:
+    - build
+  before_script:
+    - apk add --no-cache bash curl docker-compose
+  script:
+    - . ./deploy/docker/repository/deploy.sh lstart
+    - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://127.0.0.1:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
+    - "curl -sSf -H 'Accept: application/json' --user 'admin:admin' http://127.0.0.1:8100/edu-sharing/rest/openapi.json | jq -S > openapi.json"
+    - cmp -s openapi.json deploy/installer/repository/distribution/target/dist/api/openapi.json || exit 1
 
 deploy:
   stage: deploy
+  image: maven:3.6.3-jdk-8
+  services:
+    - name: "$DIND_IMAGE"
+      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
+      command: [ "dockerd-entrypoint.sh" ]
+  cache:
+    paths:
+      - .m2/repository/
   script:
     - mvn $MAVEN_CLI_OPTS deploy
+
