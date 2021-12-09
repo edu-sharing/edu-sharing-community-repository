@@ -136,6 +136,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_LTI_OIDC_ENDPOINT = "lti_oidc_endpoint";
 
+	public static final String KEY_LTI_AUTH_TOKEN_ENDPOINT = "lti_auth_token_endpoint";
+
 	/**
 	 * property file vals
 	 */
@@ -340,6 +342,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltiOidc;
 
+	private String ltiAuthTokenEndpoint;
+
 	private String ltiClientId;
 
 	private String ltiDeploymentId;
@@ -503,6 +507,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltiIss = properties.getProperty(KEY_LTI_ISS);
 		ltiDeploymentId = properties.getProperty(KEY_LTI_DEPLOYMENT_ID);
 		ltiOidc = properties.getProperty(KEY_LTI_OIDC_ENDPOINT);
+		ltiAuthTokenEndpoint = properties.getProperty(KEY_LTI_AUTH_TOKEN_ENDPOINT);
 	}
 	
 	public String getXml() {
@@ -987,5 +992,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public String getLtiOidc(){
 		return ltiOidc;
+	}
+	public String getLtiAuthTokenEndpoint() {
+		return ltiAuthTokenEndpoint;
 	}
 }

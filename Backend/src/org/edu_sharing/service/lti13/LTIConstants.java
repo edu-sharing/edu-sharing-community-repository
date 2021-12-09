@@ -22,4 +22,8 @@ public class LTIConstants {
     public static final String OPEN_ID = "openid";
 
 
+    public static final String MOODLE_AUTHENTICATION_REQUEST_URL_PATH = "/mod/lti/auth.php";
+    public static final String MOODLE_KEYSET_URL_PATH = "/mod/lti/certs.php";
+    public static final String MOODLE_AUTH_TOKEN_URL_PATH = "/mod/lti/token.php";
+
 }

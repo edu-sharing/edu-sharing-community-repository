@@ -119,7 +119,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 			
 		}
 
-		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about","/config","/register","/sharing"});
+		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about","/config","/register","/sharing","/lti"});
 		List<String> ADMIN_ENDPOINTS=Arrays.asList(new String[]{"/admin", "/bulk"});
 		List<String> DISABLED_ENDPOINTS=new ArrayList<>();
 

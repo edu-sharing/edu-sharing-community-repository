@@ -53,4 +53,18 @@ public class LTIService {
         return applicationInfo;
 
     }
+
+    public String getAppId(String iss, String clientId, String ltiDeploymentId){
+        String applicationId = null;
+        if(clientId != null && ltiDeploymentId != null) {
+            applicationId = clientId + ltiDeploymentId;
+        }else if(clientId != null){
+            applicationId = clientId + iss;
+        }else if(ltiDeploymentId != null){
+            applicationId = iss + ltiDeploymentId;
+        }else{
+            applicationId = iss;
+        }
+        return applicationId;
+    }
 }
