@@ -44,8 +44,8 @@ start() {
 	source .env.base
   repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-"127.0.0.1"}"
   repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
-  repository_search_elastic_sharts="${REPOSITORY_SEARCH_ELASTIC_SHARTS:-1}"
-  repository_search_elastic_replicas="${REPOSITORY_SEARCH_ELASTIC_REPLICAS:-1}"
+  repository_search_elastic_index_shards="${REPOSITORY_SEARCH_ELASTIC_INDEX_SHARDS:-1}"
+  repository_search_elastic_index_replicas="${REPOSITORY_SEARCH_ELASTIC_INDEX_REPLICAS:-1}"
   repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
 
 	until wait-for-it "localhost:9200" -t 3; do sleep 1; done

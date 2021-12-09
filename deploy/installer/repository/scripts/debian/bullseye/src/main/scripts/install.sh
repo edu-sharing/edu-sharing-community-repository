@@ -111,16 +111,16 @@ repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
 repository_contentstore="${REPOSITORY_SERVICE_CONTENTSTORE:-}"
 repository_contentstore_deleted="${REPOSITORY_SERVICE_CONTENTSTORE_DELETED:-}"
 
-repository_elastic_tracker_server_address="${REPOSITORY_ELASTIC_TRACKER_SERVER_HOST:-"127.0.0.1"}"
-repository_elastic_tracker_server_port="${REPOSITORY_ELASTIC_TRACKER_SERVER_PORT:-8081}"
-repository_elastic_tracker_management_server_address="${REPOSITORY_ELASTIC_TRACKER_MANAGEMENT_SERVER_HOST:-"127.0.0.1"}"
-repository_elastic_tracker_management_server_port="${REPOSITORY_ELASTIC_TRACKER_MANAGEMENT_SERVER_PORT:-8082}"
+repository_search_elastic_tracker_server_address="${REPOSITORY_SEARCH_ELASTIC_TRACKER_SERVER_HOST:-"127.0.0.1"}"
+repository_search_elastic_tracker_server_port="${REPOSITORY_SEARCH_ELASTIC_TRACKER_SERVER_PORT:-8081}"
+repository_search_elastic_tracker_management_server_address="${REPOSITORY_SEARCH_ELASTIC_TRACKER_MANAGEMENT_SERVER_HOST:-"127.0.0.1"}"
+repository_search_elastic_tracker_management_server_port="${REPOSITORY_SEARCH_ELASTIC_TRACKER_MANAGEMENT_SERVER_PORT:-8082}"
 
 repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-"127.0.0.1"}"
 repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
-repository_search_elastic_sharts="${REPOSITORY_SEARCH_ELASTIC_SHARTS:-1}"
-repository_search_elastic_replicas="${REPOSITORY_SEARCH_ELASTIC_REPLICAS:-1}"
 repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
+repository_search_elastic_index_shards="${REPOSITORY_SEARCH_ELASTIC_INDEX_SHARDS:-1}"
+repository_search_elastic_index_replicas="${REPOSITORY_SEARCH_ELASTIC_INDEX_REPLICAS:-1}"
 
 ########################################################################################################################
 
@@ -196,24 +196,25 @@ info() {
   echo ""
   echo "#########################################################################"
   echo ""
-  echo "elastic tracker:"
+  echo "elastic search:"
   echo ""
-  echo "  elastic search"
+  echo "  Host:                ${repository_search_elastic_host}"
+  echo "  Port:                ${repository_search_elastic_port}"
   echo ""
-  echo "    Host:              ${repository_search_elastic_host}"
-  echo "    Port:              ${repository_search_elastic_port}"
-  echo "    Sharts:            ${repository_search_elastic_sharts}"
-  echo "    Replicas:          ${repository_search_elastic_replicas}"
+  echo "  Index:"
   echo ""
-  echo "  tracker server:"
+  echo "    Shards:            ${repository_search_elastic_index_shards}"
+  echo "    Replicas:          ${repository_search_elastic_index_replicas}"
   echo ""
-  echo "    Host:              ${repository_elastic_tracker_server_address}"
-  echo "    Port:              ${repository_elastic_tracker_server_port}"
+  echo "  tracker:"
   echo ""
-  echo "  tracker management server:"
+  echo "    Host:              ${repository_search_elastic_tracker_server_address}"
+  echo "    Port:              ${repository_search_elastic_tracker_server_port}"
   echo ""
-  echo "    Host:              ${repository_elastic_tracker_management_server_address}"
-  echo "    Port:              ${repository_elastic_tracker_management_server_port}"
+  echo "    Management:"
+  echo ""
+  echo "      Host:            ${repository_search_elastic_tracker_management_server_address}"
+  echo "      Port:            ${repository_search_elastic_tracker_management_server_port}"
   echo ""
  	echo "#########################################################################"
   echo ""
@@ -465,17 +466,17 @@ install_elastic_tracker() {
 	elasticApplicationProps="elastictracker/application.properties"
 	touch "${elasticApplicationProps}"
 
-	sed -i -r 's|^[#]*\s*server\.address=.*|alfresco.address='"${repository_elastic_tracker_server_address}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*server\.address=' "${elasticApplicationProps}" || echo "server.address=${repository_elastic_tracker_server_address}" >>"${elasticApplicationProps}"
+	sed -i -r 's|^[#]*\s*server\.address=.*|alfresco.address='"${repository_search_elastic_tracker_server_address}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*server\.address=' "${elasticApplicationProps}" || echo "server.address=${repository_search_elastic_tracker_server_address}" >>"${elasticApplicationProps}"
 
-	sed -i -r 's|^[#]*\s*server\.port=.*|alfresco.host='"${repository_elastic_tracker_server_port}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*server\.port=' "${elasticApplicationProps}" || echo "server.port=${repository_elastic_tracker_server_port}" >>"${elasticApplicationProps}"
+	sed -i -r 's|^[#]*\s*server\.port=.*|alfresco.host='"${repository_search_elastic_tracker_server_port}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*server\.port=' "${elasticApplicationProps}" || echo "server.port=${repository_search_elastic_tracker_server_port}" >>"${elasticApplicationProps}"
 
-	sed -i -r 's|^[#]*\s*management\.server.\address=.*|alfresco.host='"${repository_elastic_tracker_management_server_address}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*management\.server.\address=' "${elasticApplicationProps}" || echo "management.server.address=${repository_elastic_tracker_management_server_address}" >>"${elasticApplicationProps}"
+	sed -i -r 's|^[#]*\s*management\.server.\address=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_address}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*management\.server.\address=' "${elasticApplicationProps}" || echo "management.server.address=${repository_search_elastic_tracker_management_server_address}" >>"${elasticApplicationProps}"
 
-	sed -i -r 's|^[#]*\s*management\.server.\port=.*|alfresco.host='"${repository_elastic_tracker_management_server_port}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*management\.server.\port=' "${elasticApplicationProps}" || echo "management.server.port=${repository_elastic_tracker_management_server_port}" >>"${elasticApplicationProps}"
+	sed -i -r 's|^[#]*\s*management\.server.\port=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_port}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*management\.server.\port=' "${elasticApplicationProps}" || echo "management.server.port=${repository_search_elastic_tracker_management_server_port}" >>"${elasticApplicationProps}"
 
 
 
@@ -496,11 +497,11 @@ install_elastic_tracker() {
 	sed -i -r 's|^[#]*\s*elastic\.port=.*|elastic.port='"${repository_search_elastic_port}"'|' "${elasticApplicationProps}"
 	grep -q '^[#]*\s*elastic\.port=' "${elasticApplicationProps}" || echo "elastic.port=${repository_search_elastic_port}" >>"${elasticApplicationProps}"
 
-	sed -i -r 's|^[#]*\s*elastic\.index.\number_of_shards=.*|elastic.index.number_of_shards='"${repository_search_elastic_sharts}"'|' "${elasticApplicationProps}"
- 	grep -q '^[#]*\s*elastic\.index.\number_of_shards=' "${elasticApplicationProps}" || echo "elastic.index.number_of_shards=${repository_search_elastic_sharts}" >>"${elasticApplicationProps}"
+	sed -i -r 's|^[#]*\s*elastic\.index.\number_of_shards=.*|elastic.index.number_of_shards='"${repository_search_elastic_index_shards}"'|' "${elasticApplicationProps}"
+ 	grep -q '^[#]*\s*elastic\.index.\number_of_shards=' "${elasticApplicationProps}" || echo "elastic.index.number_of_shards=${repository_search_elastic_index_shards}" >>"${elasticApplicationProps}"
 
-	sed -i -r 's|^[#]*\s*elastic.\index\.number_of_replicas=.*|elastic.index.number_of_replicas='"${repository_search_elastic_replicas}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*elastic.\index\.number_of_replicas=' "${elasticApplicationProps}" || echo "elastic.index.number_of_replicas=${repository_search_elastic_replicas}" >>"${elasticApplicationProps}"
+	sed -i -r 's|^[#]*\s*elastic.\index\.number_of_replicas=.*|elastic.index.number_of_replicas='"${repository_search_elastic_index_replicas}"'|' "${elasticApplicationProps}"
+	grep -q '^[#]*\s*elastic.\index\.number_of_replicas=' "${elasticApplicationProps}" || echo "elastic.index.number_of_replicas=${repository_search_elastic_index_replicas}" >>"${elasticApplicationProps}"
 
 	### elastic tracker - fix security issues ############################################################################
 

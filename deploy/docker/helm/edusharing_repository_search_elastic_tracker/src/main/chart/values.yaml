@@ -51,6 +51,9 @@ config:
     elastic:
       host: edusharing-repository-search-elastic
       port: 9200
+      index:
+        shards: 1
+        replicas: 3
 
 ########################################################################################################################
 
