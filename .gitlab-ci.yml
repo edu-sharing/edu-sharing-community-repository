@@ -1,8 +1,19 @@
+default:
+  image: maven:3.6.3-jdk-8
+  services:
+    - name: "$DIND_IMAGE"
+      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
+      command: [ "dockerd-entrypoint.sh" ]
+  cache:
+    paths:
+      - .m2/repository/
+
 variables:
+  COMMON_BIND_HOST: "0.0.0.0"
   DOCKER_DRIVER: "$DIND_DRIVER"
   DOCKER_HOST: "$DIND_HOST"
   DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
-  MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS -s .mvn/settings.xml --batch-mode --errors --show-version"
+  MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS --batch-mode --errors --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   PLUGIN_CLUSTER_ENABLED: "false"
   PLUGIN_LOGINEO_IDM_ENABLED: "false"
@@ -10,56 +21,34 @@ variables:
   PLUGIN_TRANSFORM_ENABLED: "false"
 
 stages:
-  - build
   - test
   - deploy
 
-build:
-  stage: build
-  image: maven:3.6.3-jdk-8
-  services:
-    - name: "$DIND_IMAGE"
-      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
-      command: [ "dockerd-entrypoint.sh" ]
-  cache:
-    paths:
-      - .m2/repository/
-  artifacts:
-    paths:
-      - deploy/installer/repository/distribution/target/dist/api/openapi.json
-  script:
-    - mvn $MAVEN_CLI_OPTS install
-
-test:
+test docker:
   stage: test
-  services:
-    - name: "$DIND_IMAGE"
-      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
-      command: [ "dockerd-entrypoint.sh" ]
   artifacts:
     paths:
-      - openapi.json
+      - deploy/docker/openapi.json
     when: always
-  dependencies:
-    - build
   before_script:
-    - apk add --no-cache bash curl docker-compose
+    - apt-get update -y
+    - apt-get install -y docker.io docker-compose jq wait-for-it
   script:
-    - . ./deploy/docker/repository/deploy.sh lstart
-    - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://127.0.0.1:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
-    - "curl -sSf -H 'Accept: application/json' --user 'admin:admin' http://127.0.0.1:8100/edu-sharing/rest/openapi.json | jq -S > openapi.json"
-    - cmp -s openapi.json deploy/installer/repository/distribution/target/dist/api/openapi.json || exit 1
+    - cd deploy/docker
+    - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
+    - bash ./deploy.sh lstart
+    - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
+    - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
+    - "curl -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
+    - bash ./deploy.sh remove
+    - bash ./deploy.sh purge
+    - cmp -s openapi.json repository/build/service/target/build/rest-api/openapi.json || exit 1
+  only:
+    - schedules
+    - tags
+    - web
 
 deploy:
   stage: deploy
-  image: maven:3.6.3-jdk-8
-  services:
-    - name: "$DIND_IMAGE"
-      entrypoint: [ "env", "-u", "DOCKER_HOST" ]
-      command: [ "dockerd-entrypoint.sh" ]
-  cache:
-    paths:
-      - .m2/repository/
   script:
-    - mvn $MAVEN_CLI_OPTS deploy
-
+    - mvn $MAVEN_CLI_OPTS -s .mvn/settings.xml deploy

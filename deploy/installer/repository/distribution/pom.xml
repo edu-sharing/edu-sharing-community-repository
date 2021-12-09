@@ -118,19 +118,6 @@
               <outputDirectory>${project.build.directory}/dist/elastictracker</outputDirectory>
             </configuration>
           </execution>
-          <execution>
-            <id>rest-api</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <includeArtifactIds>
-                edu_sharing-community-repository-backend-services-rest-api
-              </includeArtifactIds>
-              <outputDirectory>${project.build.directory}/dist/api</outputDirectory>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
 
@@ -162,11 +149,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
       <type>amp</type>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
     </dependency>
 
     <dependency>
