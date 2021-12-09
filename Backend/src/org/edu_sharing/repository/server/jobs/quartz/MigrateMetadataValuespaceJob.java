@@ -86,8 +86,13 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			try {
 				MetadataSet mds = MetadataHelper.getMetadataset(nodeRef);
 				MetadataWidget widget;
+				Map<MetadataKey.MetadataKeyRelated, MetadataKey> mapping;
 				try {
 					widget = mds.findWidget(mdsWidgetId);
+					mapping = widget.getValuespaceMappingByRelation(relation);
+					mapping.forEach((key, entry) -> {
+						logger.info("Found mapping in " + mdsWidgetId + ":" + key.getKey() + " -> " + entry.getKey());
+					});
 				} catch(IllegalArgumentException e) {
 					logger.warn("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
 					return;
@@ -101,7 +106,6 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 					if(value instanceof String) {
 						value = Collections.singletonList(value);
 					}
-					Map<MetadataKey.MetadataKeyRelated, MetadataKey> mapping = widget.getValuespaceMappingByRelation(relation);
 					ArrayList<String> valueMapped = new ArrayList<>();
 					((List<?>) value).stream().forEach((v) -> {
 						Serializable mapped = mapValue(nodeRef, (String) v, mapping);

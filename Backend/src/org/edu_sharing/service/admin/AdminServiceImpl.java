@@ -873,8 +873,10 @@ public class AdminServiceImpl implements AdminService  {
 		if(params == null) {
 			params = new HashMap<String,Object>();
 		}
-		params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
-		params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+			params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
+			params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		}
 
 		Class job = Class.forName(jobClass);
 		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(job, params);
