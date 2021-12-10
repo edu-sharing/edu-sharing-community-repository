@@ -456,9 +456,19 @@ install_elastic_tracker() {
 	echo "- remove elastictracker"
 	rm -rf elastictracker
 
+	### elastic tracker - fix security issues ############################################################################
+
+	echo "- create worker user"
+	id -u elastictracker &>/dev/null || adduser --home=$ALF_HOME/elastictracker --disabled-password --gecos "" --shell=/bin/bash elastictracker
+	chown -RL elastictracker:elastictracker /tmp
+
+	### elastic tracker - installation ###################################################################################
+
 	echo "- unpack edu-sharing elastic tracker"
 	tar -zxf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz \
 			elastictracker
+
+	chown -RL elastictracker:elastictracker ./elastictracker
 
 	###  elastic tracker #################################################################################################
 
@@ -477,10 +487,6 @@ install_elastic_tracker() {
 
 	sed -i -r 's|^[#]*\s*management\.server.\port=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_port}"'|' "${elasticApplicationProps}"
 	grep -q '^[#]*\s*management\.server.\port=' "${elasticApplicationProps}" || echo "management.server.port=${repository_search_elastic_tracker_management_server_port}" >>"${elasticApplicationProps}"
-
-
-
-
 
 	sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${my_host_internal}"'|' "${elasticApplicationProps}"
 	grep -q '^[#]*\s*alfresco\.host=' "${elasticApplicationProps}" || echo "alfresco.host=${my_host_internal}" >>"${elasticApplicationProps}"
@@ -503,13 +509,6 @@ install_elastic_tracker() {
 	sed -i -r 's|^[#]*\s*elastic.\index\.number_of_replicas=.*|elastic.index.number_of_replicas='"${repository_search_elastic_index_replicas}"'|' "${elasticApplicationProps}"
 	grep -q '^[#]*\s*elastic.\index\.number_of_replicas=' "${elasticApplicationProps}" || echo "elastic.index.number_of_replicas=${repository_search_elastic_index_replicas}" >>"${elasticApplicationProps}"
 
-	### elastic tracker - fix security issues ############################################################################
-
-	echo "- create worker user"
-	id -u elastictracker &>/dev/null || adduser --uid=1000 --home=$ALF_HOME/elastictracker --disabled-password --gecos "" --shell=/bin/bash elastictracker
-	chown -RL elastictracker:elastictracker ./elastictracker
-	chown -RL elastictracker:elastictracker /tmp
-
 	### elastic tracker - register systemd service #######################################################################
 
 	#ln -s "${ALF_HOME}/elastictracker/tracker.jar" /etc/init.d/elastictracker
@@ -519,9 +518,9 @@ install_elastic_tracker() {
 	elastic_tracker_jar=edu_sharing-community-repository-backend-search-elastic-tracker-${org.edu_sharing:edu_sharing-community-repository-backend-search-elastic-tracker:jar.version}.jar
 
 	# TODO Logfile
-	if [[ ! -f elastictracker ]]; then
+	if [[ ! -f elastictracker.service ]]; then
 		echo "- create systemd service"
-		touch elastictracker
+		touch elastictracker.service
 		{
 			echo "[Unit]"
 			echo "Description=edu-sharing elastic tracker"
@@ -535,15 +534,15 @@ install_elastic_tracker() {
 			echo ""
 			echo "[Install]"
 			echo "WantedBy=multi-user.target"
-		 } >> elastictracker
+		 } >> elastictracker.service
 	else
 		echo "- update systemd service"
 
-		sed -i -r 's|^WorkingDirectory=.*|WorkingDirectory='"${ALF_HOME}/elastictracker"'|' elastictracker
-    grep -q '^WorkingDirectory=' elastictracker || echo "WorkingDirectory=${ALF_HOME}/elastictracker" >> elastictracker
+		sed -i -r 's|^WorkingDirectory=.*|WorkingDirectory='"${ALF_HOME}/elastictracker"'|' elastictracker.service
+    grep -q '^WorkingDirectory=' elastictracker.service || echo "WorkingDirectory=${ALF_HOME}/elastictracker" >> elastictracker.service
 
-		sed -i -r 's|^ExecStart=.*|ExecStart='"${ALF_HOME}/elastictracker/${elastic_tracker_jar}"'|' elastictracker
-    grep -q '^ExecStart=' elastictracker || echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}" >> elastictracker
+		sed -i -r 's|^ExecStart=.*|ExecStart='"${ALF_HOME}/elastictracker/${elastic_tracker_jar}"'|' elastictracker.service
+    grep -q '^ExecStart=' elastictracker.service || echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}" >> elastictracker.service
 	fi
 
 	popd
