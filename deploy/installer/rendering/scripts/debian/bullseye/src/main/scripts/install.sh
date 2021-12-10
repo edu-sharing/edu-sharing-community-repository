@@ -72,9 +72,12 @@ db_name="${RENDERING_DATABASE_NAME:-rendering}"
 db_user="${RENDERING_DATABASE_USER:-rendering}"
 db_password="${RENDERING_DATABASE_PASS:-rendering}"
 
-repository_service_base="${REPOSITORY_SERVICE:-}"
-repository_user="${REPOSITORY_SERVICE_USER:-}"
-repository_password="${REPOSITORY_SERVICE_PASS:-}"
+repository_service_host="${REPOSITORY_SERVICE_HOST:-localhost}"
+repository_service_port="${REPOSITORY_SERVICE_PORT:-80}"
+repository_service_base="http://${repository_service_host}:${repository_service_port}/edu-sharing"
+
+repository_user="admin"
+repository_password="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 
 rendering_proxy_host="${RENDERING_PROXY_HOST:-}"
 rendering_proxy_port="${RENDERING_PROXY_PORT:-}"
@@ -173,6 +176,29 @@ install_edu_sharing() {
 	rm edu_sharing-community-deploy-installer-rendering-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}-bin.tar.gz
 
 }
+
+########################################################################################################################
+
+until wait-for-it "${db_host}:${db_port}" -t 3; do sleep 1; done
+
+[[ "${db_driv}" == "pgsql" ]] && {
+	until PGPASSWORD="${db_pass}" psql -h "${db_host}" -p "${db_port}" -U "${db_user}" -d "${db_name}" -c '\q'; do
+		echo >&2 "Waiting for database postgresql ${db_host}:${db_port} ..."
+		sleep 3
+	done
+}
+
+until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
+
+until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
+	echo >&2 "Waiting for repository ${repository_service_host} service ..."
+	sleep 3
+done
+
+until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
+	echo >&2 "Waiting for repository ${repository_service_host} search ..."
+	sleep 3
+done
 
 ########################################################################################################################
 

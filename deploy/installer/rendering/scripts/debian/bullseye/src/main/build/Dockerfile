@@ -34,6 +34,9 @@ RUN set -eux \
         xmlstarlet \
         curl \
         dirmngr \
+        postgresql-client \
+        jq \
+        wait-for-it \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
