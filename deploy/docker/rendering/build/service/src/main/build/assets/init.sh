@@ -14,6 +14,7 @@ repository_service_port="${REPOSITORY_SERVICE_PORT:-8080}"
 
 repository_service_base="http://${repository_service_host}:${repository_service_port}/edu-sharing"
 
+repository_service_admin_user="admin"
 repository_service_admin_pass="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 
 ### Wait ###############################################################################################################
@@ -35,7 +36,7 @@ my_appid=$( \
 access_token=$( \
 	curl -sS \
 		-XPOST \
-		-d "grant_type=password&client_id=eduApp&client_secret=secret&username=admin&password=${repository_service_admin_pass}" \
+		-d "grant_type=password&client_id=eduApp&client_secret=secret&username=${repository_service_admin_user}&password=${repository_service_admin_pass}" \
 		"${repository_service_base}/oauth2/token" | jq -r '.access_token' \
 )
 
