@@ -350,6 +350,7 @@
               #actionbarReferences
               class="actionbarMaterials"
               [numberOfAlwaysVisibleOptions]="1"
+              [class.display-none]="listReferences.getSelection().isEmpty()"
             ></es-actionbar>
             <es-node-entries-wrapper
               #listReferences
