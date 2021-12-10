@@ -20,11 +20,13 @@ export CATALINA_PID
 export CATALINA_PID
 
 start() {
+    ./install.sh --all --local -f .env
+    ./install.sh --all --local -f .env
+
 
 	./postgresql/scripts/ctl.sh start
 	./libreoffice/scripts/ctl.sh start
 	systemctl start elasticsearch
-	#systemctl start elastictracker
 	#./tomcat/scripts/ctl.sh daemon
 
 	local catalinaPid

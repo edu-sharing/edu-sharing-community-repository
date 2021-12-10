@@ -31,7 +31,12 @@ usage() {
 	echo "-f = environment file"
 	echo "--file"
 	echo "Loads the configuration from the specified environment file"
+
+	echo "--local"
+	echo "  Use local maven cache for installation"
 }
+
+use_local_maven_cache=0
 
 while true; do
 	flag="$1"
@@ -40,6 +45,8 @@ while true; do
 	case "$flag" in
 			--help|'-?') usage && exit 0 ;;
 			--file|-f) source "$1" && shift	;;
+			--local) use_local_maven_cache=1 ;;
+
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -160,12 +167,15 @@ info() {
 
 
 install_edu_sharing() {
-
-	echo "- download edu-sharing rendering-service distribution"
-	mvn -q dependency:get \
-			-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}:tar.gz:bin \
-			-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
-			-Dtransitive=false
+	if [[ use_local_maven_cache -eq 1 ]] ; then
+		echo "- WARNING local maven cache is used"
+	else
+		echo "- download edu-sharing rendering-service distribution"
+		mvn -q dependency:get \
+				-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}:tar.gz:bin \
+				-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
+				-Dtransitive=false
+	fi
 
 	echo "- unpack edu-sharing rendering-service distribution"
 	mvn -q dependency:copy \

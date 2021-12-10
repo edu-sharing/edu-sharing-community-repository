@@ -163,11 +163,6 @@ COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties $RS
 COPY assets/entrypoint.sh /usr/local/bin/
 COPY assets/apache2-foreground /usr/local/bin/
 
-RUN set -eux \
-    && pg_ctlcluster ${postgresql.version.major} rendering start \
-    && ./install.sh -f .env \
-    && ./install.sh -f .env
-
 ########################################################################################################################
 
 # https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop

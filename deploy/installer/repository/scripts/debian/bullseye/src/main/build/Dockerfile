@@ -229,11 +229,7 @@ RUN set -eux \
 COPY .env.base .
 COPY install.sh .
 COPY assets/entrypoint.sh .
-
-#Test Install and Update
-RUN set -eux \
-    && ./install.sh --all \
-    && ./install.sh --all
+COPY assets/.env ./
 
 ########################################################################################################################
 
