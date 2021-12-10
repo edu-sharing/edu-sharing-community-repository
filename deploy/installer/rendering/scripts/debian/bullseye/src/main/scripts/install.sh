@@ -270,6 +270,7 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 
 
   rm -f /tmp/config.ini
+  rm -rf "${RS_ROOT}"/install.bak
 	mv "${RS_ROOT}"/install/ "${RS_ROOT}"/install.bak
 
 	if [[ -n $repository_service_base ]] && [[ -n $repository_user ]] && [[ -n $repository_password ]] ; then
