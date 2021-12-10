@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+
+  repository:
+    volumes:
+      - "${MAVEN_HOME}:/.m2"
+
+  rendering:
+    volumes:
+      - "${MAVEN_HOME}:/.m2"

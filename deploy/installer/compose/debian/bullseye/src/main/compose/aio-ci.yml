@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+
+  repository:
+    environment:
+      REPOSITORY_SERVICE_HOST_EXTERNAL: "docker"
+    ports:
+      - "${COMMON_BIND_HOST:-0.0.0.0}:${REPOSITORY_SERVICE_PORT:-8100}:80"
+
+  rendering:
+    environment:
+      RENDERING_SERVICE_HOST_EXTERNAL: "docker"
+    ports:
+      - "${COMMON_BIND_HOST:-0.0.0.0}:${RENDERING_SERVICE_PORT:-9100}:80"

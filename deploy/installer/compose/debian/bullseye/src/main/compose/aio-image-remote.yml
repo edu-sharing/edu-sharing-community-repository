@@ -1,0 +1,9 @@
+version: '3.4'
+
+services:
+
+  repository:
+    image: "${docker.registry}/${docker.image}-repository-installer-scripts-debian-bullseye:${docker.tag}"
+
+  rendering:
+    image: "${docker.registry}/${docker.image}-rendering-installer-scripts-debian-bullseye:${docker.tag}"

@@ -1,3 +1,17 @@
+variables:
+  COMMON_BIND_HOST: "0.0.0.0"
+  DOCKER_DRIVER: "$DIND_DRIVER"
+  DOCKER_HOST: "$DIND_HOST"
+  DOCKER_SHARE: "/builds/$CI_PROJECT_PATH/mnt"
+  DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
+  MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS --batch-mode --errors --show-version"
+  MAVEN_HOME: "$DOCKER_SHARE/.m2"
+  MAVEN_OPTS: "-Dmaven.repo.local=$MAVEN_HOME/repository"
+  PLUGIN_CLUSTER_ENABLED: "false"
+  PLUGIN_LOGINEO_IDM_ENABLED: "false"
+  PLUGIN_REMOTE_ENABLED: "false"
+  PLUGIN_TRANSFORM_ENABLED: "false"
+
 default:
   image: maven:3.6.3-jdk-8
   services:
@@ -6,19 +20,7 @@ default:
       command: [ "dockerd-entrypoint.sh" ]
   cache:
     paths:
-      - .m2/repository/
-
-variables:
-  COMMON_BIND_HOST: "0.0.0.0"
-  DOCKER_DRIVER: "$DIND_DRIVER"
-  DOCKER_HOST: "$DIND_HOST"
-  DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
-  MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS --batch-mode --errors --show-version"
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
-  PLUGIN_CLUSTER_ENABLED: "false"
-  PLUGIN_LOGINEO_IDM_ENABLED: "false"
-  PLUGIN_REMOTE_ENABLED: "false"
-  PLUGIN_TRANSFORM_ENABLED: "false"
+      - "$MAVEN_HOME/repository"
 
 stages:
   - test
@@ -34,6 +36,7 @@ test docker:
     - apt-get update -y
     - apt-get install -y docker.io docker-compose jq wait-for-it
   script:
+    - mkdir -p "$DOCKER_SHARE"
     - cd deploy/docker
     - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
     - bash ./deploy.sh lstart
@@ -41,7 +44,30 @@ test docker:
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
     - "curl -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
     - bash ./deploy.sh remove
-    - bash ./deploy.sh purge
+    - cmp -s openapi.json repository/build/service/target/build/rest-api/openapi.json || exit 1
+  only:
+    - schedules
+    - tags
+    - web
+
+test installer:
+  stage: test
+  artifacts:
+    paths:
+      - deploy/docker/openapi.json
+    when: always
+  before_script:
+    - apt-get update -y
+    - apt-get install -y docker.io docker-compose jq wait-for-it
+  script:
+    - mkdir -p "$DOCKER_SHARE"
+    - cd deploy/installer
+    - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
+    - bash ./deploy.sh lstart
+    - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
+    - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
+    - "curl -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
+    - bash ./deploy.sh remove
     - cmp -s openapi.json repository/build/service/target/build/rest-api/openapi.json || exit 1
   only:
     - schedules
