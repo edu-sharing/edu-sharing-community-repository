@@ -150,6 +150,8 @@ RUN set -eux \
 #      ncdu \
 #      tzdata \
 
+WORKDIR /opt/rendering
+
 COPY install.sh ./
 COPY .env.base ./
 COPY assets/.env ./
@@ -160,8 +162,8 @@ COPY assets/apache2/sites/* /etc/apache2/sites-available/
 COPY assets/rendering/de.metaventis.esrender.log4php.properties $RS_ROOT/conf/
 COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties $RS_ROOT/install/_tmpl/conf/
 
-COPY assets/entrypoint.sh /usr/local/bin/
-COPY assets/apache2-foreground /usr/local/bin/
+COPY assets/entrypoint.sh ./
+COPY assets/apache2-foreground ./
 
 ########################################################################################################################
 
@@ -170,9 +172,7 @@ STOPSIGNAL SIGWINCH
 
 EXPOSE 8080
 
-ENTRYPOINT ["entrypoint.sh"]
-#CMD ["bash"]
-CMD ["/usr/local/bin/apache2-foreground"]
+ENTRYPOINT ["./entrypoint.sh"]
 
 ########################################################################################################################
 

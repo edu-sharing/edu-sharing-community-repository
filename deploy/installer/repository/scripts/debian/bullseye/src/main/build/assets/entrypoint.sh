@@ -20,9 +20,8 @@ export CATALINA_PID
 export CATALINA_PID
 
 start() {
-    ./install.sh --all --local -f .env
-    ./install.sh --all --local -f .env
-
+	./install.sh --all -f .env $@
+	./install.sh --all -f .env $@
 
 	./postgresql/scripts/ctl.sh start
 	./libreoffice/scripts/ctl.sh start
@@ -42,14 +41,6 @@ start() {
 
 	apache2ctl start
 
-
-	source .env.base
-  repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-"127.0.0.1"}"
-  repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
-  repository_search_elastic_index_shards="${REPOSITORY_SEARCH_ELASTIC_INDEX_SHARDS:-1}"
-  repository_search_elastic_index_replicas="${REPOSITORY_SEARCH_ELASTIC_INDEX_REPLICAS:-1}"
-  repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
-
 	until wait-for-it "localhost:9200" -t 3; do sleep 1; done
 
 	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s") -eq 200 ]]; do
@@ -57,7 +48,7 @@ start() {
 		sleep 3
 	done
 
-	until wait-for-it "localhost:80" -t 3; do sleep 1; done
+	until wait-for-it "localhost:8080" -t 3; do sleep 1; done
 
 	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "http://localhost:8080/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
 		echo >&2 "Waiting for edu-sharing ..."

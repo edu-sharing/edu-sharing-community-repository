@@ -57,10 +57,6 @@ if [ -n "${CI}" ]; then
 	export COMPOSE_CI=" -f aio-ci.yml ${COMPOSE_CI}"
 fi
 
-if [ -n "${MAVEN_HOME}" ]; then
-	export COMPOSE_CI=" -f aio-volume.yml ${COMPOSE_CI}"
-fi
-
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
 	pushd "compose" >/dev/null || exit
@@ -71,7 +67,7 @@ fi
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
 
-note() {
+info() {
 	[[ -f ".env" ]] && source .env
 	echo ""
 	echo "#########################################################################"
@@ -90,7 +86,7 @@ note() {
 	echo "    username: ${RENDERING_DATABASE_USER:-rendering}"
 	echo "    password: ${RENDERING_DATABASE_PASS:-rendering}"
 	echo ""
-	echo "#########################################################################"	echo ""
+	echo "#########################################################################"
 	echo ""
 }
 
@@ -104,6 +100,27 @@ ps() {
 	$COMPOSE_EXEC \
 		-f "aio.yml" \
 		ps || exit
+}
+
+init() {
+	{
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+		echo "REPOSITORY_SERVICE_HOST_EXTERNAL=${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
+		echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
+		echo "REPOSITORY_SERVICE_PORT_EXTERNAL=${REPOSITORY_SERVICE_PORT:-8100}"
+		echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
+	} >> .env.repository
+	{
+		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
+		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
+		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
+		echo "RENDERING_SERVICE_HOST_INTERNAL=rendering"
+		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
+		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+		echo "REPOSITORY_SERVICE_HOST=repository"
+		echo "REPOSITORY_SERVICE_PORT=80"
+	} >> .env.rendering
 }
 
 rstart() {
@@ -120,8 +137,13 @@ rstart() {
 }
 
 lstart() {
+	[[ -z "${MAVEN_HOME}" ]] && {
+  	export MAVEN_HOME="$HOME/.m2"
+  }
+
 	$COMPOSE_EXEC \
 		-f "aio.yml" \
+		-f "aio-volume-local.yml" \
 		$COMPOSE_CI \
 		up -d || exit
 }
@@ -140,10 +162,10 @@ remove() {
 
 case "${CLI_OPT1}" in
 rstart)
-	rstart && note
+	init && rstart && info
 	;;
 lstart)
-	lstart && note
+	init && lstart && info
 	;;
 info)
 	info

@@ -1,16 +1,13 @@
 #!/bin/sh
 set -eux
 
-echo $PWD
 pg_ctlcluster 13 rendering start
 
-#apache2ctl start
-./install.sh --local -f .env
-./install.sh --local -f .env
+apache2ctl start
 
-# first arg is `-f` or `--some-option`
-if [ "${1#-}" != "$1" ]; then
-	set -- /usr/local/bin/apache2-foreground "$@"
-fi
+./install.sh -f .env $@
+./install.sh -f .env $@
 
-exec "$@"
+apache2ctl stop
+
+exec ./apache2-foreground

@@ -16,11 +16,9 @@ default:
   image: maven:3.6.3-jdk-8
   services:
     - name: "$DIND_IMAGE"
+      alias: docker
       entrypoint: [ "env", "-u", "DOCKER_HOST" ]
       command: [ "dockerd-entrypoint.sh" ]
-  cache:
-    paths:
-      - "$MAVEN_HOME/repository"
 
 stages:
   - test
@@ -39,11 +37,11 @@ test docker:
     - mkdir -p "$DOCKER_SHARE"
     - cd deploy/docker
     - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
-    - bash ./deploy.sh lstart
+    - . ./deploy.sh lstart
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
     - "curl -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
-    - bash ./deploy.sh remove
+    - . ./deploy.sh remove
     - cmp -s openapi.json repository/build/service/target/build/rest-api/openapi.json || exit 1
   only:
     - schedules
@@ -54,7 +52,7 @@ test installer:
   stage: test
   artifacts:
     paths:
-      - deploy/docker/openapi.json
+      - deploy/installer/openapi.json
     when: always
   before_script:
     - apt-get update -y
@@ -63,12 +61,12 @@ test installer:
     - mkdir -p "$DOCKER_SHARE"
     - cd deploy/installer
     - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
-    - bash ./deploy.sh lstart
+    - . ./deploy.sh lstart
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
     - "curl -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
-    - bash ./deploy.sh remove
-    - cmp -s openapi.json repository/build/service/target/build/rest-api/openapi.json || exit 1
+    - . ./deploy.sh remove
+    - cmp -s openapi.json repository/distribution/target/dist/rest-api/openapi.json || exit 1
   only:
     - schedules
     - tags
