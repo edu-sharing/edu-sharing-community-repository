@@ -48,11 +48,16 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
         // return options.filter((o) => o.showAsAction && o.showCallback(this.node)).slice(0, 3);
     }
 
-    openContextmenu(event: MouseEvent) {
+    openContextmenu(event: MouseEvent | Event) {
         event.stopPropagation();
         event.preventDefault();
-        this.dropdownLeft = event.clientX;
-        this.dropdownTop = event.clientY;
+        if (event instanceof MouseEvent) {
+            ({ clientX: this.dropdownLeft, clientY: this.dropdownTop } = event);
+        } else {
+            ({ x: this.dropdownLeft, y: this.dropdownTop } = (
+                event.target as HTMLElement
+            ).getBoundingClientRect());
+        }
         if (!this.entriesService.selection.selected.includes(this.node)) {
             this.entriesService.selection.clear();
             this.entriesService.selection.select(this.node)

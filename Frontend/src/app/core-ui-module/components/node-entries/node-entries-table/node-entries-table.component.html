@@ -2,7 +2,7 @@
 <button
   #menuTrigger="matMenuTrigger"
   mat-button
-  class="dropdown-dummy"
+  class="dropdown-dummy cdk-visually-hidden"
   [style.left.px]="dropdownLeft"
   [style.top.px]="dropdownTop"
   [matMenuTriggerFor]="dropdown.menu"
@@ -134,6 +134,7 @@
       [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"
       *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
       (contextmenu)="onRowContextMenu({ event: $event, node: node })"
+      (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
     >
       Test
     </mat-row>
@@ -148,6 +149,7 @@
       [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"
       *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
       (contextmenu)="onRowContextMenu({ event: $event, node: node })"
+      (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
     >
     </mat-row>
   </ng-container>

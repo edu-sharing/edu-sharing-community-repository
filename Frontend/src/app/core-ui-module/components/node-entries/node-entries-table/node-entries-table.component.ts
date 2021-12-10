@@ -74,15 +74,20 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     }
 
 
-    onRowContextMenu({ event, node }: { event: MouseEvent; node: T }) {
+    onRowContextMenu({ event, node }: { event: MouseEvent | Event; node: T }) {
         if (!this.entriesService.selection.selected.includes(node)) {
             this.entriesService.selection.clear();
             this.entriesService.selection.select(node)
         }
         event.stopPropagation();
         event.preventDefault();
-        this.dropdownLeft = event.clientX;
-        this.dropdownTop = event.clientY;
+        if (event instanceof MouseEvent) {
+            ({ clientX: this.dropdownLeft, clientY: this.dropdownTop } = event);
+        } else {
+            ({ x: this.dropdownLeft, y: this.dropdownTop } = (
+                event.target as HTMLElement
+            ).getBoundingClientRect());
+        }
         this.menuTrigger.openMenu();
     }
 

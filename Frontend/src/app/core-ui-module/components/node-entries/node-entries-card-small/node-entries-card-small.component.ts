@@ -35,7 +35,7 @@ export class NodeEntriesCardSmallComponent<T extends Node> implements OnChanges 
         return options.filter((o) => o.showAsAction && o.showCallback(this.node)).slice(0, 3);
     }
 
-    openContextmenu(event: MouseEvent) {
+    openContextmenu(event: MouseEvent | Event) {
         event.preventDefault();
         event.stopPropagation();
     }
