@@ -64,4 +64,12 @@ export class DropdownComponent {
         }
         return false;
     }
+
+    /** Whether there are any enabled options so we can open the menu. */
+    canShowDropdown(): boolean {
+        // We can only open the dropdown menu, when there is at least one enabled option. Even when
+        // there are options with `showDisabled: true`, showing a menu with no selectable option
+        // causes a11y issues.
+        return this._options?.some((o) => o.isEnabled);
+    }
 }

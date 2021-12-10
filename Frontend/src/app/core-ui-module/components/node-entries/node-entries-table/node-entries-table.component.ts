@@ -1,31 +1,22 @@
-import { SelectionModel } from '@angular/cdk/collections';
+import { CdkDragDrop, CdkDragExit, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag } from '@angular/cdk/drag-drop/directives/drag';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import {
-    AfterViewInit,
-    Component,
-    EventEmitter,
-    Input,
-    Output,
-    ViewChild,
-    OnChanges,
-    SimpleChanges, ApplicationRef,
+    AfterViewInit, ApplicationRef, Component, OnChanges,
+    SimpleChanges, ViewChild
 } from '@angular/core';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatMenuTrigger } from '@angular/material/menu';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
-import { delay, first, map, takeUntil } from 'rxjs/operators';
-import {NodeEntriesService} from '../../../node-entries.service';
-import {Node} from '../../../../core-module/rest/data-object';
-import {ListItem} from '../../../../core-module/ui/list-item';
-import {MatCheckboxChange} from '@angular/material/checkbox';
-import {Target} from '../../../option-item';
-import {DropdownComponent} from '../../dropdown/dropdown.component';
-import {MatMenuTrigger} from '@angular/material/menu';
-import {CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDropList} from '@angular/cdk/drag-drop';
-import {DragCursorDirective, DragDropState} from '../../../directives/drag-cursor.directive';
-import {CdkDrag} from '@angular/cdk/drag-drop/directives/drag';
-import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { Toast } from 'src/app/core-ui-module/toast';
+import { Node } from '../../../../core-module/rest/data-object';
+import { ListItem } from '../../../../core-module/ui/list-item';
+import { DragCursorDirective } from '../../../directives/drag-cursor.directive';
+import { NodeEntriesService } from '../../../node-entries.service';
+import { Target } from '../../../option-item';
+import { DropdownComponent } from '../../dropdown/dropdown.component';
+import { ClickSource, InteractionType } from '../../node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -55,10 +46,10 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
     pageSizeOptions = [25, 50, 100];
     dragSource: T;
 
-    constructor(private route: ActivatedRoute,
+    constructor(
                 public entriesService: NodeEntriesService<T>,
                 private applicationRef: ApplicationRef,
-                private router: Router
+                private toast: Toast,
     ) {
     }
 
@@ -88,7 +79,14 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
                 event.target as HTMLElement
             ).getBoundingClientRect());
         }
-        this.menuTrigger.openMenu();
+        // Wait for the menu to reflect changed options.
+        setTimeout(() => {
+            if (this.dropdown.canShowDropdown()) {
+                this.menuTrigger.openMenu();
+            } else {
+                this.toast.toast('NO_AVAILABLE_OPTIONS');
+            }
+        });
     }
 
     private updateSort(): void {

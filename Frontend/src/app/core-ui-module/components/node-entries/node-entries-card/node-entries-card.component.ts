@@ -7,6 +7,7 @@ import {OptionItem, Target} from '../../../option-item';
 import {DropdownComponent} from '../../dropdown/dropdown.component';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
+import { Toast } from 'src/app/core-ui-module/toast';
 
 @Component({
     selector: 'es-node-entries-card',
@@ -27,6 +28,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
         public applicationRef: ApplicationRef,
+        private toast: Toast,
     ) {
     }
 
@@ -62,7 +64,14 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
             this.entriesService.selection.clear();
             this.entriesService.selection.select(this.node)
         }
-        this.menuTrigger.openMenu();
+        // Wait for the menu to reflect changed options.
+        setTimeout(() => {
+            if (this.dropdown.canShowDropdown()) {
+                this.menuTrigger.openMenu();
+            } else {
+                this.toast.toast('NO_AVAILABLE_OPTIONS');
+            }
+        });
     }
 
     getVisibleColumns() {
