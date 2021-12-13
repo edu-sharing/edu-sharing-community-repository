@@ -21,7 +21,11 @@ mat-tab-group {
     // actionbar.
     grid-template-columns: $sidenavWidth auto;
     position: relative;
-    top: $mainnavHeight;
+    // Use `margin-top` instead of `top` to not create a negative position offset on the bottom of
+    // the container, which could be overlapped by a custom footer.
+    //
+    // TODO: adapt the tabbed variants to do the same.
+    margin-top: $mainnavHeight;
     min-height: calc(100vh - #{$mainnavHeight});
 
     .collections-right {
