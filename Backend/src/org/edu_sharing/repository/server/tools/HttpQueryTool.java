@@ -2,8 +2,6 @@ package org.edu_sharing.repository.server.tools;
 
 import com.typesafe.config.Config;
 import org.alfresco.repo.cache.SimpleCache;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.*;
@@ -22,7 +20,6 @@ import org.edu_sharing.alfresco.tools.ProxyConfig;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import java.io.IOException;
@@ -32,7 +29,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class HttpQueryTool {
@@ -96,7 +92,7 @@ public class HttpQueryTool {
 
 	public String query(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects) {
 
-		HttpEntity entity = get(url, header, method, followRedirects);
+		HttpEntity entity = execute(url, header, method, followRedirects);
 		if (entity != null) {
 
 			try {
@@ -109,7 +105,7 @@ public class HttpQueryTool {
 		return null;
 	}
 
-	private HttpEntity get(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects){
+	private HttpEntity execute(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects){
 		logger.debug("url:" + url);
 
 		if(method == null){
@@ -174,7 +170,7 @@ public class HttpQueryTool {
 	}
 
 	public InputStream getStream(String url) {
-		HttpEntity entity = get(url, null, null, true);
+		HttpEntity entity = execute(url, null, null, true);
 		if (entity != null) {
 
 			try {
