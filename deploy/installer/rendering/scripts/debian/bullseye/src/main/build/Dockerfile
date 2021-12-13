@@ -133,6 +133,7 @@ RUN set -eux \
       ffmpeg \
       cron \
     && a2enmod rewrite \
+    && a2enmod headers \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 

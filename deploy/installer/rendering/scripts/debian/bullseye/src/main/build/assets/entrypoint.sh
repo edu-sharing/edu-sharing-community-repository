@@ -10,4 +10,6 @@ apache2ctl start
 
 apache2ctl stop
 
+while wait-for-it "localhost:80" -t 3; do sleep 1; done
+
 exec ./apache2-foreground
