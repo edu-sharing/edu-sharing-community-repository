@@ -1,0 +1,11 @@
+<button
+  mat-raised-button
+  color="primary"
+  *ngIf="showScrollToTop"
+  [@fade]="showScrollToTop"
+  id="scrollToTop"
+  tabindex="0"
+  (click)="scrollToTop()"
+>
+  <i esIcon="arrow_upward"></i> {{ 'GO_TO_TOP' | translate }}
+</button>

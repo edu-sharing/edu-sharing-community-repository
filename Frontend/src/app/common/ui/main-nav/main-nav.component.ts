@@ -205,7 +205,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     _currentScope: string;
     _showUser = false;
     licenseDialog: boolean;
-    showScrollToTop = false;
     licenseDetails: string;
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
 
@@ -435,8 +434,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                     'px';
             }
         }
-        this.showScrollToTop =
-            (window.pageYOffset || document.documentElement.scrollTop) > 400;
     }
 
     setNodeStore(value: boolean) {
@@ -486,10 +483,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     async refreshBanner(): Promise<void> {
         await new Promise(resolve => resolve(void 0));
         await this.handleScroll(null);
-    }
-
-    scrollToTop() {
-        UIHelper.scrollSmooth(0);
     }
 
     editProfile() {
