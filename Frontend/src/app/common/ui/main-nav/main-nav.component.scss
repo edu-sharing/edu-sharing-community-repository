@@ -1,5 +1,15 @@
 @import '../../../core-ui-module/styles/variables';
 @import '../../../core-ui-module/styles/toast';
+
+::ng-deep {
+    .mobile-move-top, .mobile-move-bottom {
+        &:focus-within {
+            // Don't hide any dynamic elements when focused.
+            top: 0 !important;
+        }
+    }
+}
+
 .topBar {
     position: fixed;
     top: 0;
