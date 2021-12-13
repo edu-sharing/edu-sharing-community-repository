@@ -86,6 +86,10 @@ public class HttpQueryTool {
 		return this.query(url,null,null,true);
 	}
 
+	public String query(HttpUriRequest method){
+		return this.query(method.getURI().toString(),null,method,true);
+	}
+
 	public String query(String url, Map<String,String> header, HttpUriRequest _method) {
 		return query(url,header,_method,true);
 	}
