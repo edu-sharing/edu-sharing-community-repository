@@ -57,8 +57,9 @@ COMPOSE_DIR="compose/target/compose"
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
 
+[[ -f ".env" ]] && source .env
+
 info() {
-	[[ -f ".env" ]] && source .env
 	echo ""
 	echo "#########################################################################"
 	echo ""

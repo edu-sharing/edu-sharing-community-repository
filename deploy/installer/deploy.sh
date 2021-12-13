@@ -67,8 +67,9 @@ fi
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
 
+[[ -f ".env" ]] && source .env
+
 info() {
-	[[ -f ".env" ]] && source .env
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -109,6 +110,7 @@ init() {
 		echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
 		echo "REPOSITORY_SERVICE_PORT_EXTERNAL=${REPOSITORY_SERVICE_PORT:-8100}"
 		echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
+		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
 	} >> .env.repository
 	{
 		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
