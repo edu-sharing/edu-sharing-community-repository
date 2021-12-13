@@ -231,13 +231,20 @@ COPY install.sh .
 COPY assets/entrypoint.sh .
 COPY assets/.env ./
 
+RUN set -eux \
+    && chmod -u+x install.sh \
+    && chmod -u+x libreoffice/scripts/ctl.sh \
+    && chmod -u+x postgresql/scripts/ctl.sh \
+    && chmod -u+x tomcat/scripts/ctl.sh \
+    && chmod -u+x entrypoint.sh
+
 ########################################################################################################################
 
 ENTRYPOINT ["./entrypoint.sh"]
 
 EXPOSE 80 8080
 
-VOLUME alf_data
+#VOLUME alf_data
 
 LABEL git.branch=${git.branch}
 LABEL git.closest.tag.name=${git.closest.tag.fixed}

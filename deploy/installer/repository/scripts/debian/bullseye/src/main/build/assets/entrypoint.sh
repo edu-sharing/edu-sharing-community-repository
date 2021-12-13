@@ -19,9 +19,10 @@ export CATALINA_OUT
 export CATALINA_PID
 export CATALINA_PID
 
+
 start() {
-	./install.sh --all -f .env $@
-	./install.sh --all -f .env $@
+	./install.sh --all -f .env "$@"
+	./install.sh --all -f .env "$@"
 
 	./postgresql/scripts/ctl.sh start
 	./libreoffice/scripts/ctl.sh start
@@ -108,7 +109,7 @@ stop() {
 	exit
 }
 
-start
+start "$@"
 
 #./postgresql/scripts/ctl.sh start
 #./libreoffice/scripts/ctl.sh start

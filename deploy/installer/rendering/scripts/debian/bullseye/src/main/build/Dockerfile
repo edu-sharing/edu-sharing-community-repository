@@ -166,6 +166,11 @@ COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties $RS
 COPY assets/entrypoint.sh ./
 COPY assets/apache2-foreground ./
 
+RUN set -eux \
+    && chmod -u+x install.sh \
+    && chmod -u+x entrypoint.sh \
+    && chmod -u+x apache2-foreground
+
 ########################################################################################################################
 
 # https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop
