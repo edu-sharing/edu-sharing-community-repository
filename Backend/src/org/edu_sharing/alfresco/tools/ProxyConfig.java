@@ -1,6 +1,8 @@
 package org.edu_sharing.alfresco.tools;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProxyConfig implements Serializable {
     String host = null;
@@ -12,6 +14,8 @@ public class ProxyConfig implements Serializable {
     Integer proxyport = null;
 
     String nonProxyHosts = null;
+
+    List<String> disableSNI4Hosts = new ArrayList<>();
 
     public String getHost() {
         return host;
@@ -60,4 +64,8 @@ public class ProxyConfig implements Serializable {
     public void setNonProxyHosts(String nonProxyHosts) {
         this.nonProxyHosts = nonProxyHosts;
     }
+
+    public List<String> getDisableSNI4Hosts() {return disableSNI4Hosts;}
+
+    public void setDisableSNI4Hosts(List<String> disableSNI4Hosts) {this.disableSNI4Hosts = disableSNI4Hosts;}
 }
