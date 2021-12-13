@@ -354,6 +354,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.innerWidth = this.winRef.getNativeWindow().innerWidth;
         //this.autocompletesArray = this.autocompletes.toArray();
         this.registerSearchOnMdsUpdate();
+        this.registerOnSelectionChange();
     }
 
     ngOnDestroy() {
@@ -414,7 +415,17 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     updateSelection(selection: Node[]) {
         this.nodeEntriesResults.getSelection().clear();
         this.nodeEntriesResults.getSelection().select(...selection);
+        this.onSelectionChanged();
+    }
+
+    private onSelectionChanged(): void {
         this.setFixMobileNav();
+    }
+
+    private registerOnSelectionChange(): void {
+        this.nodeEntriesResults.getSelection().changed.pipe(
+            takeUntil(this.destroyed$),
+        ).subscribe(() => this.onSelectionChanged());
     }
 
     getHomeRepoList() {
