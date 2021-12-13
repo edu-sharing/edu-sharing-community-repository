@@ -92,20 +92,10 @@ public class HttpQueryTool {
 
 	public String query(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects) {
 
-		HttpEntity entity = execute(url, header, method, followRedirects);
-		if (entity != null) {
-
-			try {
-				return EntityUtils.toString(entity);
-			} catch (IOException e) {
-				logger.debug(e.getMessage(),e);
-				throw new HttpException(0,e.getMessage());
-			}
-		}
-		return null;
+		return execute(url, header, method, followRedirects, String.class);
 	}
 
-	private HttpEntity execute(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects){
+	private <T extends Object> T execute(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects, Class<T> type){
 		logger.debug("url:" + url);
 
 		if(method == null){
@@ -132,7 +122,7 @@ public class HttpQueryTool {
 			return null;
 		}
 
-		HttpEntity result = null;
+		HttpEntity result;
 		try {
 			CloseableHttpResponse response = client.execute(method);
 
@@ -145,13 +135,27 @@ public class HttpQueryTool {
 				}
 				result = response.getEntity();
 
-				if(returnCode >= 400){
-					String rsStrg = null;
-					if (result != null) {
-						rsStrg = EntityUtils.toString(result);
+				try{
+					if(returnCode >= 400){
+						String rsStrg = null;
+						if (result != null) {
+							rsStrg = EntityUtils.toString(result);
+						}
+						throw new HttpException(returnCode,rsStrg);
 					}
-					throw new HttpException(returnCode,rsStrg);
+
+					if(type == String.class){
+						return (T)EntityUtils.toString(result);
+					}else if(type == InputStream.class){
+						return (T)result.getContent();
+					}else{
+						throw new RuntimeException("unsupported return type:"+type);
+					}
+				}finally {
+					response.close();
 				}
+
+
 
 			}finally {
 				response.close();
@@ -166,20 +170,13 @@ public class HttpQueryTool {
 				e.printStackTrace();
 			}
 		}
-		return result;
 	}
 
 	public InputStream getStream(String url) {
-		HttpEntity entity = execute(url, null, null, true);
-		if (entity != null) {
+		return execute(url, null, null, true, InputStream.class);
+	}
 
-			try {
-				return entity.getContent();
-			} catch (IOException e) {
-				logger.debug(e.getMessage(),e);
-				throw new HttpException(0,e.getMessage());
-			}
-		}
+	public <T extends Object> T query(String url, Class<T> type){
 		return null;
 	}
 
