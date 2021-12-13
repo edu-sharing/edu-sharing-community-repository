@@ -232,11 +232,11 @@ COPY assets/entrypoint.sh .
 COPY assets/.env ./
 
 RUN set -eux \
-    && chmod -u+x install.sh \
-    && chmod -u+x libreoffice/scripts/ctl.sh \
-    && chmod -u+x postgresql/scripts/ctl.sh \
-    && chmod -u+x tomcat/scripts/ctl.sh \
-    && chmod -u+x entrypoint.sh
+    && chmod +x install.sh \
+    && chmod +x libreoffice/scripts/ctl.sh \
+    && chmod +x postgresql/scripts/ctl.sh \
+    && chmod +x tomcat/scripts/ctl.sh \
+    && chmod +x entrypoint.sh
 
 ########################################################################################################################
 

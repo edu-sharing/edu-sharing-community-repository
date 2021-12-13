@@ -167,9 +167,9 @@ COPY assets/entrypoint.sh ./
 COPY assets/apache2-foreground ./
 
 RUN set -eux \
-    && chmod -u+x install.sh \
-    && chmod -u+x entrypoint.sh \
-    && chmod -u+x apache2-foreground
+    && chmod +x install.sh \
+    && chmod +x entrypoint.sh \
+    && chmod +x apache2-foreground
 
 ########################################################################################################################
 
