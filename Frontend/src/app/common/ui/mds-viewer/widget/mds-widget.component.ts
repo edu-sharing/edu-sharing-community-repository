@@ -71,7 +71,6 @@ export class MdsWidgetComponent{
     }
 
     isEmpty() {
-        console.log(this.value);
         return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
     }
 }
