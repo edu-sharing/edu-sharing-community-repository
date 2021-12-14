@@ -79,9 +79,12 @@ db_name="${RENDERING_DATABASE_NAME:-rendering}"
 db_user="${RENDERING_DATABASE_USER:-rendering}"
 db_password="${RENDERING_DATABASE_PASS:-rendering}"
 
-repository_service_host="${REPOSITORY_SERVICE_HOST:-localhost}"
+repository_service_host="${REPOSITORY_SERVICE_HOST:-}"
 repository_service_port="${REPOSITORY_SERVICE_PORT:-80}"
-repository_service_base="http://${repository_service_host}:${repository_service_port}/edu-sharing"
+
+if [[ -n $repository_service_host ]] ; then
+	repository_service_base="http://${repository_service_host}:${repository_service_port}/edu-sharing"
+fi
 
 repository_user="admin"
 repository_password="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
@@ -191,24 +194,27 @@ install_edu_sharing() {
 
 until wait-for-it "${db_host}:${db_port}" -t 3; do sleep 1; done
 
-[[ "${db_driv}" == "pgsql" ]] && {
+if [[ "${db_driv}" == "pgsql" ]] ; then
 	until PGPASSWORD="${db_pass}" psql -h "${db_host}" -p "${db_port}" -U "${db_user}" -d "${db_name}" -c '\q'; do
 		echo >&2 "Waiting for database postgresql ${db_host}:${db_port} ..."
 		sleep 3
 	done
-}
+fi
 
-until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
 
-until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
-	echo >&2 "Waiting for repository ${repository_service_host} service ..."
-	sleep 3
-done
+if [[ -n $repository_service_base ]] ; then
+	until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
 
-until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
-	echo >&2 "Waiting for repository ${repository_service_host} search ..."
-	sleep 3
-done
+	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
+		echo >&2 "Waiting for repository ${repository_service_host} service ..."
+		sleep 3
+	done
+
+	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
+		echo >&2 "Waiting for repository ${repository_service_host} search ..."
+		sleep 3
+	done
+fi
 
 ########################################################################################################################
 
@@ -294,7 +300,7 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
   		"${repository_service_base}/oauth2/token" | jq -r '.access_token' \
   	)
 
-  	if [ -n "${has_my_appid}" ] ; then
+  	if [[ -n "${has_my_appid}" ]] ; then
   		curl -sS \
   			-H "Authorization: Bearer ${access_token}" \
       	-H "Accept: application/json" \
