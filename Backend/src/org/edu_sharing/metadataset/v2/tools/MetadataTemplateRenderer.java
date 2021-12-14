@@ -287,7 +287,9 @@ public class MetadataTemplateRenderer {
 							value = VCardConverter.getNameForVCard("", vcardData);
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("<li class='mdsValue' data-value-key='" + rawValue + "'>");
+							widgetHtml
+								.append(widget.isMultivalue() ? "<li " : "<div ")
+								.append("class='mdsValue' data-value-key='" + rawValue + "'>");
 							if (widget.getIcon() != null) {
 								widgetHtml.append(insertIcon(widget.getIcon()));
 							}
@@ -349,7 +351,7 @@ public class MetadataTemplateRenderer {
 							widgetHtml.append("</div>");
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("</li>");
+							widgetHtml.append(widget.isMultivalue() ? "</li>" : "</div>");
 							if (isLink) {
 								widgetHtml.append("</a>");
 							}
