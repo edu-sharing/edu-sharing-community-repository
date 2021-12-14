@@ -1,4 +1,8 @@
 * text=auto
 *.sh text eol=lf
 *.env text eol=lf
-*.env.base text eol=lf
+*.env.* text eol=lf
+*.conf text eol=lf
+*.sql text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf
