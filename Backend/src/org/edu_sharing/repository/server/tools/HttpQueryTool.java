@@ -241,7 +241,7 @@ public class HttpQueryTool {
 			if (conf != null) {
 				logger.debug("nonProxyHosts:" + conf.getProxyConfig().getNonProxyHosts());
 
-				if (conf.getProxyConfig().getHost() != null && conf.getProxyConfig().getProxyhost() != null && conf.getProxyConfig().getProxyport() != null
+				if (conf.getProxyConfig().getProxyhost() != null && conf.getProxyConfig().getProxyport() != null
 						&& !(conf.getProxyConfig().getNonProxyHosts() != null && conf.getProxyConfig().getNonProxyHosts().contains(urlHost))) {
 					logger.debug("using  proxy proxyhost:" + conf.getProxyConfig().getProxyhost() + " proxyport:" + conf.getProxyConfig().getProxyport() + " host" + conf.getProxyConfig().getHost());
 
@@ -261,7 +261,7 @@ public class HttpQueryTool {
 							credentialsProvider = new BasicCredentialsProvider();
 						}
 						credentialsProvider.setCredentials(new AuthScope(conf.getProxyConfig().getProxyhost(),conf.getProxyConfig().getProxyport()),
-								new UsernamePasswordCredentials(basicAuthUn, basicAuthPw));
+								new UsernamePasswordCredentials(conf.getProxyConfig().getProxyUsername(), conf.getProxyConfig().getProxyPass()));
 						clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 						clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
 					}
