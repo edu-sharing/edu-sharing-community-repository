@@ -16,7 +16,7 @@ import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.util.EntityUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.tools.ProxyConfig;
+import org.edu_sharing.alfresco.tools.HttpQueryToolConfig;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 
 import javax.net.ssl.SSLContext;
@@ -59,17 +59,18 @@ public class HttpQueryTool {
 		if(configCache != null && configCache.get(CACHE_KEY) == null){
 			try{
 				Config root = LightbendConfigLoader.get();
-				Config config = root.getConfig("repository.proxy");
-				ProxyConfig proxyConfig = new ProxyConfig();
-				proxyConfig.setProxyhost(config.getString("proxyhost"));
-				proxyConfig.setProxyport(config.getInt("proxyport"));
-				if(config.hasPath("host")){ proxyConfig.setHost(config.getString("host"));};
-				if(config.hasPath("proxyuser"))proxyConfig.setProxyUsername(config.getString("proxyuser") );
-				if(config.hasPath("proxypass"))proxyConfig.setProxyPass(config.getString("proxypass"));
-				if(config.hasPath("nonproxyhosts")) proxyConfig.setNonProxyHosts(config.getString("nonproxyhosts"));
-				if(root.hasPath("disableSNI4Hosts")) proxyConfig.setDisableSNI4Hosts(root.getStringList("disableSNI4Hosts"));
+				Config httpClientConfiguration = root.getConfig("repository.httpclient");
+				Config proxyConfiguration = httpClientConfiguration.getConfig("proxy");
+				HttpQueryToolConfig httpQueryToolConfig = new HttpQueryToolConfig();
+				if(proxyConfiguration.hasPath("proxyhost")) httpQueryToolConfig.getProxyConfig().setProxyhost(proxyConfiguration.getString("proxyhost"));
+				if(proxyConfiguration.hasPath("proxyport")) httpQueryToolConfig.getProxyConfig().setProxyport(proxyConfiguration.getInt("proxyport"));
+				if(proxyConfiguration.hasPath("host")) httpQueryToolConfig.getProxyConfig().setHost(proxyConfiguration.getString("host"));
+				if(proxyConfiguration.hasPath("proxyuser")) httpQueryToolConfig.getProxyConfig().setProxyUsername(proxyConfiguration.getString("proxyuser") );
+				if(proxyConfiguration.hasPath("proxypass")) httpQueryToolConfig.getProxyConfig().setProxyPass(proxyConfiguration.getString("proxypass"));
+				if(proxyConfiguration.hasPath("nonproxyhosts")) httpQueryToolConfig.getProxyConfig().setNonProxyHosts(proxyConfiguration.getString("nonproxyhosts"));
+				if(httpClientConfiguration.hasPath("disableSNI4Hosts")) httpQueryToolConfig.setDisableSNI4Hosts(httpClientConfiguration.getStringList("disableSNI4Hosts"));
 
-				configCache.put(CACHE_KEY,proxyConfig);
+				configCache.put(CACHE_KEY, httpQueryToolConfig);
 
 			}catch(Exception e){
 				logger.info("No proxy to use found or invalid proxy config: "+e.getMessage());
@@ -107,7 +108,7 @@ public class HttpQueryTool {
 			URL urlObj = new URL(url);
 			String urlHost = urlObj.getHost();
 			//@todo check for config
-            ProxyConfig proxyConf = (configCache != null) ? (ProxyConfig)configCache.get(CACHE_KEY) : null;
+            HttpQueryToolConfig proxyConf = (configCache != null) ? (HttpQueryToolConfig)configCache.get(CACHE_KEY) : null;
             if (proxyConf != null && proxyConf.getDisableSNI4Hosts().contains(urlHost)) {
                 client = prepare(url,header,method,followRedirects, false);
             }else{
@@ -176,10 +177,6 @@ public class HttpQueryTool {
 		return execute(url, null, null, true, InputStream.class);
 	}
 
-	public <T extends Object> T query(String url, Class<T> type){
-		return null;
-	}
-
 
 	/**
 	 * basic auth, proxy server handling, Content-Type "charset=UTF-8"
@@ -240,30 +237,30 @@ public class HttpQueryTool {
 			String urlHost = urlObj.getHost();
 			logger.debug("current Host:" + urlHost);
 
-			ProxyConfig proxyConf = (configCache != null) ? (ProxyConfig)configCache.get(CACHE_KEY) : null;
-			if (proxyConf != null) {
-				logger.debug("nonProxyHosts:" + proxyConf.getNonProxyHosts());
+			HttpQueryToolConfig conf = (configCache != null) ? (HttpQueryToolConfig)configCache.get(CACHE_KEY) : null;
+			if (conf != null) {
+				logger.debug("nonProxyHosts:" + conf.getProxyConfig().getNonProxyHosts());
 
-				if (proxyConf.getHost() != null && proxyConf.getProxyhost() != null && proxyConf.getProxyport() != null
-						&& !(proxyConf.getNonProxyHosts() != null && proxyConf.getNonProxyHosts().contains(urlHost))) {
-					logger.debug("using  proxy proxyhost:" + proxyConf.getProxyhost() + " proxyport:" + proxyConf.getProxyport() + " host" + proxyConf.getHost());
+				if (conf.getProxyConfig().getHost() != null && conf.getProxyConfig().getProxyhost() != null && conf.getProxyConfig().getProxyport() != null
+						&& !(conf.getProxyConfig().getNonProxyHosts() != null && conf.getProxyConfig().getNonProxyHosts().contains(urlHost))) {
+					logger.debug("using  proxy proxyhost:" + conf.getProxyConfig().getProxyhost() + " proxyport:" + conf.getProxyConfig().getProxyport() + " host" + conf.getProxyConfig().getHost());
 
-					HttpHost proxy = new HttpHost(proxyConf.getProxyhost(), proxyConf.getProxyport());
+					HttpHost proxy = new HttpHost(conf.getProxyConfig().getProxyhost(), conf.getProxyConfig().getProxyport());
 
 
-					if(proxyConf.getHost() != null && !proxyConf.getHost().trim().equals("")){
+					if(conf.getProxyConfig().getHost() != null && !conf.getProxyConfig().getHost().trim().equals("")){
 						logger.warn("proxyConf.host is not longer supported");
 					}
 
 					DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 					clientBuilder.setRoutePlanner(routePlanner);
 					//clientBuilder.setProxy(proxy)
-					if (proxyConf.getProxyUsername() != null && proxyConf.getProxyPass() != null) {
+					if (conf.getProxyConfig().getProxyUsername() != null && conf.getProxyConfig().getProxyPass() != null) {
 
 						if(credentialsProvider == null){
 							credentialsProvider = new BasicCredentialsProvider();
 						}
-						credentialsProvider.setCredentials(new AuthScope(proxyConf.getProxyhost(),proxyConf.getProxyport()),
+						credentialsProvider.setCredentials(new AuthScope(conf.getProxyConfig().getProxyhost(),conf.getProxyConfig().getProxyport()),
 								new UsernamePasswordCredentials(basicAuthUn, basicAuthPw));
 						clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 						clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
