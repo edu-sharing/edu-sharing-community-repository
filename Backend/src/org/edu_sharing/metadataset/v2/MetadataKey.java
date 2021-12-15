@@ -9,7 +9,9 @@ public class MetadataKey extends MetadataTranslatable {
 		public enum Relation {
 			exactMatch,
 			narrowMatch,
-			relatedMatch
+			relatedMatch,
+			closeMatch,
+			broadMatch,
 		};
 		private Relation relation;
 

@@ -54,7 +54,7 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	}
 
 
-	protected Logger logger = Logger.getLogger(MigrateMetadataValuespaceJob.class);
+	protected static Logger logger = Logger.getLogger(MigrateMetadataValuespaceJob.class);
 	@JobFieldDescription(description = "type of objects to modify, usually ccm:io", sampleValue = "ccm:io")
 	private String type;
 	@JobFieldDescription(description = "the widget id of the metadataset containing the valuespace mapping information, usually same as targetProperty", sampleValue = "ccm:taxonid")
@@ -98,41 +98,18 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 					return;
 				}
 				Object value = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(sourceProperty));
+				Object target = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(targetProperty));
 				if(value == null){
 					logger.info("Skipping null value, node " + nodeRef);
 					return;
 				}
-				if(value instanceof String || value instanceof List) {
-					if(value instanceof String) {
-						value = Collections.singletonList(value);
-					}
-					ArrayList<String> valueMapped = new ArrayList<>();
-					((List<?>) value).stream().forEach((v) -> {
-						Serializable mapped = mapValue(nodeRef, (String) v, mapping);
-						if(mapped instanceof List) {
-							valueMapped.addAll((Collection<? extends String>) mapped);
-						} else {
-							valueMapped.add((String) mapped);
-						}
-					});
-					HashSet<String> target = new HashSet<>();
-					if(mode.equals(Mode.Merge)) {
-						Serializable targetValue = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(targetProperty));
-						if(targetValue == null) {
-						} else if (targetValue instanceof String) {
-							target.add((String) targetValue);
-						} else if (targetValue instanceof List) {
-							target.addAll((Collection<? extends String>) targetValue);
-						}
-						target.addAll(valueMapped);
-					}
-					target.addAll(valueMapped);
-					if(!testRun) {
-						NodeServiceHelper.setProperty(nodeRef, CCConstants.getValidGlobalName(targetProperty), target);
-					}
-				} else {
-					logger.error("Unable to map a property of type " + value.getClass().getName() + " via valuespace, node " + nodeRef);
+				if(!testRun) {
+					NodeServiceHelper.setProperty(nodeRef,
+							CCConstants.getValidGlobalName(targetProperty),
+							mapValueToTarget(nodeRef, mapping, mode, value, target)
+					);
 				}
+
 			} catch (Exception e) {
 				logger.warn(e.getMessage(), e);
 			}
@@ -140,7 +117,39 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.run();
 	}
 
-	private Serializable mapValue(NodeRef nodeRef, String value, Map<MetadataKey.MetadataKeyRelated, MetadataKey> metadataKeyRelated) {
+	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<MetadataKey.MetadataKeyRelated, MetadataKey> mapping, Mode mode, Object value, Object targetValue) {
+		if(value instanceof String || value instanceof List) {
+			if(value instanceof String) {
+				value = Collections.singletonList(value);
+			}
+			ArrayList<String> valueMapped = new ArrayList<>();
+			((List<?>) value).stream().forEach((v) -> {
+				Serializable mapped = mapValue(nodeRef, (String) v, mapping);
+				if(mapped instanceof List) {
+					valueMapped.addAll((Collection<? extends String>) mapped);
+				} else {
+					valueMapped.add((String) mapped);
+				}
+			});
+			HashSet<String> target = new HashSet<>();
+			if(mode.equals(Mode.Merge)) {
+				if(targetValue == null) {
+				} else if (targetValue instanceof String) {
+					target.add((String) targetValue);
+				} else if (targetValue instanceof List) {
+					target.addAll((Collection<? extends String>) targetValue);
+				}
+				target.addAll(valueMapped);
+			}
+			target.addAll(valueMapped);
+			return target;
+		} else {
+			logger.error("Unable to map a property of type " + value.getClass().getName() + " via valuespace, node " + nodeRef);
+		}
+		return null;
+	}
+
+	private static Serializable mapValue(NodeRef nodeRef, String value, Map<MetadataKey.MetadataKeyRelated, MetadataKey> metadataKeyRelated) {
 		Set<MetadataKey.MetadataKeyRelated> related = metadataKeyRelated.keySet().stream().filter((k) -> k.getKey().equals(value)).collect(Collectors.toSet());
 		Set<MetadataKey> relatedMapped = related.stream().map((k) -> metadataKeyRelated.get(k)).collect(Collectors.toSet());
 		String mappedIds = StringUtils.join(relatedMapped.stream().map(MetadataKey::getKey).collect(Collectors.toList()), ", ");
