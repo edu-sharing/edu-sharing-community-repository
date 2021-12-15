@@ -67,6 +67,10 @@ a, a:hover, a:visited, a:active {
       font-weight: 400;
     }
   }
+  // Again, `&.cdk-keyboard-focused` would be better.
+  .edusharing_rendering_metadata_body .mds_license a:focus {
+    @include setGlobalKeyboardFocus();
+  }
 }
 .topBar{
   background:#383838;
