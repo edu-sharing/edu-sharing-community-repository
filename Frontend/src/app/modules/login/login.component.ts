@@ -133,7 +133,7 @@ export class LoginComponent implements OnInit {
                     this.next = params.next;
                     this.mainnav = params.mainnav !== 'false';
                     if (this.scope === RestConstants.SAFE_SCOPE) {
-                        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                        this.connector.isLoggedIn(true).subscribe((data: LoginResult) => {
                             if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
                                 RestHelper.goToLogin(this.router, this.configService);
                             }

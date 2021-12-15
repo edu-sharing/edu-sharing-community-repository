@@ -21,7 +21,7 @@ import {GlobalContainerComponent} from "../global-container.component";
 export class RocketchatComponent implements EventListener{
     onEvent(event: string, data: any): void {
         if(event==FrameEventsService.EVENT_USER_LOGGED_IN || event==FrameEventsService.EVENT_USER_LOGGED_OUT)
-            this.initalize(true)
+            this.initalize()
     }
     @ViewChild('frame') frame:ElementRef;
     @HostListener('document:keydown', ['$event'])
@@ -66,7 +66,7 @@ export class RocketchatComponent implements EventListener{
         return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general');
     }
 
-    private initalize(forceRenew=false) {
+    private initalize() {
         this._data=null;
         this.src=null;
         this.opened=false;
@@ -75,7 +75,7 @@ export class RocketchatComponent implements EventListener{
             setTimeout(() => this.initalize(), 100);
             return;
         }
-        this.connector.isLoggedIn(forceRenew).subscribe((login)=>{
+        this.connector.isLoggedIn(false).subscribe((login)=>{
             if(login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT){
                 this._data=login.remoteAuthentications.ROCKETCHAT;
                 this.src=this.getFrameUrl();

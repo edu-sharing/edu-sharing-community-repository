@@ -49,7 +49,7 @@ export class NodeReportComponent  {
       new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
       new DialogButton('NODE_REPORT.REPORT', DialogButton.TYPE_PRIMARY, () => this.report()),
     ];
-    this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+    this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
       this.isGuest = data.isGuest;
       if (!data.isGuest){
         this.iam.getUser().subscribe((user) => {

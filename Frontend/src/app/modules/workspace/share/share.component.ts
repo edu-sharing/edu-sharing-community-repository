@@ -210,7 +210,7 @@ export class WorkspaceShareComponent {
         };
         this.linkDisabled.permissions = [];
 
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+        this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
             this.updateToolpermissions();
         });
@@ -355,7 +355,7 @@ export class WorkspaceShareComponent {
                 this.updatePublishState();
             }
         }
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+        this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isAdmin = data.isAdmin;
         });
     }
