@@ -283,36 +283,36 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 		echo "- register rendering service with the repository"
 
 		until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null "${my_internal_url}/admin/" ) -eq 200 ]]
-    do
-    	echo >&2 "Waiting for ${my_internal_url} ..."
-    	sleep 3
-    done
+		do
+			echo >&2 "Waiting for ${my_internal_url} ..."
+			sleep 3
+		done
 
 		my_meta_internal="${my_internal_url}/application/esmain/metadata.php"
 		my_appid=$( \
 			curl -sS "${my_meta_internal}" | xmlstarlet sel -t -v '/properties/entry[@key="appid"]' - | xargs echo \
 		)
 
-		access_token=$( \
-  	curl -sS \
-  		-XPOST \
-  		-d "grant_type=password&client_id=eduApp&client_secret=secret&username=${repository_user}&password=${repository_password}" \
-  		"${repository_service_base}/oauth2/token" | jq -r '.access_token' \
-  	)
+		has_my_appid=$( \
+			curl -sS \
+				-H "Accept: application/json" \
+				--user "${repository_user}:${repository_password}" \
+				"${repository_service_base}/rest/admin/v1/applications" | jq -r '.[] | select(.id == "'"${my_appid}"'") | .id' \
+		)
 
-  	if [[ -n "${has_my_appid}" ]] ; then
-  		curl -sS \
-  			-H "Authorization: Bearer ${access_token}" \
-      	-H "Accept: application/json" \
-      	-XDELETE \
-      	"${repository_service_base}/rest/admin/v1/applications/${my_appid}"
-    fi
+		if [[ -n "${has_my_appid}" ]] ; then
+			curl -sS \
+				-H "Accept: application/json" \
+				--user "${repository_user}:${repository_password}" \
+				-XDELETE \
+				"${repository_service_base}/rest/admin/v1/applications/${my_appid}"
+		fi
 
-    curl -sS \
-    	-H "Authorization: Bearer ${access_token}" \
-    	-H "Accept: application/json" \
-    	-XPUT \
-    	"${repository_service_base}/rest/admin/v1/applications?url=$( jq -nr --arg v "${my_meta_internal}" '$v|@uri' )"
+		curl -sS \
+			-H "Accept: application/json" \
+			--user "${repository_user}:${repository_password}" \
+			-XPUT \
+			"${repository_service_base}/rest/admin/v1/applications?url=$( jq -nr --arg v "${my_meta_internal}" '$v|@uri' )"
 	fi
 
 else
@@ -381,7 +381,10 @@ crontab "${croneJob}"
 rm -f  "${croneJob}"
 
 chown -R www-data:www-data "${RS_ROOT}"
+
 popd
+
+
 
 info >> "install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
 info
