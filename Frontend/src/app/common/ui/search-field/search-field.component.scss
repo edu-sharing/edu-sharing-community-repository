@@ -85,7 +85,7 @@ mat-form-field {
         font-size: $fontSizeXSmall;
         text-align: center;
         border-radius: 50%;
-        background-color: $warningMedium;
+        background-color: darken($warningMedium, 14%);
         user-select: none;
         margin: 0 5px;
     }
