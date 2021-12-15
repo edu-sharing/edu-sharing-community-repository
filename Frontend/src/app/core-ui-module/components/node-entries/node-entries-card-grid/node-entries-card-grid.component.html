@@ -32,83 +32,28 @@
   </div>
 </div>
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
-<!-- FIXME: Ideally, we would use native `ul` and `li` elements, but these have a strict model, that
-only allows `li` elements as direct children of `ul` elements. So we would need to use the native
-elements at all places without any elements between `ul` and `li`. -->
-<div
-  *ngIf="entriesService.sort?.customSortingInProgress"
-  role="list"
-  class="card-grid card-grid-reorder"
+
+<!-- Do not render the list element (`role="list"` or `li`) when there are no list items. -->
+<ng-container
+  *ngIf="(visibleNodes$ | async)?.length > 0 || entriesService.globalOptions?.length > 0"
 >
-  <ng-container *ngIf="visibleNodes$ | async as nodes">
-    <div
-      class="card-grid-order-wrapper"
-      *ngFor="let node of nodes; let i = index"
-      role="none"
-      cdkDropList
-      cdkDropListOrientation="horizontal"
-      [cdkDropListData]="i"
-      (cdkDropListDropped)="reorder($event)"
-    >
-      <es-node-entries-card
-        *ngIf="displayType === NodeEntriesDisplayType.Grid"
-        #item
-        [node]="node"
-        [dropdown]="dropdown"
-        role="listitem"
-        cdkDrag
-      ></es-node-entries-card>
-      <es-node-entries-card-small
-        *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
-        #item
-        [node]="node"
-        role="listitem"
-        cdkDrag
-      ></es-node-entries-card-small>
-    </div>
-  </ng-container>
-</div>
-<ng-container *ngIf="!entriesService.sort?.customSortingInProgress">
+  <!-- FIXME: Ideally, we would use native `ul` and `li` elements, but these have a strict model,
+  that only allows `li` elements as direct children of `ul` elements. So we would need to use the
+  native elements at all places without any elements between `ul` and `li`. -->
   <div
-    *ngIf="!entriesService.dragDrop?.dragAllowed"
+    *ngIf="entriesService.sort?.customSortingInProgress"
     role="list"
-    class="card-grid"
-    #grid
-    (esBorderBoxObserver)="onGridSizeChanges()"
-    esInfiniteScroll
-    (scrolled)="loadData()"
+    class="card-grid card-grid-reorder"
   >
-    <ng-container *ngTemplateOutlet="list"></ng-container>
-  </div>
-  <div
-    *ngIf="entriesService.dragDrop?.dragAllowed"
-    role="list"
-    class="card-grid"
-    #grid
-    (esBorderBoxObserver)="onGridSizeChanges()"
-    esInfiniteScroll
-    (dragleave)="dragExit($event)"
-    (scrolled)="loadData()"
-  >
-    <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
     <ng-container *ngIf="visibleNodes$ | async as nodes">
       <div
-        class="card-grid-drag-wrapper"
+        class="card-grid-order-wrapper"
         *ngFor="let node of nodes; let i = index"
         role="none"
         cdkDropList
-        cdkDropListOrientation="vertical"
-        [class.card-grid-drop-allowed]="
-          getDragState()?.element === node && getDragState()?.dropAllowed
-        "
-        [class.card-grid-drop-blocked]="
-          getDragState()?.element === node && !getDragState()?.dropAllowed
-        "
-        [cdkDropListData]="node"
-        [cdkDropListSortingDisabled]="true"
-        (cdkDropListEntered)="dragEnter($event)"
-        (cdkDropListExited)="dragExit($event)"
-        (cdkDropListDropped)="drop($event)"
+        cdkDropListOrientation="horizontal"
+        [cdkDropListData]="i"
+        (cdkDropListDropped)="reorder($event)"
       >
         <es-node-entries-card
           *ngIf="displayType === NodeEntriesDisplayType.Grid"
@@ -117,8 +62,6 @@ elements at all places without any elements between `ul` and `li`. -->
           [dropdown]="dropdown"
           role="listitem"
           cdkDrag
-          [cdkDragData]="node"
-          esDragCursor
         ></es-node-entries-card>
         <es-node-entries-card-small
           *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
@@ -126,24 +69,87 @@ elements at all places without any elements between `ul` and `li`. -->
           [node]="node"
           role="listitem"
           cdkDrag
-          [cdkDragData]="node"
-          esDragCursor
         ></es-node-entries-card-small>
-        <div
-          *ngIf="getDragState()?.element === node && !getDragState().dropAllowed"
-          class="card-grid-drop-blocked-container"
-        >
-          <i esIcon="cancel"></i>
-        </div>
-        <div
-          *ngIf="getDragState()?.element === node && getDragState().dropAllowed"
-          class="card-grid-drop-allowed-container"
-        >
-          <i [esIcon]="getDragState().mode === 'copy' ? 'add_circle_outline' : 'archive'"></i>
-        </div>
       </div>
     </ng-container>
   </div>
+  <ng-container *ngIf="!entriesService.sort?.customSortingInProgress">
+    <div
+      *ngIf="!entriesService.dragDrop?.dragAllowed"
+      role="list"
+      class="card-grid"
+      #grid
+      (esBorderBoxObserver)="onGridSizeChanges()"
+      esInfiniteScroll
+      (scrolled)="loadData()"
+    >
+      <ng-container *ngTemplateOutlet="list"></ng-container>
+    </div>
+    <div
+      *ngIf="entriesService.dragDrop?.dragAllowed"
+      role="list"
+      class="card-grid"
+      #grid
+      (esBorderBoxObserver)="onGridSizeChanges()"
+      esInfiniteScroll
+      (dragleave)="dragExit($event)"
+      (scrolled)="loadData()"
+    >
+      <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
+      <ng-container *ngIf="visibleNodes$ | async as nodes">
+        <div
+          class="card-grid-drag-wrapper"
+          *ngFor="let node of nodes; let i = index"
+          role="none"
+          cdkDropList
+          cdkDropListOrientation="vertical"
+          [class.card-grid-drop-allowed]="
+            getDragState()?.element === node && getDragState()?.dropAllowed
+          "
+          [class.card-grid-drop-blocked]="
+            getDragState()?.element === node && !getDragState()?.dropAllowed
+          "
+          [cdkDropListData]="node"
+          [cdkDropListSortingDisabled]="true"
+          (cdkDropListEntered)="dragEnter($event)"
+          (cdkDropListExited)="dragExit($event)"
+          (cdkDropListDropped)="drop($event)"
+        >
+          <es-node-entries-card
+            *ngIf="displayType === NodeEntriesDisplayType.Grid"
+            #item
+            [node]="node"
+            [dropdown]="dropdown"
+            role="listitem"
+            cdkDrag
+            [cdkDragData]="node"
+            esDragCursor
+          ></es-node-entries-card>
+          <es-node-entries-card-small
+            *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
+            #item
+            [node]="node"
+            role="listitem"
+            cdkDrag
+            [cdkDragData]="node"
+            esDragCursor
+          ></es-node-entries-card-small>
+          <div
+            *ngIf="getDragState()?.element === node && !getDragState().dropAllowed"
+            class="card-grid-drop-blocked-container"
+          >
+            <i esIcon="cancel"></i>
+          </div>
+          <div
+            *ngIf="getDragState()?.element === node && getDragState().dropAllowed"
+            class="card-grid-drop-allowed-container"
+          >
+            <i [esIcon]="getDragState().mode === 'copy' ? 'add_circle_outline' : 'archive'"></i>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
 </ng-container>
 <ng-container
   *ngIf="
