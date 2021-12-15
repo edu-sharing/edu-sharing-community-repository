@@ -5,4 +5,7 @@
 <es-accessibility #accessibility></es-accessibility>
 <!-- central access to all dialogs for actions -->
 <es-workspace-management #management></es-workspace-management>
-<es-scroll-to-top-button></es-scroll-to-top-button>
+<es-scroll-to-top-button
+  role="navigation"
+  [attr.aria-label]="'GO_TO_TOP' | translate"
+></es-scroll-to-top-button>
