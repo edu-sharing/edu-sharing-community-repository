@@ -2,11 +2,10 @@ variables:
   COMMON_BIND_HOST: "0.0.0.0"
   DOCKER_DRIVER: "$DIND_DRIVER"
   DOCKER_HOST: "$DIND_HOST"
-  DOCKER_SHARE: "/builds/$CI_PROJECT_PATH/mnt"
   DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
   MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS --batch-mode --errors --show-version"
-  MAVEN_HOME: "$DOCKER_SHARE/.m2"
-  MAVEN_OPTS: "-Dmaven.repo.local=$MAVEN_HOME/repository"
+  MAVEN_HOME: "/builds/$CI_PROJECT_PATH/mnt/.m2"
+  MAVEN_OPTS: "-Dmaven.repo.local=/builds/$CI_PROJECT_PATH/mnt/.m2/repository"
   PLUGIN_CLUSTER_ENABLED: "false"
   PLUGIN_LOGINEO_IDM_ENABLED: "false"
   PLUGIN_REMOTE_ENABLED: "false"
@@ -34,7 +33,7 @@ test docker:
     - apt-get update -y
     - apt-get install -y docker.io docker-compose jq wait-for-it
   script:
-    - mkdir -p "$DOCKER_SHARE"
+    - mkdir -p "$MAVEN_HOME"
     - cd deploy/docker
     - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
     - . ./deploy.sh lstart
@@ -58,7 +57,7 @@ test installer:
     - apt-get update -y
     - apt-get install -y docker.io docker-compose jq wait-for-it
   script:
-    - mkdir -p "$DOCKER_SHARE"
+    - mkdir -p "$MAVEN_HOME"
     - cd deploy/installer
     - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
     - . ./deploy.sh lstart
