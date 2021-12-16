@@ -45,7 +45,7 @@ export class RocketchatComponent implements EventListener{
         private events: FrameEventsService
     ){
         this.events.addSelfListener(this);
-        this.initalize(false);
+        this.initalize();
         window.addEventListener('message', (event:any)=>{
             if(event.source!==window.self) {
                 if(event.data.eventName=='startup') {
