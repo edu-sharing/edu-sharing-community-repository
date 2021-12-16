@@ -28,13 +28,16 @@ import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
 import org.restlet.resource.Post;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Path("/lti/v13")
@@ -78,9 +81,34 @@ public class LTIApi {
              */
             ApplicationInfo applicationInfo = ltiService.getApplicationInfo(iss, clientId, ltiDeploymentId);
             Map<String, String> model = new LTIOidcUtil().generateAuthRequestPayload(applicationInfo, dto);
+            /**
+             * store nonce and state in session for later validation
+             */
+            HttpSession session = req.getSession();
+            Map<String,String> toSession = new HashMap<>();
+            toSession.put(LTIConstants.LTI_TOOL_SESS_ATT_NONCE, model.get("nonce"));
+            toSession.put(LTIConstants.LTI_TOOL_SESS_ATT_STATE, model.get("state"));
+            storeInSession(session,toSession);
+
             return Response.status(Response.Status.OK).entity(getHTML(applicationInfo.getLtiOidc(),model,null)).build();
         } catch (LTIException | GeneralSecurityException | IOException e) {
             return Response.status(Response.Status.OK).entity(getHTML(null,null,e.getMessage())).build();
+        }
+    }
+
+    /**
+     * store multiple for allowing multiple deployments of edu-sharing(ltitool) in lms(lti platform)
+     * @param session
+     * @param params
+     */
+    private void storeInSession(HttpSession session, Map<String,String> params){
+        for(Map.Entry<String,String> entry : params.entrySet()){
+            List<String> list = (List<String>)session.getAttribute(entry.getKey());
+            if(list == null){
+               list = new ArrayList<>();
+            }
+            list.add(entry.getValue());
+            session.setAttribute(entry.getKey(), list);
         }
     }
 

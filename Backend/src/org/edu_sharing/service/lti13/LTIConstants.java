@@ -16,6 +16,9 @@ public class LTIConstants {
 
     public static final String LTI_TOOL_REDIRECTURL_PATH = "lti13";
 
+    public static final String LTI_TOOL_SESS_ATT_NONCE = "lti_nonce";
+    public static final String LTI_TOOL_SESS_ATT_STATE = "lti_state";
+
 
     public static final String FORM_POST = "form_post";
     public static final String ID_TOKEN = "id_token";
