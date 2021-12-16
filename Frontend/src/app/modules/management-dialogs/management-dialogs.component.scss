@@ -44,7 +44,7 @@ es-workspace-lti-tools{
   }
 }
 :host ::ng-deep {
-  card.qr {
+  .qr-link-card {
     mat-card-content {
       display: flex;
       justify-content: center;
