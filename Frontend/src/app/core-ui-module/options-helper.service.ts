@@ -976,8 +976,8 @@ export class OptionsHelperService implements OnDestroy {
                 data: window.location.href
             }
         );
-        qrCodeNode.constrains = [Constrain.Files, Constrain.NoBulk];
-        qrCodeNode.scopes = [Scope.Render];
+        qrCodeNode.constrains = [Constrain.NoBulk];
+        qrCodeNode.scopes = [Scope.Render, Scope.CollectionsCollection];
         qrCodeNode.group = DefaultGroups.View;
         qrCodeNode.priority = 70;
 
