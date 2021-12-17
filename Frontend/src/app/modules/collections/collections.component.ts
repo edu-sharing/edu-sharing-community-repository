@@ -1048,7 +1048,8 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     }
 
     hasNonIconPreview(): boolean {
-        return !this.collectionContent?.node?.preview?.isIcon;
+        const preview = this.collectionContent?.node?.preview;
+        return preview && !preview.isIcon;
     }
 
     private renderBreadcrumbs() {
