@@ -238,9 +238,12 @@ export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewIni
     }
 
     ngAfterViewInit(): void {
-        this.templatesService.title = this.titleRef;
-        this.templatesService.empty = this.emptyRef;
-        this.templatesService.actionArea = this.actionAreaRef;
+        // Prevent changed-after-checked error
+        Promise.resolve().then(() => {
+            this.templatesService.title = this.titleRef;
+            this.templatesService.empty = this.emptyRef;
+            this.templatesService.actionArea = this.actionAreaRef;
+        });
     }
 }
 
