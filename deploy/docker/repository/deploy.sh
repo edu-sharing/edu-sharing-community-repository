@@ -271,12 +271,16 @@ rdebug() {
 stop() {
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
+		-f "repository-image-remote.yml" \
+		-f "repository-network-dev.yml" \
 		stop || exit
 }
 
 remove() {
 	$COMPOSE_EXEC \
 		-f "repository.yml" \
+		-f "repository-image-remote.yml" \
+		-f "repository-network-dev.yml" \
 		down || exit
 }
 
