@@ -387,7 +387,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.applyParameters('did-you-mean-suggestion')
     }
 
-    async applyParameters(origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion', props: Values = null) {
+    async applyParameters(
+        origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort',
+        props: Values = null,
+    ) {
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
         if(origin === 'mds') {
@@ -751,7 +754,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     updateSort(sort: ListSortConfig) {
         this.searchService.sort = sort;
-        this.routeSearch();
+        this.applyParameters('sort');
     }
 
     permissionAddToCollection(node: Node) {
