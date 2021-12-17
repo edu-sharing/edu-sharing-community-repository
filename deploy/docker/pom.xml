@@ -1,70 +1,76 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-deploy</artifactId>
-    <version>git</version>
-    <relativePath>../pom.xml</relativePath>
-  </parent>
+    <parent>
+        <groupId>org.edu_sharing</groupId>
+        <artifactId>edu_sharing-community-deploy</artifactId>
+        <version>git</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-  <artifactId>edu_sharing-community-deploy-docker</artifactId>
-  <packaging>pom</packaging>
+    <artifactId>edu_sharing-community-deploy-docker</artifactId>
+    <packaging>pom</packaging>
 
-  <name>edu_sharing-community-deploy-docker</name>
+    <name>edu_sharing-community-deploy-docker</name>
 
-  <properties>
+    <properties>
 
-    <docker.from.apache.exporter>docker.io/bitnami/apache-exporter:0.10.1</docker.from.apache.exporter>
-    <docker.from.apache.server>docker.io/php:${php.version}-apache</docker.from.apache.server>
-    <docker.from.elasticsearch.exporter>quay.io/prometheuscommunity/elasticsearch-exporter:v1.3.0</docker.from.elasticsearch.exporter>
-    <docker.from.elasticsearch.server>docker.elastic.co/elasticsearch/elasticsearch:${elasticsearch.version}</docker.from.elasticsearch.server>
-    <docker.from.minideb>docker.io/bitnami/minideb:bullseye</docker.from.minideb>
-    <docker.from.openjdk>docker.io/openjdk:8-jdk-bullseye</docker.from.openjdk>
-    <docker.from.postgresql.exporter>quay.io/prometheuscommunity/postgres-exporter:v0.10.0</docker.from.postgresql.exporter>
-    <docker.from.postgresql.server>docker.io/bitnami/postgresql:${postgresql.version}</docker.from.postgresql.server>
-    <docker.from.redis.exporter>docker.io/bitnami/redis-exporter:1.32.0</docker.from.redis.exporter>
-    <docker.from.redis.server>docker.io/bitnami/redis:6.2.6</docker.from.redis.server>
-    <docker.from.rediscluster.server>docker.io/bitnami/redis-cluster:6.2.6</docker.from.rediscluster.server>
-    <docker.from.tomcat>docker.io/tomcat:${tomcat.version}-jdk8</docker.from.tomcat>
+        <docker.from.apache.exporter>docker.io/bitnami/apache-exporter:0.10.1</docker.from.apache.exporter>
+        <docker.from.apache.server>docker.io/php:${php.version}-apache</docker.from.apache.server>
+        <docker.from.mongo.db>docker.io/mongo:5.0.5</docker.from.mongo.db>
+        <docker.from.mongo.express>docker.io/mongo-express:0.54.0</docker.from.mongo.express>
+        <docker.from.elasticsearch.exporter>quay.io/prometheuscommunity/elasticsearch-exporter:v1.3.0</docker.from.elasticsearch.exporter>
+        <docker.from.elasticsearch.server>docker.elastic.co/elasticsearch/elasticsearch:${elasticsearch.version}</docker.from.elasticsearch.server>
+        <docker.from.minideb>docker.io/bitnami/minideb:bullseye</docker.from.minideb>
+        <docker.from.openjdk>docker.io/openjdk:8-jdk-bullseye</docker.from.openjdk>
+        <docker.from.postgresql.exporter>quay.io/prometheuscommunity/postgres-exporter:v0.10.0
+        </docker.from.postgresql.exporter>
+        <docker.from.postgresql.server>docker.io/bitnami/postgresql:${postgresql.version}
+        </docker.from.postgresql.server>
+        <docker.from.redis.exporter>docker.io/bitnami/redis-exporter:1.32.0</docker.from.redis.exporter>
+        <docker.from.redis.server>docker.io/bitnami/redis:6.2.6</docker.from.redis.server>
+        <docker.from.rediscluster.server>docker.io/bitnami/redis-cluster:6.2.6</docker.from.rediscluster.server>
+        <docker.from.tomcat>docker.io/tomcat:${tomcat.version}-jdk8</docker.from.tomcat>
 
-    <rendering.redis.client.version>5.3.4</rendering.redis.client.version>
+        <rendering.redis.client.version>5.3.4</rendering.redis.client.version>
 
-    <repository.prometheus.agent.version>0.14.0</repository.prometheus.agent.version>
-    <repository.redis.client.version>3.16.5</repository.redis.client.version>
+        <repository.prometheus.agent.version>0.14.0</repository.prometheus.agent.version>
+        <repository.redis.client.version>3.16.5</repository.redis.client.version>
 
-  </properties>
+    </properties>
 
-  <profiles>
+    <profiles>
 
-    <profile>
+        <profile>
 
-      <id>docker-build-timestamp</id>
+            <id>docker-build-timestamp</id>
 
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <name>env.DOCKER_BUILD_TIMESTAMP</name>
-          <value>true</value>
-        </property>
-      </activation>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>env.DOCKER_BUILD_TIMESTAMP</name>
+                    <value>true</value>
+                </property>
+            </activation>
 
-      <properties>
+            <properties>
 
-        <docker.tag>${project.version}-${build.timestamp}</docker.tag>
+                <docker.tag>${project.version}-${build.timestamp}</docker.tag>
 
-      </properties>
+            </properties>
 
-    </profile>
+        </profile>
 
-  </profiles>
+    </profiles>
 
-<modules>  <module>build</module>
-    <module>compose</module>
-    <module>helm</module>
-    <module>rendering</module>
-    <module>repository</module>
-  </modules>
+    <modules>
+        <module>build</module>
+        <module>compose</module>
+        <module>helm</module>
+        <module>rendering</module>
+        <module>repository</module>
+    </modules>
 </project>

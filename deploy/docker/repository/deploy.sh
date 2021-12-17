@@ -152,6 +152,7 @@ note() {
 }
 
 init() {
+	docker volume create "${COMPOSE_NAME}_repository-mongo-volume" || exit
 	docker volume create "${COMPOSE_NAME}_repository-database-volume" || exit
 	docker volume create "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
 	docker volume create "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
@@ -160,6 +161,7 @@ init() {
 }
 
 purge() {
+	docker volume rm "${COMPOSE_NAME}_repository-mongo-volume" || exit
 	docker volume rm -f "${COMPOSE_NAME}_repository-database-volume" || exit
 	docker volume rm -f "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
 	docker volume rm -f "${COMPOSE_NAME}_repository-search-solr4-volume" || exit

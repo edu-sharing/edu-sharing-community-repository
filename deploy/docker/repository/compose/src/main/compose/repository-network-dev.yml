@@ -6,6 +6,22 @@ services:
     ports:
       - "127.0.0.1:${REPOSITORY_DATABASE_PORT_SQL:-8000}:5432"
 
+  repository-mongo:
+    ports:
+      - "127.0.0.1:${REPOSITORY_DATABASE_PORT_SQL:-27017}:27017"
+
+  repository-mongo-express:
+    image: "${docker.image}-mongo-express:${docker.tag}"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: "repository-mongo"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "${REPOSITORY_MONGODB_USER:-repository}"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "${REPOSITORY_MONGODB_PASS:-repository}"
+      ME_CONFIG_MONGODB_URL: "mongodb://${REPOSITORY_MONGODB_USER:-repository}:${REPOSITORY_MONGODB_PASS:-repository}@repository-mongo:27017/"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_MONGO_EXPRESS_PORT_HTTP:-8400}:8081"
+    depends_on:
+      - repository-mongo
+
   repository-search-elastic:
     ports:
       - "127.0.0.1:${REPOSITORY_SEARCH_ELASTIC_PORT_HTTP:-8300}:9200"
