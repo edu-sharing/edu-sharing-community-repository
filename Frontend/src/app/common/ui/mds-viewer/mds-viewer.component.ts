@@ -110,7 +110,11 @@ export class MdsViewerComponent {
             'nodes',
             this._data,
         );
-        if (editor === 'legacy') {
+        if (!editor) {
+            // Initialization was interrupted. Probably, this method was called again before it
+            // could finish.
+            return;
+        } else if (editor === 'legacy') {
             console.error(
                 'mds viewer component is only supported for groups with angular rendering',
             );
