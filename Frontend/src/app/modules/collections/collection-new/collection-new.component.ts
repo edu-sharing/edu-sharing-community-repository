@@ -150,8 +150,15 @@ export class CollectionNewComponent {
 
           this.COLORS=this.config.instant('collections.colors',this.DEFAULT_COLORS);
           if(data.statusCode!=RestConstants.STATUS_CODE_OK){
+            this.toast.error(
+              { message: 'loginData.statusCode was not ok', data },
+              'TOOLPERMISSION_ERROR',
+            );
             UIHelper.getCommonParameters(this.route).subscribe((params)=> {
-              this.router.navigate([UIConstants.ROUTER_PREFIX + "collections",{queryParams:params}]);
+              this.router.navigate(
+                [UIConstants.ROUTER_PREFIX + "collections"],
+                { queryParams: params },
+              );
             });
             return;
           }
