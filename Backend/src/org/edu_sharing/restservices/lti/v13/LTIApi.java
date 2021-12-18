@@ -213,13 +213,34 @@ public class LTIApi {
                     ltiSessionObject.setIss(jws.getBody().get(LTIConstants.LTI_PARAM_ISS,String.class));
                     ltiSessionObject.setNonce(jws.getBody().get(LTIConstants.LTI_NONCE,String.class));
                     ltiSessionObject.setMessageType(ltiMessageType);
-                    if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
-                        Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
-                        ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
-                    }
+                    /**
+                     * @TODO: what happens when user is using the sames session within two browser windows
+                     * maybe use list of LTISessionObject's
+                     */
                     req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
-
-                    return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
+                    if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)){
+                        if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
+                            Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
+                            ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
+                        }
+                        return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
+                    }else if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK)){
+                        //rendering stuff
+                        /**
+                         * @TODO check for launch_presentation
+                         * "https://purl.imsglobal.org/spec/lti/claim/launch_presentation": {
+                         *     "locale": "en",
+                         *     "document_target": "iframe",
+                         *     "return_url": "http://localhost/moodle/mod/lti/return.php?course=2&launch_container=3&instanceid=1&sesskey=q6noraEPlA"
+                         *   }
+                         */
+                        String targetLink = jws.getBody().get(LTIConstants.LTI_TARGET_LINK_URI, String.class);
+                        return Response.temporaryRedirect(new URI(targetLink)).build();
+                    }else{
+                        String message = "can not handle message type:" + ltiMessageType;
+                        logger.error(message);
+                        return Response.status(Response.Status.OK).entity(getHTML(null,null,message)).build();
+                    }
                 }
             }
         }catch(Exception e){

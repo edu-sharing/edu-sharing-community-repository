@@ -15,6 +15,7 @@ public class Node {
 
 	private NodeRef ref = null;
 	private NodeRef parent = null;
+	private NodeLTIDeepLink nodeLTIDeepLink = null;
 	private Remote remote = null;
 	private String type = null;
 	private List<String> aspects = new ArrayList<String>();
@@ -391,4 +392,12 @@ public class Node {
     public Map<NodeRefImpl.Relation, Node> getRelations() {
         return relations;
     }
+
+	public void setNodeLTIDeepLink(NodeLTIDeepLink nodeLTIDeepLink) {
+		this.nodeLTIDeepLink = nodeLTIDeepLink;
+	}
+
+	public NodeLTIDeepLink getNodeLTIDeepLink() {
+		return nodeLTIDeepLink;
+	}
 }

@@ -17,6 +17,9 @@ import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.lti13.LTIConstants;
+import org.edu_sharing.service.lti13.LTIJWTUtil;
+import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.CombineMode;
@@ -105,6 +108,22 @@ public class SearchApi {
 		    		data = search.getNodes();
 		    		// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
 		    	}
+
+				LTISessionObject ltiSessionObject = (LTISessionObject)req
+						.getSession()
+						.getAttribute(LTISessionObject.class.getName());
+				if(ltiSessionObject != null){
+					for(Node n : data) {
+						if (LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING.equals(ltiSessionObject.getMessageType())) {
+							String deepLinkingResponseJwt = new LTIJWTUtil().getDeepLinkingResponseJwt(
+									ltiSessionObject, n.getTitle(), n.getRef().getId());
+							n.setNodeLTIDeepLink(
+									new NodeLTIDeepLink(
+											(String)ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_RETURN_URL),
+											deepLinkingResponseJwt));
+						}
+					}
+				}
 		    	
 		    	
 		    	Pagination pagination = new Pagination();
