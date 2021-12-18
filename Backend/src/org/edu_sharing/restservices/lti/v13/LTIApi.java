@@ -139,6 +139,7 @@ public class LTIApi {
     @Path("/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH)
     @Operation(summary = "lti tool redirect.", description = "lti tool redirect")
 
+    @Consumes({ "application/x-www-form-urlencoded" })
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
@@ -148,8 +149,8 @@ public class LTIApi {
                     @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
             })
-    public Response lti(@Parameter(description = "Issuer of the request, will be validated",required=true) @QueryParam("id_token") String idToken,
-                        @Parameter(description = "Issuer of the request, will be validated",required=true) @QueryParam("state") String state,
+    public Response lti(@Parameter(description = "Issuer of the request, will be validated",required=true) @FormParam("id_token") String idToken,
+                        @Parameter(description = "Issuer of the request, will be validated",required=true) @FormParam("state") String state,
                         @Context HttpServletRequest req){
         logger.info("id_token:"+idToken +" state:"+state);
 
