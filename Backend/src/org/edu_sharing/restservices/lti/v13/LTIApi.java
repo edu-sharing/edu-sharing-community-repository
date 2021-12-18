@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Repo;
@@ -224,7 +225,9 @@ public class LTIApi {
                             Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
                             ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
                         }
-                        return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
+                        //return Response.status(302).location(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/edu-sharing/components/search")).build();
+                        return Response.seeOther(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/components/search")).build();
+                        //return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
                     }else if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK)){
                         //rendering stuff
                         /**
@@ -236,7 +239,8 @@ public class LTIApi {
                          *   }
                          */
                         String targetLink = jws.getBody().get(LTIConstants.LTI_TARGET_LINK_URI, String.class);
-                        return Response.temporaryRedirect(new URI(targetLink)).build();
+                        return Response.status(302).location(new URI(targetLink)).build();
+                        //return Response.temporaryRedirect(new URI(targetLink)).build();
                     }else{
                         String message = "can not handle message type:" + ltiMessageType;
                         logger.error(message);
