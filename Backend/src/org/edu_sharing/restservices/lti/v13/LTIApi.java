@@ -215,6 +215,10 @@ public class LTIApi {
                     ltiSessionObject.setIss(jws.getBody().get(LTIConstants.LTI_PARAM_ISS,String.class));
                     ltiSessionObject.setNonce(jws.getBody().get(LTIConstants.LTI_NONCE,String.class));
                     ltiSessionObject.setMessageType(ltiMessageType);
+                    ltiSessionObject.setEduSharingAppId(new RepoTools().getAppId(ltiSessionObject.getIss(),
+                            stateClaims.getBody().getAudience(),
+                            ltiSessionObject.getDeploymentId()));
+
                     /**
                      * @TODO: what happens when user is using the sames session within two browser windows
                      * maybe use list of LTISessionObject's
