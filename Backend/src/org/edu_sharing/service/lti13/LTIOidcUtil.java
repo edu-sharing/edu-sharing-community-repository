@@ -49,38 +49,11 @@ public class LTIOidcUtil {
         authRequestMap.put("scope", LTIConstants.OPEN_ID);  //Always this value, as specified in the standard.
         // The state is something that we can create and add anything we want on it.
         // On this case, we have decided to create a JWT token with some information that we will use as additional security. But it is not mandatory.
-        String state = generateState(platformDeployment, authRequestMap, loginInitiationDTO, platformDeployment.getLtiClientId(), platformDeployment.getLtiDeploymentId());
+        String state = new LTIJWTUtil().generateState(platformDeployment, authRequestMap, loginInitiationDTO, platformDeployment.getLtiClientId(), platformDeployment.getLtiDeploymentId());
         authRequestMap.put("state", state); //The state we use later to retrieve some useful information about the OICD request.
         authRequestMap.put("oicdEndpoint", platformDeployment.getLtiOidc());  //We need this in the Thymeleaf template in case we decide to use the POST method. It is the endpoint where the LMS receives the OICD requests
         authRequestMap.put("oicdEndpointComplete", generateCompleteUrl(authRequestMap));  //This generates the URL to use in case we decide to use the GET method
         return authRequestMap;
-    }
-
-    public String generateState(ApplicationInfo platformDeployment, Map<String, String> authRequestMap, LoginInitiationDTO loginInitiationDTO, String clientIdValue, String deploymentIdValue) throws GeneralSecurityException, IOException {
-
-        Date date = new Date();
-        Key issPrivateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
-        String state = Jwts.builder()
-                .setHeaderParam("kid", ApplicationInfoList.getHomeRepository().getAppId())  // The key id used to sign this
-                .setHeaderParam("typ", "JWT") // The type
-                .setIssuer("ltiStarter")  //This is our own identifier, to know that we are the issuer.
-                .setSubject(platformDeployment.getLtiIss()) // We store here the platform issuer to check that matches with the issuer received later
-                .setAudience(platformDeployment.getLtiClientId())  //We send here the clientId to check it later.
-                .setExpiration(DateUtils.addSeconds(date, 3600)) //a java.util.Date
-                .setNotBefore(date) //a java.util.Date
-                .setIssuedAt(date) // for example, now
-                .setId(authRequestMap.get("nonce")) //just a nonce... we don't use it by the moment, but it could be good if we store information about the requests in DB.
-                .claim("original_iss", loginInitiationDTO.getIss())  //All this claims are the information received in the OIDC initiation and some other useful things.
-                .claim("loginHint", loginInitiationDTO.getLoginHint())
-                .claim("ltiMessageHint", loginInitiationDTO.getLtiMessageHint())
-                .claim("targetLinkUri", loginInitiationDTO.getTargetLinkUri())
-                .claim("clientId", clientIdValue)
-                .claim("ltiDeploymentId", deploymentIdValue)
-                .claim("controller", "/oidc/login_initiations")
-                .signWith(SignatureAlgorithm.RS256, issPrivateKey)  //We sign it
-                .compact();
-        logger.info("State:" + state);
-        return state;
     }
 
     private String generateCompleteUrl(Map<String, String> model) throws UnsupportedEncodingException {

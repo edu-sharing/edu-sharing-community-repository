@@ -29,4 +29,22 @@ public class LTIConstants {
     public static final String MOODLE_KEYSET_URL_PATH = "/mod/lti/certs.php";
     public static final String MOODLE_AUTH_TOKEN_URL_PATH = "/mod/lti/token.php";
 
+
+    /**
+     * Authentication response
+     */
+    public static final String LTI_MESSAGE_TYPE = "https://purl.imsglobal.org/spec/lti/claim/message_type";
+    public static final String DEEP_LINKING_SETTINGS = "https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings";
+    public static final String DEEP_LINK_RETURN_URL = "deep_link_return_url";
+
+
+    /**
+     * user information
+     */
+    public static final String LTI_NAME = "name";
+    public static final String LTI_GIVEN_NAME = "given_name";
+    public static final String LTI_FAMILY_NAME = "family_name";
+    public static final String LTI_MIDDLE_NAME = "middle_name";
+    public static final String LTI_EMAIL = "email";
+
 }

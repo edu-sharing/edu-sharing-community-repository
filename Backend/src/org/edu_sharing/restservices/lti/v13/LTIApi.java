@@ -3,6 +3,8 @@ package org.edu_sharing.restservices.lti.v13;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,20 +14,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Repo;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
-import org.edu_sharing.service.lti13.LTIConstants;
-import org.edu_sharing.service.lti13.LTIException;
-import org.edu_sharing.service.lti13.LTIOidcUtil;
-import org.edu_sharing.service.lti13.LTIService;
+import org.edu_sharing.service.lti13.*;
+import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
-import org.restlet.resource.Post;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -33,6 +31,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -74,12 +73,12 @@ public class LTIApi {
          */
 
         LoginInitiationDTO dto = new LoginInitiationDTO(iss,loginHint,targetLinkUrl,ltiMessageHint,clientId,ltiDeploymentId);
-        LTIService ltiService = new LTIService();
+        RepoTools repoTools = new RepoTools();
         try {
             /**
              * @TODO maybe use db instead of applicationinfo
              */
-            ApplicationInfo applicationInfo = ltiService.getApplicationInfo(iss, clientId, ltiDeploymentId);
+            ApplicationInfo applicationInfo = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
             Map<String, String> model = new LTIOidcUtil().generateAuthRequestPayload(applicationInfo, dto);
             /**
              * store nonce and state in session for later validation
@@ -153,6 +152,82 @@ public class LTIApi {
                         @Parameter(description = "Issuer of the request, will be validated",required=true) @QueryParam("state") String state,
                         @Context HttpServletRequest req){
         logger.info("id_token:"+idToken +" state:"+state);
+
+        try{
+            if(state == null) {
+                throw new IllegalStateException("no state param provided");
+            }
+
+            List<String> sessionStates = (List<String>)req.getSession().getAttribute(LTIConstants.LTI_TOOL_SESS_ATT_STATE);
+            if(sessionStates == null){
+                throw new IllegalStateException("no states initiated for this session");
+            }
+
+            if(!sessionStates.contains(state)){
+                throw new IllegalStateException("LTI request doesn't contains the expected state");
+            }
+
+
+            LTIJWTUtil ltijwtUtil = new LTIJWTUtil();
+            Jws<Claims> stateClaims = ltijwtUtil.validateState(state);
+
+            if(StringUtils.hasText(idToken)){
+                //Now we validate the JWT token
+                /**
+                 * @TODO maybe also use deployment id here to find te right applicationid:
+                 */
+                Jws<Claims> jws = ltijwtUtil.validateJWT(idToken, stateClaims.getBody().getAudience());
+                if (jws != null) {
+                    //Here we create and populate the LTI3Request object and we will add it to the httpServletRequest, so the redirect endpoint will have all that information
+                    //ready and will be able to use it.
+                    /*LTI3Request lti3Request = new LTI3Request(httpServletRequest, ltiDataService, true, link); // IllegalStateException if invalid
+                    req.setAttribute("LTI3", true); // indicate this request is an LTI3 one
+                    req.setAttribute("lti3_valid", lti3Request.isLoaded() && lti3Request.isComplete()); // is LTI3 request totally valid and complete
+                    req.setAttribute("lti3_message_type", lti3Request.getLtiMessageType()); // is LTI3 request totally valid and complete
+                    req.setAttribute(LTI3Request.class.getName(), lti3Request); // make the LTI3 data accessible later in the request if needed
+                     */
+                    /**
+                     * @TODO: validate correctly:
+                     *
+                     * https://www.imsglobal.org/spec/security/v1p0/#authentication-response-validation
+                     */
+
+                    /**
+                     * edu-sharing authentication
+                     */
+                    String user = jws.getBody().getSubject();
+                    String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
+                    String familyName = jws.getBody().get(LTIConstants.LTI_FAMILY_NAME, String.class);
+                    String givenName = jws.getBody().get(LTIConstants.LTI_GIVEN_NAME, String.class);
+                    String email = jws.getBody().get(LTIConstants.LTI_EMAIL, String.class);
+
+                    String authenticatedUsername = RepoTools.authenticate(req,
+                            RepoTools.mapToSSOMap(user, givenName, familyName, email));
+
+
+                    /**
+                     * deep linking stuff
+                     */
+                    String ltiMessageType = jws.getBody().get(LTIConstants.LTI_MESSAGE_TYPE,String.class);
+                    LTISessionObject ltiSessionObject = new LTISessionObject();
+                    ltiSessionObject.setMessageType(ltiMessageType);
+                    if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
+                        Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
+                        String deepLinkReturnUrl = (String)deepLinkingSettings.get(LTIConstants.DEEP_LINK_RETURN_URL);
+                        if(deepLinkReturnUrl != null){
+                            ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
+                            req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+                        }
+                    }
+                    
+                    return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
+                }
+            }
+        }catch(Exception e){
+            return Response.status(Response.Status.OK).entity(getHTML(null,null,e.getMessage())).build();
+        }
+
+
         return Response.status(Response.Status.OK).build();
     }
 
@@ -250,7 +325,7 @@ public class LTIApi {
             throw new Exception("must be an admin to register lti platforms");
         }
         HashMap<String,String> properties = new HashMap<>();
-        properties.put(ApplicationInfo.KEY_APPID, new LTIService().getAppId(platformId,clientId,deploymentId));
+        properties.put(ApplicationInfo.KEY_APPID, new RepoTools().getAppId(platformId,clientId,deploymentId));
         properties.put(ApplicationInfo.KEY_TYPE, "lti");
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, deploymentId);
         properties.put(ApplicationInfo.KEY_LTI_ISS, platformId);
