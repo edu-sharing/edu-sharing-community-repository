@@ -173,10 +173,9 @@ public class LTIApi {
 
             if(StringUtils.hasText(idToken)){
                 //Now we validate the JWT token
-                /**
-                 * @TODO maybe also use deployment id here to find te right applicationid:
-                 */
-                Jws<Claims> jws = ltijwtUtil.validateJWT(idToken, stateClaims.getBody().getAudience());
+                Jws<Claims> jws = ltijwtUtil.validateJWT(idToken,
+                        stateClaims.getBody().getAudience(),
+                        stateClaims.getBody().get(LTIConstants.LTI_STATE_DEPLOYMENT_ID, String.class));
                 if (jws != null) {
                     //Here we create and populate the LTI3Request object and we will add it to the httpServletRequest, so the redirect endpoint will have all that information
                     //ready and will be able to use it.
@@ -210,16 +209,16 @@ public class LTIApi {
                      */
                     String ltiMessageType = jws.getBody().get(LTIConstants.LTI_MESSAGE_TYPE,String.class);
                     LTISessionObject ltiSessionObject = new LTISessionObject();
+                    ltiSessionObject.setDeploymentId(jws.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class));
+                    ltiSessionObject.setIss(jws.getBody().get(LTIConstants.LTI_PARAM_ISS,String.class));
+                    ltiSessionObject.setNonce(jws.getBody().get(LTIConstants.LTI_NONCE,String.class));
                     ltiSessionObject.setMessageType(ltiMessageType);
                     if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
                         Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
-                        String deepLinkReturnUrl = (String)deepLinkingSettings.get(LTIConstants.DEEP_LINK_RETURN_URL);
-                        if(deepLinkReturnUrl != null){
-                            ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
-                            req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
-                        }
+                        ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
                     }
-                    
+                    req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+
                     return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
                 }
             }

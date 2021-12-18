@@ -12,6 +12,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.security.Key;
 import java.security.PublicKey;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class LTIJWTUtil {
@@ -40,7 +42,7 @@ public class LTIJWTUtil {
                 .setExpiration(DateUtils.addSeconds(date, 3600)) //a java.util.Date
                 .setNotBefore(date) //a java.util.Date
                 .setIssuedAt(date) // for example, now
-                .setId(authRequestMap.get("nonce")) //just a nonce... we don't use it by the moment, but it could be good if we store information about the requests in DB.
+                .setId(authRequestMap.get(LTIConstants.LTI_NONCE)) //just a nonce... we don't use it by the moment, but it could be good if we store information about the requests in DB.
                 .claim("original_iss", loginInitiationDTO.getIss())  //All this claims are the information received in the OIDC initiation and some other useful things.
                 .claim("loginHint", loginInitiationDTO.getLoginHint())
                 .claim("ltiMessageHint", loginInitiationDTO.getLtiMessageHint())
@@ -77,7 +79,7 @@ public class LTIJWTUtil {
         // If we are on this point, then the state signature has been validated. We can start other tasks now.
     }
 
-    public Jws<Claims> validateJWT(String jwt, String clientId) {
+    public Jws<Claims> validateJWT(String jwt, String clientId, String deploymentId) {
 
         return Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
 
@@ -89,7 +91,7 @@ public class LTIJWTUtil {
                 try {
                     // We are dealing with RS256 encryption, so we have some Oauth utils to manage the keys and
                     // convert them to keys from the string stored in DB. There are for sure other ways to manage this.
-                    platform = new RepoTools().getApplicationInfo(claims.getIssuer(),clientId,null);
+                    platform = new RepoTools().getApplicationInfo(claims.getIssuer(),clientId,deploymentId);
                 } catch (LTIException ex) {
                     logger.error("no platform with " + claims.getIssuer() +" " + clientId + " registered", ex);
                     return null;
@@ -114,5 +116,39 @@ public class LTIJWTUtil {
 
             }
         }).parseClaimsJws(jwt);
+    }
+
+    public String getDeepLinkingResponseJwt(String appId, LTISessionObject ltiSessionObject) throws GeneralSecurityException{
+        Key toolPrivateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+
+        ApplicationInfo appInfo = ApplicationInfoList.getApplicationInfos().get(appId);
+        if(appInfo == null){
+            logger.error("no appinfo found for appId:" + appId);
+            return null;
+        }
+
+        Date date = new Date();
+        String jwt = Jwts.builder()
+                .setHeaderParam(LTIConstants.TYP, LTIConstants.JWT)
+
+                /**
+                 *  better leave out?
+                 */
+                //.setHeaderParam(LTIConstants.KID, TextConstants.DEFAULT_KID)
+                .setHeaderParam(LTIConstants.ALG, LTIConstants.RS256)
+                .setIssuer(appInfo.getLtiClientId())  //Client ID
+                .setAudience(ltiSessionObject.getIss())
+                .setExpiration(DateUtils.addSeconds(date, 3600)) //a java.util.Date
+                .setIssuedAt(date) // for example, now
+                .claim(LTIConstants.LTI_NONCE, ltiSessionObject.getNonce())
+                .claim(LTIConstants.LTI_AZP, ltiSessionObject.getIss())
+                .claim(LTIConstants.LTI_DEPLOYMENT_ID, ltiSessionObject.getDeploymentId())
+                    .claim(LTIConstants.LTI_MESSAGE_TYPE, LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING_RESPONSE)
+                .claim(LTIConstants.LTI_VERSION, LTIConstants.LTI_VERSION_3)
+                .claim(LTIConstants.LTI_DATA, ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_DATA))
+                .claim(LTIConstants.LTI_CONTENT_ITEMS, new HashMap<String, Object>())
+                .signWith(SignatureAlgorithm.RS256, toolPrivateKey)  //We sign it
+                .compact();
+        return jwt;
     }
 }
