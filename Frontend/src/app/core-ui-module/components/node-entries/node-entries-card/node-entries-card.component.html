@@ -74,6 +74,7 @@
       ></mat-checkbox>
     </div>
   </div>
+  <es-node-entries-card-lti [node]="node"></es-node-entries-card-lti>
   <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 mode="wrapper"
                 [node]="node"
