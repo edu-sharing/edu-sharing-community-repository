@@ -247,7 +247,7 @@ public class LTIApi {
                          *   }
                          */
                         String targetLink = jws.getBody().get(LTIConstants.LTI_TARGET_LINK_URI, String.class);
-                        return Response.status(302).location(new URI(targetLink)).build();
+                        return Response.seeOther(new URI(targetLink)).build();
                         //return Response.temporaryRedirect(new URI(targetLink)).build();
                     }else{
                         String message = "can not handle message type:" + ltiMessageType;
