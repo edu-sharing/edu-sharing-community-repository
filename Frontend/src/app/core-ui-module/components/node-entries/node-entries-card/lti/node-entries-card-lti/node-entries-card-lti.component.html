@@ -1,23 +1,6 @@
-<p *ngIf="node" xmlns="http://www.w3.org/1999/html">node-entries-card-lti works!</p>
-
-<!--<form action="{{node.nodeLTIDeepLink.ltiDeepLinkReturnUrl}}" method="post">
-  <input type="hidden" id="JWT" name="JWT" value="{{node.nodeLTIDeepLink.jwtDeepLinkResponse}}"/>
-  <input type="submit" value="Select" class="btn btn-primary"/>
-</form>
-
-http://localhost/moodle/mod/lti/contentitem_return.php?course=2&amp;id=1&amp;=SOBSvgUAkV
--->
-
 <form *ngIf="node.nodeLTIDeepLink" ngNoForm [action]="node.nodeLTIDeepLink.ltiDeepLinkReturnUrl" method="POST">
   <input type="hidden" id="JWT" name="JWT" value="{{node.nodeLTIDeepLink.jwtDeepLinkResponse}}"/>
   <button ng-click="submit()">Hello</button>
   <input type="submit" value="Select" class="btn btn-primary"/>
 </form>
 
-<!--
-<form ngNoForm [action]="node.type" method="POST">
-  <input type="hidden" id="JWT" name="JWT" value=""/>
-  <button ng-click="submit()">Hello</button>
-  <input type="submit" value="Select" class="btn btn-primary"/>
-</form>
--->
