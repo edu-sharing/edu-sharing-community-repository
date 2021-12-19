@@ -1,6 +1,5 @@
 <form *ngIf="node.nodeLTIDeepLink" ngNoForm [action]="node.nodeLTIDeepLink.ltiDeepLinkReturnUrl" method="POST">
   <input type="hidden" id="JWT" name="JWT" value="{{node.nodeLTIDeepLink.jwtDeepLinkResponse}}"/>
-  <button ng-click="submit()">Hello</button>
-  <input type="submit" value="Select" class="btn btn-primary"/>
+  <input type="submit" value="Select For LTI" class="btn btn-primary"/>
 </form>
 
