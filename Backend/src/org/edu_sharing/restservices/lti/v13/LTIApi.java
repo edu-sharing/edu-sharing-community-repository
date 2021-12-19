@@ -229,6 +229,10 @@ public class LTIApi {
                             Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
                             ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
                         }
+                        /**
+                         * @TODO check if this kind of redirect works
+                         */
+
                         //return Response.status(302).location(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/edu-sharing/components/search")).build();
                         return Response.seeOther(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/components/search")).build();
                         //return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();

@@ -116,7 +116,7 @@ public class SearchApi {
 					for(Node n : data) {
 						if (LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING.equals(ltiSessionObject.getMessageType())) {
 							String deepLinkingResponseJwt = new LTIJWTUtil().getDeepLinkingResponseJwt(
-									ltiSessionObject, n.getTitle(), n.getRef().getId());
+									ltiSessionObject, n.getRef().getId(), n.getTitle() );
 							n.setNodeLTIDeepLink(
 									new NodeLTIDeepLink(
 											(String)ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_RETURN_URL),
