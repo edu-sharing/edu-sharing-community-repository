@@ -264,27 +264,6 @@ public class LTIApi {
         return Response.status(Response.Status.OK).build();
     }
 
-
-    @POST
-    @Path("/test")
-    @Operation(summary = "lti tool test.", description = "lti tool test")
-
-    @ApiResponses(
-            value = {
-                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
-            })
-    public Response ltiTest(@Parameter(description = "Issuer of the request, will be validated",required=true) @QueryParam("id_token") String idToken,
-                        @Parameter(description = "Issuer of the request, will be validated",required=true) @QueryParam("state") String state,
-                        @Context HttpServletRequest req){
-        logger.info("id_token:"+idToken +" state:"+state);
-        return Response.status(Response.Status.OK).build();
-    }
-
     @POST
     @Path("/registration")
     @Operation(summary = "register LTI platform")
