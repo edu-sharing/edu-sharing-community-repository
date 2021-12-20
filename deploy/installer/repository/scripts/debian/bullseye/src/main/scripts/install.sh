@@ -101,12 +101,13 @@ repository_database_prot="${REPOSITORY_DATABASE_PROT:-"postgresql"}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-"repository"}"
 repository_database_jdbc="jdbc:${repository_database_prot}://${repository_database_host}:${repository_database_port}/${repository_database_name}${repository_database_opts}"
 
-repository_proxy_host="${REPOSITORY_PROXY_HOST:-}"
-repository_proxy_nonproxyhosts="${REPOSITORY_PROXY_NONPROXYHOSTS:-}"
-repository_proxy_proxyhost="${REPOSITORY_PROXY_PROXYHOST:-}"
-repository_proxy_proxyport="${REPOSITORY_PROXY_PROXYPORT:-}"
-repository_proxy_proxyuser="${REPOSITORY_PROXY_PROXYUSER:-}"
-repository_proxy_proxypass="${REPOSITORY_PROXY_PROXYPASS:-}"
+repository_httpclient_disablesni4hosts="${REPOSITORY_HTTPCLIENT_DISABLE_SNI4HOSTS:-}"
+repository_httpclient_proxy_host="${REPOSITORY_HTTPCLIENT_PROXY_HOST:-}"
+repository_httpclient_proxy_nonproxyhosts="${REPOSITORY_HTTPCLIENT_PROXY_NONPROXYHOSTS:-}"
+repository_httpclient_proxy_proxyhost="${REPOSITORY_HTTPCLIENT_PROXY_PROXYHOST:-}"
+repository_httpclient_proxy_proxyport="${REPOSITORY_HTTPCLIENT_PROXY_PROXYPORT:-}"
+repository_httpclient_proxy_proxyuser="${REPOSITORY_HTTPCLIENT_PROXY_PROXYUSER:-}"
+repository_httpclient_proxy_proxypass="${REPOSITORY_HTTPCLIENT_PROXY_PROXYPASS:-}"
 
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-"127.0.0.1"}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
@@ -183,14 +184,18 @@ info() {
 	if [[ -n $rendering_proxy_host ]] ; then
 	echo "#########################################################################"
   echo ""
-  echo "proxy:"
+  echo "httpclient:"
   echo ""
-  echo "  Host:                ${repository_proxy_host}"
-  echo "  Non Proxy Host:      ${repository_proxy_nonproxyhosts}"
-  echo "  Proxy Host:          ${repository_proxy_proxyhost}"
-  echo "  Proxy Port:          ${repository_proxy_proxyport}"
-  echo "  Proxy User:          ${repository_proxy_proxyuser}"
-  echo "  Proxy Password:      ${repository_proxy_proxypass}"
+  echo "  Disable SNI4Hosts:     ${repository_httpclient_disablesni4hosts}"
+  echo ""
+  echo "  proxy:"
+  echo ""
+  echo "    Host:                ${repository_httpclient_proxy_host}"
+  echo "    Non Proxy Host:      ${repository_httpclient_proxy_nonproxyhosts}"
+  echo "    Proxy Host:          ${repository_httpclient_proxy_proxyhost}"
+  echo "    Proxy Port:          ${repository_httpclient_proxy_proxyport}"
+  echo "    Proxy User:          ${repository_httpclient_proxy_proxyuser}"
+  echo "    Proxy Password:      ${repository_httpclient_proxy_proxypass}"
   echo ""
 	fi
 
@@ -295,44 +300,44 @@ install_edu_sharing() {
 	sed -i -r 's|javax\.xml\.parsers\.SAXParserFactory=.*\"|javax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
 	grep -q 'javax\.xml\.parsers\.SAXParserFactory' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
 
-	if [[ -n "${repository_proxy_nonproxyhosts}" ]]  ; then
-		sed -i -r "s|http\.nonProxyHosts=.*\"|http.nonProxyHosts=${repository_proxy_nonproxyhosts}\"|" tomcat/bin/setenv.sh
-    grep -q 'http\.nonProxyHosts' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.nonProxyHosts ${repository_proxy_nonproxyhosts}\"" >> tomcat/bin/setenv.sh
+	if [[ -n "${repository_httpclient_proxy_nonproxyhosts}" ]]  ; then
+		sed -i -r "s|http\.nonProxyHosts=.*\"|http.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.nonProxyHosts' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.nonProxyHosts ${repository_httpclient_proxy_nonproxyhosts}\"" >> tomcat/bin/setenv.sh
 
-		sed -i -r "s|https\.nonProxyHosts=.*\"|https.nonProxyHosts=${repository_proxy_nonproxyhosts}\"|" tomcat/bin/setenv.sh
-		grep -q 'https\.nonProxyHosts' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.nonProxyHosts ${repository_proxy_nonproxyhosts}\"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.nonProxyHosts=.*\"|https.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.nonProxyHosts' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.nonProxyHosts ${repository_httpclient_proxy_nonproxyhosts}\"" >> tomcat/bin/setenv.sh
 	fi
 
-	if [[ -n "${repository_proxy_proxyhost}" ]] ; then
-		sed -i -r "s|http\.proxyHost=.*\"|http.proxyHost=${repository_proxy_proxyhost}\"|" tomcat/bin/setenv.sh
-    grep -q 'http\.proxyHost' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyHost ${repository_proxy_proxyhost}\"" >> tomcat/bin/setenv.sh
+	if [[ -n "${repository_httpclient_proxy_proxyhost}" ]] ; then
+		sed -i -r "s|http\.proxyHost=.*\"|http.proxyHost=${repository_httpclient_proxy_proxyhost}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.proxyHost' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyHost ${repository_httpclient_proxy_proxyhost}\"" >> tomcat/bin/setenv.sh
 
-		sed -i -r "s|https\.proxyHost=.*\"|https.proxyHost=${repository_proxy_proxyhost}\"|" tomcat/bin/setenv.sh
-		grep -q 'https\.proxyHost' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyHost ${repository_proxy_proxyhost}\"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.proxyHost=.*\"|https.proxyHost=${repository_httpclient_proxy_proxyhost}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.proxyHost' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyHost ${repository_httpclient_proxy_proxyhost}\"" >> tomcat/bin/setenv.sh
 	fi
 
-	if [[ -n "${repository_proxy_proxypass}" ]] ; then
-		sed -i -r "s|http\.proxyPass=.*\"|http.proxyPass=${repository_proxy_proxypass}\"|" tomcat/bin/setenv.sh
-    grep -q 'http\.proxyPass' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyPass ${repository_proxy_proxypass}\"" >> tomcat/bin/setenv.sh
+	if [[ -n "${repository_httpclient_proxy_proxypass}" ]] ; then
+		sed -i -r "s|http\.proxyPass=.*\"|http.proxyPass=${repository_httpclient_proxy_proxypass}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.proxyPass' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyPass ${repository_httpclient_proxy_proxypass}\"" >> tomcat/bin/setenv.sh
 
-		sed -i -r "s|https\.proxyPass=.*\"|https.proxyPass=${repository_proxy_proxypass}\"|" tomcat/bin/setenv.sh
-		grep -q 'https\.proxyPass' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyPass ${repository_proxy_proxypass}\"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.proxyPass=.*\"|https.proxyPass=${repository_httpclient_proxy_proxypass}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.proxyPass' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyPass ${repository_httpclient_proxy_proxypass}\"" >> tomcat/bin/setenv.sh
 	fi
 
-	if [[ -n "${repository_proxy_proxyport}" ]] ; then
-		sed -i -r "s|http\.proxyPort=.*\"|http.proxyPort=${repository_proxy_proxyport}\"|" tomcat/bin/setenv.sh
-    grep -q 'http\.proxyPort' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyPort ${repository_proxy_proxyport}\"" >> tomcat/bin/setenv.sh
+	if [[ -n "${repository_httpclient_proxy_proxyport}" ]] ; then
+		sed -i -r "s|http\.proxyPort=.*\"|http.proxyPort=${repository_httpclient_proxy_proxyport}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.proxyPort' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyPort ${repository_httpclient_proxy_proxyport}\"" >> tomcat/bin/setenv.sh
 
-		sed -i -r "s|https\.proxyPort=.*\"|https.proxyPort=${repository_proxy_proxyport}\"|" tomcat/bin/setenv.sh
-		grep -q 'https\.proxyPort' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyPort ${repository_proxy_proxyport}\"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.proxyPort=.*\"|https.proxyPort=${repository_httpclient_proxy_proxyport}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.proxyPort' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyPort ${repository_httpclient_proxy_proxyport}\"" >> tomcat/bin/setenv.sh
 	fi
 
-	if [[ -n "${repository_proxy_proxyuser}" ]] ; then
-		sed -i -r "s|http\.proxyUser=.*\"|http.proxyUser=${repository_proxy_proxyuser}\"|" tomcat/bin/setenv.sh
-    grep -q 'http\.proxyUser' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyUser ${repository_proxy_proxyuser}\"" >> tomcat/bin/setenv.sh
+	if [[ -n "${repository_httpclient_proxy_proxyuser}" ]] ; then
+		sed -i -r "s|http\.proxyUser=.*\"|http.proxyUser=${repository_httpclient_proxy_proxyuser}\"|" tomcat/bin/setenv.sh
+    grep -q 'http\.proxyUser' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyUser ${repository_httpclient_proxy_proxyuser}\"" >> tomcat/bin/setenv.sh
 
-		sed -i -r "s|https\.proxyUser=.*\"|https.proxyUser=${repository_proxy_proxyuser}\"|" tomcat/bin/setenv.sh
-		grep -q 'https\.proxyUser' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyUser ${repository_proxy_proxyuser}\"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.proxyUser=.*\"|https.proxyUser=${repository_httpclient_proxy_proxyuser}\"|" tomcat/bin/setenv.sh
+		grep -q 'https\.proxyUser' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyUser ${repository_httpclient_proxy_proxyuser}\"" >> tomcat/bin/setenv.sh
 	fi
 
 
@@ -435,34 +440,39 @@ install_edu_sharing() {
 	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
 		set "elasticsearch.servers" '["'"${repository_search_elastic_host}:${repository_search_elastic_port}"'"]'
 
-	if [[ -n "${repository_proxy_host}" ]] ; then
+	if [[ -n "${repository_httpclient_disablesni4hosts}" ]] ; then
 		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-			set "repository.proxy.host" "${repository_proxy_host}"
+			set "repository.httpclient.disableSNI4Hosts" "${repository_httpclient_disablesni4hosts}"
 	fi
 
-  if [[ -n "${repository_proxy_nonproxyhosts}" ]]  ; then
+	if [[ -n "${repository_httpclient_proxy_host}" ]] ; then
+		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+			set "repository.httpclient.proxy.host" "${repository_httpclient_proxy_host}"
+	fi
+
+  if [[ -n "${repository_httpclient_proxy_nonproxyhosts}" ]]  ; then
   	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-  		set "repository.proxy.nonproxyhosts" "${repository_proxy_nonproxyhosts}"
+  		set "repository.httpclient.proxy.nonproxyhosts" "${repository_httpclient_proxy_nonproxyhosts}"
   fi
 
-  if [[ -n "${repository_proxy_proxyhost}" ]] ; then
+  if [[ -n "${repository_httpclient_proxy_proxyhost}" ]] ; then
   	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-  		set "repository.proxy.proxyhost" "${repository_proxy_proxyhost}"
+  		set "repository.httpclient.proxy.proxyhost" "${repository_httpclient_proxy_proxyhost}"
   fi
 
-  if [[ -n "${repository_proxy_proxypass}" ]] ; then
+  if [[ -n "${repository_httpclient_proxy_proxypass}" ]] ; then
   	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-  		set "repository.proxy.proxypass" "${repository_proxy_proxypass}"
+  		set "repository.httpclient.proxy.proxypass" "${repository_httpclient_proxy_proxypass}"
   fi
 
-  if [[ -n "${repository_proxy_proxyport}" ]] ; then
+  if [[ -n "${repository_httpclient_proxy_proxyport}" ]] ; then
   	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-  		set "repository.proxy.proxyport" "${repository_proxy_proxyport}"
+  		set "repository.httpclient.proxy.proxyport" "${repository_httpclient_proxy_proxyport}"
   fi
 
-  if [[ -n "${repository_proxy_proxyuser}" ]] ; then
+  if [[ -n "${repository_httpclient_proxy_proxyuser}" ]] ; then
   	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-  		set "repository.proxy.proxyuser" "${repository_proxy_proxyuser}"
+  		set "repository.httpclient.proxy.proxyuser" "${repository_httpclient_proxy_proxyuser}"
   fi
 
 	popd

@@ -30,12 +30,13 @@ data:
   REPOSITORY_DATABASE_POOL_SQL: {{ .Values.config.database.pool.sql | quote }}
   REPOSITORY_DATABASE_PORT: {{ .Values.config.database.port | quote }}
   REPOSITORY_DATABASE_PROT: {{ .Values.config.database.protocol | quote }}
-  REPOSITORY_PROXY_HOST: {{ .Values.config.proxy.host | quote }}
-  REPOSITORY_PROXY_NONPROXYHOSTS: {{ .Values.config.proxy.nonproxyhosts | quote }}
-  REPOSITORY_PROXY_PROXYHOST: {{ .Values.config.proxy.proxyhost | quote }}
-  REPOSITORY_PROXY_PROXYPASS: {{ .Values.config.proxy.proxypass | quote }}
-  REPOSITORY_PROXY_PROXYPORT: {{ .Values.config.proxy.proxyport | quote }}
-  REPOSITORY_PROXY_PROXYUSER: {{ .Values.config.proxy.proxyuser | quote }}
+  REPOSITORY_HTTPCLIENT_DISABLE_SNI4HOSTS: {{ .Values.config.htmlclient.disablesni4host | quote }}
+  REPOSITORY_HTTPCLIENT_PROXY_HOST: {{ .Values.config.htmlclient.proxy.host | quote }}
+  REPOSITORY_HTTPCLIENT_PROXY_NONPROXYHOSTS: {{ .Values.config.htmlclient.proxy.nonproxyhosts | quote }}
+  REPOSITORY_HTTPCLIENT_PROXY_PROXYHOST: {{ .Values.config.htmlclient.proxy.proxyhost | quote }}
+  REPOSITORY_HTTPCLIENT_PROXY_PROXYPASS: {{ .Values.config.htmlclient.proxy.proxypass | quote }}
+  REPOSITORY_HTTPCLIENT_PROXY_PROXYPORT: {{ .Values.config.htmlclient.proxy.proxyport | quote }}
+  REPOSITORY_HTTPCLIENT_PROXY_PROXYUSER: {{ .Values.config.htmlclient.proxy.proxyuser | quote }}
   REPOSITORY_SEARCH_ELASTIC_HOST: {{ .Values.config.search.elastic.host | quote }}
   REPOSITORY_SEARCH_ELASTIC_PORT: {{ .Values.config.search.elastic.port | quote }}
   REPOSITORY_SEARCH_SOLR4_HOST: {{ .Values.config.search.solr4.host | quote }}

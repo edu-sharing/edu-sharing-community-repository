@@ -162,12 +162,14 @@ config:
 
   metrics: true
 
-  proxy:
-    host: ""
-    proxyhost: ""
-    proxyport: ""
-    proxyuser: ""
-    proxypass: ""
+  htmlclient:
+    disablesni4host: ""
+    proxy:
+      host: ""
+      proxyhost: ""
+      proxyport: ""
+      proxyuser: ""
+      proxypass: ""
 
   saml:
     enabled: false
