@@ -76,7 +76,7 @@ export class ProfilesComponent {
             this.globalProgress = false;
             this.userEdit=Helper.deepCopy(this.user);
             GlobalContainerComponent.finishPreloading();
-            this.iamService.getUser().subscribe((me)=>{
+            this.iamService.getCurrentUserAsync().then((me)=>{
                 this.isMe = profile.person.authorityName == me.person.authorityName;
                 if(this.isMe && login.isGuest){
                     RestHelper.goToLogin(this.router,this.config);
