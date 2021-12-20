@@ -8,12 +8,12 @@ import {
 import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
-    Component,
+    Component, ContentChild,
     ElementRef,
     EventEmitter,
     HostListener,
     Input, OnDestroy,
-    Output,
+    Output, TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
@@ -118,6 +118,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
     @ViewChild('mainMenuSidebar') mainMenuSidebar: MainMenuSidebarComponent;
     @ViewChild('mainMenuDropdown') mainMenuDropdown: MainMenuDropdownComponent;
+    @ContentChild('createButton') createButtonRef: TemplateRef<any>;
 
     /**
      * Show and enables the search field
@@ -828,7 +829,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     }
 
     private applyUserMenuOverrides(options: OptionItem[]): void {
-        this.configService.get('userMenuOverrides').subscribe((overrides) => 
+        this.configService.get('userMenuOverrides').subscribe((overrides) =>
             this.nodeHelper.applyCustomNodeOptions(overrides, null, null, options)
         );
     }

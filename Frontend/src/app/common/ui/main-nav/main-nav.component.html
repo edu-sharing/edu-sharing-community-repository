@@ -126,28 +126,31 @@
           {{ timeout }}
         </div>
         <div class="add-material">
-          <button
-            mat-button
-            class="addDesktop mat-button-no-uppercase"
-            *ngIf="!connector.getCurrentLogin()?.isGuest && isCreateAllowed()"
-            [disabled]="!isCreateAllowed() || !createMenu.hasUsableOptions()"
-            #dropdownTrigger="matMenuTrigger"
-            (menuOpened)="createMenu.updateOptions()"
-            [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
-            [attr.aria-label]="'WORKSPACE.ADD' | translate"
-          >
-            <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
-          </button>
-          <button
-            class="create-dummy"
-            *ngIf="isCreateAllowed()"
-            [style.left]="createMenuX + 'px'"
-            [style.top]="createMenuY + 'px'"
-            #dropdownTriggerDummy="matMenuTrigger"
-            [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
-            tabindex="-1"
-            aria-hidden="true"
-          ></button>
+          <ng-container *ngTemplateOutlet="createButtonRef"></ng-container>
+          <ng-container *ngIf="!createButtonRef">
+            <button
+              mat-button
+              class="addDesktop mat-button-no-uppercase"
+              *ngIf="!connector.getCurrentLogin()?.isGuest && isCreateAllowed()"
+              [disabled]="!isCreateAllowed() || !createMenu.hasUsableOptions()"
+              #dropdownTrigger="matMenuTrigger"
+              (menuOpened)="createMenu.updateOptions()"
+              [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+              [attr.aria-label]="'WORKSPACE.ADD' | translate"
+            >
+              <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+            </button>
+            <button
+              class="create-dummy"
+              *ngIf="isCreateAllowed()"
+              [style.left]="createMenuX + 'px'"
+              [style.top]="createMenuY + 'px'"
+              #dropdownTriggerDummy="matMenuTrigger"
+              [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+              tabindex="-1"
+              aria-hidden="true"
+            ></button>
+          </ng-container>
         </div>
         <div class="topBarSearch" [class.noScope]="!showScope">
           <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
