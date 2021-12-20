@@ -2,6 +2,7 @@ package org.edu_sharing.service.search.model;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
@@ -176,9 +177,9 @@ public class SearchToken implements Serializable {
 	public Map<String, Map<String, Integer>> aggregateFacetes(Map<String, Map<String, Integer>> propsMap) {
 		Map<String, Map<String, Integer>> combined = new HashMap<>();
 		if(this.query != null && facets != null) {
-			Stream<MetadataQueryParameter> facetParams = this.query.getParameters().stream().filter((p) -> p.getFacets() != null);
+			List<MetadataQueryParameter> facetParams = this.query.getParameters().stream().filter((p) -> p.getFacets() != null).collect(Collectors.toList());
 			for(Map.Entry<String, Map<String, Integer>> entry : propsMap.entrySet()) {
-				Optional<MetadataQueryParameter> param = facetParams.filter((p) -> p.getFacets().contains(entry.getKey())).findFirst();
+				Optional<MetadataQueryParameter> param = facetParams.stream().filter((p) -> p.getFacets().contains(entry.getKey())).findFirst();
 				String key = entry.getKey();
 				if(param.isPresent()) {
 					key = param.get().getName();

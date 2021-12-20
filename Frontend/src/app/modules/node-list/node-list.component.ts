@@ -51,7 +51,7 @@ export class NodeListComponent {
 }
   @Output() onSelectionChanged = new EventEmitter();
   public hasSearched = false;
-  public selected:Node[] = [];
+  @Input() selected:Node[] = [];
     @Input() fullscreenLoading=false;
 
     // the current node which has an overlay menu open

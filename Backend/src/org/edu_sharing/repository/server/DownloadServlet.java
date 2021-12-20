@@ -161,7 +161,7 @@ public class DownloadServlet extends HttpServlet{
 		if(location==null)
 			return null;
 		Map<String, String> headers=new HashMap<>();
-		return new HttpQueryTool().getStream(new GetMethod(location));
+		return new HttpQueryTool().getStream(location);
 	}
 	private static String checkAndGetCollectionRef(String nodeId){
 		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
