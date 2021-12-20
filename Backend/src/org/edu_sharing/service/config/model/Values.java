@@ -18,6 +18,7 @@ public class Values implements Serializable {
 	@XmlElement	public String editProfileUrl;
 	@XmlElement	public Boolean editProfile;
 	@XmlElement	public String[] workspaceColumns;
+	@XmlElement	public boolean workspaceSharedToMeDefaultAll;
 	@XmlElement	public String[] hideMainMenu;
 	@XmlElement	public LogoutInfo logout;
 	@XmlElement	public MenuEntry[] menuEntries;

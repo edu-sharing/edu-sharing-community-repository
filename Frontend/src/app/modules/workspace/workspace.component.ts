@@ -803,7 +803,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
 
     async prepareActionbar() {
-        this.toMeSharedToggle = await this.session.get('toMeSharedGroup', false).toPromise();
+        this.toMeSharedToggle = await this.session.get('toMeSharedGroup',
+            this.config.instant('workspaceSharedToMeDefaultAll', false)
+            ).toPromise();
         const toggle = new OptionItem('OPTIONS.TOGGLE_SHARED_TO_ME',
             this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
             () => {
