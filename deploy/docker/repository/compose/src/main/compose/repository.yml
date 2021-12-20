@@ -12,15 +12,6 @@ services:
     volumes:
       - "repository-database-volume:/bitnami/postgresql"
 
-  repository-mongo:
-    image: "${docker.image}-mongo:${docker.tag}"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: "${REPOSITORY_MONGODB_USER:-repository}"
-      MONGO_INITDB_ROOT_PASSWORD: "${REPOSITORY_MONGODB_PASS:-repository}"
-    expose:
-      - "27017"
-    volumes:
-      - "repository-mongo-volume:/data/db"
 
   repository-search-elastic:
     image: "${docker.image}-elasticsearch:${docker.tag}"
@@ -114,7 +105,6 @@ services:
       REPOSITORY_SERVICE_PORT_INTERNAL: "8080"
       REPOSITORY_TRANSFORM_HOST: repository-transform
       REPOSITORY_TRANSFORM_PORT: "8100"
-      # Todo mongodb
     expose:
       - "7199"
       - "8080"
@@ -126,7 +116,6 @@ services:
       - "repository-service-volume-shared:/usr/local/tomcat/shared"
     depends_on:
       - repository-database
-      - repository-mongo
       - repository-transform
 
   repository-transform:

@@ -20,8 +20,6 @@
 
         <docker.from.apache.exporter>docker.io/bitnami/apache-exporter:0.10.1</docker.from.apache.exporter>
         <docker.from.apache.server>docker.io/php:${php.version}-apache</docker.from.apache.server>
-        <docker.from.mongo.db>docker.io/mongo:5.0.5</docker.from.mongo.db>
-        <docker.from.mongo.express>docker.io/mongo-express:0.54.0</docker.from.mongo.express>
         <docker.from.elasticsearch.exporter>quay.io/prometheuscommunity/elasticsearch-exporter:v1.3.0</docker.from.elasticsearch.exporter>
         <docker.from.elasticsearch.server>docker.elastic.co/elasticsearch/elasticsearch:${elasticsearch.version}</docker.from.elasticsearch.server>
         <docker.from.minideb>docker.io/bitnami/minideb:bullseye</docker.from.minideb>

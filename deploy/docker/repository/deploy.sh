@@ -151,6 +151,65 @@ note() {
 	echo ""
 }
 
+compose_yml() {
+
+	COMPOSE_BASE_FILE="$1"
+	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
+	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.' )" # without extension
+
+
+	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
+	COMPOSE_LIST=
+	if [[ -f "$COMPOSE_FILE" ]]; then
+		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+  fi
+
+	shift || {
+		echo "$COMPOSE_LIST"
+		exit
+	}
+
+	while true; do
+		flag="$1"
+		shift || break
+
+		COMPOSE_FILE=""
+		case "$flag" in
+			-dev) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-network-dev.yml" ;;
+			-prd) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-network-prd.yml" ;;
+			-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
+			-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-image-remote.yml" ;;
+			*) {
+					echo "error: unknown flag: $flag"
+					echo ""
+					echo "valid flags are:"
+					echo "  -dev"
+					echo "  -prd"
+					echo "  -debug"
+					echo "  -remote"
+				} >&2
+				exit 1 ;;
+		esac
+
+		if [[ -f "$COMPOSE_FILE" ]]; then
+			COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+		fi
+	done
+
+	echo $COMPOSE_LIST
+}
+
+compose_all_plugins() {
+	COMPOSE_LIST=
+	for plugin in plugin*/ ; do
+		[ ! -d $plugin ] && continue
+		COMPOSE_PLUGIN="$(compose_yml "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
+	done
+
+	echo $COMPOSE_LIST
+}
+
 init() {
 	docker volume create "${COMPOSE_NAME}_repository-mongo-volume" || exit
 	docker volume create "${COMPOSE_NAME}_repository-database-volume" || exit
@@ -170,28 +229,35 @@ purge() {
 }
 
 logs() {
+	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
+		$COMPOSE_LIST \
 		logs -f || exit
 }
 
 ps() {
+	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
+		$COMPOSE_LIST \
 		ps || exit
 }
 
 lstart() {
+	COMPOSE_LIST="$(compose_yml repository.yml -prd) $(compose_all_plugins -prd)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-network-prd.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
 ltest() {
+	COMPOSE_LIST="$(compose_yml repository.yml -dev) $(compose_all_plugins -dev)"
+	echo "$COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-network-dev.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
@@ -207,38 +273,39 @@ ldebug() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
+	COMPOSE_LIST="$(compose_yml repository.yml -dev -debug) $(compose_all_plugins -dev)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-network-dev.yml" \
-		-f "repository-debug.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
 rstart() {
+
+	COMPOSE_LIST="$(compose_yml repository.yml -remote -prd) $(compose_all_plugins -remote -prd)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
+		$COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		-f "repository-network-prd.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
 rtest() {
+	COMPOSE_LIST="$(compose_yml repository.yml -remote -dev) $(compose_all_plugins -remote -dev)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
+		$COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		-f "repository-network-dev.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
+#TODO DEBUG PLUGIN
+#TODO CHECK CLEAN BEFORE BUILD
 
 rdebug() {
 	[[ -z "${CLI_OPT2}" ]] && {
@@ -248,39 +315,39 @@ rdebug() {
 	}
 
 	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
 	esac
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
+
+	COMPOSE_LIST="$(compose_yml repository.yml -remote -dev -debug) $(compose_all_plugins -remote -dev)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
+		$COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		-f "repository-network-dev.yml" \
-		-f "repository-debug.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
 stop() {
+	COMPOSE_LIST="$(compose_yml repository.yml -remote -dev) $(compose_all_plugins -remote -dev)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		-f "repository-network-dev.yml" \
+		$COMPOSE_LIST \
 		stop || exit
 }
 
 remove() {
+
+	COMPOSE_LIST="$(compose_yml repository.yml -remote -dev) $(compose_all_plugins -remote -dev)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		-f "repository-network-dev.yml" \
+		$COMPOSE_LIST \
 		down || exit
 }
 
@@ -305,8 +372,10 @@ build() {
 reload() {
 	echo "Reloading ..."
 
+	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
+
 	$COMPOSE_EXEC \
-		-f "repository.yml" \
+		$COMPOSE_LIST \
 		exec repository-service \
 		touch tomcat/webapps/edu-sharing/WEB-INF/web.xml || exit
 
@@ -321,19 +390,21 @@ watch() {
 	}
 
 	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
 	esac
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
+	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
+
 	echo "Watching ..."
 	fswatch -o "${COMMUNITY_PATH}/Backend/services/webapp/target/edu-sharing.war" | tee /dev/tty | xargs -n1 \
 		$COMPOSE_EXEC \
-			-f "repository.yml" \
-			exec repository-service \
-			touch tomcat/webapps/edu-sharing/WEB-INF/web.xml
+		$COMPOSE_LIST \
+		exec repository-service \
+		touch tomcat/webapps/edu-sharing/WEB-INF/web.xml
 }
 
 case "${CLI_OPT1}" in
