@@ -74,7 +74,6 @@
       ></mat-checkbox>
     </div>
   </div>
-  <es-node-entries-card-lti [node]="node"></es-node-entries-card-lti>
   <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 mode="wrapper"
                 [node]="node"
@@ -112,6 +111,7 @@
       <i esIcon="more_vert"></i>
     </button>
   </div>
+  <es-node-entries-card-lti [node]="node"></es-node-entries-card-lti>
 </div>
 <ng-template #image>
   <div class="card-image-area">
