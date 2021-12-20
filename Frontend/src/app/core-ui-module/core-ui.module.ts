@@ -256,6 +256,7 @@ import { BorderBoxObserverDirective } from './directives/border-box-observer.dir
         PermissionNamePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
+        ListItemLabelPipe,
         NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
