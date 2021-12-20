@@ -223,7 +223,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     showCreateConnector(connector: Connector) {
         this.createConnectorName = '';
         this.createConnectorType = connector;
-        this.iam.getUser().subscribe((user) => {
+        this.iam.getCurrentUserAsync().then((user) => {
             if (user.person.quota.enabled && user.person.quota.sizeCurrent >= user.person.quota.sizeQuota) {
                 this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE', 'CONNECTOR_QUOTA_REACHED_MESSAGE', DialogButton.getOk(() => {
                     this.toast.closeModalDialog();
@@ -320,7 +320,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     RestHelper.goToLogin(this.router, this.config);
                     return;
                 }
-                this.iam.getUser().subscribe(async (user: IamUser) => {
+                this.iam.getCurrentUserAsync().then(async (user: IamUser) => {
                     this.user = user;
                     await this.prepareActionbar();
                     this.loadFolders(user);

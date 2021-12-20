@@ -54,6 +54,7 @@ import { MainMenuEntriesService } from '../../services/main-menu-entries.service
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
+import {BehaviorSubject} from 'rxjs';
 
 /**
  * The main nav (top bar + menus)
@@ -196,7 +197,7 @@ export class MainNavComponent implements AfterViewInit {
     globalProgress = false;
     showEditProfile: boolean;
     showProfile: boolean;
-    user: IamUser;
+    user: BehaviorSubject<{ user: IamUser; login: LoginResult }>;
     userName: string;
     _currentScope: string;
     isGuest = false;
@@ -254,12 +255,12 @@ export class MainNavComponent implements AfterViewInit {
                         this.isGuest = data.isGuest;
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
-                        this.iam.getUser().subscribe((user: IamUser) => {
-                            this.user = user;
+                        this.iam.getCurrentUserAsync().then((user: IamUser) => {
+                            this.user = this.iam.currentUser;
                             this.canEditProfile = user.editProfile;
                             this.configService.getAll().subscribe(() => {
                                 this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
-                                    this.user.person,
+                                    user.person,
                                     this.configService,
                                 );
                             });
@@ -501,7 +502,7 @@ export class MainNavComponent implements AfterViewInit {
 
     startTutorial() {
         if(this.connector.getCurrentLogin().statusCode=='OK') {
-            this.iam.getUser().subscribe((user) => {
+            this.iam.getCurrentUserAsync().then((user) => {
                 if(user.editProfile && this.configService.instant('editProfile', false)) {
                     UIHelper.waitForComponent(this, 'userRef').subscribe(() => {
                         this.tutorialElement = this.userRef;

@@ -225,7 +225,7 @@ export class WorkspaceLicenseComponent  {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
       this.translateLicenceCountries(this.constantCountries);
       this.updateButtons();
-      this.iamApi.getUser().subscribe(() => {});
+      this.iamApi.getCurrentUserAsync().then(() => {});
   }
   public cancel(){
     this.onCancel.emit();

@@ -395,7 +395,7 @@ export class CreateMenuComponent {
     showCreateConnector(connector: Connector) {
         this.createConnectorName = '';
         this.createConnectorType = connector;
-        this.iamService.getUser().subscribe(user => {
+        this.iamService.getCurrentUserAsync().then(user => {
             if (
                 user.person.quota.enabled &&
                 user.person.quota.sizeCurrent >= user.person.quota.sizeQuota

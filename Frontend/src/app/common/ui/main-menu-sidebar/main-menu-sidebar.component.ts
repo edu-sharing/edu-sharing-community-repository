@@ -69,7 +69,7 @@ export class MainMenuSidebarComponent implements OnInit {
     async ngOnInit() {
         this.loginInfo = await this.connector.isLoggedIn(false).toPromise();
         if (this.loginInfo.isValidLogin) {
-            this.user = await this.iam.getUser().toPromise();
+            this.user = await this.iam.getCurrentUserAsync();
             this.username = await this.getUsername();
         }
     }

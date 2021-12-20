@@ -52,7 +52,7 @@ export class NodeReportComponent  {
     this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
       this.isGuest = data.isGuest;
       if (!data.isGuest){
-        this.iam.getUser().subscribe((user) => {
+        this.iam.getCurrentUserAsync().then((user) => {
           this.email = user.person.profile.email;
         });
       }

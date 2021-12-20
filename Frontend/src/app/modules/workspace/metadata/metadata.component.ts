@@ -108,7 +108,7 @@ export class WorkspaceMetadataComponent{
           }
           this.versionsLoading = false;
       });
-      this.iamApi.getUser().subscribe((login: IamUser) => {
+      this.iamApi.getCurrentUserAsync().then((login: IamUser) => {
           this.nodeApi.getNodePermissions(this.nodeObject.ref.id).subscribe((data: NodePermissions) => {
               this.permissions = this.formatPermissions(login, data);
           });
