@@ -273,6 +273,7 @@
         "cclom:general_keyword": "Schlagwörter",
         "cclom:general_description": "Beschreibung",
         "cclom:duration": "Dauer",
+        "ccm:taxonid": "Fachgebiet",
         "sys:archivedDate": "gelöscht",
         "cclom:version": "Version",
         "virtual:usagecount": "Anz. Verwendungen",
