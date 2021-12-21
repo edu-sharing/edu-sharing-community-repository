@@ -1229,6 +1229,12 @@ export class OptionsHelperService implements OnDestroy {
                 nodes.map((n) => {
                     if(n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
                         return this.nodeService.getNodeMetadata(n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
+                    } else if(n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
+                        return this.nodeService.getNodeMetadata(
+                            RestHelper.removeSpacesStoreRef(
+                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0]
+                            )
+                        );
                     } else {
                         return of({
                             node: n
