@@ -10,8 +10,19 @@ import {
     of,
     ReplaySubject,
     Subject,
+    zip,
 } from 'rxjs';
-import { filter, first, map, shareReplay, skip, switchMap, takeUntil, tap } from 'rxjs/operators';
+import {
+    combineAll,
+    filter,
+    first,
+    map,
+    shareReplay,
+    skip,
+    switchMap,
+    takeUntil,
+    tap
+} from 'rxjs/operators';
 import {
     MdsValueList,
     Node,
@@ -64,7 +75,7 @@ export type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 /**
  * NativeWidget and Widget
  */
-interface GeneralWidget {
+export interface GeneralWidget {
     status: Observable<InputStatus>;
     viewId: string;
 }
@@ -563,7 +574,7 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * Will be appended on init depending if they exist in the currently rendered group.
      */
-    private nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
+    nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
 
     // Mutable state
     private readonly completionStatus$ = new BehaviorSubject<CompletionStatus>(null);
@@ -1008,6 +1019,9 @@ export class MdsEditorInstanceService implements OnDestroy {
                 }
                 return acc;
             }, {} as { [key: string]: string[] });
+    }
+    getRegisteredWidgets(): Observable<GeneralWidget[]> {
+        return zip(this.widgets, this.nativeWidgets).pipe(map(x => (x[0] as GeneralWidget[]).concat(x[1])));
     }
 
     registerNativeWidget(component: NativeWidgetComponent, viewId: string): void {
