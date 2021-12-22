@@ -201,7 +201,7 @@
           title="{{ 'USERMENU' | translate }}"
         >
           <user-avatar [user]="iam.getCurrentUser()" [size]="'xsmall'"></user-avatar>
-          <div *ngIf="!isGuest">{{ userName }}</div>
+          <div *ngIf="!isGuest">{{ getUserName() }}</div>
           <div *ngIf="isGuest">{{ 'USER_GUEST' | translate }}</div>
           <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
           <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->

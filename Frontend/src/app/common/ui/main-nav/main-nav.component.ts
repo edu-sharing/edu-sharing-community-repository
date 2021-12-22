@@ -197,7 +197,6 @@ export class MainNavComponent implements AfterViewInit {
     globalProgress = false;
     showEditProfile: boolean;
     showProfile: boolean;
-    userName: string;
     _currentScope: string;
     isGuest = false;
     _showUser = false;
@@ -257,10 +256,7 @@ export class MainNavComponent implements AfterViewInit {
                         this.iam.getCurrentUserAsync().then((user: IamUser) => {
                             this.canEditProfile = user.editProfile;
                             this.configService.getAll().subscribe(() => {
-                                this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
-                                    user.person,
-                                    this.configService,
-                                );
+
                             });
                         });
                         this.refreshNodeStore();
@@ -953,5 +949,12 @@ export class MainNavComponent implements AfterViewInit {
             s = '0' + s;
         }
         return s;
+    }
+
+    getUserName() {
+        return ConfigurationHelper.getPersonWithConfigDisplayName(
+            this.iam.getCurrentUser(),
+            this.configService,
+        );
     }
 }
