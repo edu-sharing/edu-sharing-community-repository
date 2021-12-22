@@ -11,6 +11,7 @@ import { DialogButton } from '../core-module/ui/dialog-button';
 import { UIAnimation } from '../core-module/ui/ui-animation';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
+import {RestConnectorService} from '../core-module/core.module';
 
 @Injectable()
 export class Toast {
@@ -217,9 +218,7 @@ export class Toast {
                 message = 'TOAST.API_FORBIDDEN';
                 this.dialogTitle = null;
 
-                const login = this.storage.get(
-                    TemporaryStorageService.SESSION_INFO,
-                );
+                const login = this.injector.get(RestConnectorService).getCurrentLogin();
                 if (login && login.isGuest) {
                     this.toast('TOAST.API_FORBIDDEN_LOGIN');
                     this.goToLogin();
