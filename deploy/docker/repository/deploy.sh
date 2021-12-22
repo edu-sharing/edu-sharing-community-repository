@@ -279,7 +279,7 @@ ldebug() {
 		;;
 
 	-plugin)
-		COMPOSE_LIST="$(compose_yml repository.yml -dev) $(compose_all_plugins -dev) $(compose_yml $CLI_OPT3 -debug)"
+		COMPOSE_LIST="$(compose_yml repository.yml -dev) $(compose_all_plugins -dev) $(compose_yml $CLI_OPT3/$CLI_OPT3 -debug)"
 
 		case $CLI_OPT4 in
 			/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
@@ -308,6 +308,8 @@ ldebug() {
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
 		up -d || exit
+
+	reload
 }
 
 rstart() {
@@ -368,7 +370,7 @@ rdebug() {
 		;;
 
 	-plugin)
-		COMPOSE_LIST="$(compose_yml repository.yml -remote -dev) $(compose_all_plugins -remote -dev) $(compose_yml $CLI_OPT3 -debug)"
+		COMPOSE_LIST="$(compose_yml repository.yml -remote -dev) $(compose_all_plugins -remote -dev) $(compose_yml $CLI_OPT3/$CLI_OPT3 -debug)"
 
 		case $CLI_OPT4 in
 			/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
@@ -402,6 +404,8 @@ rdebug() {
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
 		up -d || exit
+
+	reload
 }
 
 stop() {
