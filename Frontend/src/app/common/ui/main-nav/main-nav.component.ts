@@ -197,7 +197,6 @@ export class MainNavComponent implements AfterViewInit {
     globalProgress = false;
     showEditProfile: boolean;
     showProfile: boolean;
-    user: BehaviorSubject<{ user: IamUser; login: LoginResult }>;
     userName: string;
     _currentScope: string;
     isGuest = false;
@@ -218,7 +217,7 @@ export class MainNavComponent implements AfterViewInit {
     private about: About;
 
     constructor(
-        private iam: RestIamService,
+        public iam: RestIamService,
         private connector: RestConnectorService,
         private bridge: BridgeService,
         private event: FrameEventsService,
@@ -256,7 +255,6 @@ export class MainNavComponent implements AfterViewInit {
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
                         this.iam.getCurrentUserAsync().then((user: IamUser) => {
-                            this.user = this.iam.currentUser;
                             this.canEditProfile = user.editProfile;
                             this.configService.getAll().subscribe(() => {
                                 this.userName = ConfigurationHelper.getPersonWithConfigDisplayName(
