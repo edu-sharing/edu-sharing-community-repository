@@ -2,17 +2,19 @@
 set -e
 set -o pipefail
 
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edu-sharing}"
+
 case "$(uname)" in
 MINGW*)
-	COMPOSE_EXEC="winpty docker-compose"
+	COMPOSE_EXEC="winpty docker-compose -p $COMPOSE_NAME"
 	;;
 *)
-	COMPOSE_EXEC="docker-compose"
+	COMPOSE_EXEC="docker-compose -p $COMPOSE_NAME"
 	;;
 esac
+
 export COMPOSE_EXEC
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-compose}"
 
 export CLI_CMD="$0"
 export CLI_OPT1="$1"

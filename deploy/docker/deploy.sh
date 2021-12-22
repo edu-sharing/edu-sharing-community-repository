@@ -2,17 +2,18 @@
 set -e
 set -o pipefail
 
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edu-sharing}"
+
 case "$(uname)" in
 MINGW*)
-	COMPOSE_EXEC="winpty docker-compose"
+	COMPOSE_EXEC="winpty docker-compose -p $COMPOSE_NAME"
 	;;
 *)
-	COMPOSE_EXEC="docker-compose"
+	COMPOSE_EXEC="docker-compose -p $COMPOSE_NAME"
 	;;
 esac
-export COMPOSE_EXEC
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-compose}"
+export COMPOSE_EXEC
 
 export CLI_CMD="$0"
 export CLI_OPT1="$1"
@@ -149,7 +150,7 @@ logs() {
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
-		-f $COMPOSE_LIST \
+		$COMPOSE_LIST \
 		logs -f || exit
 }
 
@@ -171,11 +172,11 @@ rstart() {
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
-		-f $COMPOSE_LIST \
+		$COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f $COMPOSE_LIST \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
@@ -186,7 +187,7 @@ lstart() {
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
-		-f $COMPOSE_LIST \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
@@ -197,7 +198,7 @@ stop() {
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
-		-f $COMPOSE_LIST \
+		$COMPOSE_LIST \
 		stop || exit
 }
 
@@ -208,7 +209,7 @@ remove() {
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
-		-f $COMPOSE_LIST \
+		$COMPOSE_LIST \
 		down || exit
 }
 

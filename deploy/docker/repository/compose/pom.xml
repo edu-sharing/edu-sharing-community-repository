@@ -92,7 +92,6 @@
                 <goals>
                   <goal>unpack-dependencies</goal>
                 </goals>
-                <phase>package</phase>
                 <configuration>
                   <includeArtifactIds>
                     edu_sharing-community-repository-plugin-mongo-deploy-docker-compose
