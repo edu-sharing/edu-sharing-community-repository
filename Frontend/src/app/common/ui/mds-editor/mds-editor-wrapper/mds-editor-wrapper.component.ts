@@ -82,6 +82,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
         private search: SearchService,
     ) {}
 
+    getInstanceService() {
+        return this.mdsEditorInstance;
+    }
+
     ngOnInit(): void {
         // For compatibility reasons, we wait for `loadMds()` to be called before initializing when
         // `nodes` is undefined.
