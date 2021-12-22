@@ -248,7 +248,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.connector.setRoute(this.route).subscribe(() => {
             this.connector.getAbout().subscribe(about => {
                 this.about = about;
-                this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
                     if (!data.isValidLogin) {
                         this.canOpen = data.isGuest;
                         this.checkConfig();

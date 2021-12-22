@@ -1022,7 +1022,7 @@ export class AdminComponent {
     const props=this.lucene.properties.split('\n');
     this.admin.exportLucene(
         this.lucene.query, this.lucene.store, props,
-        this.lucene.authorities.map(a => a.authorityName)
+        this.lucene.authorities?.map(a => a.authorityName)
     ).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
