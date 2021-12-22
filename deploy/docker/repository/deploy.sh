@@ -2,7 +2,8 @@
 set -e
 set -o pipefail
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edu-sharing}"
+GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/')"
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edu-sharing-$GIT_BRANCH}"
 
 case "$(uname)" in
 MINGW*)
@@ -285,7 +286,6 @@ ldebug() {
 			*) pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit ;;
 		esac
 
-		pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit
 		PLUGIN_PATH=$(pwd)
 		export PLUGIN_PATH
 		popd >/dev/null || exit

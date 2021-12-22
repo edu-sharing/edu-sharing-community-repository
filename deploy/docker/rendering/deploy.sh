@@ -2,7 +2,8 @@
 set -e
 set -o pipefail
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edu-sharing}"
+GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/')"
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edu-sharing-$GIT_BRANCH}"
 
 case "$(uname)" in
 MINGW*)
