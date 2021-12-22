@@ -81,59 +81,134 @@ info() {
 	echo ""
 	echo ""
 }
+compose_yml() {
+
+	COMPOSE_BASE_FILE="$1"
+	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
+	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
+
+	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
+	COMPOSE_LIST=
+	if [[ -f "$COMPOSE_FILE" ]]; then
+		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+	fi
+
+	shift || {
+		echo "$COMPOSE_LIST"
+		exit
+	}
+
+	while true; do
+		flag="$1"
+		shift || break
+
+		COMPOSE_FILE=""
+		case "$flag" in
+		-dev) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-network-dev.yml" ;;
+		-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
+		-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-image-remote.yml" ;;
+		*)
+			{
+				echo "error: unknown flag: $flag"
+				echo ""
+				echo "valid flags are:"
+				echo "  -dev"
+				echo "  -debug"
+				echo "  -remote"
+			} >&2
+			exit 1
+			;;
+		esac
+
+		if [[ -f "$COMPOSE_FILE" ]]; then
+			COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+		fi
+	done
+
+	echo $COMPOSE_LIST
+}
+
+compose_all_plugins() {
+	PLUGIN_DIR="$1"
+	shift
+
+	COMPOSE_LIST=
+	for plugin in $PLUGIN_DIR/plugin*/; do
+		[ ! -d $plugin ] && continue
+		COMPOSE_PLUGIN="$(compose_yml "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
+	done
+
+	echo $COMPOSE_LIST
+}
 
 logs() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "repository.yml" \
+		-f $COMPOSE_LIST \
 		logs -f || exit
 }
 
 ps() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "repository.yml" \
+		-f $COMPOSE_LIST \
 		ps || exit
 }
 
 rstart() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml -remote) $(compose_all_plugins repository -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml -remote) $(compose_all_plugins rendering -remote)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
+		-f $COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
-		-f "rendering-network-prd.yml" \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		-f "repository-network-prd.yml" \
+		-f $COMPOSE_LIST \
 		up -d || exit
 }
 
 lstart() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-network-prd.yml" \
-		-f "repository.yml" \
-		-f "repository-network-prd.yml" \
+		-f $COMPOSE_LIST \
 		up -d || exit
 }
 
 stop() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "repository.yml" \
+		-f $COMPOSE_LIST \
 		stop || exit
 }
 
 remove() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "repository.yml" \
+		-f $COMPOSE_LIST \
 		down || exit
 }
 

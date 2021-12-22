@@ -9,6 +9,8 @@ services:
       POSTGRESQL_ROOT_PASSWORD: "${RENDERING_DATABASE_PASS:-rendering}"
       POSTGRESQL_PASSWORD: "${RENDERING_DATABASE_PASS:-rendering}"
       POSTGRESQL_USER: "${RENDERING_DATABASE_USER:-rendering}"
+    expose:
+      - "5432"
     volumes:
       - "rendering-database-volume:/bitnami/postgresql"
 

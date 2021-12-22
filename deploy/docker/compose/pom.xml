@@ -26,20 +26,37 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
+
           <execution>
+            <id>rendering</id>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-deploy-docker-rendering-compose,
+                edu_sharing-community-deploy-docker-rendering-compose
+              </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/compose/rendering</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>repository</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
                 edu_sharing-community-deploy-docker-repository-compose
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/compose</outputDirectory>
+              <outputDirectory>${project.build.directory}/compose/repository</outputDirectory>
             </configuration>
           </execution>
+
         </executions>
       </plugin>
 
