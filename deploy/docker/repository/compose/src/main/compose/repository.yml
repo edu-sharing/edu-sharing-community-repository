@@ -126,20 +126,7 @@ services:
 
 volumes:
   repository-database-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-database-volume"
-    external: true
-  repository-mongo-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-mongo-volume"
-    external: true
   repository-search-elastic-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-search-elastic-volume"
-    external: true
   repository-search-solr4-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-search-solr4-volume"
-    external: true
   repository-service-volume-data:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-service-volume-data"
-    external: true
   repository-service-volume-shared:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-service-volume-shared"
-    external: true

@@ -210,23 +210,6 @@ compose_all_plugins() {
 	echo $COMPOSE_LIST
 }
 
-init() {
-	docker volume create "${COMPOSE_NAME}_repository-mongo-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-database-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-service-volume-data" || exit
-	docker volume create "${COMPOSE_NAME}_repository-service-volume-shared" || exit
-}
-
-purge() {
-	docker volume rm "${COMPOSE_NAME}_repository-mongo-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-database-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-service-volume-data" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-service-volume-shared" || exit
-}
 
 logs() {
 	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
@@ -305,7 +288,6 @@ rtest() {
 		up -d || exit
 }
 #TODO DEBUG PLUGIN
-#TODO CHECK CLEAN BEFORE BUILD
 
 rdebug() {
 	[[ -z "${CLI_OPT2}" ]] && {
@@ -351,24 +333,6 @@ remove() {
 		down || exit
 }
 
-build() {
-	echo "Building ..."
-
-	[[ -z "${MVN_EXEC_OPTS}" ]] && {
-		export MVN_EXEC_OPTS="-ff"
-	}
-
-	pushd "${BUILD_PATH}/../build/elasticsearch" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-	pushd "${BUILD_PATH}/../build/postgresql" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-	pushd "${BUILD_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-}
-
 reload() {
 	echo "Reloading ..."
 
@@ -409,25 +373,22 @@ watch() {
 
 case "${CLI_OPT1}" in
 rstart)
-	init && rstart && note
+	rstart && note
 	;;
 rtest)
-	init && rtest && logs
+	rtest && logs
 	;;
 rdebug)
-	init && rdebug && logs
-	;;
-build)
-	build
+	rdebug && logs
 	;;
 lstart)
-	init && lstart && note
+	lstart && note
 	;;
 ltest)
-	init && ltest && logs
+	ltest && logs
 	;;
 ldebug)
-	init && ldebug && logs
+	ldebug && logs
 	;;
 reload)
 	reload
@@ -450,9 +411,6 @@ stop)
 remove)
 	remove
 	;;
-purge)
-	purge
-	;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
@@ -462,8 +420,6 @@ purge)
 	echo "  - rstart            startup containers from remote images"
 	echo "  - rtest             startup containers from remote images with dev ports"
 	echo "  - rdebug <path>     startup containers from remote images with dev ports and artifacts"
-	echo ""
-	echo "  - build             build local images"
 	echo ""
 	echo "  - lstart            startup containers from local images"
 	echo "  - ltest             startup containers from local images with dev ports"
@@ -478,8 +434,6 @@ purge)
 	echo ""
 	echo "  - stop              stop all containers"
 	echo "  - remove            remove all containers"
-	echo ""
-	echo "  - purge             purge all data volumes"
 	echo ""
 	;;
 esac

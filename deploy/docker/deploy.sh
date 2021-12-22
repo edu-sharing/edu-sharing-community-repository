@@ -82,16 +82,6 @@ info() {
 	echo ""
 }
 
-init() {
-	docker volume create "${COMPOSE_NAME}_rendering-database-volume" || exit
-	docker volume create "${COMPOSE_NAME}_rendering-service-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-database-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-service-volume-data" || exit
-	docker volume create "${COMPOSE_NAME}_repository-service-volume-shared" || exit
-}
-
 logs() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
@@ -104,16 +94,6 @@ ps() {
 		-f "rendering.yml" \
 		-f "repository.yml" \
 		ps || exit
-}
-
-purge() {
-	docker volume rm -f "${COMPOSE_NAME}_rendering-database-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_rendering-service-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-database-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-service-volume-data" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-service-volume-shared" || exit
 }
 
 rstart() {
@@ -157,64 +137,12 @@ remove() {
 		down || exit
 }
 
-backup() {
-	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
-		exit
-	}
-
-	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
-	esac
-	BACKUP_PATH=$(pwd)
-	popd >/dev/null || exit
-
-	docker run --rm \
-		-v "${BACKUP_PATH}":/destination \
-		--mount "source=${COMPOSE_NAME}_rendering-database-volume,target=/data/rendering-database-volume" \
-		--mount "source=${COMPOSE_NAME}_rendering-service-volume,target=/data/rendering-service-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-database-volume,target=/data/repository-database-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-search-elastic-volume,target=/data/repository-search-elastic-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-search-solr4-volume,target=/data/repository-search-solr4-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-service-volume-data,target=/data/repository-service-volume-data" \
-		--mount "source=${COMPOSE_NAME}_repository-service-volume-shared,target=/data/repository-service-volume-shared" \
-		debian tar cvf "/destination/${COMPOSE_NAME}.tar" /data || exit
-}
-
-restore() {
-	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
-		exit
-	}
-
-	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
-	esac
-	BACKUP_PATH=$(pwd)
-	popd >/dev/null || exit
-
-	docker run --rm \
-		-v "${BACKUP_PATH}":/source \
-		--mount "source=${COMPOSE_NAME}_rendering-database-volume,target=/data/rendering-database-volume" \
-		--mount "source=${COMPOSE_NAME}_rendering-service-volume,target=/data/rendering-service-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-database-volume,target=/data/repository-database-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-search-elastic-volume,target=/data/repository-search-elastic-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-search-solr4-volume,target=/data/repository-search-solr4-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-service-volume-data,target=/data/repository-service-volume-data" \
-		--mount "source=${COMPOSE_NAME}_repository-service-volume-shared,target=/data/repository-service-volume-shared" \
-		debian tar xvf "/source/${COMPOSE_NAME}.tar" -C / || exit
-}
-
 case "${CLI_OPT1}" in
 rstart)
-	init && rstart && info
+	rstart && info
 	;;
 lstart)
-	init && lstart && info
+	lstart && info
 	;;
 info)
 	info
@@ -230,15 +158,6 @@ stop)
 	;;
 remove)
 	remove
-	;;
-backup)
-	init && backup
-	;;
-restore)
-	init && restore
-	;;
-purge)
-	purge
 	;;
 *)
 	echo ""
@@ -256,12 +175,11 @@ purge)
 	echo "  - stop              stop all containers"
 	echo "  - remove            remove all containers"
 	echo ""
-	echo "  - backup <path>     backup all data volumes"
-	echo "  - restore <path>    restore all data volumes"
-	echo "  - purge             remove all data volumes"
-	echo ""
 	;;
 esac
 
 popd >/dev/null || exit
 popd >/dev/null || exit
+
+
+# TODO plugin handling

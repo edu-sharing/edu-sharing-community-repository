@@ -112,16 +112,6 @@ note() {
 	echo ""
 }
 
-init() {
-	docker volume create "${COMPOSE_NAME}_rendering-database-volume" || exit
-	docker volume create "${COMPOSE_NAME}_rendering-service-volume" || exit
-}
-
-purge() {
-	docker volume rm -f "${COMPOSE_NAME}_rendering-database-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_rendering-service-volume" || exit
-}
-
 logs() {
 	$COMPOSE_EXEC \
 		-f "rendering.yml" \
@@ -233,42 +223,24 @@ remove() {
 		down || exit
 }
 
-build() {
-	echo "Building ..."
-
-	[[ -z "${MVN_EXEC_OPTS}" ]] && {
-		export MVN_EXEC_OPTS="-ff"
-	}
-
-	pushd "${BUILD_PATH}/../build/postgresql" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-	pushd "${BUILD_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-}
-
 case "${CLI_OPT1}" in
 rstart)
-	init && rstart && note
+	rstart && note
 	;;
 rtest)
-	init && rtest && logs
+	rtest && logs
 	;;
 rdebug)
-	init && rdebug && logs
-	;;
-build)
-	build
+	rdebug && logs
 	;;
 lstart)
-	init && lstart && note
+	lstart && note
 	;;
 ltest)
-	init && ltest && logs
+	ltest && logs
 	;;
 ldebug)
-	init && ldebug && logs
+	ldebug && logs
 	;;
 info)
 	info
@@ -285,9 +257,6 @@ stop)
 remove)
 	remove
 	;;
-purge)
-	purge
-	;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
@@ -297,8 +266,6 @@ purge)
 	echo "  - rstart            startup containers from remote images"
 	echo "  - rtest             startup containers from remote images with dev ports"
 	echo "  - rdebug <path>     startup containers from remote images with dev ports and artifacts"
-	echo ""
-	echo "  - build             build local images"
 	echo ""
 	echo "  - lstart            startup containers from local images"
 	echo "  - ltest             startup containers from local images with dev ports"
@@ -310,8 +277,6 @@ purge)
 	echo ""
 	echo "  - stop              stop all containers"
 	echo "  - remove            remove all containers"
-	echo ""
-	echo "  - purge             purge all data volumes"
 	echo ""
 	;;
 esac

@@ -50,8 +50,4 @@ services:
 
 volumes:
   rendering-database-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_rendering-database-volume"
-    external: true
   rendering-service-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_rendering-service-volume"
-    external: true
