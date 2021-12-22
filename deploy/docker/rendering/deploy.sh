@@ -112,51 +112,111 @@ note() {
 	echo ""
 }
 
-init() {
-	docker volume create "${COMPOSE_NAME}_rendering-database-volume" || exit
-	docker volume create "${COMPOSE_NAME}_rendering-service-volume" || exit
+compose_yml() {
+
+	COMPOSE_BASE_FILE="$1"
+	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
+	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
+
+	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
+	COMPOSE_LIST=
+	if [[ -f "$COMPOSE_FILE" ]]; then
+		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+	fi
+
+	shift || {
+		echo "$COMPOSE_LIST"
+		exit
+	}
+
+	while true; do
+		flag="$1"
+		shift || break
+
+		COMPOSE_FILE=""
+		case "$flag" in
+		-dev) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-network-dev.yml" ;;
+		-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
+		-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-image-remote.yml" ;;
+		*)
+			{
+				echo "error: unknown flag: $flag"
+				echo ""
+				echo "valid flags are:"
+				echo "  -dev"
+				echo "  -debug"
+				echo "  -remote"
+			} >&2
+			exit 1
+			;;
+		esac
+
+		if [[ -f "$COMPOSE_FILE" ]]; then
+			COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+		fi
+	done
+
+	echo $COMPOSE_LIST
 }
 
-purge() {
-	docker volume rm -f "${COMPOSE_NAME}_rendering-database-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_rendering-service-volume" || exit
+# shellcheck disable=SC2120
+compose_all_plugins() {
+	COMPOSE_LIST=
+	for plugin in plugin*/; do
+		[ ! -d $plugin ] && continue
+		COMPOSE_PLUGIN="$(compose_yml "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
+	done
+
+	echo $COMPOSE_LIST
 }
 
 logs() {
+
+	COMPOSE_LIST="$(compose_yml rendering.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
+		$COMPOSE_LIST \
 		logs -f || exit
 }
 
 ps() {
+	COMPOSE_LIST="$(compose_yml rendering.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
+		$COMPOSE_LIST \
 		ps || exit
 }
 
 rstart() {
+	COMPOSE_LIST="$(compose_yml rendering.yml -remote) $(compose_all_plugins -remote)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
+		$COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
-		-f "rendering-network-prd.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
 rtest() {
+	COMPOSE_LIST="$(compose_yml rendering.yml -remote -dev) $(compose_all_plugins -remote -dev)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
+		$COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
-		-f "rendering-network-dev.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
@@ -167,35 +227,45 @@ rdebug() {
 		exit
 	}
 
-	pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit
+	case $CLI_OPT2 in
+		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
+
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
+	COMPOSE_LIST="$(compose_yml rendering.yml -remote -dev -debug) $(compose_all_plugins -remote -dev)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
+		$COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
-		-f "rendering-network-dev.yml" \
-		-f "rendering-debug.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
 lstart() {
+	COMPOSE_LIST="$(compose_yml rendering.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-network-prd.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
 ltest() {
+	COMPOSE_LIST="$(compose_yml rendering.yml -dev) $(compose_all_plugins -dev)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-network-dev.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
@@ -210,65 +280,58 @@ ldebug() {
 		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
 		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
 	esac
+
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
+	COMPOSE_LIST="$(compose_yml rendering.yml -dev -debug) $(compose_all_plugins -dev)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-network-dev.yml" \
-		-f "rendering-debug.yml" \
+		$COMPOSE_LIST \
 		up -d || exit
 }
 
 stop() {
+	COMPOSE_LIST="$(compose_yml rendering.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
+		$COMPOSE_LIST \
 		stop || exit
 }
 
 remove() {
+	COMPOSE_LIST="$(compose_yml rendering.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
+		$COMPOSE_LIST \
 		down || exit
-}
-
-build() {
-	echo "Building ..."
-
-	[[ -z "${MVN_EXEC_OPTS}" ]] && {
-		export MVN_EXEC_OPTS="-ff"
-	}
-
-	pushd "${BUILD_PATH}/../build/postgresql" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
-	pushd "${BUILD_PATH}" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true clean install || exit
-	popd >/dev/null || exit
 }
 
 case "${CLI_OPT1}" in
 rstart)
-	init && rstart && note
+	rstart && note
 	;;
 rtest)
-	init && rtest && logs
+	rtest && logs
 	;;
 rdebug)
-	init && rdebug && logs
-	;;
-build)
-	build
+	rdebug && logs
 	;;
 lstart)
-	init && lstart && note
+	lstart && note
 	;;
 ltest)
-	init && ltest && logs
+	ltest && logs
 	;;
 ldebug)
-	init && ldebug && logs
+	ldebug && logs
 	;;
 info)
 	info
@@ -285,9 +348,6 @@ stop)
 remove)
 	remove
 	;;
-purge)
-	purge
-	;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
@@ -297,8 +357,6 @@ purge)
 	echo "  - rstart            startup containers from remote images"
 	echo "  - rtest             startup containers from remote images with dev ports"
 	echo "  - rdebug <path>     startup containers from remote images with dev ports and artifacts"
-	echo ""
-	echo "  - build             build local images"
 	echo ""
 	echo "  - lstart            startup containers from local images"
 	echo "  - ltest             startup containers from local images with dev ports"
@@ -310,8 +368,6 @@ purge)
 	echo ""
 	echo "  - stop              stop all containers"
 	echo "  - remove            remove all containers"
-	echo ""
-	echo "  - purge             purge all data volumes"
 	echo ""
 	;;
 esac

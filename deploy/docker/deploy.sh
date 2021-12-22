@@ -81,140 +81,143 @@ info() {
 	echo ""
 	echo ""
 }
+compose_yml() {
 
-init() {
-	docker volume create "${COMPOSE_NAME}_rendering-database-volume" || exit
-	docker volume create "${COMPOSE_NAME}_rendering-service-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-database-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
-	docker volume create "${COMPOSE_NAME}_repository-service-volume-data" || exit
-	docker volume create "${COMPOSE_NAME}_repository-service-volume-shared" || exit
+	COMPOSE_BASE_FILE="$1"
+	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
+	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
+
+	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
+	COMPOSE_LIST=
+	if [[ -f "$COMPOSE_FILE" ]]; then
+		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+	fi
+
+	shift || {
+		echo "$COMPOSE_LIST"
+		exit
+	}
+
+	while true; do
+		flag="$1"
+		shift || break
+
+		COMPOSE_FILE=""
+		case "$flag" in
+		-dev) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-network-dev.yml" ;;
+		-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
+		-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-image-remote.yml" ;;
+		*)
+			{
+				echo "error: unknown flag: $flag"
+				echo ""
+				echo "valid flags are:"
+				echo "  -dev"
+				echo "  -debug"
+				echo "  -remote"
+			} >&2
+			exit 1
+			;;
+		esac
+
+		if [[ -f "$COMPOSE_FILE" ]]; then
+			COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+		fi
+	done
+
+	echo $COMPOSE_LIST
+}
+
+compose_all_plugins() {
+	PLUGIN_DIR="$1"
+	shift
+
+	COMPOSE_LIST=
+	for plugin in $PLUGIN_DIR/plugin*/; do
+		[ ! -d $plugin ] && continue
+		COMPOSE_PLUGIN="$(compose_yml "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
+	done
+
+	echo $COMPOSE_LIST
 }
 
 logs() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "repository.yml" \
+		-f $COMPOSE_LIST \
 		logs -f || exit
 }
 
 ps() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "repository.yml" \
+		-f $COMPOSE_LIST \
 		ps || exit
 }
 
-purge() {
-	docker volume rm -f "${COMPOSE_NAME}_rendering-database-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_rendering-service-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-database-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-search-elastic-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-search-solr4-volume" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-service-volume-data" || exit
-	docker volume rm -f "${COMPOSE_NAME}_repository-service-volume-shared" || exit
-}
-
 rstart() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml -remote) $(compose_all_plugins repository -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml -remote) $(compose_all_plugins rendering -remote)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
+		-f $COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-image-remote.yml" \
-		-f "rendering-network-prd.yml" \
-		-f "repository.yml" \
-		-f "repository-image-remote.yml" \
-		-f "repository-network-prd.yml" \
+		-f $COMPOSE_LIST \
 		up -d || exit
 }
 
 lstart() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "rendering-network-prd.yml" \
-		-f "repository.yml" \
-		-f "repository-network-prd.yml" \
+		-f $COMPOSE_LIST \
 		up -d || exit
 }
 
 stop() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "repository.yml" \
+		-f $COMPOSE_LIST \
 		stop || exit
 }
 
 remove() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "rendering.yml" \
-		-f "repository.yml" \
+		-f $COMPOSE_LIST \
 		down || exit
-}
-
-backup() {
-	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
-		exit
-	}
-
-	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
-	esac
-	BACKUP_PATH=$(pwd)
-	popd >/dev/null || exit
-
-	docker run --rm \
-		-v "${BACKUP_PATH}":/destination \
-		--mount "source=${COMPOSE_NAME}_rendering-database-volume,target=/data/rendering-database-volume" \
-		--mount "source=${COMPOSE_NAME}_rendering-service-volume,target=/data/rendering-service-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-database-volume,target=/data/repository-database-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-search-elastic-volume,target=/data/repository-search-elastic-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-search-solr4-volume,target=/data/repository-search-solr4-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-service-volume-data,target=/data/repository-service-volume-data" \
-		--mount "source=${COMPOSE_NAME}_repository-service-volume-shared,target=/data/repository-service-volume-shared" \
-		debian tar cvf "/destination/${COMPOSE_NAME}.tar" /data || exit
-}
-
-restore() {
-	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <path>"
-		exit
-	}
-
-	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
-	esac
-	BACKUP_PATH=$(pwd)
-	popd >/dev/null || exit
-
-	docker run --rm \
-		-v "${BACKUP_PATH}":/source \
-		--mount "source=${COMPOSE_NAME}_rendering-database-volume,target=/data/rendering-database-volume" \
-		--mount "source=${COMPOSE_NAME}_rendering-service-volume,target=/data/rendering-service-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-database-volume,target=/data/repository-database-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-search-elastic-volume,target=/data/repository-search-elastic-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-search-solr4-volume,target=/data/repository-search-solr4-volume" \
-		--mount "source=${COMPOSE_NAME}_repository-service-volume-data,target=/data/repository-service-volume-data" \
-		--mount "source=${COMPOSE_NAME}_repository-service-volume-shared,target=/data/repository-service-volume-shared" \
-		debian tar xvf "/source/${COMPOSE_NAME}.tar" -C / || exit
 }
 
 case "${CLI_OPT1}" in
 rstart)
-	init && rstart && info
+	rstart && info
 	;;
 lstart)
-	init && lstart && info
+	lstart && info
 	;;
 info)
 	info
@@ -230,15 +233,6 @@ stop)
 	;;
 remove)
 	remove
-	;;
-backup)
-	init && backup
-	;;
-restore)
-	init && restore
-	;;
-purge)
-	purge
 	;;
 *)
 	echo ""
@@ -256,12 +250,11 @@ purge)
 	echo "  - stop              stop all containers"
 	echo "  - remove            remove all containers"
 	echo ""
-	echo "  - backup <path>     backup all data volumes"
-	echo "  - restore <path>    restore all data volumes"
-	echo "  - purge             remove all data volumes"
-	echo ""
 	;;
 esac
 
 popd >/dev/null || exit
 popd >/dev/null || exit
+
+
+# TODO plugin handling

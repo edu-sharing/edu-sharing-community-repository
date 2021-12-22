@@ -9,8 +9,11 @@ services:
       POSTGRESQL_PASSWORD: "${REPOSITORY_DATABASE_PASS:-repository}"
       POSTGRESQL_POSTGRES_PASSWORD: "${REPOSITORY_DATABASE_PASS:-repository}"
       POSTGRESQL_USERNAME: "${REPOSITORY_DATABASE_USER:-repository}"
+    expose:
+      - "5432"
     volumes:
       - "repository-database-volume:/bitnami/postgresql"
+
 
   repository-search-elastic:
     image: "${docker.image}-elasticsearch:${docker.tag}"
@@ -26,6 +29,7 @@ services:
       cluster.routing.allocation.disk.threshold_enabled: "false"
     expose:
       - "7199"
+      - "9200"
       - "9300"
     volumes:
       - "repository-search-elastic-volume:/usr/share/elasticsearch/data"
@@ -65,6 +69,7 @@ services:
       REPOSITORY_SERVICE_PORT: "8080"
     expose:
       - "7199"
+      - "8080"
       - "9090"
     volumes:
       - "repository-search-solr4-volume:/opt/alfresco/alf_data"
@@ -122,19 +127,10 @@ services:
     expose:
       - "8100"
 
+
 volumes:
   repository-database-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-database-volume"
-    external: true
   repository-search-elastic-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-search-elastic-volume"
-    external: true
   repository-search-solr4-volume:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-search-solr4-volume"
-    external: true
   repository-service-volume-data:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-service-volume-data"
-    external: true
   repository-service-volume-shared:
-    name: "${COMPOSE_PROJECT_NAME:-compose}_repository-service-volume-shared"
-    external: true

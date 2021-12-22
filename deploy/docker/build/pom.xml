@@ -38,7 +38,8 @@
 
   </build>
 
-<modules>  <module>apache_exporter</module>
+<modules>
+    <module>apache_exporter</module>
     <module>elasticsearch</module>
     <module>elasticsearch_exporter</module>
     <module>minideb</module>
