@@ -119,10 +119,12 @@ public class LTIApi {
      * @return
      */
     private String getHTML(String formTargetUrl, Map<String,String> params, String errorMessage){
+        String FORMNAME = "ltiform";
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body>");
+        sb.append("<script type=\"text/javascript\">window.onload=function(){document.forms[\""+FORMNAME+"\"].submit();}</script>");
         if(errorMessage == null) {
-            sb.append("<form action=\"" + formTargetUrl + "\" method=\"post\"");
+            sb.append("<form action=\"" + formTargetUrl + "\" method=\"post\" name=\"" + FORMNAME + "\"");
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 sb.append("<input type=\"hidden\" id=\"" + entry.getKey() + "\" name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\" class=\"form-control\"/>");
             }
