@@ -10,6 +10,7 @@ variables:
   PLUGIN_LOGINEO_IDM_ENABLED: "false"
   PLUGIN_REMOTE_ENABLED: "false"
   PLUGIN_TRANSFORM_ENABLED: "false"
+  PLUGIN_MONGO_ENABLED: "false"
 
 default:
   image: maven:3.8.4-jdk-8

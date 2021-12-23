@@ -374,4 +374,14 @@ hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
 
 ########################################################################################################################
 
+# LOAD PLUGIN CONFIGURATIONS
+for plugin in plugins/plugin-*/entrypoint.sh; do
+	 [[ -f $plugin ]] && {
+	 		echo "LOAD $plugin"
+	 		source $plugin || exit 1
+	 }
+done
+
+########################################################################################################################
+
 exec "$@"

@@ -168,6 +168,15 @@ RUN set -eux \
 
 ########################################################################################################################
 
+COPY --chown=worker:worker /plugins/docker/ bin/plugins/
+COPY --chown=worker:worker /plugins/configuration/ tomcat/shared/classes/
+
+# THANK YOU BILL ;)
+#RUN set -eux \
+#    && find plugins -type f -name *.sh -exec chmod +x {} \;
+
+########################################################################################################################
+
 STOPSIGNAL SIGWINCH
 
 EXPOSE 80 8080 8081
