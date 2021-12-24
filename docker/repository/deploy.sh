@@ -432,7 +432,20 @@ reload() {
 
 	echo "Use compose set: $COMPOSE_LIST"
 
-	echo "Redeploy edu-sharing amps..."
+
+	echo "Redeploy alfresco 0 plugins ..."
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec repository-service \
+		java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/edu-sharing -directory -nobackup -force || exit
+
+	echo "Redeploy alfresco 1 plugins ..."
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec repository-service \
+		java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/edu-sharing -directory -nobackup -force || exit
+
+	echo "Redeploy edu-sharing plugins..."
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
 		exec repository-service \
