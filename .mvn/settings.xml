@@ -2,74 +2,28 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
                               https://maven.apache.org/xsd/settings-1.0.0.xsd">
-
   <mirrors>
-
     <mirror>
-      <id>mirror</id>
-      <url>https://artifacts.edu-sharing.com/repository/public-releases/</url>
-      <mirrorOf>central</mirrorOf>
+      <id>edusharing-mirror</id>
+      <url>https://artifacts.edu-sharing.com/repository/maven-mirror/</url>
+      <mirrorOf>!edusharing-remote,*</mirrorOf>
     </mirror>
-
   </mirrors>
-
   <servers>
-
     <server>
-      <id>maven.deploy.releases</id>
-      <username>${env.MAVEN_USERNAME}</username>
-      <password>${env.MAVEN_PASSWORD}</password>
+      <id>edusharing-remote</id>
+      <username>${env.MAVEN_REMOTE_USERNAME}</username>
+      <password>${env.MAVEN_REMOTE_PASSWORD}</password>
     </server>
     <server>
-      <id>maven.deploy.snapshots</id>
-      <username>${env.MAVEN_USERNAME}</username>
-      <password>${env.MAVEN_PASSWORD}</password>
-    </server>
-
-    <server>
-      <id>edu-sharing.plugin.cluster.releases</id>
-      <username>${env.EDUSHARING_USERNAME}</username>
-      <password>${env.EDUSHARING_PASSWORD}</password>
+      <id>edusharing-releases</id>
+      <username>${env.MAVEN_DEPLOY_USERNAME}</username>
+      <password>${env.MAVEN_DEPLOY_PASSWORD}</password>
     </server>
     <server>
-      <id>edu-sharing.plugin.cluster.snapshots</id>
-      <username>${env.EDUSHARING_USERNAME}</username>
-      <password>${env.EDUSHARING_PASSWORD}</password>
+      <id>edusharing-snapshots</id>
+      <username>${env.MAVEN_DEPLOY_USERNAME}</username>
+      <password>${env.MAVEN_DEPLOY_PASSWORD}</password>
     </server>
-
-    <server>
-      <id>edu-sharing.plugin.logineo-idm.releases</id>
-      <username>${env.EDUSHARING_USERNAME}</username>
-      <password>${env.EDUSHARING_PASSWORD}</password>
-    </server>
-    <server>
-      <id>edu-sharing.plugin.logineo-idm.snapshots</id>
-      <username>${env.EDUSHARING_USERNAME}</username>
-      <password>${env.EDUSHARING_PASSWORD}</password>
-    </server>
-
-    <server>
-      <id>edu-sharing.plugin.remote.releases</id>
-      <username>${env.EDUSHARING_USERNAME}</username>
-      <password>${env.EDUSHARING_PASSWORD}</password>
-    </server>
-    <server>
-      <id>edu-sharing.plugin.remote.snapshots</id>
-      <username>${env.EDUSHARING_USERNAME}</username>
-      <password>${env.EDUSHARING_PASSWORD}</password>
-    </server>
-
-    <server>
-      <id>edu-sharing.plugin.transform.releases</id>
-      <username>${env.EDUSHARING_USERNAME}</username>
-      <password>${env.EDUSHARING_PASSWORD}</password>
-    </server>
-    <server>
-      <id>edu-sharing.plugin.transform.snapshots</id>
-      <username>${env.EDUSHARING_USERNAME}</username>
-      <password>${env.EDUSHARING_PASSWORD}</password>
-    </server>
-
   </servers>
-
 </settings>

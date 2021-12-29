@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+
+  rendering-database:
+    image: "${docker.registry}/${docker.repository}/edusharing-postgresql:${docker.tag}"
+
+  rendering-service:
+    image: "${docker.registry}/${docker.repository}/edusharing-rendering-service:${docker.tag}"
+
+  rendering-service-init:
+    image: "${docker.registry}/${docker.repository}/edusharing-rendering-service:${docker.tag}"

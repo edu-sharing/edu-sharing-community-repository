@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+
+  repository:
+    image: "${docker.repository}/edusharing-repository-installer-scripts-debian-bullseye:${docker.tag}"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT:-8100}:80"
+    volumes:
+      - ".env.repository:/opt/alfresco/.env"
+
+  rendering:
+    image: "${docker.repository}/edusharing-rendering-installer-scripts-debian-bullseye:${docker.tag}"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_SERVICE_PORT:-9100}:80"
+    volumes:
+      - ".env.rendering:/opt/rendering/.env"
+    depends_on:
+      - repository

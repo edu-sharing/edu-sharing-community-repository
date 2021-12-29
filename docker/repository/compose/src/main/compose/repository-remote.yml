@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+
+  repository-database:
+    image: "${docker.registry}/${docker.repository}/edusharing-postgresql:${docker.tag}"
+
+  repository-search-elastic:
+    image: "${docker.registry}/${docker.repository}/edusharing-elasticsearch:${docker.tag}"
+
+  repository-search-elastic-tracker:
+    image: "${docker.registry}/${docker.repository}/edusharing-repository-search-elastic-tracker:${docker.tag}"
+
+  repository-search-solr4:
+    image: "${docker.registry}/${docker.repository}/edusharing-repository-search-solr4:${docker.tag}"
+
+  repository-service:
+    image: "${docker.registry}/${docker.repository}/edusharing-repository-service:${docker.tag}"
+
+  repository-transform-single:
+    image: "${docker.registry}/${docker.repository}/edusharing-repository-transform-single:${docker.tag}"

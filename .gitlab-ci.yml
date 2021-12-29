@@ -3,14 +3,12 @@ variables:
   DOCKER_DRIVER: "$DIND_DRIVER"
   DOCKER_HOST: "$DIND_HOST"
   DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
-  MAVEN_CLI_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_RELEASES -Dmaven.deploy.snapshots=$MAVEN_SNAPSHOTS --batch-mode --errors --show-version"
   MAVEN_HOME: "/builds/$CI_PROJECT_PATH/mnt/.m2"
-  MAVEN_OPTS: "-Dmaven.repo.local=/builds/$CI_PROJECT_PATH/mnt/.m2/repository"
+  MAVEN_OPTS: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.registry=$HELM_REGISTRY -Dhelm.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS -Dmaven.repo.local=/builds/$CI_PROJECT_PATH/mnt/.m2/repository"
   PLUGIN_CLUSTER_ENABLED: "false"
-  PLUGIN_LOGINEO_IDM_ENABLED: "false"
+  PLUGIN_MONGO_ENABLED: "false"
   PLUGIN_REMOTE_ENABLED: "false"
   PLUGIN_TRANSFORM_ENABLED: "false"
-  PLUGIN_MONGO_ENABLED: "false"
 
 default:
   image: maven:3.8.4-jdk-8
@@ -28,15 +26,15 @@ test docker:
   stage: test
   artifacts:
     paths:
-      - deploy/docker/openapi.json
+      - docker/openapi.json
     when: always
   before_script:
     - apt-get update -y
     - apt-get install -y docker.io docker-compose jq wait-for-it
   script:
     - mkdir -p "$MAVEN_HOME"
-    - cd deploy/docker
-    - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
+    - cd docker
+    - mvn -s ../.mvn/settings.xml install
     - . ./deploy.sh lstart
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
@@ -52,15 +50,15 @@ test installer:
   stage: test
   artifacts:
     paths:
-      - deploy/installer/openapi.json
+      - installer/openapi.json
     when: always
   before_script:
     - apt-get update -y
     - apt-get install -y docker.io docker-compose jq wait-for-it
   script:
     - mkdir -p "$MAVEN_HOME"
-    - cd deploy/installer
-    - mvn $MAVEN_CLI_OPTS -s ../../.mvn/settings.xml install
+    - cd installer
+    - mvn -s ../.mvn/settings.xml install
     - . ./deploy.sh lstart
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
@@ -75,4 +73,4 @@ test installer:
 deploy:
   stage: deploy
   script:
-    - mvn $MAVEN_CLI_OPTS -s .mvn/settings.xml deploy
+    - mvn -s .mvn/settings.xml deploy

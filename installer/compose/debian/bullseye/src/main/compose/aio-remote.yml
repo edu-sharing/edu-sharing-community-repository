@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+
+  repository:
+    image: "${docker.registry}/${docker.repository}/edusharing-repository-installer-scripts-debian-bullseye:${docker.tag}"
+
+  rendering:
+    image: "${docker.registry}/${docker.repository}/edusharing-rendering-installer-scripts-debian-bullseye:${docker.tag}"

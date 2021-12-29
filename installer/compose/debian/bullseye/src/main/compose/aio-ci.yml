@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+
+  repository:
+    environment:
+      REPOSITORY_SERVICE_HOST_EXTERNAL: "docker"
+
+  rendering:
+    environment:
+      RENDERING_SERVICE_HOST_EXTERNAL: "docker"

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -10,24 +11,22 @@
     <relativePath/>
   </parent>
 
-  <artifactId>edu_sharing-community</artifactId>
+  <artifactId>edu_sharing-community-deploy</artifactId>
   <packaging>pom</packaging>
   <version>git</version>
 
-  <name>edu_sharing-community</name>
+  <name>edu_sharing-community-deploy</name>
 
   <scm>
     <connection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community-deploy.git</connection>
-    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community-deploy.git</developerConnection>
+    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community-deploy.git
+    </developerConnection>
     <url>https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community-deploy.git</url>
   </scm>
 
   <properties>
 
     <community.plattform>${project.version}</community.plattform>
-
-    <maven.deploy.releases>https://artifacts.edu-sharing.com/repository/community-releases/</maven.deploy.releases>
-    <maven.deploy.snapshots>https://artifacts.edu-sharing.com/repository/community-snapshots/</maven.deploy.snapshots>
 
   </properties>
 
@@ -132,116 +131,36 @@
   <repositories>
 
     <repository>
-      <id>edu-sharing.public.releases</id>
-      <url>https://artifacts.edu-sharing.com/repository/public-releases/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>edu-sharing.public.snapshots</id>
-      <url>https://artifacts.edu-sharing.com/repository/public-snapshots/</url>
+      <id>edusharing-remote</id>
+      <url>https://artifacts.edu-sharing.com/repository/maven-remote/</url>
       <releases>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
       </releases>
       <snapshots>
+        <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
       </snapshots>
     </repository>
 
     <repository>
-      <id>edu-sharing.plugin.cluster.releases</id>
-      <url>https://artifacts.edu-sharing.com/repository/plugin-cluster-releases/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>edu-sharing.plugin.cluster.snapshots</id>
-      <url>https://artifacts.edu-sharing.com/repository/plugin-cluster-snapshots/</url>
+      <id>edusharing-mirror</id>
+      <url>https://artifacts.edu-sharing.com/repository/maven-mirror/</url>
       <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
+        <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>edu-sharing.plugin.logineo-idm.releases</id>
-      <url>https://artifacts.edu-sharing.com/repository/plugin-logineo-idm-releases/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>edu-sharing.plugin.logineo-idm.snapshots</id>
-      <url>https://artifacts.edu-sharing.com/repository/plugin-logineo-idm-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
       </releases>
       <snapshots>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>edu-sharing.plugin.remote.releases</id>
-      <url>https://artifacts.edu-sharing.com/repository/plugin-remote-releases/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>edu-sharing.plugin.remote.snapshots</id>
-      <url>https://artifacts.edu-sharing.com/repository/plugin-remote-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>edu-sharing.plugin.transform.releases</id>
-      <url>https://artifacts.edu-sharing.com/repository/plugin-transform-releases/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>edu-sharing.plugin.transform.snapshots</id>
-      <url>https://artifacts.edu-sharing.com/repository/plugin-transform-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
+        <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
       </snapshots>
     </repository>
 
   </repositories>
 
-  <distributionManagement>
-
-    <repository>
-      <id>maven.deploy.releases</id>
-      <url>${maven.deploy.releases}</url>
-    </repository>
-
-    <snapshotRepository>
-      <id>maven.deploy.snapshots</id>
-      <url>${maven.deploy.snapshots}</url>
-    </snapshotRepository>
-
-  </distributionManagement>
-
-<modules>  <module>deploy</module>
+  <modules>
+    <module>docker</module>
+    <module>installer</module>
   </modules>
+
 </project>
