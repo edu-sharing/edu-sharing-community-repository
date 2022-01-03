@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 
 public class MetadataWidget extends MetadataTranslatable{
 
-    public enum Required{
+	private Map<String, MetadataKey> valuesAsMapCache;
+
+	public enum Required{
 		mandatory,
 		mandatoryForPublish,
 		recommended,
@@ -324,8 +326,12 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public Map<String, MetadataKey> getValuesAsMap() {
 		Map<String,MetadataKey> map=new HashMap<>();
-		if(values==null)
+		if(values==null) {
 			return map;
+		}
+		if(valuesAsMapCache != null) {
+			return valuesAsMapCache;
+		}
 		for(MetadataKey value : values){
 			map.put(value.getKey(), value);
 			if(value.getAlternativeKeys() != null) {
@@ -334,6 +340,7 @@ public class MetadataWidget extends MetadataTranslatable{
 				);
 			}
 		}
+		valuesAsMapCache = map;
 		return map;
 	}
 	public Map<MetadataKey.MetadataKeyRelated, MetadataKey> getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation relation) {
