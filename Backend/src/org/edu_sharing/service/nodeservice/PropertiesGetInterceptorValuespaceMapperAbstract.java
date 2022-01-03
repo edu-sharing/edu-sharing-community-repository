@@ -21,6 +21,13 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
     protected final MetadataKey.MetadataKeyRelated.Relation relation;
     private Map<MetadataKey.MetadataKeyRelated, MetadataKey> relationCache;
 
+    /**
+     * Init this Interceptor with the given property information
+     * @param mode The mode to use in order to fill the target property
+     * @param sourceProperty the source property to read the data from
+     * @param targetProperty the target property (where to map the data to)
+     * @param relation The relation to use
+     */
     protected PropertiesGetInterceptorValuespaceMapperAbstract(MigrateMetadataValuespaceJob.Mode mode,
                                                                String sourceProperty,
                                                                String targetProperty,
@@ -31,6 +38,10 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
         this.relation = relation;
     }
 
+    /**
+     * Set the widget
+     * the widget will be used to fetch the relation mapping data
+     */
     public void setWidget(MetadataWidget widget) {
         this.widget = widget;
         this.relationCache = widget.getValuespaceMappingByRelation(relation);

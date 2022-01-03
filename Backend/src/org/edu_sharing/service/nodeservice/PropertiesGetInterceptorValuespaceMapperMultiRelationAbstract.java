@@ -17,9 +17,15 @@ import java.util.Map;
 public abstract class PropertiesGetInterceptorValuespaceMapperMultiRelationAbstract extends PropertiesGetInterceptorValuespaceMapperAbstract {
 
     private final List<MetadataKey.MetadataKeyRelated.Relation> relations;
-    private Map<MetadataKey.MetadataKeyRelated.Relation,Map<MetadataKey.MetadataKeyRelated, MetadataKey>> relationCache = new HashMap<>();
+    private Map<MetadataKey.MetadataKeyRelated.Relation,Map<MetadataKey.MetadataKeyRelated, MetadataKey>> relationCache;
     private Logger logger = Logger.getLogger(PropertiesGetInterceptorValuespaceMapperMultiRelationAbstract.class);
 
+    /**
+     * Init this Interceptor with the given property information
+     * @param sourceProperty the source property to read the data from
+     * @param targetProperty the target property (where to map the data to)
+     * @param relations (the relations to search for mappings, the first relation that returns result for a given value in the list will be used)
+     */
     protected PropertiesGetInterceptorValuespaceMapperMultiRelationAbstract(
                                                                String sourceProperty,
                                                                String targetProperty,
@@ -33,6 +39,7 @@ public abstract class PropertiesGetInterceptorValuespaceMapperMultiRelationAbstr
     @Override
     public void setWidget(MetadataWidget widget) {
         super.setWidget(widget);
+        relationCache = new HashMap<>();
         this.relations.forEach((r) -> relationCache.put(r, widget.getValuespaceMappingByRelation(r)));
     }
 
