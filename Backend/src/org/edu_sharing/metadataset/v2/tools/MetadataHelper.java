@@ -2,6 +2,7 @@ package org.edu_sharing.metadataset.v2.tools;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.commons.collections.IteratorUtils;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -110,13 +111,15 @@ public class MetadataHelper {
 				if(prop instanceof String) {
 					prop = Arrays.asList(ValueTool.getMultivalue((String) prop));
 				}
-				if(prop instanceof List) {
+				if(prop instanceof Iterable) {
+					List<MetadataKey> keys = new ArrayList<>();
+					((Iterable<?>) prop).forEach(
+							p -> keys.add(values.get((String)p))
+					);
 					props.put(id + CCConstants.DISPLAYNAME_SUFFIX,
-							ValueTool.toMultivalue(((List<?>) prop).stream().
-									map(values::get).
-									map(metadataKey -> metadataKey == null ? "" : metadataKey.getCaption())
-									.toArray(String[]::new)
-							)
+									keys.stream()
+									.map(metadataKey -> metadataKey == null ? "" : metadataKey.getCaption())
+									.collect(Collectors.toList())
 					);
 				}
 			}

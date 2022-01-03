@@ -125,10 +125,12 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			ArrayList<String> valueMapped = new ArrayList<>();
 			((List<?>) value).stream().forEach((v) -> {
 				Serializable mapped = mapValue(nodeRef, (String) v, mapping);
-				if(mapped instanceof List) {
-					valueMapped.addAll((Collection<? extends String>) mapped);
-				} else {
-					valueMapped.add((String) mapped);
+				if(mapped != null) {
+					if (mapped instanceof List) {
+						valueMapped.addAll((Collection<? extends String>) mapped);
+					} else {
+						valueMapped.add((String) mapped);
+					}
 				}
 			});
 			HashSet<String> target = new HashSet<>();
@@ -150,16 +152,15 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	}
 
 	private static Serializable mapValue(NodeRef nodeRef, String value, Map<MetadataKey.MetadataKeyRelated, MetadataKey> metadataKeyRelated) {
-		Set<MetadataKey.MetadataKeyRelated> related = metadataKeyRelated.keySet().stream().filter((k) -> k.getKey().equals(value)).collect(Collectors.toSet());
-		Set<MetadataKey> relatedMapped = related.stream().map((k) -> metadataKeyRelated.get(k)).collect(Collectors.toSet());
+		Set<MetadataKey.MetadataKeyRelated> relatedMapped = metadataKeyRelated.entrySet().stream().filter((k) -> k.getValue().getKey().equals(value)).map(Map.Entry::getKey).collect(Collectors.toSet());
 		String mappedIds = StringUtils.join(relatedMapped.stream().map(MetadataKey::getKey).collect(Collectors.toList()), ", ");
 		if(relatedMapped.size() > 1) {
-			logger.warn("Multiple relation candidates for value " + value +" => " + mappedIds +", node " + nodeRef);
+			logger.info("Multiple relation candidates for value " + value +" => " + mappedIds +", node " + nodeRef);
 		} else if (relatedMapped.size() == 0) {
 			logger.warn("Value " + value + " has no candidate for mapping, node " + nodeRef);
-			return value;
+			return null;
 		}
-		logger.info("Mapping " + value + " => " + mappedIds + ", node " + nodeRef);
+		logger.debug("Mapping " + value + " => " + mappedIds + ", node " + nodeRef);
 		if(relatedMapped.size() == 1) {
 			return relatedMapped.iterator().next().getKey();
 		}

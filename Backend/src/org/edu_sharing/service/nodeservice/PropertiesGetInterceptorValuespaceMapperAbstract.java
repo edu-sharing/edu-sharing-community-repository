@@ -4,9 +4,10 @@ import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public abstract class PropertiesInterceptorValuespaceMapperAbstract extends PropertiesInterceptorDefault {
+public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends PropertiesGetInterceptorDefault {
     protected final MigrateMetadataValuespaceJob.Mode mode;
     /**
      * widget class
@@ -18,11 +19,12 @@ public abstract class PropertiesInterceptorValuespaceMapperAbstract extends Prop
     protected final String sourceProperty;
     protected final String targetProperty;
     protected final MetadataKey.MetadataKeyRelated.Relation relation;
+    private Map<MetadataKey.MetadataKeyRelated, MetadataKey> relationCache;
 
-    protected PropertiesInterceptorValuespaceMapperAbstract(MigrateMetadataValuespaceJob.Mode mode,
-                                                  String sourceProperty,
-                                                  String targetProperty,
-                                                  MetadataKey.MetadataKeyRelated.Relation relation) {
+    protected PropertiesGetInterceptorValuespaceMapperAbstract(MigrateMetadataValuespaceJob.Mode mode,
+                                                               String sourceProperty,
+                                                               String targetProperty,
+                                                               MetadataKey.MetadataKeyRelated.Relation relation) {
         this.mode = mode;
         this.sourceProperty = sourceProperty;
         this.targetProperty = targetProperty;
@@ -31,8 +33,12 @@ public abstract class PropertiesInterceptorValuespaceMapperAbstract extends Prop
 
     public void setWidget(MetadataWidget widget) {
         this.widget = widget;
+        this.relationCache = widget.getValuespaceMappingByRelation(relation);
     }
 
+    /**
+     * @TODO: may use beforeCacheProperties for higher performance
+     */
     @Override
     public Map<String, Object> beforeDeliverProperties(PropertiesContext context) {
         try {
@@ -62,7 +68,7 @@ public abstract class PropertiesInterceptorValuespaceMapperAbstract extends Prop
         map.put(targetProperty,
                 MigrateMetadataValuespaceJob.mapValueToTarget(
                         context.getNodeRef(),
-                        widget.getValuespaceMappingByRelation(relation),
+                        relationCache,
                         mode,
                         map.get(sourceProperty),
                         map.get(targetProperty)

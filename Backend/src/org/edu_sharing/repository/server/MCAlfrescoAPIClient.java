@@ -148,7 +148,7 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
+import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
@@ -952,16 +952,18 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 
+		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
+		String mdsId=CCConstants.metadatasetdefault_id;
+		MetadataSet mds = null;
 		/**
 		 * run over all properties and format the date props with with current
 		 * user locale
 		 */
-		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
-			String mdsId=CCConstants.metadatasetdefault_id;
+		if (hasMds) {
 			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
 				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 			}
-			MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
+			mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
 			HashMap<String, Object> addAndOverwriteDateMap = new HashMap<String, Object>();
 			for (Map.Entry<String, Object> entry : propsCopy.entrySet()) {
 
@@ -983,20 +985,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, entry.getValue());
 					// put formated
 					addAndOverwriteDateMap.put(entry.getKey(), ValueTool.toMultivalue(formattedValues));
-				}
-				try{
-					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
-					Map<String, MetadataKey> map = widget.getValuesAsMap();
-					if(!map.isEmpty()){
-						String[] keys=ValueTool.getMultivalue((String) entry.getValue());
-						String[] values=new String[keys.length];
-						for(int i=0;i<keys.length;i++)
-							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
-						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
-					}
-
-				}catch(Throwable t){
-
 				}
 			}
 
@@ -1141,13 +1129,26 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 		HashMap<String, Object> propsOutput = propsCopy;
-		for (PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+		// @TODO: remove all of this from/to multivalue
+		propsOutput = ValueTool.getMultivalue(propsOutput);
+		for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
 			propsOutput = new HashMap<>(i.beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(
 					nodeRef,
 					propsOutput,
 					Arrays.asList(aspects))
 			));
 		}
+
+		/**
+		 * attach the display name suffix
+		 */
+		if(hasMds) {
+			MetadataHelper.addVirtualDisplaynameProperties(mds, propsOutput);
+		}
+
+		// @TODO: remove all of this from/to multivalue
+		propsOutput = ValueTool.toMultivalue(propsOutput);
+
 		return propsOutput;
 	}
 
@@ -1373,7 +1374,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 			if (mdate != null) {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
-				for(PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+				for(PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
 					properties = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, properties,
 									aspects.stream().map(QName::toString).collect(Collectors.toList()))));
 				}

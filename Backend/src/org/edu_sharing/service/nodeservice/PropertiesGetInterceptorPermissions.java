@@ -4,13 +4,11 @@ import com.google.common.collect.Lists;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class PropertiesInterceptorPermissions extends PropertiesInterceptorDefault {
+public class PropertiesGetInterceptorPermissions extends PropertiesGetInterceptorDefault {
     public static Map<String, List<String>> PERMISSION_LIST = new HashMap<>();
     static {
         PERMISSION_LIST.put(CCConstants.PERMISSION_WRITE, Lists.newArrayList(

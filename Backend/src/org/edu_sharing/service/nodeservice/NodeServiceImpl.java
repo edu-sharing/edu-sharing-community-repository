@@ -278,7 +278,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					}).collect(Collectors.toList());
 
 				}catch(Throwable t){
-					logger.warn("Could not parse date for widget id " + widget.getId(), t);
+					logger.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
 					values = new ArrayList<>();
 				}
 			}
@@ -588,14 +588,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		try {
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 			Map<QName, Serializable> props = transformPropMap(_props);
-			Map<QName, Serializable> propsNotNull = new HashMap<>();
+			Map<String, Object> propsNotNull = new HashMap<>();
 
 			for(Map.Entry<QName, Serializable> prop : props.entrySet()){
 				// instead of storing props as null (which can cause solr erros), remove them completely from the node!
 				if(prop.getValue()==null)
 					nodeService.removeProperty(nodeRef,prop.getKey());
 				else
-					propsNotNull.put(prop.getKey(),prop.getValue());
+					propsNotNull.put(prop.getKey().toString(),prop.getValue());
 			}
 
 			// don't do this cause it's slow:
@@ -606,15 +606,30 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			 */
 
 			// prevent overwriting of properties that don't come with param _props
-			Set<QName> changedProps = propsNotNull.keySet();
+			Set<String> changedProps = propsNotNull.keySet();
 			Map<QName, Serializable> currentProps = nodeService.getProperties(nodeRef);
 			for (Map.Entry<QName, Serializable> entry : currentProps.entrySet()) {
-				if (!changedProps.contains(entry.getKey())) {
-					propsNotNull.put(entry.getKey(), entry.getValue());
+				if (!changedProps.contains(entry.getKey().toString())) {
+					propsNotNull.put(entry.getKey().toString(), entry.getValue());
 				}
 			}
 
-			nodeService.setProperties(nodeRef, propsNotNull);
+			for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+				try {
+					propsNotNull = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
+									nodeRef,
+									propsNotNull,
+									Arrays.asList(getAspects(store.getProtocol(), store.getIdentifier(), nodeId))));
+				} catch (Throwable e) {
+					logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.getMessage());
+				}
+			}
+			Map<QName, Serializable> propsStore = propsNotNull.entrySet().stream().collect(
+					HashMap::new,
+					(m,entry)-> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
+					HashMap::putAll
+			);
+			nodeService.setProperties(nodeRef, propsStore);
 
 		} catch (org.hibernate.StaleObjectStateException e) {
 			// this occurs sometimes in workspace
@@ -1356,6 +1371,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+		NodeRef nodeRef = new NodeRef(new StoreRef(protocol, storeId), nodeId);
 		property = NameSpaceTool.transformToLongQName(property);
 		QName prop = QName.createQName(property);
 		PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
@@ -1368,7 +1384,20 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			value = (Serializable)((Collection)value).stream().iterator().next();
 		}
 
-		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), prop,value);
+		for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+			try {
+				value = i.beforeSetProperty(PropertiesInterceptorFactory.getPropertiesContext(
+						nodeRef,
+						getProperties(protocol, storeId, nodeId),
+						Arrays.asList(getAspects(protocol, storeId, nodeId))),
+						property
+				);
+			} catch (Throwable e) {
+				logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.getMessage());
+			}
+		}
+
+		nodeService.setProperty(nodeRef, prop,value);
 	}
 
 	@Override
