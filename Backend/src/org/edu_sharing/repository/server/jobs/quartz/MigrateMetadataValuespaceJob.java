@@ -86,13 +86,10 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			try {
 				MetadataSet mds = MetadataHelper.getMetadataset(nodeRef);
 				MetadataWidget widget;
-				Map<MetadataKey.MetadataKeyRelated, MetadataKey> mapping;
+				Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping;
 				try {
 					widget = mds.findWidget(mdsWidgetId);
 					mapping = widget.getValuespaceMappingByRelation(relation);
-					mapping.forEach((key, entry) -> {
-						logger.info("Found mapping in " + mdsWidgetId + ":" + key.getKey() + " -> " + entry.getKey());
-					});
 				} catch(IllegalArgumentException e) {
 					logger.warn("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
 					return;
@@ -117,7 +114,7 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.run();
 	}
 
-	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<MetadataKey.MetadataKeyRelated, MetadataKey> mapping, Mode mode, Object value, Object targetValue) {
+	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping, Mode mode, Object value, Object targetValue) {
 		if(value instanceof String || value instanceof List) {
 			if(value instanceof String) {
 				value = Collections.singletonList(value);
@@ -151,19 +148,20 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		return null;
 	}
 
-	private static Serializable mapValue(NodeRef nodeRef, String value, Map<MetadataKey.MetadataKeyRelated, MetadataKey> metadataKeyRelated) {
-		Set<MetadataKey.MetadataKeyRelated> relatedMapped = metadataKeyRelated.entrySet().stream().filter((k) -> k.getValue().getKey().equals(value)).map(Map.Entry::getKey).collect(Collectors.toSet());
-		String mappedIds = StringUtils.join(relatedMapped.stream().map(MetadataKey::getKey).collect(Collectors.toList()), ", ");
+	private static Serializable mapValue(NodeRef nodeRef, String value, Map<String, Collection<MetadataKey.MetadataKeyRelated>> metadataKeyRelated) {
+		Collection<MetadataKey.MetadataKeyRelated> relatedMapped = metadataKeyRelated.getOrDefault(value, new ArrayList<>());
+		ArrayList<String> mappedKeys = relatedMapped.stream().map(MetadataKey::getKey).collect(Collectors.toCollection(ArrayList::new));
+		String mappedIds = StringUtils.join(mappedKeys, ", ");
 		if(relatedMapped.size() > 1) {
-			logger.info("Multiple relation candidates for value " + value +" => " + mappedIds +", node " + nodeRef);
+			//logger.info("Multiple relation candidates for value " + value +" => " + mappedIds +", node " + nodeRef);
 		} else if (relatedMapped.size() == 0) {
-			logger.warn("Value " + value + " has no candidate for mapping, node " + nodeRef);
+			//logger.warn("Value " + value + " has no candidate for mapping, node " + nodeRef);
 			return null;
 		}
-		logger.debug("Mapping " + value + " => " + mappedIds + ", node " + nodeRef);
+		//logger.debug("Mapping " + value + " => " + mappedIds + ", node " + nodeRef);
 		if(relatedMapped.size() == 1) {
 			return relatedMapped.iterator().next().getKey();
 		}
-		return relatedMapped.stream().map(MetadataKey::getKey).collect(Collectors.toCollection(ArrayList::new));
+		return mappedKeys;
 	}
 }

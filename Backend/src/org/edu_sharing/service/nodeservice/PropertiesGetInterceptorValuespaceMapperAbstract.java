@@ -4,7 +4,7 @@ import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
 
 public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends PropertiesGetInterceptorDefault {
@@ -19,7 +19,7 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
     protected final String sourceProperty;
     protected final String targetProperty;
     protected final MetadataKey.MetadataKeyRelated.Relation relation;
-    private Map<MetadataKey.MetadataKeyRelated, MetadataKey> relationCache;
+    private Map<String, Collection<MetadataKey.MetadataKeyRelated>> relationCache;
 
     /**
      * Init this Interceptor with the given property information

@@ -4,12 +4,8 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
-import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * this interceptor will map the first relation given in the input list which yields one or more hits
@@ -17,7 +13,7 @@ import java.util.Map;
 public abstract class PropertiesGetInterceptorValuespaceMapperMultiRelationAbstract extends PropertiesGetInterceptorValuespaceMapperAbstract {
 
     private final List<MetadataKey.MetadataKeyRelated.Relation> relations;
-    private Map<MetadataKey.MetadataKeyRelated.Relation,Map<MetadataKey.MetadataKeyRelated, MetadataKey>> relationCache;
+    private Map<MetadataKey.MetadataKeyRelated.Relation,Map<String, Collection<MetadataKey.MetadataKeyRelated>>> relationCache;
     private Logger logger = Logger.getLogger(PropertiesGetInterceptorValuespaceMapperMultiRelationAbstract.class);
 
     /**
