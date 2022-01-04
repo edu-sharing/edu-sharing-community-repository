@@ -4,6 +4,7 @@ import java.io.*;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,6 +16,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.log4j.Logger;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
@@ -52,7 +54,7 @@ public class OAILOMExporter {
 
 	public static String configCatalog = "exporter.oai.lom.identifier.catalog";
 	protected String lomIdentifierCatalog = (LightbendConfigLoader.get().hasPath(configCatalog)) ? LightbendConfigLoader.get().getString(configCatalog) : ApplicationInfoList.getHomeRepository().getAppId();
-	private HashMap<String, Object> properties;
+	protected HashMap<String, Object> properties;
 
 	public OAILOMExporter() throws ParserConfigurationException {
 		ApplicationContext context = AlfAppContextGate.getApplicationContext();
@@ -381,16 +383,13 @@ public class OAILOMExporter {
 		return vCard;
 	}
 
-	protected List<String> prepareContributer(List<String> contrib){
-		if(contrib instanceof List) {
-			return contrib.stream().
-					//sometimes there are empty values in list
-							filter((c) -> c != null && !c.trim().isEmpty()).
-					// validate email ppolicy
-							map(this::cleanupVCardEMail)
-					.collect(Collectors.toList());
-		}
-		return new ArrayList<>();
+	protected List<String> prepareContributer(Iterable<String> contrib){
+		return StreamSupport.stream(contrib.spliterator(), false).
+				//sometimes there are empty values in list
+						filter((c) -> c != null && !c.trim().isEmpty()).
+				// validate email ppolicy
+						map(this::cleanupVCardEMail)
+				.collect(Collectors.toList());
 	}
 
 	/**
