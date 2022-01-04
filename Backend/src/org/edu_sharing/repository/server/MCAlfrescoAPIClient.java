@@ -1130,7 +1130,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		HashMap<String, Object> propsOutput = propsCopy;
 		// @TODO: remove all of this from/to multivalue
-		propsOutput = ValueTool.getMultivalue(propsOutput);
+		ValueTool.getMultivalue(propsOutput);
 		for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
 			propsOutput = new HashMap<>(i.beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(
 					nodeRef,
@@ -1147,7 +1147,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 
 		// @TODO: remove all of this from/to multivalue
-		propsOutput = ValueTool.toMultivalue(propsOutput);
+		ValueTool.toMultivalue(propsOutput);
 
 		return propsOutput;
 	}
