@@ -16,7 +16,6 @@ esac
 
 export COMPOSE_EXEC
 
-
 export CLI_CMD="$0"
 export CLI_OPT1="$1"
 export CLI_OPT2="$2"
@@ -267,8 +266,8 @@ ldebug() {
 		COMPOSE_LIST="$(compose_yml repository.yml -test -debug) $(compose_all_plugins -test)"
 
 		case $CLI_OPT3 in
-			/*) pushd "${CLI_OPT3}" >/dev/null || exit ;;
-			*) pushd "${ROOT_PATH}/${CLI_OPT3}" >/dev/null || exit ;;
+		/*) pushd "${CLI_OPT3}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT3}" >/dev/null || exit ;;
 		esac
 
 		COMMUNITY_PATH=$(pwd)
@@ -280,8 +279,8 @@ ldebug() {
 		COMPOSE_LIST="$(compose_yml repository.yml -test) $(compose_all_plugins -test) $(compose_yml $CLI_OPT3/$CLI_OPT3 -debug)"
 
 		case $CLI_OPT4 in
-			/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
-			*) pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit ;;
+		/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit ;;
 		esac
 
 		PLUGIN_PATH=$(pwd)
@@ -355,11 +354,11 @@ rdebug() {
 	case "$CLI_OPT2" in
 
 	-repo)
-		COMPOSE_LIST="$(compose_yml repository.yml  -remote -test -debug) $(compose_all_plugins -remote -test)"
+		COMPOSE_LIST="$(compose_yml repository.yml -remote -test -debug) $(compose_all_plugins -remote -test)"
 
 		case $CLI_OPT3 in
-			/*) pushd "${CLI_OPT3}" >/dev/null || exit ;;
-			*) pushd "${ROOT_PATH}/${CLI_OPT3}" >/dev/null || exit ;;
+		/*) pushd "${CLI_OPT3}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT3}" >/dev/null || exit ;;
 		esac
 
 		COMMUNITY_PATH=$(pwd)
@@ -371,8 +370,8 @@ rdebug() {
 		COMPOSE_LIST="$(compose_yml repository.yml -remote -test) $(compose_all_plugins -remote -test) $(compose_yml $CLI_OPT3/$CLI_OPT3 -debug)"
 
 		case $CLI_OPT4 in
-			/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
-			*) pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit ;;
+		/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
+		*) pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit ;;
 		esac
 
 		pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit
@@ -417,13 +416,21 @@ stop() {
 }
 
 remove() {
-	COMPOSE_LIST="$(compose_yml repository.yml -remote -test) $(compose_all_plugins -remote -test)"
+	read -p "Are you sure you want to continue? [y/N] " answer
+	case ${answer:0:1} in
+	y | Y)
+		COMPOSE_LIST="$(compose_yml repository.yml -remote -test) $(compose_all_plugins -remote -test)"
 
-	echo "Use compose set: $COMPOSE_LIST"
+		echo "Use compose set: $COMPOSE_LIST"
 
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		down -v || exit
+		$COMPOSE_EXEC \
+			$COMPOSE_LIST \
+			down -v || exit
+		;;
+	*)
+		echo Canceled.
+		;;
+	esac
 }
 
 reload() {
@@ -455,8 +462,8 @@ watch() {
 	}
 
 	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
 	esac
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
@@ -524,13 +531,13 @@ remove)
 	echo "  - rtest             startup containers from remote images with dev ports"
 	echo "  - rdebug            startup containers from remote images with dev ports and artifacts"
 	echo "      -repo <PROJECT_ROOT_PATH> "
-  echo "      -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
+	echo "      -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
 	echo ""
 	echo "  - lstart            startup containers from local images"
 	echo "  - ltest             startup containers from local images with dev ports"
 	echo "  - ldebug            startup containers from local images with dev ports and artifacts"
 	echo "      -repo <PROJECT_ROOT_PATH> "
-  echo "      -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
+	echo "      -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
 	echo ""
 	echo "  - reload            reload services"
 	echo "  - watch <path>      reload services if webapp artifact changed"

@@ -204,14 +204,22 @@ stop() {
 }
 
 remove() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
+	read -p "Are you sure you want to continue? [y/N] " answer
+	case ${answer:0:1} in
+	y | Y)
+		COMPOSE_LIST="$COMPOSE_LIST $(compose_yml repository/repository.yml) $(compose_all_plugins repository)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose_yml rendering/rendering.yml) $(compose_all_plugins rendering)"
 
-	echo "Use compose set: $COMPOSE_LIST"
+		echo "Use compose set: $COMPOSE_LIST"
 
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		down -v || exit
+		$COMPOSE_EXEC \
+			$COMPOSE_LIST \
+			down -v || exit
+		;;
+	*)
+		echo Canceled.
+		;;
+	esac
 }
 
 case "${CLI_OPT1}" in
@@ -257,6 +265,5 @@ esac
 
 popd >/dev/null || exit
 popd >/dev/null || exit
-
 
 # TODO plugin handling

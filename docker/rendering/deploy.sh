@@ -16,7 +16,6 @@ esac
 
 export COMPOSE_EXEC
 
-
 export CLI_CMD="$0"
 export CLI_OPT1="$1"
 export CLI_OPT2="$2"
@@ -229,8 +228,8 @@ rdebug() {
 	}
 
 	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
 	esac
 
 	COMMUNITY_PATH=$(pwd)
@@ -278,8 +277,8 @@ ldebug() {
 	}
 
 	case $CLI_OPT2 in
-		/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
 	esac
 
 	COMMUNITY_PATH=$(pwd)
@@ -306,13 +305,21 @@ stop() {
 }
 
 remove() {
-	COMPOSE_LIST="$(compose_yml rendering.yml) $(compose_all_plugins)"
+	read -p "Are you sure you want to continue? [y/N] " answer
+	case ${answer:0:1} in
+	y | Y)
+		COMPOSE_LIST="$(compose_yml rendering.yml) $(compose_all_plugins)"
 
-	echo "Use compose set: $COMPOSE_LIST"
+		echo "Use compose set: $COMPOSE_LIST"
 
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		down -v || exit
+		$COMPOSE_EXEC \
+			$COMPOSE_LIST \
+			down -v || exit
+		;;
+	*)
+		echo Canceled.
+		;;
+	esac
 }
 
 case "${CLI_OPT1}" in
