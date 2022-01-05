@@ -13,8 +13,4 @@ public interface PropertiesSetInterceptor {
      * You can add or remove data in the returned set
      */
     Map<String, Object> beforeSetProperties(PropertiesGetInterceptor.PropertiesContext context);
-    /**
-     * Same as @beforeSetProperties, but called when a single property shall be set
-     */
-    Serializable beforeSetProperty(PropertiesGetInterceptor.PropertiesContext context, String property);
 }

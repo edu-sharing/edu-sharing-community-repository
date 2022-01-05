@@ -20,12 +20,4 @@ public class PropertiesSetInterceptorIgnoreAbstract implements PropertiesSetInte
         ignoredProperties.forEach((p) -> context.getProperties().remove(p));
         return context.getProperties();
     }
-
-    @Override
-    public Serializable beforeSetProperty(PropertiesGetInterceptor.PropertiesContext context, String property) {
-        if(ignoredProperties.contains(property)) {
-            return null;
-        }
-        return (Serializable) context.getProperties().get(property);
-    }
 }

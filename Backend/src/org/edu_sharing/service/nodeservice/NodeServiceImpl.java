@@ -621,7 +621,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 									propsNotNull,
 									Arrays.asList(getAspects(store.getProtocol(), store.getIdentifier(), nodeId))));
 				} catch (Throwable e) {
-					logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.getMessage());
+					logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
 				}
 			}
 			Map<QName, Serializable> propsStore = propsNotNull.entrySet().stream().collect(
@@ -1384,22 +1384,39 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			value = (Serializable)((Collection)value).stream().iterator().next();
 		}
 
-		for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+		Map<String, Object> properties = null;
+		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
 			try {
-				HashMap<String, Object> properties = getProperties(protocol, storeId, nodeId);
-				properties.put(property, value);
-				value = i.beforeSetProperty(PropertiesInterceptorFactory.getPropertiesContext(
-						nodeRef,
-						properties,
-						Arrays.asList(getAspects(protocol, storeId, nodeId))),
-						property
+				properties = nodeService.getProperties(nodeRef).entrySet().stream().collect(
+						HashMap::new,
+						(m,entry)-> m.put(entry.getKey().toString(), entry.getValue()),
+						HashMap::putAll
 				);
-			} catch (Throwable e) {
-				logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.getMessage());
-			}
+				properties.put(property, value);
+				for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+					try {
+						properties = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
+										nodeRef,
+										properties,
+										Arrays.asList(getAspects(protocol, storeId, nodeId)))
+						);
+					} catch (Throwable e) {
+						logger.warn("Error while calling interceptors " + i.getClass().getName() + ": " + e);
+					}
+				}
+				} catch (Throwable e) {
+					logger.warn("Error while handling set interceptors: " + e);
+				}
 		}
-
-		nodeService.setProperty(nodeRef, prop,value);
+		if(properties != null) {
+			nodeService.setProperties(nodeRef, properties.entrySet().stream().collect(
+					HashMap::new,
+					(m,entry)-> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
+					HashMap::putAll
+			));
+		} else {
+			nodeService.setProperty(nodeRef, prop, value);
+		}
 	}
 
 	@Override

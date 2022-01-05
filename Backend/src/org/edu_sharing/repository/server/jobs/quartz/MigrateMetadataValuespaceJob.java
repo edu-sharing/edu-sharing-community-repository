@@ -69,9 +69,13 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	private Mode mode;
 	@JobFieldDescription(description = "Only test and output, but do not modify/store the metadata")
 	private boolean testRun;
-
+	@JobFieldDescription(description = "Clear/remove the source field content after successful migration")
+	private boolean clearSourceProperty;
 	@Override
 	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
+		if(clearSourceProperty && sourceProperty.equals(targetProperty)) {
+			throw new IllegalArgumentException("clearSourceProperty can't be used when sourceProperty == targetProperty!");
+		}
 		NodeRunner runner = new NodeRunner();
 		runner.setRunAsSystem(true);
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
@@ -104,11 +108,16 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 				if(mapped!=null && mapped.size() > 0) {
 					logger.info("Mapped " + value + " -> " + StringUtils.join(mapped,", "));
 				}
-				if(!testRun && mapped!=null && mapped.size() > 0) {
-					NodeServiceHelper.setProperty(nodeRef,
-							CCConstants.getValidGlobalName(targetProperty),
-							mapped
-					);
+				if(!testRun) {
+					 if(mapped!=null && mapped.size() > 0) {
+						NodeServiceHelper.setProperty(nodeRef,
+								CCConstants.getValidGlobalName(targetProperty),
+								mapped
+						);
+					}
+					 if(clearSourceProperty) {
+						 NodeServiceHelper.removeProperty(nodeRef, CCConstants.getValidGlobalName(sourceProperty));
+					 }
 					logger.info("set property " + targetProperty +" for " + nodeRef.getId());
 				}
 
@@ -120,12 +129,12 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	}
 
 	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping, Mode mode, Object value, Object targetValue, boolean reverseMapping) {
-		if(value instanceof String || value instanceof List) {
+		if(value instanceof String || value instanceof Collection) {
 			if(value instanceof String) {
 				value = Collections.singletonList(value);
 			}
 			ArrayList<String> valueMapped = new ArrayList<>();
-			((List<?>) value).stream().forEach((v) -> {
+			((Collection<?>) value).stream().forEach((v) -> {
 				Serializable mapped = mapValue(nodeRef, (String) v, mapping, reverseMapping);
 				if(mapped != null) {
 					if (mapped instanceof Collection) {
@@ -140,15 +149,17 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 				if(targetValue == null) {
 				} else if (targetValue instanceof String) {
 					target.add((String) targetValue);
-				} else if (targetValue instanceof List) {
+				} else if (targetValue instanceof Collection) {
 					target.addAll((Collection<? extends String>) targetValue);
 				}
 				target.addAll(valueMapped);
 			}
 			target.addAll(valueMapped);
 			return target;
+		} else if(value == null) {
+
 		} else {
-			logger.error("Unable to map a property of type " + value.getClass().getName() + " via valuespace, node " + nodeRef);
+			logger.error("Unable to map a property of type " + value.getClass() + " via valuespace, node " + nodeRef);
 		}
 		return null;
 	}

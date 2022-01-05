@@ -16,6 +16,7 @@ import static org.activiti.engine.impl.util.CollectionUtil.map;
 public class PropertiesSetInterceptorValuespaceMapperAbstract implements PropertiesSetInterceptor{
     private String sourceProperty;
     private String targetProperty;
+    private boolean clearSourceProperty;
     private final List<MetadataKey.MetadataKeyRelated.Relation> relations;
 
 
@@ -25,13 +26,16 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
      * Init this Interceptor with the given property information
      * @param sourceProperty the source property to read the data from
      * @param targetProperty the target property (where to map the data to)
+     * @param clearSourceProperty if true, the content of the sourceProperty will be removed
      * @param relations (the relations to search for mappings, the first relation that returns result for a given value in the list will be used)
      */
     public PropertiesSetInterceptorValuespaceMapperAbstract(String sourceProperty,
                                                             String targetProperty,
+                                                            boolean clearSourceProperty,
                                                             List<MetadataKey.MetadataKeyRelated.Relation> relations) {
         this.sourceProperty = sourceProperty;
         this.targetProperty = targetProperty;
+        this.clearSourceProperty = clearSourceProperty;
         this.relations = relations;
     }
 
@@ -54,11 +58,15 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
 
     private void mapValues(PropertiesGetInterceptor.PropertiesContext context) {
         Map<String, Object> map = context.getProperties();
+        Object value = map.get(sourceProperty);
+        if(clearSourceProperty) {
+            map.put(sourceProperty, null);
+        }
         for(MetadataKey.MetadataKeyRelated.Relation relation : relations) {
             HashSet<String> mapped = MigrateMetadataValuespaceJob.mapValueToTarget(context.getNodeRef(),
                     relationCache.get(relation),
                     MigrateMetadataValuespaceJob.Mode.Replace,
-                    map.get(sourceProperty),
+                    value,
                     map.get(targetProperty),
                     true
             );
@@ -67,11 +75,5 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
                 return;
             }
         }
-    }
-
-    @Override
-    public Serializable beforeSetProperty(PropertiesGetInterceptor.PropertiesContext context, String property) {
-        mapValues(context);
-        return (Serializable) context.getProperties().get(property);
     }
 }
