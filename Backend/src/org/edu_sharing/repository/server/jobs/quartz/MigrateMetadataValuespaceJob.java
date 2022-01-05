@@ -128,7 +128,7 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			((List<?>) value).stream().forEach((v) -> {
 				Serializable mapped = mapValue(nodeRef, (String) v, mapping, reverseMapping);
 				if(mapped != null) {
-					if (mapped instanceof List) {
+					if (mapped instanceof Collection) {
 						valueMapped.addAll((Collection<? extends String>) mapped);
 					} else {
 						valueMapped.add((String) mapped);
