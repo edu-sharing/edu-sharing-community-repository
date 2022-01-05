@@ -13,17 +13,14 @@ dependencies:
 
   - name: edusharing_postgresql
     version: ${helm.chart.version}
-    repository: "file://../../../edusharing_postgresql/target/chart"
     alias: edusharing_rendering_postgresql
     condition: edusharing_rendering_postgresql.enabled
 
   - name: edusharing_rediscluster
     version: ${helm.chart.version}
-    repository: "file://../../../edusharing_rediscluster/target/chart"
     alias: edusharing_rendering_rediscluster
     condition: edusharing_rendering_rediscluster.enabled
 
   - name: edusharing_rendering_service
     version: ${helm.chart.version}
-    repository: "file://../../../edusharing_rendering_service/target/chart"
     condition: edusharing_rendering_service.enabled

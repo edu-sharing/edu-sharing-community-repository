@@ -19,9 +19,16 @@
   <build>
 
     <resources>
+
       <resource>
         <directory>src/main/chart</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>Chart.yaml</exclude>
+          <exclude>values.yaml</exclude>
+        </excludes>
       </resource>
+
       <resource>
         <directory>src/main/chart</directory>
         <filtering>true</filtering>
@@ -30,80 +37,28 @@
           <include>values.yaml</include>
         </includes>
       </resource>
+
     </resources>
-
-    <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <configuration>
-          <outputDirectory>${project.build.directory}/chart</outputDirectory>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <classesDirectory>${project.build.directory}/chart</classesDirectory>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>clean</goal>
-            </goals>
-            <phase>initialize</phase>
-            <configuration>
-              <excludeDefaultDirectories>true</excludeDefaultDirectories>
-              <filesets>
-                <fileset>
-                  <directory>${project.build.directory}/chart</directory>
-                  <includes>
-                    <include>Chart.lock</include>
-                  </includes>
-                </fileset>
-              </filesets>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-    </plugins>
 
     <pluginManagement>
 
       <plugins>
 
         <plugin>
-          <groupId>com.kiwigrid</groupId>
-          <artifactId>helm-maven-plugin</artifactId>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
           <configuration>
-            <chartDirectory>${project.build.directory}/chart</chartDirectory>
-            <chartVersion>${helm.chart.version}</chartVersion>
-            <appVersion>${docker.tag}</appVersion>
-            <helmVersion>${helm.version}</helmVersion>
-            <lintStrict>true</lintStrict>
-            <addDefaultRepo>false</addDefaultRepo>
-            <uploadRepoStable>
-              <name>helm.releases</name>
-              <url>${helm.registry}</url>
-              <type>${helm.type}</type>
-              <username>${helm.username}</username>
-              <password>${helm.password}</password>
-            </uploadRepoStable>
-            <uploadRepoSnapshot>
-              <name>helm.snapshots</name>
-              <url>${helm.registry}</url>
-              <type>${helm.type}</type>
-              <username>${helm.username}</username>
-              <password>${helm.password}</password>
-            </uploadRepoSnapshot>
+            <outputDirectory>${project.build.directory}/chart</outputDirectory>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+            <descriptors>
+              <descriptor>src/main/assembly/bin.xml</descriptor>
+            </descriptors>
           </configuration>
         </plugin>
 
@@ -115,13 +70,11 @@
 
   <modules>
     <module>edusharing</module>
-    <module>edusharing_elasticsearch</module>
     <module>edusharing_postgresql</module>
     <module>edusharing_rediscluster</module>
     <module>edusharing_rendering</module>
     <module>edusharing_rendering_service</module>
     <module>edusharing_repository</module>
-    <module>edusharing_repository_search_elastic_tracker</module>
     <module>edusharing_repository_search_solr4</module>
     <module>edusharing_repository_service</module>
   </modules>

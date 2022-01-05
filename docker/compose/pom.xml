@@ -26,7 +26,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
-
           <execution>
             <id>rendering</id>
             <goals>
@@ -41,7 +40,6 @@
               <outputDirectory>${project.build.directory}/compose/rendering</outputDirectory>
             </configuration>
           </execution>
-
           <execution>
             <id>repository</id>
             <goals>
@@ -56,10 +54,8 @@
               <outputDirectory>${project.build.directory}/compose/repository</outputDirectory>
             </configuration>
           </execution>
-
         </executions>
       </plugin>
-
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

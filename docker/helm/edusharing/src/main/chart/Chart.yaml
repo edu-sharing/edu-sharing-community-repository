@@ -12,16 +12,13 @@ kubeVersion: ">= 1.16.0"
 dependencies:
 
   - name: edusharing_rediscluster
-    repository: "file://../../../edusharing_rediscluster/target/chart"
     version: ${helm.chart.version}
     condition: edusharing_rediscluster.enabled
 
   - name: edusharing_rendering
-    repository: "file://../../../edusharing_rendering/target/chart"
     version: ${helm.chart.version}
     condition: edusharing_rendering.enabled
 
   - name: edusharing_repository
-    repository: "file://../../../edusharing_repository/target/chart"
     version: ${helm.chart.version}
     condition: edusharing_repository.enabled

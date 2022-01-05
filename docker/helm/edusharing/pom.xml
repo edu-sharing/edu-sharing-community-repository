@@ -18,9 +18,69 @@
 
   <name>edu_sharing-community-deploy-docker-helm-edusharing</name>
 
+  <properties>
+
+    <chart.edusharing_rediscluster.enabled>true</chart.edusharing_rediscluster.enabled>
+    <chart.edusharing_rendering.enabled>true</chart.edusharing_rendering.enabled>
+    <chart.edusharing_repository.enabled>true</chart.edusharing_repository.enabled>
+
+  </properties>
+
   <build>
 
     <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>edusharing_rediscluster</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-deploy-docker-helm-edusharing_rediscluster
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_rediscluster</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edusharing_rendering</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-deploy-docker-helm-edusharing_rendering
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_rendering</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edusharing_repository</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-deploy-docker-helm-edusharing_repository
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_repository</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>com.kiwigrid</groupId>
@@ -77,6 +137,20 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>assembly</id>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
 
   </build>
@@ -86,16 +160,22 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rediscluster</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
     </dependency>
 
   </dependencies>

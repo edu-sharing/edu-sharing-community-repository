@@ -14,7 +14,7 @@ nameOverride: edusharing-repository
 
 edusharing_repository_postgresql:
 
-  enabled: true
+  enabled: ${chart.edusharing_repository_postgresql.enabled}
 
   nameOverride: &postgresqlNameOverride edusharing-repository-postgresql
 
@@ -33,7 +33,7 @@ edusharing_repository_postgresql:
 
 edusharing_repository_rediscluster:
 
-  enabled: true
+  enabled: ${chart.edusharing_repository_rediscluster.enabled}
 
   nameOverride: &redisclusterNameOverride edusharing-rediscluster
 
@@ -46,7 +46,7 @@ edusharing_repository_rediscluster:
 
 edusharing_repository_search_elastic:
 
-  enabled: true
+  enabled: ${chart.edusharing_repository_search_elastic.enabled}
 
   nameOverride: &searchElasticNameOverride edusharing-repository-search-elastic
 
@@ -59,7 +59,7 @@ edusharing_repository_search_elastic:
 
 edusharing_repository_search_solr4:
 
-  enabled: true
+  enabled: ${chart.edusharing_repository_search_solr4.enabled}
 
   nameOverride: &searchSolr4NameOverride edusharing-repository-search-solr4
 
@@ -78,7 +78,7 @@ edusharing_repository_search_solr4:
 
 edusharing_repository_service:
 
-  enabled: true
+  enabled: ${chart.edusharing_repository_service.enabled}
 
   nameOverride: *serviceNameOverride
 
@@ -116,7 +116,7 @@ edusharing_repository_service:
 
 edusharing_repository_search_elastic_tracker:
 
-  enabled: *searchElasticEnabled
+  enabled: ${chart.edusharing_repository_search_elastic_tracker.enabled}
 
   config:
 

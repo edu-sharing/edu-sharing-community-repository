@@ -46,54 +46,72 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_elasticsearch</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_postgresql</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rediscluster</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering_service</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_elastic_tracker</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_solr4</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_service</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>

@@ -34,7 +34,7 @@ image:
 
 edusharing_rediscluster:
 
-  enabled: true
+  enabled: ${chart.edusharing_rediscluster.enabled}
 
   nameOverride: &redisclusterNameOverride edusharing-rediscluster
 
@@ -46,7 +46,7 @@ edusharing_rediscluster:
 
 edusharing_repository:
 
-  enabled: true
+  enabled: ${chart.edusharing_repository.enabled}
 
   edusharing_repository_rediscluster:
 
@@ -74,7 +74,7 @@ edusharing_repository:
 
 edusharing_rendering:
 
-  enabled: true
+  enabled: ${chart.edusharing_rendering.enabled}
 
   edusharing_rendering_rediscluster:
 

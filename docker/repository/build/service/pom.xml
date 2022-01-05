@@ -142,6 +142,7 @@
               <includeArtifactIds>
                 edu_sharing-community-repository-backend-services-rest-api
               </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
               <outputDirectory>${project.build.directory}/build/rest-api</outputDirectory>
             </configuration>
           </execution>

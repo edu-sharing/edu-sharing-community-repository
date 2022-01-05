@@ -14,7 +14,7 @@ nameOverride: edusharing-rendering
 
 edusharing_rendering_postgresql:
 
-  enabled: true
+  enabled: ${chart.edusharing_rendering_postgresql.enabled}
 
   nameOverride: &postgresqlNameOverride edusharing-rendering-postgresql
 
@@ -32,7 +32,7 @@ edusharing_rendering_postgresql:
 
 edusharing_rendering_rediscluster:
 
-  enabled: true
+  enabled: ${chart.edusharing_rendering_rediscluster.enabled}
 
   nameOverride: &redisclusterNameOverride edusharing-rendering-rediscluster
 
@@ -44,7 +44,7 @@ edusharing_rendering_rediscluster:
 
 edusharing_rendering_service:
 
-  enabled: true
+  enabled: ${chart.edusharing_rendering_service.enabled}
 
   config:
 
