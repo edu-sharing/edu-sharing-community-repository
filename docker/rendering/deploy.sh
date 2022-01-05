@@ -312,7 +312,7 @@ remove() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		down || exit
+		down -v || exit
 }
 
 case "${CLI_OPT1}" in

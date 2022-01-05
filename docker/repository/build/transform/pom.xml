@@ -28,7 +28,7 @@
         <configuration>
           <images>
             <image>
-              <name>${docker.repository}/edusharing-repository-transform-single:${docker.tag}</name>
+              <name>${docker.repository}/edusharing-repository-transform:${docker.tag}</name>
             </image>
           </images>
         </configuration>

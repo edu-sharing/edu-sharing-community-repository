@@ -65,7 +65,60 @@
   <profiles>
 
     <profile>
+
+      <id>plugin.elastic</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_ELASTIC_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <build>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>artifacts</id>
+                <goals>
+                  <goal>unpack-dependencies</goal>
+                </goals>
+                <phase>compile</phase>
+                <configuration>
+                  <includeArtifactIds>
+                    edu_sharing-community-repository-plugin-elastic-deploy-docker-compose
+                  </includeArtifactIds>
+                  <outputDirectory>${project.build.directory}/compose/plugin-elastic/</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+
+      </build>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-docker-compose</artifactId>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+    <profile>
+
       <id>plugin.mongo</id>
+
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
@@ -73,8 +126,11 @@
           <value>true</value>
         </property>
       </activation>
+
       <build>
+
         <plugins>
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
@@ -94,18 +150,26 @@
               </execution>
             </executions>
           </plugin>
+
         </plugins>
+
       </build>
+
       <dependencies>
+
         <dependency>
           <groupId>${project.groupId}</groupId>
           <artifactId>edu_sharing-community-repository-plugin-mongo-deploy-docker-compose</artifactId>
         </dependency>
+
       </dependencies>
+
     </profile>
 
     <profile>
+
       <id>plugin.transform</id>
+
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
@@ -113,8 +177,11 @@
           <value>true</value>
         </property>
       </activation>
+
       <build>
+
         <plugins>
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
@@ -134,14 +201,20 @@
               </execution>
             </executions>
           </plugin>
+
         </plugins>
+
       </build>
+
       <dependencies>
+
         <dependency>
           <groupId>${project.groupId}</groupId>
           <artifactId>edu_sharing-enterprise-repository-plugin-transform-deploy-docker-compose</artifactId>
         </dependency>
+
       </dependencies>
+
     </profile>
 
   </profiles>

@@ -423,7 +423,7 @@ remove() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		down || exit
+		down -v || exit
 }
 
 reload() {

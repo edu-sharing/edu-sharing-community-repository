@@ -6,26 +6,6 @@ services:
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_DATABASE_PORT:-8000}:5432"
 
-  repository-search-elastic:
-    environment:
-      ES_JAVA_OPTS: >-
-        -Xms${REPOSITORY_SEARCH_ELASTIC_JAVA_XMS:-1g}
-        -Xmx${REPOSITORY_SEARCH_ELASTIC_JAVA_XMX:-1g}
-        -Dcom.sun.management.jmxremote
-        -Dcom.sun.management.jmxremote.authenticate=false
-        -Dcom.sun.management.jmxremote.port=7199
-        -Dcom.sun.management.jmxremote.ssl=false
-        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
-    ports:
-      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SEARCH_ELASTIC_PORT_HTTP:-8300}:9200"
-      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SEARCH_ELASTIC_PORT_JPDA:-8301}:8000"
-
-  repository-search-elastic-tracker:
-    environment:
-      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000"
-    ports:
-      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SEARCH_ELASTIC_TRACKER_PORT_JPDA:-8401}:8000"
-
   repository-search-solr4:
     command: ["catalina.sh", "jpda", "run"]
     environment:

@@ -14,47 +14,6 @@ services:
     volumes:
       - "repository-database-volume:/bitnami/postgresql"
 
-
-  repository-search-elastic:
-    image: "${docker.repository}/edusharing-elasticsearch:${docker.tag}"
-    environment:
-      ES_JAVA_OPTS: >-
-        -Xms${REPOSITORY_SEARCH_ELASTIC_JAVA_XMS:-1g}
-        -Xmx${REPOSITORY_SEARCH_ELASTIC_JAVA_XMX:-1g}
-        -Dcom.sun.management.jmxremote
-        -Dcom.sun.management.jmxremote.authenticate=false
-        -Dcom.sun.management.jmxremote.port=7199
-        -Dcom.sun.management.jmxremote.ssl=false
-      discovery.type: "single-node"
-      cluster.routing.allocation.disk.threshold_enabled: "false"
-    expose:
-      - "7199"
-      - "9200"
-      - "9300"
-    volumes:
-      - "repository-search-elastic-volume:/usr/share/elasticsearch/data"
-
-  repository-search-elastic-tracker:
-    image: "${docker.repository}/edusharing-repository-search-elastic-tracker:${docker.tag}"
-    command:
-      - -Xms${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMS:-1g}
-      - -Xmx${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMX:-1g}
-      - -Dcom.sun.management.jmxremote
-      - -Dcom.sun.management.jmxremote.authenticate=false
-      - -Dcom.sun.management.jmxremote.port=7199
-      - -Dcom.sun.management.jmxremote.ssl=false
-    environment:
-      REPOSITORY_SEARCH_ELASTIC_HOST: repository-search-elastic
-      REPOSITORY_SEARCH_ELASTIC_PORT: "9200"
-      REPOSITORY_SERVICE_HOST: repository-service
-      REPOSITORY_SERVICE_PORT: "8080"
-      REPOSITORY_SERVICE_ADMIN_PASS: "${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
-    expose:
-      - "7199"
-    depends_on:
-      - repository-search-elastic
-      - repository-service
-
   repository-search-solr4:
     image: "${docker.repository}/edusharing-repository-search-solr4:${docker.tag}"
     environment:
@@ -105,13 +64,13 @@ services:
       REPOSITORY_SERVICE_GUEST_PASS: "${REPOSITORY_SERVICE_GUEST_PASS:-}"
       REPOSITORY_SERVICE_GUEST_USER: "${REPOSITORY_SERVICE_GUEST_USER:-}"
       REPOSITORY_SERVICE_HOME_APPID: "${COMPOSE_PROJECT_NAME:-compose}"
-      REPOSITORY_SERVICE_HOME_PROVIDER: "${REPOSITORY_SERVICE_PROVIDER:-org.edu_sharing.service.provider.ElasticSearchProvider}"
+      REPOSITORY_SERVICE_HOME_PROVIDER: "${REPOSITORY_SERVICE_PROVIDER:-}"
       REPOSITORY_SERVICE_HOST_EXTERNAL: "${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
       REPOSITORY_SERVICE_PORT_EXTERNAL: "${REPOSITORY_SERVICE_PORT_HTTP:-8100}"
       REPOSITORY_SERVICE_HOST_INTERNAL: repository-service
       REPOSITORY_SERVICE_PORT_INTERNAL: "8080"
-      REPOSITORY_TRANSFORM_SINGLE_HOST: repository-transform-single
-      REPOSITORY_TRANSFORM_SINGLE_PORT: "8100"
+      REPOSITORY_TRANSFORM_HOST: repository-transform
+      REPOSITORY_TRANSFORM_PORT: "8100"
     expose:
       - "7199"
       - "8080"
@@ -123,16 +82,15 @@ services:
       - "repository-service-volume-shared:/usr/local/tomcat/shared"
     depends_on:
       - repository-database
-      - repository-transform-single
+      - repository-transform
 
-  repository-transform-single:
-    image: "${docker.repository}/edusharing-repository-transform-single:${docker.tag}"
+  repository-transform:
+    image: "${docker.repository}/edusharing-repository-transform:${docker.tag}"
     expose:
       - "8100"
 
 volumes:
   repository-database-volume:
-  repository-search-elastic-volume:
   repository-search-solr4-volume:
   repository-service-volume-data:
   repository-service-volume-shared:

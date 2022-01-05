@@ -37,16 +37,16 @@ usage() {
   echo "  Setup edu-sharing repository"
 	echo ""
 
-  echo "--elastictracker"
-  echo "  Setup elastic tracker"
-  echo ""
+#  echo "--elastictracker"
+#  echo "  Setup elastic tracker"
+#  echo ""
 
 }
 
 ########################################################################################################################
 
 REPOSITORY=$((1<<0));
-ELASTIC_TRACKER=$((1<<1));
+#ELASTIC_TRACKER=$((1<<1));
 
 install_options=0
 use_local_maven_cache=0
@@ -59,9 +59,10 @@ while true; do
 			--help|'-?') usage && exit 0 ;;
 			--file|-f) source "$1" && shift	;;
 			--local) use_local_maven_cache=1 ;;
-			--all) install_options=$((REPOSITORY | ELASTIC_TRACKER)) ;;
+			--all) install_options=$((REPOSITORY)) ;;
+#			--all) install_options=$((REPOSITORY | ELASTIC_TRACKER)) ;;
 			--repository) install_options=$((install_options | REPOSITORY)) ;;
-			--elastictracker) install_options=$((install_options | ELASTIC_TRACKER)) ;;
+#			--elastictracker) install_options=$((install_options | ELASTIC_TRACKER)) ;;
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -112,22 +113,22 @@ repository_httpclient_proxy_proxypass="${REPOSITORY_HTTPCLIENT_PROXY_PROXYPASS:-
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-"127.0.0.1"}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
 
-repository_transform_single_host="${REPOSITORY_TRANSFORM_SINGLE_HOST:-"127.0.0.1"}"
-repository_transform_single_port="${REPOSITORY_TRANSFORM_SINGLE_PORT:-8100}"
+repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-"127.0.0.1"}"
+repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
 
 repository_contentstore="${REPOSITORY_SERVICE_CONTENTSTORE:-}"
 repository_contentstore_deleted="${REPOSITORY_SERVICE_CONTENTSTORE_DELETED:-}"
 
-repository_search_elastic_tracker_server_address="${REPOSITORY_SEARCH_ELASTIC_TRACKER_SERVER_HOST:-"127.0.0.1"}"
-repository_search_elastic_tracker_server_port="${REPOSITORY_SEARCH_ELASTIC_TRACKER_SERVER_PORT:-8081}"
-repository_search_elastic_tracker_management_server_address="${REPOSITORY_SEARCH_ELASTIC_TRACKER_MANAGEMENT_SERVER_HOST:-"127.0.0.1"}"
-repository_search_elastic_tracker_management_server_port="${REPOSITORY_SEARCH_ELASTIC_TRACKER_MANAGEMENT_SERVER_PORT:-8082}"
+#repository_search_elastic_tracker_server_address="${REPOSITORY_SEARCH_ELASTIC_TRACKER_SERVER_HOST:-"127.0.0.1"}"
+#repository_search_elastic_tracker_server_port="${REPOSITORY_SEARCH_ELASTIC_TRACKER_SERVER_PORT:-8081}"
+#repository_search_elastic_tracker_management_server_address="${REPOSITORY_SEARCH_ELASTIC_TRACKER_MANAGEMENT_SERVER_HOST:-"127.0.0.1"}"
+#repository_search_elastic_tracker_management_server_port="${REPOSITORY_SEARCH_ELASTIC_TRACKER_MANAGEMENT_SERVER_PORT:-8082}"
 
-repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-"127.0.0.1"}"
-repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
-repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
-repository_search_elastic_index_shards="${REPOSITORY_SEARCH_ELASTIC_INDEX_SHARDS:-1}"
-repository_search_elastic_index_replicas="${REPOSITORY_SEARCH_ELASTIC_INDEX_REPLICAS:-1}"
+#repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-"127.0.0.1"}"
+#repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
+#repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
+#repository_search_elastic_index_shards="${REPOSITORY_SEARCH_ELASTIC_INDEX_SHARDS:-1}"
+#repository_search_elastic_index_replicas="${REPOSITORY_SEARCH_ELASTIC_INDEX_REPLICAS:-1}"
 
 ########################################################################################################################
 
@@ -206,34 +207,34 @@ info() {
   echo "  Host:                ${repository_search_solr4_host}"
   echo "  Port:                ${repository_search_solr4_port}"
   echo ""
-  echo "#########################################################################"
-  echo ""
-  echo "elastic search:"
-  echo ""
-  echo "  Host:                ${repository_search_elastic_host}"
-  echo "  Port:                ${repository_search_elastic_port}"
-  echo ""
-  echo "  Index:"
-  echo ""
-  echo "    Shards:            ${repository_search_elastic_index_shards}"
-  echo "    Replicas:          ${repository_search_elastic_index_replicas}"
-  echo ""
-  echo "  tracker:"
-  echo ""
-  echo "    Host:              ${repository_search_elastic_tracker_server_address}"
-  echo "    Port:              ${repository_search_elastic_tracker_server_port}"
-  echo ""
-  echo "    Management:"
-  echo ""
-  echo "      Host:            ${repository_search_elastic_tracker_management_server_address}"
-  echo "      Port:            ${repository_search_elastic_tracker_management_server_port}"
-  echo ""
+#  echo "#########################################################################"
+#  echo ""
+#  echo "elastic search:"
+#  echo ""
+#  echo "  Host:                ${repository_search_elastic_host}"
+#  echo "  Port:                ${repository_search_elastic_port}"
+#  echo ""
+#  echo "  Index:"
+#  echo ""
+#  echo "    Shards:            ${repository_search_elastic_index_shards}"
+#  echo "    Replicas:          ${repository_search_elastic_index_replicas}"
+#  echo ""
+#  echo "  tracker:"
+#  echo ""
+#  echo "    Host:              ${repository_search_elastic_tracker_server_address}"
+#  echo "    Port:              ${repository_search_elastic_tracker_server_port}"
+#  echo ""
+#  echo "    Management:"
+#  echo ""
+#  echo "      Host:            ${repository_search_elastic_tracker_management_server_address}"
+#  echo "      Port:            ${repository_search_elastic_tracker_management_server_port}"
+#  echo ""
  	echo "#########################################################################"
   echo ""
   echo "transformer:"
   echo ""
-  echo "  Host:                ${repository_transform_single_host}"
-  echo "  Port:                ${repository_transform_single_port}"
+  echo "  Host:                ${repository_transform_host}"
+  echo "  Port:                ${repository_transform_port}"
   echo ""
   echo "#########################################################################"
   echo ""
@@ -268,8 +269,8 @@ install_edu_sharing() {
 	######################################################################################################################
 
 	echo "- unpack edu-sharing repository"
-	tar xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz \
-		--exclude='./elastictracker'
+	tar xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz # \
+#		--exclude='./elastictracker'
 
 	echo "- install Alfresco Module Packages"
 	if [[ -d amps/alfresco/0 ]]; then
@@ -378,8 +379,8 @@ install_edu_sharing() {
 	echo "db.pool.validate.query=${repository_database_pool_sql}" >> "${alfGlobalProps}"
 	echo "ooo.enabled=true" >> "${alfGlobalProps}"
 	echo "ooo.exe=" >> "${alfGlobalProps}"
-	echo "ooo.host=${repository_transform_single_host}" >> "${alfGlobalProps}"
-	echo "ooo.port=${repository_transform_single_port}" >> "${alfGlobalProps}"
+	echo "ooo.host=${repository_transform_host}" >> "${alfGlobalProps}"
+	echo "ooo.port=${repository_transform_port}" >> "${alfGlobalProps}"
 	echo "solr.host=${repository_search_solr4_host}" >> "${alfGlobalProps}"
   echo "solr.port=${repository_search_solr4_port}" >> "${alfGlobalProps}"
   echo "solr.secureComms=none" >> "${alfGlobalProps}"
@@ -437,8 +438,8 @@ install_edu_sharing() {
     		tomcat/shared/classes/homeApplication.properties.xml
 	fi
 
-	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-		set "elasticsearch.servers" '["'"${repository_search_elastic_host}:${repository_search_elastic_port}"'"]'
+#	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+#		set "elasticsearch.servers" '["'"${repository_search_elastic_host}:${repository_search_elastic_port}"'"]'
 
 	if [[ -n "${repository_httpclient_disablesni4hosts}" ]] ; then
 		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
@@ -480,119 +481,119 @@ install_edu_sharing() {
 
 ########################################################################################################################
 
-can_install_elastic_tracker() {
-	pushd "$ALF_HOME"
-
-		#if [[ -f "/etc/systemd/system/elastictracker" && "$(systemctl status elastictracker)" == "elastictracker is running"  ]] ; then
-		if [[ -f "/etc/systemd/system/elastictracker" && $(systemctl is-active --quiet elastictracker) ]] ; then
-  		echo ""
-  		echo "You must stop the elastic tracker before you can run the installation."
-  		exit 1
-  	fi
-
-	popd
-}
+#can_install_elastic_tracker() {
+#	pushd "$ALF_HOME"
+#
+#		#if [[ -f "/etc/systemd/system/elastictracker" && "$(systemctl status elastictracker)" == "elastictracker is running"  ]] ; then
+#		if [[ -f "/etc/systemd/system/elastictracker" && $(systemctl is-active --quiet elastictracker) ]] ; then
+#  		echo ""
+#  		echo "You must stop the elastic tracker before you can run the installation."
+#  		exit 1
+#  	fi
+#
+#	popd
+#}
 
 ########################################################################################################################
 
-install_elastic_tracker() {
-	pushd "$ALF_HOME"
-
-	echo "- remove elastictracker"
-	rm -rf elastictracker
-
-	### elastic tracker - fix security issues ############################################################################
-
-	echo "- create worker user"
-	id -u elastictracker &>/dev/null || adduser --home=$ALF_HOME/elastictracker --disabled-password --gecos "" --shell=/bin/bash elastictracker
-	chown -RL elastictracker:elastictracker /tmp
-
-	### elastic tracker - installation ###################################################################################
-
-	echo "- unpack edu-sharing elastic tracker"
-	tar -zxf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz \
-			elastictracker
-
-	chown -RL elastictracker:elastictracker ./elastictracker
-
-	###  elastic tracker #################################################################################################
-
-	echo "- update elastic tracker env"
-	elasticApplicationProps="elastictracker/application.properties"
-	touch "${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*server\.address=.*|alfresco.address='"${repository_search_elastic_tracker_server_address}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*server\.address=' "${elasticApplicationProps}" || echo "server.address=${repository_search_elastic_tracker_server_address}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*server\.port=.*|alfresco.host='"${repository_search_elastic_tracker_server_port}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*server\.port=' "${elasticApplicationProps}" || echo "server.port=${repository_search_elastic_tracker_server_port}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*management\.server.\address=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_address}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*management\.server.\address=' "${elasticApplicationProps}" || echo "management.server.address=${repository_search_elastic_tracker_management_server_address}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*management\.server.\port=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_port}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*management\.server.\port=' "${elasticApplicationProps}" || echo "management.server.port=${repository_search_elastic_tracker_management_server_port}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${my_host_internal}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*alfresco\.host=' "${elasticApplicationProps}" || echo "alfresco.host=${my_host_internal}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${my_port_internal}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*alfresco\.port=' "${elasticApplicationProps}"|| echo "alfresco.port=${my_port_internal}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*alfresco\.password=.*|alfresco.password='"${my_admin_pass}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*alfresco\.password=' "${elasticApplicationProps}" || echo "alfresco.password=${my_admin_pass}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*elastic\.host=.*|elastic.host='"${repository_search_elastic_host}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*elastic\.host=' "${elasticApplicationProps}" || echo "elastic.host=${repository_search_elastic_host}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*elastic\.port=.*|elastic.port='"${repository_search_elastic_port}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*elastic\.port=' "${elasticApplicationProps}" || echo "elastic.port=${repository_search_elastic_port}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*elastic\.index.\number_of_shards=.*|elastic.index.number_of_shards='"${repository_search_elastic_index_shards}"'|' "${elasticApplicationProps}"
- 	grep -q '^[#]*\s*elastic\.index.\number_of_shards=' "${elasticApplicationProps}" || echo "elastic.index.number_of_shards=${repository_search_elastic_index_shards}" >>"${elasticApplicationProps}"
-
-	sed -i -r 's|^[#]*\s*elastic.\index\.number_of_replicas=.*|elastic.index.number_of_replicas='"${repository_search_elastic_index_replicas}"'|' "${elasticApplicationProps}"
-	grep -q '^[#]*\s*elastic.\index\.number_of_replicas=' "${elasticApplicationProps}" || echo "elastic.index.number_of_replicas=${repository_search_elastic_index_replicas}" >>"${elasticApplicationProps}"
-
-	### elastic tracker - register systemd service #######################################################################
-
-	#ln -s "${ALF_HOME}/elastictracker/tracker.jar" /etc/init.d/elastictracker
-
-	pushd /etc/systemd/system
-
-	elastic_tracker_jar=edu_sharing-community-repository-backend-search-elastic-tracker-${org.edu_sharing:edu_sharing-community-repository-backend-search-elastic-tracker:jar.version}.jar
-
-	# TODO Logfile
-	if [[ ! -f elastictracker.service ]]; then
-		echo "- create systemd service"
-		touch elastictracker.service
-		{
-			echo "[Unit]"
-			echo "Description=edu-sharing elastic tracker"
-			echo "After=syslog.target network.target postgresql.service"
-			echo ""
-			echo "[Service]"
-			echo "WorkingDirectory=${ALF_HOME}/elastictracker"
-			echo "User=elastictracker"
-			echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}"
-			echo "SuccessExitStatus=143"
-			echo ""
-			echo "[Install]"
-			echo "WantedBy=multi-user.target"
-		 } >> elastictracker.service
-	else
-		echo "- update systemd service"
-
-		sed -i -r 's|^WorkingDirectory=.*|WorkingDirectory='"${ALF_HOME}/elastictracker"'|' elastictracker.service
-    grep -q '^WorkingDirectory=' elastictracker.service || echo "WorkingDirectory=${ALF_HOME}/elastictracker" >> elastictracker.service
-
-		sed -i -r 's|^ExecStart=.*|ExecStart='"${ALF_HOME}/elastictracker/${elastic_tracker_jar}"'|' elastictracker.service
-    grep -q '^ExecStart=' elastictracker.service || echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}" >> elastictracker.service
-	fi
-
-	popd
-	popd
-}
+#install_elastic_tracker() {
+#	pushd "$ALF_HOME"
+#
+#	echo "- remove elastictracker"
+#	rm -rf elastictracker
+#
+#	### elastic tracker - fix security issues ############################################################################
+#
+#	echo "- create worker user"
+#	id -u elastictracker &>/dev/null || adduser --home=$ALF_HOME/elastictracker --disabled-password --gecos "" --shell=/bin/bash elastictracker
+#	chown -RL elastictracker:elastictracker /tmp
+#
+#	### elastic tracker - installation ###################################################################################
+#
+#	echo "- unpack edu-sharing elastic tracker"
+#	tar -zxf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz \
+#			elastictracker
+#
+#	chown -RL elastictracker:elastictracker ./elastictracker
+#
+#	###  elastic tracker #################################################################################################
+#
+#	echo "- update elastic tracker env"
+#	elasticApplicationProps="elastictracker/application.properties"
+#	touch "${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*server\.address=.*|alfresco.address='"${repository_search_elastic_tracker_server_address}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*server\.address=' "${elasticApplicationProps}" || echo "server.address=${repository_search_elastic_tracker_server_address}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*server\.port=.*|alfresco.host='"${repository_search_elastic_tracker_server_port}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*server\.port=' "${elasticApplicationProps}" || echo "server.port=${repository_search_elastic_tracker_server_port}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*management\.server.\address=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_address}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*management\.server.\address=' "${elasticApplicationProps}" || echo "management.server.address=${repository_search_elastic_tracker_management_server_address}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*management\.server.\port=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_port}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*management\.server.\port=' "${elasticApplicationProps}" || echo "management.server.port=${repository_search_elastic_tracker_management_server_port}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${my_host_internal}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*alfresco\.host=' "${elasticApplicationProps}" || echo "alfresco.host=${my_host_internal}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${my_port_internal}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*alfresco\.port=' "${elasticApplicationProps}"|| echo "alfresco.port=${my_port_internal}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*alfresco\.password=.*|alfresco.password='"${my_admin_pass}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*alfresco\.password=' "${elasticApplicationProps}" || echo "alfresco.password=${my_admin_pass}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*elastic\.host=.*|elastic.host='"${repository_search_elastic_host}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*elastic\.host=' "${elasticApplicationProps}" || echo "elastic.host=${repository_search_elastic_host}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*elastic\.port=.*|elastic.port='"${repository_search_elastic_port}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*elastic\.port=' "${elasticApplicationProps}" || echo "elastic.port=${repository_search_elastic_port}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*elastic\.index.\number_of_shards=.*|elastic.index.number_of_shards='"${repository_search_elastic_index_shards}"'|' "${elasticApplicationProps}"
+# 	grep -q '^[#]*\s*elastic\.index.\number_of_shards=' "${elasticApplicationProps}" || echo "elastic.index.number_of_shards=${repository_search_elastic_index_shards}" >>"${elasticApplicationProps}"
+#
+#	sed -i -r 's|^[#]*\s*elastic.\index\.number_of_replicas=.*|elastic.index.number_of_replicas='"${repository_search_elastic_index_replicas}"'|' "${elasticApplicationProps}"
+#	grep -q '^[#]*\s*elastic.\index\.number_of_replicas=' "${elasticApplicationProps}" || echo "elastic.index.number_of_replicas=${repository_search_elastic_index_replicas}" >>"${elasticApplicationProps}"
+#
+#	### elastic tracker - register systemd service #######################################################################
+#
+#	#ln -s "${ALF_HOME}/elastictracker/tracker.jar" /etc/init.d/elastictracker
+#
+#	pushd /etc/systemd/system
+#
+#	elastic_tracker_jar=edu_sharing-community-repository-backend-search-elastic-tracker-${org.edu_sharing:edu_sharing-community-repository-backend-search-elastic-tracker:jar.version}.jar
+#
+#	# TODO Logfile
+#	if [[ ! -f elastictracker.service ]]; then
+#		echo "- create systemd service"
+#		touch elastictracker.service
+#		{
+#			echo "[Unit]"
+#			echo "Description=edu-sharing elastic tracker"
+#			echo "After=syslog.target network.target postgresql.service"
+#			echo ""
+#			echo "[Service]"
+#			echo "WorkingDirectory=${ALF_HOME}/elastictracker"
+#			echo "User=elastictracker"
+#			echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}"
+#			echo "SuccessExitStatus=143"
+#			echo ""
+#			echo "[Install]"
+#			echo "WantedBy=multi-user.target"
+#		 } >> elastictracker.service
+#	else
+#		echo "- update systemd service"
+#
+#		sed -i -r 's|^WorkingDirectory=.*|WorkingDirectory='"${ALF_HOME}/elastictracker"'|' elastictracker.service
+#    grep -q '^WorkingDirectory=' elastictracker.service || echo "WorkingDirectory=${ALF_HOME}/elastictracker" >> elastictracker.service
+#
+#		sed -i -r 's|^ExecStart=.*|ExecStart='"${ALF_HOME}/elastictracker/${elastic_tracker_jar}"'|' elastictracker.service
+#    grep -q '^ExecStart=' elastictracker.service || echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}" >> elastictracker.service
+#	fi
+#
+#	popd
+#	popd
+#}
 
 ########################################################################################################################
 
@@ -690,9 +691,9 @@ if [[ $((install_options & REPOSITORY)) != 0 ]]; then
 	can_install_repository
 fi
 
-if [[ $((install_options & ELASTIC_TRACKER)) != 0 ]]; then
-	can_install_elastic_tracker
-fi
+#if [[ $((install_options & ELASTIC_TRACKER)) != 0 ]]; then
+#	can_install_elastic_tracker
+#fi
 
 ########################################################################################################################
 
@@ -715,9 +716,9 @@ if [[ $((install_options & REPOSITORY)) != 0 ]]; then
 	install_repository
 fi
 
-if [[ $((install_options & ELASTIC_TRACKER)) != 0 ]]; then
-	install_elastic_tracker
-fi
+#if [[ $((install_options & ELASTIC_TRACKER)) != 0 ]]; then
+#	install_elastic_tracker
+#fi
 
 rm edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
 

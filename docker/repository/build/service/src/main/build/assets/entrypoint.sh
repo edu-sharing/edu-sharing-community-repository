@@ -46,10 +46,6 @@ repository_database_prot="${REPOSITORY_DATABASE_PROT:-"postgresql"}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
 repository_database_jdbc="jdbc:${repository_database_prot}://${repository_database_host}:${repository_database_port}/${repository_database_name}${repository_database_opts}"
 
-repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-repository-search-elastic}"
-repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
-repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
-
 repository_httpclient_disablesni4hosts="${REPOSITORY_HTTPCLIENT_DISABLE_SNI4HOSTS:-}"
 repository_httpclient_proxy_host="${REPOSITORY_HTTPCLIENT_PROXY_HOST:-}"
 repository_httpclient_proxy_nonproxyhosts="${REPOSITORY_HTTPCLIENT_PROXY_NONPROXYHOSTS:-}"
@@ -61,8 +57,8 @@ repository_httpclient_proxy_proxyuser="${REPOSITORY_HTTPCLIENT_PROXY_PROXYUSER:-
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-repository-search-solr4}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
 
-repository_transform_single_host="${REPOSITORY_TRANSFORM_SINGLE_HOST:-repository-transform-single}"
-repository_transform_single_port="${REPOSITORY_TRANSFORM_SINGLE_PORT:-8100}"
+repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-repository-transform}"
+repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
 
 ### Wait ###############################################################################################################
 
@@ -79,13 +75,6 @@ repository_transform_single_port="${REPOSITORY_TRANSFORM_SINGLE_PORT:-8100}"
 
 }
 
-until wait-for-it "${repository_search_elastic_host}:${repository_search_elastic_port}" -t 3; do sleep 1; done
-
-until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null "${repository_search_elastic_base}/_cluster/health?wait_for_status=yellow&timeout=3s") -eq 200 ]]; do
-	echo >&2 "Waiting for ${repository_search_elastic_host} ..."
-	sleep 3
-done
-
 until wait-for-it "${repository_database_host}:${repository_database_port}" -t 3; do sleep 1; done
 
 until PGPASSWORD="${repository_database_pass}" \
@@ -94,7 +83,7 @@ until PGPASSWORD="${repository_database_pass}" \
 	sleep 3
 done
 
-until wait-for-it "${repository_transform_single_host}:${repository_transform_single_port}" -t 3; do sleep 1; done
+until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
 
 ########################################################################################################################
 
@@ -225,11 +214,11 @@ grep -q '^[#]*\s*ooo\.enabled=' "${global}" || echo "ooo.enabled=true" >>"${glob
 sed -i -r 's|^[#]*\s*ooo\.exe=.*|ooo.exe=|' "${global}"
 grep -q '^[#]*\s*ooo\.exe=' "${global}" || echo "ooo.exe=" >>"${global}"
 
-sed -i -r 's|^[#]*\s*ooo\.host=.*|ooo.host='"${repository_transform_single_host}"'|' "${global}"
-grep -q '^[#]*\s*ooo\.host=' "${global}" || echo "ooo.host=${repository_transform_single_host}" >>"${global}"
+sed -i -r 's|^[#]*\s*ooo\.host=.*|ooo.host='"${repository_transform_host}"'|' "${global}"
+grep -q '^[#]*\s*ooo\.host=' "${global}" || echo "ooo.host=${repository_transform_host}" >>"${global}"
 
-sed -i -r 's|^[#]*\s*ooo\.port=.*|ooo.port='"${repository_transform_single_port}"'|' "${global}"
-grep -q '^[#]*\s*ooo\.port=' "${global}" || echo "ooo.port=${repository_transform_single_port}" >>"${global}"
+sed -i -r 's|^[#]*\s*ooo\.port=.*|ooo.port='"${repository_transform_port}"'|' "${global}"
+grep -q '^[#]*\s*ooo\.port=' "${global}" || echo "ooo.port=${repository_transform_port}" >>"${global}"
 
 sed -i -r 's|^[#]*\s*share\.protocol=.*|share.protocol='"${my_prot_external}"'|' "${global}"
 grep -q '^[#]*\s*share\.protocol=' "${global}" || echo "share.protocol=${my_prot_external}" >>"${global}"
@@ -332,9 +321,6 @@ xmlstarlet ed -L \
 		-i '$entry' -t attr -n "key" -v "remote_provider" \
 		tomcat/shared/classes/homeApplication.properties.xml
 }
-
-hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-	set "elasticsearch.servers" '["'"${repository_search_elastic_host}:${repository_search_elastic_port}"'"]'
 
 [[ -n "${repository_httpclient_disablesni4hosts}" ]] && {
 	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \

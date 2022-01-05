@@ -1,5 +1,3 @@
-# Config
-.env
 # Maven
 target/
 pom.xml.tag
@@ -22,3 +20,7 @@ buildNumber.properties
 !.vscode/extensions.json
 *.code-workspace
 .history/
+# 3rd party licenses
+THIRD-PARTY*.txt
+# Dotenv
+.env

@@ -43,7 +43,7 @@ spec:
       {{- end }}
       {{- if .Values.init.sysctl.enabled }}
       - name: {{ include "edusharing_elasticsearch.name" . }}-init-sysctl
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-elasticsearch:{{ .Values.global.image.tag }}
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"

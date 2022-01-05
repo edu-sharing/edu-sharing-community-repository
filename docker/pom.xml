@@ -20,10 +20,6 @@
 
     <docker.from.apache.exporter>docker.io/bitnami/apache-exporter:0.10.1</docker.from.apache.exporter>
     <docker.from.apache.server>docker.io/php:${php.version}-apache</docker.from.apache.server>
-    <docker.from.elasticsearch.exporter>quay.io/prometheuscommunity/elasticsearch-exporter:v1.3.0
-    </docker.from.elasticsearch.exporter>
-    <docker.from.elasticsearch.server>docker.elastic.co/elasticsearch/elasticsearch:${elasticsearch.version}
-    </docker.from.elasticsearch.server>
     <docker.from.minideb>docker.io/bitnami/minideb:bullseye</docker.from.minideb>
     <docker.from.openjdk>docker.io/openjdk:8-jdk-bullseye</docker.from.openjdk>
     <docker.from.postgresql.exporter>quay.io/prometheuscommunity/postgres-exporter:v0.10.0

@@ -129,8 +129,8 @@ spec:
         {{- with .Values.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
-      - name: {{ include "edusharing_repository_service.name" . }}-transform-single
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-repository-transform-single:{{ .Values.global.image.tag }}
+      - name: {{ include "edusharing_repository_service.name" . }}-transform
+        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-repository-transform:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         envFrom:
         - configMapRef:
