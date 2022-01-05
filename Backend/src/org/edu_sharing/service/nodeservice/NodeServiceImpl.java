@@ -1386,9 +1386,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
 			try {
+				HashMap<String, Object> properties = getProperties(protocol, storeId, nodeId);
+				properties.put(property, value);
 				value = i.beforeSetProperty(PropertiesInterceptorFactory.getPropertiesContext(
 						nodeRef,
-						getProperties(protocol, storeId, nodeId),
+						properties,
 						Arrays.asList(getAspects(protocol, storeId, nodeId))),
 						property
 				);

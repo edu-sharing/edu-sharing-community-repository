@@ -91,20 +91,25 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 					widget = mds.findWidget(mdsWidgetId);
 					mapping = widget.getValuespaceMappingByRelation(relation);
 				} catch(IllegalArgumentException e) {
-					logger.warn("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
+					logger.debug("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
 					return;
 				}
 				Object value = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(sourceProperty));
 				Object target = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(targetProperty));
 				if(value == null){
-					logger.info("Skipping null value, node " + nodeRef);
+					logger.debug("Skipping null value, node " + nodeRef);
 					return;
 				}
-				if(!testRun) {
+				HashSet<String> mapped = mapValueToTarget(nodeRef, mapping, mode, value, target, true);
+				if(mapped!=null && mapped.size() > 0) {
+					logger.info("Mapped " + value + " -> " + StringUtils.join(mapped,", "));
+				}
+				if(!testRun && mapped!=null && mapped.size() > 0) {
 					NodeServiceHelper.setProperty(nodeRef,
 							CCConstants.getValidGlobalName(targetProperty),
-							mapValueToTarget(nodeRef, mapping, mode, value, target)
+							mapped
 					);
+					logger.info("set property " + targetProperty +" for " + nodeRef.getId());
 				}
 
 			} catch (Exception e) {
@@ -114,14 +119,14 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.run();
 	}
 
-	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping, Mode mode, Object value, Object targetValue) {
+	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping, Mode mode, Object value, Object targetValue, boolean reverseMapping) {
 		if(value instanceof String || value instanceof List) {
 			if(value instanceof String) {
 				value = Collections.singletonList(value);
 			}
 			ArrayList<String> valueMapped = new ArrayList<>();
 			((List<?>) value).stream().forEach((v) -> {
-				Serializable mapped = mapValue(nodeRef, (String) v, mapping);
+				Serializable mapped = mapValue(nodeRef, (String) v, mapping, reverseMapping);
 				if(mapped != null) {
 					if (mapped instanceof List) {
 						valueMapped.addAll((Collection<? extends String>) mapped);
@@ -148,20 +153,39 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		return null;
 	}
 
-	private static Serializable mapValue(NodeRef nodeRef, String value, Map<String, Collection<MetadataKey.MetadataKeyRelated>> metadataKeyRelated) {
-		Collection<MetadataKey.MetadataKeyRelated> relatedMapped = metadataKeyRelated.getOrDefault(value, new ArrayList<>());
-		ArrayList<String> mappedKeys = relatedMapped.stream().map(MetadataKey::getKey).collect(Collectors.toCollection(ArrayList::new));
+	/**
+	 *
+	 * @param nodeRef
+	 * @param value
+	 * @param metadataKeyRelated
+	 * Data structure containting sourceId -> [relation with target id[, relation with target id, ...]]
+	 * @param reverseMapping
+	 * When true: the "value" is supposed to have on of the relation target ids. It will be mapped matching source ids of this link
+	 * When false: The "value" is supposed to be the source id. It will be mapped to target ids of this link. This mode is much faster because of the given data structure
+	 * @return
+	 */
+	private static Serializable mapValue(NodeRef nodeRef, String value, Map<String, Collection<MetadataKey.MetadataKeyRelated>> metadataKeyRelated, boolean reverseMapping) {
+		Collection<String> mappedKeys;
+		Collection<MetadataKey.MetadataKeyRelated> relatedMapped;
+		if (reverseMapping) {
+			mappedKeys = metadataKeyRelated.entrySet().stream().filter(
+					(e) -> e.getValue().stream().filter((t) -> t.getKey().equals(value)).count() > 0
+					).map(Map.Entry::getKey).collect(Collectors.toSet());
+		} else {
+			relatedMapped = metadataKeyRelated.getOrDefault(value, new ArrayList<>());
+			mappedKeys = relatedMapped.stream().map(MetadataKey::getKey).collect(Collectors.toCollection(ArrayList::new));
+		}
 		String mappedIds = StringUtils.join(mappedKeys, ", ");
-		if(relatedMapped.size() > 1) {
+		if(mappedKeys.size() > 1) {
 			//logger.info("Multiple relation candidates for value " + value +" => " + mappedIds +", node " + nodeRef);
-		} else if (relatedMapped.size() == 0) {
+		} else if (mappedKeys.size() == 0) {
 			//logger.warn("Value " + value + " has no candidate for mapping, node " + nodeRef);
 			return null;
 		}
 		//logger.debug("Mapping " + value + " => " + mappedIds + ", node " + nodeRef);
-		if(relatedMapped.size() == 1) {
-			return relatedMapped.iterator().next().getKey();
+		if(mappedKeys.size() == 1) {
+			return mappedKeys.iterator().next();
 		}
-		return mappedKeys;
+		return (Serializable) mappedKeys;
 	}
 }

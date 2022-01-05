@@ -53,7 +53,8 @@ public abstract class PropertiesGetInterceptorValuespaceMapperMultiRelationAbstr
                     relationCache.get(relation),
                     mode,
                     map.get(sourceProperty),
-                    map.get(targetProperty)
+                    map.get(targetProperty),
+                    false
             );
             if(mapped != null && !mapped.isEmpty()) {
                 map.put(targetProperty, mapped);

@@ -82,7 +82,8 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
                         relationCache,
                         mode,
                         map.get(sourceProperty),
-                        map.get(targetProperty)
+                        map.get(targetProperty),
+                        false
                 ));
         return map;
     }
