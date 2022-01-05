@@ -41,6 +41,7 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
      */
     public void setWidget(MetadataWidget widget) {
         this.widget = widget;
+        relationCache = new HashMap<>();
         this.relations.forEach((r) -> relationCache.put(r, widget.getValuespaceMappingByRelation(r)));
     }
 
