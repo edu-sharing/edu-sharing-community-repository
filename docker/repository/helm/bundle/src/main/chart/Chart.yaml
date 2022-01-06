@@ -1,0 +1,47 @@
+apiVersion: v2
+
+name: edusharing_${helm.repository}_repository
+description: edusharing_${helm.repository}_repository
+
+icon: ${helm.chart.icon}
+
+version: ${helm.chart.version}
+appVersion: ${docker.tag}
+kubeVersion: ">= 1.16.0"
+
+dependencies:
+
+  - name: edusharing_community_postgresql
+    version: ${helm.chart.version}
+    alias: edusharing_repository_postgresql
+    condition: edusharing_repository_postgresql.enabled
+
+  - name: edusharing_community_rediscluster
+    version: ${helm.chart.version}
+    alias: edusharing_repository_rediscluster
+    condition: edusharing_repository_rediscluster.enabled
+
+  - name: edusharing_community_elasticsearch
+    version: ${helm.chart.version}
+    alias: edusharing_repository_search_elastic
+    condition: edusharing_repository_search_elastic.enabled
+
+  - name: edusharing_community_repository_search_elastic_tracker
+    version: ${helm.chart.version}
+    alias: edusharing_repository_search_elastic_tracker
+    condition: edusharing_repository_search_elastic_tracker.enabled
+
+  - name: edusharing_community_repository_search_solr4
+    version: ${helm.chart.version}
+    alias: edusharing_repository_search_solr4
+    condition: edusharing_repository_search_solr4.enabled
+
+  - name: edusharing_community_repository_service
+    version: ${helm.chart.version}
+    alias: edusharing_repository_service
+    condition: edusharing_repository_service.enabled
+
+  - name: edusharing_enterprise_repository_transform
+    version: ${helm.chart.version}
+    alias: edusharing_repository_transform
+    condition: edusharing_repository_transform.enabled

@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-deploy-docker-repository-helm</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-deploy-docker-repository-helm-bundle</artifactId>
+  <packaging>jar</packaging>
+
+  <name>edu_sharing-community-deploy-docker-repository-helm-bundle</name>
+
+  <properties>
+
+    <chart.edusharing_repository_postgresql.enabled>true</chart.edusharing_repository_postgresql.enabled>
+    <chart.edusharing_repository_rediscluster.enabled>true</chart.edusharing_repository_rediscluster.enabled>
+    <chart.edusharing_repository_search_solr4.enabled>true</chart.edusharing_repository_search_solr4.enabled>
+    <chart.edusharing_repository_search_elastic.enabled>false</chart.edusharing_repository_search_elastic.enabled>
+    <chart.edusharing_repository_search_elastic_tracker.enabled>false
+    </chart.edusharing_repository_search_elastic_tracker.enabled>
+    <chart.edusharing_repository_service.enabled>true</chart.edusharing_repository_service.enabled>
+
+  </properties>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>edusharing_postgresql</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-deploy-docker-helm-postgresql
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_postgresql</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edusharing_rediscluster</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-deploy-docker-helm-rediscluster
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_rediscluster
+              </outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edu_sharing_elasticsearch</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-elasticsearch
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_elasticsearch
+              </outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edusharing_repository_search_elastic_tracker</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-server
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>
+                ${project.build.directory}/chart/charts/edusharing_community_repository_search_elastic_tracker
+              </outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edusharing_repository_search_solr4</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-deploy-docker-repository-helm-solr4
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_repository_search_solr4
+              </outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edusharing_repository_service</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-deploy-docker-repository-helm-service
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_repository_service
+              </outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edusharing_repository_transform</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm-server
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_enterprise_repository_transform
+              </outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.kiwigrid</groupId>
+        <artifactId>helm-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>init</id>
+            <goals>
+              <goal>init</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+          <execution>
+            <id>dependency-build</id>
+            <goals>
+              <goal>dependency-build</goal>
+            </goals>
+            <phase>compile</phase>
+          </execution>
+          <execution>
+            <id>lint</id>
+            <goals>
+              <goal>lint</goal>
+            </goals>
+            <phase>test</phase>
+          </execution>
+          <execution>
+            <id>package</id>
+            <goals>
+              <goal>package</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+          <execution>
+            <id>upload</id>
+            <goals>
+              <goal>upload</goal>
+            </goals>
+            <phase>deploy</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>assembly</id>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-postgresql</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-helm-rediscluster</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-repository-helm-solr4
+      </artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-deploy-docker-repository-helm-service</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-elasticsearch</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-server</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm-server</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
+    </dependency>
+
+  </dependencies>
+
+
+  <profiles>
+
+    <profile>
+
+      <id>plugin.elastic</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_ELASTIC_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <properties>
+
+        <chart.edusharing_repository_search_elastic.enabled>true</chart.edusharing_repository_search_elastic.enabled>
+        <chart.edusharing_repository_search_elastic_tracker.enabled>true
+        </chart.edusharing_repository_search_elastic_tracker.enabled>
+
+      </properties>
+
+    </profile>
+
+    <profile>
+
+      <id>plugin.transform</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_TRANSFORM_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <properties>
+
+        <chart.edusharing_repository_transform.enabled>true</chart.edusharing_repository_transform.enabled>
+
+      </properties>
+
+    </profile>
+
+  </profiles>
+
+</project>

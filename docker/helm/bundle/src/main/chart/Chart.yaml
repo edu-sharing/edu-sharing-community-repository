@@ -1,0 +1,27 @@
+apiVersion: v2
+
+name: edusharing_${helm.repository}
+description: edusharing_${helm.repository}
+
+icon: ${helm.chart.icon}
+
+version: ${helm.chart.version}
+appVersion: ${docker.tag}
+kubeVersion: ">= 1.16.0"
+
+dependencies:
+
+  - name: edusharing_community_rediscluster
+    version: ${helm.chart.version}
+    alias: edusharing_rediscluster
+    condition: edusharing_rediscluster.enabled
+
+  - name: edusharing_community_rendering
+    version: ${helm.chart.version}
+    alias: edusharing_rendering
+    condition: edusharing_rendering.enabled
+
+  - name: edusharing_community_repository
+    version: ${helm.chart.version}
+    alias: edusharing_repository
+    condition: edusharing_repository.enabled

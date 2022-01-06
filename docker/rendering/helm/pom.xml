@@ -6,15 +6,15 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-deploy-docker</artifactId>
+    <artifactId>edu_sharing-community-deploy-docker-rendering</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-deploy-docker-helm</artifactId>
+  <artifactId>edu_sharing-community-deploy-docker-rendering-helm</artifactId>
   <packaging>pom</packaging>
 
-  <name>edu_sharing-community-deploy-docker-helm</name>
+  <name>edu_sharing-community-deploy-docker-rendering-helm</name>
 
   <build>
 
@@ -70,8 +70,7 @@
 
   <modules>
     <module>bundle</module>
-    <module>postgresql</module>
-    <module>rediscluster</module>
+    <module>service</module>
   </modules>
 
 </project>

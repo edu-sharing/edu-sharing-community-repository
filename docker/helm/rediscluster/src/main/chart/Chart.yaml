@@ -1,0 +1,10 @@
+apiVersion: v2
+
+name: edusharing_${helm.repository}_rediscluster
+description: edusharing_${helm.repository}_rediscluster
+
+icon: ${helm.chart.icon}
+
+version: ${helm.chart.version}
+appVersion: ${docker.tag}
+kubeVersion: ">= 1.16.0"

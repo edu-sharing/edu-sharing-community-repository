@@ -44,7 +44,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_elasticsearch</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-postgresql</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -52,7 +52,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_postgresql</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-helm-rediscluster</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -60,7 +60,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rediscluster</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-rendering-helm-bundle</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -68,7 +68,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-rendering-helm-service</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -76,7 +76,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_rendering_service</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-repository-helm-bundle</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -84,7 +84,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-repository-helm-service</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -92,23 +92,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_elastic_tracker</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_search_solr4</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-edusharing_repository_service</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-repository-helm-solr4</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
