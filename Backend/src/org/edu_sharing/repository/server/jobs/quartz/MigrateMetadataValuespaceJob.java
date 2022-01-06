@@ -58,7 +58,7 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 
 
 	protected static Logger logger = Logger.getLogger(MigrateMetadataValuespaceJob.class);
-	@JobFieldDescription(description = "type of objects to modify, usually ccm:io", sampleValue = "ccm:io")
+	@JobFieldDescription(description = "type of objects to modify, usually ccm:io, split mulitple values via comma", sampleValue = "ccm:io")
 	private String type;
 	@JobFieldDescription(description = "Single node id to apply the task (for testing purposes only)")
 	private String nodeId;
@@ -86,7 +86,7 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		runner.setKeepModifiedDate(true);
 		runner.setThreaded(false);
-		runner.setTypes(Collections.singletonList(CCConstants.getValidGlobalName(type)));
+		runner.setTypes(Arrays.stream(type.split(",")).map(String::trim).map(CCConstants::getValidGlobalName).collect(Collectors.toList()));
 
 		runner.setTask((nodeRef) -> {
 			if(isInterrupted()) {
