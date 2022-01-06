@@ -61,6 +61,7 @@ import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-ve
 import { ViewInstanceService } from './view-instance.service';
 import {EditorMode} from '../../../../core-ui-module/mds-types';
 import {MdsEditorWidgetBase} from '../widgets/mds-editor-widget-base';
+import {MdsEditorWidgetVCardComponent} from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -108,6 +109,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.Month]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Color]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Textarea]: MdsEditorWidgetTextComponent,
+        [MdsWidgetType.VCard]: MdsEditorWidgetVCardComponent,
         [MdsWidgetType.Checkbox]: MdsEditorWidgetCheckboxComponent,
         [MdsWidgetType.RadioHorizontal]: MdsEditorWidgetRadioButtonComponent,
         [MdsWidgetType.RadioVertical]: MdsEditorWidgetRadioButtonComponent,
