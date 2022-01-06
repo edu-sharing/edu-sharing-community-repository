@@ -588,6 +588,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
               const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL','archive',()=> {
                   this.downloadSequence();
               });
+              downloadAll.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
               downloadAll.group = DefaultGroups.View;
               downloadAll.priority = 35;
               options.splice(1,0,downloadAll);

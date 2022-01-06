@@ -46,7 +46,10 @@ public class LRMITool {
         lrmi.put("@context","http://schema.org/");
         lrmi.put("@type",new String[]{"CreativeWork","MediaObject"});
         for(Map.Entry<String,String> vcard : VCARD_MAPPING.entrySet()){
-            lrmi.put(vcard.getKey(),getFromVCard(vcard.getValue(),props));
+            Object data = getFromVCard(vcard.getValue(), props);
+            if(data != null) {
+                lrmi.put(vcard.getKey(), data);
+            }
         }
         lrmi.put("url",URLTool.getNgRenderNodeUrl(node.getNodeRef().getId(),node.getVersion()));
         lrmi.put("thumbnailUrl",NodeServiceHelper.getPreview(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node.getNodeRef().getId())).getUrl());
@@ -114,12 +117,18 @@ public class LRMITool {
                 json.put("@type", "Organization");
                 json.put("legalName", vcard.get(key + CCConstants.VCARD_ORG));
             }
-            result.put(json);
+            String name = VCardConverter.getNameForVCard(key, vcard);
+            if(name!=null && !name.isEmpty()) {
+                result.put(json);
+            }
         }
-        if(result.length()>1)
+        if(result.length()>1) {
             return result;
-        else
+        } else if (result.length() == 1) {
             return result.getJSONObject(0);
+        } else {
+            return null;
+        }
     }
 
     /**

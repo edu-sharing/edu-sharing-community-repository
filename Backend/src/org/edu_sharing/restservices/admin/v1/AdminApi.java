@@ -1304,6 +1304,7 @@ public class AdminApi {
 			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@ApiParam(value = "properties to fetch, use parent::<property> to include parent property values") @QueryParam("properties") List<String> properties,
 			@ApiParam(value = "store, workspace or archive") @QueryParam("store") LuceneStore store,
+			@ApiParam(value = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1327,6 +1328,7 @@ public class AdminApi {
 				token.setContentType(ContentType.ALL);
 				token.setLuceneString(query);
 				token.disableSearchCriterias();
+				token.setAuthorityScope(authorityScope);
 				StoreRef storeRef = LuceneStore.Archive.equals(store) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
 				if (LuceneStore.Archive.equals(store)) {
 					token.setStoreName(storeRef.getIdentifier());

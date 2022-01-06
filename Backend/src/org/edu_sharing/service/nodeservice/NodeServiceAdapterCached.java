@@ -1,6 +1,8 @@
 package org.edu_sharing.service.nodeservice;
 
 import org.apache.commons.collections.map.LRUMap;
+import org.apache.lucene.util.cache.Cache;
+import org.apache.lucene.util.cache.SimpleLRUCache;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 import java.util.Collections;
@@ -8,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NodeServiceAdapterCached extends NodeServiceAdapter{
-    private static Map propertyCache = Collections.synchronizedMap(new LRUMap(1000));
+    private static final Cache propertyCache = Cache.synchronizedCache(new SimpleLRUCache(1000));
 
     public NodeServiceAdapterCached(String appId) {
         super(appId);
