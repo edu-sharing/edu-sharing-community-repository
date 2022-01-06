@@ -7,7 +7,7 @@ icon: ${helm.chart.icon}
 
 version: ${helm.chart.version}
 appVersion: ${docker.tag}
-kubeVersion: ">= 1.16.0"
+kubeVersion: "${helm.kube.version}"
 
 dependencies:
 
