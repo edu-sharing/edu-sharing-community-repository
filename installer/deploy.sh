@@ -64,7 +64,6 @@ fi
 	popd >/dev/null || exit
 }
 
-
 pushd "${COMPOSE_DIR}" >/dev/null || exit
 
 [[ -f ".env" ]] && source .env
@@ -111,7 +110,7 @@ init() {
 		echo "REPOSITORY_SERVICE_PORT_EXTERNAL=${REPOSITORY_SERVICE_PORT:-8100}"
 		echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
 		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
-	} >> .env.repository
+	} >>.env.repository
 	{
 		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
 		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
@@ -122,7 +121,7 @@ init() {
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 		echo "REPOSITORY_SERVICE_HOST=repository"
 		echo "REPOSITORY_SERVICE_PORT=80"
-	} >> .env.rendering
+	} >>.env.rendering
 }
 
 rstart() {
@@ -140,8 +139,8 @@ rstart() {
 
 lstart() {
 	[[ -z "${MAVEN_HOME}" ]] && {
-  	export MAVEN_HOME="$HOME/.m2"
-  }
+		export MAVEN_HOME="$HOME/.m2"
+	}
 
 	$COMPOSE_EXEC \
 		-f "aio.yml" \
@@ -157,9 +156,17 @@ stop() {
 }
 
 remove() {
-	$COMPOSE_EXEC \
-		-f "aio.yml" \
-		down || exit
+	read -p "Are you sure you want to continue? [y/N] " answer
+	case ${answer:0:1} in
+	y | Y)
+		$COMPOSE_EXEC \
+			-f "aio.yml" \
+			down -v || exit
+		;;
+	*)
+		echo Canceled.
+		;;
+	esac
 }
 
 case "${CLI_OPT1}" in
