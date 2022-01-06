@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <beans>
-  <!--  <bean id="transformer.worker.OpenOffice" class="org.edu_sharing.alfresco.transformer.JodconverterTransformerWorker">
+   <!-- <bean id="transformer.worker.OpenOffice" class="org.edu_sharing.alfresco.transformer.JodconverterTransformerWorker">
         <property name="mimetypeService">
             <ref bean="mimetypeService" />
         </property>
@@ -15,6 +15,15 @@
             <ref bean="global-properties"/>
         </property>
     </bean>
-   -->
+
+    <bean id="openOfficeConnectionTester" class="org.edu_sharing.alfresco.transformer.JodconverterConnectionTester">
+      <property name="strict">
+         <value>false</value>
+      </property>
+      <property name="properties">
+            <ref bean="global-properties"/>
+        </property>
+   </bean>
+-->
 
 </beans>
