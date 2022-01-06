@@ -17,6 +17,7 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
     private String sourceProperty;
     private String targetProperty;
     private boolean clearSourceProperty;
+    private MigrateMetadataValuespaceJob.Mode mode;
     private final List<MetadataKey.MetadataKeyRelated.Relation> relations;
 
 
@@ -32,10 +33,12 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
     public PropertiesSetInterceptorValuespaceMapperAbstract(String sourceProperty,
                                                             String targetProperty,
                                                             boolean clearSourceProperty,
+                                                            MigrateMetadataValuespaceJob.Mode mode,
                                                             List<MetadataKey.MetadataKeyRelated.Relation> relations) {
         this.sourceProperty = sourceProperty;
         this.targetProperty = targetProperty;
         this.clearSourceProperty = clearSourceProperty;
+        this.mode = mode;
         this.relations = relations;
     }
 
@@ -71,6 +74,13 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
                     true
             );
             if(mapped != null && !mapped.isEmpty()) {
+                if(mode.equals(MigrateMetadataValuespaceJob.Mode.Merge)) {
+                    Object target = map.get(targetProperty);
+                    if(!(target instanceof Collection)) {
+                        target = Collections.singletonList(target);
+                    }
+                    mapped.addAll((Collection<? extends String>) target);
+                }
                 map.put(targetProperty, mapped);
                 return;
             }

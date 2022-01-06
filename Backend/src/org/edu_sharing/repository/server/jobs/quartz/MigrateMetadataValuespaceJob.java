@@ -27,7 +27,9 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
@@ -41,6 +43,7 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescript
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.security.core.Authentication;
 
 import java.io.Serializable;
 import java.util.*;
@@ -57,6 +60,8 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	protected static Logger logger = Logger.getLogger(MigrateMetadataValuespaceJob.class);
 	@JobFieldDescription(description = "type of objects to modify, usually ccm:io", sampleValue = "ccm:io")
 	private String type;
+	@JobFieldDescription(description = "Single node id to apply the task (for testing purposes only)")
+	private String nodeId;
 	@JobFieldDescription(description = "the widget id of the metadataset containing the valuespace mapping information, usually same as targetProperty", sampleValue = "ccm:taxonid")
 	private String mdsWidgetId;
 	@JobFieldDescription(description = "the source property containing the metadata values to migrate", sampleValue = "ccm:taxonid")
@@ -125,6 +130,14 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 				logger.warn(e.getMessage(), e);
 			}
 		});
+		if(nodeId != null && !nodeId.isEmpty()) {
+			logger.info("Transforming single node " +nodeId);
+			AuthenticationUtil.runAsSystem(() -> {
+				runner.getTask().accept(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+				return null;
+			});
+			return;
+		}
 		runner.run();
 	}
 
