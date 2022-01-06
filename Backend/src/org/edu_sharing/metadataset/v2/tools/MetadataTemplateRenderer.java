@@ -542,7 +542,7 @@ public class MetadataTemplateRenderer {
 
 				}
 			}
-			if(widget.getType().equals("filesize")){
+			if("number".equals(widget.getType()) && "bytes".equals(widget.getFormat())) {
 				try{
 					value=formatFileSize(Long.parseLong(value));
 				}catch(Throwable t){
