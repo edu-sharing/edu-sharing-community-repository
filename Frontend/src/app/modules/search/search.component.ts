@@ -86,7 +86,7 @@ import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../cor
     providers: [WindowRefService],
     animations: [trigger('fromLeft', UIAnimation.fromLeft())],
 })
-export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SearchComponent implements AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -221,7 +221,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
     }
 
-    ngOnInit() {
+    ngAfterViewInit() {
         setTimeout(() => {
             this.tutorialElement = this.mainNavRef.searchField.input;
             this.handleScroll();
@@ -347,9 +347,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.sidenavOpened$
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.extendedSearchTabGroup?.realignInkBar());
-    }
 
-    ngAfterViewInit() {
         this.scrollTo(this.searchService.offset);
         this.innerWidth = this.winRef.getNativeWindow().innerWidth;
         //this.autocompletesArray = this.autocompletes.toArray();
@@ -694,7 +692,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setDisplayType(type: NodeEntriesDisplayType) {
-        this.nodeEntriesResults.displayType = type;
+        this.searchService.displayType = type;
         this.router.navigate(['./'], {
             relativeTo: this.activatedRoute,
             queryParams: {

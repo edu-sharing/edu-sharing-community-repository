@@ -160,7 +160,7 @@
             (searchStringChange)="searchQueryChange.emit($event)"
             [placeholder]="searchPlaceholder"
             [enableFiltersAndSuggestions]="currentScope === 'search'"
-            (search)="doSearch($event)"
+            (search)="doSearch(searchQuery)"
             (clear)="clearSearch()"
           ></es-search-field>
         </div>
