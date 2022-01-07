@@ -25,6 +25,7 @@ export class AdminConfigComponent {
   configClient = '';
   configGlobal = '';
   configDeployment = '';
+  configParsed = '';
   serverConfig = '';
   extensionConfig = '';
   size = 'medium';
@@ -34,22 +35,24 @@ export class AdminConfigComponent {
       private locator: RestLocatorService,
       private toast: Toast,
   ) {
-    this.adminService.getConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE).subscribe((data)=>{
-      this.configClient = data;
-      this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_BASE).subscribe((data) => {
-        this.configGlobal = data;
-        this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE).subscribe((data) => {
-            this.configDeployment = data;
-        });
-        this.adminService.getConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE).subscribe((data) => {
-          this.extensionConfig = data;
-        });
-        this.adminService.getConfigFile(AdminConfigComponent.SERVER_CONFIG_FILE).subscribe((data) => {
-          this.serverConfig = data;
-        });
+      this.adminService.getConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE).subscribe((data)=>{
+          this.configClient = data;
+          this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_BASE).subscribe((base) => {
+              this.configGlobal = base;
+              this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE).subscribe((deployment) => {
+                  this.configDeployment = deployment;
+              });
+              this.adminService.getConfigMerged().subscribe((merged) => {
+                  this.configParsed = JSON.stringify(merged, null, 2);
+              });
+              this.adminService.getConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE).subscribe((extension) => {
+                  this.extensionConfig = extension;
+              });
+              this.adminService.getConfigFile(AdminConfigComponent.SERVER_CONFIG_FILE).subscribe((server) => {
+                  this.serverConfig = server;
+              });
+          });
       });
-    });
-
   }
   displayError(error: any) {
     console.warn(error);

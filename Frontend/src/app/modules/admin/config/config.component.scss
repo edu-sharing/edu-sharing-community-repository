@@ -33,7 +33,7 @@
     }
 }
 :host ::ng-deep{
-    ngx-monaco-editor.globalConfig{
+    ngx-monaco-editor.globalConfig, ngx-monaco-editor.parsedConfig{
         .view-lines{
             opacity: 0.7;
         }

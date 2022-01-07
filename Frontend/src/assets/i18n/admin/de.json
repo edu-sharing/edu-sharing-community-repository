@@ -30,6 +30,8 @@
             "EXTENSION_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Beachten Sie, dass diese Konfiguration beim Rollout überschrieben wird. Die hier erfolgten Änderungen müssen an das edu-sharing Entwicklerteam gegeben werden",
             "SERVER_CONFIG_TITLE": "Server-Konfigurationsdatei (Überschreiben)",
             "SERVER_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Diese Änderungen gelten für den aktuellen Server und werden bei Updates nicht überschrieben. Sie haben die höchste Priorität. ACHTUNG! Im Cluster-Betrieb gelten diese Parameter nur für den aktuellen Cluster-Server!",
+            "PARSED_TITLE": "Aktive Konfigurationswerte",
+            "PARSED_HINT": "Das JSON-Ergebnis der aktuell aktiven Konfiguration inkl. aller angewandten Vererbungen der einzelnen Dateien",
 
             "SIZE": "Editor-Größe",
             "SIZE_MEDIUM": "Normal",
