@@ -38,14 +38,14 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/alfresco/alf_data
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/alfresco/tomcat/shared
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/alfresco/alf_data
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/tomcat/shared
         volumeMounts:
         - name: share
-          mountPath: /usr/local/alfresco/alf_data
+          mountPath: /opt/alfresco/alf_data
           subPath: data/
         - name: share
-          mountPath: /usr/local/alfresco/tomcat/shared
+          mountPath: /usr/local/tomcat/shared
           subPath: config/
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
@@ -82,18 +82,18 @@ spec:
           subPath: config/
         - name: file
           mountPath: /usr/local/tomcat/shared/classes/alfresco-global.properties
-          subPath: alfresco-global.properties
+          subPath: alfresco
         - name: file
           mountPath: /usr/local/tomcat/shared/classes/config/edu-sharing.conf
-          subPath: edu-sharing.conf
+          subPath: services
         - name: file
           mountPath: /usr/local/tomcat/conf/redisson.yaml
-          subPath: redisson.yaml
+          subPath: redisson
         {{- if .Values.config.saml.enabled }}
         {{- if .Values.config.saml.config }}
         - name: saml-file
           mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/securityContext.xml
-          subPath: securityContext.xml
+          subPath: security
         {{- end }}
         {{- if .Values.config.saml.files }}
         - name: saml-files

@@ -6,6 +6,7 @@ metadata:
   name: {{ include "edusharing_repository_service.name" . }}-saml-file
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
 data:
-  securityContext.xml: {{ .Values.config.saml.config | quote }}
+  security: |
+    {{ .Values.config.saml.config | quote }}
 {{- end }}
 {{- end }}
