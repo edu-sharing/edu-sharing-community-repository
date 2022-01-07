@@ -57,8 +57,8 @@ repository_httpclient_proxy_proxyuser="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PR
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-repository-search-solr4}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
 
-repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-repository-transform}"
-repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
+repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-}"
+repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-}"
 
 ### Wait ###############################################################################################################
 
@@ -83,7 +83,9 @@ until PGPASSWORD="${repository_database_pass}" \
 	sleep 3
 done
 
-until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
+[[ -n "${repository_transform_host}" && -n "${repository_transform_port}" ]] && {
+	until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
+}
 
 ########################################################################################################################
 
