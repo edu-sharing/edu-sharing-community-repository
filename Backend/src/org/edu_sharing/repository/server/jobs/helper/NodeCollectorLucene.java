@@ -34,7 +34,7 @@ public class NodeCollectorLucene {
         this.storeRef = storeRef;
     }
 
-    List<NodeRef> getNodes(){
+    public List<NodeRef> getNodes(){
         logger.info("query:" + lucene);
         Set<NodeRef> set = new HashSet<>();
         execute(0,lucene,set);
