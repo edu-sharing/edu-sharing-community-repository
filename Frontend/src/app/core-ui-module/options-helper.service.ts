@@ -241,8 +241,11 @@ export class OptionsHelperService implements OnDestroy {
                          dropdown: DropdownComponent = null) {
         this.mainNav = mainNav;
         if(!this.mainNav) {
-            console.info('no mainnav provided to options helper, will use singleton from service');
             this.mainNav = this.injector.get(MainNavService).getMainNav();
+            console.info('no mainnav provided to options helper, will use singleton from service', this.mainNav);
+            if(!this.mainNav) {
+                console.warn('mainnav was not available via singleton service');
+            }
         }
         this.actionbar = actionbar;
         this.list = list;
