@@ -27,6 +27,7 @@
     <chart.edusharing_repository_search_elastic_tracker.enabled>false
     </chart.edusharing_repository_search_elastic_tracker.enabled>
     <chart.edusharing_repository_service.enabled>true</chart.edusharing_repository_service.enabled>
+    <chart.edusharing_repository_transform.enabled>false</chart.edusharing_repository_transform.enabled>
 
   </properties>
 

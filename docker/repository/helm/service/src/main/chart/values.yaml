@@ -167,6 +167,7 @@ config:
       disablesni4host: ""
       proxy:
         host: ""
+        nonproxyhosts: ""
         proxyhost: ""
         proxyport: ""
         proxyuser: ""
