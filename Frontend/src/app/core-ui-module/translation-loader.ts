@@ -167,7 +167,6 @@ export class TranslationLoader implements TranslateLoader {
         for(let key of Object.keys(translations)) {
             if(typeof translations[key] === 'string') {
                 translations[key] = (translations[key] as string).replace(/{{GENDER_SEPARATOR}}/g, "*");
-                console.log(translations[key]);
             } else {
                 translations[key] = this.replaceGenderCharacter(translations[key] as Dictionary);
             }
