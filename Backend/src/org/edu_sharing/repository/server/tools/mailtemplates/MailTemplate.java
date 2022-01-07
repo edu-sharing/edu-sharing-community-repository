@@ -127,16 +127,12 @@ public class MailTemplate {
 		if(override)
 			overridePostfix="_override";
 		try{
-			in = MailTemplate.class.getResourceAsStream(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_MAILTEMPLATES + "/templates_"+locale + overridePostfix + ".xml");
-			if(in==null)
-				throw new Exception();
+			in = PropertiesHelper.Config.getInputStreamForFile(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_MAILTEMPLATES + "/templates_"+locale + overridePostfix + ".xml");
 		}
 		catch(Throwable t){
-			in = MailTemplate.class.getResourceAsStream(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_MAILTEMPLATES + "/templates"+overridePostfix+".xml");
+			in = PropertiesHelper.Config.getInputStreamForFile(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_MAILTEMPLATES + "/templates"+overridePostfix+".xml");
 		}
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		if(in==null)
-			return null;
 		return builder.parse(in);
 	}
 }
