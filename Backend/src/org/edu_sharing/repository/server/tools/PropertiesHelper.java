@@ -27,16 +27,51 @@
  */
 package org.edu_sharing.repository.server.tools;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.InvalidPropertiesFormatException;
-import java.util.Properties;
+import java.net.URLClassLoader;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class PropertiesHelper {
+
+	public static class Config {
+		public static String PATH_CONFIG = "config/";
+		public static String PATH_PREFIX_LOCAL = "local";
+		public static String PATH_PREFIX_LOCAL_APPLICATIONS = PATH_PREFIX_LOCAL + "/applications";
+		public static String PATH_PREFIX_DEPLOYMENT = "deployment";
+		public static String PATH_PREFIX_DEFAULTS = "defaults";
+		public static String PATH_PREFIX_DEFAULTS_METADATASETS = PATH_PREFIX_DEFAULTS + "/metadatasets";
+		public static String PATH_PREFIX_DEFAULTS_MAILTEMPLATES = PATH_PREFIX_DEFAULTS + "/mailtemplates";
+
+		public static String getPropertyFilePath(String propertyFile) {
+			return PATH_CONFIG + PATH_PREFIX_LOCAL_APPLICATIONS + "/" +
+					propertyFile;
+		}
+		public static URLClassLoader getClassLoaderForPath(String configPath) {
+			File file = new File( getAbsolutePathForConfigFile(configPath));
+			URL[] urls;
+			try {
+				urls = new URL[]{file.getParentFile().toURI().toURL()};
+				return new URLClassLoader(urls);
+			} catch (MalformedURLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		public static String getAbsolutePathForConfigFile(String configFile) {
+			return System.getProperty("catalina.base") + "/shared/classes/" + configFile;
+		}
+
+		public static ResourceBundle getResourceBundleForFile(String configFile) throws IOException {
+			return new PropertyResourceBundle(getInputStreamForFile(configFile));
+		}
+
+		public static InputStream getInputStreamForFile(String configFile) throws FileNotFoundException {
+			return new FileInputStream(System.getProperty("catalina.base") + "/shared/classes/" + configFile);
+		}
+	}
 
 	final public static String EXCEPTION_UNHANDLED_TYPE = "Unhandled type given.";
 	public static final String XML = "xml";
@@ -51,7 +86,7 @@ public class PropertiesHelper {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		if (type.equals(XML)) {
 			try {
-				// don't cache:
+				// propertyFile = getPropertyFilePath(propertyFile);
 				URL url = classLoader.getResource(propertyFile);
 
 				if (url == null) {
@@ -74,6 +109,7 @@ public class PropertiesHelper {
 		else if (type.equals(TEXT)) {
 
 			try {
+				// propertyFile = getPropertyFilePath(propertyFile);
 				URL url = classLoader.getResource(propertyFile);
 				InputStream is = url.openStream();
 				props.load(is);
@@ -102,22 +138,17 @@ public class PropertiesHelper {
 			String _propertyFileName, String _type) {
 		boolean success = false;
 		Properties props = new Properties();
-		ClassLoader classLoader = PropertiesHelper.class.getClassLoader();
 		if (_type.equals(XML)) {
 			try {
-				// don't cache:
-				URL url = classLoader.getResource(_propertyFileName);
-
-				InputStream is = url.openStream();
+				InputStream is = new FileInputStream(_propertyFileName);
 				props.loadFromXML(is);
 				props.setProperty(_key, _value);
-				props.storeToXML(new FileOutputStream(url.getFile()),
+				props.storeToXML(new FileOutputStream(_propertyFileName),
 						" changed");
 				is.close();
 				success = true;
 				
 			} catch (InvalidPropertiesFormatException e) {
-				StackTraceElement[] stackTraceEl = e.getStackTrace();
 				e.printStackTrace();
 			} catch (IOException e) {
 
@@ -135,34 +166,4 @@ public class PropertiesHelper {
 		}
 		return list;
 	}
-
-	public static boolean validatePropertyFile(String _propFile) {
-		
-		Properties props = new Properties();
-		ClassLoader classLoader = PropertiesHelper.class.getClassLoader();
-		boolean result = false;
-		
-		if (_propFile == null || _propFile.trim().equals(""))
-			return false;
-		try {
-			// don't cache:
-
-			URL url = classLoader.getResource(_propFile);
-
-			InputStream is = url.openStream();
-			props.load(is);
-			is.close();
-			result = true;
-
-		} catch (InvalidPropertiesFormatException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		} catch (Exception e) {
-			return false;
-		}
-		
-		return result;
-	}
-
 }

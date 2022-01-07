@@ -52,7 +52,9 @@ public class KeyGenerator extends UpdateAbstract {
 
 		KeyPair kp = s.generateKeys();
 		try {
-
+			String file = PropertiesHelper.Config.getAbsolutePathForConfigFile(
+					PropertiesHelper.Config.getPropertyFilePath(CCConstants.REPOSITORY_FILE_HOME)
+			);
 			if (homeRepo.getPublicKey() == null) {
 
 				logInfo("will set public key");
@@ -62,7 +64,7 @@ public class KeyGenerator extends UpdateAbstract {
 							+ new String(new Base64().encode(kp.getPublic().getEncoded())) + "-----END PUBLIC KEY-----";
 
 					PropertiesHelper.setProperty(ApplicationInfo.KEY_PUBLIC_KEY, pubKeyString,
-							CCConstants.REPOSITORY_FILE_HOME, PropertiesHelper.XML);
+							file, PropertiesHelper.XML);
 				}
 
 			}
@@ -73,7 +75,7 @@ public class KeyGenerator extends UpdateAbstract {
 				if (!test) {
 					PropertiesHelper.setProperty(ApplicationInfo.KEY_PRIVATE_KEY,
 							new String(new Base64().encode(kp.getPrivate().getEncoded())),
-							CCConstants.REPOSITORY_FILE_HOME, PropertiesHelper.XML);
+							file, PropertiesHelper.XML);
 				}
 
 			}

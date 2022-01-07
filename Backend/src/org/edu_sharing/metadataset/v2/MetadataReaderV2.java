@@ -4,17 +4,16 @@ import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
-import org.apache.axis2.databinding.types.soapencoding.Array;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataCondition.CONDITION_TYPE;
-import org.edu_sharing.metadataset.v2.valuespace_reader.OpenSALTReader;
 import org.edu_sharing.metadataset.v2.valuespace_reader.ValuespaceReader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -30,10 +29,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MetadataReaderV2 {
 	
@@ -58,7 +54,7 @@ public class MetadataReaderV2 {
 	}
 
 	public static String getPath(){
-		return "/org/edu_sharing/metadataset/v2/";
+		return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_METADATASETS + "/";
 	}
 
 	public static List<MetadataWidget> getWidgetsByNode(NodeRef node,String locale) throws Exception{
@@ -303,7 +299,7 @@ public class MetadataReaderV2 {
 		String prefix=getPath()+"xml/";
 		if(type.equals(Filetype.VALUESPACE))
 			prefix+="valuespaces/";
-		InputStream is=MetadataReaderV2.class.getResourceAsStream(prefix+name);
+		InputStream is=PropertiesHelper.Config.getInputStreamForFile(prefix+name);
 		if(is==null)
 			throw new IOException("file "+name+" not found: "+prefix+name);
 		return is;
@@ -786,10 +782,9 @@ public class MetadataReaderV2 {
 	private static ResourceBundle getTranslationCache(String i18nFile) {
 		if(translationBundles.containsKey(i18nFile))
 			return translationBundles.get(i18nFile);
-		PropertyResourceBundle bundle = null;
+		ResourceBundle bundle = null;
 		try {
-			InputStream isLocale=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18nFile+".properties");
-			bundle = new PropertyResourceBundle(isLocale);
+			bundle = PropertiesHelper.Config.getResourceBundleForFile(getPath()+"i18n/"+i18nFile);
 		}catch(Throwable t) {
 		}
 		translationBundles.put(i18nFile, bundle);

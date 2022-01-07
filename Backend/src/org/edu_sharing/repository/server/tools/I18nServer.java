@@ -27,6 +27,10 @@
  */
 package org.edu_sharing.repository.server.tools;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -40,7 +44,7 @@ public class I18nServer {
 	
 	private static Log logger = LogFactory.getLog(I18nServer.class);
 	
-	public static final String defaultResourceBundle = CCConstants.I18N_METADATASETBUNDLE;
+	public static final String defaultResourceBundle = PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_METADATASETS + "/i18n/mds";
 	
 	/**
 	 * returns I18n value for locale found in system properties user.language and user.country
@@ -72,7 +76,7 @@ public class I18nServer {
 			return key;
 		}
 	}
-	public static String getTranslationDefaultResourcebundle(String key, String locale){
+	private static String getTranslationDefaultResourcebundle(String key, String locale){
 		
 		return getTranslation(key,locale,defaultResourceBundle);
 	}
@@ -158,7 +162,6 @@ public class I18nServer {
 	
 	
 	private static String getTranslation(String key,String language,String country, String resourceBoundle){
-		logger.debug("key:"+key+" lang:"+language+" country:"+country);
 		Locale currentLocale;
         ResourceBundle messages;
 
@@ -167,13 +170,12 @@ public class I18nServer {
         }else{
         	currentLocale = new Locale(language, country);
         }
-        
-        
-        messages = ResourceBundle.getBundle(resourceBoundle, currentLocale);
-        String result =messages.getString(key);
-
-        logger.debug("I18nServer result:"+result);
-        return result;
+		try {
+			messages = PropertiesHelper.Config.getResourceBundleForFile(resourceBoundle + "_" + currentLocale.toString() + ".properties");
+		}catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+		return messages.getString(key);
 	}
 	
 }

@@ -1,9 +1,6 @@
 package org.edu_sharing.restservices.admin.v1;
 
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -250,7 +247,7 @@ public class AdminApi {
 				entry.setRepositoryType(appInfo.getRepositoryType());
 				entry.setSubtype(appInfo.getSubtype());
 				entry.setXml(appInfo.getXml());
-				entry.setFile(appInfo.getAppFile());
+				entry.setFile(new File(appInfo.getAppFile()).getName());
 				if (ApplicationInfo.TYPE_RENDERSERVICE.equals(entry.getType()) && entry.getContentUrl() != null) {
 					entry.setConfigUrl(appInfo.getContentUrl().replace("/application/esmain/index.php", "/admin"));
 				}

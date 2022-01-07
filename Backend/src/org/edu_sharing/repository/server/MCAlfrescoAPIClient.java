@@ -736,32 +736,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		return AuthenticationUtil.runAs(getChildrenWorker, repoAdmin);
 	}
 
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
-		if (parentID == null) {
-
-			String startParentId = getRootNodeId();
-			if (startParentId == null || startParentId.trim().equals("")) {
-				parentID = nodeService.getRootNode(storeRef).getId();
-			} else {
-				parentID = startParentId;
-			}
-		}
-		NodeRef parentNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, parentID);
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(parentNodeRef);
-		return childAssocList;
-	}
-
 	public HashMap<String, HashMap<String, Object>> getChildren(String parentID, String type) throws Throwable {
 
 		HashMap<String, HashMap<String, Object>> returnVal = new HashMap<String, HashMap<String, Object>>();
 
 		if (parentID == null) {
-			String startParentId = getRootNodeId();
-			if (startParentId == null || startParentId.trim().equals("")) {
-				parentID = nodeService.getRootNode(storeRef).getId();
-			} else {
-				parentID = startParentId;
-			}
+			parentID = nodeService.getRootNode(storeRef).getId();
 		}
 
 		NodeRef parentNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, parentID);
@@ -1479,27 +1459,22 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public void removeNode(StoreRef store, String nodeId) {
 		nodeService.deleteNode(new NodeRef(store, nodeId));
 	}
-	
+
 	public String getRootNodeId() {
 
 		String result = null;
 		try {
-			result = PropertiesHelper.getProperty("explorer-start-nodeid", MCAlfrescoAPIClient.propertyfile, PropertiesHelper.XML);
+			result = null;
 
-			if (result == null || result.trim().equals("")) {
-				result = null;
+			// access from API Client always is the HomeRepository
+			ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 
-				// access from API Client always is the HomeRepository
-				ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-
-				String adminUser = appInfo.getUsername();
-				String tmpUser = authenticationInfo.get(CCConstants.AUTH_USERNAME);
-				if (!adminUser.equals(tmpUser)) {
-					result = getHomeFolderID(tmpUser);
-				}else if ("admin".equals(tmpUser)) {
-					result = getCompanyHomeNodeId();
-				}
-
+			String adminUser = appInfo.getUsername();
+			String tmpUser = authenticationInfo.get(CCConstants.AUTH_USERNAME);
+			if (!adminUser.equals(tmpUser)) {
+				result = getHomeFolderID(tmpUser);
+			}else if ("admin".equals(tmpUser)) {
+				result = getCompanyHomeNodeId();
 			}
 
 		} catch (Exception e) {

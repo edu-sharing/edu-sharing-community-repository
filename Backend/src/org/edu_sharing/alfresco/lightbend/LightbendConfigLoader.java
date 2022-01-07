@@ -8,14 +8,16 @@ import org.alfresco.repo.cache.SimpleCache;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.util.StreamUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class LightbendConfigLoader {
     private static SimpleCache<String, String> configCache = (SimpleCache) AlfAppContextGate.getApplicationContext().getBean("eduSharingLightBendConfigCache");
     private static Logger logger = Logger.getLogger(LightbendConfigLoader.class);
-    public static String PATH_PREFIX = "config/";
     public static String BASE_FILE = "edu-sharing.base.conf";
     public static String DEPLOYMENT_FILE = "edu-sharing.deployment.conf";
     public static String SERVER_FILE = "edu-sharing.server-{{hostname}}.conf";
@@ -30,10 +32,10 @@ public class LightbendConfigLoader {
         if(configCache.get("config") != null) {
             return ConfigFactory.parseString(configCache.get("config"), ConfigParseOptions.defaults());
         }
-        String base = PATH_PREFIX + BASE_FILE;
-        String deployment = PATH_PREFIX + DEPLOYMENT_FILE;
-        String server = PATH_PREFIX + getServerConfigName();
-        String custom = PATH_PREFIX + CUSTOM_FILE;
+        String base = getConfigFileLocation(BASE_FILE);
+        String deployment = getConfigFileLocation(DEPLOYMENT_FILE);
+        String server = getConfigFileLocation(SERVER_FILE);
+        String custom = getConfigFileLocation(CUSTOM_FILE);
         Config config = ConfigFactory.parseResourcesAnySyntax(server)
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(deployment))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(custom))
@@ -41,6 +43,23 @@ public class LightbendConfigLoader {
                 .resolve();
         configCache.put("config", config.root().render(ConfigRenderOptions.concise()));
         return config;
+    }
+
+    public static String getConfigFileLocation(String configFileName) {
+        if(Arrays.asList(BASE_FILE, CUSTOM_FILE).contains(configFileName)) {
+            return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS + "/" + configFileName;
+        }
+        if(configFileName.equals(DEPLOYMENT_FILE)) {
+            return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEPLOYMENT + "/" + configFileName;
+        }
+        if(configFileName.equals(SERVER_FILE)) {
+            return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_LOCAL + "/" + getServerConfigName();
+        }
+        if(configFileName.equals(ConfigServiceFactory.CONFIG_FILENAME)) {
+            return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS + "/" + configFileName;
+        }
+
+        throw new RuntimeException("Invalid config filename: " + configFileName);
     }
 
     public static String getServerConfigName() {

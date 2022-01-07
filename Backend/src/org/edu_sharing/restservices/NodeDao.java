@@ -531,7 +531,7 @@ public class NodeDao {
 					nodePropsReplace.remove(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
 					this.nodeProps.putAll(nodePropsReplace);
 				}catch(Throwable t){
-					logger.warn("Error while fetching properties for node id "+getId()+": Node is a remote node and calling remote "+(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)+" failed",t);
+					logger.warn("Error while fetching properties for node id "+getId()+": Node is a remote node of "+ this.remoteRepository +  " and calling remote "+(String)this.nodeProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID)+" failed",t);
 				}
 			}
 

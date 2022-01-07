@@ -7,6 +7,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.Mail;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -126,12 +127,12 @@ public class MailTemplate {
 		if(override)
 			overridePostfix="_override";
 		try{
-			in = MailTemplate.class.getResourceAsStream("/org/edu_sharing/repository/server/tools/mailtemplates/templates_"+locale + overridePostfix + ".xml");
+			in = MailTemplate.class.getResourceAsStream(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_MAILTEMPLATES + "/templates_"+locale + overridePostfix + ".xml");
 			if(in==null)
 				throw new Exception();
 		}
 		catch(Throwable t){
-			in = MailTemplate.class.getResourceAsStream("/org/edu_sharing/repository/server/tools/mailtemplates/templates"+overridePostfix+".xml");
+			in = MailTemplate.class.getResourceAsStream(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_MAILTEMPLATES + "/templates"+overridePostfix+".xml");
 		}
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		if(in==null)

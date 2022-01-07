@@ -1,9 +1,7 @@
 package org.edu_sharing.service.admin;
 
 import java.io.*;
-import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +19,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import net.sf.acegisecurity.Authentication;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -385,7 +382,9 @@ public class AdminServiceImpl implements AdminService  {
 		apps.remove(pos);
 		String result=org.apache.commons.lang3.StringUtils.join(apps,",");
 		changeAppPropertiesApplications(result, new Date()+" removed app: "+info.getAppFile());
-		File appFile = new File(getCatalinaBase()+"/shared/classes/"+info.getAppFile());
+		File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(
+				PropertiesHelper.Config.getPropertyFilePath(info.getAppFile())
+		));
 		appFile.renameTo(new File(appFile.getAbsolutePath()+System.currentTimeMillis()+".bak"));
 		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
@@ -759,20 +758,10 @@ public class AdminServiceImpl implements AdminService  {
 		paramsMap.put(OAIConst.PARAM_FORCE_UPDATE,true);
 		return new ImporterJob().start(JobHandler.createJobDataMap(paramsMap));
 	}
-	public void throwIfInvalidConfigFile(String filename){
-		if(		!LightbendConfigLoader.BASE_FILE.equals(filename) &&
-				!LightbendConfigLoader.CUSTOM_FILE.equals(filename) &&
-				!LightbendConfigLoader.SERVER_FILE.equals(filename) &&
-				!LightbendConfigLoader.DEPLOYMENT_FILE.equals(filename) &&
-				!ConfigServiceFactory.CONFIG_FILENAME.equals(filename)
-		)
-			throw new IllegalArgumentException(filename+" is not a valid config filename");
-	}
 	@Override
 	public void updateConfigFile(String filename, String content) throws Throwable {
-		throwIfInvalidConfigFile(filename);
 		filename = mapConfigFile(filename);
-		File file = new File(getCatalinaBase() + "/shared/classes/" + LightbendConfigLoader.PATH_PREFIX + filename);
+		File file = new File(getCatalinaBase() + "/shared/classes/" + filename);
 		try {
 			Files.copy(file, new File(file.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
 		}catch(FileNotFoundException e){
@@ -784,17 +773,13 @@ public class AdminServiceImpl implements AdminService  {
 
 	@Override
 	public String getConfigFile(String filename) throws Throwable {
-		throwIfInvalidConfigFile(filename);
 		filename = mapConfigFile(filename);
-		File file = new File(getCatalinaBase()+"/shared/classes/"+ LightbendConfigLoader.PATH_PREFIX+filename);
+		File file = new File(getCatalinaBase()+"/shared/classes/"+ filename);
 		return FileUtils.readFileToString(file);
 	}
 
 	private String mapConfigFile(String filename) {
-		if(filename.equals(LightbendConfigLoader.SERVER_FILE)) {
-			return LightbendConfigLoader.getServerConfigName();
-		}
-		return filename;
+		return LightbendConfigLoader.getConfigFileLocation(filename);
 	}
 
 	@Override
@@ -915,16 +900,18 @@ public class AdminServiceImpl implements AdminService  {
 	
 	@Override
 	public Properties getPropertiesXML(String xmlFile) throws Exception {
-		Properties homeAppProps = PropertiesHelper.getProperties(xmlFile, PropertiesHelper.XML);
+		Properties homeAppProps = PropertiesHelper.getProperties(PropertiesHelper.Config.getPropertyFilePath(xmlFile), PropertiesHelper.XML);
 		return homeAppProps;
 	}
 	
 	@Override
 	public void updatePropertiesXML(String xmlFile,Map<String,String> properties) throws Exception {
-		File appFile = new File(getCatalinaBase()+"/shared/classes/"+xmlFile);
-		Files.copy(appFile, new File(appFile.getAbsolutePath()+System.currentTimeMillis()+".bak"));
+		File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(
+				PropertiesHelper.Config.getPropertyFilePath(xmlFile)
+		));
+		Files.copy(appFile, new File(appFile.getAbsolutePath() + "_" + System.currentTimeMillis()+".bak"));
 		for(String key : properties.keySet()){
-			PropertiesHelper.setProperty(key,properties.get(key),xmlFile, PropertiesHelper.XML);
+			PropertiesHelper.setProperty(key,properties.get(key), appFile.getAbsolutePath(), PropertiesHelper.XML);
 		}
 		ApplicationInfoList.refresh();
 		RepoFactory.refresh();

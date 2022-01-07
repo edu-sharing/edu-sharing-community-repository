@@ -21,6 +21,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -123,8 +124,6 @@ public class ConfigServiceImpl implements ConfigService{
 			//return SerializationUtils.clone((Config) configCache.get(CACHE_KEY));
 		}
 		InputStream is = getConfigInputStream();
-		if(is==null)
-			throw new IOException("client.config.xml file missing");
 		Config config;
 		synchronized (jaxbUnmarshaller) {
             config = (Config) jaxbUnmarshaller.unmarshal(is);
@@ -134,9 +133,13 @@ public class ConfigServiceImpl implements ConfigService{
 		return jacksonReader.readValue(configCache.get(CACHE_KEY));
 	}
 
-	private InputStream getConfigInputStream() {
+	private InputStream getConfigInputStream() throws IOException {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		return classLoader.getResourceAsStream("config/"+ConfigServiceFactory.CONFIG_FILENAME);
+		String file = LightbendConfigLoader.getConfigFileLocation(ConfigServiceFactory.CONFIG_FILENAME);
+		InputStream is = classLoader.getResourceAsStream(file);
+		if(is==null)
+			throw new IOException(file + " missing");
+		return is;
 	}
 	private Context getContext(String domain) throws Exception {
 		Config config=getConfig();

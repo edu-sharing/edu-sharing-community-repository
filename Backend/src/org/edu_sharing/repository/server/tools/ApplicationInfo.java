@@ -34,10 +34,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.client.tools.MimeTypes;
 
 public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable{
 
@@ -339,7 +337,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public ApplicationInfo(String _appFile) throws Exception{
 		if(_appFile == null) throw new Exception("Application Filename was null!");
-		appFile = _appFile;
+		appFile = PropertiesHelper.Config.getPropertyFilePath(_appFile);
 		
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();

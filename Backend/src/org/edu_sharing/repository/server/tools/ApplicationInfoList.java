@@ -110,7 +110,7 @@ public class ApplicationInfoList {
 		return getApplicationInfoByProperty(type, ApplicationInfoProperty.REPOSITORYTYPE);
 	}
 	/**
-	 * 
+	 *
 	 * @return Map with AppId, ApplicationInfo
 	 */
 	public static HashMap<String, ApplicationInfo> getApplicationInfos(){
@@ -136,7 +136,8 @@ public class ApplicationInfoList {
 	private static synchronized void initAppInfos(){
 		String[] appFileArray = null;
 		try{
-			String repStr = PropertiesHelper.getProperty("applicationfiles", "ccapp-registry.properties.xml", PropertiesHelper.XML);
+			ApplicationInfo registry = new ApplicationInfo("ccapp-registry.properties.xml");
+			String repStr = registry.getString("applicationfiles", null);
 			if(repStr == null || repStr.trim().isEmpty()){
 				logger.error("Repository Registry config is undefined or empty");
 				return;
