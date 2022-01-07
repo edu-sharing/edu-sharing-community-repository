@@ -31,7 +31,6 @@ spec:
             volumeMounts:
             - name: share
               mountPath: /var/cache/esrender
-              subPath: data/
             {{- with .Values.job.cachecleaner.resources }}
             resources: {{ toYaml . | nindent 14 }}
             {{- end }}

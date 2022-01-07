@@ -20,7 +20,7 @@ spec:
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       initContainers:
-      {{- if .Values.init.permission.enabled }}
+      {{- if (default .Values.global.cluster.storage.data.permission .Values.persistence.data.permission) }}
       - name: {{ include "edusharing_repository_search_solr4.name" . }}-init-permission
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -32,7 +32,6 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /usr/local/alfresco/alf_data
-          subPath: data/
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -56,7 +55,6 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /usr/local/alfresco/alf_data
-          subPath: data/
         {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:

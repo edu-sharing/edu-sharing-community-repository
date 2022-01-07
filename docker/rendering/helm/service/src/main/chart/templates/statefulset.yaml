@@ -21,7 +21,7 @@ spec:
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       initContainers:
-      {{- if .Values.init.permission.enabled }}
+      {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
       - name: {{ include "edusharing_rendering_service.name" . }}-init-permission
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -29,11 +29,10 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R www-data:www-data /var/cache/esrender
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender
         volumeMounts:
         - name: share
           mountPath: /var/cache/esrender
-          subPath: data/
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -58,7 +57,6 @@ spec:
         volumeMounts:
         - name: share
           mountPath: /var/cache/esrender
-          subPath: data/
         {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:

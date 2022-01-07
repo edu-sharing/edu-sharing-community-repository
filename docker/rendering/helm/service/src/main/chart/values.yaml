@@ -22,6 +22,7 @@ global:
 
     storage:
       share:
+        permission: false
         spec: {}
 #          storageClassName:
 
@@ -178,8 +179,6 @@ resources:
 init:
 
   permission:
-
-    enabled: false
 
     resources: {}
 

@@ -30,7 +30,7 @@ spec:
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       initContainers:
-      {{- if .Values.init.permission.enabled }}
+      {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
       - name: {{ include "edusharing_repository_service.name" . }}-init-permission
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -38,15 +38,13 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/alfresco/alf_data
           chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/tomcat/shared
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/alfresco/alf_data
         volumeMounts:
-        - name: share
-          mountPath: /opt/alfresco/alf_data
-          subPath: data/
-        - name: share
+        - name: share-config
           mountPath: /usr/local/tomcat/shared
-          subPath: config/
+        - name: share-data
+          mountPath: /opt/alfresco/alf_data
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -74,12 +72,10 @@ spec:
         - name: gossip
           containerPort: 5701
         volumeMounts:
-        - name: share
-          mountPath: /opt/alfresco/alf_data
-          subPath: data/
-        - name: share
+        - name: share-config
           mountPath: /usr/local/tomcat/shared
-          subPath: config/
+        - name: share-data
+          mountPath: /opt/alfresco/alf_data
         - name: file
           mountPath: /usr/local/tomcat/shared/classes/alfresco-global.properties
           subPath: alfresco
@@ -129,6 +125,7 @@ spec:
         {{- with .Values.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
+      {{ if not .Values.config.transform.pool.enabled }}
       - name: {{ include "edusharing_repository_service.name" . }}-transform
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-repository-transform:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -172,6 +169,7 @@ spec:
         {{- with .Values.sidecar.transform.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
+      {{- end }}
       {{- with .Values.global.image.pullSecrets }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -207,9 +205,12 @@ spec:
         {{- end }}
       {{- end }}
       volumes:
-      - name: share
+      - name: share-config
         persistentVolumeClaim:
-          claimName: {{ include "edusharing_repository_service.pvc.share" . }}
+          claimName: {{ include "edusharing_repository_service.pvc.share.config" . }}
+      - name: share-data
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_repository_service.pvc.share.data" . }}
       - name: file
         configMap:
           name: {{ include "edusharing_repository_service.name" . }}-file

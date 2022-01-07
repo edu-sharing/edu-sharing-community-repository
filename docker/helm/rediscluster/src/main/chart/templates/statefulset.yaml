@@ -22,7 +22,7 @@ spec:
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
     spec:
       initContainers:
-      {{- if .Values.init.permission.enabled }}
+      {{- if (default .Values.global.cluster.storage.data.permission .Values.persistence.data.permission) }}
       - name: {{ include "edusharing_rediscluster.name" . }}-init-permission
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-minideb:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
@@ -34,7 +34,6 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /bitnami/redis
-          subPath: data/
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -73,7 +72,6 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /bitnami/redis
-          subPath: data/
         - name: file
           mountPath: /opt/bitnami/redis/etc/redis-default.conf
           subPath: redis-default.conf

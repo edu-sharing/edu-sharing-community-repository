@@ -142,7 +142,7 @@ xmlstarlet ed -L \
 
 ### Tomcat shared ######################################################################################################
 
-tar -x -v --skip-old-files -f tomcat/shared.tar
+tar -x -v --skip-old-files --no-same-permissions -f tomcat/shared.tar
 
 ### Alfresco platform ##################################################################################################
 
