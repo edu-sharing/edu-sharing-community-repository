@@ -84,7 +84,8 @@ RUN set -eux \
 ########################################################################################################################
 
 RUN set -eux \
-    && mkdir -p $RS_CACHE \
+    && mkdir -p $RS_CACHE/config \
+    && mkdir -p $RS_CACHE/data \
 	&& chown -R www-data:www-data /etc/apache2 $RS_ROOT $RS_CACHE $PHP_INI_DIR
 
 USER www-data

@@ -35,11 +35,17 @@ global:
     pullPolicy: Always
     pullSecrets: []
 
+  patroni:
+    enabled: false
+    name: &nameOverride edusharing-repository-service
+    secrets: "credentials.postgresql.acid.zalan.do"
+    team: edusharing
+
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
-nameOverride: edusharing-repository-service
+nameOverride: *nameOverride
 
 ########################################################################################################################
 
@@ -131,6 +137,7 @@ config:
       timeout: -1
 
   custom:
+    enabled: false
     alfresco: ""
     services: ""
 
@@ -143,6 +150,7 @@ config:
     password: repository
     protocol: postgresql
     options: ""
+    patroni: {}
 
     pool:
       max: 80

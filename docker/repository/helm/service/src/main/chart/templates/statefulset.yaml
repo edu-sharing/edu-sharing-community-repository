@@ -15,6 +15,9 @@ spec:
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
         checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
+        {{- if .Values.config.custom.enabled }}
+        checksum/configmap-file-custom: {{ include (print .Template.BasePath "/configmap-file-custom.yaml") . | sha256sum | trunc 63 }}
+        {{- end }}
         {{- if .Values.config.saml.enabled }}
         {{- if .Values.config.saml.config }}
         checksum/configmap-saml-file: {{ include (print .Template.BasePath "/configmap-saml-file.yaml") . | sha256sum | trunc 63 }}
@@ -59,6 +62,20 @@ spec:
         {{- if .Values.config.jvm.debug }}
         args: [ "catalina.sh", "jpda", "run" ]
         {{- end }}
+        {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
+        {{- if $patroni.enabled }}
+        env:
+          - name: REPOSITORY_DATABASE_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
+                key: username
+          - name: REPOSITORY_DATABASE_PASS
+            valueFrom:
+              secretKeyRef:
+                name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
+                key: password
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ include "edusharing_repository_service.name" . }}-env
@@ -77,14 +94,16 @@ spec:
         - name: share-data
           mountPath: /opt/alfresco/alf_data
         - name: file
-          mountPath: /usr/local/tomcat/shared/classes/alfresco-global.properties
-          subPath: alfresco
-        - name: file
-          mountPath: /usr/local/tomcat/shared/classes/config/edu-sharing.conf
-          subPath: services
-        - name: file
           mountPath: /usr/local/tomcat/conf/redisson.yaml
           subPath: redisson
+        {{- if .Values.config.custom.enabled }}
+        - name: file-custom
+          mountPath: /usr/local/tomcat/shared/classes/alfresco-global.properties
+          subPath: alfresco
+        - name: file-custom
+          mountPath: /usr/local/tomcat/shared/classes/config/edu-sharing.conf
+          subPath: services
+        {{- end }}
         {{- if .Values.config.saml.enabled }}
         {{- if .Values.config.saml.config }}
         - name: saml-file
@@ -214,6 +233,11 @@ spec:
       - name: file
         configMap:
           name: {{ include "edusharing_repository_service.name" . }}-file
+      {{- if .Values.config.custom.enabled }}
+      - name: file-custom
+        configMap:
+          name: {{ include "edusharing_repository_service.name" . }}-file-custom
+      {{- end }}
       {{- if .Values.config.saml.enabled }}
       {{- if .Values.config.saml.config }}
       - name: saml-file

@@ -25,11 +25,22 @@ global:
     pullPolicy: Always
     pullSecrets: []
 
+  patroni:
+    enabled: false
+    name: &nameOverride edusharing-postgresql
+    postgres: "13"
+    replicas: 3
+    secrets: "credentials.postgresql.acid.zalan.do"
+    synchronous:
+      enabled: true
+      strict: true
+    team: edusharing
+
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
-nameOverride: edusharing-postgresql
+nameOverride: *nameOverride
 
 ########################################################################################################################
 

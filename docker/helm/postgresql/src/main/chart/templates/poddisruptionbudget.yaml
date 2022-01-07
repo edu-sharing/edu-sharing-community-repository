@@ -1,3 +1,4 @@
+{{- if not .Values.global.patroni.enabled }}
 {{- if .Values.global.cluster.pdb.enabled }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
@@ -8,4 +9,5 @@ spec:
   maxUnavailable: 0
   selector:
     matchLabels: {{ include "edusharing_postgresql.labels.instance" . | nindent 6 }}
+{{- end }}
 {{- end }}

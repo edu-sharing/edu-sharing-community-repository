@@ -5,7 +5,6 @@ metadata:
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  podManagementPolicy: Parallel
   selector:
     matchLabels: {{ include "edusharing_rendering_service.labels.instance" . | nindent 6 }}
   serviceName: {{ include "edusharing_rendering_service.name" . }}-headless
@@ -29,10 +28,13 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender/config
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender/data
         volumeMounts:
-        - name: share
-          mountPath: /var/cache/esrender
+          - name: share-config
+            mountPath: /var/cache/esrender/config
+          - name: share-data
+            mountPath: /var/cache/esrender/data
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -44,6 +46,20 @@ spec:
       - name: {{ include "edusharing_rendering_service.name" . }}
         image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-rendering-service:{{ .Values.global.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
+        {{- if $patroni.enabled }}
+        env:
+        - name: RENDERING_DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
+              key: username
+        - name: RENDERING_DATABASE_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
+              key: password
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ include "edusharing_rendering_service.name" . }}-env
@@ -55,8 +71,10 @@ spec:
         - name: api-external
           containerPort: 8081
         volumeMounts:
-        - name: share
-          mountPath: /var/cache/esrender
+        - name: share-config
+          mountPath: /var/cache/esrender/config
+        - name: share-data
+          mountPath: /var/cache/esrender/data
         {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:
@@ -132,6 +150,9 @@ spec:
         {{- end }}
       {{- end }}
       volumes:
-      - name: share
+      - name: share-config
         persistentVolumeClaim:
-          claimName: {{ include "edusharing_rendering_service.pvc.share" . }}
+          claimName: {{ include "edusharing_rendering_service.pvc.share.config" . }}
+      - name: share-data
+        persistentVolumeClaim:
+          claimName: {{ include "edusharing_rendering_service.pvc.share.data" . }}

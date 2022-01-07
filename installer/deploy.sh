@@ -2,6 +2,9 @@
 set -e
 set -o pipefail
 
+GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/')"
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-installer-$GIT_BRANCH}"
+
 case "$(uname)" in
 MINGW*)
 	COMPOSE_EXEC="winpty docker-compose"
@@ -10,9 +13,8 @@ MINGW*)
 	COMPOSE_EXEC="docker-compose"
 	;;
 esac
-export COMPOSE_EXEC
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-compose}"
+export COMPOSE_EXEC
 
 export CLI_CMD="$0"
 export CLI_OPT1="$1"

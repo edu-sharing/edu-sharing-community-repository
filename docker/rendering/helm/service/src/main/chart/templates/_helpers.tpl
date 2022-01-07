@@ -28,6 +28,10 @@ app: {{ include "edusharing_rendering_service.name" . }}
 app.kubernetes.io/name: {{ include "edusharing_rendering_service.name" . }}
 {{- end -}}
 
-{{- define "edusharing_rendering_service.pvc.share" -}}
-share-{{ include "edusharing_rendering_service.name" . }}
+{{- define "edusharing_rendering_service.pvc.share.config" -}}
+share-{{ include "edusharing_rendering_service.name" . }}-config
+{{- end -}}
+
+{{- define "edusharing_rendering_service.pvc.share.data" -}}
+share-{{ include "edusharing_rendering_service.name" . }}-data
 {{- end -}}

@@ -33,11 +33,17 @@ global:
     pullPolicy: Always
     pullSecrets: []
 
+  patroni:
+    enabled: false
+    name: &nameOverride edusharing-rendering-service
+    secrets: "credentials.postgresql.acid.zalan.do"
+    team: edusharing
+
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
-nameOverride: edusharing-rendering-service
+nameOverride: *nameOverride
 
 ########################################################################################################################
 
@@ -105,6 +111,7 @@ config:
     database: rendering
     username: rendering
     password: rendering
+    patroni: {}
 
   repository:
     host: edusharing-repository-service
@@ -116,12 +123,20 @@ config:
 persistence:
 
   share:
-    create: true
-    spec:
-      accessModes: [ "ReadWriteMany" ]
-      resources:
-        requests:
-          storage: 5Gi
+    config:
+      create: true
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            storage: 1Gi
+    data:
+      create: true
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            storage: 5Gi
 
 ########################################################################################################################
 

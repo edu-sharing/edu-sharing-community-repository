@@ -34,7 +34,8 @@ services:
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_SERVICE_PORT_HTTP:-9100}:8081"
     volumes:
-      - "rendering-service-volume:/var/cache/esrender"
+      - "rendering-service-volume-config:/var/cache/esrender/config"
+      - "rendering-service-volume-data:/var/cache/esrender/data"
     depends_on:
       - rendering-database
 
@@ -52,4 +53,5 @@ services:
 
 volumes:
   rendering-database-volume:
-  rendering-service-volume:
+  rendering-service-volume-config:
+  rendering-service-volume-data:

@@ -95,14 +95,9 @@ sed -i 's|^\(\s*\)[#]*ServerName.*|\1ServerName '"${my_host_internal}"'|' /etc/a
 
 ########################################################################################################################
 
-if mkdir "${RS_CACHE}/config" >/dev/null 2>&1; then
-
-	touch "${RS_CACHE}/config.lock"
+if mkdir "${RS_CACHE}/config/.init" >/dev/null 2>&1; then
 
 	echo "install started."
-
-	mkdir -p "${RS_CACHE}/data"
-	chown www-data:www-data "${RS_CACHE}/data"
 
 	cat >/tmp/config.ini <<-EOF
 		[application]
@@ -151,19 +146,9 @@ if mkdir "${RS_CACHE}/config" >/dev/null 2>&1; then
 	find -L . -type f -newer "${before}" -exec cp {} "${RS_CACHE}/config/{}" \;
 	find "${RS_CACHE}/config" -type d -empty -delete
 
-	rm "${RS_CACHE}/config.lock"
-
 	echo "config saved."
 
 else
-
-	echo "install skipped."
-
-	sleep 2
-	while [ -e "${RS_CACHE}/config.lock" ]; do
-		echo .
-		sleep 2
-	done
 
 	echo "config restoring."
 
@@ -180,8 +165,6 @@ fi
 ########################################################################################################################
 
 yes | php admin/cli/update.php
-
-chown -R www-data:www-data "${RS_ROOT}"
 
 ########################################################################################################################
 

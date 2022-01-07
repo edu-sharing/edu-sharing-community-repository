@@ -1,3 +1,4 @@
+{{- if not .Values.global.patroni.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,3 +10,4 @@ data:
     {{ $key }} = '{{ $value }}'
     {{- end }}
     listen_addresses = '{{ if .Values.global.cluster.istio.enabled }}127.0.0.1{{ else }}0.0.0.0{{ end }}'
+{{- end }}
