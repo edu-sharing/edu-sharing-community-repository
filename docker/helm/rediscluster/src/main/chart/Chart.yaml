@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: edusharing_${helm.repository}_rediscluster
-description: edusharing_${helm.repository}_rediscluster
+name: edusharing_community_rediscluster
+description: edusharing_community_rediscluster
 
 icon: ${helm.chart.icon}
 

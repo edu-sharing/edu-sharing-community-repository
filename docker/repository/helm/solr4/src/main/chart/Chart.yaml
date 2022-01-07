@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: edusharing_${helm.repository}_repository_search_solr4
-description: edusharing_${helm.repository}_repository_search_solr4
+name: edusharing_community_repository_search_solr4
+description: edusharing_community_repository_search_solr4
 
 icon: ${helm.chart.icon}
 

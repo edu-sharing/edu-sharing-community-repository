@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: edusharing_${helm.repository}_repository
-description: edusharing_${helm.repository}_repository
+name: edusharing_community_repository
+description: edusharing_community_repository
 
 icon: ${helm.chart.icon}
 
@@ -41,7 +41,7 @@ dependencies:
     alias: edusharing_repository_service
     condition: edusharing_repository_service.enabled
 
-  - name: edusharing_enterprise_repository_transform
+  - name: edusharing_community_repository_transform
     version: ${helm.chart.version}
     alias: edusharing_repository_transform
     condition: edusharing_repository_transform.enabled

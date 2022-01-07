@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: edusharing_${helm.repository}
-description: edusharing_${helm.repository}
+name: edusharing_community
+description: edusharing_community
 
 icon: ${helm.chart.icon}
 

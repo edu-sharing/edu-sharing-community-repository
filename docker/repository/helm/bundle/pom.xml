@@ -143,11 +143,11 @@
             <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm-server
+                edu_sharing-community-repository-plugin-transform-deploy-docker-helm-server
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/edusharing_enterprise_repository_transform
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_repository_transform
               </outputDirectory>
             </configuration>
           </execution>
@@ -274,7 +274,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm-server</artifactId>
+      <artifactId>edu_sharing-community-repository-plugin-transform-deploy-docker-helm-server</artifactId>
       <type>tar.gz</type>
       <classifier>bin</classifier>
     </dependency>

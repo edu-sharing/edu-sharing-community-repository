@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: edusharing_${helm.repository}_postgresql
-description: edusharing_${helm.repository}_postgresql
+name: edusharing_community_postgresql
+description: edusharing_community_postgresql
 
 icon: ${helm.chart.icon}
 
