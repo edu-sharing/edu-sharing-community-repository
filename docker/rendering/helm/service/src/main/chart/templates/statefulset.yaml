@@ -22,7 +22,7 @@ spec:
       initContainers:
       {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
       - name: {{ include "edusharing_rendering_service.name" . }}-init-permission
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-minideb:{{ .Values.global.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-minideb:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -44,20 +44,15 @@ spec:
       {{- end }}
       containers:
       - name: {{ include "edusharing_rendering_service.name" . }}
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-rendering-service:{{ .Values.global.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-rendering-service:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
         {{- if $patroni.enabled }}
         env:
-        - name: RENDERING_DATABASE_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
-              key: username
         - name: RENDERING_DATABASE_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
+              name: {{ .Values.config.database.username }}.{{ $patroni.name }}.{{ $patroni.secrets }}
               key: password
         {{- end }}
         envFrom:
@@ -103,7 +98,7 @@ spec:
         {{- end }}
       {{- if .Values.sidecar.metrics.enabled }}
       - name: {{ include "edusharing_rendering_service.name" . }}-metrics
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-apache_exporter:{{ .Values.global.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-apache_exporter:{{ .Values.image.tag }}
         args:
         - --scrape_uri=http://127.0.0.1:8080/server-status/?auto
         - --telemetry.address={{ if .Values.global.cluster.istio.enabled }}127.0.0.1{{ end }}:9117

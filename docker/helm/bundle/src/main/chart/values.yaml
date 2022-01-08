@@ -9,11 +9,11 @@ global:
     istio:
       enabled: false
 
-    prometheus:
-      enabled: false
-      retention: 1w
-      scrapeInterval: 10s
-      scrapeTimeout: 10s
+  prometheus:
+    enabled: false
+    retention: 1w
+    scrapeInterval: 10s
+    scrapeTimeout: 10s
 
 ########################################################################################################################
 # LOCAL
@@ -34,7 +34,7 @@ image:
 
 edusharing_rediscluster:
 
-  enabled: ${chart.edusharing_rediscluster.enabled}
+  enabled: true
 
   nameOverride: &redisclusterNameOverride edusharing-rediscluster
 
@@ -46,11 +46,22 @@ edusharing_rediscluster:
 
 edusharing_repository:
 
-  enabled: ${chart.edusharing_repository.enabled}
+  enabled: true
 
   edusharing_repository_rediscluster:
 
     enabled: false
+
+  edusharing_repository_postgresql:
+
+    enabled: true
+
+    nameOverride: &repositoryPostgresqlNameOverride edusharing-repository-postgresql
+
+    config:
+      patroni:
+        enabled: false
+        name: *repositoryPostgresqlNameOverride
 
   edusharing_repository_service:
 
@@ -70,15 +81,28 @@ edusharing_repository:
         host: *redisclusterNameOverride
         port: *redisclusterServicePortApi
 
+      database:
+
 ########################################################################################################################
 
 edusharing_rendering:
 
-  enabled: ${chart.edusharing_rendering.enabled}
+  enabled: true
 
   edusharing_rendering_rediscluster:
 
     enabled: false
+
+  edusharing_rendering_postgresql:
+
+    enabled: true
+
+    nameOverride: &renderingPostgresqlNameOverride edusharing-rendering-postgresql
+
+    config:
+      patroni:
+        enabled: false
+        name: *renderingPostgresqlNameOverride
 
   edusharing_rendering_service:
 

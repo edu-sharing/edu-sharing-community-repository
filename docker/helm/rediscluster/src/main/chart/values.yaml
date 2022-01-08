@@ -13,15 +13,12 @@ global:
       enabled: false
 
     storage:
+
       data:
         permission: false
         spec: {}
-#          storageClassName:
 
   image:
-    registry: ${docker.registry}
-    repository: ${docker.repository}
-    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
 
@@ -30,6 +27,11 @@ global:
 ########################################################################################################################
 
 nameOverride: edusharing-rediscluster
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  tag: ${docker.tag}
 
 ########################################################################################################################
 

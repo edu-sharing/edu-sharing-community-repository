@@ -18,14 +18,6 @@
 
   <name>edu_sharing-community-deploy-docker-rendering-helm-bundle</name>
 
-  <properties>
-
-    <chart.edusharing_rendering_postgresql.enabled>true</chart.edusharing_rendering_postgresql.enabled>
-    <chart.edusharing_rendering_rediscluster.enabled>true</chart.edusharing_rendering_rediscluster.enabled>
-    <chart.edusharing_rendering_service.enabled>true</chart.edusharing_rendering_service.enabled>
-
-  </properties>
-
   <build>
 
     <plugins>

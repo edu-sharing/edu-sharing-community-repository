@@ -8,8 +8,6 @@ global:
 
     cert:
       annotations: {}
-#        cert-manager.io/cluster-issuer:
-#        cert-manager.io/issuer:
 
     istio:
       enabled: false
@@ -21,21 +19,18 @@ global:
       enabled: false
 
     storage:
+
       share:
         permission: false
         spec: {}
-#          storageClassName:
 
   image:
-    registry: ${docker.registry}
-    repository: ${docker.repository}
-    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
 
   patroni:
     enabled: false
-    name: &nameOverride edusharing-rendering-service
+    name: edusharing-rendering-postgresql
     secrets: "credentials.postgresql.acid.zalan.do"
     team: edusharing
 
@@ -43,7 +38,12 @@ global:
 # LOCAL
 ########################################################################################################################
 
-nameOverride: *nameOverride
+nameOverride: edusharing-rendering-service
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  tag: ${docker.tag}
 
 ########################################################################################################################
 
@@ -123,6 +123,7 @@ config:
 persistence:
 
   share:
+
     config:
       create: true
       spec:

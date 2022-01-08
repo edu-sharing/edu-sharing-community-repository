@@ -15,7 +15,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ include "edusharing_rendering_service.name" . }}-job-init
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-rendering-service:{{ .Values.global.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-rendering-service:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         args: ["init.sh"]
         envFrom:

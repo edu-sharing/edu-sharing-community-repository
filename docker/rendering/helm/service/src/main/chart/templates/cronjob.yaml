@@ -20,21 +20,16 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: {{ include "edusharing_rendering_service.name" . }}-job-cachecleaner
-            image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-rendering-service:{{ .Values.global.image.tag }}
+            image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-rendering-service:{{ .Values.image.tag }}
             imagePullPolicy: {{ .Values.global.image.pullPolicy }}
             args: ["php", "func/classes.new/Helper/cacheCleaner.php"]
             {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
             {{- if $patroni.enabled }}
             env:
-              - name: RENDERING_DATABASE_USER
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
-                    key: username
               - name: RENDERING_DATABASE_PASS
                 valueFrom:
                   secretKeyRef:
-                    name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
+                    name: {{ .Values.config.database.username }}.{{ $patroni.name }}.{{ $patroni.secrets }}
                     key: password
             {{- end }}
             envFrom:

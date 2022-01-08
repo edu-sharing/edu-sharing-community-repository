@@ -13,15 +13,12 @@ global:
       enabled: false
 
     storage:
+
       data:
         permission: false
         spec: {}
-#          storageClassName:
 
   image:
-    registry: ${docker.registry}
-    repository: ${docker.repository}
-    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
 
@@ -30,6 +27,11 @@ global:
 ########################################################################################################################
 
 nameOverride: edusharing-repository-search-solr4
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  tag: ${docker.tag}
 
 ########################################################################################################################
 
@@ -76,6 +78,7 @@ tolerations: []
 persistence:
 
   data:
+
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:

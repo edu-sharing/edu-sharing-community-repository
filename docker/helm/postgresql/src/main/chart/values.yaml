@@ -13,15 +13,12 @@ global:
       enabled: false
 
     storage:
+
       data:
         permission: false
         spec: {}
-#          storageClassName:
 
   image:
-    registry: ${docker.registry}
-    repository: ${docker.repository}
-    tag: ${docker.tag}
     pullPolicy: Always
     pullSecrets: []
 
@@ -30,7 +27,6 @@ global:
     name: &nameOverride edusharing-postgresql
     postgres: "13"
     replicas: 3
-    secrets: "credentials.postgresql.acid.zalan.do"
     synchronous:
       enabled: true
       strict: true
@@ -41,6 +37,11 @@ global:
 ########################################################################################################################
 
 nameOverride: *nameOverride
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  tag: ${docker.tag}
 
 ########################################################################################################################
 

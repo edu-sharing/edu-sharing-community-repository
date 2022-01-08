@@ -2,11 +2,21 @@
 # GLOBAL
 ########################################################################################################################
 
+global:
+
+  patroni:
+    name: &postgresqlNameOverride edusharing-repository-postgresql
+
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
 nameOverride: edusharing-repository
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  tag: ${docker.tag}
 
 ########################################################################################################################
 # DEPENDENCY
@@ -14,9 +24,9 @@ nameOverride: edusharing-repository
 
 edusharing_repository_postgresql:
 
-  enabled: ${chart.edusharing_repository_postgresql.enabled}
+  enabled: true
 
-  nameOverride: &postgresqlNameOverride edusharing-repository-postgresql
+  nameOverride: *postgresqlNameOverride
 
   service:
 
@@ -33,7 +43,7 @@ edusharing_repository_postgresql:
 
 edusharing_repository_rediscluster:
 
-  enabled: ${chart.edusharing_repository_rediscluster.enabled}
+  enabled: true
 
   nameOverride: &redisclusterNameOverride edusharing-rediscluster
 
@@ -59,7 +69,7 @@ edusharing_repository_search_elastic:
 
 edusharing_repository_search_solr4:
 
-  enabled: ${chart.edusharing_repository_search_solr4.enabled}
+  enabled: true
 
   nameOverride: &searchSolr4NameOverride edusharing-repository-search-solr4
 
@@ -89,7 +99,7 @@ edusharing_repository_transform:
 
 edusharing_repository_service:
 
-  enabled: ${chart.edusharing_repository_service.enabled}
+  enabled: true
 
   nameOverride: *serviceNameOverride
 

@@ -1,4 +1,4 @@
-{{- if .Values.global.cluster.prometheus.enabled }}
+{{- if .Values.global.prometheus.enabled }}
 {{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" -}}
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
@@ -9,9 +9,9 @@ spec:
   additionalScrapeConfigs:
     name: {{ include "edusharing.name" . }}-prometheus
     key:  additionalScrapeConfigs
-  retention: {{ .Values.global.cluster.prometheus.retention }}
-  scrapeInterval: {{ .Values.global.cluster.prometheus.scrapeInterval }}
-  scrapeTimeout: {{ .Values.global.cluster.prometheus.scrapeTimeout }}
+  retention: {{ .Values.global.prometheus.retention }}
+  scrapeInterval: {{ .Values.global.prometheus.scrapeInterval }}
+  scrapeTimeout: {{ .Values.global.prometheus.scrapeTimeout }}
   serviceAccountName: {{ include "edusharing.name" . }}-prometheus
   serviceMonitorSelector: {}
 {{- end }}

@@ -35,7 +35,7 @@ spec:
       initContainers:
       {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
       - name: {{ include "edusharing_repository_service.name" . }}-init-permission
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-minideb:{{ .Values.global.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-minideb:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -57,7 +57,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ include "edusharing_repository_service.name" . }}-server
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-repository-service:{{ .Values.global.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-repository-service:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         {{- if .Values.config.jvm.debug }}
         args: [ "catalina.sh", "jpda", "run" ]
@@ -65,15 +65,10 @@ spec:
         {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
         {{- if $patroni.enabled }}
         env:
-          - name: REPOSITORY_DATABASE_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
-                key: username
           - name: REPOSITORY_DATABASE_PASS
             valueFrom:
               secretKeyRef:
-                name: {{ $patroni.team }}.{{ $patroni.name }}.{{ $patroni.secrets }}
+                name: {{ .Values.config.database.username }}.{{ $patroni.name }}.{{ $patroni.secrets }}
                 key: password
         {{- end }}
         envFrom:
@@ -146,7 +141,7 @@ spec:
         {{- end }}
       {{ if not .Values.config.transform.pool.enabled }}
       - name: {{ include "edusharing_repository_service.name" . }}-transform
-        image: {{ .Values.global.image.registry }}/{{ .Values.global.image.repository }}/edusharing-repository-transform:{{ .Values.global.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-repository-transform:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         envFrom:
         - configMapRef:

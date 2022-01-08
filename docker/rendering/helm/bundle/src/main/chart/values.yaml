@@ -2,11 +2,21 @@
 # GLOBAL
 ########################################################################################################################
 
+global:
+
+  patroni:
+    name: &postgresqlNameOverride edusharing-rendering-postgresql
+
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
 
 nameOverride: edusharing-rendering
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  tag: ${docker.tag}
 
 ########################################################################################################################
 # DEPENDENCY
@@ -14,9 +24,9 @@ nameOverride: edusharing-rendering
 
 edusharing_rendering_postgresql:
 
-  enabled: ${chart.edusharing_rendering_postgresql.enabled}
+  enabled: true
 
-  nameOverride: &postgresqlNameOverride edusharing-rendering-postgresql
+  nameOverride: *postgresqlNameOverride
 
   service:
     port:
@@ -32,7 +42,7 @@ edusharing_rendering_postgresql:
 
 edusharing_rendering_rediscluster:
 
-  enabled: ${chart.edusharing_rendering_rediscluster.enabled}
+  enabled: true
 
   nameOverride: &redisclusterNameOverride edusharing-rendering-rediscluster
 
@@ -44,7 +54,7 @@ edusharing_rendering_rediscluster:
 
 edusharing_rendering_service:
 
-  enabled: ${chart.edusharing_rendering_service.enabled}
+  enabled: true
 
   config:
 
