@@ -3,12 +3,12 @@
 Prerequisites
 -------------
 
-- Docker Engine 19.03.0+
-- Docker Compose 1.27.4+
-- Apache Maven 3.6.3+
+- Docker Engine 18.06.0+
+- Apache Maven 3.8.4+
+- Java SE Development Kit 1.8
 - Git SCM
 
-Startup
+Install
 -------
 
 1. Start up an instance from remote docker images by calling:
@@ -17,53 +17,45 @@ Startup
    ./deploy.sh rstart
    ```
 
-2. Stream out the log messages by calling:
+2. Request all necessary information by calling:
 
    ```
-   ./deploy.sh logs
-   ```
-
-3. Shut down the instance by calling:
-
-   ```
-   ./deploy.sh remove
-   ```
-
-4. Clean up all data volumes by calling:
-
-   ```
-   ./deploy.sh purge
+   ./deploy.sh info
    ```
 
 Build
 -----
 
-0. If you have switched on additional plugins (see below), then you have to add your credentials for each plugin
-   in `$HOME/.m2/settings.xml` too:
+0. Please add following elements to `$HOME/.m2/settings.xml` und add your credentials:
 
    ```
-      <server>  
-        <id>edu-sharing.plugin.remote.releases</id>
-        <username> ... </username>
-        <password> ... </password>
-      </server>
-      <server>
-        <id>edu-sharing.plugin.remote.snapshots</id>
-        <username> ... </username>
-        <password> ... </password>
-      </server>  
+     <mirrors>
+       <mirror>
+         <id>edusharing-mirror</id>
+         <url>https://artifacts.edu-sharing.com/repository/maven-mirror/</url>
+         <mirrorOf>!edusharing-remote,*</mirrorOf>
+       </mirror>
+     </mirrors>
+     <servers>
+       <server>
+         <id>edusharing-remote</id>
+         <username>...</username>
+         <password>...</password>
+       </server>
+     </servers>
    ```      
 
-   Then setting following environment variables:
+   To switch on/off plugins, please set following environment variables:
 
    ```
-   export PLUGIN_REMOTE_ENABLED="true"
+   export PLUGIN_ELASTIC_ENABLED="true"
+   export PLUGIN_MONGO_ENABLED="true"
    ```
 
 1. Build local docker images by calling:
 
    ```
-   ./deploy.sh build
+   mvn install
    ```
 
 Test
@@ -95,18 +87,6 @@ Test
    ./deploy.sh logs
    ```
 
-4. Shut down the instance by calling:
-
-   ```
-   ./deploy.sh remove
-   ```
-
-5. Clean up all data volumes by calling:
-
-   ```
-   ./deploy.sh purge
-   ```
-
 Debugging
 ---------
 
@@ -116,7 +96,7 @@ Debugging
    [edu-sharing-community-repository](https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository) project by calling:
 
    ```
-   ./deploy.sh ldebug <path>
+   ./deploy.sh ldebug -repo <path>
    ```
 
 3. Request all necessary information by calling:
@@ -154,18 +134,21 @@ Debugging
       > ```     
       > and use the special URL shown (instead of the usual one).
 
-5. Shut down the instance by calling:
+Uninstall
+---------
+
+1. Shut down an instance by calling:
+
+   ```
+   ./deploy.sh stop
+   ```
+
+2. Clean up all data volumes by calling:
 
    ```
    ./deploy.sh remove
    ```
-
-6. Clean up all data volumes by calling:
-
-   ```
-   ./deploy.sh purge
-   ```
-
+   
 ---
 If you need more information, please consult
 our [edu-sharing community sdk](https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community-sdk) project.

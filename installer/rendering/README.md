@@ -4,9 +4,9 @@
 Prerequisites
 -------------
 - Debian:Bullseye
-- JDK 8
 - Postgresql 13
-- Apache Maven 3.6.3+
+- Java SE Development Kit 1.8
+- Apache Maven 3.8.4+
 - PHP 7.4 with dom, soap, common, gd, mbstring, zip, curl, exif, pgsql, x-debug
 - xmlstarlet
 - wait-for-it

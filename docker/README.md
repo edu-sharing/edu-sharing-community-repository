@@ -4,12 +4,12 @@
 Prerequisites
 -------------
 
-- Docker Engine 19.03.0+
-- Docker Compose 1.27.4+ 
-- Apache Maven 3.6.3+
+- Docker Engine 18.06.0+
+- Apache Maven 3.8.4+
+- Java SE Development Kit 1.8
 - Git SCM
 
-Startup
+Install
 -------
 
 1. Start up an instance from remote docker images by calling:
@@ -18,40 +18,25 @@ Startup
    ./deploy.sh rstart
    ```
 
-2. Stream out the log messages by calling:
+2. Request all necessary informations by calling:
 
    ```
-   ./deploy.sh logs
+   ./deploy.sh info
    ```
 
-3. Shut down the instance by calling:
+Uninstall
+---------
+
+1. Shut down an instance by calling:
+
+   ```
+   ./deploy.sh stop
+   ```
+
+2. Clean up all data volumes by calling:
 
    ```
    ./deploy.sh remove
-   ```
-
-4. Clean up all data volumes by calling:
-
-   ```
-   ./deploy.sh purge
-   ```
-
-Backup
-------
-
-1. Save all data volumes on disk by calling:
-
-   ```
-   ./deploy.sh backup <path>
-   ```
-
-Restore
--------
-
-1. Restore all data volumes from disk by calling:
-
-   ```
-   ./deploy.sh restore <path>
    ```
 
 ---
