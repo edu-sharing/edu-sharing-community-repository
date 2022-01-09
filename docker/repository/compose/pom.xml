@@ -39,6 +39,55 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>plugin-elastic</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-elastic-deploy-docker-compose
+              </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/compose/plugin-elastic/</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>plugin-mongo</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-mongo-deploy-docker-compose
+              </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/compose/plugin-mongo/</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>plugin-transform</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-enterprise-repository-plugin-transform-deploy-docker-compose
+              </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/compose/plugin-transform/</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <classesDirectory>${project.build.directory}/compose</classesDirectory>
@@ -76,35 +125,6 @@
         </property>
       </activation>
 
-      <build>
-
-        <plugins>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>artifacts</id>
-                <goals>
-                  <goal>unpack-dependencies</goal>
-                </goals>
-                <phase>compile</phase>
-                <configuration>
-                  <includeArtifactIds>
-                    edu_sharing-community-repository-plugin-elastic-deploy-docker-compose
-                  </includeArtifactIds>
-                  <excludes>META-INF/**</excludes>
-                  <outputDirectory>${project.build.directory}/compose/plugin-elastic/</outputDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-        </plugins>
-
-      </build>
-
       <dependencies>
 
         <dependency>
@@ -128,35 +148,6 @@
         </property>
       </activation>
 
-      <build>
-
-        <plugins>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>artifacts</id>
-                <goals>
-                  <goal>unpack-dependencies</goal>
-                </goals>
-                <phase>compile</phase>
-                <configuration>
-                  <includeArtifactIds>
-                    edu_sharing-community-repository-plugin-mongo-deploy-docker-compose
-                  </includeArtifactIds>
-                  <excludes>META-INF/**</excludes>
-                  <outputDirectory>${project.build.directory}/compose/plugin-mongo/</outputDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-        </plugins>
-
-      </build>
-
       <dependencies>
 
         <dependency>
@@ -179,35 +170,6 @@
           <value>true</value>
         </property>
       </activation>
-
-      <build>
-
-        <plugins>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>artifacts</id>
-                <goals>
-                  <goal>unpack-dependencies</goal>
-                </goals>
-                <phase>compile</phase>
-                <configuration>
-                  <includeArtifactIds>
-                    edu_sharing-enterprise-repository-plugin-transform-deploy-docker-compose
-                  </includeArtifactIds>
-                  <excludes>META-INF/**</excludes>
-                  <outputDirectory>${project.build.directory}/compose/plugin-transform/</outputDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-        </plugins>
-
-      </build>
 
       <dependencies>
 

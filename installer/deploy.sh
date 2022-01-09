@@ -193,6 +193,9 @@ stop)
 remove)
 	remove
 	;;
+ci)
+	init && lstart
+	;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
@@ -201,6 +204,8 @@ remove)
 	echo ""
 	echo "  - rstart            startup containers from remote images"
 	echo "  - lstart            startup containers from local images"
+	echo ""
+	echo "  - ci                startup containers inside ci-pipeline"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"

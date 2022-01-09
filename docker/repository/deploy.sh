@@ -276,7 +276,7 @@ ldebug() {
 		;;
 
 	-plugin)
-		COMPOSE_LIST="$(compose_yml repository.yml -test) $(compose_all_plugins -test) $(compose_yml $CLI_OPT3/$CLI_OPT3 -debug)"
+		COMPOSE_LIST="$(compose_yml repository.yml -test) $(compose_all_plugins -test) $(compose_yml plugin-$CLI_OPT3/plugin-$CLI_OPT3 -debug)"
 
 		case $CLI_OPT4 in
 		/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
@@ -367,7 +367,7 @@ rdebug() {
 		;;
 
 	-plugin)
-		COMPOSE_LIST="$(compose_yml repository.yml -remote -test) $(compose_all_plugins -remote -test) $(compose_yml $CLI_OPT3/$CLI_OPT3 -debug)"
+		COMPOSE_LIST="$(compose_yml repository.yml -remote -test) $(compose_all_plugins -remote -test) $(compose_yml plugin-$CLI_OPT3/plugin-$CLI_OPT3 -debug)"
 
 		case $CLI_OPT4 in
 		/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
