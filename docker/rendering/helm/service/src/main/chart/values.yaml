@@ -219,7 +219,7 @@ job:
 
     resources: {}
 
-    schedule: "*/10 * * * *"
+    schedule: "0 * * * *"
 
     securityContext:
       allowPrivilegeEscalation: false
