@@ -291,17 +291,17 @@ remove() {
 }
 
 ci() {
-	COMPOSE_LIST1="$(compose_only_plugins repository -remote)"
-	COMPOSE_LIST2="$(compose_only_plugins rendering -remote)"
+	COMPOSE_LIST="$(compose_only_plugins -remote)"
 
-  [[ -n $COMPOSE_LIST1 || -n $COMPOSE_LIST2 ]] && {
-		echo "Use compose set: $COMPOSE_LIST1 $COMPOSE_LIST2"
+  [[ -n $COMPOSE_LIST ]] && {
+		echo "Use compose set: $COMPOSE_LIST"
 
 		$COMPOSE_EXEC \
-			$COMPOSE_LIST1 $COMPOSE_LIST2 \
+			$COMPOSE_LIST \
 			pull || exit
 	}
 
+	COMPOSE_LIST=
 	COMPOSE_LIST="$(compose_all aio.yml -local -ci) $(compose_all_plugins -remote -ci)"
 
 	echo "Use compose set: $COMPOSE_LIST"
