@@ -3,7 +3,9 @@ set -e
 set -o pipefail
 
 ########################################################################################################################
-execution_folder=$(dirname -- "${BASH_SOURCE[0]}")
+#execution_folder=$(dirname -- "${BASH_SOURCE[0]}")
+execution_folder="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo execution_folder
 
 pushd "$execution_folder" &> /dev/null
 
@@ -13,7 +15,7 @@ if [[ -f ".env.base" ]] ; then
 	source .env.base &> /dev/null
 fi
 
-# LOAD PLUGIN BASE ENVIRONENT VARIABLES
+# LOAD PLUGIN BASE ENVIRONMENT VARIABLES
 if [[ -d "$execution_folder/plugins" ]] ; then
 	for plugin in "$execution_folder"/plugins/plugin-*/.env.base; do
 		 [[ -f "$plugin" ]] && {
@@ -43,12 +45,15 @@ usage() {
 
 	echo "--local"
 	echo "  Use local maven cache for installation"
+
+	echo "--baseimage"
+	echo "  Define the path to the alfresco base image"
 }
 
 ########################################################################################################################
 
 use_local_maven_cache=0
-envfile=
+alfresco_base_image="$execution_folder/alfresco-base-image-for-edu-sharing_DO-NOT-DELETE-ME.tar.gz"
 
 while true; do
 	flag="$1"
@@ -56,8 +61,9 @@ while true; do
 
 	case "$flag" in
 			--help|'-?') usage && exit 0 ;;
-			--file|-f) envfile="$1" && source "$1" && shift	;;
+			--file|-f) source "$1" && shift	;;
 			--local) use_local_maven_cache=1 ;;
+			--baseimage) alfresco_base_image="$1" && shift;;
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -470,85 +476,31 @@ install_edu_sharing() {
 
 ########################################################################################################################
 
-can_install_repository(){
-	pushd "$ALF_HOME" &> /dev/null
-	if [[ ! -f alfresco.sh ]] ; then
-		echo ""
-		echo "Env ALF_HOME must point to the home directory of your Alfresco Platform!"
-		exit 1
-	fi
+pushd "$ALF_HOME" &> /dev/null
+if [[ ! -f alfresco.sh ]] ; then
+	echo ""
+	echo "Env ALF_HOME must point to the home directory of your Alfresco Platform!"
+	exit 1
+fi
 
-	if [[ ! -d tomcat/webapps/alfresco || ! -d tomcat/webapps/solr4 ]] ; then
-		echo ""
-		echo "You must have started the Alfresco Platform at least once before you can run the installation."
-		exit 1
-	fi
+if [[ ! -d tomcat/webapps/alfresco || ! -d tomcat/webapps/solr4 ]] ; then
+	echo ""
+	echo "You must have started the Alfresco Platform at least once before you can run the installation."
+	exit 1
+fi
 
-	if [[ "$(./alfresco.sh status tomcat)" != "tomcat not running" ]] ; then
-		echo ""
-		echo "Please stop Tomcat before you can run the installation!"
-		exit 1
-	fi
+if [[ "$(./alfresco.sh status tomcat)" != "tomcat not running" ]] ; then
+	echo ""
+	echo "Please stop Tomcat before you can run the installation!"
+	exit 1
+fi
 
-	if [[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] ; then
-		echo ""
-		echo "Please stop Postgresql before you can run the installation!"
-		exit 1
-	fi
-	popd
-}
-
-########################################################################################################################
-
-install_repository() {
-
-	alfresco_base_snapshot="alfresco-base-SNAPSHOT-DO-NOT-DELETE-ME.tar.gz"
-	if [[ -f ../$alfresco_base_snapshot ]] ; then
-
-		echo ""
-		echo "Update ... "
-
-		echo "- make a snapshot of edu-sharing platform"
-		snapshot_name=edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
-		tar -czf ../$snapshot_name amps tomcat solr4
-
-		echo "- cleanup amps and tomcat"
-		rm -rf amps
-		rm -rf tomcat
-		rm -rf solr4
-
-		echo "- restore amps and tomcat"
-		tar -zxf ../$alfresco_base_snapshot
-
-		install_edu_sharing
-
-		echo "- restore persistent data of Alfresco platform"
-		if [[ $(tar -tf  ../$snapshot_name | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
-			tar -zxf ../$snapshot_name tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
-		else
-			echo "nothing to restore"
-		fi
-
-		echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
-		pushd .. &> /dev/null
-		ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
-		popd
-
-	else
-
-		echo ""
-		echo "Install ... "
-
-		echo "- make a snapshot of Alfresco platform"
-		tar -czf ../$alfresco_base_snapshot amps tomcat solr4
-
-		install_edu_sharing
-
-	fi
-
-	echo "- you may need to delete the solr4 index, model and content folders!"
-	popd
-}
+if [[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] ; then
+	echo ""
+	echo "Please stop Postgresql before you can run the installation!"
+	exit 1
+fi
+popd
 
 ########################################################################################################################
 
@@ -571,15 +523,14 @@ mvn -q dependency:copy \
 	-DoutputDirectory=.
 
 
-alfresco_base_snapshot="alfresco-base-SNAPSHOT-DO-NOT-DELETE-ME.tar.gz"
-if [[ -f ../$alfresco_base_snapshot ]] ; then
+if [[ -f "$alfresco_base_image" ]] ; then
 
 	echo ""
 	echo "Update ... "
 
 	echo "- make a snapshot of edu-sharing platform"
-	snapshot_name=edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
-	tar -czf ../$snapshot_name amps tomcat solr4
+	snapshot_name="$execution_folder/snapshots/edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S").tar.gz"
+	tar -czf "$snapshot_name" amps tomcat solr4
 
 	echo "- cleanup amps and tomcat"
 	rm -rf amps
@@ -587,13 +538,13 @@ if [[ -f ../$alfresco_base_snapshot ]] ; then
 	rm -rf solr4
 
 	echo "- restore amps and tomcat"
-	tar -zxf ../$alfresco_base_snapshot
+	tar -zxf "$alfresco_base_image"
 
 	install_edu_sharing
 
 	echo "- restore persistent data of Alfresco platform"
-	if [[ $(tar -tf  ../$snapshot_name | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
-		tar -zxf ../$snapshot_name tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
+	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
+		tar -zxf "$snapshot_name" tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
 	else
 		echo "nothing to restore"
 	fi
@@ -609,7 +560,7 @@ else
 	echo "Install ... "
 
 	echo "- make a snapshot of Alfresco platform"
-	tar -czf ../$alfresco_base_snapshot amps tomcat solr4
+	tar -czf "$alfresco_base_image" amps tomcat solr4
 
 	install_edu_sharing
 
@@ -620,7 +571,7 @@ echo "- you may need to delete the solr4 index, model and content folders!"
 rm edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
 popd
 
-info >> "install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
+info >> "$execution_folder/install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
 info
 
 echo "- done."
