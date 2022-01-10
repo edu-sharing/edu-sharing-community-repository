@@ -280,9 +280,6 @@ stop() {
 }
 
 remove() {
-	read -p "Are you sure you want to continue? [y/N] " answer
-	case ${answer:0:1} in
-	y | Y)
 		COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
 
 		echo "Use compose set: $COMPOSE_LIST"
@@ -290,11 +287,6 @@ remove() {
 		$COMPOSE_EXEC \
 			$COMPOSE_LIST \
 			down || exit
-		;;
-	*)
-		echo Canceled.
-		;;
-	esac
 }
 
 ci() {
