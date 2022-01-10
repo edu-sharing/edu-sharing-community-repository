@@ -3,13 +3,13 @@ version: '3.7'
 services:
 
   repository-database:
-    image: "${docker.registry}/${docker.repository}/edusharing-postgresql:${docker.tag}"
+    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-docker-build-postgresql:${docker.tag}"
 
   repository-search-solr4:
-    image: "${docker.registry}/${docker.repository}/edusharing-repository-search-solr4:${docker.tag}"
+    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-docker-repository-build-search-solr4:${docker.tag}"
 
   repository-service:
-    image: "${docker.registry}/${docker.repository}/edusharing-repository-service:${docker.tag}"
+    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-docker-repository-build-service:${docker.tag}"
 
   repository-transform:
-    image: "${docker.registry}/${docker.repository}/edusharing-repository-transform:${docker.tag}"
+    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-docker-repository-build-transform:${docker.tag}"

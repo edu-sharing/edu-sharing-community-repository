@@ -3,10 +3,10 @@ version: '3.7'
 services:
 
   rendering-database:
-    image: "${docker.registry}/${docker.repository}/edusharing-postgresql:${docker.tag}"
+    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-docker-build-postgresql:${docker.tag}"
 
   rendering-service:
-    image: "${docker.registry}/${docker.repository}/edusharing-rendering-service:${docker.tag}"
+    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-docker-rendering-build-service:${docker.tag}"
 
   rendering-service-init:
-    image: "${docker.registry}/${docker.repository}/edusharing-rendering-service:${docker.tag}"
+    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-docker-rendering-build-service:${docker.tag}"

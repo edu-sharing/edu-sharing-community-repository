@@ -66,13 +66,6 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <configuration>
-          <images>
-            <image>
-              <name>${docker.repository}/edusharing-rendering-installer-scripts-debian-bullseye:${docker.tag}</name>
-            </image>
-          </images>
-        </configuration>
         <executions>
           <execution>
             <id>build</id>

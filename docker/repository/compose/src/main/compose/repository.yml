@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
   repository-database:
-    image: "${docker.repository}/edusharing-postgresql:${docker.tag}"
+    image: "${docker.repository}/edu_sharing-community-deploy-docker-build-postgresql:${docker.tag}"
     environment:
       POSTGRESQL_DATABASE: "${REPOSITORY_DATABASE_NAME:-repository}"
       POSTGRESQL_PASSWORD: "${REPOSITORY_DATABASE_PASS:-repository}"
@@ -15,7 +15,7 @@ services:
       - "repository-database-volume:/bitnami/postgresql"
 
   repository-search-solr4:
-    image: "${docker.repository}/edusharing-repository-search-solr4:${docker.tag}"
+    image: "${docker.repository}/edu_sharing-community-deploy-docker-repository-build-search-solr4:${docker.tag}"
     environment:
       CATALINA_OPTS: >-
         -Xms${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-1g}
@@ -39,7 +39,7 @@ services:
       - repository-service
 
   repository-service:
-    image: "${docker.repository}/edusharing-repository-service:${docker.tag}"
+    image: "${docker.repository}/edu_sharing-community-deploy-docker-repository-build-service:${docker.tag}"
     environment:
       CATALINA_OPTS: >-
         -Xms${REPOSITORY_SERVICE_JAVA_XMS:-1g}
@@ -85,7 +85,7 @@ services:
       - repository-transform
 
   repository-transform:
-    image: "${docker.repository}/edusharing-repository-transform:${docker.tag}"
+    image: "${docker.repository}/edu_sharing-community-deploy-docker-repository-build-transform:${docker.tag}"
     expose:
       - "8100"
 

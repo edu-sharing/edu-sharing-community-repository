@@ -25,13 +25,6 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <configuration>
-          <images>
-            <image>
-              <name>${docker.repository}/edusharing-apache_exporter:${docker.tag}</name>
-            </image>
-          </images>
-        </configuration>
         <executions>
           <execution>
             <id>build</id>

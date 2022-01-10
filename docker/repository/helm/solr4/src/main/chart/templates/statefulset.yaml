@@ -22,7 +22,7 @@ spec:
       initContainers:
       {{- if (default .Values.global.cluster.storage.data.permission .Values.persistence.data.permission) }}
       - name: {{ include "edusharing_repository_search_solr4.name" . }}-init-permission
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-minideb:{{ .Values.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edu_sharing-community-deploy-docker-build-minideb:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -41,7 +41,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ include "edusharing_repository_search_solr4.name" . }}
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edusharing-repository-search-solr4:{{ .Values.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edu_sharing-community-deploy-docker-repository-build-search-solr4:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         {{- if .Values.config.jvm.debug }}
         args: [ "catalina.sh", "jpda", "run" ]
