@@ -28,18 +28,20 @@ start() {
 
 	######################################################################################################################
 
-	# PLUGIN BEFORE
-	for plugin in bin/plugins/plugin-*/entrypoint-before.sh; do
+	./postgresql/scripts/ctl.sh start
+	./libreoffice/scripts/ctl.sh start
+
+
+	######################################################################################################################
+
+	# PLUGIN AFTER
+	for plugin in bin/plugins/plugin-*/entrypoint.sh; do
 		 [[ -f $plugin ]] && {
 				source $plugin || exit 1
 		 }
 	done
 
 	######################################################################################################################
-
-	./postgresql/scripts/ctl.sh start
-	./libreoffice/scripts/ctl.sh start
-
 
 	local catalinaPid
 
@@ -53,17 +55,6 @@ start() {
 	echo $"$catalinaPid" >"${CATALINA_PID}"
 
 	apache2ctl start
-
-	######################################################################################################################
-
-	# PLUGIN AFTER
-	for plugin in bin/plugins/plugin-*/entrypoint-after.sh; do
-		 [[ -f $plugin ]] && {
-				source $plugin || exit 1
-		 }
-	done
-
-	######################################################################################################################
 
 	echo "CATALINA_PID: $CATALINA_PID"
 	wait "$catalinaPid"
