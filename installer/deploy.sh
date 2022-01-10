@@ -22,14 +22,14 @@ export CLI_OPT2="$2"
 export CLI_OPT3="$3"
 export CLI_OPT4="$4"
 
-if [ -z "${M2_HOME}" ]; then
-	export MVN_EXEC="mvn"
-else
-	export MVN_EXEC="${M2_HOME}/bin/mvn"
-fi
+export MAVEN_CMD="mvn"
 
-[[ -z "${MVN_EXEC_OPTS}" ]] && {
-	export MVN_EXEC_OPTS="-q -ff"
+[[ -z "${MAVEN_CMD_OPTS}" ]] && {
+	export MAVEN_CMD_OPTS="-q -ff"
+}
+
+[[ -z "${MAVEN_HOME}" ]] && {
+	export MAVEN_HOME="$HOME/.m2"
 }
 
 ROOT_PATH="$(
@@ -56,7 +56,7 @@ COMPOSE_DIR="compose/debian/bullseye/target/compose"
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
 	pushd "compose" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true package || exit
+	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
 }
 
@@ -86,74 +86,107 @@ info() {
 	echo ""
 }
 
-compose_yml() {
+compose_only() {
 
 	COMPOSE_BASE_FILE="$1"
 	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
 	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
 
-	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
 	COMPOSE_LIST=
-	if [[ -f "$COMPOSE_FILE" ]]; then
-		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
-	fi
 
-	shift || {
-		echo "$COMPOSE_LIST"
-		exit
+	shift && {
+
+		while true; do
+			flag="$1"
+			shift || break
+
+			COMPOSE_FILE=""
+			case "$flag" in
+			-test) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-test.yml" ;;
+			-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
+			-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
+			-ci) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-ci.yml" ;;
+			*)
+				{
+					echo "error: unknown flag: $flag"
+					echo ""
+					echo "valid flags are:"
+					echo "  -test"
+					echo "  -debug"
+					echo "  -remote"
+				} >&2
+				exit 1
+				;;
+			esac
+
+			if [[ -f "$COMPOSE_FILE" ]]; then
+				COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+			fi
+
+		done
+
 	}
-
-	while true; do
-		flag="$1"
-		shift || break
-
-		COMPOSE_FILE=""
-		case "$flag" in
-		-ci) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-ci.yml" ;;
-		-local) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-local.yml" ;;
-		-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
-		*)
-			{
-				echo "error: unknown flag: $flag"
-				echo ""
-				echo "valid flags are:"
-				echo "  -ci"
-				echo "  -local"
-				echo "  -remote"
-			} >&2
-			exit 1
-			;;
-		esac
-
-		if [[ -f "$COMPOSE_FILE" ]]; then
-			COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
-		fi
-	done
 
 	echo $COMPOSE_LIST
 }
 
-compose_all_plugins() {
+compose_all() {
+
+	COMPOSE_BASE_FILE="$1"
+	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
+	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
+
 	COMPOSE_LIST=
-	for plugin in plugin*/; do
+
+	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
+	if [[ -f "$COMPOSE_FILE" ]]; then
+		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+	fi
+
+	shift && {
+
+		while true; do
+			flag="$1"
+			shift || break
+
+			COMPOSE_LIST="$COMPOSE_LIST $(compose_only "$COMPOSE_BASE_FILE" "$flag")"
+		done
+
+	}
+
+	echo $COMPOSE_LIST
+}
+
+compose_only_plugins() {
+	PLUGIN_DIR="$1"
+	shift
+
+	COMPOSE_LIST=
+	for plugin in $PLUGIN_DIR/plugin*/; do
 		[ ! -d $plugin ] && continue
-		COMPOSE_PLUGIN="$(compose_yml "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_PLUGIN="$(compose_only "./$plugin$(basename $plugin).yml" "$@")"
 		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
 	done
 
 	echo $COMPOSE_LIST
 }
 
-export COMPOSE_CI=""
-if [ -n "${CI}" ]; then
-	export REPOSITORY_SERVICE_HOST="docker"
-	export RENDERING_SERVICE_HOST="docker"
+compose_all_plugins() {
+	PLUGIN_DIR="$1"
+	shift
 
-	export COMPOSE_CI="$(compose_yml aio.yml -ci) $(compose_all_plugins -ci)"
-fi
+	COMPOSE_LIST=
+	for plugin in $PLUGIN_DIR/plugin*/; do
+		[ ! -d $plugin ] && continue
+		COMPOSE_PLUGIN="$(compose_all "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
+	done
+
+	echo $COMPOSE_LIST
+}
 
 logs() {
-	COMPOSE_LIST="$(compose_yml aio.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -163,7 +196,7 @@ logs() {
 }
 
 ps() {
-	COMPOSE_LIST="$(compose_yml aio.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -209,7 +242,7 @@ init() {
 }
 
 rstart() {
-	COMPOSE_LIST="$(compose_yml aio.yml -remote) $(compose_all_plugins -remote)"
+	COMPOSE_LIST="$(compose_all aio.yml -remote) $(compose_all_plugins -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -219,27 +252,21 @@ rstart() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		$COMPOSE_CI \
 		up -d || exit
 }
 
 lstart() {
-	COMPOSE_LIST="$(compose_yml aio.yml -local) $(compose_all_plugins -local)"
+	COMPOSE_LIST="$(compose_all aio.yml -local) $(compose_all_plugins -local)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
-	[[ -z "${MAVEN_HOME}" ]] && {
-  	export MAVEN_HOME="$HOME/.m2"
-  }
-
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		$COMPOSE_CI \
 		up -d || exit
 }
 
 stop() {
-	COMPOSE_LIST="$(compose_yml aio.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -252,17 +279,39 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$(compose_yml aio.yml) $(compose_all_plugins)"
+		COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
 		$COMPOSE_EXEC \
 			$COMPOSE_LIST \
 			down || exit
+		;;
 	*)
 		echo Canceled.
 		;;
 	esac
+}
+
+ci() {
+	COMPOSE_LIST1="$(compose_only_plugins repository -remote)"
+	COMPOSE_LIST2="$(compose_only_plugins rendering -remote)"
+
+  [[ -n $COMPOSE_LIST1 || -n $COMPOSE_LIST2 ]] && {
+		echo "Use compose set: $COMPOSE_LIST1 $COMPOSE_LIST2"
+
+		$COMPOSE_EXEC \
+			$COMPOSE_LIST1 $COMPOSE_LIST2 \
+			pull || exit
+	}
+
+	COMPOSE_LIST="$(compose_all aio.yml -local -ci) $(compose_all_plugins -remote -ci)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
 }
 
 case "${CLI_OPT1}" in
@@ -288,7 +337,7 @@ remove)
 	remove
 	;;
 ci)
-	init && lstart
+	init && ci
 	;;
 *)
 	echo ""

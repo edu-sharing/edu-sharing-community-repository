@@ -20,14 +20,14 @@ export CLI_CMD="$0"
 export CLI_OPT1="$1"
 export CLI_OPT2="$2"
 
-if [ -z "${M2_HOME}" ]; then
-	export MVN_EXEC="mvn"
-else
-	export MVN_EXEC="${M2_HOME}/bin/mvn"
-fi
+export MAVEN_CMD="mvn"
 
-[[ -z "${MVN_EXEC_OPTS}" ]] && {
-	export MVN_EXEC_OPTS="-q -ff"
+[[ -z "${MAVEN_CMD_OPTS}" ]] && {
+	export MAVEN_CMD_OPTS="-q -ff"
+}
+
+[[ -z "${MAVEN_HOME}" ]] && {
+	export MAVEN_HOME="$HOME/.m2"
 }
 
 ROOT_PATH="$(
@@ -43,13 +43,13 @@ COMPOSE_DIR="compose/target/compose"
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
 	pushd "rendering/compose" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true install || exit
+	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit
 	popd >/dev/null || exit
 	pushd "repository/compose" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true install || exit
+	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit
 	popd >/dev/null || exit
 	pushd "compose" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true package || exit
+	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
 }
 
