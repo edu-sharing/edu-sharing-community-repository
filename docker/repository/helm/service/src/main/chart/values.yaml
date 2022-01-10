@@ -202,7 +202,7 @@ config:
 
   transform:
 
-    pool:
+    server:
       enabled: false
       host: edusharing-repository-transform
       port: 8080

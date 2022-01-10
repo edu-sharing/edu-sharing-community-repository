@@ -31,6 +31,41 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>plugin-elastic</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-elastic-deploy-installer-compose-debian-bullseye
+              </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/compose/plugin-elastic/</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>plugin-transform</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-enterprise-repository-plugin-transform-deploy-installer-compose-debian-bullseye
+              </includeArtifactIds>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/compose/plugin-transform/</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <configuration>
           <outputDirectory>${project.build.directory}/compose</outputDirectory>
@@ -67,6 +102,7 @@
     <profile>
 
       <id>plugin.elastic</id>
+
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
@@ -75,39 +111,34 @@
         </property>
       </activation>
 
-      <build>
-        <plugins>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>artifacts</id>
-                <goals>
-                  <goal>unpack-dependencies</goal>
-                </goals>
-                <phase>compile</phase>
-                <configuration>
-                  <includeArtifactIds>
-                    edu_sharing-community-repository-plugin-elastic-deploy-installer-compose-debian-bullseye
-                  </includeArtifactIds>
-                  <excludes>META-INF/**</excludes>
-                  <outputDirectory>${project.build.directory}/compose/plugin-elastic/</outputDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-        </plugins>
-      </build>
-
       <dependencies>
         <dependency>
           <groupId>${project.groupId}</groupId>
           <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-installer-compose-debian-bullseye</artifactId>
         </dependency>
       </dependencies>
+
+    </profile>
+
+    <profile>
+
+      <id>plugin.transform</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_TRANSFORM_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-transform-deploy-installer-compose-debian-bullseye</artifactId>
+        </dependency>
+      </dependencies>
+
     </profile>
 
   </profiles>

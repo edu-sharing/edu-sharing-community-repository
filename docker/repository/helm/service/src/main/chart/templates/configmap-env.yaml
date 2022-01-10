@@ -56,8 +56,8 @@ data:
   REPOSITORY_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}
   REPOSITORY_SERVICE_WAIT_EXTERNAL: {{ .Values.config.connector.external.timeout | quote }}
   REPOSITORY_SERVICE_WAIT_INTERNAL: {{ .Values.config.connector.internal.timeout | quote }}
-  REPOSITORY_TRANSFORM_BIND: {{ if .Values.config.transform.pool.enabled }}""{{ else }}"127.0.0.1"{{ end }}
-  REPOSITORY_TRANSFORM_HOST: {{ if .Values.config.transform.pool.enabled }}""{{ else }}"127.0.0.1"{{ end }}
-  REPOSITORY_TRANSFORM_PORT: {{ if .Values.config.transform.pool.enabled }}""{{ else }}"8100"{{ end }}
-  REPOSITORY_TRANSFORM_POOL_HOST: {{ .Values.config.transform.pool.host | quote }}
-  REPOSITORY_TRANSFORM_POOL_PORT: {{ .Values.config.transform.pool.port | quote }}
+  REPOSITORY_TRANSFORM_BIND: {{ if .Values.config.transform.server.enabled }}""{{ else }}"127.0.0.1"{{ end }}
+  REPOSITORY_TRANSFORM_HOST: {{ if .Values.config.transform.server.enabled }}""{{ else }}"127.0.0.1"{{ end }}
+  REPOSITORY_TRANSFORM_PORT: {{ if .Values.config.transform.server.enabled }}""{{ else }}"8100"{{ end }}
+  REPOSITORY_TRANSFORM_SERVER_HOST: {{ .Values.config.transform.server.host | quote }}
+  REPOSITORY_TRANSFORM_SERVER_PORT: {{ .Values.config.transform.server.port | quote }}

@@ -200,7 +200,7 @@ ps() {
 }
 
 init() {
-	rm -f .env.repository .env.rendering .env.elastic
+	rm -f .env.repository .env.rendering .env.elastic .env.transform
 	{
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 		echo "REPOSITORY_SERVICE_HOST_EXTERNAL=${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
@@ -209,9 +209,13 @@ init() {
 		echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
 		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
 
-		#elastic plugin
+		# plugin elastic (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
 		echo "REPOSITORY_SEARCH_ELASTIC_HOST=elastic"
 		echo "REPOSITORY_SEARCH_ELASTIC_PORT=9200"
+
+		# plugin transform (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
+		echo "REPOSITORY_TRANSFORM_SERVER_HOST=transform"
+		echo "REPOSITORY_TRANSFORM_SERVER_PORT=8080"
 	} >> .env.repository
 
 	{
@@ -227,11 +231,17 @@ init() {
 		echo "REPOSITORY_SERVICE_PORT=80"
 	} >> .env.rendering
 
+	# plugin elastic (please check deploy/installer/tracker/scripts/../install.sh inside plugin)
 	{
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
     echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
     echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
 	} >> .env.elastic
+
+	# plugin transform (please check deploy/installer/server/scripts/../install.sh inside plugin)
+	{
+		echo ""
+	} >> .env.transform
 
 }
 

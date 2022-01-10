@@ -49,7 +49,8 @@
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-plugin-elastic-deploy-installer-repository-scripts-debian-bullseye
+                edu_sharing-community-repository-plugin-elastic-deploy-installer-repository-scripts-debian-bullseye,
+                edu_sharing-enterprise-repository-plugin-transform-deploy-installer-repository-scripts-debian-bullseye
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
               <outputDirectory>${project.build.directory}/build</outputDirectory>
@@ -131,6 +132,7 @@
   </dependencies>
 
   <profiles>
+
     <profile>
 
       <id>plugin.elastic</id>
@@ -147,10 +149,32 @@
         <dependency>
           <groupId>${project.groupId}</groupId>
           <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-installer-repository-scripts-debian-bullseye</artifactId>
-<!--          <classifier>sources</classifier>-->
         </dependency>
       </dependencies>
 
     </profile>
+
+    <profile>
+
+      <id>plugin.transform</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_TRANSFORM_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-transform-deploy-installer-repository-scripts-debian-bullseye</artifactId>
+        </dependency>
+      </dependencies>
+
+    </profile>
+
   </profiles>
+
 </project>
