@@ -114,6 +114,7 @@ compose_only() {
 					echo "  -test"
 					echo "  -debug"
 					echo "  -remote"
+					echo "  -ci"
 				} >&2
 				exit 1
 				;;
